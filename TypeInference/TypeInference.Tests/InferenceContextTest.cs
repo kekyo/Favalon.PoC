@@ -18,7 +18,7 @@ namespace TypeInference
         {
             // var a = 123;
             var expression = new Constant(123);
-            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { new CLRType(typeof(int)) }));
+            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { AvalonType.Create<int>() }));
         }
 
         [Test]
@@ -28,7 +28,7 @@ namespace TypeInference
             var expression1 = new Constant(123);
             var expression2 = new Constant(456);
             var expression = new PlusOperator(expression1, expression2);
-            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { new CLRType(typeof(int)) }));
+            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { AvalonType.Create<int>() }));
         }
 
 
@@ -41,7 +41,7 @@ namespace TypeInference
         {
             // var a = 123.456;
             var expression = new Constant(123.456);
-            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { new CLRType(typeof(double)) }));
+            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { AvalonType.Create<double>() }));
         }
 
         [Test]
@@ -49,7 +49,7 @@ namespace TypeInference
         {
             // var a = "ABC";
             var expression = new Constant("ABC");
-            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { new CLRType(typeof(string)) }));
+            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { AvalonType.Create<string>() }));
         }
     }
 }

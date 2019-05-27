@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TypeInference.Types
 {
@@ -11,5 +9,10 @@ namespace TypeInference.Types
         }
 
         public abstract bool Equals(AvalonType other);
+
+        public static CLRType Create(Type type) =>
+            new CLRType(type);
+        public static CLRType Create<T>() =>
+            new CLRType(typeof(T));
     }
 }

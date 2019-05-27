@@ -1,12 +1,14 @@
-﻿namespace TypeInference.Types
+﻿using System;
+
+namespace TypeInference.Types
 {
     public sealed class CLRType : AvalonType
     {
-        private readonly System.Type type;
+        private readonly Type type;
 
-        public CLRType(System.Type type) => this.type = type;
+        internal CLRType(Type type) => this.type = type;
 
-        public System.Type RawType => this.type;
+        public Type RawType => this.type;
 
         public override int GetHashCode() =>
             this.type.GetHashCode();

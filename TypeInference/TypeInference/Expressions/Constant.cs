@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using TypeInference.Types;
 
@@ -13,6 +14,6 @@ namespace TypeInference.Expressions
 
 
         public IEnumerable<AvalonType> CalculatedTypes =>
-            new[] { new CLRType(this.value.GetType()) };
+            new[] { AvalonType.Create(this.value.GetType()) };
     }
 }

@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using TypeInference.Expressions;
+using TypeInference.Types;
+
 namespace TypeInference
 {
     [TestFixture]
@@ -14,18 +17,18 @@ namespace TypeInference
         public void Int32ConstantIsInt32Type()
         {
             // var a = 123;
-            var expression = new ConstantExpression(123);
-            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { typeof(int) }));
+            var expression = new Constant(123);
+            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { new CLRType(typeof(int)) }));
         }
 
         [Test]
         public void Int32ConstantPlusInt32ConstantIsInt32Type()
         {
             // var a = 123 + 456;
-            var expression1 = new ConstantExpression(123);
-            var expression2 = new ConstantExpression(456);
-            var expression = new PlusOperatorExpression(expression1, expression2);
-            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { typeof(int) }));
+            var expression1 = new Constant(123);
+            var expression2 = new Constant(456);
+            var expression = new PlusOperator(expression1, expression2);
+            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { new CLRType(typeof(int)) }));
         }
 
 
@@ -37,16 +40,16 @@ namespace TypeInference
         public void DoubleConstantIsDoubleType()
         {
             // var a = 123.456;
-            var expression = new ConstantExpression(123.456);
-            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { typeof(double) }));
+            var expression = new Constant(123.456);
+            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { new CLRType(typeof(double)) }));
         }
 
         [Test]
         public void StringConstantIsStringType()
         {
             // var a = "ABC";
-            var expression = new ConstantExpression("ABC");
-            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { typeof(string) }));
+            var expression = new Constant("ABC");
+            Assert.IsTrue(expression.CalculatedTypes.SequenceEqual(new[] { new CLRType(typeof(string)) }));
         }
     }
 }

@@ -5,7 +5,7 @@
     <TargetFramework>net472</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <NullableContextOptions>enable</NullableContextOptions>
-    <Namespace>TypeInference</Namespace>
+    <Namespace>TypeInferences</Namespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TypeInference\TypeInference.csproj" />
+    <ProjectReference Include="..\TypeInference\TypeInferences.csproj" />
   </ItemGroup>
 
 </Project>

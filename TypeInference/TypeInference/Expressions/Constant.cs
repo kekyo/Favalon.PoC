@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using TypeInference.Types;
+using TypeInferences.Types;
 
-namespace TypeInference.Expressions
+namespace TypeInferences.Expressions
 {
-    public sealed class Constant
+    public class Constant : AvalonExpression
     {
         private readonly object value;
 
-        public Constant(object value) => this.value = value;
+        internal Constant(object value) =>
+            this.value = value;
 
-
-        public IEnumerable<AvalonType> CalculatedTypes =>
-            new[] { AvalonType.Create(this.value.GetType()) };
+        public override AvalonType InferenceType => AvalonType.Create(this.value.GetType());
     }
 }

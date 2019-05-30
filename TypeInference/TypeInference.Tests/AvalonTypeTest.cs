@@ -1,6 +1,9 @@
 ﻿using NUnit.Framework;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
-
+using System.Runtime.Serialization;
 using TypeInferences.Types;
 
 namespace TypeInferences
@@ -22,7 +25,24 @@ namespace TypeInferences
             var args = new[] { DoubleType.Instance, Int32Type.Instance, UInt16Type.Instance };
 
             var actual = AvalonType.Wide(args[index0], args[index1]);
-            Assert.AreEqual(args[resultIndex], actual);
+
+            var expected = args[resultIndex];
+            Assert.AreEqual(expected, actual);
+        }
+
+        private sealed class ObjectComparer<T> : IComparer<T>
+        {
+            public int Compare(T x, T y) =>
+                 x!.GetHashCode().CompareTo(y!.GetHashCode());
+
+            public static readonly IComparer<T> Instance = new ObjectComparer<T>();
+        }
+
+        private static bool SequenceEqualNotOrdered<T>(IEnumerable<T> expected, IEnumerable<T> actual)
+        {
+            var fex = expected.OrderBy(v => v, ObjectComparer<T>.Instance);
+            var fac = actual.OrderBy(v => v, ObjectComparer<T>.Instance);
+            return fex.SequenceEqual(fac);
         }
 
         [TestCase(0, 1)]
@@ -34,7 +54,9 @@ namespace TypeInferences
             var actual = AvalonType.Wide(args[index0], args[index1]).
                 EnumerateTypes().
                 ToArray();
-            Assert.IsFalse(new[] { StringType.Instance, Int32Type.Instance }.Except(actual).Any());
+
+            var expected = new[] { StringType.Instance, Int32Type.Instance };
+            Assert.IsTrue(SequenceEqualNotOrdered(expected, actual));
         }
 
         [TestCase(0, 1, 2)]
@@ -50,7 +72,45 @@ namespace TypeInferences
             var actual = AvalonType.Wide(args[index0], args[index1], args[index2]).
                 EnumerateTypes().
                 ToArray();
-            Assert.IsFalse(new[] { StringType.Instance, DoubleType.Instance }.Except(actual).Any());
+
+            var expected = new[] { StringType.Instance, DoubleType.Instance };
+            Assert.IsTrue(SequenceEqualNotOrdered(expected, actual));
+        }
+
+        [TestCase(3, 0, 1, 2)]
+        [TestCase(3, 1, 0, 2)]
+        [TestCase(3, 0, 2, 1)]
+        [TestCase(3, 1, 2, 0)]
+        [TestCase(3, 2, 0, 1)]
+        [TestCase(3, 2, 1, 0)]
+        [TestCase(0, 3, 1, 2)]
+        [TestCase(1, 3, 0, 2)]
+        [TestCase(0, 3, 2, 1)]
+        [TestCase(1, 3, 2, 0)]
+        [TestCase(2, 3, 0, 1)]
+        [TestCase(2, 3, 1, 0)]
+        [TestCase(0, 1, 3, 2)]
+        [TestCase(1, 0, 3, 2)]
+        [TestCase(0, 2, 3, 1)]
+        [TestCase(1, 2, 3, 0)]
+        [TestCase(2, 0, 3, 1)]
+        [TestCase(2, 1, 3, 0)]
+        [TestCase(0, 1, 2, 3)]
+        [TestCase(1, 0, 2, 3)]
+        [TestCase(0, 2, 1, 3)]
+        [TestCase(1, 2, 0, 3)]
+        [TestCase(2, 0, 1, 3)]
+        [TestCase(2, 1, 0, 3)]
+        public void BothObjectStringInt32WideIsUnion(int index0, int index1, int index2, int index3)
+        {
+            var args = new[] { DoubleType.Instance, StringType.Instance, Int32Type.Instance, ObjectType.Instance };
+
+            var actual = AvalonType.Wide(args[index0], args[index1], args[index2], args[index3]).
+                EnumerateTypes().
+                ToArray();
+
+            var expected = new[] { ObjectType.Instance };
+            Assert.IsTrue(SequenceEqualNotOrdered(expected, actual));
         }
     }
 }

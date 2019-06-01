@@ -16,6 +16,11 @@ namespace TypeInferences.Expressions
             new Constant(value);
         public static AvalonExpression Increment(AvalonExpression parameter) =>
             new Increment(parameter);
+
+        public static AvalonExpression Parameter(string name) =>
+            new Parameter(name, new UnassignedType());
+        public static AvalonExpression Parameter(string name, AvalonType type) =>
+            new Parameter(name, type);
         public static AvalonExpression Lambda(AvalonExpression body, AvalonExpression parameter) =>
             new Lambda(body, parameter);
     }

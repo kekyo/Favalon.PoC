@@ -33,6 +33,14 @@ namespace TypeInferences
             var constant = AvalonExpression.Constant("ABC");
             Assert.AreEqual(StringType.Instance, constant.InferenceType);
         }
+
+        [Test]
+        public void ObjectConstantIsObjectType()
+        {
+            // var a = new object();
+            var constant = AvalonExpression.Constant(new object());
+            Assert.AreEqual(ObjectType.Instance, constant.InferenceType);
+        }
         #endregion
 
         #region Increment
@@ -53,35 +61,52 @@ namespace TypeInferences
             var apply = AvalonExpression.Increment(constant);
             Assert.AreEqual(DoubleType.Instance, constant.InferenceType);
         }
-
         #endregion
 
         #region Lambda
         [Test]
-        public void Int32ConstantFromInt32TypeLambda()
+        public void Int32ConstantFromInt32ParameterLambda()
         {
-            // var f = 123 => 456;
-            var parameter = AvalonExpression.Constant(123);
-            var lambda = AvalonExpression.Lambda(AvalonExpression.Constant(456), parameter);
+            // var f = a:Int32 => 123;
+            var parameter = AvalonExpression.Parameter("a", Int32Type.Instance);
+            var lambda = AvalonExpression.Lambda(AvalonExpression.Constant(123), parameter);
             Assert.AreEqual(Int32Type.Instance, lambda.InferenceType);
         }
 
         [Test]
-        public void DoubleConstantFromInt32TypeLambda()
+        public void DoubleConstantFromInt32ParameterLambda()
         {
-            // var f = 123 => 456.789;
-            var parameter = AvalonExpression.Constant(123);
+            // var f = a:Int32 => 456.789;
+            var parameter = AvalonExpression.Parameter("a", Int32Type.Instance);
             var lambda = AvalonExpression.Lambda(AvalonExpression.Constant(456.789), parameter);
             Assert.AreEqual(DoubleType.Instance, lambda.InferenceType);
         }
 
         [Test]
-        public void StringConstantFromInt32TypeLambda()
+        public void StringConstantFromInt32ParameterLambda()
         {
-            // var f = 123 => "ABC";
-            var parameter = AvalonExpression.Constant(123);
+            // var f = a:Int32 => "ABC";
+            var parameter = AvalonExpression.Parameter("a", Int32Type.Instance);
             var lambda = AvalonExpression.Lambda(AvalonExpression.Constant("ABC"), parameter);
             Assert.AreEqual(StringType.Instance, lambda.InferenceType);
+        }
+
+        [Test]
+        public void Int32ValueFromInt32ParameterLambda()
+        {
+            // var f = a:Int32 => a;
+            var parameter = AvalonExpression.Parameter("a", Int32Type.Instance);
+            var lambda = AvalonExpression.Lambda(parameter, parameter);
+            Assert.AreEqual(Int32Type.Instance, lambda.InferenceType);
+        }
+
+        [Test]
+        public void UnassignedValueFromUnassignedParameterLambda()
+        {
+            // var f = a => a;
+            var parameter = AvalonExpression.Parameter("a");
+            var lambda = AvalonExpression.Lambda(parameter, parameter);
+            Assert.IsTrue(lambda.InferenceType is UnassignedType);
         }
         #endregion
     }

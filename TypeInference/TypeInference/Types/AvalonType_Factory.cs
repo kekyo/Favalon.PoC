@@ -26,6 +26,10 @@ namespace TypeInferences.Types
             {
                 return StringType.Instance;
             }
+            if (typeInfo == typeof(object).GetTypeInfo())
+            {
+                return ObjectType.Instance;
+            }
 
             throw new ArgumentException();
         }

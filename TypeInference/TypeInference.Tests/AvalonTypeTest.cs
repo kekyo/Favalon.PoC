@@ -4,9 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using TypeInferences.Types;
 
-namespace TypeInferences
+namespace TypeInferences.Types
 {
     [TestFixture]
     public sealed class AvalonTypeTest

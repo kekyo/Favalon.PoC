@@ -18,6 +18,6 @@ namespace TypeInferences.Types
             return false;
         }
 
-        public static new readonly AvalonType Instance = new Int32Type();
+        public static readonly AvalonType Instance = new Int32Type();
     }
 }

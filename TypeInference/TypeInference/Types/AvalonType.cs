@@ -14,6 +14,9 @@ namespace TypeInferences.Types
         public bool Equals(AvalonType rhs) =>
             object.ReferenceEquals(this, rhs);
 
+        public override bool Equals(object obj) =>
+            obj is AvalonType type ? this.Equals(type) : false;
+
         public virtual IEnumerable<AvalonType> EnumerateTypes() =>
             new[] { this };
 
@@ -54,7 +57,6 @@ namespace TypeInferences.Types
                     {
                         rcTypes[index] = calculated;
                         found = true;
-                        break;
                     }
                 }
                 if (!found)
@@ -65,7 +67,7 @@ namespace TypeInferences.Types
 
             return (rcTypes.Count <= 1) ?
                 rcTypes[0] :
-                new UnionType(rcTypes.ToArray());
+                new UnionType(rcTypes.Distinct().ToArray());
         }
     }
 }

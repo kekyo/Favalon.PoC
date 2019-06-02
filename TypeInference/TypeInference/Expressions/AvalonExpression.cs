@@ -18,7 +18,7 @@ namespace TypeInferences.Expressions
             new Increment(parameter);
 
         public static AvalonExpression Parameter(string name) =>
-            new Parameter(name, new UnassignedType());
+            new Parameter(name, AvalonType.Unspecified);
         public static AvalonExpression Parameter(string name, AvalonType type) =>
             new Parameter(name, type);
         public static AvalonExpression Lambda(AvalonExpression body, AvalonExpression parameter) =>

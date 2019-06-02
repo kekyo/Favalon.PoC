@@ -14,6 +14,6 @@ namespace TypeInferences.Expressions
         }
 
         public override AvalonType InferenceType =>
-            AvalonType.Wide(base.parameter.InferenceType, Int32Type.Instance);
+            base.parameter.InferenceType.ToWide(AvalonType.FromClrType<int>());
     }
 }

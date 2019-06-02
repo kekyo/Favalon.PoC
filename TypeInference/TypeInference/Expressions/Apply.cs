@@ -10,9 +10,7 @@ namespace TypeInferences.Expressions
     {
         internal readonly AvalonExpression parameter;
 
-        internal Apply(AvalonExpression parameter)
-        {
+        internal Apply(AvalonExpression parameter) =>
             this.parameter = parameter;
-        }
     }
 }

@@ -2,26 +2,44 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using TypeInferences.Types.Internals;
 
 namespace TypeInferences.Types
 {
-    public abstract partial class AvalonType
+    public enum AvalonTypes
+    {
+        Unspecified,
+        ClrType,
+        Union
+    }
+
+    public abstract class AvalonType :
+        IEquatable<AvalonType>, IComparable<AvalonType>
     {
         private protected AvalonType()
         {
         }
 
-        public bool Equals(AvalonType rhs) =>
-            object.ReferenceEquals(this, rhs);
+        public abstract AvalonTypes Type { get; }
 
-        public override bool Equals(object obj) =>
-            obj is AvalonType type ? this.Equals(type) : false;
+        public abstract string Identity { get; }
 
-        public virtual IEnumerable<AvalonType> EnumerateTypes() =>
-            new[] { this };
+        public override int GetHashCode() =>
+            this.Identity.GetHashCode();
 
-        private protected virtual bool IsConvertibleFrom(AvalonType rhs) =>
-            false;
+        public virtual bool Equals(AvalonType rhs) =>
+            this.Identity == rhs.Identity;
+
+        public virtual int CompareTo(AvalonType other) =>
+            this.Identity.CompareTo(other.Identity);
+
+        internal abstract bool IsConvertibleFrom(AvalonType rhs);
+
+        internal AvalonType Normalized =>
+            this is AvalonTypeRef typeRef ? typeRef.type : this;
+
+        public override string ToString() =>
+            this.Identity;
 
         private static AvalonType? WideCore(AvalonType lhs, AvalonType rhs)
         {
@@ -43,17 +61,18 @@ namespace TypeInferences.Types
             }
         }
 
-        public static AvalonType Wide(params AvalonType[] types)
+        public AvalonType ToWide(params AvalonType[] types)
         {
-            var rcTypes = new List<AvalonType>();
+            var rcTypes = new List<AvalonType> { this.Normalized };
 
             foreach (var type in types)
             {
+                var normalizedType = type.Normalized;
                 var found = false;
                 for (var index = 0; index < rcTypes.Count; index++)
                 {
                     var rcType = rcTypes[index];
-                    if (WideCore(rcType, type) is AvalonType calculated)
+                    if (WideCore(rcType, normalizedType) is AvalonType calculated)
                     {
                         rcTypes[index] = calculated;
                         found = true;
@@ -61,7 +80,7 @@ namespace TypeInferences.Types
                 }
                 if (!found)
                 {
-                    rcTypes.Add(type);
+                    rcTypes.Add(normalizedType);
                 }
             }
 
@@ -69,5 +88,20 @@ namespace TypeInferences.Types
                 rcTypes[0] :
                 new UnionType(rcTypes.Distinct().ToArray());
         }
+
+        public AvalonTypeRef MakeTypeRef() =>
+            new AvalonTypeRef(this.Normalized);
+
+        public static AvalonType FromClrType<T>() =>
+            FromClrType(typeof(T).GetTypeInfo());
+
+        public static AvalonType FromClrType(Type type) =>
+            FromClrType(type.GetTypeInfo());
+
+        public static AvalonType FromClrType(TypeInfo type) =>
+            new ClrType(type);
+
+        public static readonly AvalonType Unspecified =
+            new UnspecifiedType();
     }
 }

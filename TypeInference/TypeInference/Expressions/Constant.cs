@@ -13,6 +13,6 @@ namespace TypeInferences.Expressions
         internal Constant(object value) =>
             this.value = value;
 
-        public override AvalonType InferenceType => AvalonType.Create(this.value.GetType());
+        public override AvalonType InferenceType => AvalonType.FromClrType(this.value.GetType());
     }
 }

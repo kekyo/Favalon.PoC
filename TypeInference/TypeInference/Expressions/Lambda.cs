@@ -16,7 +16,7 @@ namespace TypeInferences.Expressions
             this.Parameter = parameter;
         }
 
-        public AvalonExpression Parameter { get; }
+        public new AvalonExpression Parameter { get; }
 
         public override AvalonType InferenceType =>
             body.InferenceType;

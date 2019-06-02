@@ -6,15 +6,7 @@ using TypeInferences.Types.Internals;
 
 namespace TypeInferences.Types
 {
-    public enum AvalonTypes
-    {
-        Unspecified,
-        ClrType,
-        Union
-    }
-
-    public abstract class AvalonType :
-        IEquatable<AvalonType>, IComparable<AvalonType>
+    public abstract class AvalonType : IAvalonType
     {
         private protected AvalonType()
         {
@@ -27,16 +19,16 @@ namespace TypeInferences.Types
         public override int GetHashCode() =>
             this.Identity.GetHashCode();
 
-        public virtual bool Equals(AvalonType rhs) =>
+        public virtual bool Equals(IAvalonType rhs) =>
             this.Identity == rhs.Identity;
 
-        public virtual int CompareTo(AvalonType other) =>
+        public virtual int CompareTo(IAvalonType other) =>
             this.Identity.CompareTo(other.Identity);
 
-        internal abstract bool IsConvertibleFrom(AvalonType rhs);
+        public abstract bool IsConvertibleFrom(IAvalonType rhs);
 
-        internal AvalonType Normalized =>
-            this is AvalonTypeRef typeRef ? typeRef.type : this;
+        public AvalonType Normalized =>
+            this;
 
         public override string ToString() =>
             this.Identity;
@@ -61,7 +53,7 @@ namespace TypeInferences.Types
             }
         }
 
-        public AvalonType ToWide(params AvalonType[] types)
+        public AvalonType ToWide(params IAvalonType[] types)
         {
             var rcTypes = new List<AvalonType> { this.Normalized };
 

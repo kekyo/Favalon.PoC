@@ -18,14 +18,14 @@ namespace TypeInferences.Types.Internals
         public override int GetHashCode() =>
             this.Identity.GetHashCode();
 
-        public override bool Equals(AvalonType rhs) =>
+        public override bool Equals(IAvalonType rhs) =>
             // Always false because unspecified type equality props only shared AvalonType instance.
             false;
 
-        public override int CompareTo(AvalonType other) =>
+        public override int CompareTo(IAvalonType other) =>
             -1;
 
-        internal override bool IsConvertibleFrom(AvalonType rhs) =>
+        public override bool IsConvertibleFrom(IAvalonType rhs) =>
             false;
     }
 }

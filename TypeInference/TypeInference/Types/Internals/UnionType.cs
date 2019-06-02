@@ -21,8 +21,9 @@ namespace TypeInferences.Types.Internals
         public IEnumerable<AvalonType> EnumerateTypes() =>
             this.types;
 
-        internal override bool IsConvertibleFrom(AvalonType rhs)
+        public override bool IsConvertibleFrom(IAvalonType rhs)
         {
+            // TODO:
             return false;
         }
     }

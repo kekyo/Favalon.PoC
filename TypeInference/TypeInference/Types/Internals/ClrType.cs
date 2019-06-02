@@ -27,9 +27,9 @@ namespace TypeInferences.Types.Internals
         public override string Identity =>
             this.type.FullName;
 
-        internal override bool IsConvertibleFrom(AvalonType rhs)
+        public override bool IsConvertibleFrom(IAvalonType rhs)
         {
-            if (rhs is ClrType clrType)
+            if (rhs.Normalized is ClrType clrType)
             {
                 if (this.type.IsAssignableFrom(clrType.type))
                 {

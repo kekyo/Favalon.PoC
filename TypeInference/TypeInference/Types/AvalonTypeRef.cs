@@ -5,19 +5,21 @@ using TypeInferences.Types.Internals;
 
 namespace TypeInferences.Types
 {
-    public sealed class AvalonTypeRef :
-        AvalonType, IEquatable<AvalonTypeRef>, IComparable<AvalonTypeRef>
+    public sealed class AvalonTypeRef : IAvalonType
     {
         internal AvalonType type;
 
         internal AvalonTypeRef(AvalonType type) =>
             this.type = type;
 
-        public override AvalonTypes Type =>
+        public AvalonTypes Type =>
             type.Type;
 
-        public override string Identity =>
+        public string Identity =>
             this.type.Identity;
+
+        public AvalonType Normalized =>
+            this.type;
 
         public override int GetHashCode() =>
             this.type.GetHashCode();
@@ -27,23 +29,23 @@ namespace TypeInferences.Types
                 true :
                 this.type.Equals(rhs.type);
 
-        public override bool Equals(AvalonType rhs) =>
+        public bool Equals(IAvalonType rhs) =>
             object.ReferenceEquals(this, rhs) ?
                 true :
                 this.type.Equals(rhs?.Normalized);
 
         public override bool Equals(object obj) =>
-            obj is AvalonType rhs ?
+            obj is IAvalonType rhs ?
                 this.Equals(rhs) :
                 false;
 
         public int CompareTo(AvalonTypeRef other) =>
             this.type.CompareTo(other.type);
 
-        public override int CompareTo(AvalonType other) =>
+        public int CompareTo(IAvalonType other) =>
             this.type.CompareTo(other.Normalized);
 
-        internal override bool IsConvertibleFrom(AvalonType rhs) =>
+        public bool IsConvertibleFrom(IAvalonType rhs) =>
             this.type.IsConvertibleFrom(rhs.Normalized);
 
         public override string ToString() =>
@@ -54,7 +56,7 @@ namespace TypeInferences.Types
                 unionType.EnumerateTypes() :
                 new[] { this.type };
 
-        public void ComposeToWide(params AvalonType[] types) =>
+        public void ComposeToWide(params IAvalonType[] types) =>
             this.type = this.type.ToWide(types);
     }
 }

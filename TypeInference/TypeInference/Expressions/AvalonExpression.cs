@@ -12,16 +12,18 @@ namespace TypeInferences.Expressions
 
         public abstract AvalonType InferenceType { get; }
 
-        public static AvalonExpression Constant(object value) =>
+        public static Constant Constant(object value) =>
             new Constant(value);
-        public static AvalonExpression Increment(AvalonExpression parameter) =>
+        public static Increment Increment(AvalonExpression parameter) =>
             new Increment(parameter);
 
-        public static AvalonExpression Parameter(string name) =>
+        public static Parameter Parameter(string name) =>
             new Parameter(name, AvalonType.Unspecified);
-        public static AvalonExpression Parameter(string name, AvalonType type) =>
+        public static Parameter Parameter(string name, AvalonType type) =>
             new Parameter(name, type);
-        public static AvalonExpression Lambda(AvalonExpression body, AvalonExpression parameter) =>
+        public static Lambda Lambda(AvalonExpression body, AvalonExpression parameter) =>
             new Lambda(body, parameter);
+        public static Apply Apply(Lambda target, params AvalonExpression[] arguments) =>
+            new Apply(target, arguments);
     }
 }

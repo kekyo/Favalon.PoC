@@ -106,12 +106,27 @@ namespace TypeInferences
         }
 
         [Test]
-        public void UnassignedValueFromUnassignedParameterLambda()
+        public void UnspecifiedValueFromUnspecifiedParameterLambda()
         {
             // var f = a => a;
             var parameter = AvalonExpression.Parameter("a");
             var lambda = AvalonExpression.Lambda(parameter, parameter);
-            Assert.AreEqual(AvalonTypes.Unspecified, lambda.InferenceType.Type);
+            Assert.AreEqual(AvalonType.Unspecified, lambda.InferenceType);
+        }
+        #endregion
+
+        #region Inference
+        [Test]
+        public void UnspecifiedValueFromUnspecifiedParameterApplyToInt32()
+        {
+            // var f = a => a;
+            // var r = f(123);
+            var parameter = AvalonExpression.Parameter("a");
+            var lambda = AvalonExpression.Lambda(parameter, parameter);
+            var constant = AvalonExpression.Constant(123);
+            var apply = AvalonExpression.Apply(lambda, constant);
+
+            Assert.AreEqual(int32Type, apply.InferenceType);
         }
         #endregion
     }

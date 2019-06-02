@@ -6,11 +6,18 @@ using TypeInferences.Types;
 
 namespace TypeInferences.Expressions
 {
-    public abstract class Apply : AvalonExpression
+    public sealed class Apply : AvalonExpression
     {
-        internal readonly AvalonExpression parameter;
+        private readonly Lambda target;
+        private readonly AvalonExpression[] arguments;
 
-        internal Apply(AvalonExpression parameter) =>
-            this.parameter = parameter;
+        internal Apply(Lambda target, AvalonExpression[] arguments)
+        {
+            this.target = target;
+            this.arguments = arguments;
+        }
+
+        public override AvalonType InferenceType =>
+            this.parameter.InferenceType.ToWide(this.arguments);
     }
 }

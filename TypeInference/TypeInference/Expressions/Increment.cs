@@ -6,14 +6,14 @@ using TypeInferences.Types;
 
 namespace TypeInferences.Expressions
 {
-    public sealed class Increment : Apply
+    public sealed class Increment : AvalonExpression
     {
-        internal Increment(AvalonExpression parameter)
-            : base(parameter)
-        {
-        }
+        private readonly AvalonExpression parameter;
+
+        internal Increment(AvalonExpression parameter) =>
+            this.parameter = parameter;
 
         public override AvalonType InferenceType =>
-            base.parameter.InferenceType.ToWide(AvalonType.FromClrType<int>());
+            this.parameter.InferenceType.ToWide(AvalonType.FromClrType<int>());
     }
 }

@@ -22,6 +22,11 @@ namespace TypeInferences.Types
         public virtual bool Equals(IAvalonType rhs) =>
             this.Identity == rhs.Identity;
 
+        public override bool Equals(object obj) =>
+            obj is IAvalonType type ?
+                this.Equals(type.Normalized) :
+                false;
+
         public virtual int CompareTo(IAvalonType other) =>
             this.Identity.CompareTo(other.Identity);
 

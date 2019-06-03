@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.452
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicSyntaxTree", "BasicSyntaxTree\BasicSyntaxTree.csproj", "{457E4C48-9153-4757-B086-A7E425CD5EBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicSyntaxTree.Tests", "BasicSyntaxTree.Tests\BasicSyntaxTree.Tests.csproj", "{9A439F90-5BE6-444A-9FAB-4B6612E60831}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{457E4C48-9153-4757-B086-A7E425CD5EBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{457E4C48-9153-4757-B086-A7E425CD5EBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{457E4C48-9153-4757-B086-A7E425CD5EBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{457E4C48-9153-4757-B086-A7E425CD5EBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A439F90-5BE6-444A-9FAB-4B6612E60831}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A439F90-5BE6-444A-9FAB-4B6612E60831}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A439F90-5BE6-444A-9FAB-4B6612E60831}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A439F90-5BE6-444A-9FAB-4B6612E60831}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {82DE873C-8730-4F49-BE5A-8FBB0F33BBE7}
+	EndGlobalSection
+EndGlobal

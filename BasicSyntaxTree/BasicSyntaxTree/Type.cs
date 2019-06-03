@@ -34,21 +34,21 @@ namespace BasicSyntaxTree
     public sealed class FunctionType : Type
     {
         public readonly Type ParameterType;
-        public readonly Type ResultType;
+        public readonly Type ExpressionType;
 
-        internal FunctionType(Type parameterType, Type resultType)
+        internal FunctionType(Type parameterType, Type expressionType)
         {
             this.ParameterType = parameterType;
-            this.ResultType = resultType;
+            this.ExpressionType = expressionType;
         }
 
         public override bool Equals(Type other) =>
             other is FunctionType rhs ?
-                (this.ParameterType.Equals(rhs.ParameterType) && this.ResultType.Equals(rhs.ResultType)) :
+                (this.ParameterType.Equals(rhs.ParameterType) && this.ExpressionType.Equals(rhs.ExpressionType)) :
                 false;
 
         public override string ToString() =>
-            $"{this.ParameterType} -> {this.ResultType}";
+            $"{this.ParameterType} -> {this.ExpressionType}";
     }
 
     public sealed class VariableType : Type

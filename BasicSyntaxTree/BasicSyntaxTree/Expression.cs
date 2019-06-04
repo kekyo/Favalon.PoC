@@ -9,8 +9,11 @@ namespace BasicSyntaxTree
 
         internal abstract Type VisitInfering(TypeEnvironment environment, VariableContext context);
 
-        public Type Infer<T>(T typeEnvironment) where T : IReadOnlyDictionary<string, Type> =>
-            this.VisitInfering(new TypeEnvironment(typeEnvironment), new VariableContext());
+        public Type Infer<T>(T typeEnvironment) where T : IReadOnlyDictionary<string, Type>
+        {
+            var context = new VariableContext();
+            return context.Resolve(this.VisitInfering(new TypeEnvironment(typeEnvironment), context));
+        }
 
         // =======================================================================
 
@@ -134,23 +137,17 @@ namespace BasicSyntaxTree
 
         private static void Unify(Type type1, Type type2, VariableContext context)
         {
-            if (type1.Equals(type2))
-            {
-                return;
-            }
-
             if ((type1 is FunctionType ft1) && (type2 is FunctionType ft2))
             {
                 Unify(ft1.ParameterType, ft2.ParameterType, context);
                 Unify(ft1.ExpressionType, ft2.ExpressionType, context);
                 return;
             }
-
             if (type1 is VariableType vt1)
             {
-                if (type2 is VariableType vt2)
+                if (type2 is VariableType vt21)
                 {
-                    if (vt1.Index == vt2.Index)
+                    if (vt1.Index == vt21.Index)
                     {
                         return;
                     }
@@ -159,9 +156,13 @@ namespace BasicSyntaxTree
                 Unify(vt1, type2, context);
                 return;
             }
-            else if (type2 is VariableType vt2)
+            if (type2 is VariableType vt22)
             {
-                Unify(vt2, type1, context);
+                Unify(vt22, type1, context);
+                return;
+            }
+            if (type1.Equals(type2))
+            {
                 return;
             }
 

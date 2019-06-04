@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace BasicSyntaxTree
 {
@@ -16,5 +15,23 @@ namespace BasicSyntaxTree
 
         public void AddInferType(VariableType variableType, Type type) =>
             this.types.Add(variableType.Index, type);
+
+        public Type Resolve(Type type)
+        {
+            if (type is FunctionType functionType)
+            {
+                return Type.Function(
+                    this.Resolve(functionType.ParameterType),
+                    this.Resolve(functionType.ExpressionType));
+            }
+            if (type is VariableType variableType)
+            {
+                if (types.TryGetValue(variableType.Index, out var vt))
+                {
+                    return this.Resolve(vt);
+                }
+            }
+            return type;
+        }
     }
 }

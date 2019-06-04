@@ -22,8 +22,7 @@ namespace BasicSyntaxTree.Tests
             var actual = nat.Infer(globalEnv);
 
             // Integer
-            var expected = Type.Integer;
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual("Integer", actual.ToString());
         }
 
         [Test]
@@ -41,8 +40,26 @@ namespace BasicSyntaxTree.Tests
             var actual = fun.Infer(globalEnv);
 
             // Integer -> Integer
-            var expected = Type.Function(Type.Integer, Type.Integer);
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual("Integer -> Integer", actual.ToString());
+        }
+
+        [Test]
+        public void FunctionCombinedExpression()
+        {
+            var globalEnv = CreateEnvironment();
+
+            // fun f = g => x => f (g x)
+            var expra2 = Expression.Variable("x");
+            var exprf2 = Expression.Variable("g");
+            var expra1 = Expression.Apply(exprf2, expra2);
+            var exprf1 = Expression.Variable("f");
+            var expr3 = Expression.Apply(exprf1, expra1);
+            var expr2 = Expression.Function("x", expr3);
+            var expr1 = Expression.Function("g", expr2);
+            var fun = Expression.Function("f", expr1);
+            var actual = fun.Infer(globalEnv);
+
+            Assert.AreEqual("('T3 -> 'T4) -> ('T2 -> 'T3) -> 'T2 -> 'T4", actual.ToString());
         }
     }
 }

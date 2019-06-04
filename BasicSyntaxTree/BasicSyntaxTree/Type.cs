@@ -47,8 +47,17 @@ namespace BasicSyntaxTree
                 (this.ParameterType.Equals(rhs.ParameterType) && this.ExpressionType.Equals(rhs.ExpressionType)) :
                 false;
 
-        public override string ToString() =>
-            $"{this.ParameterType} -> {this.ExpressionType}";
+        public override string ToString()
+        {
+            if (this.ParameterType is FunctionType)
+            {
+                return $"({this.ParameterType}) -> {this.ExpressionType}";
+            }
+            else
+            {
+                return $"{this.ParameterType} -> {this.ExpressionType}";
+            }
+        }
     }
 
     public sealed class VariableType : Type

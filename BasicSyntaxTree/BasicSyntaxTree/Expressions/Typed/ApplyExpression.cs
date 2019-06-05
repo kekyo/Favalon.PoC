@@ -17,7 +17,7 @@ namespace BasicSyntaxTree.Expressions.Typed
         {
             this.Lambda.Resolve(context);
             this.Argument.Resolve(context);
-            base.Resolve(context);
+            this.Type = context.ResolveType(this.Type);
         }
 
         public override string ToString() =>

@@ -7,12 +7,11 @@ namespace BasicSyntaxTree.Expressions.Typed
         private protected TypedExpression(Type type, TextRegion textRegion) : base(textRegion) =>
             this.Type = type;
 
-        public Type Type { get; private set; }
+        public Type Type { get; private protected set; }
 
         public override bool IsResolved =>
             this.Type.IsResolved;
 
-        internal virtual void Resolve(InferContext context) =>
-            this.Type = context.ResolveType(this.Type);
+        internal abstract void Resolve(InferContext context);
     }
 }

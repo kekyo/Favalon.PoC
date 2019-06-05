@@ -16,10 +16,11 @@ namespace BasicSyntaxTree.Expressions.Typed
         internal override void Resolve(InferContext context)
         {
             this.Body.Resolve(context);
-            base.Resolve(context);
+            this.Type = context.ResolveType(this.Type);
         }
 
+
         public override string ToString() =>
-            $"{this.Parameter}:{this.Type} = {this.Body}";
+            $"fun {this.Parameter}:{this.Type} -> {this.Body}";
     }
 }

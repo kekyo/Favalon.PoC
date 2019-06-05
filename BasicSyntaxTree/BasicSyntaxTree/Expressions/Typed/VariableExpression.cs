@@ -9,6 +9,9 @@ namespace BasicSyntaxTree.Expressions.Typed
         internal VariableExpression(string name, Type type, TextRegion textRegion) : base(type, textRegion) =>
             this.Name = name;
 
+        internal override void Resolve(InferContext context) =>
+            this.Type = context.ResolveType(this.Type);
+
         public override string ToString() =>
             $"{this.Name}:{this.Type}";
     }

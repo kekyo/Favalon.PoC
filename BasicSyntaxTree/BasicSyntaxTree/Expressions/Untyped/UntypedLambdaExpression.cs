@@ -6,12 +6,12 @@ namespace BasicSyntaxTree.Expressions.Untyped
     public sealed class UntypedLambdaExpression : UntypedExpression
     {
         public readonly string Parameter;
-        public readonly UntypedExpression Body;
+        public readonly UntypedExpression Expression;
 
-        internal UntypedLambdaExpression(string parameter, UntypedExpression body, TextRegion textRegion) : base(textRegion)
+        internal UntypedLambdaExpression(string parameter, UntypedExpression expression, TextRegion textRegion) : base(textRegion)
         {
             this.Parameter = parameter;
-            this.Body = body;
+            this.Expression = expression;
         }
 
         internal override TypedExpression Visit(TypeEnvironment environment, InferContext context)
@@ -19,12 +19,12 @@ namespace BasicSyntaxTree.Expressions.Untyped
             var scopedEnvironment = environment.MakeScope();
             var parameterType = context.CreateUntypedType();
             scopedEnvironment.RegisterVariable(this.Parameter, parameterType);
-            var body = this.Body.Visit(scopedEnvironment, context);
-            var type = Type.Function(parameterType, body.Type);
-            return new LambdaExpression(this.Parameter, body, type, this.TextRegion);
+            var expression = this.Expression.Visit(scopedEnvironment, context);
+            var type = Type.Function(parameterType, expression.Type);
+            return new LambdaExpression(this.Parameter, expression, type, this.TextRegion);
         }
 
         public override string ToString() =>
-            $"fun {this.Parameter} = {this.Body}";
+            $"fun {this.Parameter} = {this.Expression}";
     }
 }

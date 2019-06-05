@@ -80,5 +80,22 @@ namespace BasicSyntaxTree
             Assert.AreEqual("('d -> 'e) -> ('c -> 'd) -> 'c -> 'e", actual.Type.ToString());
             Assert.IsFalse(actual.IsResolved);
         }
+
+        [Test]
+        public void BindInt32Expression()
+        {
+            var globalEnv = Expression.CreateEnvironment();
+
+            // let x = 123 in x
+            var textRegion = TextRegion.Create(target, 1, 1, 5, 1);
+            var int32Expression = UntypedExpression.Constant(123, textRegion);
+            var bindExpression = UntypedExpression.Bind("x", int32Expression, UntypedExpression.Variable("x", textRegion), textRegion);
+            var actual = bindExpression.Infer(globalEnv);
+
+            // Int32
+            Assert.AreEqual("Int32", actual.Type.ToString());
+            Assert.IsTrue(actual.IsResolved);
+        }
+
     }
 }

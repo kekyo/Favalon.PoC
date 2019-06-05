@@ -4,7 +4,7 @@ namespace BasicSyntaxTree.Expressions.Typed
 {
     public abstract class TypedExpression : Expression
     {
-        private protected TypedExpression(Type type) =>
+        private protected TypedExpression(Type type, TextRegion textRegion) : base(textRegion) =>
             this.Type = type;
 
         public Type Type { get; private set; }

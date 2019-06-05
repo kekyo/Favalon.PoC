@@ -7,13 +7,11 @@ namespace BasicSyntaxTree.Expressions.Untyped
     {
         public readonly string Name;
 
-        internal UntypedVariableExpression(string name) =>
+        internal UntypedVariableExpression(string name, TextRegion textRegion) : base(textRegion) =>
             this.Name = name;
 
         internal override TypedExpression Visit(TypeEnvironment environment, InferContext context) =>
-            new VariableExpression(
-                this.Name,
-                environment.GetType(this.Name) ?? context.CreateUntypedType());
+            new VariableExpression(this.Name, environment.GetType(this.Name) ?? context.CreateUntypedType(), this.TextRegion);
 
         public override string ToString() =>
             this.Name;

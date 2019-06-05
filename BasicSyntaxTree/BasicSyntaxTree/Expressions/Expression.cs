@@ -6,7 +6,10 @@ namespace BasicSyntaxTree.Expressions
 {
     public abstract class Expression
     {
-        protected Expression() { }
+        public readonly TextRegion TextRegion;
+
+        protected Expression(TextRegion textRegion) =>
+            this.TextRegion = textRegion;
 
         public static IReadOnlyDictionary<string, Type> CreateEnvironment(
             params (string name, Type type)[] environments) =>

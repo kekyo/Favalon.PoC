@@ -6,7 +6,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
 {
     public abstract class UntypedExpression : Expression
     {
-        private protected UntypedExpression() { }
+        private protected UntypedExpression(TextRegion textRegion) : base(textRegion) { }
 
         internal abstract TypedExpression Visit(TypeEnvironment environment, InferContext context);
 
@@ -20,16 +20,16 @@ namespace BasicSyntaxTree.Expressions.Untyped
 
         // =======================================================================
 
-        public static UntypedConstantExpression Constant(object value) =>
-            new UntypedConstantExpression(value);
+        public static UntypedConstantExpression Constant(object value, TextRegion textRegion) =>
+            new UntypedConstantExpression(value, textRegion);
 
-        public static UntypedVariableExpression Variable(string name) =>
-            new UntypedVariableExpression(name);
+        public static UntypedVariableExpression Variable(string name, TextRegion textRegion) =>
+            new UntypedVariableExpression(name, textRegion);
 
-        public static UntypedLambdaExpression Lambda(string parameter, UntypedExpression body) =>
-            new UntypedLambdaExpression(parameter, body);
+        public static UntypedLambdaExpression Lambda(string parameter, UntypedExpression body, TextRegion textRegion) =>
+            new UntypedLambdaExpression(parameter, body, textRegion);
 
-        public static UntypedApplyExpression Apply(UntypedExpression function, UntypedExpression argument) =>
-            new UntypedApplyExpression(function, argument);
+        public static UntypedApplyExpression Apply(UntypedExpression function, UntypedExpression argument, TextRegion textRegion) =>
+            new UntypedApplyExpression(function, argument, textRegion);
     }
 }

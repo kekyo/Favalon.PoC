@@ -7,7 +7,7 @@ namespace BasicSyntaxTree.Expressions.Typed
         public readonly TypedExpression Lambda;
         public readonly TypedExpression Argument;
 
-        internal ApplyExpression(TypedExpression lambda, TypedExpression argument, Type type) : base(type)
+        internal ApplyExpression(TypedExpression lambda, TypedExpression argument, Type type, TextRegion textRegion) : base(type, textRegion)
         {
             this.Lambda = lambda;
             this.Argument = argument;

@@ -8,7 +8,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
         public readonly string Parameter;
         public readonly UntypedExpression Body;
 
-        internal UntypedLambdaExpression(string parameter, UntypedExpression body)
+        internal UntypedLambdaExpression(string parameter, UntypedExpression body, TextRegion textRegion) : base(textRegion)
         {
             this.Parameter = parameter;
             this.Body = body;
@@ -21,7 +21,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
             scopedEnvironment.RegisterVariable(this.Parameter, parameterType);
             var body = this.Body.Visit(scopedEnvironment, context);
             var type = Type.Function(parameterType, body.Type);
-            return new LambdaExpression(this.Parameter, body, type);
+            return new LambdaExpression(this.Parameter, body, type, this.TextRegion);
         }
 
         public override string ToString() =>

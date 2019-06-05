@@ -7,7 +7,7 @@ namespace BasicSyntaxTree.Expressions.Typed
         public readonly string Parameter;
         public readonly TypedExpression Body;
 
-        internal LambdaExpression(string parameter, TypedExpression body, Type type) : base(type)
+        internal LambdaExpression(string parameter, TypedExpression body, Type type, TextRegion textRegion) : base(type, textRegion)
         {
             this.Parameter = parameter;
             this.Body = body;

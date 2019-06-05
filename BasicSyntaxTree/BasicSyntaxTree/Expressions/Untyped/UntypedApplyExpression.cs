@@ -8,7 +8,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
         public new readonly UntypedExpression Lambda;
         public readonly UntypedExpression Argument;
 
-        internal UntypedApplyExpression(UntypedExpression lambda, UntypedExpression argument)
+        internal UntypedApplyExpression(UntypedExpression lambda, UntypedExpression argument, TextRegion textRegion) : base(textRegion)
         {
             this.Lambda = lambda;
             this.Argument = argument;
@@ -99,7 +99,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
 
             Unify(functionExpression.Type, Type.Function(argumentExpression.Type, returnType), context);
 
-            return new ApplyExpression(functionExpression, argumentExpression, returnType);
+            return new ApplyExpression(functionExpression, argumentExpression, returnType, this.TextRegion);
         }
 
         public override string ToString() =>

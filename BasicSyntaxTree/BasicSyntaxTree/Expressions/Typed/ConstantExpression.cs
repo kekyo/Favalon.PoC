@@ -6,7 +6,7 @@ namespace BasicSyntaxTree.Expressions.Typed
     {
         public readonly object Value;
 
-        internal ConstantExpression(object value, Type type) : base(type) =>
+        internal ConstantExpression(object value, Type type, TextRegion textRegion) : base(type, textRegion) =>
             this.Value = value;
 
         public override string ToString() =>

@@ -1,4 +1,5 @@
 ﻿using BasicSyntaxTree.Expressions;
+using BasicSyntaxTree.Expressions.Untyped;
 using BasicSyntaxTree.Types;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -19,11 +20,11 @@ namespace BasicSyntaxTree
             var globalEnv = CreateEnvironment();
 
             // 123
-            var nat = Expression.Natural(123);
+            var nat = UntypedExpression.Constant(123);
             var actual = nat.Infer(globalEnv);
 
             // Integer
-            Assert.AreEqual("Integer", actual.ToString());
+            Assert.AreEqual("Integer", actual.Type.ToString());
         }
 
         [Test]
@@ -35,13 +36,13 @@ namespace BasicSyntaxTree
                 );
 
             // fun x = ((+) x) 1
-            var inner = Expression.Apply(Expression.Variable("+"), Expression.Variable("x"));
-            var outer = Expression.Apply(inner, Expression.Natural(1));
-            var fun = Expression.Lambda("x", outer);
+            var inner = UntypedExpression.Apply(UntypedExpression.Variable("+"), UntypedExpression.Variable("x"));
+            var outer = UntypedExpression.Apply(inner, UntypedExpression.Constant(1));
+            var fun = UntypedExpression.Lambda("x", outer);
             var actual = fun.Infer(globalEnv);
 
             // Integer -> Integer
-            Assert.AreEqual("Integer -> Integer", actual.ToString());
+            Assert.AreEqual("Integer -> Integer", actual.Type.ToString());
         }
 
         [Test]
@@ -50,17 +51,17 @@ namespace BasicSyntaxTree
             var globalEnv = CreateEnvironment();
 
             // fun f = g => x => f (g x)
-            var expra2 = Expression.Variable("x");
-            var exprf2 = Expression.Variable("g");
-            var expra1 = Expression.Apply(exprf2, expra2);
-            var exprf1 = Expression.Variable("f");
-            var expr3 = Expression.Apply(exprf1, expra1);
-            var expr2 = Expression.Lambda("x", expr3);
-            var expr1 = Expression.Lambda("g", expr2);
-            var fun = Expression.Lambda("f", expr1);
+            var expra2 = UntypedExpression.Variable("x");
+            var exprf2 = UntypedExpression.Variable("g");
+            var expra1 = UntypedExpression.Apply(exprf2, expra2);
+            var exprf1 = UntypedExpression.Variable("f");
+            var expr3 = UntypedExpression.Apply(exprf1, expra1);
+            var expr2 = UntypedExpression.Lambda("x", expr3);
+            var expr1 = UntypedExpression.Lambda("g", expr2);
+            var fun = UntypedExpression.Lambda("f", expr1);
             var actual = fun.Infer(globalEnv);
 
-            Assert.AreEqual("('T3 -> 'T4) -> ('T2 -> 'T3) -> 'T2 -> 'T4", actual.ToString());
+            Assert.AreEqual("('T3 -> 'T4) -> ('T2 -> 'T3) -> 'T2 -> 'T4", actual.Type.ToString());
         }
     }
 }

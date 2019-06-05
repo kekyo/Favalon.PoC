@@ -17,19 +17,19 @@ namespace BasicSyntaxTree.Expressions
         public void AddInferredType(UntypedType variableType, Type type) =>
             this.types.Add(variableType.Index, type);
 
-        public Type Resolve(Type type)
+        public Type ResolveType(Type type)
         {
             if (type is FunctionType functionType)
             {
                 return Type.Function(
-                    this.Resolve(functionType.ParameterType),
-                    this.Resolve(functionType.ExpressionType));
+                    this.ResolveType(functionType.ParameterType),
+                    this.ResolveType(functionType.ExpressionType));
             }
             if (type is UntypedType variableType)
             {
                 if (types.TryGetValue(variableType.Index, out var vt))
                 {
-                    return this.Resolve(vt);
+                    return this.ResolveType(vt);
                 }
             }
             return type;

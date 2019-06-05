@@ -4,12 +4,12 @@ namespace BasicSyntaxTree.Expressions.Typed
 {
     public sealed class ConstantExpression : TypedExpression
     {
-        public readonly int Value;
+        public readonly object Value;
 
-        internal ConstantExpression(int value, Type type) : base(type) =>
+        internal ConstantExpression(object value, Type type) : base(type) =>
             this.Value = value;
 
         public override string ToString() =>
-            $"{this.Value}:{this.Type}";
+            this.Value is string str ? $"\"{str}\":{this.Type}" : $"{this.Value}:{this.Type}";
     }
 }

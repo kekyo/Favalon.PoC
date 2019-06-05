@@ -20,7 +20,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
 
         // =======================================================================
 
-        public static UntypedConstantExpression Constant(int value) =>
+        public static UntypedConstantExpression Constant(object value) =>
             new UntypedConstantExpression(value);
 
         public static UntypedVariableExpression Variable(string name) =>

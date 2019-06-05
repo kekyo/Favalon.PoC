@@ -14,19 +14,32 @@ namespace BasicSyntaxTree
             var globalEnv = Expression.CreateEnvironment();
 
             // 123
-            var nat = UntypedExpression.Constant(123);
-            var actual = nat.Infer(globalEnv);
+            var integerExpression = UntypedExpression.Constant(123);
+            var actual = integerExpression.Infer(globalEnv);
 
-            // Integer
-            Assert.AreEqual("Integer", actual.Type.ToString());
+            // Int32
+            Assert.AreEqual("Int32", actual.Type.ToString());
+        }
+
+        [Test]
+        public void StringExpression()
+        {
+            var globalEnv = Expression.CreateEnvironment();
+
+            // "ABC"
+            var stringExpression = UntypedExpression.Constant("ABC");
+            var actual = stringExpression.Infer(globalEnv);
+
+            // String
+            Assert.AreEqual("String", actual.Type.ToString());
         }
 
         [Test]
         public void FunctionExpression()
         {
             var globalEnv = Expression.CreateEnvironment(
-                // (+) = Integer -> (Integer -> Integer)
-                ("+", Type.Function(Type.Integer(), Type.Function(Type.Integer(), Type.Integer())))
+                // (+) = Int32 -> (Int32 -> Int32)
+                ("+", Type.Function(Type.Dotnet<int>(), Type.Function(Type.Dotnet<int>(), Type.Dotnet<int>())))
                 );
 
             // fun x = ((+) x) 1
@@ -35,8 +48,8 @@ namespace BasicSyntaxTree
             var fun = UntypedExpression.Lambda("x", outer);
             var actual = fun.Infer(globalEnv);
 
-            // Integer -> Integer
-            Assert.AreEqual("Integer -> Integer", actual.Type.ToString());
+            // Int32 -> Int32
+            Assert.AreEqual("Int32 -> Int32", actual.Type.ToString());
         }
 
         [Test]

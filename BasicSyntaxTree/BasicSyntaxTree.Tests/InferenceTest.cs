@@ -2,22 +2,16 @@
 using BasicSyntaxTree.Expressions.Untyped;
 using BasicSyntaxTree.Types;
 using NUnit.Framework;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace BasicSyntaxTree
 {
     [TestFixture]
     public sealed class InferenceTest
     {
-        private static IReadOnlyDictionary<string, Type> CreateEnvironment(
-            params (string name, Type type)[] environments) =>
-            environments.ToDictionary(entry => entry.name, entry => entry.type);
-
         [Test]
         public void IntegerExpression()
         {
-            var globalEnv = CreateEnvironment();
+            var globalEnv = Expression.CreateEnvironment();
 
             // 123
             var nat = UntypedExpression.Constant(123);
@@ -30,9 +24,9 @@ namespace BasicSyntaxTree
         [Test]
         public void FunctionExpression()
         {
-            var globalEnv = CreateEnvironment(
+            var globalEnv = Expression.CreateEnvironment(
                 // (+) = Integer -> (Integer -> Integer)
-                ("+", Type.Function(Type.Integer, Type.Function(Type.Integer, Type.Integer)))
+                ("+", Type.Function(Type.Integer(), Type.Function(Type.Integer(), Type.Integer())))
                 );
 
             // fun x = ((+) x) 1
@@ -48,7 +42,7 @@ namespace BasicSyntaxTree
         [Test]
         public void FunctionCombinedExpression()
         {
-            var globalEnv = CreateEnvironment();
+            var globalEnv = Expression.CreateEnvironment();
 
             // fun f = g => x => f (g x)
             var expra2 = UntypedExpression.Variable("x");
@@ -61,7 +55,7 @@ namespace BasicSyntaxTree
             var fun = UntypedExpression.Lambda("f", expr1);
             var actual = fun.Infer(globalEnv);
 
-            Assert.AreEqual("('T3 -> 'T4) -> ('T2 -> 'T3) -> 'T2 -> 'T4", actual.Type.ToString());
+            Assert.AreEqual("('d -> 'e) -> ('c -> 'd) -> 'c -> 'e", actual.Type.ToString());
         }
     }
 }

@@ -11,7 +11,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
             this.Value = value;
 
         internal override TypedExpression Visit(TypeEnvironment environment, VariableContext context) =>
-            new ConstantExpression(this.Value, Type.Integer);
+            new ConstantExpression(this.Value, Type.Integer());
 
         public override string ToString() =>
             this.Value.ToString();

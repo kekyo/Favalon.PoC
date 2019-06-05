@@ -9,7 +9,7 @@ namespace BasicSyntaxTree.Expressions
         private int index;
 
         public UntypedType CreateUntypedType() =>
-            Type.Variable(this.index++);
+            Type.Untyped(this.index++);
 
         public Type? GetInferredType(UntypedType variableType) =>
             this.types.TryGetValue(variableType.Index, out var type) ? type : null;

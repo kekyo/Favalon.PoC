@@ -14,7 +14,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
             this.Body = body;
         }
 
-        internal override TypedExpression Visit(TypeEnvironment environment, VariableContext context)
+        internal override TypedExpression Visit(TypeEnvironment environment, InferContext context)
         {
             var scopedEnvironment = environment.MakeScope();
             var parameterType = context.CreateUntypedType();

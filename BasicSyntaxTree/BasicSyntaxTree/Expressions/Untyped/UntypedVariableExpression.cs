@@ -10,7 +10,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
         internal UntypedVariableExpression(string name) =>
             this.Name = name;
 
-        internal override TypedExpression Visit(TypeEnvironment environment, VariableContext context) =>
+        internal override TypedExpression Visit(TypeEnvironment environment, InferContext context) =>
             new VariableExpression(
                 this.Name,
                 environment.GetType(this.Name) ?? context.CreateUntypedType());

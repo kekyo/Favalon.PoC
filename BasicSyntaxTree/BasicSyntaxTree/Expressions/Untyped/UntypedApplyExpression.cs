@@ -14,7 +14,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
             this.Argument = argument;
         }
 
-        private static bool Occur(Type type, UntypedType untypedType, VariableContext context)
+        private static bool Occur(Type type, UntypedType untypedType, InferContext context)
         {
             if (type is FunctionType ft)
             {
@@ -39,7 +39,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
             return false;
         }
 
-        private static void Unify(UntypedType untypedType, Type type, VariableContext context)
+        private static void Unify(UntypedType untypedType, Type type, InferContext context)
         {
             //var isOccur = Occur(type, untypedType, context);
             //if (isOccur)
@@ -57,7 +57,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
             }
         }
 
-        private static void Unify(Type type1, Type type2, VariableContext context)
+        private static void Unify(Type type1, Type type2, InferContext context)
         {
             if ((type1 is FunctionType functionType1) && (type2 is FunctionType functionType2))
             {
@@ -91,7 +91,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
             throw new System.Exception();
         }
 
-        internal override TypedExpression Visit(TypeEnvironment environment, VariableContext context)
+        internal override TypedExpression Visit(TypeEnvironment environment, InferContext context)
         {
             var functionExpression = this.Lambda.Visit(environment, context);
             var argumentExpression = this.Argument.Visit(environment, context);

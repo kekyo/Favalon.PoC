@@ -6,13 +6,13 @@ namespace BasicSyntaxTree.Expressions.Untyped
 {
     public abstract class UntypedExpression : Expression
     {
-        protected UntypedExpression() { }
+        private protected UntypedExpression() { }
 
-        internal abstract TypedExpression Visit(TypeEnvironment environment, VariableContext context);
+        internal abstract TypedExpression Visit(TypeEnvironment environment, InferContext context);
 
         public TypedExpression Infer<T>(T typeEnvironment) where T : IReadOnlyDictionary<string, Type>
         {
-            var context = new VariableContext();
+            var context = new InferContext();
             var typedExpression = this.Visit(new TypeEnvironment(typeEnvironment), context);
             typedExpression.Resolve(context);
             return typedExpression;

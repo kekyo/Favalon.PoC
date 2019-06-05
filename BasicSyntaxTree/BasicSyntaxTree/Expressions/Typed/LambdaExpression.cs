@@ -13,7 +13,7 @@ namespace BasicSyntaxTree.Expressions.Typed
             this.Body = body;
         }
 
-        internal override void Resolve(VariableContext context)
+        internal override void Resolve(InferContext context)
         {
             this.Body.Resolve(context);
             base.Resolve(context);

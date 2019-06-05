@@ -1,9 +1,10 @@
 ﻿using BasicSyntaxTree.Types;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BasicSyntaxTree.Expressions
 {
-    internal sealed class VariableContext
+    internal sealed class InferContext
     {
         private readonly Dictionary<int, Type> types = new Dictionary<int, Type>();
         private int index;
@@ -34,5 +35,8 @@ namespace BasicSyntaxTree.Expressions
             }
             return type;
         }
+
+        public override string ToString() =>
+            $"[{string.Join(",", this.types.Select(entry => $"{{{entry.Key}:{entry.Value}}}"))}]";
     }
 }

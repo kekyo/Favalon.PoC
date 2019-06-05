@@ -13,7 +13,7 @@ namespace BasicSyntaxTree.Expressions.Typed
             this.Argument = argument;
         }
 
-        internal override void Resolve(VariableContext context)
+        internal override void Resolve(InferContext context)
         {
             this.Lambda.Resolve(context);
             this.Argument.Resolve(context);

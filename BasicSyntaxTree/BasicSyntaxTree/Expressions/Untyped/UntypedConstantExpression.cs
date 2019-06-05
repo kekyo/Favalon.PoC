@@ -10,7 +10,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
         internal UntypedConstantExpression(object value) =>
             this.Value = value;
 
-        internal override TypedExpression Visit(TypeEnvironment environment, VariableContext context) =>
+        internal override TypedExpression Visit(TypeEnvironment environment, InferContext context) =>
             new ConstantExpression(this.Value, Type.Dotnet(this.Value.GetType()));
 
         public override string ToString() =>

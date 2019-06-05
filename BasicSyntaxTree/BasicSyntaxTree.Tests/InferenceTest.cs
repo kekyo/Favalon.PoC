@@ -22,6 +22,7 @@ namespace BasicSyntaxTree
 
             // Int32
             Assert.AreEqual("Int32", actual.Type.ToString());
+            Assert.IsTrue(actual.IsResolved);
         }
 
         [Test]
@@ -36,6 +37,7 @@ namespace BasicSyntaxTree
 
             // String
             Assert.AreEqual("String", actual.Type.ToString());
+            Assert.IsTrue(actual.IsResolved);
         }
 
         [Test]
@@ -55,6 +57,7 @@ namespace BasicSyntaxTree
 
             // Int32 -> Int32
             Assert.AreEqual("Int32 -> Int32", actual.Type.ToString());
+            Assert.IsTrue(actual.IsResolved);
         }
 
         [Test]
@@ -75,6 +78,7 @@ namespace BasicSyntaxTree
             var actual = fun.Infer(globalEnv);
 
             Assert.AreEqual("('d -> 'e) -> ('c -> 'd) -> 'c -> 'e", actual.Type.ToString());
+            Assert.IsFalse(actual.IsResolved);
         }
     }
 }

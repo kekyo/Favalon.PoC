@@ -7,6 +7,8 @@
         internal UntypedType(int index) =>
             this.Index = index;
 
+        public override bool IsResolved => false;
+
         public override bool Equals(Type other) =>
             other is UntypedType rhs ?
                 (this.Index == rhs.Index) :

@@ -11,6 +11,8 @@ namespace BasicSyntaxTree.Expressions
         protected Expression(TextRegion textRegion) =>
             this.TextRegion = textRegion;
 
+        public abstract bool IsResolved { get; }
+
         public static IReadOnlyDictionary<string, Type> CreateEnvironment(
             params (string name, Type type)[] environments) =>
             environments.ToDictionary(entry => entry.name, entry => entry.type);

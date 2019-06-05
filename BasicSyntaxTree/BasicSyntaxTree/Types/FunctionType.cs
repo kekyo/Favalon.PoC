@@ -11,6 +11,9 @@
             this.ExpressionType = expressionType;
         }
 
+        public override bool IsResolved =>
+            this.ParameterType.IsResolved && this.ExpressionType.IsResolved;
+
         public override bool Equals(Type other) =>
             other is FunctionType rhs ?
                 (this.ParameterType.Equals(rhs.ParameterType) && this.ExpressionType.Equals(rhs.ExpressionType)) :

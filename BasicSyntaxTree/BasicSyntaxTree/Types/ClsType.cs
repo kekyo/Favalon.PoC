@@ -6,6 +6,8 @@
 
         public abstract System.Type Type { get; }
 
+        public override bool IsResolved => true;
+
         public override bool Equals(Type other) =>
             other is ClsTypeBase rhs ? this.Type.Equals(rhs.Type) : false;
 
@@ -23,8 +25,10 @@
 
     public sealed class ClsType<T> : ClsTypeBase
     {
+        private static readonly System.Type type = typeof(T);
+
         internal ClsType() { }
 
-        public override System.Type Type => typeof(T);
+        public override System.Type Type => type;
     }
 }

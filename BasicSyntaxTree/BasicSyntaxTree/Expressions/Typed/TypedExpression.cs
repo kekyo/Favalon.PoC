@@ -9,6 +9,9 @@ namespace BasicSyntaxTree.Expressions.Typed
 
         public Type Type { get; private set; }
 
+        public override bool IsResolved =>
+            this.Type.IsResolved;
+
         internal virtual void Resolve(InferContext context) =>
             this.Type = context.ResolveType(this.Type);
     }

@@ -4,7 +4,11 @@
     {
         protected Type() { }
 
+        public abstract bool IsResolved { get; }
+
         public abstract bool Equals(Type other);
+
+        // =======================================================================
 
         public static ClsType<T> ClsType<T>() =>
             new ClsType<T>();

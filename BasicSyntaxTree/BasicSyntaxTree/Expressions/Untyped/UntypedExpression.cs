@@ -8,6 +8,8 @@ namespace BasicSyntaxTree.Expressions.Untyped
     {
         private protected UntypedExpression(TextRegion textRegion) : base(textRegion) { }
 
+        public override bool IsResolved => false;
+
         internal abstract TypedExpression Visit(TypeEnvironment environment, InferContext context);
 
         public TypedExpression Infer<T>(T typeEnvironment) where T : IReadOnlyDictionary<string, Type>

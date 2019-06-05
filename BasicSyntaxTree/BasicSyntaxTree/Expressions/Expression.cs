@@ -1,7 +1,7 @@
-﻿using System;
+﻿using BasicSyntaxTree.Types;
 using System.Collections.Generic;
 
-namespace BasicSyntaxTree
+namespace BasicSyntaxTree.Expressions
 {
     public abstract class Expression
     {
@@ -23,8 +23,8 @@ namespace BasicSyntaxTree
         public static VariableExpression Variable(string name) =>
             new VariableExpression(name);
 
-        public static FunctionExpression Function(string parameter, Expression body) =>
-            new FunctionExpression(parameter, body);
+        public static LambdaExpression Lambda(string parameter, Expression body) =>
+            new LambdaExpression(parameter, body);
 
         public static ApplyExpression Apply(Expression function, Expression argument) =>
             new ApplyExpression(function, argument);
@@ -52,18 +52,18 @@ namespace BasicSyntaxTree
             this.Name = name;
 
         internal override Type VisitInfering(TypeEnvironment environment, VariableContext context) =>
-            environment.GetType(this.Name) ?? context.CreateVariable();
+            environment.GetType(this.Name) ?? context.CreateUntypedType();
 
         public override string ToString() =>
             this.Name;
     }
 
-    public sealed class FunctionExpression : Expression
+    public sealed class LambdaExpression : Expression
     {
         public readonly string Parameter;
         public readonly Expression Body;
 
-        internal FunctionExpression(string parameter, Expression body)
+        internal LambdaExpression(string parameter, Expression body)
         {
             this.Parameter = parameter;
             this.Body = body;
@@ -72,7 +72,7 @@ namespace BasicSyntaxTree
         internal override Type VisitInfering(TypeEnvironment environment, VariableContext context)
         {
             var scopedEnvironment = environment.MakeScope();
-            var parameterType = context.CreateVariable();
+            var parameterType = context.CreateUntypedType();
             scopedEnvironment.RegisterVariable(this.Parameter, parameterType);
             return Type.Function(parameterType, this.Body.VisitInfering(scopedEnvironment, context));
         }
@@ -83,82 +83,82 @@ namespace BasicSyntaxTree
 
     public sealed class ApplyExpression : Expression
     {
-        public new readonly Expression Function;
+        public new readonly Expression Lambda;
         public readonly Expression Argument;
 
-        internal ApplyExpression(Expression function, Expression argument)
+        internal ApplyExpression(Expression lambda, Expression argument)
         {
-            this.Function = function;
+            this.Lambda = lambda;
             this.Argument = argument;
         }
 
-        private static bool Occur(Type type, VariableType variableType, VariableContext context)
+        private static bool Occur(Type type, UntypedType untypedType, VariableContext context)
         {
             if (type is FunctionType ft)
             {
                 return
-                    Occur(ft.ParameterType, variableType, context) ||
-                    Occur(ft.ExpressionType, variableType, context);
+                    Occur(ft.ParameterType, untypedType, context) ||
+                    Occur(ft.ExpressionType, untypedType, context);
             }
 
-            if (type is VariableType vt)
+            if (type is UntypedType untypedType2)
             {
-                if (vt.Index == variableType.Index)
+                if (untypedType2.Index == untypedType.Index)
                 {
                     return true;
                 }
                 
-                if (context.GetInferType(vt) is Type it)
+                if (context.GetInferredType(untypedType2) is Type it)
                 {
-                    return Occur(it, variableType, context);
+                    return Occur(it, untypedType, context);
                 }
             }
 
             return false;
         }
 
-        private static void Unify(VariableType variableType, Type type, VariableContext context)
+        private static void Unify(UntypedType untypedType, Type type, VariableContext context)
         {
-            var isOccur = Occur(type, variableType, context);
-            if (isOccur)
-            {
-                throw new Exception();
-            }
+            //var isOccur = Occur(type, untypedType, context);
+            //if (isOccur)
+            //{
+            //    throw new System.Exception();
+            //}
 
-            if (context.GetInferType(variableType) is Type it)
+            if (context.GetInferredType(untypedType) is Type inferredType)
             {
-                Unify(it, type, context);
+                Unify(inferredType, type, context);
             }
             else
             {
-                context.AddInferType(variableType, type);
+                context.AddInferredType(untypedType, type);
             }
         }
 
         private static void Unify(Type type1, Type type2, VariableContext context)
         {
-            if ((type1 is FunctionType ft1) && (type2 is FunctionType ft2))
+            if ((type1 is FunctionType functionType1) && (type2 is FunctionType functionType2))
             {
-                Unify(ft1.ParameterType, ft2.ParameterType, context);
-                Unify(ft1.ExpressionType, ft2.ExpressionType, context);
+                Unify(functionType1.ParameterType, functionType2.ParameterType, context);
+                Unify(functionType1.ExpressionType, functionType2.ExpressionType, context);
                 return;
             }
-            if (type1 is VariableType vt1)
+            if (type1 is UntypedType untypedType1)
             {
-                if (type2 is VariableType vt21)
+                if (type2 is UntypedType untypedType21)
                 {
-                    if (vt1.Index == vt21.Index)
+                    if (untypedType1.Index == untypedType21.Index)
                     {
                         return;
                     }
                 }
 
-                Unify(vt1, type2, context);
+                Unify(untypedType1, type2, context);
                 return;
             }
-            if (type2 is VariableType vt22)
+            if (type2 is UntypedType untypedType22)
             {
-                Unify(vt22, type1, context);
+                Unify(untypedType22, type1, context);
                 return;
             }
             if (type1.Equals(type2))
@@ -166,21 +166,21 @@ namespace BasicSyntaxTree
                 return;
             }
 
-            throw new Exception();
+            throw new System.Exception();
         }
 
         internal override Type VisitInfering(TypeEnvironment environment, VariableContext context)
         {
-            var ft = this.Function.VisitInfering(environment, context);
-            var at = this.Argument.VisitInfering(environment, context);
-            var rt = context.CreateVariable();
+            var functionType = this.Lambda.VisitInfering(environment, context);
+            var argumentType = this.Argument.VisitInfering(environment, context);
+            var returnType = context.CreateUntypedType();
 
-            Unify(ft, Type.Function(at, rt), context);
+            Unify(functionType, Type.Function(argumentType, returnType), context);
 
-            return rt;
+            return returnType;
         }
 
         public override string ToString() =>
-            $"{this.Function} {this.Argument}";
+            $"{this.Lambda} {this.Argument}";
     }
 }

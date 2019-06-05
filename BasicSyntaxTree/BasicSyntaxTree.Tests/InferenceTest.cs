@@ -1,9 +1,10 @@
-﻿using NUnit.Framework;
-using System;
+﻿using BasicSyntaxTree.Expressions;
+using BasicSyntaxTree.Types;
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BasicSyntaxTree.Tests
+namespace BasicSyntaxTree
 {
     [TestFixture]
     public sealed class InferenceTest
@@ -36,7 +37,7 @@ namespace BasicSyntaxTree.Tests
             // fun x = ((+) x) 1
             var inner = Expression.Apply(Expression.Variable("+"), Expression.Variable("x"));
             var outer = Expression.Apply(inner, Expression.Natural(1));
-            var fun = Expression.Function("x", outer);
+            var fun = Expression.Lambda("x", outer);
             var actual = fun.Infer(globalEnv);
 
             // Integer -> Integer
@@ -54,9 +55,9 @@ namespace BasicSyntaxTree.Tests
             var expra1 = Expression.Apply(exprf2, expra2);
             var exprf1 = Expression.Variable("f");
             var expr3 = Expression.Apply(exprf1, expra1);
-            var expr2 = Expression.Function("x", expr3);
-            var expr1 = Expression.Function("g", expr2);
-            var fun = Expression.Function("f", expr1);
+            var expr2 = Expression.Lambda("x", expr3);
+            var expr1 = Expression.Lambda("g", expr2);
+            var fun = Expression.Lambda("f", expr1);
             var actual = fun.Infer(globalEnv);
 
             Assert.AreEqual("('T3 -> 'T4) -> ('T2 -> 'T3) -> 'T2 -> 'T4", actual.ToString());

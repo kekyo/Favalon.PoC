@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BasicSyntaxTree
+﻿namespace BasicSyntaxTree.Types
 {
-    public abstract class Type : IEquatable<Type>
+    public abstract class Type : System.IEquatable<Type>
     {
         protected Type() { }
 
@@ -16,8 +12,8 @@ namespace BasicSyntaxTree
         public static FunctionType Function(Type parameterType, Type resultType) =>
             new FunctionType(parameterType, resultType);
 
-        public static VariableType Variable(int index) =>
-            new VariableType(index);
+        public static UntypedType Variable(int index) =>
+            new UntypedType(index);
     }
 
     public sealed class IntegerType : Type
@@ -60,15 +56,15 @@ namespace BasicSyntaxTree
         }
     }
 
-    public sealed class VariableType : Type
+    public sealed class UntypedType : Type
     {
         public readonly int Index;
 
-        internal VariableType(int index) =>
+        internal UntypedType(int index) =>
             this.Index = index;
 
         public override bool Equals(Type other) =>
-            other is VariableType rhs ?
+            other is UntypedType rhs ?
                 (this.Index == rhs.Index) :
                 false;
 

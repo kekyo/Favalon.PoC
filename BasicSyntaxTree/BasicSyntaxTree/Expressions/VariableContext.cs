@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using BasicSyntaxTree.Types;
+using System.Collections.Generic;
 
-namespace BasicSyntaxTree
+namespace BasicSyntaxTree.Expressions
 {
     internal sealed class VariableContext
     {
         private readonly Dictionary<int, Type> types = new Dictionary<int, Type>();
         private int index;
 
-        public VariableType CreateVariable() =>
+        public UntypedType CreateUntypedType() =>
             Type.Variable(this.index++);
 
-        public Type? GetInferType(VariableType variableType) =>
+        public Type? GetInferredType(UntypedType variableType) =>
             this.types.TryGetValue(variableType.Index, out var type) ? type : null;
 
-        public void AddInferType(VariableType variableType, Type type) =>
+        public void AddInferredType(UntypedType variableType, Type type) =>
             this.types.Add(variableType.Index, type);
 
         public Type Resolve(Type type)
@@ -24,7 +25,7 @@ namespace BasicSyntaxTree
                     this.Resolve(functionType.ParameterType),
                     this.Resolve(functionType.ExpressionType));
             }
-            if (type is VariableType variableType)
+            if (type is UntypedType variableType)
             {
                 if (types.TryGetValue(variableType.Index, out var vt))
                 {

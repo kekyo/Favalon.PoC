@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using BasicSyntaxTree.Types;
+using System.Collections.Generic;
 
-namespace BasicSyntaxTree
+namespace BasicSyntaxTree.Expressions
 {
     internal sealed class TypeEnvironment
     {
@@ -20,7 +20,7 @@ namespace BasicSyntaxTree
         public TypeEnvironment MakeScope() =>
             new TypeEnvironment(this.types);
 
-        public void RegisterVariable(string name, VariableType variableType)
+        public void RegisterVariable(string name, UntypedType variableType)
         {
             if (!this.isCloned)
             {

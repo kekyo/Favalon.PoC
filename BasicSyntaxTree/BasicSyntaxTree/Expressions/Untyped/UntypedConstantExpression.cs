@@ -11,7 +11,7 @@ namespace BasicSyntaxTree.Expressions.Untyped
             this.Value = value;
 
         internal override TypedExpression Visit(TypeEnvironment environment, InferContext context) =>
-            new ConstantExpression(this.Value, Type.Dotnet(this.Value.GetType()), this.TextRegion);
+            new ConstantExpression(this.Value, Type.ClsType(this.Value.GetType()), this.TextRegion);
 
         public override string ToString() =>
             this.Value.ToString();

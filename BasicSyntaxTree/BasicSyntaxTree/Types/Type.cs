@@ -6,11 +6,11 @@
 
         public abstract bool Equals(Type other);
 
-        public static DotnetType Dotnet<T>() =>
-            new DotnetType(typeof(T));
+        public static ClsType<T> ClsType<T>() =>
+            new ClsType<T>();
 
-        public static DotnetType Dotnet(System.Type type) =>
-            new DotnetType(type);
+        public static ClsType ClsType(System.Type type) =>
+            new ClsType(type);
 
         public static FunctionType Function(Type parameterType, Type resultType) =>
             new FunctionType(parameterType, resultType);

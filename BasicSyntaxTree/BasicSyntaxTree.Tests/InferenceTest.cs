@@ -1,4 +1,4 @@
-﻿using BasicSyntaxTree.Types;
+﻿using BasicSyntaxTree.Untyped.Types;
 using NUnit.Framework;
 
 namespace BasicSyntaxTree
@@ -43,7 +43,7 @@ namespace BasicSyntaxTree
         {
             var globalEnv = Expression.CreateEnvironment(
                 // (+) = Int32 -> (Int32 -> Int32)
-                ("+", Type.Function(Type.ClsType<int>(), Type.Function(Type.ClsType<int>(), Type.ClsType<int>())))
+                ("+", UntypedType.Function(UntypedType.ClsType<int>(), UntypedType.Function(UntypedType.ClsType<int>(), UntypedType.ClsType<int>())))
                 );
 
             // fun x = ((+) x) 1

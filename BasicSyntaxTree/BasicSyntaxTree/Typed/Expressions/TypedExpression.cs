@@ -1,14 +1,14 @@
-﻿using BasicSyntaxTree.Types;
-using BasicSyntaxTree.Untyped;
+﻿using BasicSyntaxTree.Untyped;
+using BasicSyntaxTree.Untyped.Types;
 
 namespace BasicSyntaxTree.Typed.Expressions
 {
     public abstract class TypedExpression : Expression
     {
-        private protected TypedExpression(Type type, TextRegion textRegion) : base(textRegion) =>
+        private protected TypedExpression(UntypedType type, TextRegion textRegion) : base(textRegion) =>
             this.Type = type;
 
-        public Type Type { get; private protected set; }
+        public UntypedType Type { get; private protected set; }
 
         public override bool IsResolved =>
             this.Type.IsResolved;

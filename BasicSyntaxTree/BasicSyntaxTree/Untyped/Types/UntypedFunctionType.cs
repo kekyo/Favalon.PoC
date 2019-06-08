@@ -1,11 +1,11 @@
-﻿namespace BasicSyntaxTree.Types
+﻿namespace BasicSyntaxTree.Untyped.Types
 {
-    public sealed class FunctionType : Type
+    public sealed class UntypedFunctionType : UntypedType
     {
-        public readonly Type ParameterType;
-        public readonly Type ExpressionType;
+        public readonly UntypedType ParameterType;
+        public readonly UntypedType ExpressionType;
 
-        internal FunctionType(Type parameterType, Type expressionType)
+        internal UntypedFunctionType(UntypedType parameterType, UntypedType expressionType)
         {
             this.ParameterType = parameterType;
             this.ExpressionType = expressionType;
@@ -15,13 +15,13 @@
             this.ParameterType.IsResolved && this.ExpressionType.IsResolved;
 
         public override bool Equals(Type other) =>
-            other is FunctionType rhs ?
+            other is UntypedFunctionType rhs ?
                 (this.ParameterType.Equals(rhs.ParameterType) && this.ExpressionType.Equals(rhs.ExpressionType)) :
                 false;
 
         public override string ToString()
         {
-            if (this.ParameterType is FunctionType)
+            if (this.ParameterType is UntypedFunctionType)
             {
                 return $"({this.ParameterType}) -> {this.ExpressionType}";
             }

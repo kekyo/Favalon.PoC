@@ -1,5 +1,4 @@
 ﻿using BasicSyntaxTree.Typed.Expressions;
-using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Untyped.Expressions
 {
@@ -11,7 +10,7 @@ namespace BasicSyntaxTree.Untyped.Expressions
             this.Name = name;
 
         internal override TypedExpression Visit(TypeEnvironment environment, InferContext context) =>
-            new VariableExpression(this.Name, environment.GetType(this.Name) ?? context.CreateUntypedType(), this.TextRegion);
+            new VariableExpression(this.Name, environment.GetType(this.Name) ?? context.CreateUnspecifiedType(), this.TextRegion);
 
         public override string ToString() =>
             this.Name;

@@ -1,5 +1,5 @@
 ﻿using BasicSyntaxTree.Typed.Expressions;
-using BasicSyntaxTree.Types;
+using BasicSyntaxTree.Untyped.Types;
 
 namespace BasicSyntaxTree.Untyped.Expressions
 {
@@ -17,10 +17,10 @@ namespace BasicSyntaxTree.Untyped.Expressions
         internal override TypedExpression Visit(TypeEnvironment environment, InferContext context)
         {
             var scopedEnvironment = environment.MakeScope();
-            var parameterType = context.CreateUntypedType();
+            var parameterType = context.CreateUnspecifiedType();
             scopedEnvironment.RegisterVariable(this.Parameter, parameterType);
             var expression = this.Expression.Visit(scopedEnvironment, context);
-            var type = Type.Function(parameterType, expression.Type);
+            var type = UntypedType.Function(parameterType, expression.Type);
             return new LambdaExpression(this.Parameter, expression, type, this.TextRegion);
         }
 

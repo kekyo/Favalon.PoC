@@ -1,16 +1,16 @@
-﻿namespace BasicSyntaxTree.Types
+﻿namespace BasicSyntaxTree.Untyped.Types
 {
-    public sealed class UntypedType : Type
+    public sealed class UnspecifiedType : UntypedType
     {
         public readonly int Index;
 
-        internal UntypedType(int index) =>
+        internal UnspecifiedType(int index) =>
             this.Index = index;
 
         public override bool IsResolved => false;
 
         public override bool Equals(Type other) =>
-            other is UntypedType rhs ?
+            other is UnspecifiedType rhs ?
                 (this.Index == rhs.Index) :
                 false;
 

@@ -1,5 +1,5 @@
-﻿using BasicSyntaxTree.Types;
-using BasicSyntaxTree.Untyped;
+﻿using BasicSyntaxTree.Untyped;
+using BasicSyntaxTree.Untyped.Types;
 
 namespace BasicSyntaxTree.Typed.Expressions
 {
@@ -7,7 +7,7 @@ namespace BasicSyntaxTree.Typed.Expressions
     {
         public readonly object Value;
 
-        internal ConstantExpression(object value, Type type, TextRegion textRegion) : base(type, textRegion) =>
+        internal ConstantExpression(object value, UntypedType type, TextRegion textRegion) : base(type, textRegion) =>
             this.Value = value;
 
         internal override void Resolve(InferContext context) =>

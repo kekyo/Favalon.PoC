@@ -1,4 +1,4 @@
-﻿using BasicSyntaxTree.Types;
+﻿using BasicSyntaxTree.Untyped.Types;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,29 +6,29 @@ namespace BasicSyntaxTree.Untyped
 {
     internal sealed class InferContext
     {
-        private readonly Dictionary<int, Type> types = new Dictionary<int, Type>();
+        private readonly Dictionary<int, UntypedType> types = new Dictionary<int, UntypedType>();
         private int index;
 
-        public UntypedType CreateUntypedType() =>
-            Type.Untyped(this.index++);
+        public UnspecifiedType CreateUnspecifiedType() =>
+            Type.Unspecified(this.index++);
 
-        public Type? GetInferredType(UntypedType variableType) =>
-            this.types.TryGetValue(variableType.Index, out var type) ? type : null;
+        public UntypedType? GetInferredType(UnspecifiedType unspecifiedType) =>
+            this.types.TryGetValue(unspecifiedType.Index, out var type) ? type : null;
 
-        public void AddInferredType(UntypedType variableType, Type type) =>
-            this.types.Add(variableType.Index, type);
+        public void AddInferredType(UnspecifiedType unspecifiedType, UntypedType type) =>
+            this.types.Add(unspecifiedType.Index, type);
 
-        public Type ResolveType(Type type)
+        public UntypedType ResolveType(UntypedType type)
         {
-            if (type is FunctionType functionType)
+            if (type is UntypedFunctionType functionType)
             {
                 return Type.Function(
                     this.ResolveType(functionType.ParameterType),
                     this.ResolveType(functionType.ExpressionType));
             }
-            if (type is UntypedType variableType)
+            if (type is UnspecifiedType unspecifiedType)
             {
-                if (types.TryGetValue(variableType.Index, out var vt))
+                if (types.TryGetValue(unspecifiedType.Index, out var vt))
                 {
                     return this.ResolveType(vt);
                 }

@@ -1,4 +1,4 @@
-﻿using BasicSyntaxTree.Types;
+﻿using BasicSyntaxTree.Untyped.Types;
 using BasicSyntaxTree.Untyped.Expressions;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +14,8 @@ namespace BasicSyntaxTree
 
         public abstract bool IsResolved { get; }
 
-        public static IReadOnlyDictionary<string, Type> CreateEnvironment(
-            params (string name, Type type)[] environments) =>
+        public static IReadOnlyDictionary<string, UntypedType> CreateEnvironment(
+            params (string name, UntypedType type)[] environments) =>
             environments.ToDictionary(entry => entry.name, entry => entry.type);
 
         // =======================================================================

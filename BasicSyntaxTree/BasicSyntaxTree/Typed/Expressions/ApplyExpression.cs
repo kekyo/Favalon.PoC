@@ -1,5 +1,5 @@
-﻿using BasicSyntaxTree.Types;
-using BasicSyntaxTree.Untyped;
+﻿using BasicSyntaxTree.Untyped;
+using BasicSyntaxTree.Untyped.Types;
 
 namespace BasicSyntaxTree.Typed.Expressions
 {
@@ -8,7 +8,7 @@ namespace BasicSyntaxTree.Typed.Expressions
         public new readonly TypedExpression Lambda;
         public readonly TypedExpression Argument;
 
-        internal ApplyExpression(TypedExpression lambda, TypedExpression argument, Type type, TextRegion textRegion) : base(type, textRegion)
+        internal ApplyExpression(TypedExpression lambda, TypedExpression argument, UntypedType type, TextRegion textRegion) : base(type, textRegion)
         {
             this.Lambda = lambda;
             this.Argument = argument;

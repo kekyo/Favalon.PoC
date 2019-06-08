@@ -1,5 +1,4 @@
 ﻿using BasicSyntaxTree.Typed.Expressions;
-using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Untyped.Expressions
 {
@@ -21,7 +20,7 @@ namespace BasicSyntaxTree.Untyped.Expressions
         internal override TypedExpression Visit(TypeEnvironment environment, InferContext context)
         {
             var scopedEnvironment = environment.MakeScope();
-            var boundType = context.CreateUntypedType();
+            var boundType = context.CreateUnspecifiedType();
 
             scopedEnvironment.RegisterVariable(this.Name, boundType);
             var expression = this.Expression.Visit(scopedEnvironment, context);

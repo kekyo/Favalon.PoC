@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BasicSyntaxTree.Expressions
+namespace BasicSyntaxTree.Untyped
 {
     internal sealed class InferContext
     {

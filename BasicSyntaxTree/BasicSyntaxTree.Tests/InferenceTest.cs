@@ -1,6 +1,4 @@
-﻿using BasicSyntaxTree.Expressions;
-using BasicSyntaxTree.Expressions.Untyped;
-using BasicSyntaxTree.Types;
+﻿using BasicSyntaxTree.Types;
 using NUnit.Framework;
 
 namespace BasicSyntaxTree
@@ -17,7 +15,7 @@ namespace BasicSyntaxTree
 
             // 123
             var textRegion = TextRegion.Create(target, 1, 1, 5, 1);
-            var integerExpression = UntypedExpression.Constant(123, textRegion);
+            var integerExpression = Expression.Constant(123, textRegion);
             var actual = integerExpression.Infer(globalEnv);
 
             // Int32
@@ -32,7 +30,7 @@ namespace BasicSyntaxTree
 
             // "ABC"
             var textRegion = TextRegion.Create(target, 1, 1, 5, 1);
-            var stringExpression = UntypedExpression.Constant("ABC", textRegion);
+            var stringExpression = Expression.Constant("ABC", textRegion);
             var actual = stringExpression.Infer(globalEnv);
 
             // String
@@ -50,9 +48,9 @@ namespace BasicSyntaxTree
 
             // fun x = ((+) x) 1
             var textRegion = TextRegion.Create(target, 1, 1, 5, 1);
-            var inner = UntypedExpression.Apply(UntypedExpression.Variable("+", textRegion), UntypedExpression.Variable("x", textRegion), textRegion);
-            var outer = UntypedExpression.Apply(inner, UntypedExpression.Constant(1, textRegion), textRegion);
-            var fun = UntypedExpression.Lambda("x", outer, textRegion);
+            var inner = Expression.Apply(Expression.Variable("+", textRegion), Expression.Variable("x", textRegion), textRegion);
+            var outer = Expression.Apply(inner, Expression.Constant(1, textRegion), textRegion);
+            var fun = Expression.Lambda("x", outer, textRegion);
             var actual = fun.Infer(globalEnv);
 
             // Int32 -> Int32
@@ -67,14 +65,14 @@ namespace BasicSyntaxTree
 
             // fun f = g => x => f (g x)
             var textRegion = TextRegion.Create(target, 1, 1, 5, 1);
-            var expra2 = UntypedExpression.Variable("x", textRegion);
-            var exprf2 = UntypedExpression.Variable("g", textRegion);
-            var expra1 = UntypedExpression.Apply(exprf2, expra2, textRegion);
-            var exprf1 = UntypedExpression.Variable("f", textRegion);
-            var expr3 = UntypedExpression.Apply(exprf1, expra1, textRegion);
-            var expr2 = UntypedExpression.Lambda("x", expr3, textRegion);
-            var expr1 = UntypedExpression.Lambda("g", expr2, textRegion);
-            var fun = UntypedExpression.Lambda("f", expr1, textRegion);
+            var expra2 = Expression.Variable("x", textRegion);
+            var exprf2 = Expression.Variable("g", textRegion);
+            var expra1 = Expression.Apply(exprf2, expra2, textRegion);
+            var exprf1 = Expression.Variable("f", textRegion);
+            var expr3 = Expression.Apply(exprf1, expra1, textRegion);
+            var expr2 = Expression.Lambda("x", expr3, textRegion);
+            var expr1 = Expression.Lambda("g", expr2, textRegion);
+            var fun = Expression.Lambda("f", expr1, textRegion);
             var actual = fun.Infer(globalEnv);
 
             Assert.AreEqual("('d -> 'e) -> ('c -> 'd) -> 'c -> 'e", actual.Type.ToString());
@@ -88,8 +86,8 @@ namespace BasicSyntaxTree
 
             // let x = 123 in x
             var textRegion = TextRegion.Create(target, 1, 1, 5, 1);
-            var int32Expression = UntypedExpression.Constant(123, textRegion);
-            var bindExpression = UntypedExpression.Bind("x", int32Expression, UntypedExpression.Variable("x", textRegion), textRegion);
+            var int32Expression = Expression.Constant(123, textRegion);
+            var bindExpression = Expression.Bind("x", int32Expression, Expression.Variable("x", textRegion), textRegion);
             var actual = bindExpression.Infer(globalEnv);
 
             // Int32

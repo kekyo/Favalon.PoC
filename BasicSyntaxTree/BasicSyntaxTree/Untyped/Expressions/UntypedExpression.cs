@@ -1,8 +1,8 @@
-﻿using BasicSyntaxTree.Expressions.Typed;
+﻿using BasicSyntaxTree.Typed.Expressions;
 using BasicSyntaxTree.Types;
 using System.Collections.Generic;
 
-namespace BasicSyntaxTree.Expressions.Untyped
+namespace BasicSyntaxTree.Untyped.Expressions
 {
     public abstract class UntypedExpression : Expression
     {
@@ -98,22 +98,5 @@ namespace BasicSyntaxTree.Expressions.Untyped
 
             throw new System.Exception();
         }
-
-        // =======================================================================
-
-        public static UntypedConstantExpression Constant(object value, TextRegion textRegion) =>
-            new UntypedConstantExpression(value, textRegion);
-
-        public static UntypedVariableExpression Variable(string name, TextRegion textRegion) =>
-            new UntypedVariableExpression(name, textRegion);
-
-        public static UntypedLambdaExpression Lambda(string parameter, UntypedExpression body, TextRegion textRegion) =>
-            new UntypedLambdaExpression(parameter, body, textRegion);
-
-        public static UntypedApplyExpression Apply(UntypedExpression function, UntypedExpression argument, TextRegion textRegion) =>
-            new UntypedApplyExpression(function, argument, textRegion);
-
-        public static UntypedBindExpression Bind(string name, UntypedExpression expression, UntypedExpression body, TextRegion textRegion) =>
-            new UntypedBindExpression(name, expression, body, textRegion);
     }
 }

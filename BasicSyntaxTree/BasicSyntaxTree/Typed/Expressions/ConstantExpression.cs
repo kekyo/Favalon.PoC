@@ -1,6 +1,7 @@
 ﻿using BasicSyntaxTree.Types;
+using BasicSyntaxTree.Untyped;
 
-namespace BasicSyntaxTree.Expressions.Typed
+namespace BasicSyntaxTree.Typed.Expressions
 {
     public sealed class ConstantExpression : TypedExpression
     {

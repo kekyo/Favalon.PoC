@@ -1,7 +1,7 @@
 ﻿using BasicSyntaxTree.Types;
 using System.Collections.Generic;
 
-namespace BasicSyntaxTree.Expressions
+namespace BasicSyntaxTree.Untyped
 {
     internal sealed class TypeEnvironment
     {

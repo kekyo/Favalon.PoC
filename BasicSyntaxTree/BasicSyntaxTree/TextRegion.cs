@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BasicSyntaxTree.Expressions
+namespace BasicSyntaxTree
 {
     public struct TextRegion
     {

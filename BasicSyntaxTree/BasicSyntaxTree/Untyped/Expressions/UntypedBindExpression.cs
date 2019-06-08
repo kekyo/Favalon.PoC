@@ -1,7 +1,7 @@
-﻿using BasicSyntaxTree.Expressions.Typed;
+﻿using BasicSyntaxTree.Typed.Expressions;
 using BasicSyntaxTree.Types;
 
-namespace BasicSyntaxTree.Expressions.Untyped
+namespace BasicSyntaxTree.Untyped.Expressions
 {
     public sealed class UntypedBindExpression : UntypedExpression
     {

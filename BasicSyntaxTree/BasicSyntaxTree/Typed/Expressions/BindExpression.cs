@@ -1,4 +1,6 @@
-﻿namespace BasicSyntaxTree.Expressions.Typed
+﻿using BasicSyntaxTree.Untyped;
+
+namespace BasicSyntaxTree.Typed.Expressions
 {
     public sealed class BindExpression : TypedExpression
     {

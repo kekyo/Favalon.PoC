@@ -1,10 +1,11 @@
 ﻿using BasicSyntaxTree.Types;
+using BasicSyntaxTree.Untyped;
 
-namespace BasicSyntaxTree.Expressions.Typed
+namespace BasicSyntaxTree.Typed.Expressions
 {
     public sealed class ApplyExpression : TypedExpression
     {
-        public readonly TypedExpression Lambda;
+        public new readonly TypedExpression Lambda;
         public readonly TypedExpression Argument;
 
         internal ApplyExpression(TypedExpression lambda, TypedExpression argument, Type type, TextRegion textRegion) : base(type, textRegion)

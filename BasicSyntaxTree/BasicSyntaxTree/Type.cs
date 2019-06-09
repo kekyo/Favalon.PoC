@@ -1,4 +1,5 @@
-﻿using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Untyped;
+using BasicSyntaxTree.Untyped.Types;
 
 namespace BasicSyntaxTree
 {
@@ -12,16 +13,13 @@ namespace BasicSyntaxTree
 
         // =======================================================================
 
-        public static UntypedClsType<T> ClsType<T>() =>
-            new UntypedClsType<T>();
+        public static UntypedClrType<T> ClsType<T>() =>
+            new UntypedClrType<T>();
 
-        public static UntypedClsType ClsType(System.Type type) =>
-            new UntypedClsType(type);
+        public static UntypedClrType ClsType(System.Type type) =>
+            new UntypedClrType(type);
 
         public static UntypedFunctionType Function(UntypedType parameterType, UntypedType resultType) =>
             new UntypedFunctionType(parameterType, resultType);
-
-        public static UnspecifiedType Unspecified(int index) =>
-            new UnspecifiedType(index);
     }
 }

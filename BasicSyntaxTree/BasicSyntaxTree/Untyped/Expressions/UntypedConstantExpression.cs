@@ -1,5 +1,6 @@
-﻿using BasicSyntaxTree.Typed.Expressions;
-using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Typed;
+using BasicSyntaxTree.Typed.Expressions;
+using BasicSyntaxTree.Typed.Types;
 
 namespace BasicSyntaxTree.Untyped.Expressions
 {
@@ -11,7 +12,7 @@ namespace BasicSyntaxTree.Untyped.Expressions
             this.Value = value;
 
         internal override TypedExpression Visit(TypeEnvironment environment, InferContext context) =>
-            new ConstantExpression(this.Value, UntypedType.ClsType(this.Value.GetType()), this.TextRegion);
+            new ConstantExpression(this.Value, new ClrType(this.Value.GetType()), this.TextRegion);
 
         public override string ToString() =>
             this.Value.ToString();

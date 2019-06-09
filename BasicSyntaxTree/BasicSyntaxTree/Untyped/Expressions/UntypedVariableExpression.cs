@@ -1,4 +1,5 @@
-﻿using BasicSyntaxTree.Typed.Expressions;
+﻿using BasicSyntaxTree.Typed;
+using BasicSyntaxTree.Typed.Expressions;
 
 namespace BasicSyntaxTree.Untyped.Expressions
 {

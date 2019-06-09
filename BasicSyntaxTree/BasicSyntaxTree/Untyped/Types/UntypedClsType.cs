@@ -1,34 +1,47 @@
-﻿namespace BasicSyntaxTree.Untyped.Types
+﻿using BasicSyntaxTree.Typed;
+using BasicSyntaxTree.Typed.Types;
+
+namespace BasicSyntaxTree.Untyped.Types
 {
-    public abstract class UntypedClsTypeBase : UntypedType
+    public abstract class UntypedClrTypeBase : UntypedType
     {
-        private protected UntypedClsTypeBase() { }
+        private protected UntypedClrTypeBase() { }
 
         public abstract System.Type Type { get; }
 
         public override bool IsResolved => true;
 
         public override bool Equals(Type other) =>
-            other is UntypedClsTypeBase rhs ? this.Type.Equals(rhs.Type) : false;
+            other is UntypedClrTypeBase rhs1 ? this.Type.Equals(rhs1.Type) :
+            other is ClrTypeBase rhs2 ? this.Type.Equals(rhs2.Type) :
+            false;
+
+        public abstract TypedType ToClrType();
 
         public override string ToString() =>
             this.Type.Name;
     }
 
-    public sealed class UntypedClsType : UntypedClsTypeBase
+    public sealed class UntypedClrType : UntypedClrTypeBase
     {
-        internal UntypedClsType(System.Type type) =>
+        internal UntypedClrType(System.Type type) =>
             this.Type = type;
 
         public override System.Type Type { get; }
+
+        public override TypedType ToClrType() =>
+            new ClrType(this.Type);
     }
 
-    public sealed class UntypedClsType<T> : UntypedClsTypeBase
+    public sealed class UntypedClrType<T> : UntypedClrTypeBase
     {
         private static readonly System.Type type = typeof(T);
 
-        internal UntypedClsType() { }
+        internal UntypedClrType() { }
 
         public override System.Type Type => type;
+
+        public override TypedType ToClrType() =>
+            new ClrType<T>();
     }
 }

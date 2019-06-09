@@ -1,4 +1,4 @@
-﻿namespace BasicSyntaxTree.Untyped.Types
+﻿namespace BasicSyntaxTree.Untyped
 {
     public abstract class UntypedType : Type
     {

@@ -1,5 +1,6 @@
-﻿using BasicSyntaxTree.Typed.Expressions;
-using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Typed;
+using BasicSyntaxTree.Typed.Expressions;
+using BasicSyntaxTree.Typed.Types;
 
 namespace BasicSyntaxTree.Untyped.Expressions
 {
@@ -20,7 +21,7 @@ namespace BasicSyntaxTree.Untyped.Expressions
             var parameterType = context.CreateUnspecifiedType();
             scopedEnvironment.RegisterVariable(this.Parameter, parameterType);
             var expression = this.Expression.Visit(scopedEnvironment, context);
-            var type = UntypedType.Function(parameterType, expression.Type);
+            var type = new FunctionType(parameterType, expression.Type);
             return new LambdaExpression(this.Parameter, expression, type, this.TextRegion);
         }
 

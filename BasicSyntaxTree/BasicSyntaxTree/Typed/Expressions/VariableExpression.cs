@@ -7,7 +7,7 @@ namespace BasicSyntaxTree.Typed.Expressions
     {
         public readonly string Name;
 
-        internal VariableExpression(string name, UntypedType type, TextRegion textRegion) : base(type, textRegion) =>
+        internal VariableExpression(string name, Type type, TextRegion textRegion) : base(type, textRegion) =>
             this.Name = name;
 
         internal override void Resolve(InferContext context) =>

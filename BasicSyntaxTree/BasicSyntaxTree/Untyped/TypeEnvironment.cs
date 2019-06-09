@@ -20,7 +20,7 @@ namespace BasicSyntaxTree.Untyped
         public TypeEnvironment MakeScope() =>
             new TypeEnvironment(this.types);
 
-        public void RegisterVariable(string name, UnspecifiedType variableType)
+        public void RegisterVariable(string name, UnspecifiedType unspecifiedType)
         {
             if (!this.isCloned)
             {
@@ -28,7 +28,7 @@ namespace BasicSyntaxTree.Untyped
                 this.isCloned = true;
             }
 
-            this.types[name] = variableType;
+            this.types[name] = unspecifiedType;
         }
 
         public UntypedType? GetType(string name) =>

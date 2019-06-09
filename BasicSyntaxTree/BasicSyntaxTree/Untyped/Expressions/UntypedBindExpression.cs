@@ -1,4 +1,5 @@
-﻿using BasicSyntaxTree.Typed.Expressions;
+﻿using BasicSyntaxTree.Typed;
+using BasicSyntaxTree.Typed.Expressions;
 
 namespace BasicSyntaxTree.Untyped.Expressions
 {
@@ -26,7 +27,7 @@ namespace BasicSyntaxTree.Untyped.Expressions
             var expression = this.Expression.Visit(scopedEnvironment, context);
             var body = this.Body.Visit(scopedEnvironment, context);
 
-            Unify(expression.Type, body.Type, context);
+            context.Unify(expression.Type, body.Type);
 
             return new BindExpression(this.Name, expression, body, this.TextRegion);
         }

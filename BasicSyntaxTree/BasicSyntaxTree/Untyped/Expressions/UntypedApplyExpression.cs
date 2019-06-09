@@ -1,5 +1,6 @@
-﻿using BasicSyntaxTree.Typed.Expressions;
-using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Typed;
+using BasicSyntaxTree.Typed.Expressions;
+using BasicSyntaxTree.Typed.Types;
 
 namespace BasicSyntaxTree.Untyped.Expressions
 {
@@ -20,7 +21,7 @@ namespace BasicSyntaxTree.Untyped.Expressions
             var argumentExpression = this.Argument.Visit(environment, context);
             var returnType = context.CreateUnspecifiedType();
 
-            Unify(functionExpression.Type, UntypedType.Function(argumentExpression.Type, returnType), context);
+            context.Unify(functionExpression.Type, new FunctionType(argumentExpression.Type, returnType));
 
             return new ApplyExpression(functionExpression, argumentExpression, returnType, this.TextRegion);
         }

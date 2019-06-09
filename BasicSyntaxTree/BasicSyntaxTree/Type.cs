@@ -13,10 +13,10 @@ namespace BasicSyntaxTree
 
         // =======================================================================
 
-        public static UntypedClrType<T> ClsType<T>() =>
-            new UntypedClrType<T>();
+        public static UntypedClrType<T> ClrType<T>() =>
+            UntypedClrType<T>.Instance;
 
-        public static UntypedClrType ClsType(System.Type type) =>
+        public static UntypedClrType ClrType(System.Type type) =>
             new UntypedClrType(type);
 
         public static UntypedFunctionType Function(UntypedType parameterType, UntypedType resultType) =>

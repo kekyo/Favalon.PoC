@@ -37,11 +37,14 @@ namespace BasicSyntaxTree.Untyped.Types
     {
         private static readonly System.Type type = typeof(T);
 
-        internal UntypedClrType() { }
+        private UntypedClrType() { }
 
         public override System.Type Type => type;
 
         public override TypedType ToClrType() =>
-            new ClrType<T>();
+            Typed.Types.ClrType<T>.Instance;
+
+        internal static readonly UntypedClrType<T> Instance =
+            new UntypedClrType<T>();
     }
 }

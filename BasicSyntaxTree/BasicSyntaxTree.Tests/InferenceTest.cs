@@ -42,7 +42,7 @@ namespace BasicSyntaxTree
         {
             var globalEnv = Expression.CreateEnvironment(
                 // (+) = Int32 -> (Int32 -> Int32)
-                ("+", Type.Function(Type.ClsType<int>(), Type.Function(Type.ClsType<int>(), Type.ClsType<int>())))
+                ("+", Type.Function(Type.ClrType<int>(), Type.Function(Type.ClrType<int>(), Type.ClrType<int>())))
                 );
 
             // fun x = ((+) x) 1

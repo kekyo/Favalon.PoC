@@ -31,8 +31,11 @@ namespace BasicSyntaxTree.Typed.Types
     {
         private static readonly System.Type type = typeof(T);
 
-        internal ClrType() { }
+        private ClrType() { }
 
         public override System.Type Type => type;
+
+        internal static readonly ClrType<T> Instance =
+            new ClrType<T>();
     }
 }

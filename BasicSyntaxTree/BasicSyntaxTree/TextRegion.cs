@@ -23,6 +23,9 @@ namespace BasicSyntaxTree
         public override string ToString() =>
             $"{this.Target.PathAndQuery}({this.BeginRow},{this.BeginColumn})";
 
+        public static readonly TextRegion Unknown =
+            new TextRegion(new Uri("unknown.fav", UriKind.RelativeOrAbsolute), 0, 0, 1, 1);
+
         public static TextRegion Create(
             Uri target, int beginRow, int beginColumn, int endRow, int endColumn) =>
             new TextRegion(target, beginRow, beginColumn, endRow, endColumn);

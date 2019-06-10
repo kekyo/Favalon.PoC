@@ -1,9 +1,10 @@
 ﻿using BasicSyntaxTree.Typed.Types;
+using BasicSyntaxTree.Untyped;
 using BasicSyntaxTree.Untyped.Types;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BasicSyntaxTree.Untyped
+namespace BasicSyntaxTree
 {
     internal sealed class InferContext
     {
@@ -148,7 +149,7 @@ namespace BasicSyntaxTree.Untyped
                     this.ResolveType(ft2.ParameterType),
                     this.ResolveType(ft2.ExpressionType));
             }
-            if (type is UntypedClrTypeBase clrType)
+            if (type is UntypedClrType clrType)
             {
                 return clrType.ToClrType();
             }
@@ -156,7 +157,7 @@ namespace BasicSyntaxTree.Untyped
             {
                 if (types.TryGetValue(unspecifiedType.Index, out var vt))
                 {
-                    return this.ResolveType(vt);
+                    return vt;
                 }
             }
             return type;

@@ -9,10 +9,12 @@ namespace BasicSyntaxTree.Typed.Expressions
         internal ConstantExpression(object value, Type type, TextRegion textRegion) : base(type, textRegion) =>
             this.Value = value;
 
+        internal override bool IsSafePrintable => this.Value is string;
+
         internal override void Resolve(InferContext context) =>
             this.Type = context.ResolveType(this.Type);
 
         public override string ToString() =>
-            this.Value is string str ? $"\"{str}\":{this.Type}" : $"{this.Value}:{this.Type}";
+            this.Value is string str ? $"\"{str}\"" : $"{this.Value}:{this.Type}";
     }
 }

@@ -7,13 +7,38 @@ namespace BasicSyntaxTree.Untyped.Expressions
     {
         public readonly string Name;
 
-        internal UntypedVariableExpression(string name, TextRegion textRegion) : base(textRegion) =>
+        internal UntypedVariableExpression(string name, UntypedType? annotatedType, TextRegion textRegion) : base(annotatedType, textRegion) =>
             this.Name = name;
 
-        internal override TypedExpression Visit(TypeEnvironment environment, InferContext context) =>
-            new VariableExpression(this.Name, environment.GetType(this.Name) ?? context.CreateUnspecifiedType(), this.TextRegion);
+        internal override bool IsSafePrintable =>
+            this.AnnotetedType == null;
+
+        internal override TypedExpression Visit(Environment environment, InferContext context)
+        {
+            if (this.AnnotetedType is Type type)
+            {
+                environment.RegisterVariable(this.Name, type);
+            }
+            else if (environment.GetType(this.Name) is Type it)
+            {
+                type = it;
+            }
+            else
+            {
+                type = context.CreateUnspecifiedType();
+                environment.RegisterVariable(this.Name, type);
+            }
+
+            return new VariableExpression(this.Name, type, this.TextRegion);
+        }
 
         public override string ToString() =>
-            this.Name;
+            this.AnnotetedType is Type annotatedType ? $"{this.Name}:{annotatedType}" : this.Name;
+
+        // =======================================================================
+        // Short generator usable for tests.
+
+        public static implicit operator UntypedVariableExpression(string variableName) =>
+            new UntypedVariableExpression(variableName, default, TextRegion.Unknown);
     }
 }

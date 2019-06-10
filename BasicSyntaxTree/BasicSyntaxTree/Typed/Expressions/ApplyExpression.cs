@@ -5,23 +5,25 @@ namespace BasicSyntaxTree.Typed.Expressions
 {
     public sealed class ApplyExpression : TypedExpression
     {
-        public new readonly TypedExpression Lambda;
+        public readonly TypedExpression Function;
         public readonly TypedExpression Argument;
 
-        internal ApplyExpression(TypedExpression lambda, TypedExpression argument, Type type, TextRegion textRegion) : base(type, textRegion)
+        internal ApplyExpression(TypedExpression function, TypedExpression argument, Type type, TextRegion textRegion) : base(type, textRegion)
         {
-            this.Lambda = lambda;
+            this.Function = function;
             this.Argument = argument;
         }
 
+        internal override bool IsSafePrintable => false;
+
         internal override void Resolve(InferContext context)
         {
-            this.Lambda.Resolve(context);
+            this.Function.Resolve(context);
             this.Argument.Resolve(context);
             this.Type = context.ResolveType(this.Type);
         }
 
         public override string ToString() =>
-            $"({this.Lambda} {this.Argument}):{this.Type}";
+            $"({this.Function} {this.Argument.SafePrintable}):{this.Type}";
     }
 }

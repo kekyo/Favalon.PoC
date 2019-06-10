@@ -7,32 +7,35 @@ namespace BasicSyntaxTree.Untyped.Expressions
     {
         // let a = 123 in ...
         // let f = fun x -> (+) x 1 in ...
-        public readonly string Name;
+        public readonly UntypedVariableExpression Target;
         public readonly UntypedExpression Expression;
         public readonly UntypedExpression Body;
 
-        internal UntypedBindExpression(string name, UntypedExpression expression, UntypedExpression body, TextRegion textRegion) : base(textRegion)
+        internal UntypedBindExpression(
+            UntypedVariableExpression target, UntypedExpression expression, UntypedExpression body, UntypedType? annotatedType,
+            TextRegion textRegion) : base(annotatedType, textRegion)
         {
-            this.Name = name;
+            this.Target = target;
             this.Expression = expression;
             this.Body = body;
         }
 
-        internal override TypedExpression Visit(TypeEnvironment environment, InferContext context)
+        internal override bool IsSafePrintable => false;
+
+        internal override TypedExpression Visit(Environment environment, InferContext context)
         {
             var scopedEnvironment = environment.MakeScope();
-            var boundType = context.CreateUnspecifiedType();
 
-            scopedEnvironment.RegisterVariable(this.Name, boundType);
+            var target = (VariableExpression)this.Target.Visit(scopedEnvironment, context);
             var expression = this.Expression.Visit(scopedEnvironment, context);
             var body = this.Body.Visit(scopedEnvironment, context);
 
             context.Unify(expression.Type, body.Type);
 
-            return new BindExpression(this.Name, expression, body, this.TextRegion);
+            return new BindExpression(target, expression, body, this.TextRegion);
         }
 
         public override string ToString() =>
-            $"let {this.Name} = {this.Expression} in {this.Body}";
+            $"let {this.Target} = {this.Expression} in {this.Body}";
     }
 }

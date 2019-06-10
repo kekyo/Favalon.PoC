@@ -1,8 +1,8 @@
-﻿using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Untyped;
+using BasicSyntaxTree.Untyped.Types;
 using BasicSyntaxTree.Untyped.Expressions;
 using System.Collections.Generic;
 using System.Linq;
-using BasicSyntaxTree.Untyped;
 
 namespace BasicSyntaxTree
 {
@@ -10,12 +10,21 @@ namespace BasicSyntaxTree
     {
         public readonly TextRegion TextRegion;
 
-        protected Expression(TextRegion textRegion) =>
+        private protected Expression(TextRegion textRegion) =>
             this.TextRegion = textRegion;
 
         public abstract bool IsResolved { get; }
 
-        public static IReadOnlyDictionary<string, UntypedType> CreateEnvironment(
+        internal abstract bool IsSafePrintable { get; }
+
+        internal string SafePrintable =>
+            this.IsSafePrintable ? this.ToString() : $"({this})";
+
+        public static IReadOnlyDictionary<string, UntypedFunctionType> CreateFunctionTypeEnvironment(
+            params (string name, UntypedFunctionType type)[] environments) =>
+            environments.ToDictionary(entry => entry.name, entry => entry.type);
+
+        public static IReadOnlyDictionary<string, UntypedType> CreateTypeEnvironment(
             params (string name, UntypedType type)[] environments) =>
             environments.ToDictionary(entry => entry.name, entry => entry.type);
 
@@ -25,15 +34,23 @@ namespace BasicSyntaxTree
             new UntypedConstantExpression(value, textRegion);
 
         public static UntypedVariableExpression Variable(string name, TextRegion textRegion) =>
-            new UntypedVariableExpression(name, textRegion);
+            new UntypedVariableExpression(name, default, textRegion);
+        public static UntypedVariableExpression Variable(string name, UntypedType annotatedType, TextRegion textRegion) =>
+            new UntypedVariableExpression(name, annotatedType, textRegion);
 
-        public static UntypedLambdaExpression Lambda(string parameter, UntypedExpression body, TextRegion textRegion) =>
-            new UntypedLambdaExpression(parameter, body, textRegion);
+        public static UntypedLambdaExpression Lambda(UntypedVariableExpression parameter, UntypedExpression body, TextRegion textRegion) =>
+            new UntypedLambdaExpression(parameter, body, default, textRegion);
+        public static UntypedLambdaExpression Lambda(UntypedVariableExpression parameter, UntypedExpression body, UntypedType annotatedType, TextRegion textRegion) =>
+            new UntypedLambdaExpression(parameter, body, annotatedType, textRegion);
 
         public static UntypedApplyExpression Apply(UntypedExpression function, UntypedExpression argument, TextRegion textRegion) =>
-            new UntypedApplyExpression(function, argument, textRegion);
+            new UntypedApplyExpression(function, argument, default, textRegion);
+        public static UntypedApplyExpression Apply(UntypedExpression function, UntypedExpression argument, UntypedType annotatedType, TextRegion textRegion) =>
+            new UntypedApplyExpression(function, argument, annotatedType, textRegion);
 
-        public static UntypedBindExpression Bind(string name, UntypedExpression expression, UntypedExpression body, TextRegion textRegion) =>
-            new UntypedBindExpression(name, expression, body, textRegion);
+        public static UntypedBindExpression Bind(UntypedVariableExpression target, UntypedExpression expression, UntypedExpression body, TextRegion textRegion) =>
+            new UntypedBindExpression(target, expression, body, default, textRegion);
+        public static UntypedBindExpression Bind(UntypedVariableExpression target, UntypedExpression expression, UntypedExpression body, UntypedType annotatedType, TextRegion textRegion) =>
+            new UntypedBindExpression(target, expression, body, annotatedType, textRegion);
     }
 }

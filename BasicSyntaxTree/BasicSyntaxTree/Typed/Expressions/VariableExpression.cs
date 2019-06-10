@@ -10,6 +10,8 @@ namespace BasicSyntaxTree.Typed.Expressions
         internal VariableExpression(string name, Type type, TextRegion textRegion) : base(type, textRegion) =>
             this.Name = name;
 
+        internal override bool IsSafePrintable => false;
+
         internal override void Resolve(InferContext context) =>
             this.Type = context.ResolveType(this.Type);
 

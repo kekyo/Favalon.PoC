@@ -6,27 +6,31 @@ namespace BasicSyntaxTree.Untyped.Expressions
 {
     public sealed class UntypedApplyExpression : UntypedExpression
     {
-        public new readonly UntypedExpression Lambda;
+        public readonly UntypedExpression Function;
         public readonly UntypedExpression Argument;
 
-        internal UntypedApplyExpression(UntypedExpression lambda, UntypedExpression argument, TextRegion textRegion) : base(textRegion)
+        internal UntypedApplyExpression(
+            UntypedExpression function, UntypedExpression argument, UntypedType? annotatedType,
+            TextRegion textRegion) : base(annotatedType, textRegion)
         {
-            this.Lambda = lambda;
+            this.Function = function;
             this.Argument = argument;
         }
 
-        internal override TypedExpression Visit(TypeEnvironment environment, InferContext context)
+        internal override bool IsSafePrintable => false;
+
+        internal override TypedExpression Visit(Environment environment, InferContext context)
         {
-            var functionExpression = this.Lambda.Visit(environment, context);
+            var functionExpression = this.Function.Visit(environment, context);
             var argumentExpression = this.Argument.Visit(environment, context);
-            var returnType = context.CreateUnspecifiedType();
+            var thisExpressionType = this.AnnotetedType ?? context.CreateUnspecifiedType();
 
-            context.Unify(functionExpression.Type, new FunctionType(argumentExpression.Type, returnType));
+            context.Unify(functionExpression.Type, new FunctionType(argumentExpression.Type, thisExpressionType));
 
-            return new ApplyExpression(functionExpression, argumentExpression, returnType, this.TextRegion);
+            return new ApplyExpression(functionExpression, argumentExpression, thisExpressionType, this.TextRegion);
         }
 
         public override string ToString() =>
-            $"{this.Lambda} {this.Argument}";
+            $"{this.Function} {this.Argument.SafePrintable}";
     }
 }

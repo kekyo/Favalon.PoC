@@ -1,6 +1,6 @@
 ﻿using BasicSyntaxTree.Typed;
 using BasicSyntaxTree.Typed.Expressions;
-using BasicSyntaxTree.Typed.Types;
+using BasicSyntaxTree.Untyped.Types;
 
 namespace BasicSyntaxTree.Untyped.Expressions
 {
@@ -8,13 +8,15 @@ namespace BasicSyntaxTree.Untyped.Expressions
     {
         public readonly object Value;
 
-        internal UntypedConstantExpression(object value, TextRegion textRegion) : base(textRegion) =>
+        internal UntypedConstantExpression(object value, TextRegion textRegion) : base(new UntypedClrType(value.GetType()), textRegion) =>
             this.Value = value;
 
-        internal override TypedExpression Visit(TypeEnvironment environment, InferContext context) =>
-            new ConstantExpression(this.Value, new ClrType(this.Value.GetType()), this.TextRegion);
+        internal override bool IsSafePrintable => true;
+
+        internal override TypedExpression Visit(Environment environment, InferContext context) =>
+            new ConstantExpression(this.Value, this.AnnotetedType!, this.TextRegion);
 
         public override string ToString() =>
-            this.Value.ToString();
+            this.Value is string str ? $"\"{str}\"" : this.Value.ToString();
     }
 }

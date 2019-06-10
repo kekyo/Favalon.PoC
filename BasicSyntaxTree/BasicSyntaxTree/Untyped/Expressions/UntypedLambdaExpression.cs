@@ -6,26 +6,31 @@ namespace BasicSyntaxTree.Untyped.Expressions
 {
     public sealed class UntypedLambdaExpression : UntypedExpression
     {
-        public readonly string Parameter;
+        public readonly UntypedVariableExpression Parameter;
         public readonly UntypedExpression Expression;
 
-        internal UntypedLambdaExpression(string parameter, UntypedExpression expression, TextRegion textRegion) : base(textRegion)
+        internal UntypedLambdaExpression(
+            UntypedVariableExpression parameter, UntypedExpression expression, UntypedType? annotatedType,
+            TextRegion textRegion) : base(annotatedType, textRegion)
         {
             this.Parameter = parameter;
             this.Expression = expression;
         }
 
-        internal override TypedExpression Visit(TypeEnvironment environment, InferContext context)
+        internal override bool IsSafePrintable => false;
+
+        internal override TypedExpression Visit(Environment environment, InferContext context)
         {
             var scopedEnvironment = environment.MakeScope();
-            var parameterType = context.CreateUnspecifiedType();
-            scopedEnvironment.RegisterVariable(this.Parameter, parameterType);
+
+            var parameter = (VariableExpression)this.Parameter.Visit(scopedEnvironment, context);
             var expression = this.Expression.Visit(scopedEnvironment, context);
-            var type = new FunctionType(parameterType, expression.Type);
-            return new LambdaExpression(this.Parameter, expression, type, this.TextRegion);
+            var type = new FunctionType(parameter.Type, expression.Type);
+
+            return new LambdaExpression(parameter, expression, type, this.TextRegion);
         }
 
         public override string ToString() =>
-            $"fun {this.Parameter} = {this.Expression}";
+            $"fun {this.Parameter} -> {this.Expression}";
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace BasicSyntaxTree
@@ -23,12 +24,22 @@ namespace BasicSyntaxTree
         public static Lazy<T> Lazy<T>(Func<T> factory) =>
             new Lazy<T>(factory);
 
-        public static Dictionary<T, U> ToDictionary<T, U>(this IReadOnlyDictionary<T, U> dict)
+        public static Dictionary<T, U> ToDictionary<T, U>(this IEnumerable<KeyValuePair<T, U>> dict)
         {
-            var temp = new Dictionary<T, U>();
+            var temp = (dict is ICollection coll) ? new Dictionary<T, U>(coll.Count) : new Dictionary<T, U>();
             foreach (var entry in dict)
             {
                 temp.Add(entry.Key, entry.Value);
+            }
+            return temp;
+        }
+
+        public static Dictionary<T, U> ToDictionary<T, U>(this IEnumerable<(T key, U value)> dict)
+        {
+            var temp = (dict is ICollection coll) ? new Dictionary<T, U>(coll.Count) : new Dictionary<T, U>();
+            foreach (var entry in dict)
+            {
+                temp.Add(entry.key, entry.value);
             }
             return temp;
         }

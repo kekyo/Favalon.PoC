@@ -132,7 +132,7 @@ namespace BasicSyntaxTree
                 return;
             }
 
-            throw new System.Exception();
+//            throw new System.Exception();
         }
 
         public Type ResolveType(Type type)

@@ -18,12 +18,21 @@ namespace BasicSyntaxTree
 
         public static UntypedType ClrType(System.Type type)
         {
-            // .NET CLS special case: List<int> ===> List<> -> int
-            if (type.IsGenericType && !type.IsGenericTypeDefinition)
+            if (type.IsGenericType)
             {
-                return HigherOrder(
-                    ClrType(type.GetGenericTypeDefinition()),
-                    ClrType(type.GetGenericArguments()[0]));
+                // .NET CLS special case: List<> ===> List<>
+                if (type.IsGenericTypeDefinition)
+                {
+                    return new UntypedTypeConstructor(type);
+                }
+                // .NET CLS special case: List<int> ===> List<> -> int
+                else
+                {
+                    // TODO: nested type
+                    return Function(
+                        ClrType(type.GetGenericTypeDefinition()),
+                        ClrType(type.GetGenericArguments()[0]));
+                }
             }
             // int, List<>
             else
@@ -34,8 +43,5 @@ namespace BasicSyntaxTree
 
         public static UntypedFunctionType Function(UntypedType parameterType, UntypedType resultType) =>
             new UntypedFunctionType(parameterType, resultType);
-
-        public static UntypedHigherOrderType HigherOrder(UntypedType typeConstructor, UntypedType typeArgument) =>
-            new UntypedHigherOrderType(typeConstructor, typeArgument);
     }
 }

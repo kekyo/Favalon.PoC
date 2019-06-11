@@ -3,7 +3,7 @@ using BasicSyntaxTree.Typed.Types;
 
 namespace BasicSyntaxTree.Untyped.Types
 {
-    public sealed class UntypedClrType : UntypedType
+    public class UntypedClrType : UntypedType
     {
         internal UntypedClrType(System.Type type) =>
             this.Type = type;

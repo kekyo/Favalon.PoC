@@ -1,5 +1,6 @@
 ﻿using BasicSyntaxTree.Typed;
 using BasicSyntaxTree.Typed.Expressions;
+using BasicSyntaxTree.Untyped.Types;
 
 namespace BasicSyntaxTree.Untyped.Expressions
 {
@@ -21,7 +22,15 @@ namespace BasicSyntaxTree.Untyped.Expressions
             }
             else if (environment.GetType(this.Name) is Type it)
             {
-                type = it;
+                if (it is UntypedTypeConstructor tc)
+                {
+                    var pt = context.CreateUnspecifiedType();
+                    type = new ApplyExpression()
+                }
+                else
+                {
+                    type = it;
+                }
             }
             else
             {

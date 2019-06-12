@@ -1,8 +1,7 @@
-﻿using BasicSyntaxTree.Typed;
-using BasicSyntaxTree.Typed.Expressions;
+﻿using BasicSyntaxTree.Untyped;
 using BasicSyntaxTree.Untyped.Types;
 
-namespace BasicSyntaxTree.Untyped.Expressions
+namespace BasicSyntaxTree.Expressions.Unresolved
 {
     public sealed class UntypedVariableExpression : UntypedExpression
     {
@@ -22,12 +21,12 @@ namespace BasicSyntaxTree.Untyped.Expressions
             }
             else if (environment.GetType(this.Name) is Type it)
             {
-                if (it is UntypedTypeConstructor tc)
-                {
-                    var pt = context.CreateUnspecifiedType();
-                    type = new ApplyExpression()
-                }
-                else
+                //if (it is UntypedTypeConstructor tc)
+                //{
+                //    var pt = context.CreateUnspecifiedType();
+                //    type = new ApplyExpression()
+                //}
+                //else
                 {
                     type = it;
                 }

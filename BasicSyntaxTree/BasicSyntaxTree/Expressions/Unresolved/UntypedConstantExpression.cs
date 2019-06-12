@@ -1,8 +1,6 @@
-﻿using BasicSyntaxTree.Typed;
-using BasicSyntaxTree.Typed.Expressions;
-using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Untyped.Types;
 
-namespace BasicSyntaxTree.Untyped.Expressions
+namespace BasicSyntaxTree.Expressions.Unresolved
 {
     public sealed class UntypedConstantExpression : UntypedExpression
     {

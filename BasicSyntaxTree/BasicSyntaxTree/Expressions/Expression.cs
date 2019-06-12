@@ -1,10 +1,10 @@
 ﻿using BasicSyntaxTree.Untyped;
 using BasicSyntaxTree.Untyped.Types;
-using BasicSyntaxTree.Untyped.Expressions;
 using System.Collections.Generic;
 using System.Linq;
+using BasicSyntaxTree.Expressions.Unresolved;
 
-namespace BasicSyntaxTree
+namespace BasicSyntaxTree.Expressions
 {
     public abstract class Expression
     {

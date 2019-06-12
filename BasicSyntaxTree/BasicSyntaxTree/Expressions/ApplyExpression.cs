@@ -1,7 +1,7 @@
 ﻿using BasicSyntaxTree.Untyped;
 using BasicSyntaxTree.Untyped.Types;
 
-namespace BasicSyntaxTree.Typed.Expressions
+namespace BasicSyntaxTree.Expressions
 {
     public sealed class ApplyExpression : TypedExpression
     {

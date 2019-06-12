@@ -1,6 +1,6 @@
 ﻿using BasicSyntaxTree.Untyped;
 
-namespace BasicSyntaxTree.Typed
+namespace BasicSyntaxTree.Expressions
 {
     public abstract class TypedExpression : Expression
     {

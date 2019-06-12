@@ -1,6 +1,6 @@
 ﻿using BasicSyntaxTree.Untyped;
 
-namespace BasicSyntaxTree.Typed.Expressions
+namespace BasicSyntaxTree.Expressions
 {
     public sealed class LambdaExpression : TypedExpression
     {

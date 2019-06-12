@@ -1,7 +1,7 @@
-﻿using BasicSyntaxTree.Typed;
-using BasicSyntaxTree.Untyped.Expressions;
+﻿using BasicSyntaxTree.Expressions.Unresolved;
+using BasicSyntaxTree.Untyped;
 
-namespace BasicSyntaxTree.Untyped
+namespace BasicSyntaxTree.Expressions
 {
     public abstract class UntypedExpression : Expression
     {

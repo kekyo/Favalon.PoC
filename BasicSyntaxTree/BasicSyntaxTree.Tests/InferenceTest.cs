@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BasicSyntaxTree
 {
-    using static BasicSyntaxTree.Untyped.UntypedExpression;
+    using static BasicSyntaxTree.Expressions.UntypedExpression;
 
     [TestFixture]
     public sealed class InferenceTest

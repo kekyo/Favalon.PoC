@@ -1,7 +1,6 @@
-﻿using BasicSyntaxTree.Untyped;
-using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Types.Unresolved;
 
-namespace BasicSyntaxTree
+namespace BasicSyntaxTree.Types
 {
     public abstract class Type : System.IEquatable<Type>
     {
@@ -13,17 +12,17 @@ namespace BasicSyntaxTree
 
         // =======================================================================
 
-        public static UntypedType ClrType<T>() =>
+        public static UnresolvedType ClrType<T>() =>
             ClrType(typeof(T));
 
-        public static UntypedType ClrType(System.Type type)
+        public static UnresolvedType ClrType(System.Type type)
         {
             if (type.IsGenericType)
             {
                 // .NET CLS special case: List<> ===> List<>
                 if (type.IsGenericTypeDefinition)
                 {
-                    return new UntypedTypeConstructor(type);
+                    return new UnresolvedTypeConstructor(type);
                 }
                 // .NET CLS special case: List<int> ===> List<> -> int
                 else
@@ -37,11 +36,11 @@ namespace BasicSyntaxTree
             // int, List<>
             else
             {
-                return new UntypedClrType(type);
+                return new UnresolvedClrType(type);
             }
         }
 
-        public static UntypedFunctionType Function(UntypedType parameterType, UntypedType resultType) =>
-            new UntypedFunctionType(parameterType, resultType);
+        public static UnresolvedFunctionType Function(UnresolvedType parameterType, UnresolvedType resultType) =>
+            new UnresolvedFunctionType(parameterType, resultType);
     }
 }

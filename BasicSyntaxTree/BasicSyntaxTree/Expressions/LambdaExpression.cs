@@ -1,13 +1,13 @@
-﻿using BasicSyntaxTree.Untyped;
+﻿using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Expressions
 {
-    public sealed class LambdaExpression : TypedExpression
+    public sealed class LambdaExpression : ResolvedExpression
     {
         public readonly VariableExpression Parameter;
-        public readonly TypedExpression Body;
+        public readonly ResolvedExpression Body;
 
-        internal LambdaExpression(VariableExpression parameter, TypedExpression body, Type type, TextRegion textRegion) : base(type, textRegion)
+        internal LambdaExpression(VariableExpression parameter, ResolvedExpression body, Type type, TextRegion textRegion) : base(type, textRegion)
         {
             this.Parameter = parameter;
             this.Body = body;

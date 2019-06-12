@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using BasicSyntaxTree.Types;
+using System.Collections.Generic;
 
 namespace BasicSyntaxTree
 {

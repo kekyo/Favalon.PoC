@@ -1,17 +1,17 @@
-﻿using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Types.Unresolved;
 
 namespace BasicSyntaxTree.Expressions.Unresolved
 {
-    public sealed class UntypedConstantExpression : UntypedExpression
+    public sealed class UnresolvedConstantExpression : UnresolvedExpression
     {
         public readonly object Value;
 
-        internal UntypedConstantExpression(object value, TextRegion textRegion) : base(new UntypedClrType(value.GetType()), textRegion) =>
+        internal UnresolvedConstantExpression(object value, TextRegion textRegion) : base(new UnresolvedClrType(value.GetType()), textRegion) =>
             this.Value = value;
 
         internal override bool IsSafePrintable => true;
 
-        internal override TypedExpression Visit(Environment environment, InferContext context) =>
+        internal override ResolvedExpression Visit(Environment environment, InferContext context) =>
             new ConstantExpression(this.Value, this.AnnotetedType!, this.TextRegion);
 
         public override string ToString() =>

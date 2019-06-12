@@ -1,19 +1,18 @@
-﻿using BasicSyntaxTree.Untyped;
-using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Expressions.Unresolved
 {
-    public sealed class UntypedVariableExpression : UntypedExpression
+    public sealed class UnresolvedVariableExpression : UnresolvedExpression
     {
         public readonly string Name;
 
-        internal UntypedVariableExpression(string name, UntypedType? annotatedType, TextRegion textRegion) : base(annotatedType, textRegion) =>
+        internal UnresolvedVariableExpression(string name, UnresolvedType? annotatedType, TextRegion textRegion) : base(annotatedType, textRegion) =>
             this.Name = name;
 
         internal override bool IsSafePrintable =>
             this.AnnotetedType == null;
 
-        internal override TypedExpression Visit(Environment environment, InferContext context)
+        internal override ResolvedExpression Visit(Environment environment, InferContext context)
         {
             if (this.AnnotetedType is Type type)
             {
@@ -46,7 +45,7 @@ namespace BasicSyntaxTree.Expressions.Unresolved
         // =======================================================================
         // Short generator usable for tests.
 
-        public static implicit operator UntypedVariableExpression(string variableName) =>
-            new UntypedVariableExpression(variableName, default, TextRegion.Unknown);
+        public static implicit operator UnresolvedVariableExpression(string variableName) =>
+            new UnresolvedVariableExpression(variableName, default, TextRegion.Unknown);
     }
 }

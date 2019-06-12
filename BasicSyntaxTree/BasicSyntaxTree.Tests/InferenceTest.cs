@@ -1,9 +1,10 @@
-﻿using NUnit.Framework;
+﻿using BasicSyntaxTree.Types;
+using NUnit.Framework;
 using System.Collections.Generic;
 
 namespace BasicSyntaxTree
 {
-    using static BasicSyntaxTree.Expressions.UntypedExpression;
+    using static BasicSyntaxTree.Expressions.UnresolvedExpression;
 
     [TestFixture]
     public sealed class InferenceTest
@@ -130,11 +131,11 @@ namespace BasicSyntaxTree
         {
             var globalEnv = new Environment();
 
-            globalEnv.RegisterVariable("list", Type.ClrType(typeof(List<>)));
+            globalEnv.RegisterVariable("List", Type.ClrType(typeof(List<>)));
 
-            // fun xs -> list int xs
-            // Lambda(xs, Apply(Apply(list, int), xs))
-            var inner = Apply("list", "int");
+            // fun xs -> List int xs
+            // Lambda(xs, Apply(Apply(List, int), xs))
+            var inner = Apply("List", "int");
             var outer = Apply(inner, "xs");
             var fun = Lambda("xs", outer);
             var actual = fun.Infer(globalEnv);

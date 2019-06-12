@@ -1,15 +1,14 @@
-﻿using BasicSyntaxTree.Typed.Types;
-using BasicSyntaxTree.Untyped;
+﻿using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Expressions.Unresolved
 {
-    public sealed class UntypedLambdaExpression : UntypedExpression
+    public sealed class UnresolvedLambdaExpression : UnresolvedExpression
     {
-        public readonly UntypedVariableExpression Parameter;
-        public readonly UntypedExpression Expression;
+        public readonly UnresolvedVariableExpression Parameter;
+        public readonly UnresolvedExpression Expression;
 
-        internal UntypedLambdaExpression(
-            UntypedVariableExpression parameter, UntypedExpression expression, UntypedType? annotatedType,
+        internal UnresolvedLambdaExpression(
+            UnresolvedVariableExpression parameter, UnresolvedExpression expression, UnresolvedType? annotatedType,
             TextRegion textRegion) : base(annotatedType, textRegion)
         {
             this.Parameter = parameter;
@@ -18,7 +17,7 @@ namespace BasicSyntaxTree.Expressions.Unresolved
 
         internal override bool IsSafePrintable => false;
 
-        internal override TypedExpression Visit(Environment environment, InferContext context)
+        internal override ResolvedExpression Visit(Environment environment, InferContext context)
         {
             var scopedEnvironment = environment.MakeScope();
 

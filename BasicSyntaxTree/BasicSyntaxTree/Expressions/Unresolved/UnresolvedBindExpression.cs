@@ -1,17 +1,17 @@
-﻿using BasicSyntaxTree.Untyped;
+﻿using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Expressions.Unresolved
 {
-    public sealed class UntypedBindExpression : UntypedExpression
+    public sealed class UnresolvedBindExpression : UnresolvedExpression
     {
         // let a = 123 in ...
         // let f = fun x -> (+) x 1 in ...
-        public readonly UntypedVariableExpression Target;
-        public readonly UntypedExpression Expression;
-        public readonly UntypedExpression Body;
+        public readonly UnresolvedVariableExpression Target;
+        public readonly UnresolvedExpression Expression;
+        public readonly UnresolvedExpression Body;
 
-        internal UntypedBindExpression(
-            UntypedVariableExpression target, UntypedExpression expression, UntypedExpression body, UntypedType? annotatedType,
+        internal UnresolvedBindExpression(
+            UnresolvedVariableExpression target, UnresolvedExpression expression, UnresolvedExpression body, UnresolvedType? annotatedType,
             TextRegion textRegion) : base(annotatedType, textRegion)
         {
             this.Target = target;
@@ -21,7 +21,7 @@ namespace BasicSyntaxTree.Expressions.Unresolved
 
         internal override bool IsSafePrintable => false;
 
-        internal override TypedExpression Visit(Environment environment, InferContext context)
+        internal override ResolvedExpression Visit(Environment environment, InferContext context)
         {
             var scopedEnvironment = environment.MakeScope();
 

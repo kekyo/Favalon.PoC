@@ -1,9 +1,8 @@
-﻿using BasicSyntaxTree.Untyped;
-using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Expressions
 {
-    public sealed class VariableExpression : TypedExpression
+    public sealed class VariableExpression : ResolvedExpression
     {
         public readonly string Name;
 

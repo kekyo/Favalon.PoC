@@ -1,15 +1,14 @@
-﻿using BasicSyntaxTree.Typed.Types;
-using BasicSyntaxTree.Untyped;
+﻿using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Expressions.Unresolved
 {
-    public sealed class UntypedApplyExpression : UntypedExpression
+    public sealed class UnresolvedApplyExpression : UnresolvedExpression
     {
-        public readonly UntypedExpression Function;
-        public readonly UntypedExpression Argument;
+        public readonly UnresolvedExpression Function;
+        public readonly UnresolvedExpression Argument;
 
-        internal UntypedApplyExpression(
-            UntypedExpression function, UntypedExpression argument, UntypedType? annotatedType,
+        internal UnresolvedApplyExpression(
+            UnresolvedExpression function, UnresolvedExpression argument, UnresolvedType? annotatedType,
             TextRegion textRegion) : base(annotatedType, textRegion)
         {
             this.Function = function;
@@ -18,7 +17,7 @@ namespace BasicSyntaxTree.Expressions.Unresolved
 
         internal override bool IsSafePrintable => false;
 
-        internal override TypedExpression Visit(Environment environment, InferContext context)
+        internal override ResolvedExpression Visit(Environment environment, InferContext context)
         {
             var functionExpression = this.Function.Visit(environment, context);
             var argumentExpression = this.Argument.Visit(environment, context);

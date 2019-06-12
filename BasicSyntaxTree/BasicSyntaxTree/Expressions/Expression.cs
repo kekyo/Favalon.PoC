@@ -1,8 +1,8 @@
-﻿using BasicSyntaxTree.Untyped;
-using BasicSyntaxTree.Untyped.Types;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using BasicSyntaxTree.Expressions.Unresolved;
+using BasicSyntaxTree.Types;
+using BasicSyntaxTree.Types.Unresolved;
 
 namespace BasicSyntaxTree.Expressions
 {
@@ -20,37 +20,37 @@ namespace BasicSyntaxTree.Expressions
         internal string SafePrintable =>
             this.IsSafePrintable ? this.ToString() : $"({this})";
 
-        public static IReadOnlyDictionary<string, UntypedFunctionType> CreateFunctionTypeEnvironment(
-            params (string name, UntypedFunctionType type)[] environments) =>
+        public static IReadOnlyDictionary<string, UnresolvedFunctionType> CreateFunctionTypeEnvironment(
+            params (string name, UnresolvedFunctionType type)[] environments) =>
             environments.ToDictionary(entry => entry.name, entry => entry.type);
 
-        public static IReadOnlyDictionary<string, UntypedType> CreateTypeEnvironment(
-            params (string name, UntypedType type)[] environments) =>
+        public static IReadOnlyDictionary<string, UnresolvedType> CreateTypeEnvironment(
+            params (string name, UnresolvedType type)[] environments) =>
             environments.ToDictionary(entry => entry.name, entry => entry.type);
 
         // =======================================================================
 
-        public static UntypedConstantExpression Constant(object value, TextRegion textRegion) =>
-            new UntypedConstantExpression(value, textRegion);
+        public static UnresolvedConstantExpression Constant(object value, TextRegion textRegion) =>
+            new UnresolvedConstantExpression(value, textRegion);
 
-        public static UntypedVariableExpression Variable(string name, TextRegion textRegion) =>
-            new UntypedVariableExpression(name, default, textRegion);
-        public static UntypedVariableExpression Variable(string name, UntypedType annotatedType, TextRegion textRegion) =>
-            new UntypedVariableExpression(name, annotatedType, textRegion);
+        public static UnresolvedVariableExpression Variable(string name, TextRegion textRegion) =>
+            new UnresolvedVariableExpression(name, default, textRegion);
+        public static UnresolvedVariableExpression Variable(string name, UnresolvedType annotatedType, TextRegion textRegion) =>
+            new UnresolvedVariableExpression(name, annotatedType, textRegion);
 
-        public static UntypedLambdaExpression Lambda(UntypedVariableExpression parameter, UntypedExpression body, TextRegion textRegion) =>
-            new UntypedLambdaExpression(parameter, body, default, textRegion);
-        public static UntypedLambdaExpression Lambda(UntypedVariableExpression parameter, UntypedExpression body, UntypedType annotatedType, TextRegion textRegion) =>
-            new UntypedLambdaExpression(parameter, body, annotatedType, textRegion);
+        public static UnresolvedLambdaExpression Lambda(UnresolvedVariableExpression parameter, UnresolvedExpression body, TextRegion textRegion) =>
+            new UnresolvedLambdaExpression(parameter, body, default, textRegion);
+        public static UnresolvedLambdaExpression Lambda(UnresolvedVariableExpression parameter, UnresolvedExpression body, UnresolvedType annotatedType, TextRegion textRegion) =>
+            new UnresolvedLambdaExpression(parameter, body, annotatedType, textRegion);
 
-        public static UntypedApplyExpression Apply(UntypedExpression function, UntypedExpression argument, TextRegion textRegion) =>
-            new UntypedApplyExpression(function, argument, default, textRegion);
-        public static UntypedApplyExpression Apply(UntypedExpression function, UntypedExpression argument, UntypedType annotatedType, TextRegion textRegion) =>
-            new UntypedApplyExpression(function, argument, annotatedType, textRegion);
+        public static UnresolvedApplyExpression Apply(UnresolvedExpression function, UnresolvedExpression argument, TextRegion textRegion) =>
+            new UnresolvedApplyExpression(function, argument, default, textRegion);
+        public static UnresolvedApplyExpression Apply(UnresolvedExpression function, UnresolvedExpression argument, UnresolvedType annotatedType, TextRegion textRegion) =>
+            new UnresolvedApplyExpression(function, argument, annotatedType, textRegion);
 
-        public static UntypedBindExpression Bind(UntypedVariableExpression target, UntypedExpression expression, UntypedExpression body, TextRegion textRegion) =>
-            new UntypedBindExpression(target, expression, body, default, textRegion);
-        public static UntypedBindExpression Bind(UntypedVariableExpression target, UntypedExpression expression, UntypedExpression body, UntypedType annotatedType, TextRegion textRegion) =>
-            new UntypedBindExpression(target, expression, body, annotatedType, textRegion);
+        public static UnresolvedBindExpression Bind(UnresolvedVariableExpression target, UnresolvedExpression expression, UnresolvedExpression body, TextRegion textRegion) =>
+            new UnresolvedBindExpression(target, expression, body, default, textRegion);
+        public static UnresolvedBindExpression Bind(UnresolvedVariableExpression target, UnresolvedExpression expression, UnresolvedExpression body, UnresolvedType annotatedType, TextRegion textRegion) =>
+            new UnresolvedBindExpression(target, expression, body, annotatedType, textRegion);
     }
 }

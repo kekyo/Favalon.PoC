@@ -1,4 +1,4 @@
-﻿namespace BasicSyntaxTree.Typed.Types
+﻿namespace BasicSyntaxTree.Types
 {
     public sealed class FunctionType : TypedType
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace BasicSyntaxTree
 {
-    public static class Utilities
+    internal static class Utilities
     {
         public static IEnumerable<U> Collect<T, U>(this IEnumerable<T> enumerable, Func<T, U?> extractor)
             where U : class

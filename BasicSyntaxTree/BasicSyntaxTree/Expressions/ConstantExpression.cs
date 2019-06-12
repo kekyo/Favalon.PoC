@@ -1,8 +1,8 @@
-﻿using BasicSyntaxTree.Untyped;
+﻿using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Expressions
 {
-    public sealed class ConstantExpression : TypedExpression
+    public sealed class ConstantExpression : ResolvedExpression
     {
         public readonly object Value;
 

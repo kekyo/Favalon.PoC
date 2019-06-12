@@ -1,14 +1,14 @@
-﻿using BasicSyntaxTree.Untyped;
+﻿using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Expressions
 {
-    public sealed class BindExpression : TypedExpression
+    public sealed class BindExpression : ResolvedExpression
     {
         public readonly VariableExpression Target;
-        public readonly TypedExpression Expression;
-        public readonly TypedExpression Body;
+        public readonly ResolvedExpression Expression;
+        public readonly ResolvedExpression Body;
 
-        internal BindExpression(VariableExpression target, TypedExpression expression, TypedExpression body, TextRegion textRegion) : base(body.Type, textRegion)
+        internal BindExpression(VariableExpression target, ResolvedExpression expression, ResolvedExpression body, TextRegion textRegion) : base(body.Type, textRegion)
         {
             this.Target = target;
             this.Expression = expression;

@@ -1,14 +1,13 @@
-﻿using BasicSyntaxTree.Untyped;
-using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Expressions
 {
-    public sealed class ApplyExpression : TypedExpression
+    public sealed class ApplyExpression : ResolvedExpression
     {
-        public readonly TypedExpression Function;
-        public readonly TypedExpression Argument;
+        public readonly ResolvedExpression Function;
+        public readonly ResolvedExpression Argument;
 
-        internal ApplyExpression(TypedExpression function, TypedExpression argument, Type type, TextRegion textRegion) : base(type, textRegion)
+        internal ApplyExpression(ResolvedExpression function, ResolvedExpression argument, Type type, TextRegion textRegion) : base(type, textRegion)
         {
             this.Function = function;
             this.Argument = argument;

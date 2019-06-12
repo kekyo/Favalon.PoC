@@ -1,6 +1,6 @@
-﻿using BasicSyntaxTree.Untyped.Types;
+﻿using BasicSyntaxTree.Types.Unresolved;
 
-namespace BasicSyntaxTree.Typed.Types
+namespace BasicSyntaxTree.Types
 {
     public sealed class ClrType : TypedType
     {
@@ -12,7 +12,7 @@ namespace BasicSyntaxTree.Typed.Types
         public override bool IsResolved => true;
 
         public override bool Equals(Type other) =>
-            other is UntypedClrType rhs1 ? this.Type.Equals(rhs1.Type) :
+            other is UnresolvedClrType rhs1 ? this.Type.Equals(rhs1.Type) :
             other is ClrType rhs2 ? this.Type.Equals(rhs2.Type) :
             false;
 

@@ -8,7 +8,7 @@ namespace BasicSyntaxTree.Expressions.Unresolved
         public readonly UnresolvedExpression Argument;
 
         internal UnresolvedApplyExpression(
-            UnresolvedExpression function, UnresolvedExpression argument, UnresolvedType? annotatedType,
+            UnresolvedExpression function, UnresolvedExpression argument, Type? annotatedType,
             TextRegion textRegion) : base(annotatedType, textRegion)
         {
             this.Function = function;
@@ -19,13 +19,34 @@ namespace BasicSyntaxTree.Expressions.Unresolved
 
         internal override ResolvedExpression Visit(Environment environment, InferContext context)
         {
-            var functionExpression = this.Function.Visit(environment, context);
-            var argumentExpression = this.Argument.Visit(environment, context);
-            var thisExpressionType = this.AnnotetedType ?? context.CreateUnspecifiedType();
+            var function = this.Function.Visit(environment, context);
+            var argument = this.Argument.Visit(environment, context);
+            var thisExpressionType = this.AnnotetedType;
 
-            context.Unify(functionExpression.Type, new FunctionType(argumentExpression.Type, thisExpressionType));
+            // Apply type constructors
+            if ((function.InferredType is TypeConstructorType tycon) &&
+                (argument.InferredType is KindType argumentType))
+            {
+                thisExpressionType = thisExpressionType ?? tycon.Apply(argumentType);
 
-            return new ApplyExpression(functionExpression, argumentExpression, thisExpressionType, this.TextRegion);
+                return new ApplyExpression(
+                    function, argument, thisExpressionType, this.TextRegion);
+            }
+
+            // Apply constructor with instance
+            if ((function.InferredType is RuntimeKindType kindType) &&
+                !(argument.InferredType is KindType))
+            {
+                // TODO: How to apply constructor function (and what the signature like: kind<'a> -> 'b)
+            }
+
+            // Likes applying function expression
+            thisExpressionType = thisExpressionType ?? context.CreateUnspecifiedType();
+
+            context.Unify(function.InferredType, new FunctionType(argument.InferredType, thisExpressionType));
+
+            return new ApplyExpression(
+                function, argument, thisExpressionType, this.TextRegion);
         }
 
         public override string ToString() =>

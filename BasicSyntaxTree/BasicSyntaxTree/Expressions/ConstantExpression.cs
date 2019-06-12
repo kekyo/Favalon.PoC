@@ -6,15 +6,16 @@ namespace BasicSyntaxTree.Expressions
     {
         public readonly object Value;
 
-        internal ConstantExpression(object value, Type type, TextRegion textRegion) : base(type, textRegion) =>
+        internal ConstantExpression(object value, Type inferredType, TextRegion textRegion) :
+            base(inferredType, textRegion) =>
             this.Value = value;
 
         internal override bool IsSafePrintable => this.Value is string;
 
         internal override void Resolve(InferContext context) =>
-            this.Type = context.ResolveType(this.Type);
+            this.InferredType = context.ResolveType(this.InferredType);
 
         public override string ToString() =>
-            this.Value is string str ? $"\"{str}\"" : $"{this.Value}:{this.Type}";
+            $"{Utilities.PrettyPrint(this.Value)}:{this.InferredType}";
     }
 }

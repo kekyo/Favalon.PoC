@@ -6,7 +6,8 @@ namespace BasicSyntaxTree.Expressions.Unresolved
     {
         public readonly string Name;
 
-        internal UnresolvedVariableExpression(string name, UnresolvedType? annotatedType, TextRegion textRegion) : base(annotatedType, textRegion) =>
+        internal UnresolvedVariableExpression(string name, Type? annotatedType, TextRegion textRegion) :
+            base(annotatedType, textRegion) =>
             this.Name = name;
 
         internal override bool IsSafePrintable =>
@@ -20,15 +21,7 @@ namespace BasicSyntaxTree.Expressions.Unresolved
             }
             else if (environment.GetType(this.Name) is Type it)
             {
-                //if (it is UntypedTypeConstructor tc)
-                //{
-                //    var pt = context.CreateUnspecifiedType();
-                //    type = new ApplyExpression()
-                //}
-                //else
-                {
-                    type = it;
-                }
+                type = it;
             }
             else
             {
@@ -40,7 +33,9 @@ namespace BasicSyntaxTree.Expressions.Unresolved
         }
 
         public override string ToString() =>
-            this.AnnotetedType is Type annotatedType ? $"{this.Name}:{annotatedType}" : this.Name;
+            this.AnnotetedType is Type annotatedType ?
+                ((this.Name.Length >= 1) ? $"{this.Name}:{annotatedType}" : annotatedType.ToString()) :
+                (this.Name.Length >= 1) ? this.Name : "(unnamed)";
 
         // =======================================================================
         // Short generator usable for tests.

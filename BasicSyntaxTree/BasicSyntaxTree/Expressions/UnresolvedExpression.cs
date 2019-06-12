@@ -5,12 +5,12 @@ namespace BasicSyntaxTree.Expressions
 {
     public abstract class UnresolvedExpression : Expression
     {
-        private protected UnresolvedExpression(UnresolvedType? annotatedType, TextRegion textRegion) : base(textRegion) =>
+        private protected UnresolvedExpression(Type? annotatedType, TextRegion textRegion) : base(textRegion) =>
             this.AnnotetedType = annotatedType;
 
         public override bool IsResolved => false;
 
-        public UnresolvedType? AnnotetedType { get; }
+        public Type? AnnotetedType { get; }
 
         internal abstract ResolvedExpression Visit(Environment environment, InferContext context);
 
@@ -28,18 +28,16 @@ namespace BasicSyntaxTree.Expressions
         public static UnresolvedConstantExpression Constant(object value) =>
             new UnresolvedConstantExpression(value, TextRegion.Unknown);
 
-        public static UnresolvedVariableExpression Variable(string name) =>
-            new UnresolvedVariableExpression(name, default, TextRegion.Unknown);
-        public static UnresolvedVariableExpression Variable(string name, UnresolvedType annotatedType) =>
+        public static UnresolvedVariableExpression Variable(string name, Type? annotatedType = default) =>
             new UnresolvedVariableExpression(name, annotatedType, TextRegion.Unknown);
 
-        public static UnresolvedLambdaExpression Lambda(UnresolvedVariableExpression parameter, UnresolvedExpression body, UnresolvedType? annotatedType = default) =>
+        public static UnresolvedLambdaExpression Lambda(UnresolvedVariableExpression parameter, UnresolvedExpression body, Type? annotatedType = default) =>
             new UnresolvedLambdaExpression(parameter, body, annotatedType, TextRegion.Unknown);
 
-        public static UnresolvedApplyExpression Apply(UnresolvedExpression function, UnresolvedExpression argument, UnresolvedType? annotatedType = default) =>
+        public static UnresolvedApplyExpression Apply(UnresolvedExpression function, UnresolvedExpression argument, Type? annotatedType = default) =>
             new UnresolvedApplyExpression(function, argument, annotatedType, TextRegion.Unknown);
 
-        public static UnresolvedBindExpression Bind(UnresolvedVariableExpression target, UnresolvedExpression expression, UnresolvedExpression body, UnresolvedType? annotatedType = default) =>
+        public static UnresolvedBindExpression Bind(UnresolvedVariableExpression target, UnresolvedExpression expression, UnresolvedExpression body, Type? annotatedType = default) =>
             new UnresolvedBindExpression(target, expression, body, annotatedType, TextRegion.Unknown);
 
         public static implicit operator UnresolvedExpression(string variableName) =>

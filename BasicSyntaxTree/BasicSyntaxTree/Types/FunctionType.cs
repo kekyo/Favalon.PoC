@@ -1,6 +1,6 @@
 ﻿namespace BasicSyntaxTree.Types
 {
-    public sealed class FunctionType : TypedType
+    public sealed class FunctionType : Type
     {
         public readonly Type ParameterType;
         public readonly Type ExpressionType;

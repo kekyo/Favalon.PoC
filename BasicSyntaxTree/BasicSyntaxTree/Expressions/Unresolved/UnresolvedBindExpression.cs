@@ -4,14 +4,12 @@ namespace BasicSyntaxTree.Expressions.Unresolved
 {
     public sealed class UnresolvedBindExpression : UnresolvedExpression
     {
-        // let a = 123 in ...
-        // let f = fun x -> (+) x 1 in ...
         public readonly UnresolvedVariableExpression Target;
         public readonly UnresolvedExpression Expression;
         public readonly UnresolvedExpression Body;
 
         internal UnresolvedBindExpression(
-            UnresolvedVariableExpression target, UnresolvedExpression expression, UnresolvedExpression body, UnresolvedType? annotatedType,
+            UnresolvedVariableExpression target, UnresolvedExpression expression, UnresolvedExpression body, Type? annotatedType,
             TextRegion textRegion) : base(annotatedType, textRegion)
         {
             this.Target = target;
@@ -29,9 +27,10 @@ namespace BasicSyntaxTree.Expressions.Unresolved
             var expression = this.Expression.Visit(scopedEnvironment, context);
             var body = this.Body.Visit(scopedEnvironment, context);
 
-            context.Unify(expression.Type, body.Type);
+            context.Unify(expression.InferredType, body.InferredType);
 
-            return new BindExpression(target, expression, body, this.TextRegion);
+            return new BindExpression(
+                target, expression, body, body.InferredType, this.TextRegion);
         }
 
         public override string ToString() =>

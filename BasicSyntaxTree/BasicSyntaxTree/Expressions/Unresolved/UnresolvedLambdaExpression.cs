@@ -8,8 +8,8 @@ namespace BasicSyntaxTree.Expressions.Unresolved
         public readonly UnresolvedExpression Expression;
 
         internal UnresolvedLambdaExpression(
-            UnresolvedVariableExpression parameter, UnresolvedExpression expression, UnresolvedType? annotatedType,
-            TextRegion textRegion) : base(annotatedType, textRegion)
+            UnresolvedVariableExpression parameter, UnresolvedExpression expression, Type? annotatedType, TextRegion textRegion) :
+            base(annotatedType, textRegion)
         {
             this.Parameter = parameter;
             this.Expression = expression;
@@ -23,7 +23,7 @@ namespace BasicSyntaxTree.Expressions.Unresolved
 
             var parameter = (VariableExpression)this.Parameter.Visit(scopedEnvironment, context);
             var expression = this.Expression.Visit(scopedEnvironment, context);
-            var type = new FunctionType(parameter.Type, expression.Type);
+            var type = new FunctionType(parameter.InferredType, expression.InferredType);
 
             return new LambdaExpression(parameter, expression, type, this.TextRegion);
         }

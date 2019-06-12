@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace BasicSyntaxTree
 {
     using static BasicSyntaxTree.Expressions.UnresolvedExpression;
+    using static BasicSyntaxTree.Types.Type;
 
     [TestFixture]
     public sealed class InferenceTest
@@ -19,7 +20,7 @@ namespace BasicSyntaxTree
             var actual = integerExpression.Infer(globalEnv);
 
             // Int32
-            Assert.AreEqual("Int32", actual.Type.ToString());
+            Assert.AreEqual("int", actual.InferredType.ToString());
             Assert.IsTrue(actual.IsResolved);
         }
 
@@ -33,7 +34,27 @@ namespace BasicSyntaxTree
             var actual = stringExpression.Infer(globalEnv);
 
             // String
-            Assert.AreEqual("String", actual.Type.ToString());
+            Assert.AreEqual("string", actual.InferredType.ToString());
+            Assert.IsTrue(actual.IsResolved);
+        }
+
+        [Test]
+        public void FunctionApplyAtEnvironmentExpression()
+        {
+            var globalEnv = new Environment();
+
+            // (+) : int -> (int -> int)
+            globalEnv.RegisterVariable("+", Function(RuntimeType<int>(), Function(RuntimeType<int>(), RuntimeType<int>())));
+
+            // fun x -> (+) x 1
+            // Lambda(x, Apply(Apply(+, x), 1))
+            var inner = Apply("+", "x");
+            var outer = Apply(inner, Constant(1));
+            var fun = Lambda("x", outer);
+            var actual = fun.Infer(globalEnv);
+
+            // int -> int
+            Assert.AreEqual("int -> int", actual.InferredType.ToString());
             Assert.IsTrue(actual.IsResolved);
         }
 
@@ -42,29 +63,34 @@ namespace BasicSyntaxTree
         {
             var globalEnv = new Environment();
 
-            // (+) : fun a -> fun b -> a b
-            // (+) : Lambda(a, Lambda(b, Apply(a, b)))
-            //var plusExpression = Lambda("a", Lambda("b", Apply("a", "b")));
-            //var plusExpressionType = plusExpression.Infer(globalEnv).Type;
-            //globalEnv.RegisterVariable("+", plusExpressionType);
-
-            // (+) : Int32 -> (Int32 -> Int32)
-            globalEnv.RegisterVariable("+", Type.Function(Type.ClrType<int>(), Type.Function(Type.ClrType<int>(), Type.ClrType<int>())));
-
-            // fun x -> (+) x 1
-            // Lambda(x, Apply(Apply(+, x), 1))
-            var inner = Apply("+", "x");
-            var outer = Apply(inner, Constant(1));
-            var fun = Lambda("x", outer);
+            // fun f -> f 1
+            // Lambda(f, Apply(f, 1))
+            var expr = Apply("f", Constant(1));
+            var fun = Lambda("f", expr);
             var actual = fun.Infer(globalEnv);
-            
-            // Int32 -> Int32
-            Assert.AreEqual("Int32 -> Int32", actual.Type.ToString());
-            Assert.IsTrue(actual.IsResolved);
+
+            Assert.AreEqual("(int -> 'b) -> 'b", actual.InferredType.ToString());
+            Assert.IsFalse(actual.IsResolved);
         }
 
         [Test]
         public void FunctionCombinedExpression()
+        {
+            var globalEnv = new Environment();
+
+            // fun f -> fun g -> f g
+            // Lambda(f, Lambda(g, Apply(f, g)))
+            var expr2 = Apply("f", "g");
+            var expr1 = Lambda("g", expr2);
+            var fun = Lambda("f", expr1);
+            var actual = fun.Infer(globalEnv);
+
+            Assert.AreEqual("('b -> 'c) -> 'b -> 'c", actual.InferredType.ToString());
+            Assert.IsFalse(actual.IsResolved);
+        }
+
+        [Test]
+        public void Function3CombinedExpression()
         {
             var globalEnv = new Environment();
 
@@ -77,7 +103,7 @@ namespace BasicSyntaxTree
             var fun = Lambda("f", expr1);
             var actual = fun.Infer(globalEnv);
 
-            Assert.AreEqual("('d -> 'e) -> ('c -> 'd) -> 'c -> 'e", actual.Type.ToString());
+            Assert.AreEqual("('d -> 'e) -> ('c -> 'd) -> 'c -> 'e", actual.InferredType.ToString());
             Assert.IsFalse(actual.IsResolved);
         }
 
@@ -88,10 +114,10 @@ namespace BasicSyntaxTree
 
             // fun a:int -> a
             // Lambda(a:int, a)
-            var fun = Lambda(Variable("a", Type.ClrType<int>()), "a");
+            var fun = Lambda(Variable("a", RuntimeType<int>()), "a");
             var actual = fun.Infer(globalEnv);
 
-            Assert.AreEqual("Int32 -> Int32", actual.Type.ToString());
+            Assert.AreEqual("int -> int", actual.InferredType.ToString());
             Assert.IsTrue(actual.IsResolved);
         }
 
@@ -106,7 +132,7 @@ namespace BasicSyntaxTree
             var actual = bindExpression.Infer(globalEnv);
 
             // Int32
-            Assert.AreEqual("Int32", actual.Type.ToString());
+            Assert.AreEqual("int", actual.InferredType.ToString());
             Assert.IsTrue(actual.IsResolved);
         }
 
@@ -122,16 +148,96 @@ namespace BasicSyntaxTree
             var actual = bindExpression.Infer(globalEnv);
 
             // Int32
-            Assert.AreEqual("Int32", actual.Type.ToString());
+            Assert.AreEqual("int", actual.InferredType.ToString());
             Assert.IsTrue(actual.IsResolved);
         }
 
         [Test]
-        public void TypeFunctionExpression()
+        public void ApplyConstructorExpression()
         {
             var globalEnv = new Environment();
 
-            globalEnv.RegisterVariable("List", Type.ClrType(typeof(List<>)));
+            globalEnv.RegisterVariable("Int32List", Function(RuntimeType<IEnumerable<int>>(), RuntimeType<List<int>>()));
+
+            // fun xs -> Int32List xs
+            // Lambda(xs, Apply(Int32List, xs))
+            var inner = Apply("Int32List", "xs");
+            var fun = Lambda("xs", inner);
+            var actual = fun.Infer(globalEnv);
+
+            // seq<int> -> List<int>
+            Assert.AreEqual("seq<int> -> System.Collections.Generic.List<int>", actual.InferredType.ToString());
+            Assert.IsTrue(actual.IsResolved);
+        }
+
+        [Test]
+        public void ApplyConstructorWithAnnotationExpression()
+        {
+            var globalEnv = new Environment();
+
+            globalEnv.RegisterVariable("Int32List", Function(RuntimeType<IEnumerable<int>>(), RuntimeType<List<int>>()));
+
+            // fun xs -> (Int32List xs):List<Int32>
+            // Lambda(xs, Apply(Int32List, xs, List<Int32>))
+            var inner = Apply("Int32List", "xs", RuntimeType<List<int>>());
+            var fun = Lambda("xs", inner);
+            var actual = fun.Infer(globalEnv);
+
+            // seq<int> -> List<int>
+            Assert.AreEqual("seq<int> -> System.Collections.Generic.List<int>", actual.InferredType.ToString());
+            Assert.IsTrue(actual.IsResolved);
+        }
+
+        [Test]
+        public void ApplyTypeConstructorExpression()
+        {
+            var globalEnv = new Environment();
+
+            // NewList: kind<List>
+            globalEnv.RegisterVariable("List", KindType(typeof(List<>)));
+
+            // Integer: kind<Integer>
+            globalEnv.RegisterVariable("Int", KindType<int>());
+
+            // fun xs -> List Int xs
+            // Lambda(xs, Apply(Apply(NewList, int), xs))
+            var inner = Apply("List", "Int");
+            var outer = Apply(inner, "xs");
+            var fun = Lambda("xs", outer);
+            var actual = fun.Infer(globalEnv);
+
+            // seq<'a> -> List<'a>
+            Assert.AreEqual("seq<'a> -> System.Collections.Generic.List<'a>", actual.InferredType.ToString());
+            Assert.IsTrue(actual.IsResolved);
+        }
+
+        [Test]
+        public void AppliedTypeConstructorExpression()
+        {
+            var globalEnv = new Environment();
+
+            // List: tycon
+            // List: ty -> ty
+            globalEnv.RegisterVariable("List", RuntimeType(typeof(List<>)));
+            globalEnv.RegisterVariable("int", RuntimeType<int>());
+
+            // List int
+            // Apply(List, int)
+            var expr = Apply("List", "int");
+            var actual = expr.Infer(globalEnv);
+
+            // List<int>
+            Assert.AreEqual("System.Collections.Generic.List<int>", actual.InferredType.ToString());
+            Assert.IsTrue(actual.IsResolved);
+        }
+
+        [Test]
+        public void ApplySeqAppliedTypeConstructor()
+        {
+            var globalEnv = new Environment();
+
+            globalEnv.RegisterVariable("List", RuntimeType(typeof(List<>)));
+            globalEnv.RegisterVariable("int", RuntimeType<int>());
 
             // fun xs -> List int xs
             // Lambda(xs, Apply(Apply(List, int), xs))
@@ -140,8 +246,8 @@ namespace BasicSyntaxTree
             var fun = Lambda("xs", outer);
             var actual = fun.Infer(globalEnv);
 
-            // Int32 -> Int32
-            Assert.AreEqual("Int32 -> Int32", actual.Type.ToString());
+            // int -> int
+            Assert.AreEqual("int -> int", actual.InferredType.ToString());
             Assert.IsTrue(actual.IsResolved);
         }
     }

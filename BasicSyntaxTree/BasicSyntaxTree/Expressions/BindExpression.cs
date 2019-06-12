@@ -8,7 +8,8 @@ namespace BasicSyntaxTree.Expressions
         public readonly ResolvedExpression Expression;
         public readonly ResolvedExpression Body;
 
-        internal BindExpression(VariableExpression target, ResolvedExpression expression, ResolvedExpression body, TextRegion textRegion) : base(body.Type, textRegion)
+        internal BindExpression(VariableExpression target, ResolvedExpression expression, ResolvedExpression body, Type inferredType, TextRegion textRegion) :
+            base(inferredType, textRegion)
         {
             this.Target = target;
             this.Expression = expression;
@@ -22,7 +23,7 @@ namespace BasicSyntaxTree.Expressions
             this.Expression.Resolve(context);
             this.Body.Resolve(context);
             this.Target.Resolve(context);
-            this.Type = context.ResolveType(this.Type);
+            this.InferredType = context.ResolveType(this.InferredType);
         }
 
         public override string ToString() =>

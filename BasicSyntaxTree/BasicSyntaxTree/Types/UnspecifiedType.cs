@@ -1,16 +1,16 @@
-﻿namespace BasicSyntaxTree.Types.Unresolved
+﻿namespace BasicSyntaxTree.Types
 {
-    public sealed class UnspecifiedHigherOrderedType : UnresolvedType
+    public sealed class UnspecifiedType : Type
     {
         public readonly int Index;
 
-        internal UnspecifiedHigherOrderedType(int index) =>
+        internal UnspecifiedType(int index) =>
             this.Index = index;
 
         public override bool IsResolved => false;
 
         public override bool Equals(Type other) =>
-            other is UnspecifiedHigherOrderedType rhs ?
+            other is UnspecifiedType rhs ?
                 (this.Index == rhs.Index) :
                 false;
 
@@ -19,7 +19,7 @@
             var ch = (char)('a' + (this.Index % ('z' - 'a' + 1)));
             var suffixIndex = this.Index / ('z' - 'a' + 1);
             var suffix = (suffixIndex >= 1) ? suffixIndex.ToString() : string.Empty;
-            return $"''{ch}{suffix}";
+            return $"'{ch}{suffix}";
         }
     }
 }

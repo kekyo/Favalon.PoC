@@ -7,7 +7,8 @@ namespace BasicSyntaxTree.Expressions
         public readonly VariableExpression Parameter;
         public readonly ResolvedExpression Body;
 
-        internal LambdaExpression(VariableExpression parameter, ResolvedExpression body, Type type, TextRegion textRegion) : base(type, textRegion)
+        internal LambdaExpression(VariableExpression parameter, ResolvedExpression body, Type inferredType, TextRegion textRegion) :
+            base(inferredType, textRegion)
         {
             this.Parameter = parameter;
             this.Body = body;
@@ -19,11 +20,11 @@ namespace BasicSyntaxTree.Expressions
         {
             this.Body.Resolve(context);
             this.Parameter.Resolve(context);
-            this.Type = context.ResolveType(this.Type);
+            this.InferredType = context.ResolveType(this.InferredType);
         }
 
 
         public override string ToString() =>
-            $"fun {this.Parameter.SafePrintable}:{this.Type} -> {this.Body}";
+            $"fun {this.Parameter.SafePrintable}:{this.InferredType} -> {this.Body}";
     }
 }

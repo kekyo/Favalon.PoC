@@ -4,13 +4,13 @@ namespace BasicSyntaxTree.Expressions
 {
     public abstract class ResolvedExpression : Expression
     {
-        private protected ResolvedExpression(Type type, TextRegion textRegion) : base(textRegion) =>
-            this.Type = type;
+        private protected ResolvedExpression(Type inferredType, TextRegion textRegion) : base(textRegion) =>
+            this.InferredType = inferredType;
 
-        public Type Type { get; private protected set; }
+        public Type InferredType { get; private protected set; }
 
         public override bool IsResolved =>
-            this.Type.IsResolved;
+            this.InferredType.IsResolved;
 
         internal abstract void Resolve(InferContext context);
     }

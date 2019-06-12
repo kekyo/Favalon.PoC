@@ -1,4 +1,4 @@
-﻿using BasicSyntaxTree.Types.Unresolved;
+﻿using BasicSyntaxTree.Types;
 
 namespace BasicSyntaxTree.Expressions.Unresolved
 {
@@ -6,7 +6,8 @@ namespace BasicSyntaxTree.Expressions.Unresolved
     {
         public readonly object Value;
 
-        internal UnresolvedConstantExpression(object value, TextRegion textRegion) : base(new UnresolvedClrType(value.GetType()), textRegion) =>
+        internal UnresolvedConstantExpression(object value, TextRegion textRegion) :
+            base(Type.RuntimeType(value.GetType()), textRegion) =>
             this.Value = value;
 
         internal override bool IsSafePrintable => true;
@@ -15,6 +16,6 @@ namespace BasicSyntaxTree.Expressions.Unresolved
             new ConstantExpression(this.Value, this.AnnotetedType!, this.TextRegion);
 
         public override string ToString() =>
-            this.Value is string str ? $"\"{str}\"" : this.Value.ToString();
+            Utilities.PrettyPrint(this.Value);
     }
 }

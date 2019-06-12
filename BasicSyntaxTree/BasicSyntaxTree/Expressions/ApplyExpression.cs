@@ -7,7 +7,8 @@ namespace BasicSyntaxTree.Expressions
         public readonly ResolvedExpression Function;
         public readonly ResolvedExpression Argument;
 
-        internal ApplyExpression(ResolvedExpression function, ResolvedExpression argument, Type type, TextRegion textRegion) : base(type, textRegion)
+        internal ApplyExpression(ResolvedExpression function, ResolvedExpression argument, Type inferredType, TextRegion textRegion) :
+            base(inferredType, textRegion)
         {
             this.Function = function;
             this.Argument = argument;
@@ -19,10 +20,10 @@ namespace BasicSyntaxTree.Expressions
         {
             this.Function.Resolve(context);
             this.Argument.Resolve(context);
-            this.Type = context.ResolveType(this.Type);
+            this.InferredType = context.ResolveType(this.InferredType);
         }
 
         public override string ToString() =>
-            $"({this.Function} {this.Argument.SafePrintable}):{this.Type}";
+            $"({this.Function} {this.Argument.SafePrintable}):{this.InferredType}";
     }
 }

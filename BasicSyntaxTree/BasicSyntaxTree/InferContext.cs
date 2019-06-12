@@ -1,5 +1,4 @@
 ﻿using BasicSyntaxTree.Types;
-using BasicSyntaxTree.Types.Unresolved;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,9 +20,9 @@ namespace BasicSyntaxTree
         private void AddInferredType(UnspecifiedType unspecifiedType, Type type) =>
             this.types.Add(unspecifiedType.Index, type);
 
-        private bool Occur(UnresolvedType type, UnspecifiedType unspecifiedType)
+        private bool Occur(Type type, UnspecifiedType unspecifiedType)
         {
-            if (type is UnresolvedFunctionType ft)
+            if (type is FunctionType ft)
             {
                 return
                     Occur(ft.ParameterType, unspecifiedType) ||
@@ -37,7 +36,7 @@ namespace BasicSyntaxTree
                     return true;
                 }
 
-                if (this.GetInferredType(unspecifiedType2) is UnresolvedType it)
+                if (this.GetInferredType(unspecifiedType2) is Type it)
                 {
                     return Occur(it, unspecifiedType);
                 }
@@ -67,40 +66,12 @@ namespace BasicSyntaxTree
         public void Unify(Type type1, Type type2)
         {
             {
-                // unify(UntypedFunctionType, ...)
-                if (type1 is UnresolvedFunctionType ft11)
-                {
-                    if (type2 is UnresolvedFunctionType ft21)
-                    {
-                        Unify(ft11.ParameterType, ft21.ParameterType);
-                        Unify(ft11.ExpressionType, ft21.ExpressionType);
-                        return;
-                    }
-                    if (type2 is FunctionType ft22)
-                    {
-                        Unify(ft11.ParameterType, ft22.ParameterType);
-                        Unify(ft11.ExpressionType, ft22.ExpressionType);
-                        return;
-                    }
-                }
-            }
-
-            {
                 // unify(FunctionType, ...)
-                if (type1 is FunctionType ft11)
+                if ((type1 is FunctionType ft11) && (type2 is FunctionType ft22))
                 {
-                    if (type2 is UnresolvedFunctionType ft21)
-                    {
-                        Unify(ft11.ParameterType, ft21.ParameterType);
-                        Unify(ft11.ExpressionType, ft21.ExpressionType);
-                        return;
-                    }
-                    if (type2 is FunctionType ft22)
-                    {
-                        Unify(ft11.ParameterType, ft22.ParameterType);
-                        Unify(ft11.ExpressionType, ft22.ExpressionType);
-                        return;
-                    }
+                    Unify(ft11.ParameterType, ft22.ParameterType);
+                    Unify(ft11.ExpressionType, ft22.ExpressionType);
+                    return;
                 }
             }
 
@@ -136,21 +107,11 @@ namespace BasicSyntaxTree
 
         public Type ResolveType(Type type)
         {
-            if (type is UnresolvedFunctionType ft1)
+            if (type is FunctionType ft)
             {
                 return new FunctionType(
-                    this.ResolveType(ft1.ParameterType),
-                    this.ResolveType(ft1.ExpressionType));
-            }
-            if (type is FunctionType ft2)
-            {
-                return new FunctionType(
-                    this.ResolveType(ft2.ParameterType),
-                    this.ResolveType(ft2.ExpressionType));
-            }
-            if (type is UnresolvedClrType clrType)
-            {
-                return clrType.ToClrType();
+                    this.ResolveType(ft.ParameterType),
+                    this.ResolveType(ft.ExpressionType));
             }
             if (type is UnspecifiedType unspecifiedType)
             {

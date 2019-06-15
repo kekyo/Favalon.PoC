@@ -7,7 +7,7 @@ namespace BasicSyntaxTree.Expressions.Unresolved
         public readonly object Value;
 
         internal UnresolvedConstantExpression(object value, TextRegion textRegion) :
-            base(Type.RuntimeType(value.GetType()), textRegion) =>
+            base(Type.Runtime(value.GetType()), textRegion) =>
             this.Value = value;
 
         internal override bool IsSafePrintable => true;

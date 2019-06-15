@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\k\.nuget\packages\microsoft.net.test.sdk\16.1.1\build\netcoreapp1.0" t="Include">
+      <e p="Microsoft.NET.Test.Sdk.Program.cs" t="Include" />
+    </e>
+    <e p="C:\Users\k\.nuget\packages\nunit3testadapter\3.13.0\build\netcoreapp1.0\nunit.engine.netstandard.dll" t="Include" />
+    <e p="C:\Users\k\.nuget\packages\nunit3testadapter\3.13.0\build\netcoreapp1.0\NUnit3.TestAdapter.dll" t="Include" />
+    <e p="C:\Users\k\.nuget\packages\nunit3testadapter\3.13.0\build\netcoreapp1.0\NUnit3.TestAdapter.pdb" t="Include" />
+    <e p="C:\Users\k\.Rider2019.1\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\k\.Rider2019.1\system\resharper-host\local\Transient\ReSharperHost\v191\SolutionCaches\_BasicSyntaxTree.1950274040.00" t="ExcludeRecursive" />
+    <e p="D:\PROJECT\Avalon.PoC\BasicSyntaxTree" t="IncludeFlat">
+      <e p="BasicSyntaxTree" t="IncludeRecursive">
+        <e p="BasicSyntaxTree.csproj" t="IncludeRecursive" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Environment.cs" t="Include" />
+        <e p="Expressions" t="Include">
+          <e p="ApplyExpression.cs" t="Include" />
+          <e p="BindExpression.cs" t="Include" />
+          <e p="ConstantExpression.cs" t="Include" />
+          <e p="Expression.cs" t="Include" />
+          <e p="KindTypeExpression.cs" t="Include" />
+          <e p="LambdaExpression.cs" t="Include" />
+          <e p="ResolvedExpression.cs" t="Include" />
+          <e p="Unresolved" t="Include">
+            <e p="UnresolvedApplyExpression.cs" t="Include" />
+            <e p="UnresolvedBindExpression.cs" t="Include" />
+            <e p="UnresolvedConstantExpression.cs" t="Include" />
+            <e p="UnresolvedLambdaExpression.cs" t="Include" />
+            <e p="UnresolvedVariableExpression.cs" t="Include" />
+          </e>
+          <e p="UnresolvedExpression.cs" t="Include" />
+          <e p="VariableExpression.cs" t="Include" />
+        </e>
+        <e p="InferContext.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netstandard2.0" t="Include">
+              <e p="BasicSyntaxTree.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="TextRegion.cs" t="Include" />
+        <e p="Types" t="Include">
+          <e p="FunctionType.cs" t="Include" />
+          <e p="KindType.cs" t="Include" />
+          <e p="RuntimeKindType.cs" t="Include" />
+          <e p="RuntimeType.cs" t="Include" />
+          <e p="Type.cs" t="Include" />
+          <e p="TypeConstructorType.cs" t="Include" />
+          <e p="UnspecifiedType.cs" t="Include" />
+        </e>
+        <e p="Unit.cs" t="Include" />
+        <e p="Utilities.cs" t="Include" />
+      </e>
+      <e p="BasicSyntaxTree.sln" t="IncludeFlat" />
+      <e p="BasicSyntaxTree.Tests" t="IncludeRecursive">
+        <e p="BasicSyntaxTree.Tests.csproj" t="IncludeRecursive" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="InferenceTest.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.0" t="Include">
+              <e p="BasicSyntaxTree.Tests.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>

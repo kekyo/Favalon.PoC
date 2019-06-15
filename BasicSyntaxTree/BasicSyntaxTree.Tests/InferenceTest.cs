@@ -44,7 +44,7 @@ namespace BasicSyntaxTree
             var globalEnv = new Environment();
 
             // (+) : int -> (int -> int)
-            globalEnv.RegisterVariable("+", Function(RuntimeType<int>(), Function(RuntimeType<int>(), RuntimeType<int>())));
+            globalEnv.RegisterVariable("+", Function(Runtime<int>(), Function(Runtime<int>(), Runtime<int>())));
 
             // fun x -> (+) x 1
             // Lambda(x, Apply(Apply(+, x), 1))
@@ -114,7 +114,7 @@ namespace BasicSyntaxTree
 
             // fun a:int -> a
             // Lambda(a:int, a)
-            var fun = Lambda(Variable("a", RuntimeType<int>()), "a");
+            var fun = Lambda(Variable("a", Runtime<int>()), "a");
             var actual = fun.Infer(globalEnv);
 
             Assert.AreEqual("int -> int", actual.InferredType.ToString());
@@ -157,7 +157,7 @@ namespace BasicSyntaxTree
         {
             var globalEnv = new Environment();
 
-            globalEnv.RegisterVariable("Int32List", Function(RuntimeType<IEnumerable<int>>(), RuntimeType<List<int>>()));
+            globalEnv.RegisterVariable("Int32List", Function(Runtime<IEnumerable<int>>(), Runtime<List<int>>()));
 
             // fun xs -> Int32List xs
             // Lambda(xs, Apply(Int32List, xs))
@@ -175,11 +175,11 @@ namespace BasicSyntaxTree
         {
             var globalEnv = new Environment();
 
-            globalEnv.RegisterVariable("Int32List", Function(RuntimeType<IEnumerable<int>>(), RuntimeType<List<int>>()));
+            globalEnv.RegisterVariable("Int32List", Function(Runtime<IEnumerable<int>>(), Runtime<List<int>>()));
 
             // fun xs -> (Int32List xs):List<Int32>
             // Lambda(xs, Apply(Int32List, xs, List<Int32>))
-            var inner = Apply("Int32List", "xs", RuntimeType<List<int>>());
+            var inner = Apply("Int32List", "xs", Runtime<List<int>>());
             var fun = Lambda("xs", inner);
             var actual = fun.Infer(globalEnv);
 
@@ -194,10 +194,10 @@ namespace BasicSyntaxTree
             var globalEnv = new Environment();
 
             // NewList: kind<List>
-            globalEnv.RegisterVariable("List", KindType(typeof(List<>)));
+            globalEnv.RegisterVariable("List", Kind(typeof(List<>)));
 
             // Integer: kind<Integer>
-            globalEnv.RegisterVariable("Int", KindType<int>());
+            globalEnv.RegisterVariable("Int", Kind<int>());
 
             // fun xs -> List Int xs
             // Lambda(xs, Apply(Apply(NewList, int), xs))
@@ -218,8 +218,8 @@ namespace BasicSyntaxTree
 
             // List: tycon
             // List: ty -> ty
-            globalEnv.RegisterVariable("List", RuntimeType(typeof(List<>)));
-            globalEnv.RegisterVariable("int", RuntimeType<int>());
+            globalEnv.RegisterVariable("List", Runtime(typeof(List<>)));
+            globalEnv.RegisterVariable("int", Runtime<int>());
 
             // List int
             // Apply(List, int)
@@ -236,8 +236,8 @@ namespace BasicSyntaxTree
         {
             var globalEnv = new Environment();
 
-            globalEnv.RegisterVariable("List", RuntimeType(typeof(List<>)));
-            globalEnv.RegisterVariable("int", RuntimeType<int>());
+            globalEnv.RegisterVariable("List", Runtime(typeof(List<>)));
+            globalEnv.RegisterVariable("int", Runtime<int>());
 
             // fun xs -> List int xs
             // Lambda(xs, Apply(Apply(List, int), xs))

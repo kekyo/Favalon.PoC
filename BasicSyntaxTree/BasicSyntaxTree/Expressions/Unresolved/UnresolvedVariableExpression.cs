@@ -18,18 +18,34 @@ namespace BasicSyntaxTree.Expressions.Unresolved
             if (this.AnnotetedType is Type type)
             {
                 environment.RegisterVariable(this.Name, type);
+
+                if (type is KindType kindType)
+                {
+                    return new KindTypeExpression(kindType, this.TextRegion);
+                }
+                else
+                {
+                    return new VariableExpression(this.Name, type, this.TextRegion);
+                }
             }
-            else if (environment.GetType(this.Name) is Type it)
+            else if (environment.GetType(this.Name) is Type inferredType)
             {
-                type = it;
+                if (inferredType is KindType kindType)
+                {
+                    return new KindTypeExpression(kindType, this.TextRegion);
+                }
+                else
+                {
+                    return new VariableExpression(this.Name, inferredType, this.TextRegion);
+                }
             }
             else
             {
                 type = context.CreateUnspecifiedType();
                 environment.RegisterVariable(this.Name, type);
-            }
 
-            return new VariableExpression(this.Name, type, this.TextRegion);
+                return new VariableExpression(this.Name, type, this.TextRegion);
+            }
         }
 
         public override string ToString() =>

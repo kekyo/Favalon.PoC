@@ -23,7 +23,6 @@ namespace BasicSyntaxTree.Expressions
             this.InferredType = context.ResolveType(this.InferredType);
         }
 
-
         public override string ToString() =>
             $"fun {this.Parameter.SafePrintable}:{this.InferredType} -> {this.Body}";
     }

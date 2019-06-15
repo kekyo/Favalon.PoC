@@ -1,8 +1,10 @@
 ﻿using BasicSyntaxTree.Expressions.Unresolved;
 using BasicSyntaxTree.Types;
+using System.Diagnostics;
 
 namespace BasicSyntaxTree.Expressions
 {
+    [DebuggerDisplay("{DebuggerDisplay}")]
     public abstract class Expression
     {
         public readonly TextRegion TextRegion;
@@ -14,6 +16,8 @@ namespace BasicSyntaxTree.Expressions
 
         internal abstract bool IsSafePrintable { get; }
 
+        public string DebuggerDisplay =>
+            $"{this.GetType().Name}: {this.ToString()}";
         internal string SafePrintable =>
             this.IsSafePrintable ? this.ToString() : $"({this})";
 

@@ -1,11 +1,11 @@
 ﻿namespace BasicSyntaxTree.Types
 {
-    public sealed class FunctionType : Type, IRuntimeType
+    public sealed class KindFunctionType : KindType, IRuntimeType
     {
-        public readonly Type ParameterType;
-        public readonly Type ResultType;
+        public readonly KindType ParameterType;
+        public readonly KindType ResultType;
 
-        internal FunctionType(Type parameterType, Type resultType)
+        internal KindFunctionType(KindType parameterType, KindType resultType)
         {
             this.ParameterType = parameterType;
             this.ResultType = resultType;
@@ -26,7 +26,7 @@
 
         public override string ToString()
         {
-            if (this.ParameterType is FunctionType)
+            if (this.ParameterType is KindFunctionType)
             {
                 return $"({this.ParameterType}) -> {this.ResultType}";
             }

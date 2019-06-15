@@ -26,7 +26,7 @@ namespace BasicSyntaxTree
             {
                 return
                     Occur(ft.ParameterType, unspecifiedType) ||
-                    Occur(ft.ExpressionType, unspecifiedType);
+                    Occur(ft.ResultType, unspecifiedType);
             }
 
             if (type is UnspecifiedType unspecifiedType2)
@@ -65,13 +65,40 @@ namespace BasicSyntaxTree
 
         public void Unify(Type type1, Type type2)
         {
+            if (type1.Equals(type2))
+            {
+                return;
+            }
+
             {
                 // unify(FunctionType, ...)
-                if ((type1 is FunctionType ft11) && (type2 is FunctionType ft22))
+                if (type1 is FunctionType ft11)
                 {
-                    Unify(ft11.ParameterType, ft22.ParameterType);
-                    Unify(ft11.ExpressionType, ft22.ExpressionType);
-                    return;
+                    // unify(FunctionType, FunctionType)
+                    if (type2 is FunctionType ft)
+                    {
+                        Unify(ft11.ParameterType, ft.ParameterType);
+                        Unify(ft11.ResultType, ft.ResultType);
+                        return;
+                    }
+                    // unify(FunctionType, KindFunctionType)
+                    else if (type2 is KindFunctionType kft1)
+                    {
+                        Unify(ft11.ParameterType, kft1.ParameterType);
+                        Unify(ft11.ResultType, kft1.ResultType);
+                        return;
+                    }
+                }
+                // unify(KindFunctionType, ...)
+                else if (type1 is KindFunctionType kft2)
+                {
+                    // unify(KindFunctionType, FunctionType)
+                    if (type2 is FunctionType ft12)
+                    {
+                        Unify(kft2.ParameterType, ft12.ParameterType);
+                        Unify(kft2.ResultType, ft12.ResultType);
+                        return;
+                    }
                 }
             }
 
@@ -97,11 +124,6 @@ namespace BasicSyntaxTree
                 }
             }
 
-            if (type1.Equals(type2))
-            {
-                return;
-            }
-
 //            throw new System.Exception();
         }
 
@@ -111,7 +133,7 @@ namespace BasicSyntaxTree
             {
                 return new FunctionType(
                     this.ResolveType(ft.ParameterType),
-                    this.ResolveType(ft.ExpressionType));
+                    this.ResolveType(ft.ResultType));
             }
             if (type is UnspecifiedType unspecifiedType)
             {

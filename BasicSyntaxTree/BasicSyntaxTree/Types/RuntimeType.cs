@@ -1,6 +1,6 @@
 ﻿namespace BasicSyntaxTree.Types
 {
-    public sealed class RuntimeType : Type
+    public sealed class RuntimeType : Type, IRuntimeType
     {
         internal RuntimeType(System.Type type) =>
             this.Type = type;

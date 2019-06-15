@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="41dd7fe4-dd4d-4349-9f95-2d290f012279" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/BasicSyntaxTree/Expressions/Unresolved/UnresolvedApplyExpression.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BasicSyntaxTree/Expressions/Unresolved/UnresolvedApplyExpression.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BasicSyntaxTree/Expressions/Unresolved/UnresolvedVariableExpression.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BasicSyntaxTree/Expressions/Unresolved/UnresolvedVariableExpression.cs" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/BasicSyntaxTree.Tests/InferenceTest.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="200">
+              <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
+              <folding>
+                <marker date="1560519271994" expanded="true" signature="6:85" ph="..." />
+                <marker date="1560519271994" expanded="true" signature="112:8452" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="125:226" ph="..." />
+                <marker date="1560519271994" expanded="true" signature="283:8450" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="344:679" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="734:1075" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="1150:1794" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="1388:1455" ph="/* fun x -&gt; (+) x 1 ... */" />
+                <marker date="1560519271994" expanded="true" signature="1851:2251" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="1922:1975" ph="/* fun f -&gt; f 1 ... */" />
+                <marker date="1560519271994" expanded="true" signature="2316:2779" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="2387:2460" ph="/* fun f -&gt; fun g -&gt; f g ... */" />
+                <marker date="1560519271994" expanded="true" signature="2845:3445" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="2916:3023" ph="/* fun f -&gt; fun g -&gt; fun x -&gt; f (g x) ... */" />
+                <marker date="1560519271994" expanded="true" signature="3511:3880" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="3582:3631" ph="/* fun a:int -&gt; a ... */" />
+                <marker date="1560519271994" expanded="true" signature="3938:4327" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="4009:4059" ph="/* let x = 123 in x ... */" />
+                <marker date="1560519271994" expanded="true" signature="4389:4836" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="4460:4552" ph="/* let x = 123 in ... */" />
+                <marker date="1560519271994" expanded="true" signature="4901:5515" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="5095:5168" ph="/* fun xs -&gt; Int32List xs ... */" />
+                <marker date="1560519271994" expanded="true" signature="5594:6261" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="5788:5888" ph="/* fun xs -&gt; (Int32List xs):List&lt;Int32&gt; ... */" />
+                <marker date="1560519271994" expanded="true" signature="6330:7079" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="6614:6696" ph="/* fun xs -&gt; List Int xs ... */" />
+                <marker date="1560519271994" expanded="true" signature="7150:7742" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="7221:7265" ph="/* List: tycon ... */" />
+                <marker date="1560519271994" expanded="true" signature="7423:7466" ph="/* List int ... */" />
+                <marker date="1560519271994" expanded="true" signature="7811:8444" ph="{...}" />
+                <marker date="1560519271994" expanded="true" signature="8027:8106" ph="/* fun xs -&gt; List int xs ... */" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/BasicSyntaxTree.Tests/InferenceTest.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="ProjectConfigurationFiles">
+    <option name="files">
+      <list>
+        <option value="$PROJECT_DIR$/.idea/.idea.BasicSyntaxTree/.idea/vcs.xml" />
+        <option value="$PROJECT_DIR$/.idea/.idea.BasicSyntaxTree/.idea/indexLayout.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="432" />
+    <option name="y" value="63" />
+    <option name="width" value="1652" />
+    <option name="height" value="965" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator currentView="SolutionExplorer" proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="FileSystemExplorer" />
+      <pane id="SolutionExplorer">
+        <subPane>
+          <expand>
+            <path>
+              <item name="" type="784c90a0:SolutionExplorerRootNode" />
+              <item name="BasicSyntaxTree" type="24d0babc:SolutionExplorerModelNode" />
+            </path>
+            <path>
+              <item name="" type="784c90a0:SolutionExplorerRootNode" />
+              <item name="BasicSyntaxTree" type="24d0babc:SolutionExplorerModelNode" />
+              <item name="BasicSyntaxTree" type="24d0babc:SolutionExplorerModelNode" />
+            </path>
+            <path>
+              <item name="" type="784c90a0:SolutionExplorerRootNode" />
+              <item name="BasicSyntaxTree" type="24d0babc:SolutionExplorerModelNode" />
+              <item name="BasicSyntaxTree.Tests" type="24d0babc:SolutionExplorerModelNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+        <option name="show-all-files" value="false" />
+      </pane>
+      <pane id="AssemblyExplorer" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="Rider.DefaultBreakpoints.AreToggled" value="true" />
+    <property name="Rider.ProjectViewActivator.IsNotFirstRun" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.C#" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="41dd7fe4-dd4d-4349-9f95-2d290f012279" name="Default Changelist" comment="" />
+      <created>1560585709875</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1560585709875</updated>
+      <workItem from="1560585713057" duration="1085000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="1085000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="3856" height="1576" extended-state="6" />
+    <layout>
+      <window_info id="Favorites" order="0" side_tool="true" />
+      <window_info id="Structure" order="1" sideWeight="0.5006676" side_tool="true" weight="0.1780586" />
+      <window_info id="Unit Tests Coverage" order="2" weight="0.13210799" />
+      <window_info id="Unit Tests" order="3" sideWeight="0.49933246" visible="true" weight="0.0816434" />
+      <window_info anchor="bottom" id="NuGet" order="0" sideWeight="0.4998683" visible="true" weight="0.14962251" />
+      <window_info anchor="bottom" id="Docker" order="1" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Database Changes" order="2" />
+      <window_info anchor="bottom" id="Event Log" order="3" side_tool="true" />
+      <window_info anchor="bottom" id="Performance Profiler" order="4" weight="0.32988626" />
+      <window_info anchor="bottom" id="Message" order="5" />
+      <window_info anchor="bottom" id="Find" order="6" />
+      <window_info anchor="bottom" id="Run" order="7" />
+      <window_info anchor="bottom" id="Debug" order="8" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="9" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="10" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="11" />
+      <window_info active="true" anchor="bottom" id="Build" order="12" sideWeight="0.50013167" side_tool="true" visible="true" weight="0.14962251" />
+      <window_info anchor="bottom" id="Terminal" order="13" sideWeight="0.5002872" side_tool="true" weight="0.21303" />
+      <window_info anchor="bottom" id="Errors In Solution" order="14" sideWeight="0.5002872" side_tool="true" weight="0.24301966" />
+      <window_info anchor="right" content_ui="combo" id="Project" order="0" sideWeight="0.49948293" visible="true" weight="0.062681064" />
+      <window_info anchor="right" id="Version Control" order="1" weight="0.32969558" />
+      <window_info anchor="right" id="Database" order="2" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="3" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="4" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="5" weight="0.25" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="null" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" suspend="NONE" type="DotNet Exception Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/BasicSyntaxTree.Tests/InferenceTest.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="200">
+          <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
+          <folding>
+            <marker date="1560519271994" expanded="true" signature="6:85" ph="..." />
+            <marker date="1560519271994" expanded="true" signature="112:8452" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="125:226" ph="..." />
+            <marker date="1560519271994" expanded="true" signature="283:8450" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="344:679" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="734:1075" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="1150:1794" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="1388:1455" ph="/* fun x -&gt; (+) x 1 ... */" />
+            <marker date="1560519271994" expanded="true" signature="1851:2251" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="1922:1975" ph="/* fun f -&gt; f 1 ... */" />
+            <marker date="1560519271994" expanded="true" signature="2316:2779" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="2387:2460" ph="/* fun f -&gt; fun g -&gt; f g ... */" />
+            <marker date="1560519271994" expanded="true" signature="2845:3445" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="2916:3023" ph="/* fun f -&gt; fun g -&gt; fun x -&gt; f (g x) ... */" />
+            <marker date="1560519271994" expanded="true" signature="3511:3880" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="3582:3631" ph="/* fun a:int -&gt; a ... */" />
+            <marker date="1560519271994" expanded="true" signature="3938:4327" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="4009:4059" ph="/* let x = 123 in x ... */" />
+            <marker date="1560519271994" expanded="true" signature="4389:4836" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="4460:4552" ph="/* let x = 123 in ... */" />
+            <marker date="1560519271994" expanded="true" signature="4901:5515" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="5095:5168" ph="/* fun xs -&gt; Int32List xs ... */" />
+            <marker date="1560519271994" expanded="true" signature="5594:6261" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="5788:5888" ph="/* fun xs -&gt; (Int32List xs):List&lt;Int32&gt; ... */" />
+            <marker date="1560519271994" expanded="true" signature="6330:7079" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="6614:6696" ph="/* fun xs -&gt; List Int xs ... */" />
+            <marker date="1560519271994" expanded="true" signature="7150:7742" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="7221:7265" ph="/* List: tycon ... */" />
+            <marker date="1560519271994" expanded="true" signature="7423:7466" ph="/* List int ... */" />
+            <marker date="1560519271994" expanded="true" signature="7811:8444" ph="{...}" />
+            <marker date="1560519271994" expanded="true" signature="8027:8106" ph="/* fun xs -&gt; List int xs ... */" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

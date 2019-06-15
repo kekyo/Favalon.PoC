@@ -24,24 +24,24 @@ namespace BasicSyntaxTree.Expressions.Unresolved
             var thisExpressionType = this.AnnotetedType;
 
             // Apply type constructors
+            // Apply(tycon, kind) : kind
             if ((function.InferredType is TypeConstructorType tycon) &&
                 (argument.InferredType is KindType argumentType))
             {
                 thisExpressionType = thisExpressionType ?? tycon.Apply(argumentType);
-
-                return new ApplyExpression(
-                    function, argument, thisExpressionType, this.TextRegion);
             }
-
             // Apply constructor with instance
-            if ((function.InferredType is RuntimeKindType kindType) &&
+            // Apply(rkind, 'a) : rkind
+            else if ((function.InferredType is RuntimeKindType rkindType) &&
                 !(argument.InferredType is KindType))
             {
-                // TODO: How to apply constructor function (and what the signature like: kind<'a> -> 'b)
+                thisExpressionType = thisExpressionType ?? rkindType.ToRuntimeType();
             }
-
             // Likes applying function expression
-            thisExpressionType = thisExpressionType ?? context.CreateUnspecifiedType();
+            else
+            {
+                thisExpressionType = thisExpressionType ?? context.CreateUnspecifiedType();
+            }
 
             context.Unify(function.InferredType, new FunctionType(argument.InferredType, thisExpressionType));
 

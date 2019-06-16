@@ -28,10 +28,12 @@ namespace BasicSyntaxTree.Types
         public static KindType Kind(System.Type type) =>
             type.IsGenericTypeDefinition ? (KindType)new TypeConstructorType(type) : new RuntimeKindType(type);
 
-        public static FunctionType Function(Type parameterType, Type resultType) =>
-            new FunctionType(parameterType, resultType);
+        public static Type Function(Type parameterType, Type resultType) =>
+            ((parameterType is KindType pkt) && (resultType is KindType rkt)) ?
+                (Type)KindFunction(pkt, rkt) :
+                new FunctionType(parameterType, resultType);
 
-        public static KindFunctionType KindFunction(KindType parameterType, KindType resultType) =>
+        public static KindType KindFunction(KindType parameterType, KindType resultType) =>
             new KindFunctionType(parameterType, resultType);
     }
 }

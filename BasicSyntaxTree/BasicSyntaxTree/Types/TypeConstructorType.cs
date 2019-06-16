@@ -11,9 +11,12 @@
             other is TypeConstructorType rhs ? this.Type.Equals(rhs.Type) :
             false;
 
+        public override string ToString() =>
+            this.Type.PrettyPrint();
+
         internal Type Apply(KindType argumentType) =>
-            Kind((this.Type is IRuntimeType rt1) && (argumentType is IRuntimeType rt2) ?
-                rt1.Type.MakeGenericType(rt2.Type) :
+            Kind((argumentType is IRuntimeType art) ?
+                this.Type.MakeGenericType(art.Type) :
                 throw new System.InvalidOperationException());
     }
 }

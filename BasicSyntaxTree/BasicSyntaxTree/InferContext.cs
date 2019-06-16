@@ -103,7 +103,7 @@ namespace BasicSyntaxTree
             }
 
             {
-                // unify(UnspecifiedType)
+                // unify(UnspecifiedType, ...)
                 if (type1 is UnspecifiedType ut1)
                 {
                     if (type2 is UnspecifiedType ut21)
@@ -117,6 +117,7 @@ namespace BasicSyntaxTree
                     UnifyUnspecified(ut1, type2);
                     return;
                 }
+                // unify(..., UnspecifiedType)
                 if (type2 is UnspecifiedType ut22)
                 {
                     UnifyUnspecified(ut22, type1);

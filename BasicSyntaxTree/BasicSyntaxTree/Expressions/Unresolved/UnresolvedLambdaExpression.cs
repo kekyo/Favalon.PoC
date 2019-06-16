@@ -23,7 +23,7 @@ namespace BasicSyntaxTree.Expressions.Unresolved
 
             var parameter = (VariableExpression)this.Parameter.Visit(scopedEnvironment, context);
             var expression = this.Expression.Visit(scopedEnvironment, context);
-            var type = new FunctionType(parameter.InferredType, expression.InferredType);
+            var type = Type.Function(parameter.InferredType, expression.InferredType);
 
             return new LambdaExpression(parameter, expression, type, this.TextRegion);
         }

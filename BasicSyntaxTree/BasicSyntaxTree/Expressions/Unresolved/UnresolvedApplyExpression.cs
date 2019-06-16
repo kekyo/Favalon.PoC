@@ -43,7 +43,7 @@ namespace BasicSyntaxTree.Expressions.Unresolved
                 thisExpressionType = thisExpressionType ?? context.CreateUnspecifiedType();
             }
 
-            context.Unify(function.InferredType, new FunctionType(argument.InferredType, thisExpressionType));
+            context.Unify(function.InferredType, Type.Function(argument.InferredType, thisExpressionType));
 
             return new ApplyExpression(
                 function, argument, thisExpressionType, this.TextRegion);

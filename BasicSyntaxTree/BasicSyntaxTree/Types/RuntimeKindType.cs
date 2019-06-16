@@ -11,6 +11,9 @@
             other is RuntimeKindType rhs ? this.Type.Equals(rhs.Type) :
             false;
 
+        public override string ToString() =>
+            this.Type.PrettyPrint();
+
         internal Type ToRuntimeType() =>
             Runtime(this.Type);
     }

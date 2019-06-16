@@ -189,37 +189,12 @@ namespace BasicSyntaxTree
         }
 
         [Test]
-        public void ApplyTypeConstructorExpression()
-        {
-            var globalEnv = new Environment();
-
-            // NewList: kind<List>
-            globalEnv.RegisterVariable("List", Kind(typeof(List<>)));
-
-            // Integer: kind<Integer>
-            globalEnv.RegisterVariable("Int", Kind<int>());
-
-            // fun xs -> List Int xs
-            // Lambda(xs, Apply(Apply(NewList, int), xs))
-            var inner = Apply("List", "Int");
-            var outer = Apply(inner, "xs");
-            var fun = Lambda("xs", outer);
-            var actual = fun.Infer(globalEnv);
-
-            // seq<'a> -> List<'a>
-            Assert.AreEqual("seq<'a> -> System.Collections.Generic.List<'a>", actual.InferredType.ToString());
-            Assert.IsTrue(actual.IsResolved);
-        }
-
-        [Test]
         public void AppliedTypeConstructorExpression()
         {
             var globalEnv = new Environment();
 
-            // List: tycon
-            // List: ty -> ty
-            globalEnv.RegisterVariable("List", Runtime(typeof(List<>)));
-            globalEnv.RegisterVariable("int", Runtime<int>());
+            globalEnv.RegisterVariable("List", Kind(typeof(List<>)));
+            globalEnv.RegisterVariable("int", Kind<int>());
 
             // List int
             // Apply(List, int)
@@ -229,6 +204,29 @@ namespace BasicSyntaxTree
             // List<int>
             Assert.AreEqual("System.Collections.Generic.List<int>", actual.InferredType.ToString());
             Assert.IsTrue(actual.IsResolved);
+        }
+
+        [Test]
+        public void ApplyTypeConstructorExpression()
+        {
+            var globalEnv = new Environment();
+
+            // List: kind<List>
+            globalEnv.RegisterVariable("List", Kind(typeof(List<>)));
+
+            // Int: kind<Int>
+            globalEnv.RegisterVariable("Int", Kind<int>());
+
+            // fun xs -> List Int xs
+            // Lambda(xs, Apply(Apply(NewList, int), xs))
+            var inner = Apply("List", "Int");
+            var outer = Apply(inner, "xs");
+            var fun = Lambda("xs", outer);
+            var actual = fun.Infer(globalEnv);
+
+            // 'a -> List<int>
+            Assert.AreEqual("'a -> System.Collections.Generic.List<int>", actual.InferredType.ToString());
+            Assert.IsFalse(actual.IsResolved);
         }
 
         [Test]

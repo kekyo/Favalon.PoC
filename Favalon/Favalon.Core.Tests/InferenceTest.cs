@@ -4,7 +4,7 @@ using Favalon.Expressions;
 
 namespace Favalon
 {
-    using static Expression;
+    using static Factory;
 
     [TestFixture]
     public sealed class InferenceTest
@@ -19,9 +19,7 @@ namespace Favalon
             var actual = expression.Infer(environment);
 
             Assert.AreEqual("123", actual.ReadableString);
-
-            var resolved = actual as IResolvedExpression;
-            Assert.AreEqual("System.Int32", resolved?.HigherOrderExpression.ReadableString);
+            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -34,9 +32,7 @@ namespace Favalon
             var actual = expression.Infer(environment);
 
             Assert.AreEqual("x", actual.ReadableString);
-
-            var resolved = actual as IResolvedExpression;
-            Assert.IsNull(resolved);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -44,14 +40,13 @@ namespace Favalon
         {
             var environment = new ExpressionEnvironment();
 
-            var expression = Apply(Variable("x"), Integer(123));
+            // x 123
+            var expression = Apply("x", Integer(123));
 
             var actual = expression.Infer(environment);
 
             Assert.AreEqual("x 123", actual.ReadableString);
-
-            var resolved = actual as IResolvedExpression;
-            Assert.AreEqual("'a -> System.Int32", resolved?.HigherOrderExpression.ReadableString);
+            Assert.AreEqual("'b", actual.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -59,14 +54,12 @@ namespace Favalon
         {
             var environment = new ExpressionEnvironment();
 
-            var expression = Bind(Variable("x"), Integer(123), Variable("x"));
+            var expression = Bind("x", Integer(123), "x");
 
             var actual = expression.Infer(environment);
 
             Assert.AreEqual("x = 123 in x", actual.ReadableString);
-
-            var resolved = actual as IResolvedExpression;
-            Assert.AreEqual("System.Int32", resolved?.HigherOrderExpression.ReadableString);
+            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
         }
     }
 }

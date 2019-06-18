@@ -1,36 +1,35 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+
+[assembly:InternalsVisibleTo("Favalon.Core.Tests")]
 
 namespace Favalon.Expressions
 {
     public abstract class Expression
     {
-        private protected Expression() { }
+        private protected Expression(Expression higherOrder) =>
+            this.HigherOrder = higherOrder;
 
         public abstract string ReadableString { get; }
 
-        public abstract Expression Infer(ExpressionEnvironment environment);
+        public Expression HigherOrder { get; internal set; }
+
+        internal abstract Expression Visit(ExpressionEnvironment environment);
+        internal abstract void Resolve(ExpressionEnvironment environment);
+
+        public Expression Infer(ExpressionEnvironment environment)
+        {
+            var expression = this.Visit(environment);
+            expression.Resolve(environment);
+            return expression;
+        }
 
         public override string ToString() =>
             $"{this.GetType().Name.Replace("Expression", string.Empty)}: {this.ReadableString}";
 
-        ///////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////
 
-        public static IntegerExpression Integer(int value) =>
-            new IntegerExpression(value);
- 
-        public static UnresolvedVariableExpression Variable(string name) =>
-            new UnresolvedVariableExpression(name);
-
-        public static ApplyExpression Apply(Expression function, Expression argument) =>
-            new ApplyExpression(function, argument);
-
-        public static BindExpression Bind(VariableExpression parameter, Expression expression, Expression body) =>
-            new BindExpression(parameter, expression, body);
-
-        public static TypeExpression Type(string name) =>
-            new TypeExpression(name);
-
-        public static KindExpression Kind() =>
-            new KindExpression();
+        public static implicit operator Expression(string name) =>
+            new VariableExpression(name);
     }
 }

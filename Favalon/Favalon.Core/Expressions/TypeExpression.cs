@@ -2,20 +2,22 @@
 
 namespace Favalon.Expressions
 {
-    public sealed class TypeExpression : Expression, IResolvedExpression
+    public sealed class TypeExpression : Expression
     {
         public readonly string Name;
 
-        internal TypeExpression(string name) =>
+        internal TypeExpression(string name) :
+            base(KindExpression.Instance) =>
             this.Name = name;
 
         public override string ReadableString =>
             this.Name.ToString();
 
-        public Expression HigherOrderExpression =>
-            Kind();
-
-        public override Expression Infer(ExpressionEnvironment environment) =>
+        internal override Expression Visit(ExpressionEnvironment environment) =>
             this;
+
+        internal override void Resolve(ExpressionEnvironment environment)
+        {
+        }
     }
 }

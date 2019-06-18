@@ -4,29 +4,40 @@ namespace Favalon.Expressions
 {
     public sealed class BindExpression : Expression
     {
-        public readonly VariableExpression Parameter;
+        public readonly VariableExpression Variable;
         public readonly Expression Expression;
         public readonly Expression Body;
 
-        internal BindExpression(VariableExpression parameter, Expression expression, Expression body)
+        internal BindExpression(VariableExpression variable, Expression expression, Expression body) :
+            base(body.HigherOrder)
         {
-            this.Parameter = parameter;
+            this.Variable = variable;
             this.Expression = expression;
             this.Body = body;
         }
 
         public override string ReadableString =>
-            $"{this.Parameter.ReadableString} = {this.Expression.ReadableString} in {this.Body.ReadableString}";
+            $"{this.Variable.ReadableString} = {this.Expression.ReadableString} in {this.Body.ReadableString}";
 
-        public override Expression Infer(ExpressionEnvironment environment)
+        internal override Expression Visit(ExpressionEnvironment environment)
         {
             var scoped = environment.NewScope();
 
-            var parameter = this.Parameter.Infer(scoped);
+            var variable = (VariableExpression)this.Variable.Visit(scoped);
+            var expression = this.Expression.Visit(scoped);
 
+            scoped.AddVariable(variable.Name, expression);
 
+            var body = this.Body.Visit(scoped);
 
-            return this;
+            return new BindExpression(variable, expression, body);
+        }
+
+        internal override void Resolve(ExpressionEnvironment environment)
+        {
+            this.Variable.Resolve(environment);
+            this.Expression.Resolve(environment);
+            this.Body.Resolve(environment);
         }
     }
 }

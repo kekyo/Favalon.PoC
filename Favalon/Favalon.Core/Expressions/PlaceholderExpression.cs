@@ -1,8 +1,10 @@
 ﻿using System;
 
+using Favalon.Expressions.Internals;
+
 namespace Favalon.Expressions
 {
-    public sealed class PlaceholderExpression : Expression
+    public sealed class PlaceholderExpression : Expression, IEquatable<PlaceholderExpression>
     {
         public readonly int Index;
 
@@ -10,15 +12,12 @@ namespace Favalon.Expressions
             base(UndefinedExpression.Instance) =>
             this.Index = index;
 
-        public override string ReadableString
+        internal override string GetInternalReadableString(bool withAnnotation)
         {
-            get
-            {
-                var ch = (char)('a' + (this.Index % ('z' - 'a' + 1)));
-                var suffixIndex = this.Index / ('z' - 'a' + 1);
-                var suffix = (suffixIndex >= 1) ? suffixIndex.ToString() : string.Empty;
-                return $"'{ch}{suffix}";
-            }
+            var ch = (char)('a' + (this.Index % ('z' - 'a' + 1)));
+            var suffixIndex = this.Index / ('z' - 'a' + 1);
+            var suffix = (suffixIndex >= 1) ? suffixIndex.ToString() : string.Empty;
+            return $"'{ch}{suffix}";
         }
 
         internal override Expression Visit(ExpressionEnvironment environment) =>
@@ -27,5 +26,8 @@ namespace Favalon.Expressions
         internal override void Resolve(ExpressionEnvironment environment)
         {
         }
+
+        public bool Equals(PlaceholderExpression other) =>
+            this.Index == other.Index;
     }
 }

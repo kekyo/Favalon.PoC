@@ -15,8 +15,8 @@ namespace Favalon.Expressions
             this.Expression = expression;
         }
 
-        public override string ReadableString =>
-            $"{this.Parameter.ReadableString} -> {this.Expression.ReadableString}";
+        internal override string GetInternalReadableString(bool withAnnotation) =>
+            $"{this.Parameter.GetReadableString(withAnnotation)} -> {this.Expression.GetReadableString(withAnnotation)}";
 
         internal override Expression Visit(ExpressionEnvironment environment)
         {

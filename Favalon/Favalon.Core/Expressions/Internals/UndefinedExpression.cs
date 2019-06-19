@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Favalon.Expressions
+﻿namespace Favalon.Expressions.Internals
 {
     internal sealed class UndefinedExpression : Expression
     {
@@ -10,7 +8,7 @@ namespace Favalon.Expressions
             base(null!)
         { }
 
-        public override string ReadableString =>
+        internal override string GetInternalReadableString(bool withAnnotation) =>
             "(Undefined)";
 
         internal override Expression Visit(ExpressionEnvironment environment) =>

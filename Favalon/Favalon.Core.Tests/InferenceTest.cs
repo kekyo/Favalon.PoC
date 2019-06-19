@@ -61,5 +61,57 @@ namespace Favalon
             Assert.AreEqual("x = 123 in x", actual.ReadableString);
             Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
         }
+
+        [Test]
+        public void BindPlaceholder()
+        {
+            var environment = new ExpressionEnvironment();
+
+            var expression = Bind("x", Integer(123), "y");
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("x = 123 in y", actual.ReadableString);
+            Assert.AreEqual("'b", actual.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void BindFunction()
+        {
+            var environment = new ExpressionEnvironment();
+
+            var expression = Bind("x", Apply("y", Integer(123)), "y");
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("x = y 123 in y", actual.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'c", actual.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void BindFunction2()
+        {
+            var environment = new ExpressionEnvironment();
+
+            var expression = Bind("x", Apply(Apply("y", Integer(123)), Integer(456)), "y");
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("x = y 123 456 in y", actual.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'c", actual.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void BindFunction3()
+        {
+            var environment = new ExpressionEnvironment();
+
+            var expression = Bind("x", Apply("y", Apply("z", Integer(456))), "y");
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("x = y (z 456) in y", actual.ReadableString);
+            Assert.AreEqual("'b -> System.Int32 -> 'c", actual.HigherOrder.ReadableString);
+        }
     }
 }

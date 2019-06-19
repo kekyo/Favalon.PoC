@@ -10,7 +10,7 @@ namespace Favalon.Expressions
             base(KindExpression.Instance) =>
             this.Name = name;
 
-        public override string ReadableString =>
+        internal override string GetInternalReadableString(bool withAnnotation) =>
             this.Name.ToString();
 
         internal override Expression Visit(ExpressionEnvironment environment) =>

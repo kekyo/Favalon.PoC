@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Favalon.Expressions.Internals;
 
 namespace Favalon.Expressions
 {
@@ -8,7 +8,7 @@ namespace Favalon.Expressions
             base(UndefinedExpression.Instance)
         { }
 
-        public override string ReadableString =>
+        internal override string GetInternalReadableString(bool withAnnotation) =>
             "(Kind)";
 
         internal override Expression Visit(ExpressionEnvironment environment) =>

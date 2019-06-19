@@ -1,40 +1,41 @@
 ﻿using System.Collections.Generic;
 
+using Favalon.Expressions.Internals;
+
 namespace Favalon.Expressions
 {
     public sealed class ExpressionEnvironment
     {
-        private sealed class IndexHolder
-        {
-            private int index;
-            public int Next() =>
-                index++;
-        }
-
+        private readonly PlaceholderEnvironment placeholderEnvironment;
         private readonly ExpressionEnvironment? parent;
-        private Dictionary<string, Expression>? bindExpressions;
-        private IndexHolder indexHolder;
+        private Dictionary<string, Expression>? higherOrders;
 
         private ExpressionEnvironment(ExpressionEnvironment parent)
         {
             this.parent = parent;
-            this.indexHolder = parent.indexHolder;
+            this.placeholderEnvironment = parent.placeholderEnvironment;
         }
 
         public ExpressionEnvironment() =>
-            this.indexHolder = new IndexHolder();
+            this.placeholderEnvironment = new PlaceholderEnvironment();
+
+        public void Reset()
+        {
+            placeholderEnvironment.Reset();
+            higherOrders = null;
+        }
 
         internal ExpressionEnvironment NewScope() =>
             new ExpressionEnvironment(this);
 
-        public bool TryGetVariable(string name, out Expression expression)
+        internal bool TryGetHigherOrder(string name, out Expression higherOrder)
         {
-            var current = (ExpressionEnvironment?)this;
+            ExpressionEnvironment? current = this;
             do
             {
-                if (current.bindExpressions != null)
+                if (current.higherOrders != null)
                 {
-                    if (current.bindExpressions.TryGetValue(name, out expression))
+                    if (current.higherOrders.TryGetValue(name, out higherOrder))
                     {
                         return true;
                     }
@@ -43,26 +44,66 @@ namespace Favalon.Expressions
             }
             while (current != null);
 
-            expression = default;
+            higherOrder = default!;
             return false;
         }
 
-        public void AddVariable(string name, Expression expression)
+        public void SetHigherOrder(string name, Expression higherOrder)
         {
-            if (this.bindExpressions == null)
+            if (higherOrders == null)
             {
-                this.bindExpressions = new Dictionary<string, Expression>();
+                higherOrders = new Dictionary<string, Expression>();
             }
 
-            this.bindExpressions[name] = expression;
+            higherOrders[name] = higherOrder;
         }
 
-        public PlaceholderExpression CreatePlaceholder() =>
-            new PlaceholderExpression(indexHolder.Next());
+        internal PlaceholderExpression CreatePlaceholder() =>
+            placeholderEnvironment.Create();
+
+        internal void UnifyExpression(Expression expression1, Expression expression2)
+        {
+            if (expression1 is PlaceholderExpression placeholder1)
+            {
+                if (expression2 is PlaceholderExpression placeholder2)
+                {
+                    if (!placeholder1.Equals(placeholder2))
+                    {
+                        placeholderEnvironment.SetExpression(placeholder1, expression2);
+                    }
+                    return;
+                }
+                else if (placeholderEnvironment.TryGetExpression(placeholder1, out var resolved))
+                {
+                    this.UnifyExpression(expression2, resolved);
+                }
+                else
+                {
+                    placeholderEnvironment.SetExpression(placeholder1, expression2);
+                }
+            }
+            else if (expression2 is PlaceholderExpression placeholder2)
+            {
+                if (placeholderEnvironment.TryGetExpression(placeholder2, out var resolved))
+                {
+                    this.UnifyExpression(expression1, resolved);
+                }
+                else
+                {
+                    placeholderEnvironment.SetExpression(placeholder2, expression1);
+                }
+            }
+        }
 
         internal Expression Resolve(Expression expression)
         {
-            // TODO:
+            if (expression is PlaceholderExpression placeholder)
+            {
+                if (placeholderEnvironment.TryGetExpression(placeholder, out var resolved))
+                {
+                    return resolved;
+                }
+            }
             return expression;
         }
     }

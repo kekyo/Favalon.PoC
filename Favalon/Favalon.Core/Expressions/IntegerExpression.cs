@@ -10,7 +10,7 @@ namespace Favalon.Expressions
             base(Int32Type) =>
             this.Value = value;
 
-        public override string ReadableString =>
+        internal override string GetInternalReadableString(bool withAnnotation) =>
             this.Value.ToString();
 
         internal override Expression Visit(ExpressionEnvironment environment) =>

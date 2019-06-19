@@ -1,5 +1,7 @@
-﻿using System;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
+
+using Favalon.Expressions.Internals;
 
 [assembly:InternalsVisibleTo("Favalon.Core.Tests")]
 
@@ -10,7 +12,15 @@ namespace Favalon.Expressions
         private protected Expression(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
-        public abstract string ReadableString { get; }
+        internal abstract string GetInternalReadableString(bool withAnnotation);
+
+        public string GetReadableString(bool withAnnotation) =>
+            (withAnnotation && !(this.HigherOrder is UndefinedExpression)) ?
+                $"{this.GetInternalReadableString(withAnnotation)}:{this.HigherOrder.GetInternalReadableString(false)}" :
+                this.GetInternalReadableString(withAnnotation);
+
+        public string ReadableString =>
+            this.GetReadableString(true);
 
         public Expression HigherOrder { get; internal set; }
 

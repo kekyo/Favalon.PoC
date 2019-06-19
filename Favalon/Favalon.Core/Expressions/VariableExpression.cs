@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Favalon.Expressions.Internals;
 
 namespace Favalon.Expressions
 {
@@ -14,18 +14,18 @@ namespace Favalon.Expressions
             base(higherOrder) =>
             this.Name = name;
 
-        public override string ReadableString =>
+        internal override string GetInternalReadableString(bool withAnnotation) =>
             this.Name.ToString();
 
         internal override Expression Visit(ExpressionEnvironment environment)
         {
-            if (environment.TryGetVariable(this.Name, out var expression))
+            if (environment.TryGetHigherOrder(this.Name, out var higherOrder))
             {
-                return new VariableExpression(this.Name, expression.HigherOrder);
+                return new VariableExpression(this.Name, higherOrder);
             }
 
             var placeholder = environment.CreatePlaceholder();
-            environment.AddVariable(this.Name, placeholder);
+            environment.SetHigherOrder(this.Name, placeholder);
             return new VariableExpression(this.Name, placeholder);
         }
 

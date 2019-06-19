@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Favalon.Expressions
+﻿namespace Favalon.Expressions
 {
     public sealed class BindExpression : Expression
     {
@@ -16,8 +14,8 @@ namespace Favalon.Expressions
             this.Body = body;
         }
 
-        public override string ReadableString =>
-            $"{this.Variable.ReadableString} = {this.Expression.ReadableString} in {this.Body.ReadableString}";
+        internal override string GetInternalReadableString(bool withAnnotation) =>
+            $"({this.Variable.GetReadableString(withAnnotation)} = {this.Expression.GetReadableString(withAnnotation)} in {this.Body.GetInternalReadableString(withAnnotation)})";
 
         internal override Expression Visit(ExpressionEnvironment environment)
         {
@@ -26,7 +24,7 @@ namespace Favalon.Expressions
             var variable = (VariableExpression)this.Variable.Visit(scoped);
             var expression = this.Expression.Visit(scoped);
 
-            scoped.AddVariable(variable.Name, expression);
+            scoped.SetHigherOrder(variable.Name, expression.HigherOrder);
 
             var body = this.Body.Visit(scoped);
 

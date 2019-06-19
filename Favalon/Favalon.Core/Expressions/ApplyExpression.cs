@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Favalon.Expressions
+﻿namespace Favalon.Expressions
 {
     public sealed class ApplyExpression : Expression
     {
@@ -22,10 +20,10 @@ namespace Favalon.Expressions
             this.Argument = argument;
         }
 
-        public override string ReadableString =>
+        internal override string GetInternalReadableString(bool withAnnotation) =>
             (this.Argument is ApplyExpression) ?
-            $"{this.Function.ReadableString} ({this.Argument.ReadableString})" :
-            $"{this.Function.ReadableString} {this.Argument.ReadableString}";
+                $"{this.Function.GetReadableString(withAnnotation)} ({this.Argument.GetReadableString(withAnnotation)})" :
+                $"{this.Function.GetReadableString(withAnnotation)} {this.Argument.GetReadableString(withAnnotation)}";
 
         internal override Expression Visit(ExpressionEnvironment environment)
         {
@@ -34,8 +32,16 @@ namespace Favalon.Expressions
 
             // f:'a x:int  (f = int -> 'b)
             var resultHigherOrder = environment.CreatePlaceholder();
-            var ft = new FunctionExpression(argument.HigherOrder, resultHigherOrder);
-            function.HigherOrder = ft;
+
+            var functionHigherOrder = new FunctionExpression(argument.HigherOrder, resultHigherOrder);
+            if (function is VariableExpression variable)
+            {
+                environment.SetHigherOrder(variable.Name, functionHigherOrder);
+            }
+
+            environment.UnifyExpression(function.HigherOrder, resultHigherOrder);
+
+            function.HigherOrder = functionHigherOrder;
 
             return new ApplyExpression(function, argument, resultHigherOrder);
         }

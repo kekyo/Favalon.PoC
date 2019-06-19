@@ -17,5 +17,8 @@ namespace Favalon.Expressions
 
         public static BindExpression Bind(VariableExpression variable, Expression expression, Expression body) =>
             new BindExpression(variable, expression, body);
+
+        public static LambdaExpression Lambda(VariableExpression parameter, Expression expression) =>
+            new LambdaExpression(parameter, expression);
     }
 }

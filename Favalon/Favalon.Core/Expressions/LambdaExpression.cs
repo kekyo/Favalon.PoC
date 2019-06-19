@@ -5,14 +5,19 @@ namespace Favalon.Expressions
     public sealed class LambdaExpression : Expression
     {
         // x -> expr
-        public readonly Expression Parameter;
+        public readonly VariableExpression Parameter;
         public readonly Expression Expression;
 
-        internal LambdaExpression(Expression parameter, Expression expression) :
-            base(expression.HigherOrder)
+        private LambdaExpression(VariableExpression parameter, Expression expression, Expression higherOrder) :
+            base(higherOrder)
         {
             this.Parameter = parameter;
             this.Expression = expression;
+        }
+
+        internal LambdaExpression(VariableExpression parameter, Expression expression) :
+            this(parameter, expression, new FunctionExpression(parameter.HigherOrder, expression.HigherOrder))
+        {
         }
 
         internal override bool CanProduceSafeReadableString =>
@@ -25,10 +30,11 @@ namespace Favalon.Expressions
         {
             var scoped = environment.NewScope();
 
-            var parameter = this.Parameter.Visit(scoped);
+            var parameter = (VariableExpression)this.Parameter.Visit(scoped);
             var expression = this.Expression.Visit(scoped);
+            var resultHigherOrder = new FunctionExpression(parameter.HigherOrder, expression.HigherOrder);
 
-            return new LambdaExpression(parameter, expression);
+            return new LambdaExpression(parameter, expression, resultHigherOrder);
         }
 
         internal override void Resolve(ExpressionEnvironment environment)

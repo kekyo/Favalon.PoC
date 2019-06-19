@@ -27,10 +27,8 @@
             var variable = (VariableExpression)this.Variable.Visit(scoped);
             var expression = this.Expression.Visit(scoped);
 
-            scoped.SetHigherOrder(variable.Name, expression.HigherOrder);
             scoped.UnifyExpression(variable.HigherOrder, expression.HigherOrder);
-
-            //variable.HigherOrder = expression.HigherOrder;
+            scoped.SetNamedExpression(variable.Name, expression);
 
             var body = this.Body.Visit(scoped);
 

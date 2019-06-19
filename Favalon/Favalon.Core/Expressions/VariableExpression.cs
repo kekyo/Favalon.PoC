@@ -22,14 +22,15 @@ namespace Favalon.Expressions
 
         internal override Expression Visit(ExpressionEnvironment environment)
         {
-            if (environment.TryGetHigherOrder(this.Name, out var higherOrder))
+            if (environment.TryGetNamedExpression(this.Name, out var resolved))
             {
-                return new VariableExpression(this.Name, higherOrder);
+                return new VariableExpression(this.Name, resolved.HigherOrder);
             }
 
             var placeholder = environment.CreatePlaceholder();
-            environment.SetHigherOrder(this.Name, placeholder);
-            return new VariableExpression(this.Name, placeholder);
+            var variable = new VariableExpression(this.Name, placeholder);
+            environment.SetNamedExpression(this.Name, variable);
+            return variable;
         }
 
         internal override void Resolve(ExpressionEnvironment environment) =>

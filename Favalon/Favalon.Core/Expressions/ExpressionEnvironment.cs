@@ -8,7 +8,7 @@ namespace Favalon.Expressions
     {
         private readonly PlaceholderEnvironment placeholderEnvironment;
         private readonly ExpressionEnvironment? parent;
-        private Dictionary<string, Expression>? higherOrders;
+        private Dictionary<string, Expression>? namedExpressions;
 
         private ExpressionEnvironment(ExpressionEnvironment parent)
         {
@@ -22,20 +22,20 @@ namespace Favalon.Expressions
         public void Reset()
         {
             placeholderEnvironment.Reset();
-            higherOrders = null;
+            namedExpressions = null;
         }
 
         internal ExpressionEnvironment NewScope() =>
             new ExpressionEnvironment(this);
 
-        internal bool TryGetHigherOrder(string name, out Expression higherOrder)
+        internal bool TryGetNamedExpression(string name, out Expression expression)
         {
             ExpressionEnvironment? current = this;
             do
             {
-                if (current.higherOrders != null)
+                if (current.namedExpressions != null)
                 {
-                    if (current.higherOrders.TryGetValue(name, out higherOrder))
+                    if (current.namedExpressions.TryGetValue(name, out expression))
                     {
                         return true;
                     }
@@ -44,18 +44,18 @@ namespace Favalon.Expressions
             }
             while (current != null);
 
-            higherOrder = default!;
+            expression = default!;
             return false;
         }
 
-        public void SetHigherOrder(string name, Expression higherOrder)
+        public void SetNamedExpression(string name, Expression expression)
         {
-            if (higherOrders == null)
+            if (namedExpressions == null)
             {
-                higherOrders = new Dictionary<string, Expression>();
+                namedExpressions = new Dictionary<string, Expression>();
             }
 
-            higherOrders[name] = higherOrder;
+            namedExpressions[name] = expression;
         }
 
         internal PlaceholderExpression CreatePlaceholder() =>

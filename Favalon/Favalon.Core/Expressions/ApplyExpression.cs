@@ -35,16 +35,15 @@
 
             // f:'a x:int  (f = int -> 'b)
             var resultHigherOrder = environment.CreatePlaceholder();
-
-            var functionHigherOrder = new FunctionExpression(argument.HigherOrder, resultHigherOrder);
-            if (function is VariableExpression variable)
-            {
-                environment.SetHigherOrder(variable.Name, functionHigherOrder);
-            }
-
             environment.UnifyExpression(function.HigherOrder, resultHigherOrder);
 
+            var functionHigherOrder = new FunctionExpression(argument.HigherOrder, resultHigherOrder);
             function.HigherOrder = functionHigherOrder;
+
+            if (function is VariableExpression variable)
+            {
+                environment.SetNamedExpression(variable.Name, variable);
+            }
 
             return new ApplyExpression(function, argument, resultHigherOrder);
         }

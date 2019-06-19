@@ -15,6 +15,9 @@ namespace Favalon.Expressions
             this.Expression = expression;
         }
 
+        internal override bool CanProduceSafeReadableString =>
+            false;
+
         internal override string GetInternalReadableString(bool withAnnotation) =>
             $"{this.Parameter.GetReadableString(withAnnotation)} -> {this.Expression.GetReadableString(withAnnotation)}";
 

@@ -20,8 +20,11 @@
             this.Argument = argument;
         }
 
+        internal override bool CanProduceSafeReadableString =>
+            false;
+
         internal override string GetInternalReadableString(bool withAnnotation) =>
-            (this.Argument is ApplyExpression) ?
+            (!this.Argument.CanProduceSafeReadableString && this.Argument is ApplyExpression) ?
                 $"{this.Function.GetReadableString(withAnnotation)} ({this.Argument.GetReadableString(withAnnotation)})" :
                 $"{this.Function.GetReadableString(withAnnotation)} {this.Argument.GetReadableString(withAnnotation)}";
 

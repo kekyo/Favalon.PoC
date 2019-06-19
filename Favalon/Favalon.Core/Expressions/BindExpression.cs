@@ -14,8 +14,11 @@
             this.Body = body;
         }
 
+        internal override bool CanProduceSafeReadableString =>
+            false;
+
         internal override string GetInternalReadableString(bool withAnnotation) =>
-            $"({this.Variable.GetReadableString(withAnnotation)} = {this.Expression.GetReadableString(withAnnotation)} in {this.Body.GetInternalReadableString(withAnnotation)})";
+            $"{this.Variable.GetReadableString(withAnnotation)} = {this.Expression.GetReadableString(withAnnotation)} in {this.Body.GetReadableString(withAnnotation)}";
 
         internal override Expression Visit(ExpressionEnvironment environment)
         {
@@ -25,6 +28,9 @@
             var expression = this.Expression.Visit(scoped);
 
             scoped.SetHigherOrder(variable.Name, expression.HigherOrder);
+            scoped.UnifyExpression(variable.HigherOrder, expression.HigherOrder);
+
+            //variable.HigherOrder = expression.HigherOrder;
 
             var body = this.Body.Visit(scoped);
 

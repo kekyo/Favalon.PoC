@@ -12,6 +12,9 @@ namespace Favalon.Expressions
             base(UndefinedExpression.Instance) =>
             this.Index = index;
 
+        internal override bool CanProduceSafeReadableString =>
+            true;
+
         internal override string GetInternalReadableString(bool withAnnotation)
         {
             var ch = (char)('a' + (this.Index % ('z' - 'a' + 1)));

@@ -14,6 +14,9 @@ namespace Favalon.Expressions
             base(higherOrder) =>
             this.Name = name;
 
+        internal override bool CanProduceSafeReadableString =>
+            true;
+
         internal override string GetInternalReadableString(bool withAnnotation) =>
             this.Name.ToString();
 

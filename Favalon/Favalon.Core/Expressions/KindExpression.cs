@@ -8,6 +8,13 @@ namespace Favalon.Expressions
             base(UndefinedExpression.Instance)
         { }
 
+        internal override bool CanProduceSafeReadableString =>
+            true;
+        internal override bool IsIgnoreAnnotationReadableString =>
+            true;
+        internal override bool IsIgnoreReadableString =>
+            true;
+
         internal override string GetInternalReadableString(bool withAnnotation) =>
             "(Kind)";
 

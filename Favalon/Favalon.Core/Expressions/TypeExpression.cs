@@ -10,6 +10,11 @@ namespace Favalon.Expressions
             base(KindExpression.Instance) =>
             this.Name = name;
 
+        internal override bool CanProduceSafeReadableString =>
+            true;
+        internal override bool IsIgnoreAnnotationReadableString =>
+            true;
+
         internal override string GetInternalReadableString(bool withAnnotation) =>
             this.Name.ToString();
 

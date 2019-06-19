@@ -12,12 +12,23 @@ namespace Favalon.Expressions
         private protected Expression(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
+        internal abstract bool CanProduceSafeReadableString { get; }
+        internal virtual bool IsIgnoreAnnotationReadableString =>
+            false;
+        internal virtual bool IsIgnoreReadableString =>
+            false;
+
         internal abstract string GetInternalReadableString(bool withAnnotation);
 
+        private static string GetSafeInternalReadableString(Expression expression, bool withAnnotation) =>
+            expression.CanProduceSafeReadableString ?
+                expression.GetInternalReadableString(withAnnotation) :
+                $"({expression.GetInternalReadableString(withAnnotation)})";
+
         public string GetReadableString(bool withAnnotation) =>
-            (withAnnotation && !(this.HigherOrder is UndefinedExpression)) ?
-                $"{this.GetInternalReadableString(withAnnotation)}:{this.HigherOrder.GetInternalReadableString(false)}" :
-                this.GetInternalReadableString(withAnnotation);
+            (withAnnotation && !this.IsIgnoreAnnotationReadableString && !this.HigherOrder.IsIgnoreReadableString) ?
+                $"{GetSafeInternalReadableString(this, withAnnotation)}:{GetSafeInternalReadableString(this.HigherOrder, false)}" :
+                GetSafeInternalReadableString(this, withAnnotation);
 
         public string ReadableString =>
             this.GetReadableString(true);

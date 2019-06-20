@@ -31,8 +31,10 @@ namespace Favalon.Expressions
 
         internal override Expression Visit(ExpressionEnvironment environment)
         {
-            var parameter = this.Parameter.Visit(environment);
-            var expression = this.Expression.Visit(environment);
+            var scoped = environment.NewScope();
+
+            var parameter = this.Parameter.Visit(scoped);
+            var expression = this.Expression.Visit(scoped);
 
             return new LambdaExpression(parameter, expression);
         }

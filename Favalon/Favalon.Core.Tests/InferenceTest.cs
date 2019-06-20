@@ -152,6 +152,20 @@ namespace Favalon
         {
             var environment = new ExpressionEnvironment();
 
+            // x -> x y
+            var expression = Lambda("x", Apply("x", "y"));
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("x -> x y", actual.ReadableString);
+            Assert.AreEqual("'a -> 'c", actual.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void LambdaFunction3()
+        {
+            var environment = new ExpressionEnvironment();
+
             // x -> y -> x y
             var expression = Lambda("x", Lambda("y", Apply("x", "y")));
 

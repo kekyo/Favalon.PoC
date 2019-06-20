@@ -23,12 +23,8 @@ namespace Favalon.Expressions
             return $"'{ch}{suffix}";
         }
 
-        internal override Expression Visit(ExpressionEnvironment environment) =>
+        internal override Expression Visit(ExpressionEnvironment environment, InferContext context) =>
             this;
-
-        internal override void Resolve(ExpressionEnvironment environment)
-        {
-        }
 
         public bool Equals(PlaceholderExpression other) =>
             this.Index == other.Index;

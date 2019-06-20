@@ -20,21 +20,21 @@ namespace Favalon.Expressions
         internal override string GetInternalReadableString(bool withAnnotation) =>
             this.Name.ToString();
 
-        internal override Expression Visit(ExpressionEnvironment environment)
+        internal override Expression Visit(ExpressionEnvironment environment, InferContext context)
         {
             if (environment.TryGetNamedExpression(this.Name, out var resolved))
             {
                 return new VariableExpression(this.Name, resolved.HigherOrder);
             }
 
-            var placeholder = environment.CreatePlaceholder();
+            var placeholder = context.CreatePlaceholder();
             var variable = new VariableExpression(this.Name, placeholder);
             environment.SetNamedExpression(this.Name, variable);
+
+            context.RegisterFixupHigherOrder(variable);
+
             return variable;
         }
-
-        internal override void Resolve(ExpressionEnvironment environment) =>
-            this.HigherOrder = environment.Resolve(this.HigherOrder);
 
         /////////////////////////////////////////////////////////////////////////
 

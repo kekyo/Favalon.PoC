@@ -1,4 +1,6 @@
-﻿namespace Favalon.Expressions
+﻿using Favalon.Expressions.Internals;
+
+namespace Favalon.Expressions
 {
     public sealed class BindExpression : Expression
     {
@@ -20,27 +22,22 @@
         internal override string GetInternalReadableString(bool withAnnotation) =>
             $"{this.Variable.GetReadableString(withAnnotation)} = {this.Expression.GetReadableString(withAnnotation)} in {this.Body.GetReadableString(withAnnotation)}";
 
-        internal override Expression Visit(ExpressionEnvironment environment)
+        internal override Expression Visit(ExpressionEnvironment environment, InferContext context)
         {
             var scoped = environment.NewScope();
 
-            var variable = (VariableExpression)this.Variable.Visit(scoped);
-            var expression = this.Expression.Visit(scoped);
+            var variable = (VariableExpression)this.Variable.Visit(scoped, context);
+            var expression = this.Expression.Visit(scoped, context);
 
-            scoped.UnifyExpression(variable.HigherOrder, expression.HigherOrder);
+            context.UnifyExpression(variable.HigherOrder, expression.HigherOrder);
             scoped.SetNamedExpression(variable.Name, expression);
 
-            var body = this.Body.Visit(scoped);
+            var body = this.Body.Visit(scoped, context);
 
-            return new BindExpression(variable, expression, body);
-        }
+            var bind = new BindExpression(variable, expression, body);
+            context.RegisterFixupHigherOrder(bind);
 
-        internal override void Resolve(ExpressionEnvironment environment)
-        {
-            this.Variable.Resolve(environment);
-            this.Expression.Resolve(environment);
-            this.Body.Resolve(environment);
-            this.HigherOrder = environment.Resolve(this.HigherOrder);
+            return bind;
         }
     }
 }

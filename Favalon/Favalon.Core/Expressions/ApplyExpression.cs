@@ -1,4 +1,6 @@
-﻿namespace Favalon.Expressions
+﻿using Favalon.Expressions.Internals;
+
+namespace Favalon.Expressions
 {
     public sealed class ApplyExpression : Expression
     {
@@ -28,31 +30,28 @@
                 $"{this.Function.GetReadableString(withAnnotation)} ({this.Argument.GetReadableString(withAnnotation)})" :
                 $"{this.Function.GetReadableString(withAnnotation)} {this.Argument.GetReadableString(withAnnotation)}";
 
-        internal override Expression Visit(ExpressionEnvironment environment)
+        internal override Expression Visit(ExpressionEnvironment environment, InferContext context)
         {
-            var function = this.Function.Visit(environment);
-            var argument = this.Argument.Visit(environment);
+            var function = this.Function.Visit(environment, context);
+            var argument = this.Argument.Visit(environment, context);
 
-            // f:'a x:int  (f = int -> 'b)
-            var resultHigherOrder = environment.CreatePlaceholder();
-            environment.UnifyExpression(function.HigherOrder, resultHigherOrder);
-
-            var functionHigherOrder = new LambdaExpression(argument.HigherOrder, resultHigherOrder);
-            function.HigherOrder = functionHigherOrder;
+            var resultHigherOrder = context.CreatePlaceholder();
 
             if (function is VariableExpression variable)
             {
+                var variableHigherOrder = new LambdaExpression(argument.HigherOrder, resultHigherOrder);
+                context.UnifyExpression(variable.HigherOrder, variableHigherOrder);
                 environment.SetNamedExpression(variable.Name, variable);
             }
+            else
+            {
+                context.UnifyExpression(function.HigherOrder, resultHigherOrder);
+            }
 
-            return new ApplyExpression(function, argument, resultHigherOrder);
-        }
+            var apply = new ApplyExpression(function, argument, resultHigherOrder);
+            context.RegisterFixupHigherOrder(apply);
 
-        internal override void Resolve(ExpressionEnvironment environment)
-        {
-            this.Function.Resolve(environment);
-            this.Argument.Resolve(environment);
-            this.HigherOrder = environment.Resolve(this.HigherOrder);
+            return apply;
         }
     }
 }

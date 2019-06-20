@@ -12,6 +12,10 @@ namespace Favalon.Expressions
         private protected Expression(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
+        public Expression HigherOrder { get; internal set; }
+
+        internal abstract Expression Visit(ExpressionEnvironment environment, InferContext context);
+
         internal abstract bool CanProduceSafeReadableString { get; }
         internal virtual bool IsIgnoreAnnotationReadableString =>
             false;
@@ -40,11 +44,6 @@ namespace Favalon.Expressions
         public string ReadableString =>
             this.GetInternalReadableString(false, GetInternalReadableString);
 
-        public Expression HigherOrder { get; internal set; }
-
-        internal abstract Expression Visit(ExpressionEnvironment environment);
-        internal abstract void Resolve(ExpressionEnvironment environment);
-
         public override string ToString() =>
             $"{this.GetType().Name.Replace("Expression", string.Empty)}: {this.GetInternalReadableString(true, GetInternalReadableString)}";
 
@@ -59,8 +58,9 @@ namespace Favalon.Expressions
         public static TExpression Infer<TExpression>(this TExpression expression, ExpressionEnvironment environment)
             where TExpression : Expression
         {
-            var visited = (TExpression)expression.Visit(environment);
-            visited.Resolve(environment);
+            var context = new InferContext();
+            var visited = (TExpression)expression.Visit(environment, context);
+            context.FixupHigherOrders();
             return visited;
         }
     }

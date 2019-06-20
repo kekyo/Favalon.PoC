@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions.Internals;
+using System;
 
 namespace Favalon.Expressions
 {
@@ -18,11 +19,7 @@ namespace Favalon.Expressions
         internal override string GetInternalReadableString(bool withAnnotation) =>
             this.Name.ToString();
 
-        internal override Expression Visit(ExpressionEnvironment environment) =>
+        internal override Expression Visit(ExpressionEnvironment environment, InferContext context) =>
             this;
-
-        internal override void Resolve(ExpressionEnvironment environment)
-        {
-        }
     }
 }

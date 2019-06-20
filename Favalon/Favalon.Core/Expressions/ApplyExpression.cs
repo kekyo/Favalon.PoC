@@ -21,7 +21,7 @@
         }
 
         internal override bool CanProduceSafeReadableString =>
-            true;
+            false;
 
         internal override string GetInternalReadableString(bool withAnnotation) =>
             (!this.Argument.CanProduceSafeReadableString || this.Argument is ApplyExpression) ?

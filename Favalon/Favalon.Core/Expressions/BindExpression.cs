@@ -15,7 +15,7 @@
         }
 
         internal override bool CanProduceSafeReadableString =>
-            true;
+            false;
 
         internal override string GetInternalReadableString(bool withAnnotation) =>
             $"{this.Variable.GetReadableString(withAnnotation)} = {this.Expression.GetReadableString(withAnnotation)} in {this.Body.GetReadableString(withAnnotation)}";

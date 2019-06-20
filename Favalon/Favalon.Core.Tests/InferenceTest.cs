@@ -143,7 +143,8 @@ namespace Favalon
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("(x:'a -> (y:(System.Int32 -> 'c) 123):'c):('a -> 'c)", actual.GetReadableString(true));
+            Assert.AreEqual("x -> y 123", actual.ReadableString);
+            Assert.AreEqual("'a -> 'c", actual.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -152,12 +153,12 @@ namespace Favalon
             var environment = new ExpressionEnvironment();
 
             // x -> y -> x y
-            // (x:('b -> 'c) -> (y:'b -> (x:('b -> 'c) y:'b):'c):('b -> 'c)):(('b -> 'c) -> 'b -> 'c)
             var expression = Lambda("x", Lambda("y", Apply("x", "y")));
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("(x:('b -> 'c) -> (y:'b -> (x:('b -> 'c) y:'b):'c):('b -> 'c)):(('b -> 'c) -> 'b -> 'c)", actual.ReadableString);
+            Assert.AreEqual("x -> y -> x y", actual.ReadableString);
+            Assert.AreEqual("'b -> 'c -> 'c", actual.HigherOrder.ReadableString);
         }
 
         [Test]

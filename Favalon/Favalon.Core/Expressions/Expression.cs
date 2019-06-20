@@ -30,7 +30,7 @@ namespace Favalon.Expressions
             expression.GetInternalReadableString(withAnnotation);
 
         private static string GetSafeInternalReadableString(Expression expression, bool withAnnotation) =>
-            expression.CanProduceSafeReadableString ?
+            (expression.CanProduceSafeReadableString || !withAnnotation) ?
                 expression.GetInternalReadableString(withAnnotation) :
                 $"({expression.GetInternalReadableString(withAnnotation)})";
 

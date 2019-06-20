@@ -4,43 +4,44 @@ namespace Favalon.Expressions
 {
     public sealed class LambdaExpression : Expression
     {
-        // x -> expr
-        public readonly VariableExpression Parameter;
+        // 'a -> 'b
+        public readonly Expression Parameter;
         public readonly Expression Expression;
 
-        private LambdaExpression(VariableExpression parameter, Expression expression, Expression higherOrder) :
+        private LambdaExpression(Expression parameter, Expression expression, Expression higherOrder) :
             base(higherOrder)
         {
             this.Parameter = parameter;
             this.Expression = expression;
         }
 
-        internal LambdaExpression(VariableExpression parameter, Expression expression) :
-            this(parameter, expression, new FunctionExpression(parameter.HigherOrder, expression.HigherOrder))
+        internal LambdaExpression(Expression parameter, Expression expression) :
+            this(parameter, expression,
+                new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, KindExpression.Instance))
         {
         }
 
         internal override bool CanProduceSafeReadableString =>
             false;
+        internal override bool IsIgnoreReadableString =>
+            this.Parameter.IsIgnoreReadableString || this.Expression.IsIgnoreReadableString;
 
         internal override string GetInternalReadableString(bool withAnnotation) =>
             $"{this.Parameter.GetReadableString(withAnnotation)} -> {this.Expression.GetReadableString(withAnnotation)}";
 
         internal override Expression Visit(ExpressionEnvironment environment)
         {
-            var scoped = environment.NewScope();
+            var parameter = this.Parameter.Visit(environment);
+            var expression = this.Expression.Visit(environment);
 
-            var parameter = (VariableExpression)this.Parameter.Visit(scoped);
-            var expression = this.Expression.Visit(scoped);
-            var resultHigherOrder = new FunctionExpression(parameter.HigherOrder, expression.HigherOrder);
-
-            return new LambdaExpression(parameter, expression, resultHigherOrder);
+            return new LambdaExpression(parameter, expression);
         }
 
         internal override void Resolve(ExpressionEnvironment environment)
         {
             this.Parameter.Resolve(environment);
             this.Expression.Resolve(environment);
+            this.HigherOrder = environment.Resolve(this.HigherOrder);
         }
     }
 }

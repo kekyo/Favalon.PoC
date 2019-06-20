@@ -15,7 +15,7 @@
         }
 
         internal override bool CanProduceSafeReadableString =>
-            false;
+            true;
 
         internal override string GetInternalReadableString(bool withAnnotation) =>
             $"{this.Variable.GetReadableString(withAnnotation)} = {this.Expression.GetReadableString(withAnnotation)} in {this.Body.GetReadableString(withAnnotation)}";
@@ -40,6 +40,7 @@
             this.Variable.Resolve(environment);
             this.Expression.Resolve(environment);
             this.Body.Resolve(environment);
+            this.HigherOrder = environment.Resolve(this.HigherOrder);
         }
     }
 }

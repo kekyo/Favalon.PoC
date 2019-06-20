@@ -20,37 +20,48 @@ namespace Favalon.Expressions
 
         internal abstract string GetInternalReadableString(bool withAnnotation);
 
+        private string GetInternalReadableString(
+            bool withAnnotation, System.Func<Expression, bool, string> getReadableString) =>
+            (withAnnotation && !this.IsIgnoreAnnotationReadableString && !this.HigherOrder.IsIgnoreReadableString) ?
+                $"{getReadableString(this, withAnnotation)}:{getReadableString(this.HigherOrder, false)}" :
+                getReadableString(this, withAnnotation);
+
+        private static string GetInternalReadableString(Expression expression, bool withAnnotation) =>
+            expression.GetInternalReadableString(withAnnotation);
+
         private static string GetSafeInternalReadableString(Expression expression, bool withAnnotation) =>
             expression.CanProduceSafeReadableString ?
                 expression.GetInternalReadableString(withAnnotation) :
                 $"({expression.GetInternalReadableString(withAnnotation)})";
 
         public string GetReadableString(bool withAnnotation) =>
-            (withAnnotation && !this.IsIgnoreAnnotationReadableString && !this.HigherOrder.IsIgnoreReadableString) ?
-                $"{GetSafeInternalReadableString(this, withAnnotation)}:{GetSafeInternalReadableString(this.HigherOrder, false)}" :
-                GetSafeInternalReadableString(this, withAnnotation);
+            GetInternalReadableString(withAnnotation, GetSafeInternalReadableString);
 
         public string ReadableString =>
-            this.GetReadableString(true);
+            this.GetInternalReadableString(false, GetInternalReadableString);
 
         public Expression HigherOrder { get; internal set; }
 
         internal abstract Expression Visit(ExpressionEnvironment environment);
         internal abstract void Resolve(ExpressionEnvironment environment);
 
-        public Expression Infer(ExpressionEnvironment environment)
-        {
-            var expression = this.Visit(environment);
-            expression.Resolve(environment);
-            return expression;
-        }
-
         public override string ToString() =>
-            $"{this.GetType().Name.Replace("Expression", string.Empty)}: {this.ReadableString}";
+            $"{this.GetType().Name.Replace("Expression", string.Empty)}: {this.GetInternalReadableString(true, GetInternalReadableString)}";
 
         /////////////////////////////////////////////////////////////////////////
 
         public static implicit operator Expression(string name) =>
             new VariableExpression(name);
+    }
+
+    public static class ExpressionExtensions
+    {
+        public static TExpression Infer<TExpression>(this TExpression expression, ExpressionEnvironment environment)
+            where TExpression : Expression
+        {
+            var visited = (TExpression)expression.Visit(environment);
+            visited.Resolve(environment);
+            return visited;
+        }
     }
 }

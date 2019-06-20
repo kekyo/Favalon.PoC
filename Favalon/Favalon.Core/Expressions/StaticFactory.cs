@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Favalon.Expressions
 {
-    public static class Factory
+    public static class StaticFactory
     {
         public static IntegerExpression Integer(int value) =>
             new IntegerExpression(value);

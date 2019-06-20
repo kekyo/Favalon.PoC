@@ -4,7 +4,7 @@ using Favalon.Expressions;
 
 namespace Favalon
 {
-    using static Factory;
+    using static StaticFactory;
 
     [TestFixture]
     public sealed class InferenceTest
@@ -33,7 +33,8 @@ namespace Favalon
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("x:'a", actual.ReadableString);
+            Assert.AreEqual("x", actual.ReadableString);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -46,7 +47,10 @@ namespace Favalon
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("(x:(System.Int32 -> 'b) 123):'b", actual.ReadableString);
+            Assert.AreEqual("x 123", actual.ReadableString);
+            Assert.AreEqual("'b", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("System.Int32 -> 'b", actual.Function.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -59,7 +63,10 @@ namespace Favalon
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("(x:System.Int32 = 123 in x:System.Int32):System.Int32", actual.ReadableString);
+            Assert.AreEqual("x = 123 in x", actual.ReadableString);
+            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -72,7 +79,10 @@ namespace Favalon
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("(x:System.Int32 = 123 in y:'b):'b", actual.ReadableString);
+            Assert.AreEqual("x = 123 in y", actual.ReadableString);
+            Assert.AreEqual("'b", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -85,7 +95,10 @@ namespace Favalon
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("(x:'c = (y:(System.Int32 -> 'c) 123):'c in y:(System.Int32 -> 'c)):(System.Int32 -> 'c)", actual.ReadableString);
+            Assert.AreEqual("x = y 123 in y", actual.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'c", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("'c", actual.Variable.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -98,7 +111,10 @@ namespace Favalon
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("(x:'d = ((y:(System.Int32 -> 'c) 123):(System.Int32 -> 'd) 456):'d in y:(System.Int32 -> 'c)):(System.Int32 -> 'c)", actual.ReadableString);
+            Assert.AreEqual("x = y 123 456 in y", actual.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'c", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("'d", actual.Variable.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -111,7 +127,10 @@ namespace Favalon
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("(x:'e = (y:('d -> 'e) ((z:(System.Int32 -> 'd) 123):'d)):'e in y:('d -> 'e)):('d -> 'e)", actual.ReadableString);
+            Assert.AreEqual("x = y (z 123) in y", actual.ReadableString);
+            Assert.AreEqual("'d -> 'e", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("'e", actual.Variable.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -124,7 +143,7 @@ namespace Favalon
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("(x:'a -> (y:(System.Int32 -> 'c) 123):'c):('a -> 'c)", actual.ReadableString);
+            Assert.AreEqual("(x:'a -> (y:(System.Int32 -> 'c) 123):'c):('a -> 'c)", actual.GetReadableString(true));
         }
 
         [Test]
@@ -152,7 +171,10 @@ namespace Favalon
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("(x:(System.Int32 -> 'b) v:System.Int32):'b", actual.ReadableString);
+            Assert.AreEqual("x v", actual.ReadableString);
+            Assert.AreEqual("'b", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("System.Int32 -> 'b", actual.Function.HigherOrder.ReadableString);
         }
     }
 }

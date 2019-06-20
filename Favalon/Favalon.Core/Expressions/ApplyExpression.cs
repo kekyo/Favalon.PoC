@@ -14,17 +14,17 @@
         }
 
         internal ApplyExpression(Expression function, Expression argument) :
-            base((function.HigherOrder as FunctionExpression)?.Result ?? function.HigherOrder)
+            base((function.HigherOrder as LambdaExpression)?.Expression ?? function.HigherOrder)
         {
             this.Function = function;
             this.Argument = argument;
         }
 
         internal override bool CanProduceSafeReadableString =>
-            false;
+            true;
 
         internal override string GetInternalReadableString(bool withAnnotation) =>
-            (!this.Argument.CanProduceSafeReadableString && this.Argument is ApplyExpression) ?
+            (!this.Argument.CanProduceSafeReadableString || this.Argument is ApplyExpression) ?
                 $"{this.Function.GetReadableString(withAnnotation)} ({this.Argument.GetReadableString(withAnnotation)})" :
                 $"{this.Function.GetReadableString(withAnnotation)} {this.Argument.GetReadableString(withAnnotation)}";
 
@@ -37,7 +37,7 @@
             var resultHigherOrder = environment.CreatePlaceholder();
             environment.UnifyExpression(function.HigherOrder, resultHigherOrder);
 
-            var functionHigherOrder = new FunctionExpression(argument.HigherOrder, resultHigherOrder);
+            var functionHigherOrder = new LambdaExpression(argument.HigherOrder, resultHigherOrder);
             function.HigherOrder = functionHigherOrder;
 
             if (function is VariableExpression variable)
@@ -52,6 +52,7 @@
         {
             this.Function.Resolve(environment);
             this.Argument.Resolve(environment);
+            this.HigherOrder = environment.Resolve(this.HigherOrder);
         }
     }
 }

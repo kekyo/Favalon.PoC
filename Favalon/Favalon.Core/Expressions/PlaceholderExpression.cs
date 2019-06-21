@@ -26,6 +26,12 @@ namespace Favalon.Expressions
         internal override Expression Visit(ExpressionEnvironment environment, InferContext context) =>
             this;
 
+        internal override Expression FixupChildren(InferContext context)
+        {
+            this.HigherOrder = context.Fixup(this.HigherOrder);
+            return this;
+        }
+
         public bool Equals(PlaceholderExpression other) =>
             this.Index == other.Index;
     }

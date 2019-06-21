@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
-using Favalon.Expressions.Internals;
+﻿using System.Runtime.CompilerServices;
 
 [assembly:InternalsVisibleTo("Favalon.Core.Tests")]
 
@@ -15,6 +12,8 @@ namespace Favalon.Expressions
         public Expression HigherOrder { get; internal set; }
 
         internal abstract Expression Visit(ExpressionEnvironment environment, InferContext context);
+
+        internal abstract Expression FixupChildren(InferContext context);
 
         internal abstract bool CanProduceSafeReadableString { get; }
         internal virtual bool IsIgnoreAnnotationReadableString =>
@@ -59,9 +58,9 @@ namespace Favalon.Expressions
             where TExpression : Expression
         {
             var context = new InferContext();
-            var visited = (TExpression)expression.Visit(environment, context);
-            context.FixupHigherOrders();
-            return visited;
+            var visited = expression.Visit(environment, context);
+            var fixup = context.Fixup(visited);
+            return (TExpression)fixup;
         }
     }
 }

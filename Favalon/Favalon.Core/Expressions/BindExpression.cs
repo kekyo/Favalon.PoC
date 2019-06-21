@@ -4,9 +4,9 @@ namespace Favalon.Expressions
 {
     public sealed class BindExpression : Expression
     {
-        public readonly VariableExpression Variable;
-        public readonly Expression Expression;
-        public readonly Expression Body;
+        public Expression Variable { get; private set; }
+        public Expression Expression { get; private set; }
+        public Expression Body { get; private set; }
 
         internal BindExpression(VariableExpression variable, Expression expression, Expression body) :
             base(body.HigherOrder)
@@ -34,10 +34,16 @@ namespace Favalon.Expressions
 
             var body = this.Body.Visit(scoped, context);
 
-            var bind = new BindExpression(variable, expression, body);
-            context.RegisterFixupHigherOrder(bind);
+            return new BindExpression(variable, expression, body);
+        }
 
-            return bind;
+        internal override Expression FixupChildren(InferContext context)
+        {
+            this.Variable = context.Fixup(this.Variable);
+            this.Expression = context.Fixup(this.Expression);
+            this.Body = context.Fixup(this.Body);
+            this.HigherOrder = context.Fixup(this.HigherOrder);
+            return this;
         }
     }
 }

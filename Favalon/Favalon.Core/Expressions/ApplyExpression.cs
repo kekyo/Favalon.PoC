@@ -5,8 +5,8 @@ namespace Favalon.Expressions
     public sealed class ApplyExpression : Expression
     {
         // f x
-        public readonly Expression Function;
-        public readonly Expression Argument;
+        public Expression Function { get; private set; }
+        public Expression Argument { get; private set; }
 
         private ApplyExpression(Expression function, Expression argument, Expression higherOrder) :
             base(higherOrder)
@@ -48,10 +48,15 @@ namespace Favalon.Expressions
                 context.UnifyExpression(function.HigherOrder, resultHigherOrder);
             }
 
-            var apply = new ApplyExpression(function, argument, resultHigherOrder);
-            context.RegisterFixupHigherOrder(apply);
+            return new ApplyExpression(function, argument, resultHigherOrder);
+        }
 
-            return apply;
+        internal override Expression FixupChildren(InferContext context)
+        {
+            this.Function = context.Fixup(this.Function);
+            this.Argument = context.Fixup(this.Argument);
+            this.HigherOrder = context.Fixup(this.HigherOrder);
+            return this;
         }
     }
 }

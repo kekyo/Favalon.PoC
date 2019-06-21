@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Favalon.Expressions
 {
@@ -7,8 +6,6 @@ namespace Favalon.Expressions
     {
         private readonly Dictionary<PlaceholderExpression, Expression> placeholders =
             new Dictionary<PlaceholderExpression, Expression>();
-        private readonly Queue<Expression> resolvers =
-            new Queue<Expression>();
         private int index;
 
         internal InferContext() { }
@@ -50,20 +47,17 @@ namespace Favalon.Expressions
             }
         }
 
-        public void RegisterFixupHigherOrder(Expression expression) =>
-            resolvers.Enqueue(expression);
-
-        internal void FixupHigherOrders()
+        public Expression Fixup(Expression expression)
         {
-            while (resolvers.Count >= 1)
+            if (expression is PlaceholderExpression placeholder)
             {
-                var expression = resolvers.Dequeue();
-                if ((expression.HigherOrder is PlaceholderExpression placeholder) &&
-                    placeholders.TryGetValue(placeholder, out var resolved))
+                if (placeholders.TryGetValue(placeholder, out var resolved))
                 {
-                    expression.HigherOrder = resolved;
+                    return resolved;
                 }
             }
+
+            return expression.FixupChildren(this);
         }
     }
 }

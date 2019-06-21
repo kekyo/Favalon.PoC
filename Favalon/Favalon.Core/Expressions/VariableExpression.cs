@@ -31,9 +31,13 @@ namespace Favalon.Expressions
             var variable = new VariableExpression(this.Name, placeholder);
             environment.SetNamedExpression(this.Name, variable);
 
-            context.RegisterFixupHigherOrder(variable);
-
             return variable;
+        }
+
+        internal override Expression FixupChildren(InferContext context)
+        {
+            this.HigherOrder = context.Fixup(this.HigherOrder);
+            return this;
         }
 
         /////////////////////////////////////////////////////////////////////////

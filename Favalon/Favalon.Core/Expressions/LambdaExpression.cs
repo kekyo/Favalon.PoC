@@ -3,8 +3,8 @@
     public sealed class LambdaExpression : Expression
     {
         // 'a -> 'b
-        public readonly Expression Parameter;
-        public readonly Expression Expression;
+        public Expression Parameter { get; private set; }
+        public Expression Expression { get; private set; }
 
         private LambdaExpression(Expression parameter, Expression expression, Expression higherOrder) :
             base(higherOrder)
@@ -34,10 +34,15 @@
             var parameter = this.Parameter.Visit(scoped, context);
             var expression = this.Expression.Visit(scoped, context);
 
-            var lambda = new LambdaExpression(parameter, expression);
-            context.RegisterFixupHigherOrder(lambda);
+            return new LambdaExpression(parameter, expression);
+        }
 
-            return lambda;
+        internal override Expression FixupChildren(InferContext context)
+        {
+            this.Parameter = context.Fixup(this.Parameter);
+            this.Expression = context.Fixup(this.Expression);
+            this.HigherOrder = context.Fixup(this.HigherOrder);
+            return this;
         }
     }
 }

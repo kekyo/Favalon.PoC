@@ -158,7 +158,7 @@ namespace Favalon
             var actual = expression.Infer(environment);
 
             Assert.AreEqual("x -> x y", actual.ReadableString);
-            Assert.AreEqual("'a -> 'c", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'b -> 'c -> 'c", actual.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -172,7 +172,7 @@ namespace Favalon
             var actual = expression.Infer(environment);
 
             Assert.AreEqual("x -> y -> x y", actual.ReadableString);
-            Assert.AreEqual("'b -> 'c -> 'c", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'b -> 'c -> 'b -> 'c", actual.HigherOrder.ReadableString);
         }
 
         [Test]

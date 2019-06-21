@@ -19,12 +19,6 @@ namespace Favalon.Expressions
         internal override string GetInternalReadableString(bool withAnnotation) =>
             this.Value.ToString();
 
-        internal override Expression Visit(ExpressionEnvironment environment, InferContext context) =>
-            this;
-
-        internal override Expression FixupChildren(InferContext context) =>
-            this;
-
         private static readonly TypeExpression Int32Type = new TypeExpression("System.Int32");
     }
 }

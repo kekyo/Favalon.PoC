@@ -2,27 +2,27 @@
 
 namespace Favalon.Expressions
 {
-    public sealed class ExpressionEnvironment
+    public sealed class Environment
     {
-        private readonly ExpressionEnvironment? parent;
+        private readonly Environment? parent;
         private Dictionary<string, Expression>? namedExpressions;
 
-        private ExpressionEnvironment(ExpressionEnvironment parent)
+        private Environment(Environment parent)
         {
             this.parent = parent;
         }
 
-        public ExpressionEnvironment() { }
+        public Environment() { }
 
         public void Reset() =>
             namedExpressions = null;
 
-        internal ExpressionEnvironment NewScope() =>
-            new ExpressionEnvironment(this);
+        internal Environment NewScope() =>
+            new Environment(this);
 
         internal bool TryGetNamedExpression(string name, out Expression expression)
         {
-            ExpressionEnvironment? current = this;
+            Environment? current = this;
             do
             {
                 if (current.namedExpressions != null)

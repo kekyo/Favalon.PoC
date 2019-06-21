@@ -30,7 +30,7 @@ namespace Favalon.Expressions
                 $"{this.Function.GetReadableString(withAnnotation)} ({this.Argument.GetReadableString(withAnnotation)})" :
                 $"{this.Function.GetReadableString(withAnnotation)} {this.Argument.GetReadableString(withAnnotation)}";
 
-        internal override Expression Visit(ExpressionEnvironment environment, InferContext context)
+        protected internal override Expression Visit(Environment environment, InferContext context)
         {
             var function = this.Function.Visit(environment, context);
             var argument = this.Argument.Visit(environment, context);
@@ -51,12 +51,11 @@ namespace Favalon.Expressions
             return new ApplyExpression(function, argument, resultHigherOrder);
         }
 
-        internal override Expression FixupChildren(InferContext context)
+        protected internal override bool FixupChildren(InferContext context)
         {
             this.Function = context.Fixup(this.Function);
             this.Argument = context.Fixup(this.Argument);
-            this.HigherOrder = context.Fixup(this.HigherOrder);
-            return this;
+            return true;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Favalon
         [Test]
         public void FromInteger()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // 123
             var expression = Integer(123);
@@ -26,7 +26,7 @@ namespace Favalon
         [Test]
         public void FromVariable()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // x
             var expression = Variable("x");
@@ -40,7 +40,7 @@ namespace Favalon
         [Test]
         public void ApplyVariableAndInteger()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // x 123
             var expression = Apply("x", Integer(123));
@@ -56,7 +56,7 @@ namespace Favalon
         [Test]
         public void BindInteger()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // x = 123 in x
             var expression = Bind("x", Integer(123), "x");
@@ -72,7 +72,7 @@ namespace Favalon
         [Test]
         public void BindPlaceholder()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // x = 123 in y
             var expression = Bind("x", Integer(123), "y");
@@ -88,7 +88,7 @@ namespace Favalon
         [Test]
         public void BindFunction()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // x = y 123 in y
             var expression = Bind("x", Apply("y", Integer(123)), "y");
@@ -104,7 +104,7 @@ namespace Favalon
         [Test]
         public void BindFunction2()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // x = y 123 456 in y
             var expression = Bind("x", Apply(Apply("y", Integer(123)), Integer(456)), "y");
@@ -120,7 +120,7 @@ namespace Favalon
         [Test]
         public void BindFunction3()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // x = y (z 123) in y
             var expression = Bind("x", Apply("y", Apply("z", Integer(123))), "y");
@@ -136,7 +136,7 @@ namespace Favalon
         [Test]
         public void LambdaFunction()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // x -> y 123
             var expression = Lambda("x", Apply("y", Integer(123)));
@@ -150,7 +150,7 @@ namespace Favalon
         [Test]
         public void LambdaFunction2()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // x -> x y
             var expression = Lambda("x", Apply("x", "y"));
@@ -164,7 +164,7 @@ namespace Favalon
         [Test]
         public void LambdaFunction3()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
 
             // x -> y -> x y
             var expression = Lambda("x", Lambda("y", Apply("x", "y")));
@@ -178,7 +178,7 @@ namespace Favalon
         [Test]
         public void ApplyRegisteredIntegerExpression()
         {
-            var environment = new ExpressionEnvironment();
+            var environment = new Environment();
             environment.SetNamedExpression("v", Integer(123));
 
             // x v

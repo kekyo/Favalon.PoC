@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Favalon.Expressions
+namespace Favalon.Expressions.Internals
 {
     public sealed class InferContext
     {
@@ -57,7 +57,12 @@ namespace Favalon.Expressions
                 }
             }
 
-            return expression.FixupChildren(this);
+            if (expression.FixupChildren(this))
+            {
+                expression.HigherOrder = this.Fixup(expression.HigherOrder);
+            }
+
+            return expression;
         }
     }
 }

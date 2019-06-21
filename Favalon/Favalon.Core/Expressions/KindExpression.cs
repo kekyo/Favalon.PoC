@@ -18,12 +18,6 @@ namespace Favalon.Expressions
         internal override string GetInternalReadableString(bool withAnnotation) =>
             "(Kind)";
 
-        internal override Expression Visit(ExpressionEnvironment environment, InferContext context) =>
-            this;
-
-        internal override Expression FixupChildren(InferContext context) =>
-            this;
-
         internal static readonly KindExpression Instance = new KindExpression();
     }
 }

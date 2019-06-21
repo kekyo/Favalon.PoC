@@ -1,4 +1,6 @@
-﻿namespace Favalon.Expressions
+﻿using Favalon.Expressions.Internals;
+
+namespace Favalon.Expressions
 {
     public sealed class LambdaExpression : Expression
     {
@@ -27,7 +29,7 @@
         internal override string GetInternalReadableString(bool withAnnotation) =>
             $"{this.Parameter.GetReadableString(withAnnotation)} -> {this.Expression.GetReadableString(withAnnotation)}";
 
-        internal override Expression Visit(ExpressionEnvironment environment, InferContext context)
+        protected internal override Expression Visit(Environment environment, InferContext context)
         {
             var scoped = environment.NewScope();
 
@@ -37,12 +39,11 @@
             return new LambdaExpression(parameter, expression);
         }
 
-        internal override Expression FixupChildren(InferContext context)
+        protected internal override bool FixupChildren(InferContext context)
         {
             this.Parameter = context.Fixup(this.Parameter);
             this.Expression = context.Fixup(this.Expression);
-            this.HigherOrder = context.Fixup(this.HigherOrder);
-            return this;
+            return true;
         }
     }
 }

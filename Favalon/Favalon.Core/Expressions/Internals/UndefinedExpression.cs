@@ -18,11 +18,6 @@
         internal override string GetInternalReadableString(bool withAnnotation) =>
             "(Undefined)";
 
-        internal override Expression Visit(ExpressionEnvironment environment, InferContext context) =>
-            this;
-        internal override Expression FixupChildren(InferContext context) =>
-            this;
-
         internal static readonly UndefinedExpression Instance = new UndefinedExpression();
 
         static UndefinedExpression() =>

@@ -20,7 +20,7 @@ namespace Favalon.Expressions
         internal override string GetInternalReadableString(bool withAnnotation) =>
             this.Name.ToString();
 
-        internal override Expression Visit(ExpressionEnvironment environment, InferContext context)
+        protected internal override Expression Visit(Environment environment, InferContext context)
         {
             if (environment.TryGetNamedExpression(this.Name, out var resolved))
             {
@@ -34,11 +34,8 @@ namespace Favalon.Expressions
             return variable;
         }
 
-        internal override Expression FixupChildren(InferContext context)
-        {
-            this.HigherOrder = context.Fixup(this.HigherOrder);
-            return this;
-        }
+        protected internal override bool FixupChildren(InferContext context) =>
+            true;
 
         /////////////////////////////////////////////////////////////////////////
 

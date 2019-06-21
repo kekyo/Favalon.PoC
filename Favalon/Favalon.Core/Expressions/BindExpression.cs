@@ -22,7 +22,7 @@ namespace Favalon.Expressions
         internal override string GetInternalReadableString(bool withAnnotation) =>
             $"{this.Variable.GetReadableString(withAnnotation)} = {this.Expression.GetReadableString(withAnnotation)} in {this.Body.GetReadableString(withAnnotation)}";
 
-        internal override Expression Visit(ExpressionEnvironment environment, InferContext context)
+        protected internal override Expression Visit(Environment environment, InferContext context)
         {
             var scoped = environment.NewScope();
 
@@ -37,13 +37,13 @@ namespace Favalon.Expressions
             return new BindExpression(variable, expression, body);
         }
 
-        internal override Expression FixupChildren(InferContext context)
+        protected internal override bool FixupChildren(InferContext context)
         {
             this.Variable = context.Fixup(this.Variable);
             this.Expression = context.Fixup(this.Expression);
             this.Body = context.Fixup(this.Body);
-            this.HigherOrder = context.Fixup(this.HigherOrder);
-            return this;
+
+            return true;
         }
     }
 }

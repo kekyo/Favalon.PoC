@@ -51,10 +51,10 @@ namespace Favalon.Expressions
             return new ApplyExpression(function, argument, resultHigherOrder);
         }
 
-        protected internal override bool FixupChildren(InferContext context)
+        protected internal override bool TraverseChildren(System.Func<Expression, Expression> yc)
         {
-            this.Function = context.Fixup(this.Function);
-            this.Argument = context.Fixup(this.Argument);
+            this.Function = yc(this.Function);
+            this.Argument = yc(this.Argument);
             return true;
         }
     }

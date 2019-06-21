@@ -18,6 +18,6 @@ namespace Favalon.Expressions
         internal override string GetInternalReadableString(bool withAnnotation) =>
             "(Kind)";
 
-        internal static readonly KindExpression Instance = new KindExpression();
+        public static readonly KindExpression Instance = new KindExpression();
     }
 }

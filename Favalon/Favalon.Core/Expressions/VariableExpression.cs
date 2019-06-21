@@ -34,7 +34,7 @@ namespace Favalon.Expressions
             return variable;
         }
 
-        protected internal override bool FixupChildren(InferContext context) =>
+        protected internal override bool TraverseChildren(System.Func<Expression, Expression> yc) =>
             true;
 
         /////////////////////////////////////////////////////////////////////////

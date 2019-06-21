@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon.Expressions.Internals
 {
@@ -6,6 +7,8 @@ namespace Favalon.Expressions.Internals
     {
         private readonly Dictionary<PlaceholderExpression, Expression> placeholders =
             new Dictionary<PlaceholderExpression, Expression>();
+        private readonly SortedSet<PlaceholderExpression> collection =
+            new SortedSet<PlaceholderExpression>();
         private int index;
 
         internal InferContext() { }
@@ -47,7 +50,7 @@ namespace Favalon.Expressions.Internals
             }
         }
 
-        public Expression Fixup(Expression expression)
+        public Expression FixupHigherOrders(Expression expression)
         {
             if (expression is PlaceholderExpression placeholder)
             {
@@ -57,12 +60,35 @@ namespace Favalon.Expressions.Internals
                 }
             }
 
-            if (expression.FixupChildren(this))
+            if (expression.TraverseChildren(this.FixupHigherOrders))
             {
-                expression.HigherOrder = this.Fixup(expression.HigherOrder);
+                expression.HigherOrder = this.FixupHigherOrders(expression.HigherOrder);
             }
 
             return expression;
+        }
+
+        public Expression AggregatePlaceholders(Expression expression)
+        {
+            if (expression is PlaceholderExpression placeholder)
+            {
+                collection.Add(placeholder);
+            }
+
+            if (expression.TraverseChildren(this.AggregatePlaceholders))
+            {
+                expression.HigherOrder = this.AggregatePlaceholders(expression.HigherOrder);
+            }
+
+            return expression;
+        }
+
+        internal void FixupPlaceholders()
+        {
+            foreach (var entry in collection.Select((ph, index) => (ph, index)))
+            {
+                entry.ph.Index = entry.index;
+            }
         }
     }
 }

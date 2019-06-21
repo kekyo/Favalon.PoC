@@ -7,7 +7,7 @@ namespace Favalon.Expressions
 {
     public abstract class Expression
     {
-        private protected Expression(Expression higherOrder) =>
+        protected Expression(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
         public Expression HigherOrder { get; internal set; }
@@ -15,8 +15,18 @@ namespace Favalon.Expressions
         protected internal virtual Expression Visit(Environment environment, InferContext context) =>
             this;
 
-        protected internal virtual bool FixupChildren(InferContext context) =>
+        protected internal virtual bool TraverseChildren(System.Func<Expression, Expression> ycon) =>
             false;
+
+        public Expression Infer(Environment environment)
+        {
+            var context = new InferContext();
+            var visited = this.Visit(environment, context);
+            var fixup1 = context.FixupHigherOrders(visited);
+            var fixup2 = context.AggregatePlaceholders(fixup1);
+            context.FixupPlaceholders();
+            return fixup2;
+        }
 
         internal abstract bool CanProduceSafeReadableString { get; }
         internal virtual bool IsIgnoreAnnotationReadableString =>
@@ -53,17 +63,5 @@ namespace Favalon.Expressions
 
         public static implicit operator Expression(string name) =>
             new VariableExpression(name);
-    }
-
-    public static class ExpressionExtensions
-    {
-        public static TExpression Infer<TExpression>(this TExpression expression, Environment environment)
-            where TExpression : Expression
-        {
-            var context = new InferContext();
-            var visited = expression.Visit(environment, context);
-            var fixup = context.Fixup(visited);
-            return (TExpression)fixup;
-        }
     }
 }

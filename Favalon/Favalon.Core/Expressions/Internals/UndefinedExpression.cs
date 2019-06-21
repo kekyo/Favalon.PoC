@@ -4,8 +4,7 @@
     {
         // Dead end expression.
 
-        internal UndefinedExpression() :
-            base(null!)
+        internal UndefinedExpression() : base(null!)
         { }
 
         internal override bool CanProduceSafeReadableString =>
@@ -18,7 +17,7 @@
         internal override string GetInternalReadableString(bool withAnnotation) =>
             "(Undefined)";
 
-        internal static readonly UndefinedExpression Instance = new UndefinedExpression();
+        public static readonly UndefinedExpression Instance = new UndefinedExpression();
 
         static UndefinedExpression() =>
             Instance.HigherOrder = Instance;  // Infinite recursivity.

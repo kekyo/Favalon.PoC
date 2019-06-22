@@ -13,8 +13,8 @@ namespace Favalon.Expressions.Internals
 
         internal InferContext() { }
 
-        public PlaceholderExpression CreatePlaceholder() =>
-            new PlaceholderExpression(index++);
+        public PlaceholderExpression CreatePlaceholder(int rank) =>
+            new PlaceholderExpression(rank, index++);
 
         public void UnifyExpression(Expression expression1, Expression expression2)
         {

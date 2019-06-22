@@ -8,6 +8,9 @@
         public static VariableExpression Variable(string name) =>
             new VariableExpression(name);
 
+        public static TypeExpression Type(string name) =>
+            new TypeExpression(name);
+
         public static ApplyExpression Apply(Expression function, Expression argument) =>
             new ApplyExpression(function, argument);
 

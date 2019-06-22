@@ -27,7 +27,7 @@ namespace Favalon.Expressions
                 return new VariableExpression(this.Name, resolved.HigherOrder);
             }
 
-            var placeholder = context.CreatePlaceholder();
+            var placeholder = context.CreatePlaceholder(1);
             var variable = new VariableExpression(this.Name, placeholder);
             environment.SetNamedExpression(this.Name, variable);
 

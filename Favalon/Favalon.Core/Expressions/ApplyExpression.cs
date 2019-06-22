@@ -35,7 +35,7 @@ namespace Favalon.Expressions
             var function = this.Function.Visit(environment, context);
             var argument = this.Argument.Visit(environment, context);
 
-            var resultHigherOrder = context.CreatePlaceholder();
+            var resultHigherOrder = context.CreatePlaceholder(1);
 
             if (function is VariableExpression variable)
             {

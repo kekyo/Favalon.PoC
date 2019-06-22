@@ -1,28 +1,26 @@
 ﻿using NUnit.Framework;
 
-using Favalon.Expressions;
-
-namespace Favalon
+namespace Favalon.Expressions
 {
     using static StaticFactory;
 
     [TestFixture]
-    public sealed class InferenceTest
+    public sealed class RankOneExpressionTest
     {
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void FromInteger()
+        public void FromType()
         {
             var environment = new Environment();
 
-            // 123
-            var expression = Integer(123);
+            // System.Int32
+            var expression = Type("System.Int32");
 
-            var actual = expression.Infer(environment);
+            var actual = (TypeExpression)expression.Infer(environment);
 
-            Assert.AreEqual("123", actual.ReadableString);
-            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32", actual.ReadableString);
+            Assert.AreEqual("(Kind)", actual.HigherOrder.ReadableString);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,15 +30,16 @@ namespace Favalon
         {
             var environment = new Environment();
 
-            // x
-            var expression = Variable("x");
+            // 'T
+            var expression = Variable("'T");
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("x", actual.ReadableString);
-            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'T", actual.ReadableString);
+            Assert.AreEqual("(Kind)", actual.HigherOrder.ReadableString);
         }
 
+#if false
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Test]
@@ -201,5 +200,6 @@ namespace Favalon
             Assert.AreEqual("x -> y -> x y", actual.ReadableString);
             Assert.AreEqual("'a -> 'b -> 'a -> 'b", actual.HigherOrder.ReadableString);
         }
+#endif
     }
 }

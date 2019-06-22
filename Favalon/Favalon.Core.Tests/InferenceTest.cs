@@ -54,9 +54,9 @@ namespace Favalon
             var actual = (ApplyExpression)expression.Infer(environment);
 
             Assert.AreEqual("x 123", actual.ReadableString);
-            Assert.AreEqual("'b", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("System.Int32 -> 'b", actual.Function.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'a", actual.Function.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -71,9 +71,9 @@ namespace Favalon
             var actual = (ApplyExpression)expression.Infer(environment);
 
             Assert.AreEqual("x v", actual.ReadableString);
-            Assert.AreEqual("'b", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("System.Int32 -> 'b", actual.Function.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'a", actual.Function.HigherOrder.ReadableString);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ namespace Favalon
             var actual = (BindExpression)expression.Infer(environment);
 
             Assert.AreEqual("x = 123 in y", actual.ReadableString);
-            Assert.AreEqual("'b", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
             Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
         }
@@ -121,9 +121,9 @@ namespace Favalon
             var actual = (BindExpression)expression.Infer(environment);
 
             Assert.AreEqual("x = y 123 in y", actual.ReadableString);
-            Assert.AreEqual("System.Int32 -> 'c", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("'c", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("'a", actual.Variable.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -137,9 +137,9 @@ namespace Favalon
             var actual = (BindExpression)expression.Infer(environment);
 
             Assert.AreEqual("x = y 123 456 in y", actual.ReadableString);
-            Assert.AreEqual("System.Int32 -> 'c", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("'d", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("'b", actual.Variable.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -153,9 +153,9 @@ namespace Favalon
             var actual = (BindExpression)expression.Infer(environment);
 
             Assert.AreEqual("x = y (z 123) in y", actual.ReadableString);
-            Assert.AreEqual("'d -> 'e", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'a -> 'b", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("'e", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("'b", actual.Variable.HigherOrder.ReadableString);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -171,7 +171,7 @@ namespace Favalon
             var actual = (LambdaExpression)expression.Infer(environment);
 
             Assert.AreEqual("x -> y 123", actual.ReadableString);
-            Assert.AreEqual("'a -> 'c", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'a -> 'b", actual.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -185,7 +185,7 @@ namespace Favalon
             var actual = (LambdaExpression)expression.Infer(environment);
 
             Assert.AreEqual("x -> x y", actual.ReadableString);
-            Assert.AreEqual("'b -> 'c -> 'c", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'a -> 'b -> 'b", actual.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -199,7 +199,7 @@ namespace Favalon
             var actual = (LambdaExpression)expression.Infer(environment);
 
             Assert.AreEqual("x -> y -> x y", actual.ReadableString);
-            Assert.AreEqual("'b -> 'c -> 'b -> 'c", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'a -> 'b -> 'a -> 'b", actual.HigherOrder.ReadableString);
         }
     }
 }

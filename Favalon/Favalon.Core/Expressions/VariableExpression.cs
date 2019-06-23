@@ -2,10 +2,8 @@
 
 namespace Favalon.Expressions
 {
-    public sealed class VariableExpression : Expression
+    public sealed class VariableExpression : IdentityExpression
     {
-        public readonly string Name;
-
         internal VariableExpression(string name) :
             base(UndefinedExpression.Instance) =>
             this.Name = name;
@@ -14,11 +12,13 @@ namespace Favalon.Expressions
             base(higherOrder) =>
             this.Name = name;
 
+        public override string Name { get; }
+
         internal override bool CanProduceSafeReadableString =>
             true;
 
         internal override string GetInternalReadableString(bool withAnnotation) =>
-            this.Name.ToString();
+            this.Name;
 
         protected internal override Expression Visit(Environment environment, InferContext context)
         {

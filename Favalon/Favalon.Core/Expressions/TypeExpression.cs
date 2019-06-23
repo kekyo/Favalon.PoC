@@ -1,15 +1,12 @@
-﻿using Favalon.Expressions.Internals;
-using System;
-
-namespace Favalon.Expressions
+﻿namespace Favalon.Expressions
 {
-    public sealed class TypeExpression : Expression
+    public sealed class TypeExpression : IdentityExpression
     {
-        public readonly string Name;
-
         internal TypeExpression(string name) :
             base(KindExpression.Instance) =>
             this.Name = name;
+
+        public override string Name { get; }
 
         internal override bool CanProduceSafeReadableString =>
             true;

@@ -1,9 +1,6 @@
-﻿using Favalon.Expressions.Internals;
-using System;
-
-namespace Favalon.Expressions
+﻿namespace Favalon.Expressions
 {
-    public sealed class IntegerExpression : Expression
+    public sealed class IntegerExpression : TermExpression
     {
         public readonly int Value;
 

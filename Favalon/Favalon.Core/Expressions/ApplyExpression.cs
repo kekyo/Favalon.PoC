@@ -5,9 +5,6 @@ namespace Favalon.Expressions
     public sealed class ApplyExpression : Expression
     {
         // f x
-        public Expression Function { get; private set; }
-        public Expression Argument { get; private set; }
-
         private ApplyExpression(Expression function, Expression argument, Expression higherOrder) :
             base(higherOrder)
         {
@@ -21,6 +18,9 @@ namespace Favalon.Expressions
             this.Function = function;
             this.Argument = argument;
         }
+
+        public Expression Function { get; private set; }
+        public Expression Argument { get; private set; }
 
         internal override bool CanProduceSafeReadableString =>
             false;

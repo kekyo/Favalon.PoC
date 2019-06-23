@@ -4,10 +4,6 @@ namespace Favalon.Expressions
 {
     public sealed class BindExpression : Expression
     {
-        public Expression Variable { get; private set; }
-        public Expression Expression { get; private set; }
-        public Expression Body { get; private set; }
-
         internal BindExpression(VariableExpression variable, Expression expression, Expression body) :
             base(body.HigherOrder)
         {
@@ -15,6 +11,10 @@ namespace Favalon.Expressions
             this.Expression = expression;
             this.Body = body;
         }
+
+        public Expression Variable { get; private set; }
+        public Expression Expression { get; private set; }
+        public Expression Body { get; private set; }
 
         internal override bool CanProduceSafeReadableString =>
             false;

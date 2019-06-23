@@ -13,8 +13,18 @@ namespace Favalon.Expressions.Internals
 
         internal InferContext() { }
 
-        public PlaceholderExpression CreatePlaceholder(int rank) =>
-            new PlaceholderExpression(rank, index++);
+        public PlaceholderExpression CreatePlaceholder(int rank)
+        {
+            var newIndex = index++;
+
+            var r = new string('\'', rank);
+            var ch = (char)('a' + (newIndex % ('z' - 'a' + 1)));
+            var suffixIndex = newIndex / ('z' - 'a' + 1);
+            var suffix = (suffixIndex >= 1) ? suffixIndex.ToString() : string.Empty;
+            var name = $"{r}{ch}{suffix}";
+
+            return new PlaceholderExpression(rank, newIndex);
+        }
 
         public void UnifyExpression(Expression expression1, Expression expression2)
         {

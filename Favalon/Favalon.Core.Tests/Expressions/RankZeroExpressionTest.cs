@@ -172,6 +172,41 @@ namespace Favalon.Expressions
             Assert.AreEqual("'b", actual.Variable.HigherOrder.ReadableString);
         }
 
+        [Test]
+        public void BindShadowed1()
+        {
+            var environment = new Environment();
+
+            // x = 123 in x = y -> x in x
+            var expression = Bind("x", Integer(123), Bind("x", Lambda("y", "x"), "x"));
+
+            var actual = (BindExpression)expression.Infer(environment);
+
+            Assert.AreEqual("x = 123 in x = y -> x in x", actual.ReadableString);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
+        }
+
+        //[Test]
+        //public void BindShadowed2()
+        //{
+        //    var environment = new Environment();
+
+        //    // x = z 456
+        //    environment.SetNamedExpression("x", Lambda("z", Integer(456)).Infer(environment));
+
+        //    // x = 123 in y
+        //    var expression = Bind("x", Integer(123), "y");
+
+        //    var actual = (BindExpression)expression.Infer(environment);
+
+        //    Assert.AreEqual("x = 123 in y", actual.ReadableString);
+        //    Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+
+        //    Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
+        //}
+
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Test]
@@ -215,5 +250,21 @@ namespace Favalon.Expressions
             Assert.AreEqual("x -> y -> x y", actual.ReadableString);
             Assert.AreEqual("('a -> 'b) -> 'a -> 'b", actual.HigherOrder.ReadableString);
         }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //[Test]
+        //public void RecursiveFunction()
+        //{
+        //    var environment = new Environment();
+
+        //    // x = y -> x 123 in x 456
+        //    var expression = Bind("x", Lambda("y", Apply("x", Integer(123))), Apply("x", Integer(456)));
+
+        //    var actual = (BindExpression)expression.Infer(environment);
+
+        //    Assert.AreEqual("x -> y 123", actual.ReadableString);
+        //    Assert.AreEqual("'a -> 'b", actual.HigherOrder.ReadableString);
+        //}
     }
 }

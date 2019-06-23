@@ -26,6 +26,8 @@ namespace Favalon.Expressions
         {
             var scoped = environment.NewScope();
 
+            // TODO: Bind: Variable ===> string Name {get;}
+
             var variable = (VariableExpression)this.Variable.Visit(scoped, context);
             var expression = this.Expression.Visit(scoped, context);
 

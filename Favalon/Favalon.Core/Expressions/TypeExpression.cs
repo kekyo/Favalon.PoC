@@ -7,8 +7,5 @@
             this.Name = name;
 
         public override string Name { get; }
-
-        internal override bool IsIgnoreAnnotationReadableString =>
-            true;
     }
 }

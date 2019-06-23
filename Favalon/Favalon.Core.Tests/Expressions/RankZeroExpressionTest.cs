@@ -199,7 +199,7 @@ namespace Favalon.Expressions
             var actual = (LambdaExpression)expression.Infer(environment);
 
             Assert.AreEqual("x -> x y", actual.ReadableString);
-            Assert.AreEqual("'a -> 'b -> 'b", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("('a -> 'b) -> 'b", actual.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -213,7 +213,7 @@ namespace Favalon.Expressions
             var actual = (LambdaExpression)expression.Infer(environment);
 
             Assert.AreEqual("x -> y -> x y", actual.ReadableString);
-            Assert.AreEqual("'a -> 'b -> 'a -> 'b", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("('a -> 'b) -> 'a -> 'b", actual.HigherOrder.ReadableString);
         }
     }
 }

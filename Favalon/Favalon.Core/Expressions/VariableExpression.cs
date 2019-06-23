@@ -14,10 +14,7 @@ namespace Favalon.Expressions
 
         public override string Name { get; }
 
-        internal override bool CanProduceSafeReadableString =>
-            true;
-
-        internal override string GetInternalReadableString(bool withAnnotation) =>
+        protected override string FormatReadableString(bool withAnnotation) =>
             this.Name;
 
         protected internal override Expression Visit(Environment environment, InferContext context)

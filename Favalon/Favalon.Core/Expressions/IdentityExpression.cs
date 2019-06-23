@@ -11,6 +11,9 @@ namespace Favalon.Expressions
 
         public abstract string Name { get; }
 
+        protected override string FormatReadableString(bool withAnnotation) =>
+            this.Name;
+
         public override int GetHashCode() =>
             this.Name.GetHashCode();
 
@@ -19,11 +22,5 @@ namespace Favalon.Expressions
 
         public int CompareTo(IdentityExpression other) =>
             this.Name.CompareTo(other.Name);
-
-        internal override bool CanProduceSafeReadableString =>
-            true;
-
-        internal override string GetInternalReadableString(bool withAnnotation) =>
-            this.Name;
     }
 }

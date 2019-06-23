@@ -12,6 +12,9 @@ namespace Favalon.Expressions
 
         public Expression HigherOrder { get; internal set; }
 
+        public virtual bool ShowInAnnotation => 
+            true;
+
         protected internal virtual Expression Visit(Environment environment, InferContext context) =>
             this;
 
@@ -28,36 +31,23 @@ namespace Favalon.Expressions
             return fixup2;
         }
 
-        internal abstract bool CanProduceSafeReadableString { get; }
-        internal virtual bool IsIgnoreAnnotationReadableString =>
-            false;
-        internal virtual bool IsIgnoreReadableString =>
-            false;
+        protected abstract string FormatReadableString(bool withAnnotation);
 
-        internal abstract string GetInternalReadableString(bool withAnnotation);
-
-        private string GetInternalReadableString(
-            bool withAnnotation, System.Func<Expression, bool, string> getReadableString) =>
-            (withAnnotation && !this.IsIgnoreAnnotationReadableString && !this.HigherOrder.IsIgnoreReadableString) ?
-                $"{getReadableString(this, withAnnotation)}:{getReadableString(this.HigherOrder, false)}" :
-                getReadableString(this, withAnnotation);
-
-        private static string GetInternalReadableString(Expression expression, bool withAnnotation) =>
-            expression.GetInternalReadableString(withAnnotation);
-
-        private static string GetSafeInternalReadableString(Expression expression, bool withAnnotation) =>
-            (expression.CanProduceSafeReadableString || !withAnnotation) ?
-                expression.GetInternalReadableString(withAnnotation) :
-                $"({expression.GetInternalReadableString(withAnnotation)})";
+        private string InternalFormatReadableString(bool withAnnotation) =>
+            (this is TermExpression) ?
+                this.FormatReadableString(withAnnotation) :
+                $"({this.FormatReadableString(withAnnotation)})";
 
         public string GetReadableString(bool withAnnotation) =>
-            GetInternalReadableString(withAnnotation, GetSafeInternalReadableString);
+            (withAnnotation && this.HigherOrder.ShowInAnnotation) ?
+                $"{this.InternalFormatReadableString(true)}:{this.HigherOrder.InternalFormatReadableString(false)}" :
+                this.FormatReadableString(false);
 
         public string ReadableString =>
-            this.GetInternalReadableString(false, GetInternalReadableString);
+            this.FormatReadableString(false);
 
         public override string ToString() =>
-            $"{this.GetType().Name.Replace("Expression", string.Empty)}: {this.GetInternalReadableString(true, GetInternalReadableString)}";
+            $"{this.GetType().Name.Replace("Expression", string.Empty)}: {this.GetReadableString(true)}";
 
         /////////////////////////////////////////////////////////////////////////
 

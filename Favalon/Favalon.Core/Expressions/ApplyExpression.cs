@@ -22,11 +22,11 @@ namespace Favalon.Expressions
         public Expression Function { get; private set; }
         public Expression Argument { get; private set; }
 
-        internal override bool CanProduceSafeReadableString =>
-            false;
+        public override bool ShowInAnnotation =>
+            this.Argument.ShowInAnnotation;
 
-        internal override string GetInternalReadableString(bool withAnnotation) =>
-            (!this.Argument.CanProduceSafeReadableString || this.Argument is ApplyExpression) ?
+        protected override string FormatReadableString(bool withAnnotation) =>
+            (this.Argument is ApplyExpression) ?
                 $"{this.Function.GetReadableString(withAnnotation)} ({this.Argument.GetReadableString(withAnnotation)})" :
                 $"{this.Function.GetReadableString(withAnnotation)} {this.Argument.GetReadableString(withAnnotation)}";
 

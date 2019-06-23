@@ -201,7 +201,7 @@ namespace Favalon.Expressions
             var actual = (LambdaExpression)expression.Infer(environment);
 
             Assert.AreEqual("x -> x y", actual.ReadableString);
-            Assert.AreEqual("(Kind) -> 'a -> 'a", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("((Kind) -> 'a) -> 'a", actual.HigherOrder.ReadableString);
         }
 
 #if false
@@ -216,7 +216,7 @@ namespace Favalon.Expressions
             var actual = (LambdaExpression)expression.Infer(environment);
 
             Assert.AreEqual("x -> y -> x y", actual.ReadableString);
-            Assert.AreEqual("'a -> 'b -> 'a -> 'b", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("('a -> 'b) -> 'a -> 'b", actual.HigherOrder.ReadableString);
         }
 #endif
     }

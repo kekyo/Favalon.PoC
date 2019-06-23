@@ -16,10 +16,10 @@ namespace Favalon.Expressions
         public Expression Expression { get; private set; }
         public Expression Body { get; private set; }
 
-        internal override bool CanProduceSafeReadableString =>
-            false;
+        public override bool ShowInAnnotation =>
+            this.Body.ShowInAnnotation;
 
-        internal override string GetInternalReadableString(bool withAnnotation) =>
+        protected override string FormatReadableString(bool withAnnotation) =>
             $"{this.Variable.GetReadableString(withAnnotation)} = {this.Expression.GetReadableString(withAnnotation)} in {this.Body.GetReadableString(withAnnotation)}";
 
         protected internal override Expression Visit(Environment environment, InferContext context)

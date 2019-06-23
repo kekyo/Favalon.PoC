@@ -21,13 +21,13 @@ namespace Favalon.Expressions
         {
         }
 
-        internal override bool CanProduceSafeReadableString =>
-            false;
-        internal override bool IsIgnoreReadableString =>
-            this.Parameter.IsIgnoreReadableString || this.Expression.IsIgnoreReadableString;
+        public override bool ShowInAnnotation =>
+            this.Parameter.ShowInAnnotation && this.Expression.ShowInAnnotation;
 
-        internal override string GetInternalReadableString(bool withAnnotation) =>
-            $"{this.Parameter.GetReadableString(withAnnotation)} -> {this.Expression.GetReadableString(withAnnotation)}";
+        protected override string FormatReadableString(bool withAnnotation) =>
+            (this.Parameter is LambdaExpression) ?
+                $"({this.Parameter.GetReadableString(withAnnotation)}) -> {this.Expression.GetReadableString(withAnnotation)}" :
+                $"{this.Parameter.GetReadableString(withAnnotation)} -> {this.Expression.GetReadableString(withAnnotation)}";
 
         protected internal override Expression Visit(Environment environment, InferContext context)
         {

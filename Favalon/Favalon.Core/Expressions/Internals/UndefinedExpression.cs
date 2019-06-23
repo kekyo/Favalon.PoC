@@ -7,14 +7,10 @@
         internal UndefinedExpression() : base(null!)
         { }
 
-        internal override bool CanProduceSafeReadableString =>
-            true;
-        internal override bool IsIgnoreAnnotationReadableString =>
-            true;
-        internal override bool IsIgnoreReadableString =>
-            true;
+        public override bool ShowInAnnotation =>
+            false;
 
-        internal override string GetInternalReadableString(bool withAnnotation) =>
+        protected override string FormatReadableString(bool withAnnotation) =>
             "(Undefined)";
 
         public static readonly UndefinedExpression Instance = new UndefinedExpression();

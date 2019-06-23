@@ -8,14 +8,10 @@ namespace Favalon.Expressions
             base(UndefinedExpression.Instance)
         { }
 
-        internal override bool CanProduceSafeReadableString =>
-            true;
-        internal override bool IsIgnoreAnnotationReadableString =>
-            true;
-        internal override bool IsIgnoreReadableString =>
-            true;
+        public override bool ShowInAnnotation =>
+            false;
 
-        internal override string GetInternalReadableString(bool withAnnotation) =>
+        protected override string FormatReadableString(bool withAnnotation) =>
             "(Kind)";
 
         public static readonly KindExpression Instance = new KindExpression();

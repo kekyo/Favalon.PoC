@@ -26,7 +26,7 @@ namespace Favalon.Expressions
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void FromVariable()
+        public void FromVariable1()
         {
             var environment = new Environment();
 
@@ -37,6 +37,22 @@ namespace Favalon.Expressions
 
             Assert.AreEqual("x", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void FromVariable2()
+        {
+            var environment = new Environment();
+
+            environment.SetNamedExpression("x", Integer(123));
+
+            // x
+            var expression = Variable("x");
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("x", actual.ReadableString);
+            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +125,7 @@ namespace Favalon.Expressions
         }
 
         [Test]
-        public void BindFunction()
+        public void BindFunction1()
         {
             var environment = new Environment();
 
@@ -159,7 +175,7 @@ namespace Favalon.Expressions
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void LambdaFunction()
+        public void LambdaFunction1()
         {
             var environment = new Environment();
 

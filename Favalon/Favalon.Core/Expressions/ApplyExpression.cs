@@ -35,7 +35,7 @@ namespace Favalon.Expressions
             var function = this.Function.Visit(environment, context);
             var argument = this.Argument.Visit(environment, context);
 
-            var resultHigherOrder = context.CreatePlaceholder(1);
+            var resultHigherOrder = context.CreatePlaceholder();
 
             if (function is VariableExpression variable)
             {
@@ -51,10 +51,10 @@ namespace Favalon.Expressions
             return new ApplyExpression(function, argument, resultHigherOrder);
         }
 
-        protected internal override bool TraverseChildren(System.Func<Expression, Expression> yc)
+        protected internal override bool TraverseChildren(System.Func<Expression, int, Expression> yc, int rank)
         {
-            this.Function = yc(this.Function);
-            this.Argument = yc(this.Argument);
+            this.Function = yc(this.Function, rank);
+            this.Argument = yc(this.Argument, rank);
             return true;
         }
     }

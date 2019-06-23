@@ -27,14 +27,14 @@ namespace Favalon.Expressions
                 return new VariableExpression(this.Name, resolved.HigherOrder);
             }
 
-            var placeholder = context.CreatePlaceholder(1);
+            var placeholder = context.CreatePlaceholder();
             var variable = new VariableExpression(this.Name, placeholder);
             environment.SetNamedExpression(this.Name, variable);
 
             return variable;
         }
 
-        protected internal override bool TraverseChildren(System.Func<Expression, Expression> yc) =>
+        protected internal override bool TraverseChildren(System.Func<Expression, int, Expression> yc, int rank) =>
             true;
 
         /////////////////////////////////////////////////////////////////////////

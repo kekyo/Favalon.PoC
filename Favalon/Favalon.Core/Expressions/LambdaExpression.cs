@@ -39,10 +39,10 @@ namespace Favalon.Expressions
             return new LambdaExpression(parameter, expression);
         }
 
-        protected internal override bool TraverseChildren(System.Func<Expression, Expression> yc)
+        protected internal override bool TraverseChildren(System.Func<Expression, int, Expression> yc, int rank)
         {
-            this.Parameter = yc(this.Parameter);
-            this.Expression = yc(this.Expression);
+            this.Parameter = yc(this.Parameter, rank);
+            this.Expression = yc(this.Expression, rank);
             return true;
         }
     }

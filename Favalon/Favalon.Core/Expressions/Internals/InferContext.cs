@@ -5,89 +5,79 @@ namespace Favalon.Expressions.Internals
 {
     public sealed class InferContext
     {
-        private readonly Dictionary<PlaceholderExpression, Expression> placeholders =
-            new Dictionary<PlaceholderExpression, Expression>();
+        private readonly Dictionary<IdentityExpression, Expression> identities =
+            new Dictionary<IdentityExpression, Expression>();
         private readonly SortedSet<PlaceholderExpression> collection =
             new SortedSet<PlaceholderExpression>();
         private int index;
 
         internal InferContext() { }
 
-        public PlaceholderExpression CreatePlaceholder(int rank)
-        {
-            var newIndex = index++;
-
-            var r = new string('\'', rank);
-            var ch = (char)('a' + (newIndex % ('z' - 'a' + 1)));
-            var suffixIndex = newIndex / ('z' - 'a' + 1);
-            var suffix = (suffixIndex >= 1) ? suffixIndex.ToString() : string.Empty;
-            var name = $"{r}{ch}{suffix}";
-
-            return new PlaceholderExpression(rank, newIndex);
-        }
+        public PlaceholderExpression CreatePlaceholder() =>
+            new PlaceholderExpression(index++);
 
         public void UnifyExpression(Expression expression1, Expression expression2)
         {
-            if (expression1 is PlaceholderExpression placeholder1)
+            if (expression1 is IdentityExpression identity1)
             {
-                if (expression2 is PlaceholderExpression placeholder2)
+                if (expression2 is IdentityExpression identity2)
                 {
-                    if (!placeholder1.Equals(placeholder2))
+                    if (!identity1.Equals(identity2))
                     {
-                        placeholders[placeholder1] = expression2;
+                        identities[identity1] = expression2;
                     }
                     return;
                 }
-                else if (placeholders.TryGetValue(placeholder1, out var resolved))
+                else if (identities.TryGetValue(identity1, out var resolved))
                 {
                     this.UnifyExpression(expression2, resolved);
                 }
                 else
                 {
-                    placeholders[placeholder1] = expression2;
+                    identities[identity1] = expression2;
                 }
             }
-            else if (expression2 is PlaceholderExpression placeholder2)
+            else if (expression2 is IdentityExpression identity2)
             {
-                if (placeholders.TryGetValue(placeholder2, out var resolved))
+                if (identities.TryGetValue(identity2, out var resolved))
                 {
                     this.UnifyExpression(expression1, resolved);
                 }
                 else
                 {
-                    placeholders[placeholder2] = expression1;
+                    identities[identity2] = expression1;
                 }
             }
         }
 
-        public Expression FixupHigherOrders(Expression expression)
+        public Expression FixupHigherOrders(Expression expression, int rank)
         {
-            if (expression is PlaceholderExpression placeholder)
+            if (expression is IdentityExpression identity)
             {
-                if (placeholders.TryGetValue(placeholder, out var resolved))
+                if (identities.TryGetValue(identity, out var resolved))
                 {
                     return resolved;
                 }
             }
 
-            if (expression.TraverseChildren(this.FixupHigherOrders))
+            if (expression.TraverseChildren(this.FixupHigherOrders, rank))
             {
-                expression.HigherOrder = this.FixupHigherOrders(expression.HigherOrder);
+                expression.HigherOrder = this.FixupHigherOrders(expression.HigherOrder, rank + 1);
             }
 
             return expression;
         }
 
-        public Expression AggregatePlaceholders(Expression expression)
+        public Expression AggregatePlaceholders(Expression expression, int rank)
         {
             if (expression is PlaceholderExpression placeholder)
             {
                 collection.Add(placeholder);
             }
 
-            if (expression.TraverseChildren(this.AggregatePlaceholders))
+            if (expression.TraverseChildren(this.AggregatePlaceholders, rank))
             {
-                expression.HigherOrder = this.AggregatePlaceholders(expression.HigherOrder);
+                expression.HigherOrder = this.AggregatePlaceholders(expression.HigherOrder, rank + 1);
             }
 
             return expression;

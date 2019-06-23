@@ -37,11 +37,11 @@ namespace Favalon.Expressions
             return new BindExpression(variable, expression, body);
         }
 
-        protected internal override bool TraverseChildren(System.Func<Expression, Expression> yc)
+        protected internal override bool TraverseChildren(System.Func<Expression, int, Expression> yc, int rank)
         {
-            this.Variable = yc(this.Variable);
-            this.Expression = yc(this.Expression);
-            this.Body = yc(this.Body);
+            this.Variable = yc(this.Variable, rank);
+            this.Expression = yc(this.Expression, rank);
+            this.Body = yc(this.Body, rank);
 
             return true;
         }

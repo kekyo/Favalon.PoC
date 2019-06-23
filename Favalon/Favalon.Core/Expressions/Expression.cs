@@ -15,15 +15,15 @@ namespace Favalon.Expressions
         protected internal virtual Expression Visit(Environment environment, InferContext context) =>
             this;
 
-        protected internal virtual bool TraverseChildren(System.Func<Expression, Expression> ycon) =>
+        protected internal virtual bool TraverseChildren(System.Func<Expression, int, Expression> ycon, int rank) =>
             false;
 
-        public Expression Infer(Environment environment)
+        public Expression Infer(Environment environment, int rank = 0)
         {
             var context = new InferContext();
             var visited = this.Visit(environment, context);
-            var fixup1 = context.FixupHigherOrders(visited);
-            var fixup2 = context.AggregatePlaceholders(fixup1);
+            var fixup1 = context.FixupHigherOrders(visited, rank);
+            var fixup2 = context.AggregatePlaceholders(fixup1, rank);
             context.FixupPlaceholders();
             return fixup2;
         }

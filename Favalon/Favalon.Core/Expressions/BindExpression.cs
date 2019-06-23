@@ -12,7 +12,7 @@ namespace Favalon.Expressions
             this.Body = body;
         }
 
-        public Expression Variable { get; private set; }
+        public VariableExpression Variable { get; private set; }
         public Expression Expression { get; private set; }
         public Expression Body { get; private set; }
 
@@ -24,12 +24,23 @@ namespace Favalon.Expressions
 
         protected internal override Expression Visit(Environment environment, InferContext context)
         {
+            // Bind expression scope details:
+            // let x = y in z
+            //     |   |    |
+            //     | outer  |   <-- environment
+            //     |        |
+            //     +-inner--+   <-- scoped
+
+            var expression = this.Expression.Visit(environment, context);
+
             var scoped = environment.NewScope();
 
-            // TODO: Bind: Variable ===> string Name {get;}
-
-            var variable = (VariableExpression)this.Variable.Visit(scoped, context);
-            var expression = this.Expression.Visit(scoped, context);
+            // Force replacing with new placeholder.
+            // Because the bind expression excepts inferring from derived environments,
+            // but uses variable expression instead simple name string.
+            // It requires annotation processing.
+            //var variable = (VariableExpression)this.Variable.Visit(scoped, context);
+            var variable = this.Variable.CreateWithPlaceholder(scoped, context);
 
             context.UnifyExpression(variable.HigherOrder, expression.HigherOrder);
             scoped.SetNamedExpression(variable.Name, expression);
@@ -41,7 +52,7 @@ namespace Favalon.Expressions
 
         protected internal override bool TraverseChildren(System.Func<Expression, int, Expression> yc, int rank)
         {
-            this.Variable = yc(this.Variable, rank);
+            this.Variable = (VariableExpression)yc(this.Variable, rank);
             this.Expression = yc(this.Expression, rank);
             this.Body = yc(this.Body, rank);
 

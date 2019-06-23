@@ -183,7 +183,7 @@ namespace Favalon.Expressions
             var actual = (BindExpression)expression.Infer(environment);
 
             Assert.AreEqual("x = 123 in x = y -> x in x", actual.ReadableString);
-            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("'a -> System.Int32", actual.HigherOrder.ReadableString);
 
             Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
         }

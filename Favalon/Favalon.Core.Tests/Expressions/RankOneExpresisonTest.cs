@@ -172,6 +172,22 @@ namespace Favalon.Expressions
             Assert.AreEqual("'b", actual.Variable.HigherOrder.ReadableString);
         }
 
+        [Test]
+        public void BindShadowed1()
+        {
+            var environment = new Environment();
+
+            // x = System.Int32 in x = y -> x in x
+            var expression = Bind("x", Type("System.Int32"), Bind("x", Lambda("y", "x"), "x"));
+
+            var actual = (BindExpression)expression.Infer(environment);
+
+            Assert.AreEqual("x = System.Int32 in x = y -> x in x", actual.ReadableString);
+            Assert.AreEqual("'a -> (Kind)", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("(Kind)", actual.Variable.HigherOrder.ReadableString);
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Test]

@@ -17,18 +17,25 @@ namespace Favalon.Expressions
         protected override string FormatReadableString(bool withAnnotation) =>
             this.Name;
 
+        internal VariableExpression CreateWithPlaceholder(Environment environment, InferContext context)
+        {
+            var placeholder = context.CreatePlaceholder();
+            var variable = new VariableExpression(this.Name, placeholder);
+            environment.SetNamedExpression(this.Name, variable);
+
+            return variable;
+        }
+
         protected internal override Expression Visit(Environment environment, InferContext context)
         {
             if (environment.TryGetNamedExpression(this.Name, out var resolved))
             {
                 return new VariableExpression(this.Name, resolved.HigherOrder);
             }
-
-            var placeholder = context.CreatePlaceholder();
-            var variable = new VariableExpression(this.Name, placeholder);
-            environment.SetNamedExpression(this.Name, variable);
-
-            return variable;
+            else
+            {
+                return this.CreateWithPlaceholder(environment, context);
+            }
         }
 
         protected internal override bool TraverseChildren(System.Func<Expression, int, Expression> yc, int rank) =>

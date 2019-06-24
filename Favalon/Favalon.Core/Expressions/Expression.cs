@@ -36,7 +36,7 @@ namespace Favalon.Expressions
             this.FormatReadableString(new FormatStringContext(false, false, false));
 
         public string StrictReadableString =>
-            this.FormatReadableString(new FormatStringContext(false, true, false));
+            this.FormatReadableString(new FormatStringContext(true, true, false));
 
         public override string ToString() =>
             $"{this.GetExpressionShortName()}: {this.GetReadableString(true, true, false)}";
@@ -48,7 +48,7 @@ namespace Favalon.Expressions
             this.CreateXml(new FormatStringContext(false, false, true));
 
         public XElement StrictXml =>
-            this.CreateXml(new FormatStringContext(false, true, true));
+            this.CreateXml(new FormatStringContext(true, true, true));
 
         /////////////////////////////////////////////////////////////////////////
 

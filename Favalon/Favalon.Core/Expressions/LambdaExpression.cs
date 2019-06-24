@@ -26,10 +26,13 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             this.Parameter.ShowInAnnotation && this.Expression.ShowInAnnotation;
 
-        protected internal override string FormatReadableString(FormatStringContext context) =>
-            (this.Parameter is LambdaExpression) ?
-                $"({this.Parameter.GetReadableString(context)}) -> {this.Expression.GetReadableString(context)}" :
-                $"{this.Parameter.GetReadableString(context)} -> {this.Expression.GetReadableString(context)}";
+        protected internal override string FormatReadableString(FormatStringContext context)
+        {
+            var arrow = context.Fancy ? "→" : "->";
+            return (this.Parameter is LambdaExpression) ?
+                $"({this.Parameter.GetReadableString(context)}) {arrow} {this.Expression.GetReadableString(context)}" :
+                $"{this.Parameter.GetReadableString(context)} {arrow} {this.Expression.GetReadableString(context)}";
+        }
 
         protected internal override Expression Visit(Environment environment, InferContext context)
         {

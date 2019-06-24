@@ -25,11 +25,11 @@ namespace Favalon.Expressions
         public static XElement CreateXml(this Expression expression, FormatStringContext context) =>
             new XElement(expression.GetExpressionShortName(),
                 new[] { (XObject)new XAttribute("expression", expression.GetReadableString(context.NewDerived(false, true))) }.
-                Concat(context.WithAnnotation ?
-                    new[] { (XObject)new XElement("HigherOrder", expression.HigherOrder.CreateXml(context)) } :
-                    expression.HigherOrder.ShowInAnnotation ?
-                        new[] { (XObject)new XAttribute("higherOrder", expression.HigherOrder.GetReadableString(context.NewDerived(false, true))) } :
-                        Enumerable.Empty<XObject>()).
+                Concat(expression.HigherOrder.ShowInAnnotation ?
+                    (context.WithAnnotation ?
+                        new[] { (XObject)new XElement("HigherOrder", expression.HigherOrder.CreateXml(context)) } :
+                        new[] { (XObject)new XAttribute("higherOrder", expression.HigherOrder.GetReadableString(context.NewDerived(false, true))) }) :
+                    Enumerable.Empty<XObject>()).
                 Concat(expression.CreateXmlChildren(context)).
                 ToArray<object>());
 

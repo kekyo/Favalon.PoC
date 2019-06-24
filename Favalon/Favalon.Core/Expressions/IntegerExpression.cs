@@ -11,7 +11,7 @@ namespace Favalon.Expressions
             base(Int32Type) =>
             this.Value = value;
 
-        protected internal override string FormatReadableString(bool withAnnotation) =>
+        protected internal override string FormatReadableString(ReadableStringContext context) =>
             this.Value.ToString();
 
         private static readonly TypeExpression Int32Type = new TypeExpression("System.Int32");

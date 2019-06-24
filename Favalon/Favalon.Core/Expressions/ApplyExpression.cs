@@ -27,10 +27,10 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             this.Argument.ShowInAnnotation;
 
-        protected internal override string FormatReadableString(bool withAnnotation) =>
+        protected internal override string FormatReadableString(ReadableStringContext context) =>
             (this.Argument is ApplyExpression) ?
-                $"{this.Function.GetReadableString(withAnnotation)} ({this.Argument.GetReadableString(withAnnotation)})" :
-                $"{this.Function.GetReadableString(withAnnotation)} {this.Argument.GetReadableString(withAnnotation)}";
+                $"{this.Function.GetReadableString(context)} ({this.Argument.GetReadableString(context)})" :
+                $"{this.Function.GetReadableString(context)} {this.Argument.GetReadableString(context)}";
 
         protected internal override Expression Visit(Environment environment, InferContext context)
         {

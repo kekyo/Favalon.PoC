@@ -13,7 +13,7 @@ namespace Favalon.Expressions
 
         public abstract string Name { get; }
 
-        protected internal override string FormatReadableString(bool withAnnotation) =>
+        protected internal override string FormatReadableString(ReadableStringContext context) =>
             this.Name;
 
         public override int GetHashCode() =>

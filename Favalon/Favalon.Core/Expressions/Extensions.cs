@@ -4,23 +4,38 @@ using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
+    public sealed class ReadableStringContext
+    {
+        public readonly bool WithAnnotation;
+        public readonly bool Fancy;
+
+        internal ReadableStringContext(bool withAnnotation, bool fancy)
+        {
+            this.WithAnnotation = withAnnotation;
+            this.Fancy = fancy;
+        }
+
+        public ReadableStringContext DisableAnnotation() =>
+            new ReadableStringContext(false, this.Fancy);
+    }
+
     public static class Extensions
     {
         public static string GetExpressionShortName(this Expression expression) =>
             expression.GetType().Name.Replace("Expression", string.Empty);
 
-        private static string InternalFormatReadableString(this Expression expression, bool withAnnotation) =>
+        private static string InternalFormatReadableString(this Expression expression, ReadableStringContext context) =>
             (expression is TermExpression) ?
-                expression.FormatReadableString(withAnnotation) :
-                $"({expression.FormatReadableString(withAnnotation)})";
+                expression.FormatReadableString(context) :
+                $"({expression.FormatReadableString(context)})";
 
-        public static string GetReadableString(this Expression expression, bool withAnnotation, bool fancy = false)
-        {
-            var str = (withAnnotation && expression.HigherOrder.ShowInAnnotation) ?
-                $"{expression.InternalFormatReadableString(true)}:{expression.HigherOrder.InternalFormatReadableString(false)}" :
-                expression.FormatReadableString(false);
-            return fancy ? str.Replace("->", "→") : str;
-        }
+        public static string GetReadableString(this Expression expression, ReadableStringContext context) =>
+            (context.WithAnnotation && expression.HigherOrder.ShowInAnnotation) ?
+                $"{expression.InternalFormatReadableString(context)}:{expression.HigherOrder.InternalFormatReadableString(context.DisableAnnotation())}" :
+                expression.FormatReadableString(context.DisableAnnotation());
+
+        public static string GetReadableString(this Expression expression, bool withAnnotation, bool fancy = false) =>
+            expression.GetReadableString(new ReadableStringContext(withAnnotation, fancy));
 
         public static XElement CreateXml(this Expression expression, bool strictAnnotation) =>
             new XElement(expression.GetExpressionShortName(),

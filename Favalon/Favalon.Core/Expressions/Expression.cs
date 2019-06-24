@@ -30,10 +30,10 @@ namespace Favalon.Expressions
         protected internal virtual TraverseResults Traverse(System.Func<Expression, int, Expression> ycon, int rank) =>
             TraverseResults.Finished;
 
-        protected internal abstract string FormatReadableString(bool withAnnotation);
+        protected internal abstract string FormatReadableString(ReadableStringContext context);
 
         public string ReadableString =>
-            this.FormatReadableString(false);
+            this.FormatReadableString(new ReadableStringContext(false, false));
 
         public override string ToString() =>
             $"{this.GetExpressionShortName()}: {this.GetReadableString(true)}";

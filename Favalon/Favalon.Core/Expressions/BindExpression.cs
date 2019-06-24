@@ -16,9 +16,6 @@ namespace Favalon.Expressions
         public Expression Expression { get; private set; }
         public Expression Body { get; private set; }
 
-        public override bool ShowInAnnotation =>
-            this.Body.ShowInAnnotation;
-
         protected override string FormatReadableString(bool withAnnotation) =>
             $"{this.Variable.GetReadableString(withAnnotation)} = {this.Expression.GetReadableString(withAnnotation)} in {this.Body.GetReadableString(withAnnotation)}";
 
@@ -27,13 +24,12 @@ namespace Favalon.Expressions
             // Bind expression scope details:
             // let x = y in z
             //     |   |    |
-            //     | outer  |   <-- environment
+            //     | outer  |
             //     |        |
-            //     +-inner--+   <-- scoped
-
-            var expression = this.Expression.Visit(environment, context);
+            //     +-inner--+
 
             var scoped = environment.NewScope();
+            var expression = this.Expression.Visit(scoped, context);
 
             // Force replacing with new placeholder.
             // Because the bind expression excepts inferring from derived environments,

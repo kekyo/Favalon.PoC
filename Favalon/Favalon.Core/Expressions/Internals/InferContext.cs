@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Favalon.Expressions.Internals
 {
@@ -83,11 +82,12 @@ namespace Favalon.Expressions.Internals
             return expression;
         }
 
-        internal void FixupPlaceholders()
+        internal void RearrangePlaceholderIndex()
         {
-            foreach (var entry in collection.Select((ph, index) => (ph, index)))
+            var index = 0;
+            foreach (var placeholder in collection)
             {
-                entry.ph.Index = entry.index;
+                placeholder.Index = index++;
             }
         }
     }

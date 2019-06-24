@@ -251,6 +251,25 @@ namespace Favalon.Expressions
             Assert.AreEqual("('a -> 'b) -> 'a -> 'b", actual.HigherOrder.ReadableString);
         }
 
+        [Test]
+        public void LambdaShadowed1()
+        {
+            var environment = new Environment();
+
+            // x -> y -> x -> x 123
+            // (x:'a -> (y:'b -> (x:(System.Int32 -> 'c) -> (x:(System.Int32 -> 'c) 123:System.Int32):'c):((System.Int32 -> 'c) -> 'c)):('b -> (System.Int32 -> 'c) -> 'c)):('a -> 'b -> (System.Int32 -> 'c) -> 'c)
+            var expression = Lambda("x", Lambda("y", Lambda("x", Apply("x", Integer(123)))));
+
+            var actual = (LambdaExpression)expression.Infer(environment);
+
+            var a = actual.GetReadableString(true);
+
+            Assert.AreEqual("x -> y -> x -> x 123", actual.ReadableString);
+            Assert.AreEqual("'a -> 'b -> (System.Int32 -> 'c) -> 'c", actual.HigherOrder.ReadableString);
+
+            //Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
         //[Test]

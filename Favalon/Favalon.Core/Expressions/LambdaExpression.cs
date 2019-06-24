@@ -1,4 +1,4 @@
-﻿using Favalon.Expressions.Internals;
+using Favalon.Expressions.Internals;
 
 namespace Favalon.Expressions
 {
@@ -33,7 +33,13 @@ namespace Favalon.Expressions
         {
             var scoped = environment.NewScope();
 
-            var parameter = this.Parameter.Visit(scoped, context);
+            // Force replacing with new placeholder at the variable parameter.
+            // Because the bind expression excepts inferring from derived environments,
+            // but uses variable expression instead simple name string.
+            // It requires annotation processing.
+            var parameter = (this.Parameter is VariableExpression variable) ?
+                variable.CreateWithPlaceholder(scoped, context) :
+                this.Parameter.Visit(scoped, context);
             var expression = this.Expression.Visit(scoped, context);
 
             return new LambdaExpression(parameter, expression);

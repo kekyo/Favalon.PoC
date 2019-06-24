@@ -1,4 +1,5 @@
 ﻿using Favalon.Expressions.Internals;
+
 using System.Runtime.CompilerServices;
 
 [assembly:InternalsVisibleTo("Favalon.Core.Tests")]
@@ -25,10 +26,10 @@ namespace Favalon.Expressions
         {
             var context = new InferContext();
             var visited = this.Visit(environment, context);
-            var fixup1 = context.FixupHigherOrders(visited, rank);
-            var fixup2 = context.AggregatePlaceholders(fixup1, rank);
-            context.FixupPlaceholders();
-            return fixup2;
+            var fixup = context.FixupHigherOrders(visited, rank);
+            var aggregated = context.AggregatePlaceholders(fixup, rank);
+            context.RearrangePlaceholderIndex();
+            return aggregated;
         }
 
         protected abstract string FormatReadableString(bool withAnnotation);

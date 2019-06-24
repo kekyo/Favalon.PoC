@@ -9,6 +9,7 @@ namespace Favalon.Expressions
             this.Index = index;
 
         public int Index { get; internal set; }
+
         public override string Name
         {
             get

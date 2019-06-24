@@ -45,11 +45,12 @@ namespace Favalon.Expressions
             return new LambdaExpression(parameter, expression);
         }
 
-        protected internal override bool TraverseChildren(System.Func<Expression, int, Expression> yc, int rank)
+        protected internal override TraverseResults Traverse(System.Func<Expression, int, Expression> yc, int rank)
         {
             this.Parameter = yc(this.Parameter, rank);
             this.Expression = yc(this.Expression, rank);
-            return true;
+
+            return TraverseResults.RequeireHigherOrder;
         }
     }
 }

@@ -8,6 +8,12 @@ namespace Favalon.Expressions
 {
     public abstract class Expression
     {
+        protected internal enum TraverseResults
+        {
+            Finished,
+            RequeireHigherOrder
+        }
+
         protected Expression(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
@@ -19,8 +25,8 @@ namespace Favalon.Expressions
         protected internal virtual Expression Visit(Environment environment, InferContext context) =>
             this;
 
-        protected internal virtual bool TraverseChildren(System.Func<Expression, int, Expression> ycon, int rank) =>
-            false;
+        protected internal virtual TraverseResults Traverse(System.Func<Expression, int, Expression> ycon, int rank) =>
+            TraverseResults.Finished;
 
         public Expression Infer(Environment environment, int rank = 0)
         {

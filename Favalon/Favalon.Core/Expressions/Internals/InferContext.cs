@@ -59,7 +59,7 @@ namespace Favalon.Expressions.Internals
                 }
             }
 
-            if (expression.TraverseChildren(this.FixupHigherOrders, rank))
+            if (expression.Traverse(this.FixupHigherOrders, rank) == Expression.TraverseResults.RequeireHigherOrder)
             {
                 expression.HigherOrder = this.FixupHigherOrders(expression.HigherOrder, rank + 1);
             }
@@ -74,7 +74,7 @@ namespace Favalon.Expressions.Internals
                 collection.Add(placeholder);
             }
 
-            if (expression.TraverseChildren(this.AggregatePlaceholders, rank))
+            if (expression.Traverse(this.AggregatePlaceholders, rank) == Expression.TraverseResults.RequeireHigherOrder)
             {
                 expression.HigherOrder = this.AggregatePlaceholders(expression.HigherOrder, rank + 1);
             }

@@ -46,13 +46,13 @@ namespace Favalon.Expressions
             return new BindExpression(variable, expression, body);
         }
 
-        protected internal override bool TraverseChildren(System.Func<Expression, int, Expression> yc, int rank)
+        protected internal override TraverseResults Traverse(System.Func<Expression, int, Expression> yc, int rank)
         {
             this.Variable = (VariableExpression)yc(this.Variable, rank);
             this.Expression = yc(this.Expression, rank);
             this.Body = yc(this.Body, rank);
 
-            return true;
+            return TraverseResults.RequeireHigherOrder;
         }
     }
 }

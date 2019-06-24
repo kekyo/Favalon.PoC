@@ -38,8 +38,8 @@ namespace Favalon.Expressions
             }
         }
 
-        protected internal override bool TraverseChildren(System.Func<Expression, int, Expression> yc, int rank) =>
-            true;
+        protected internal override TraverseResults Traverse(System.Func<Expression, int, Expression> yc, int rank) =>
+            TraverseResults.RequeireHigherOrder;
 
         /////////////////////////////////////////////////////////////////////////
 

@@ -51,11 +51,12 @@ namespace Favalon.Expressions
             return new ApplyExpression(function, argument, resultHigherOrder);
         }
 
-        protected internal override bool TraverseChildren(System.Func<Expression, int, Expression> yc, int rank)
+        protected internal override TraverseResults Traverse(System.Func<Expression, int, Expression> yc, int rank)
         {
             this.Function = yc(this.Function, rank);
             this.Argument = yc(this.Argument, rank);
-            return true;
+
+            return TraverseResults.RequeireHigherOrder;
         }
     }
 }

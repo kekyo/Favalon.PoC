@@ -151,9 +151,9 @@ namespace Favalon.Expressions
             var actual = (BindExpression)expression.Infer(environment);
 
             Assert.AreEqual("x = y System.Int32 System.Int64 in y", actual.ReadableString);
-            Assert.AreEqual("(Kind) -> 'a", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("(Kind) -> (Kind) -> 'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("'b", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("'T2", actual.Variable.HigherOrder.StrictReadableString);
         }
 
         [Test]
@@ -169,7 +169,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = y (z System.Int32) in y", actual.ReadableString);
             Assert.AreEqual("'a -> 'b", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("'b", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("'T3", actual.Variable.HigherOrder.StrictReadableString);
         }
 
         [Test]
@@ -235,5 +235,21 @@ namespace Favalon.Expressions
             Assert.AreEqual("('a -> 'b) -> 'a -> 'b", actual.HigherOrder.ReadableString);
         }
 #endif
+
+        [Test]
+        public void LambdaShadowed1()
+        {
+            var environment = new Environment();
+
+            // x -> y -> x -> x System.Int32
+            var expression = Lambda("x", Lambda("y", Lambda("x", Apply("x", Type("System.Int32")))));
+
+            var actual = (LambdaExpression)expression.Infer(environment);
+
+            Assert.AreEqual("x -> y -> x -> x System.Int32", actual.ReadableString);
+            Assert.AreEqual("'a -> 'b -> ((Kind) -> 'c) -> 'c", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("'a", actual.Parameter.HigherOrder.ReadableString);
+        }
     }
 }

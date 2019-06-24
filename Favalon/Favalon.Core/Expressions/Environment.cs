@@ -4,21 +4,34 @@ namespace Favalon.Expressions
 {
     public sealed class Environment
     {
-        private readonly Environment? parent;
-        private Dictionary<string, Expression>? namedExpressions;
-
-        private Environment(Environment parent)
+        private sealed class IndexCell
         {
-            this.parent = parent;
+            private long index;
+            public long Next() =>
+                index++;
         }
 
-        public Environment() { }
+        private readonly Environment? parent;
+        private Dictionary<string, Expression>? namedExpressions;
+        private IndexCell indexCell;
+
+        private Environment(Environment parent, IndexCell indexCell)
+        {
+            this.parent = parent;
+            this.indexCell = indexCell;
+        }
+
+        public Environment() =>
+            indexCell = new IndexCell();
 
         public void Reset() =>
             namedExpressions = null;
 
         internal Environment NewScope() =>
-            new Environment(this);
+            new Environment(this, indexCell);
+
+        public PlaceholderExpression CreatePlaceholder() =>
+            new PlaceholderExpression(indexCell.Next());
 
         internal bool TryGetNamedExpression(string name, out Expression expression)
         {

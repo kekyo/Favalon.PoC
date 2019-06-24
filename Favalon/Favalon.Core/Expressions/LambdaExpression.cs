@@ -39,19 +39,12 @@ namespace Favalon.Expressions
             // Because the bind expression excepts inferring from derived environments,
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
-            if (this.Parameter is VariableExpression variable)
-            {
-                var parameter = variable.CreateWithPlaceholder(scoped, context);
-                var expression = this.Expression.Visit(scoped, context);
-                context.UnifyExpression(variable.HigherOrder, expression.HigherOrder);
-                return new LambdaExpression(parameter, expression);
-            }
-            else
-            {
-                var parameter = this.Parameter.Visit(scoped, context);
-                var expression = this.Expression.Visit(scoped, context);
-                return new LambdaExpression(parameter, expression);
-            }
+            var parameter = (this.Parameter is VariableExpression variable) ?
+                variable.CreateWithPlaceholder(scoped, context) :
+                this.Parameter.Visit(scoped, context);
+            var expression = this.Expression.Visit(scoped, context);
+
+            return new LambdaExpression(parameter, expression);
         }
 
         protected internal override TraverseResults Traverse(System.Func<Expression, int, Expression> yc, int rank)

@@ -262,21 +262,5 @@ namespace Favalon.Expressions
 
             Assert.AreEqual("'a", actual.Parameter.HigherOrder.ReadableString);
         }
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////
-
-        //[Test]
-        //public void RecursiveFunction()
-        //{
-        //    var environment = new Environment();
-
-        //    // x = y -> x 123 in x 456
-        //    var expression = Bind("x", Lambda("y", Apply("x", Integer(123))), Apply("x", Integer(456)));
-
-        //    var actual = (BindExpression)expression.Infer(environment);
-
-        //    Assert.AreEqual("x -> y 123", actual.ReadableString);
-        //    Assert.AreEqual("'a -> 'b", actual.HigherOrder.ReadableString);
-        //}
     }
 }

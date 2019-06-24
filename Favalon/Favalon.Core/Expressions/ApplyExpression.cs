@@ -37,7 +37,7 @@ namespace Favalon.Expressions
             var function = this.Function.Visit(environment, context);
             var argument = this.Argument.Visit(environment, context);
 
-            var resultHigherOrder = context.CreatePlaceholder();
+            var resultHigherOrder = environment.CreatePlaceholder();
 
             var variableHigherOrder = new LambdaExpression(argument.HigherOrder, resultHigherOrder);
             context.UnifyExpression(function.HigherOrder, variableHigherOrder);

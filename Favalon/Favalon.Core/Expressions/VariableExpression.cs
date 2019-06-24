@@ -16,7 +16,7 @@ namespace Favalon.Expressions
 
         internal VariableExpression CreateWithPlaceholder(Environment environment, InferContext context)
         {
-            var placeholder = context.CreatePlaceholder();
+            var placeholder = environment.CreatePlaceholder();
             var variable = new VariableExpression(this.Name, placeholder);
             environment.SetNamedExpression(this.Name, variable);
 

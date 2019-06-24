@@ -4,15 +4,10 @@ namespace Favalon.Expressions.Internals
 {
     public sealed class InferContext
     {
-        private static long index;
-
         private readonly Dictionary<IdentityExpression, Expression> identities =
             new Dictionary<IdentityExpression, Expression>();
 
         internal InferContext() { }
-
-        public PlaceholderExpression CreatePlaceholder() =>
-            new PlaceholderExpression(index++);
 
         public void UnifyExpression(Expression expression1, Expression expression2)
         {

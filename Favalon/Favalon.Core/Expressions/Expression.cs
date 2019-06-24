@@ -30,19 +30,25 @@ namespace Favalon.Expressions
         protected internal virtual TraverseResults Traverse(System.Func<Expression, int, Expression> ycon, int rank) =>
             TraverseResults.Finished;
 
-        protected internal abstract string FormatReadableString(ReadableStringContext context);
+        protected internal abstract string FormatReadableString(FormatStringContext context);
 
         public string ReadableString =>
-            this.FormatReadableString(new ReadableStringContext(false, false));
+            this.FormatReadableString(new FormatStringContext(false, false, false));
+
+        public string StrictReadableString =>
+            this.FormatReadableString(new FormatStringContext(false, true, false));
 
         public override string ToString() =>
-            $"{this.GetExpressionShortName()}: {this.GetReadableString(true)}";
+            $"{this.GetExpressionShortName()}: {this.GetReadableString(true, true, false)}";
 
-        protected internal virtual IEnumerable<XObject> CreateXmlChildren(bool strictAnnotation) =>
+        protected internal virtual IEnumerable<XObject> CreateXmlChildren(FormatStringContext context) =>
             Enumerable.Empty<XObject>();
 
         public XElement Xml =>
-            this.CreateXml(false);
+            this.CreateXml(new FormatStringContext(false, false, true));
+
+        public XElement StrictXml =>
+            this.CreateXml(new FormatStringContext(false, true, true));
 
         /////////////////////////////////////////////////////////////////////////
 

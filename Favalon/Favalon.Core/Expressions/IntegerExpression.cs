@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Xml.Linq;
+﻿using Favalon.Expressions.Internals;
 
 namespace Favalon.Expressions
 {
@@ -11,7 +10,7 @@ namespace Favalon.Expressions
             base(Int32Type) =>
             this.Value = value;
 
-        protected internal override string FormatReadableString(ReadableStringContext context) =>
+        protected internal override string FormatReadableString(FormatStringContext context) =>
             this.Value.ToString();
 
         private static readonly TypeExpression Int32Type = new TypeExpression("System.Int32");

@@ -2,7 +2,7 @@
 
 namespace Favalon.Expressions
 {
-    using static StaticFactory;
+    using static Internals.StaticFactory;
 
     [TestFixture]
     public sealed class RankZeroExpressionTest
@@ -151,9 +151,7 @@ namespace Favalon.Expressions
             var actual = (BindExpression)expression.Infer(environment);
 
             Assert.AreEqual("x = y 123 456 in y", actual.ReadableString);
-            Assert.AreEqual("System.Int32 -> 'a", actual.HigherOrder.ReadableString);
-
-            Assert.AreEqual("'b", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> System.Int32 -> 'a", actual.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -168,8 +166,6 @@ namespace Favalon.Expressions
 
             Assert.AreEqual("x = y (z 123) in y", actual.ReadableString);
             Assert.AreEqual("'a -> 'b", actual.HigherOrder.ReadableString);
-
-            Assert.AreEqual("'b", actual.Variable.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -194,14 +190,14 @@ namespace Favalon.Expressions
             var environment = new Environment();
 
             // x = z 456
-            environment.SetNamedExpression("x2", Lambda("z", Integer(456)).Infer(environment));
+            environment.SetNamedExpression("x", Lambda("z", Integer(456)).Infer(environment));
 
             // x = 123 in y
-            var expression = Bind("x", Integer(123), "x2");
+            var expression = Bind("x", Integer(123), "x");
 
             var actual = (BindExpression)expression.Infer(environment);
 
-            Assert.AreEqual("x = 123 in x2", actual.ReadableString);
+            Assert.AreEqual("x = 123 in x", actual.ReadableString);
             Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
 
             Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);

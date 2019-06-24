@@ -26,7 +26,7 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             this.Parameter.ShowInAnnotation && this.Expression.ShowInAnnotation;
 
-        protected internal override string FormatReadableString(ReadableStringContext context) =>
+        protected internal override string FormatReadableString(FormatStringContext context) =>
             (this.Parameter is LambdaExpression) ?
                 $"({this.Parameter.GetReadableString(context)}) -> {this.Expression.GetReadableString(context)}" :
                 $"{this.Parameter.GetReadableString(context)} -> {this.Expression.GetReadableString(context)}";
@@ -39,12 +39,19 @@ namespace Favalon.Expressions
             // Because the bind expression excepts inferring from derived environments,
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
-            var parameter = (this.Parameter is VariableExpression variable) ?
-                variable.CreateWithPlaceholder(scoped, context) :
-                this.Parameter.Visit(scoped, context);
-            var expression = this.Expression.Visit(scoped, context);
-
-            return new LambdaExpression(parameter, expression);
+            if (this.Parameter is VariableExpression variable)
+            {
+                var parameter = variable.CreateWithPlaceholder(scoped, context);
+                var expression = this.Expression.Visit(scoped, context);
+                context.UnifyExpression(variable.HigherOrder, expression.HigherOrder);
+                return new LambdaExpression(parameter, expression);
+            }
+            else
+            {
+                var parameter = this.Parameter.Visit(scoped, context);
+                var expression = this.Expression.Visit(scoped, context);
+                return new LambdaExpression(parameter, expression);
+            }
         }
 
         protected internal override TraverseResults Traverse(System.Func<Expression, int, Expression> yc, int rank)
@@ -55,7 +62,7 @@ namespace Favalon.Expressions
             return TraverseResults.RequeireHigherOrder;
         }
 
-        protected internal override IEnumerable<XObject> CreateXmlChildren(bool strictAnnotation) =>
-            new[] { this.Parameter.CreateXml(strictAnnotation), this.Expression.CreateXml(strictAnnotation) };
+        protected internal override IEnumerable<XObject> CreateXmlChildren(FormatStringContext context) =>
+            new[] { this.Parameter.CreateXml(context), this.Expression.CreateXml(context) };
     }
 }

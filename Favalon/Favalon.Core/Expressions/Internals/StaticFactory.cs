@@ -1,4 +1,4 @@
-﻿namespace Favalon.Expressions
+﻿namespace Favalon.Expressions.Internals
 {
     public static class StaticFactory
     {

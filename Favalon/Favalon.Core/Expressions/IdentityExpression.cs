@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml.Linq;
+﻿using Favalon.Expressions.Internals;
+using System;
 
 namespace Favalon.Expressions
 {
     public abstract class IdentityExpression : TermExpression,
-        IEquatable<IdentityExpression>, IComparable<IdentityExpression>
+        IEquatable<IdentityExpression>
     {
         protected IdentityExpression(Expression higherOrder) :
             base(higherOrder)
@@ -13,16 +12,16 @@ namespace Favalon.Expressions
 
         public abstract string Name { get; }
 
-        protected internal override string FormatReadableString(ReadableStringContext context) =>
+        protected internal override string FormatReadableString(FormatStringContext context) =>
             this.Name;
 
         public override int GetHashCode() =>
             this.Name.GetHashCode();
 
-        public bool Equals(IdentityExpression other) =>
+        public virtual bool Equals(IdentityExpression other) =>
             this.Name.Equals(other.Name);
 
-        public int CompareTo(IdentityExpression other) =>
-            this.Name.CompareTo(other.Name);
+        public override bool Equals(object obj) =>
+            obj is IdentityExpression identity ? this.Equals(identity) : false;
     }
 }

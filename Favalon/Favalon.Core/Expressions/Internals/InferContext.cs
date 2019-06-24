@@ -4,11 +4,10 @@ namespace Favalon.Expressions.Internals
 {
     public sealed class InferContext
     {
+        private static long index;
+
         private readonly Dictionary<IdentityExpression, Expression> identities =
             new Dictionary<IdentityExpression, Expression>();
-        private readonly SortedSet<PlaceholderExpression> collection =
-            new SortedSet<PlaceholderExpression>();
-        private int index;
 
         internal InferContext() { }
 
@@ -51,44 +50,32 @@ namespace Favalon.Expressions.Internals
 
         public Expression FixupHigherOrders(Expression expression, int rank)
         {
-            if (expression is IdentityExpression identity)
+            var current = expression;
+
+            if (current is IdentityExpression identity)
             {
                 if (identities.TryGetValue(identity, out var resolved))
                 {
-                    return resolved;
+                    current = resolved;
                 }
             }
 
-            if (expression.Traverse(this.FixupHigherOrders, rank) == Expression.TraverseResults.RequeireHigherOrder)
+            if (current.Traverse(this.FixupHigherOrders, rank) == Expression.TraverseResults.RequeireHigherOrder)
             {
-                expression.HigherOrder = this.FixupHigherOrders(expression.HigherOrder, rank + 1);
+                current.HigherOrder = this.FixupHigherOrders(current.HigherOrder, rank + 1);
             }
 
-            return expression;
+            return current;
         }
 
         public Expression AggregatePlaceholders(Expression expression, int rank)
         {
-            if (expression is PlaceholderExpression placeholder)
-            {
-                collection.Add(placeholder);
-            }
-
             if (expression.Traverse(this.AggregatePlaceholders, rank) == Expression.TraverseResults.RequeireHigherOrder)
             {
                 expression.HigherOrder = this.AggregatePlaceholders(expression.HigherOrder, rank + 1);
             }
 
             return expression;
-        }
-
-        internal void RearrangePlaceholderIndex()
-        {
-            var index = 0;
-            foreach (var placeholder in collection)
-            {
-                placeholder.Index = index++;
-            }
         }
     }
 }

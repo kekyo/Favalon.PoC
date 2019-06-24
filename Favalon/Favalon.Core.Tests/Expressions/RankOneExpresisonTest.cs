@@ -2,7 +2,7 @@
 
 namespace Favalon.Expressions
 {
-    using static StaticFactory;
+    using static Internals.StaticFactory;
 
     [TestFixture]
     public sealed class RankOneExpressionTest

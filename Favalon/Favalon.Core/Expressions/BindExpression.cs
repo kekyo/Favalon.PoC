@@ -18,7 +18,7 @@ namespace Favalon.Expressions
         public Expression Expression { get; private set; }
         public Expression Body { get; private set; }
 
-        protected internal override string FormatReadableString(ReadableStringContext context) =>
+        protected internal override string FormatReadableString(FormatStringContext context) =>
             $"{this.Variable.GetReadableString(context)} = {this.Expression.GetReadableString(context)} in {this.Body.GetReadableString(context)}";
 
         protected internal override Expression Visit(Environment environment, InferContext context)
@@ -57,7 +57,7 @@ namespace Favalon.Expressions
             return TraverseResults.RequeireHigherOrder;
         }
 
-        protected internal override IEnumerable<XObject> CreateXmlChildren(bool strictAnnotation) =>
-            new[] { this.Variable.CreateXml(strictAnnotation), this.Expression.CreateXml(strictAnnotation), this.Body.CreateXml(strictAnnotation) };
+        protected internal override IEnumerable<XObject> CreateXmlChildren(FormatStringContext context) =>
+            new[] { this.Variable.CreateXml(context), this.Expression.CreateXml(context), this.Body.CreateXml(context) };
     }
 }

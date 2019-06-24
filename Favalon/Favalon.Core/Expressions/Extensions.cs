@@ -4,48 +4,33 @@ using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
-    public sealed class ReadableStringContext
-    {
-        public readonly bool WithAnnotation;
-        public readonly bool Fancy;
-
-        internal ReadableStringContext(bool withAnnotation, bool fancy)
-        {
-            this.WithAnnotation = withAnnotation;
-            this.Fancy = fancy;
-        }
-
-        public ReadableStringContext DisableAnnotation() =>
-            new ReadableStringContext(false, this.Fancy);
-    }
-
     public static class Extensions
     {
         public static string GetExpressionShortName(this Expression expression) =>
             expression.GetType().Name.Replace("Expression", string.Empty);
 
-        private static string InternalFormatReadableString(this Expression expression, ReadableStringContext context) =>
+        private static string InternalFormatReadableString(this Expression expression, FormatStringContext context) =>
             (expression is TermExpression) ?
                 expression.FormatReadableString(context) :
                 $"({expression.FormatReadableString(context)})";
 
-        public static string GetReadableString(this Expression expression, ReadableStringContext context) =>
+        public static string GetReadableString(this Expression expression, FormatStringContext context) =>
             (context.WithAnnotation && expression.HigherOrder.ShowInAnnotation) ?
-                $"{expression.InternalFormatReadableString(context)}:{expression.HigherOrder.InternalFormatReadableString(context.DisableAnnotation())}" :
-                expression.FormatReadableString(context.DisableAnnotation());
+                $"{expression.InternalFormatReadableString(context)}:{expression.HigherOrder.InternalFormatReadableString(context.NewDerived(false, null))}" :
+                expression.FormatReadableString(context.NewDerived(false, null));
 
-        public static string GetReadableString(this Expression expression, bool withAnnotation, bool fancy = false) =>
-            expression.GetReadableString(new ReadableStringContext(withAnnotation, fancy));
+        public static string GetReadableString(this Expression expression, bool withAnnotation, bool strictPlaceholderNaming, bool fancy) =>
+            expression.GetReadableString(new FormatStringContext(withAnnotation, strictPlaceholderNaming, fancy));
 
-        public static XElement CreateXml(this Expression expression, bool strictAnnotation) =>
+        public static XElement CreateXml(this Expression expression, FormatStringContext context) =>
             new XElement(expression.GetExpressionShortName(),
-                new[] { (XObject)new XAttribute("expression", expression.GetReadableString(false, true)) }.
-                Concat(strictAnnotation ?
-                    new[] { (XObject)new XElement("HigherOrder", expression.HigherOrder.CreateXml(strictAnnotation)) } :
+                new[] { (XObject)new XAttribute("expression", expression.GetReadableString(context.NewDerived(false, true))) }.
+                Concat(context.WithAnnotation ?
+                    new[] { (XObject)new XElement("HigherOrder", expression.HigherOrder.CreateXml(context)) } :
                     expression.HigherOrder.ShowInAnnotation ?
-                        new[] { (XObject)new XAttribute("higherOrder", expression.HigherOrder.GetReadableString(false, true)) } :
+                        new[] { (XObject)new XAttribute("higherOrder", expression.HigherOrder.GetReadableString(context.NewDerived(false, true))) } :
                         Enumerable.Empty<XObject>()).
-                Concat(expression.CreateXmlChildren(strictAnnotation)).
+                Concat(expression.CreateXmlChildren(context)).
                 ToArray<object>());
 
         public static Expression Infer(this Expression expression, Environment environment, int rank = 0)
@@ -53,9 +38,7 @@ namespace Favalon.Expressions
             var context = new InferContext();
             var visited = expression.Visit(environment, context);
             var fixup = context.FixupHigherOrders(visited, rank);
-            var aggregated = context.AggregatePlaceholders(fixup, rank);
-            context.RearrangePlaceholderIndex();
-            return aggregated;
+            return context.AggregatePlaceholders(fixup, rank);
         }
     }
 }

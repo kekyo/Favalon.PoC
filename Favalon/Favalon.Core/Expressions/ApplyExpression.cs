@@ -27,7 +27,7 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             this.Argument.ShowInAnnotation;
 
-        protected internal override string FormatReadableString(ReadableStringContext context) =>
+        protected internal override string FormatReadableString(FormatStringContext context) =>
             (this.Argument is ApplyExpression) ?
                 $"{this.Function.GetReadableString(context)} ({this.Argument.GetReadableString(context)})" :
                 $"{this.Function.GetReadableString(context)} {this.Argument.GetReadableString(context)}";
@@ -39,16 +39,8 @@ namespace Favalon.Expressions
 
             var resultHigherOrder = context.CreatePlaceholder();
 
-            if (function is VariableExpression variable)
-            {
-                var variableHigherOrder = new LambdaExpression(argument.HigherOrder, resultHigherOrder);
-                context.UnifyExpression(variable.HigherOrder, variableHigherOrder);
-                environment.SetNamedExpression(variable.Name, variable);
-            }
-            else
-            {
-                context.UnifyExpression(function.HigherOrder, resultHigherOrder);
-            }
+            var variableHigherOrder = new LambdaExpression(argument.HigherOrder, resultHigherOrder);
+            context.UnifyExpression(function.HigherOrder, variableHigherOrder);
 
             return new ApplyExpression(function, argument, resultHigherOrder);
         }
@@ -61,7 +53,7 @@ namespace Favalon.Expressions
             return TraverseResults.RequeireHigherOrder;
         }
 
-        protected internal override IEnumerable<XObject> CreateXmlChildren(bool strictAnnotation) =>
-            new[] { this.Function.CreateXml(strictAnnotation), this.Argument.CreateXml(strictAnnotation) };
+        protected internal override IEnumerable<XObject> CreateXmlChildren(FormatStringContext context) =>
+            new[] { this.Function.CreateXml(context), this.Argument.CreateXml(context) };
     }
 }

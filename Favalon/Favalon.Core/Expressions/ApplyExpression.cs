@@ -1,4 +1,6 @@
 ﻿using Favalon.Expressions.Internals;
+using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
@@ -58,5 +60,8 @@ namespace Favalon.Expressions
 
             return TraverseResults.RequeireHigherOrder;
         }
+
+        protected internal override IEnumerable<XObject> CreateXmlChildren(bool strictAnnotation) =>
+            new[] { this.Function.CreateXml(strictAnnotation), this.Argument.CreateXml(strictAnnotation) };
     }
 }

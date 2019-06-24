@@ -188,24 +188,24 @@ namespace Favalon.Expressions
             Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
         }
 
-        //[Test]
-        //public void BindShadowed2()
-        //{
-        //    var environment = new Environment();
+        [Test]
+        public void BindShadowed2()
+        {
+            var environment = new Environment();
 
-        //    // x = z 456
-        //    environment.SetNamedExpression("x", Lambda("z", Integer(456)).Infer(environment));
+            // x = z 456
+            environment.SetNamedExpression("x2", Lambda("z", Integer(456)).Infer(environment));
 
-        //    // x = 123 in y
-        //    var expression = Bind("x", Integer(123), "y");
+            // x = 123 in y
+            var expression = Bind("x", Integer(123), "x2");
 
-        //    var actual = (BindExpression)expression.Infer(environment);
+            var actual = (BindExpression)expression.Infer(environment);
 
-        //    Assert.AreEqual("x = 123 in y", actual.ReadableString);
-        //    Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("x = 123 in x2", actual.ReadableString);
+            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
 
-        //    Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
-        //}
+            Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
+        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -257,17 +257,14 @@ namespace Favalon.Expressions
             var environment = new Environment();
 
             // x -> y -> x -> x 123
-            // (x:'a -> (y:'b -> (x:(System.Int32 -> 'c) -> (x:(System.Int32 -> 'c) 123:System.Int32):'c):((System.Int32 -> 'c) -> 'c)):('b -> (System.Int32 -> 'c) -> 'c)):('a -> 'b -> (System.Int32 -> 'c) -> 'c)
             var expression = Lambda("x", Lambda("y", Lambda("x", Apply("x", Integer(123)))));
 
             var actual = (LambdaExpression)expression.Infer(environment);
 
-            var a = actual.GetReadableString(true);
-
             Assert.AreEqual("x -> y -> x -> x 123", actual.ReadableString);
             Assert.AreEqual("'a -> 'b -> (System.Int32 -> 'c) -> 'c", actual.HigherOrder.ReadableString);
 
-            //Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("'a", actual.Parameter.HigherOrder.ReadableString);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////

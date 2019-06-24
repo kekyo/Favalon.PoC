@@ -1,4 +1,7 @@
-﻿namespace Favalon.Expressions
+﻿using System.Collections.Generic;
+using System.Xml.Linq;
+
+namespace Favalon.Expressions
 {
     public sealed class IntegerExpression : TermExpression
     {

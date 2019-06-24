@@ -1,6 +1,8 @@
 ﻿using Favalon.Expressions.Internals;
-
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 [assembly:InternalsVisibleTo("Favalon.Core.Tests")]
 
@@ -34,7 +36,13 @@ namespace Favalon.Expressions
             this.FormatReadableString(false);
 
         public override string ToString() =>
-            $"{this.GetType().Name.Replace("Expression", string.Empty)}: {this.GetReadableString(true)}";
+            $"{this.GetExpressionShortName()}: {this.GetReadableString(true)}";
+
+        protected internal virtual IEnumerable<XObject> CreateXmlChildren(bool strictAnnotation) =>
+            Enumerable.Empty<XObject>();
+
+        public XElement Xml =>
+            this.CreateXml(false);
 
         /////////////////////////////////////////////////////////////////////////
 

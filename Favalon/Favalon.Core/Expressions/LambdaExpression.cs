@@ -24,7 +24,7 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             this.Parameter.ShowInAnnotation && this.Expression.ShowInAnnotation;
 
-        protected override string FormatReadableString(bool withAnnotation) =>
+        protected internal override string FormatReadableString(bool withAnnotation) =>
             (this.Parameter is LambdaExpression) ?
                 $"({this.Parameter.GetReadableString(withAnnotation)}) -> {this.Expression.GetReadableString(withAnnotation)}" :
                 $"{this.Parameter.GetReadableString(withAnnotation)} -> {this.Expression.GetReadableString(withAnnotation)}";

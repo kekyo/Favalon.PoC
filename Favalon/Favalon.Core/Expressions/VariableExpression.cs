@@ -14,9 +14,6 @@ namespace Favalon.Expressions
 
         public override string Name { get; }
 
-        protected override string FormatReadableString(bool withAnnotation) =>
-            this.Name;
-
         internal VariableExpression CreateWithPlaceholder(Environment environment, InferContext context)
         {
             var placeholder = context.CreatePlaceholder();

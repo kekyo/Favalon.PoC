@@ -28,27 +28,7 @@ namespace Favalon.Expressions
         protected internal virtual TraverseResults Traverse(System.Func<Expression, int, Expression> ycon, int rank) =>
             TraverseResults.Finished;
 
-        public Expression Infer(Environment environment, int rank = 0)
-        {
-            var context = new InferContext();
-            var visited = this.Visit(environment, context);
-            var fixup = context.FixupHigherOrders(visited, rank);
-            var aggregated = context.AggregatePlaceholders(fixup, rank);
-            context.RearrangePlaceholderIndex();
-            return aggregated;
-        }
-
-        protected abstract string FormatReadableString(bool withAnnotation);
-
-        private string InternalFormatReadableString(bool withAnnotation) =>
-            (this is TermExpression) ?
-                this.FormatReadableString(withAnnotation) :
-                $"({this.FormatReadableString(withAnnotation)})";
-
-        public string GetReadableString(bool withAnnotation) =>
-            (withAnnotation && this.HigherOrder.ShowInAnnotation) ?
-                $"{this.InternalFormatReadableString(true)}:{this.HigherOrder.InternalFormatReadableString(false)}" :
-                this.FormatReadableString(false);
+        protected internal abstract string FormatReadableString(bool withAnnotation);
 
         public string ReadableString =>
             this.FormatReadableString(false);

@@ -11,7 +11,7 @@ namespace Favalon.Expressions
 
         public abstract string Name { get; }
 
-        protected override string FormatReadableString(bool withAnnotation) =>
+        protected internal override string FormatReadableString(bool withAnnotation) =>
             this.Name;
 
         public override int GetHashCode() =>

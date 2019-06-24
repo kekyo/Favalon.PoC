@@ -10,7 +10,7 @@
         public override bool ShowInAnnotation =>
             false;
 
-        protected override string FormatReadableString(bool withAnnotation) =>
+        protected internal override string FormatReadableString(bool withAnnotation) =>
             "(Undefined)";
 
         public static readonly UndefinedExpression Instance = new UndefinedExpression();

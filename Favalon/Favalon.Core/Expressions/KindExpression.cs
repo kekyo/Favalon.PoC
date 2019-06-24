@@ -11,7 +11,7 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             false;
 
-        protected override string FormatReadableString(bool withAnnotation) =>
+        protected internal override string FormatReadableString(bool withAnnotation) =>
             "(Kind)";
 
         public static readonly KindExpression Instance = new KindExpression();

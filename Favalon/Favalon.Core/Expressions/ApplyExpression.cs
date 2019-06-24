@@ -25,7 +25,7 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             this.Argument.ShowInAnnotation;
 
-        protected override string FormatReadableString(bool withAnnotation) =>
+        protected internal override string FormatReadableString(bool withAnnotation) =>
             (this.Argument is ApplyExpression) ?
                 $"{this.Function.GetReadableString(withAnnotation)} ({this.Argument.GetReadableString(withAnnotation)})" :
                 $"{this.Function.GetReadableString(withAnnotation)} {this.Argument.GetReadableString(withAnnotation)}";

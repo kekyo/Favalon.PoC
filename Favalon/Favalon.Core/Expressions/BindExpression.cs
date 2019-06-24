@@ -16,7 +16,7 @@ namespace Favalon.Expressions
         public Expression Expression { get; private set; }
         public Expression Body { get; private set; }
 
-        protected override string FormatReadableString(bool withAnnotation) =>
+        protected internal override string FormatReadableString(bool withAnnotation) =>
             $"{this.Variable.GetReadableString(withAnnotation)} = {this.Expression.GetReadableString(withAnnotation)} in {this.Body.GetReadableString(withAnnotation)}";
 
         protected internal override Expression Visit(Environment environment, InferContext context)

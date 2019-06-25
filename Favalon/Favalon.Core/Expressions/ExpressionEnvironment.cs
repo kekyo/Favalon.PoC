@@ -55,20 +55,13 @@ namespace Favalon.Expressions
             return false;
         }
 
-        public ExpressionEnvironment Bind(string boundName, Expression expression, bool newScope = false)
+        public void Bind(string boundName, Expression expression)
         {
-            if (newScope)
-            {
-                return this.NewScope().Bind(boundName, expression, false);
-            }
-
             if (bindExpressions == null)
             {
                 bindExpressions = new Dictionary<string, Expression>();
             }
             bindExpressions[boundName] = expression;
-
-            return this;
         }
 
         public static ExpressionEnvironment Create() =>

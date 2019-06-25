@@ -2,8 +2,8 @@
 {
     partial class Expression
     {
-        public static IntegerExpression Integer(int value, TextRange textRange) =>
-            new IntegerExpression(value, textRange);
+        public static ConstantExpression Constant(object value, TextRange textRange) =>
+            new ConstantExpression(value, textRange);
 
         public static VariableExpression Variable(string name, TextRange textRange) =>
             new VariableExpression(name, textRange);
@@ -12,6 +12,8 @@
 
         public static TypeExpression Type(string name, TextRange textRange) =>
             new TypeExpression(name, textRange);
+        public static TypeExpression Type(System.Type type, TextRange textRange) =>
+            new TypeExpression(type, textRange);
 
         public static KindExpression Kind() =>
             KindExpression.Instance;

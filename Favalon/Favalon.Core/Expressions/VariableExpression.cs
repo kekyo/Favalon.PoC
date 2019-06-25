@@ -20,7 +20,7 @@ namespace Favalon.Expressions
             {
                 var freeVariableHigherOrder = environment.CreateFreeVariable(this.HigherOrder.TextRange);
                 var variable = new VariableExpression(this.Name, freeVariableHigherOrder, this.TextRange);
-                environment.Bind(this.Name, variable, false);
+                environment.Bind(this.Name, variable);
 
                 return variable;
             }

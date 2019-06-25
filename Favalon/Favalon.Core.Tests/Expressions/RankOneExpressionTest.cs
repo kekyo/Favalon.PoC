@@ -123,6 +123,7 @@ namespace Favalon.Expressions
         public void ApplyRegisteredTypeExpression()
         {
             var environment = ExpressionEnvironment.Create();
+
             environment.Bind("v", Type("System.Int32"));
 
             // x v

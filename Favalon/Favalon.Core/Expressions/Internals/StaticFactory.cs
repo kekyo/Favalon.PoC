@@ -2,8 +2,8 @@
 {
     public static class StaticFactory
     {
-        public static IntegerExpression Integer(int value) =>
-            new IntegerExpression(value, TextRange.Unknown);
+        public static ConstantExpression Constant(object value) =>
+            new ConstantExpression(value, TextRange.Unknown);
 
         public static VariableExpression Variable(string name) =>
             new VariableExpression(name, TextRange.Unknown);
@@ -15,6 +15,8 @@
 
         public static TypeExpression Type(string name) =>
             new TypeExpression(name, TextRange.Unknown);
+        public static TypeExpression Type(System.Type type) =>
+            new TypeExpression(type, TextRange.Unknown);
 
         public static KindExpression Kind() =>
             KindExpression.Instance;

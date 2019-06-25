@@ -40,7 +40,7 @@ namespace Favalon.Expressions
             var bound = this.Bound.CreateWithFreeVariableIfUndefined(scoped, context);
 
             context.UnifyExpression(bound.HigherOrder, expression.HigherOrder);
-            scoped.Bind(bound.Name, expression, false);
+            scoped.Bind(bound.Name, expression);
 
             var body = this.Body.VisitInferring(scoped, context);
 

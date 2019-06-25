@@ -14,13 +14,13 @@ namespace Favalon.Expressions
 
         public override string Name { get; }
 
-        internal VariableExpression CreateWithFreeVariableIfUndefined(ExpressionEnvironment environment, InferContext context)
+        internal VariableExpression CreateWithFreeVariableIfUndefined(ExpressionEnvironment environment)
         {
             if (this.HigherOrder is UndefinedExpression)
             {
                 var freeVariableHigherOrder = environment.CreateFreeVariable(this.HigherOrder.TextRange);
                 var variable = new VariableExpression(this.Name, freeVariableHigherOrder, this.TextRange);
-                environment.Bind(this.Name, variable);
+                //environment.Bind(this, variable);
 
                 return variable;
             }
@@ -32,13 +32,19 @@ namespace Favalon.Expressions
 
         protected internal override Expression VisitInferring(ExpressionEnvironment environment, InferContext context)
         {
-            if (environment.TryGetBoundExpression(this.Name, out var resolved))
+            if (environment.GetBoundExpression(this.Name) is (VariableExpression b, Expression e))
             {
-                return new VariableExpression(this.Name, resolved.HigherOrder, this.TextRange);
+                var bound = b.CreateWithFreeVariableIfUndefined(environment);
+                var expression = e.VisitInferring(environment, context);
+
+                context.UnifyExpression(bound.HigherOrder, expression.HigherOrder);
+                return bound;
             }
             else
             {
-                return this.CreateWithFreeVariableIfUndefined(environment, context);
+                var bound = this.CreateWithFreeVariableIfUndefined(environment);
+                environment.Bind(this, bound);
+                return bound;
             }
         }
 

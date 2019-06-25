@@ -204,6 +204,40 @@ namespace Favalon.Expressions
         }
 
         [Test]
+        public void BindAnnotatedEnvironment1()
+        {
+            var environment = ExpressionEnvironment.Create();
+
+            // x = y:System.Int32
+            environment.Bind("x", Variable("y", Type("System.Int32")));
+
+            // x
+            var expression = Variable("x");
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("x", actual.ReadableString);
+            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void BindAnnotatedEnvironment2()
+        {
+            var environment = ExpressionEnvironment.Create();
+
+            // x:System.Int32 = y
+            environment.Bind(Variable("x", Type("System.Int32")), "y");
+
+            // x
+            var expression = Variable("x");
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("x", actual.ReadableString);
+            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
+        }
+
+        [Test]
         public void BindFunction1()
         {
             var environment = ExpressionEnvironment.Create();

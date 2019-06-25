@@ -14,7 +14,7 @@ namespace Favalon.Expressions
         }
 
         private readonly ExpressionEnvironment? parent;
-        private Dictionary<string, Expression>? bindExpressions;
+        private Dictionary<string, (VariableExpression bound, Expression expression)>? boundExpressions;
         private IndexCell indexCell;
 
         private ExpressionEnvironment(ExpressionEnvironment parent, IndexCell indexCell)
@@ -27,7 +27,7 @@ namespace Favalon.Expressions
             indexCell = new IndexCell();
 
         public void Reset() =>
-            bindExpressions = null;
+            boundExpressions = null;
 
         internal ExpressionEnvironment NewScope() =>
             new ExpressionEnvironment(this, indexCell);
@@ -35,33 +35,32 @@ namespace Favalon.Expressions
         public FreeVariableExpression CreateFreeVariable(TextRange textRange) =>
             new FreeVariableExpression(indexCell.Next(), textRange);
 
-        internal bool TryGetBoundExpression(string boundName, out Expression expression)
+        internal (VariableExpression bound, Expression expression)? GetBoundExpression(string boundName)
         {
             ExpressionEnvironment? current = this;
             do
             {
-                if (current.bindExpressions != null)
+                if (current.boundExpressions != null)
                 {
-                    if (current.bindExpressions.TryGetValue(boundName, out expression))
+                    if (current.boundExpressions.TryGetValue(boundName, out var resolved))
                     {
-                        return true;
+                        return resolved;
                     }
                 }
                 current = current.parent;
             }
             while (current != null);
 
-            expression = default!;
-            return false;
+            return default;
         }
 
-        public void Bind(string boundName, Expression expression)
+        public void Bind(VariableExpression bound, Expression expression)
         {
-            if (bindExpressions == null)
+            if (boundExpressions == null)
             {
-                bindExpressions = new Dictionary<string, Expression>();
+                boundExpressions = new Dictionary<string, (VariableExpression bound, Expression expression)>();
             }
-            bindExpressions[boundName] = expression;
+            boundExpressions[bound.Name] = (bound, expression);
         }
 
         public static ExpressionEnvironment Create() =>

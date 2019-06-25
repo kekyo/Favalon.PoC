@@ -42,7 +42,7 @@ namespace Favalon.Expressions
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
             var parameter = (this.Parameter is VariableExpression variable) ?
-                variable.CreateWithFreeVariableIfUndefined(scoped, context) :
+                variable.CreateWithFreeVariableIfUndefined(scoped) :
                 this.Parameter.VisitInferring(scoped, context);
             var expression = this.Expression.VisitInferring(scoped, context);
 

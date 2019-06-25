@@ -37,10 +37,10 @@ namespace Favalon.Expressions
             // Because the bind expression infers excepted from derived environments,
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
-            var bound = this.Bound.CreateWithFreeVariableIfUndefined(scoped, context);
+            var bound = this.Bound.CreateWithFreeVariableIfUndefined(scoped);
 
             context.UnifyExpression(bound.HigherOrder, expression.HigherOrder);
-            scoped.Bind(bound.Name, expression);
+            scoped.Bind(bound, expression);
 
             var body = this.Body.VisitInferring(scoped, context);
 

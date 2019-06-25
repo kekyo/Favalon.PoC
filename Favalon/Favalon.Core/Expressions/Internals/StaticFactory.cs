@@ -2,6 +2,9 @@
 {
     public static class StaticFactory
     {
+        public static ExpressionEnvironment Environment() =>
+            ExpressionEnvironment.Create();
+
         public static IntegerExpression Integer(int value) =>
             new IntegerExpression(value);
 
@@ -10,7 +13,7 @@
         public static VariableExpression Variable(string name, Expression higherOrder) =>
             new VariableExpression(name, higherOrder);
 
-        public static FreeVariableExpression FreeVariable(this Environment environment) =>
+        public static FreeVariableExpression FreeVariable(this ExpressionEnvironment environment) =>
             environment.CreateFreeVariable();
 
         public static TypeExpression Type(string name) =>

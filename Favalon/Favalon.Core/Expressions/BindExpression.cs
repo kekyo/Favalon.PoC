@@ -21,7 +21,7 @@ namespace Favalon.Expressions
         protected internal override string FormatReadableString(FormatStringContext context) =>
             $"{this.Bound.GetReadableString(context)} = {this.Expression.GetReadableString(context)} in {this.Body.GetReadableString(context)}";
 
-        protected internal override Expression VisitInferring(Environment environment, InferContext context)
+        protected internal override Expression VisitInferring(ExpressionEnvironment environment, InferContext context)
         {
             // Bind expression scope details:
             // let x = y in z
@@ -40,7 +40,7 @@ namespace Favalon.Expressions
             var bound = this.Bound.CreateWithFreeVariableIfUndefined(scoped, context);
 
             context.UnifyExpression(bound.HigherOrder, expression.HigherOrder);
-            scoped.SetNamedExpression(bound.Name, expression);
+            scoped.Bind(bound.Name, expression, false);
 
             var body = this.Body.VisitInferring(scoped, context);
 

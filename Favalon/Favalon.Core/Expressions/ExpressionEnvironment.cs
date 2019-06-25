@@ -1,0 +1,75 @@
+﻿using System.Collections.Generic;
+
+namespace Favalon.Expressions
+{
+    public sealed class ExpressionEnvironment
+    {
+        private sealed class IndexCell
+        {
+            private long index;
+            public long Next() =>
+                index++;
+        }
+
+        private readonly ExpressionEnvironment? parent;
+        private Dictionary<string, Expression>? bindExpressions;
+        private IndexCell indexCell;
+
+        private ExpressionEnvironment(ExpressionEnvironment parent, IndexCell indexCell)
+        {
+            this.parent = parent;
+            this.indexCell = indexCell;
+        }
+
+        private ExpressionEnvironment() =>
+            indexCell = new IndexCell();
+
+        public void Reset() =>
+            bindExpressions = null;
+
+        internal ExpressionEnvironment NewScope() =>
+            new ExpressionEnvironment(this, indexCell);
+
+        public FreeVariableExpression CreateFreeVariable() =>
+            new FreeVariableExpression(indexCell.Next());
+
+        internal bool TryGetBoundExpression(string boundName, out Expression expression)
+        {
+            ExpressionEnvironment? current = this;
+            do
+            {
+                if (current.bindExpressions != null)
+                {
+                    if (current.bindExpressions.TryGetValue(boundName, out expression))
+                    {
+                        return true;
+                    }
+                }
+                current = current.parent;
+            }
+            while (current != null);
+
+            expression = default!;
+            return false;
+        }
+
+        public ExpressionEnvironment Bind(string boundName, Expression expression, bool newScope = false)
+        {
+            if (newScope)
+            {
+                return this.NewScope().Bind(boundName, expression, false);
+            }
+
+            if (bindExpressions == null)
+            {
+                bindExpressions = new Dictionary<string, Expression>();
+            }
+            bindExpressions[boundName] = expression;
+
+            return this;
+        }
+
+        public static ExpressionEnvironment Create() =>
+            new ExpressionEnvironment();
+    }
+}

@@ -34,7 +34,7 @@ namespace Favalon.Expressions
                 $"{this.Parameter.GetReadableString(context)} {arrow} {this.Expression.GetReadableString(context)}";
         }
 
-        protected internal override Expression VisitInferring(Environment environment, InferContext context)
+        protected internal override Expression VisitInferring(ExpressionEnvironment environment, InferContext context)
         {
             var scoped = environment.NewScope();
 

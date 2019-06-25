@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
-    public static class Extensions
+    public static class ExpressionExtensions
     {
         public static string GetExpressionShortName(this Expression expression) =>
             expression.GetType().Name.Replace("Expression", string.Empty);
@@ -33,7 +33,7 @@ namespace Favalon.Expressions
                 Concat(expression.CreateXmlChildren(context)).
                 ToArray<object>());
 
-        public static TExpression Infer<TExpression>(this TExpression expression, Environment environment, int rank = 0)
+        public static TExpression Infer<TExpression>(this TExpression expression, ExpressionEnvironment environment, int rank = 0)
             where TExpression : Expression
         {
             var context = new InferContext();

@@ -13,7 +13,7 @@ namespace Favalon.Expressions
             this.Index = index;
 
         public override string Name =>
-            $"'T{this.Index}";
+            $"'{this.Index}";
 
         protected internal override string FormatReadableString(FormatStringContext context)
         {

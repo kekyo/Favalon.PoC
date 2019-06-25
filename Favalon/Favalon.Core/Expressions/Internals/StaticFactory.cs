@@ -2,9 +2,6 @@
 {
     public static class StaticFactory
     {
-        public static ExpressionEnvironment Environment() =>
-            ExpressionEnvironment.Create();
-
         public static IntegerExpression Integer(int value) =>
             new IntegerExpression(value, TextRange.Unknown);
 

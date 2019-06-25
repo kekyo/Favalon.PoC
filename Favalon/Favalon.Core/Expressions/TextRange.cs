@@ -11,6 +11,12 @@ namespace Favalon.Expressions
         public readonly Uri Target;
         public readonly Range Range;
 
+        private TextRange(string target, Range range)
+        {
+            this.Target = new Uri(target, UriKind.RelativeOrAbsolute);
+            this.Range = range;
+        }
+
         private TextRange(Uri target, Range range)
         {
             this.Target = target;
@@ -35,13 +41,19 @@ namespace Favalon.Expressions
         public override bool Equals(object obj) =>
             obj is TextRange textRange ? this.Equals(textRange) : false;
 
+        public static TextRange Create(string target, Range range) =>
+            new TextRange(target, range);
         public static TextRange Create(Uri target, Range range) =>
             new TextRange(target, range);
         public static TextRange Create(Range range) =>
             new TextRange(unknown, range);
 
-        public static implicit operator TextRange(System.ValueTuple<Uri, int, int> textRange) =>
+        public static implicit operator TextRange(System.ValueTuple<string, int, int> textRange) =>
             new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3)));
+        public static implicit operator TextRange(System.ValueTuple<Uri, int, int> textRange) =>
+           new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3)));
+        public static implicit operator TextRange(System.ValueTuple<string, int, int, int, int> textRange) =>
+            new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3), Position.Create(textRange.Item4, textRange.Item5)));
         public static implicit operator TextRange(System.ValueTuple<Uri, int, int, int, int> textRange) =>
             new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3), Position.Create(textRange.Item4, textRange.Item5)));
     }

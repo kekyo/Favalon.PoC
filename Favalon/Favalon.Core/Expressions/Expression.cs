@@ -8,7 +8,7 @@ using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
-    public abstract class Expression
+    public abstract partial class Expression
     {
         protected internal enum TraverseInferringResults
         {

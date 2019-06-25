@@ -8,8 +8,8 @@ namespace Favalon.Expressions
     {
         public readonly long Index;
 
-        internal FreeVariableExpression(long index) :
-            base(UndefinedExpression.Instance) =>
+        internal FreeVariableExpression(long index, TextRange textRange) :
+            base(UndefinedExpression.Instance, textRange) =>
             this.Index = index;
 
         public override string Name =>

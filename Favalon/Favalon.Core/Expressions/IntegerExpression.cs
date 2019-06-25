@@ -6,13 +6,14 @@ namespace Favalon.Expressions
     {
         public readonly int Value;
 
-        internal IntegerExpression(int value) :
-            base(Int32Type) =>
+        internal IntegerExpression(int value, TextRange textRange) :
+            base(Int32Type, textRange) =>
             this.Value = value;
 
         protected internal override string FormatReadableString(FormatStringContext context) =>
             this.Value.ToString();
 
-        private static readonly TypeExpression Int32Type = new TypeExpression("System.Int32");
+        private static readonly TypeExpression Int32Type =
+            new TypeExpression("System.Int32", TextRange.Unknown);
     }
 }

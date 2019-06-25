@@ -5,7 +5,7 @@ namespace Favalon.Expressions
     public sealed class KindExpression : IdentityExpression
     {
         private KindExpression() :
-            base(UndefinedExpression.Instance)
+            base(UndefinedExpression.Instance, TextRange.Unknown)
         { }
 
         public override string Name =>

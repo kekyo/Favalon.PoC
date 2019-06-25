@@ -9,6 +9,8 @@ namespace Favalon.Expressions
             private long index;
             public long Next() =>
                 index++;
+            public override string ToString() =>
+                $"Index={index}";
         }
 
         private readonly ExpressionEnvironment? parent;
@@ -30,8 +32,8 @@ namespace Favalon.Expressions
         internal ExpressionEnvironment NewScope() =>
             new ExpressionEnvironment(this, indexCell);
 
-        public FreeVariableExpression CreateFreeVariable() =>
-            new FreeVariableExpression(indexCell.Next());
+        public FreeVariableExpression CreateFreeVariable(TextRange textRange) =>
+            new FreeVariableExpression(indexCell.Next(), textRange);
 
         internal bool TryGetBoundExpression(string boundName, out Expression expression)
         {

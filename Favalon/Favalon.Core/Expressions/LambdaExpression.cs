@@ -10,16 +10,15 @@ namespace Favalon.Expressions
         public Expression Parameter { get; private set; }
         public Expression Expression { get; private set; }
 
-        private LambdaExpression(Expression parameter, Expression expression, Expression higherOrder) :
-            base(higherOrder)
+        private LambdaExpression(Expression parameter, Expression expression, Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange)
         {
             this.Parameter = parameter;
             this.Expression = expression;
         }
 
-        internal LambdaExpression(Expression parameter, Expression expression) :
-            this(parameter, expression,
-                new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, KindExpression.Instance))
+        internal LambdaExpression(Expression parameter, Expression expression, TextRange textRange) :
+            this(parameter, expression, new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, KindExpression.Instance, textRange), textRange)
         {
         }
 
@@ -47,7 +46,7 @@ namespace Favalon.Expressions
                 this.Parameter.VisitInferring(scoped, context);
             var expression = this.Expression.VisitInferring(scoped, context);
 
-            return new LambdaExpression(parameter, expression);
+            return new LambdaExpression(parameter, expression, this.TextRange);
         }
 
         protected internal override TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> yc, int rank)

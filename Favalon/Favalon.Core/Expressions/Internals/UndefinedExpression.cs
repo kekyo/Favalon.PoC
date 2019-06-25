@@ -4,7 +4,7 @@
     {
         // Dead end expression.
 
-        internal UndefinedExpression() : base(null!)
+        internal UndefinedExpression() : base(null!, TextRange.Unknown)
         { }
 
         public override bool ShowInAnnotation =>

@@ -2,8 +2,8 @@
 {
     public abstract class TermExpression : Expression
     {
-        protected TermExpression(Expression higherOrder) :
-            base(higherOrder)
+        protected TermExpression(Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange)
         { }
     }
 }

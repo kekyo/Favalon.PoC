@@ -6,8 +6,8 @@ namespace Favalon.Expressions
     public abstract class IdentityExpression : TermExpression,
         IEquatable<IdentityExpression>
     {
-        protected IdentityExpression(Expression higherOrder) :
-            base(higherOrder)
+        protected IdentityExpression(Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange)
         { }
 
         public abstract string Name { get; }
@@ -27,6 +27,6 @@ namespace Favalon.Expressions
         /////////////////////////////////////////////////////////////////////////
 
         public static implicit operator IdentityExpression(string name) =>
-            new VariableExpression(name);
+            new VariableExpression(name, TextRange.Unknown);
     }
 }

@@ -7,15 +7,15 @@ namespace Favalon.Expressions
     public sealed class ApplyExpression : Expression
     {
         // f x
-        private ApplyExpression(Expression function, Expression argument, Expression higherOrder) :
-            base(higherOrder)
+        private ApplyExpression(Expression function, Expression argument, Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange)
         {
             this.Function = function;
             this.Argument = argument;
         }
 
-        internal ApplyExpression(Expression function, Expression argument) :
-            this(function, argument, UndefinedExpression.Instance)
+        internal ApplyExpression(Expression function, Expression argument, TextRange textRange) :
+            this(function, argument, UndefinedExpression.Instance, textRange)
         {
         }
 
@@ -35,12 +35,12 @@ namespace Favalon.Expressions
             var function = this.Function.VisitInferring(environment, context);
             var argument = this.Argument.VisitInferring(environment, context);
 
-            var resultHigherOrder = environment.CreateFreeVariable();
+            var resultHigherOrder = environment.CreateFreeVariable(this.TextRange);
 
-            var variableHigherOrder = new LambdaExpression(argument.HigherOrder, resultHigherOrder);
+            var variableHigherOrder = new LambdaExpression(argument.HigherOrder, resultHigherOrder, this.TextRange);
             context.UnifyExpression(function.HigherOrder, variableHigherOrder);
 
-            return new ApplyExpression(function, argument, resultHigherOrder);
+            return new ApplyExpression(function, argument, resultHigherOrder, this.TextRange);
         }
 
         protected internal override TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> yc, int rank)

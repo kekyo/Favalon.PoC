@@ -6,8 +6,8 @@ namespace Favalon.Expressions
 {
     public sealed class BindExpression : Expression
     {
-        internal BindExpression(VariableExpression bound, Expression expression, Expression body) :
-            base(body.HigherOrder)
+        internal BindExpression(VariableExpression bound, Expression expression, Expression body, TextRange textRange) :
+            base(body.HigherOrder, textRange)
         {
             this.Bound = bound;
             this.Expression = expression;
@@ -44,7 +44,7 @@ namespace Favalon.Expressions
 
             var body = this.Body.VisitInferring(scoped, context);
 
-            return new BindExpression(bound, expression, body);
+            return new BindExpression(bound, expression, body, this.TextRange);
         }
 
         protected internal override TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> yc, int rank)

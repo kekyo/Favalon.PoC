@@ -1,32 +1,30 @@
-﻿using System;
-
-namespace Favalon.Expressions
+﻿namespace Favalon.Expressions
 {
     public struct Range
     {
-        private static readonly Uri unknown = new Uri("unknown", UriKind.RelativeOrAbsolute);
+        public static readonly Range Empty = Create(Position.Empty, Position.Empty);
 
-        public static readonly Range Unknown = Create(Position.Empty, Position.Empty);
-
-        public readonly Uri Target;
         public readonly Position First;
         public readonly Position Last;
 
-        private Range(Uri target, Position first, Position last)
+        private Range(Position first, Position last)
         {
-            this.Target = target;
             this.First = first;
             this.Last = last;
         }
 
+        public bool Contains(Range inside) =>
+            ((this.First.Line < inside.First.Line) || ((this.First.Line == inside.First.Line) && (this.First.Column <= inside.First.Column))) &&
+            ((inside.Last.Line < this.Last.Line) || ((inside.Last.Line == this.Last.Line) && (inside.Last.Column <= this.Last.Column)));
+
         public override string ToString() =>
             (this.First.Equals(this.Last)) ?
-            $"{this.Target.LocalPath}({this.First})" :
-            $"{this.Target.LocalPath}({this.First},{this.Last})";
+                this.First.ToString() :
+                $"{this.First},{this.Last}";
 
-        public static Range Create(Uri target, Position first, Position last) =>
-            new Range(target, first, last);
+        public static Range Create(Position position) =>
+            new Range(position, position);
         public static Range Create(Position first, Position last) =>
-            new Range(unknown, first, last);
+            new Range(first, last);
     }
 }

@@ -16,10 +16,15 @@ namespace Favalon.Expressions
             RequeireHigherOrder
         }
 
-        protected Expression(Expression higherOrder) =>
+        protected Expression(Expression higherOrder, TextRange textRange)
+        {
             this.HigherOrder = higherOrder;
+            this.TextRange = textRange;
+        }
 
         public Expression HigherOrder { get; internal set; }
+
+        public readonly TextRange TextRange;
 
         public virtual bool ShowInAnnotation => 
             true;
@@ -53,6 +58,6 @@ namespace Favalon.Expressions
         /////////////////////////////////////////////////////////////////////////
 
         public static implicit operator Expression(string name) =>
-            new VariableExpression(name);
+            new VariableExpression(name, TextRange.Unknown);
     }
 }

@@ -2,8 +2,8 @@
 {
     public sealed class TypeExpression : IdentityExpression
     {
-        internal TypeExpression(string name) :
-            base(KindExpression.Instance) =>
+        internal TypeExpression(string name, TextRange textRange) :
+            base(KindExpression.Instance, textRange) =>
             this.Name = name;
 
         public override string Name { get; }

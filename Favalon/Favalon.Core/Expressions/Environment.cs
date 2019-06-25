@@ -30,8 +30,8 @@ namespace Favalon.Expressions
         internal Environment NewScope() =>
             new Environment(this, indexCell);
 
-        public PlaceholderExpression CreatePlaceholder() =>
-            new PlaceholderExpression(indexCell.Next());
+        public FreeVariableExpression CreateFreeVariable() =>
+            new FreeVariableExpression(indexCell.Next());
 
         internal bool TryGetNamedExpression(string name, out Expression expression)
         {

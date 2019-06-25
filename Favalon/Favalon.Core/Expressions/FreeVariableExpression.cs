@@ -3,12 +3,12 @@ using System;
 
 namespace Favalon.Expressions
 {
-    public sealed class PlaceholderExpression : IdentityExpression,
-        IEquatable<PlaceholderExpression>, IComparable<PlaceholderExpression>
+    public sealed class FreeVariableExpression : IdentityExpression,
+        IEquatable<FreeVariableExpression>, IComparable<FreeVariableExpression>
     {
         public readonly long Index;
 
-        internal PlaceholderExpression(long index) :
+        internal FreeVariableExpression(long index) :
             base(UndefinedExpression.Instance) =>
             this.Index = index;
 
@@ -35,13 +35,13 @@ namespace Favalon.Expressions
         public override int GetHashCode() =>
             this.Index.GetHashCode();
 
-        public bool Equals(PlaceholderExpression other) =>
+        public bool Equals(FreeVariableExpression other) =>
             this.Index.Equals(other.Index);
 
         public override bool Equals(IdentityExpression other) =>
-            other is PlaceholderExpression placeholder ? this.Equals(placeholder) : false;
+            other is FreeVariableExpression freeVariable ? this.Equals(freeVariable) : false;
 
-        public int CompareTo(PlaceholderExpression other) =>
+        public int CompareTo(FreeVariableExpression other) =>
             this.Index.CompareTo(other.Index);
     }
 }

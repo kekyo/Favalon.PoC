@@ -14,12 +14,12 @@ namespace Favalon.Expressions
 
         public override string Name { get; }
 
-        internal VariableExpression CreateWithPlaceholderIfUndefined(Environment environment, InferContext context)
+        internal VariableExpression CreateWithFreeVariableIfUndefined(Environment environment, InferContext context)
         {
             if (this.HigherOrder is UndefinedExpression)
             {
-                var placeholder = environment.CreatePlaceholder();
-                var variable = new VariableExpression(this.Name, placeholder);
+                var freeVariableHigherOrder = environment.CreateFreeVariable();
+                var variable = new VariableExpression(this.Name, freeVariableHigherOrder);
                 environment.SetNamedExpression(this.Name, variable);
 
                 return variable;
@@ -38,7 +38,7 @@ namespace Favalon.Expressions
             }
             else
             {
-                return this.CreateWithPlaceholderIfUndefined(environment, context);
+                return this.CreateWithFreeVariableIfUndefined(environment, context);
             }
         }
 

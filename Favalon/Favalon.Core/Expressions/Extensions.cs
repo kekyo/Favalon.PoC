@@ -38,7 +38,7 @@ namespace Favalon.Expressions
             var context = new InferContext();
             var visited = expression.Visit(environment, context);
             var fixup = context.FixupHigherOrders(visited, rank);
-            return context.AggregatePlaceholders(fixup, rank);
+            return context.AggregateFreeVariables(fixup, rank);
         }
     }
 }

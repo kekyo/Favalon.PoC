@@ -10,6 +10,9 @@
         public static VariableExpression Variable(string name, Expression higherOrder) =>
             new VariableExpression(name, higherOrder);
 
+        public static FreeVariableExpression FreeVariable(this Environment environment) =>
+            environment.CreateFreeVariable();
+
         public static TypeExpression Type(string name) =>
             new TypeExpression(name);
 

@@ -33,12 +33,12 @@ namespace Favalon.Expressions
             var scoped = environment.NewScope();
             var expression = this.Expression.Visit(scoped, context);
 
-            // Force replacing with new placeholder.
+            // Force replacing with new free variable.
             // Because the bind expression excepts inferring from derived environments,
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
             //var variable = (VariableExpression)this.Variable.Visit(scoped, context);
-            var variable = this.Variable.CreateWithPlaceholderIfUndefined(scoped, context);
+            var variable = this.Variable.CreateWithFreeVariableIfUndefined(scoped, context);
 
             context.UnifyExpression(variable.HigherOrder, expression.HigherOrder);
             scoped.SetNamedExpression(variable.Name, expression);

@@ -11,29 +11,29 @@ namespace Favalon.Expressions.Internals
 
         public void UnifyExpression(Expression expression1, Expression expression2)
         {
-            // Pair of placehoders / one of placeholder
-            if (expression1 is PlaceholderExpression placeholder1)
+            // Pair of placehoders / one of freeVariable
+            if (expression1 is FreeVariableExpression freeVariable1)
             {
-                if (expression2 is PlaceholderExpression placeholder2)
+                if (expression2 is FreeVariableExpression freeVariable2)
                 {
-                    // Unify placeholder2 into placehoder1 if aren't same.
-                    if (!placeholder1.Equals(placeholder2))
+                    // Unify freeVariable2 into freeVariable1 if aren't same.
+                    if (!freeVariable1.Equals(freeVariable2))
                     {
-                        identities[placeholder1] = placeholder2;
+                        identities[freeVariable1] = freeVariable2;
                     }
                     return;
                 }
 
-                // Fallback placeholder1 below.
+                // Fallback freeVariable1 below.
             }
-            else if (expression2 is PlaceholderExpression)
+            else if (expression2 is FreeVariableExpression)
             {
                 // Swap primary expression and re-examine it.
                 this.UnifyExpression(expression2, expression1);
                 return;
             }
 
-            // Pair of identities / one of identity (Include fallbacked placeholder)
+            // Pair of identities / one of identity (Include fallbacked freeVariable)
             if (expression1 is IdentityExpression identity1)
             {
                 if (expression2 is IdentityExpression identity2)
@@ -99,11 +99,11 @@ namespace Favalon.Expressions.Internals
             return current;
         }
 
-        public Expression AggregatePlaceholders(Expression expression, int rank)
+        public Expression AggregateFreeVariables(Expression expression, int rank)
         {
-            if (expression.Traverse(this.AggregatePlaceholders, rank) == Expression.TraverseResults.RequeireHigherOrder)
+            if (expression.Traverse(this.AggregateFreeVariables, rank) == Expression.TraverseResults.RequeireHigherOrder)
             {
-                expression.HigherOrder = this.AggregatePlaceholders(expression.HigherOrder, rank + 1);
+                expression.HigherOrder = this.AggregateFreeVariables(expression.HigherOrder, rank + 1);
             }
 
             return expression;

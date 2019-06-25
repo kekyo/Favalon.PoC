@@ -93,7 +93,7 @@ namespace Favalon.Expressions
             var environment = new Environment();
 
             // x:(* -> 'a) System.Int32
-            var expression = Apply(Variable("x", Lambda(Kind(), environment.CreatePlaceholder())), Type("System.Int32"));
+            var expression = Apply(Variable("x", Lambda(Kind(), environment.FreeVariable())), Type("System.Int32"));
 
             var actual = (ApplyExpression)expression.Infer(environment);
 
@@ -155,7 +155,7 @@ namespace Favalon.Expressions
         }
 
         [Test]
-        public void BindPlaceholder()
+        public void BindFreeVariable()
         {
             var environment = new Environment();
 

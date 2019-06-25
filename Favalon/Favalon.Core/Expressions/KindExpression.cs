@@ -2,17 +2,20 @@
 
 namespace Favalon.Expressions
 {
-    public sealed class KindExpression : Expression
+    public sealed class KindExpression : IdentityExpression
     {
         private KindExpression() :
             base(UndefinedExpression.Instance)
         { }
 
+        public override string Name =>
+            "*";
+
         public override bool ShowInAnnotation =>
             false;
 
         protected internal override string FormatReadableString(FormatStringContext context) =>
-            "(Kind)";
+            context.StrictNaming ? "(Kind)" : "*";
 
         public static readonly KindExpression Instance = new KindExpression();
     }

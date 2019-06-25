@@ -4,23 +4,30 @@ namespace Favalon.Expressions
 {
     public sealed class VariableExpression : IdentityExpression
     {
+        internal VariableExpression(string name, Expression higherOrder) :
+            base(higherOrder) =>
+            this.Name = name;
+
         internal VariableExpression(string name) :
             base(UndefinedExpression.Instance) =>
             this.Name = name;
 
-        private VariableExpression(string name, Expression higherOrder) :
-            base(higherOrder) =>
-            this.Name = name;
-
         public override string Name { get; }
 
-        internal VariableExpression CreateWithPlaceholder(Environment environment, InferContext context)
+        internal VariableExpression CreateWithPlaceholderIfUndefined(Environment environment, InferContext context)
         {
-            var placeholder = environment.CreatePlaceholder();
-            var variable = new VariableExpression(this.Name, placeholder);
-            environment.SetNamedExpression(this.Name, variable);
+            if (this.HigherOrder is UndefinedExpression)
+            {
+                var placeholder = environment.CreatePlaceholder();
+                var variable = new VariableExpression(this.Name, placeholder);
+                environment.SetNamedExpression(this.Name, variable);
 
-            return variable;
+                return variable;
+            }
+            else
+            {
+                return new VariableExpression(this.Name, this.HigherOrder);
+            }
         }
 
         protected internal override Expression Visit(Environment environment, InferContext context)
@@ -31,7 +38,7 @@ namespace Favalon.Expressions
             }
             else
             {
-                return this.CreateWithPlaceholder(environment, context);
+                return this.CreateWithPlaceholderIfUndefined(environment, context);
             }
         }
 

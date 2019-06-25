@@ -17,7 +17,7 @@ namespace Favalon.Expressions
 
         protected internal override string FormatReadableString(FormatStringContext context)
         {
-            if (context.StrictPlaceholderNaming)
+            if (context.StrictNaming)
             {
                 return this.Name;
             }

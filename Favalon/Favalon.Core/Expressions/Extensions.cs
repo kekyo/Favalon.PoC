@@ -19,8 +19,8 @@ namespace Favalon.Expressions
                 $"{expression.InternalFormatReadableString(context)}:{expression.HigherOrder.InternalFormatReadableString(context.NewDerived(false, null))}" :
                 expression.FormatReadableString(context.NewDerived(false, null));
 
-        public static string GetReadableString(this Expression expression, bool withAnnotation, bool strictPlaceholderNaming, bool fancy) =>
-            expression.GetReadableString(new FormatStringContext(withAnnotation, strictPlaceholderNaming, fancy));
+        public static string GetReadableString(this Expression expression, bool withAnnotation, bool strictNaming, bool fancySymbols) =>
+            expression.GetReadableString(new FormatStringContext(withAnnotation, strictNaming, fancySymbols));
 
         public static XElement CreateXml(this Expression expression, FormatStringContext context) =>
             new XElement(expression.GetExpressionShortName(),

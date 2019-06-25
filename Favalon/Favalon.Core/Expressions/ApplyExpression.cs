@@ -15,10 +15,8 @@ namespace Favalon.Expressions
         }
 
         internal ApplyExpression(Expression function, Expression argument) :
-            base((function.HigherOrder as LambdaExpression)?.Expression ?? function.HigherOrder)
+            this(function, argument, UndefinedExpression.Instance)
         {
-            this.Function = function;
-            this.Argument = argument;
         }
 
         public Expression Function { get; private set; }

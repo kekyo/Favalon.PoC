@@ -38,7 +38,7 @@ namespace Favalon.Expressions
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
             //var variable = (VariableExpression)this.Variable.Visit(scoped, context);
-            var variable = this.Variable.CreateWithPlaceholder(scoped, context);
+            var variable = this.Variable.CreateWithPlaceholderIfUndefined(scoped, context);
 
             context.UnifyExpression(variable.HigherOrder, expression.HigherOrder);
             scoped.SetNamedExpression(variable.Name, expression);

@@ -23,5 +23,10 @@ namespace Favalon.Expressions
 
         public override bool Equals(object obj) =>
             obj is IdentityExpression identity ? this.Equals(identity) : false;
+
+        /////////////////////////////////////////////////////////////////////////
+
+        public static implicit operator IdentityExpression(string name) =>
+            new VariableExpression(name);
     }
 }

@@ -28,7 +28,7 @@ namespace Favalon.Expressions
 
         protected internal override string FormatReadableString(FormatStringContext context)
         {
-            var arrow = context.Fancy ? "→" : "->";
+            var arrow = context.FancySymbols ? "→" : "->";
             return (this.Parameter is LambdaExpression) ?
                 $"({this.Parameter.GetReadableString(context)}) {arrow} {this.Expression.GetReadableString(context)}" :
                 $"{this.Parameter.GetReadableString(context)} {arrow} {this.Expression.GetReadableString(context)}";
@@ -43,7 +43,7 @@ namespace Favalon.Expressions
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
             var parameter = (this.Parameter is VariableExpression variable) ?
-                variable.CreateWithPlaceholder(scoped, context) :
+                variable.CreateWithPlaceholderIfUndefined(scoped, context) :
                 this.Parameter.Visit(scoped, context);
             var expression = this.Expression.Visit(scoped, context);
 

@@ -7,24 +7,24 @@ namespace Favalon.Expressions.Internals
         private SortedDictionary<PlaceholderExpression, int> placeholders;
 
         public readonly bool WithAnnotation;
-        public readonly bool Fancy;
-        public readonly bool StrictPlaceholderNaming;
+        public readonly bool FancySymbols;
+        public readonly bool StrictNaming;
 
-        private FormatStringContext(bool withAnnotation, bool strictPlaceholderNaming, bool fancy, SortedDictionary<PlaceholderExpression, int> placeholders)
+        private FormatStringContext(bool withAnnotation, bool strictNaming, bool fancySymbols, SortedDictionary<PlaceholderExpression, int> placeholders)
         {
             this.WithAnnotation = withAnnotation;
-            this.Fancy = fancy;
-            this.StrictPlaceholderNaming = strictPlaceholderNaming;
+            this.FancySymbols = fancySymbols;
+            this.StrictNaming = strictNaming;
             this.placeholders = placeholders;
         }
 
-        internal FormatStringContext(bool withAnnotation, bool strictPlaceholderNaming, bool fancy) :
-            this(withAnnotation, strictPlaceholderNaming, fancy, new SortedDictionary<PlaceholderExpression, int>())
+        internal FormatStringContext(bool withAnnotation, bool strictNaming, bool fancySymbols) :
+            this(withAnnotation, strictNaming, fancySymbols, new SortedDictionary<PlaceholderExpression, int>())
         {
         }
 
-        public FormatStringContext NewDerived(bool? withAnnotation, bool? fancy) =>
-            new FormatStringContext(withAnnotation ?? this.WithAnnotation, this.StrictPlaceholderNaming, fancy ?? this.Fancy, placeholders);
+        public FormatStringContext NewDerived(bool? withAnnotation, bool? fancySymbols) =>
+            new FormatStringContext(withAnnotation ?? this.WithAnnotation, this.StrictNaming, fancySymbols ?? this.FancySymbols, placeholders);
 
         internal int GetAdjustedIndex(PlaceholderExpression placeholder)
         {

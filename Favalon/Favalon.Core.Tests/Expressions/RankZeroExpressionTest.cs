@@ -55,6 +55,20 @@ namespace Favalon.Expressions
             Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
         }
 
+        [Test]
+        public void FromVariableWithAnnotation()
+        {
+            var environment = new Environment();
+
+            // x:System.Int32
+            var expression = Variable("x", Type("System.Int32"));
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("x", actual.ReadableString);
+            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Test]
@@ -68,6 +82,38 @@ namespace Favalon.Expressions
             var actual = (ApplyExpression)expression.Infer(environment);
 
             Assert.AreEqual("x 123", actual.ReadableString);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("System.Int32 -> 'a", actual.Function.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void ApplyAnnotatedVariableAndInteger()
+        {
+            var environment = new Environment();
+
+            // x:(System.Int32 -> 'a) 123
+            var expression = Apply(Variable("x", Lambda(Type("System.Int32"), environment.CreatePlaceholder())), Integer(123));
+
+            var actual = (ApplyExpression)expression.Infer(environment);
+
+            Assert.AreEqual("x 123", actual.ReadableString);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("System.Int32 -> 'a", actual.Function.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void ApplyVariableAndAnnotatedVariable()
+        {
+            var environment = new Environment();
+
+            // x y:System.Int32
+            var expression = Apply("x", Variable("y", Type("System.Int32")));
+
+            var actual = (ApplyExpression)expression.Infer(environment);
+
+            Assert.AreEqual("x y", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
             Assert.AreEqual("System.Int32 -> 'a", actual.Function.HigherOrder.ReadableString);
@@ -120,6 +166,38 @@ namespace Favalon.Expressions
 
             Assert.AreEqual("x = 123 in y", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void BindAnnotatedVariable1()
+        {
+            var environment = new Environment();
+
+            // x = y:System.Int32 in x
+            var expression = Bind("x", Variable("y", Type("System.Int32")), "x");
+
+            var actual = (BindExpression)expression.Infer(environment);
+
+            Assert.AreEqual("x = y in x", actual.ReadableString);
+            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void BindAnnotatedVariable2()
+        {
+            var environment = new Environment();
+
+            // x:System.Int32 = y in x
+            var expression = Bind(Variable("x", Type("System.Int32")), "y", "x");
+
+            var actual = (BindExpression)expression.Infer(environment);
+
+            Assert.AreEqual("x = y in x", actual.ReadableString);
+            Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
 
             Assert.AreEqual("System.Int32", actual.Variable.HigherOrder.ReadableString);
         }
@@ -189,10 +267,10 @@ namespace Favalon.Expressions
         {
             var environment = new Environment();
 
-            // x = z 456
-            environment.SetNamedExpression("x", Lambda("z", Integer(456)).Infer(environment));
+            // x = y 456
+            environment.SetNamedExpression("x", Lambda("y", Integer(456)).Infer(environment));
 
-            // x = 123 in y
+            // x = 123 in x
             var expression = Bind("x", Integer(123), "x");
 
             var actual = (BindExpression)expression.Infer(environment);

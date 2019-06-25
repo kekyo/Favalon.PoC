@@ -14,7 +14,7 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             false;
 
-        protected internal override string FormatReadableString(FormatStringContext context) =>
+        protected internal override string FormatReadableString(FormatContext context) =>
             context.StrictNaming ? "(Kind)" : "*";
 
         public static readonly KindExpression Instance = new KindExpression();

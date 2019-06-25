@@ -10,7 +10,7 @@ namespace Favalon.Expressions
             base(Int32Type, textRange) =>
             this.Value = value;
 
-        protected internal override string FormatReadableString(FormatStringContext context) =>
+        protected internal override string FormatReadableString(FormatContext context) =>
             this.Value.ToString();
 
         private static readonly TypeExpression Int32Type =

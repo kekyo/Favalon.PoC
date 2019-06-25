@@ -25,7 +25,7 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             this.Argument.ShowInAnnotation;
 
-        protected internal override string FormatReadableString(FormatStringContext context) =>
+        protected internal override string FormatReadableString(FormatContext context) =>
             (this.Argument is ApplyExpression) ?
                 $"{this.Function.GetReadableString(context)} ({this.Argument.GetReadableString(context)})" :
                 $"{this.Function.GetReadableString(context)} {this.Argument.GetReadableString(context)}";
@@ -51,7 +51,7 @@ namespace Favalon.Expressions
             return TraverseInferringResults.RequeireHigherOrder;
         }
 
-        protected internal override IEnumerable<XObject> CreateXmlChildren(FormatStringContext context) =>
+        protected internal override IEnumerable<XObject> CreateXmlChildren(FormatContext context) =>
             new[] { this.Function.CreateXml(context), this.Argument.CreateXml(context) };
     }
 }

@@ -15,7 +15,7 @@ namespace Favalon.Expressions
         public override string Name =>
             $"'{this.Index}";
 
-        protected internal override string FormatReadableString(FormatStringContext context)
+        protected internal override string FormatReadableString(FormatContext context)
         {
             if (context.StrictNaming)
             {

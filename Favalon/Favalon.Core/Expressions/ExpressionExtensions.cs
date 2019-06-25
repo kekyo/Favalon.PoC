@@ -9,20 +9,20 @@ namespace Favalon.Expressions
         public static string GetExpressionShortName(this Expression expression) =>
             expression.GetType().Name.Replace("Expression", string.Empty);
 
-        private static string InternalFormatReadableString(this Expression expression, FormatStringContext context) =>
+        private static string InternalFormatReadableString(this Expression expression, FormatContext context) =>
             (expression is TermExpression) ?
                 expression.FormatReadableString(context) :
                 $"({expression.FormatReadableString(context)})";
 
-        public static string GetReadableString(this Expression expression, FormatStringContext context) =>
+        public static string GetReadableString(this Expression expression, FormatContext context) =>
             (context.WithAnnotation && expression.HigherOrder.ShowInAnnotation) ?
                 $"{expression.InternalFormatReadableString(context)}:{expression.HigherOrder.InternalFormatReadableString(context.NewDerived(false, null))}" :
                 expression.FormatReadableString(context.NewDerived(false, null));
 
         public static string GetReadableString(this Expression expression, bool withAnnotation, bool strictNaming, bool fancySymbols) =>
-            expression.GetReadableString(new FormatStringContext(withAnnotation, strictNaming, fancySymbols));
+            expression.GetReadableString(new FormatContext(withAnnotation, strictNaming, fancySymbols));
 
-        public static XElement CreateXml(this Expression expression, FormatStringContext context) =>
+        public static XElement CreateXml(this Expression expression, FormatContext context) =>
             new XElement(expression.GetExpressionShortName(),
                 new[] { (XObject)new XAttribute("expression", expression.GetReadableString(context.NewDerived(false, true))) }.
                 Concat(expression.HigherOrder.ShowInAnnotation ?

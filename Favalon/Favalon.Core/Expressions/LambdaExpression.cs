@@ -25,7 +25,7 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             this.Parameter.ShowInAnnotation && this.Expression.ShowInAnnotation;
 
-        protected internal override string FormatReadableString(FormatStringContext context)
+        protected internal override string FormatReadableString(FormatContext context)
         {
             var arrow = context.FancySymbols ? "→" : "->";
             return (this.Parameter is LambdaExpression) ?
@@ -57,7 +57,7 @@ namespace Favalon.Expressions
             return TraverseInferringResults.RequeireHigherOrder;
         }
 
-        protected internal override IEnumerable<XObject> CreateXmlChildren(FormatStringContext context) =>
+        protected internal override IEnumerable<XObject> CreateXmlChildren(FormatContext context) =>
             new[] { this.Parameter.CreateXml(context), this.Expression.CreateXml(context) };
     }
 }

@@ -38,10 +38,16 @@ namespace Favalon.Expressions
         public bool Equals(FreeVariableExpression other) =>
             this.Index.Equals(other.Index);
 
+        bool IEquatable<FreeVariableExpression>.Equals(FreeVariableExpression other) =>
+            this.Equals(other);
+
         public override bool Equals(IdentityExpression other) =>
             other is FreeVariableExpression freeVariable ? this.Equals(freeVariable) : false;
 
         public int CompareTo(FreeVariableExpression other) =>
             this.Index.CompareTo(other.Index);
+
+        int IComparable<FreeVariableExpression>.CompareTo(FreeVariableExpression other) =>
+            this.CompareTo(other);
     }
 }

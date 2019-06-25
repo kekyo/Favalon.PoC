@@ -26,5 +26,10 @@
             new Range(position, position);
         public static Range Create(Position first, Position last) =>
             new Range(first, last);
+
+        public static implicit operator Range(System.ValueTuple<int, int> range) =>
+            new Range(range, range);
+        public static implicit operator Range(System.ValueTuple<int, int, int, int> range) =>
+            new Range(Position.Create(range.Item1, range.Item2), Position.Create(range.Item3, range.Item4));
     }
 }

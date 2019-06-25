@@ -18,5 +18,8 @@
 
         public static Position Create(int line, int column) =>
             new Position(line, column);
+
+        public static implicit operator Position(System.ValueTuple<int, int> position) =>
+            new Position(position.Item1, position.Item2);
     }
 }

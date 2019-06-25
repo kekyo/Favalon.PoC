@@ -21,6 +21,9 @@ namespace Favalon.Expressions
         public virtual bool Equals(IdentityExpression other) =>
             this.Name.Equals(other.Name);
 
+        bool IEquatable<IdentityExpression>.Equals(IdentityExpression other) =>
+            this.Equals(other);
+
         public override bool Equals(object obj) =>
             obj is IdentityExpression identity ? this.Equals(identity) : false;
 

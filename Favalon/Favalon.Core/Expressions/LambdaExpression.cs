@@ -34,28 +34,28 @@ namespace Favalon.Expressions
                 $"{this.Parameter.GetReadableString(context)} {arrow} {this.Expression.GetReadableString(context)}";
         }
 
-        protected internal override Expression Visit(Environment environment, InferContext context)
+        protected internal override Expression VisitInferring(Environment environment, InferContext context)
         {
             var scoped = environment.NewScope();
 
-            // Force replacing with new freeVariable at the variable parameter.
-            // Because the bind expression excepts inferring from derived environments,
+            // Force replacing with new free variable at the variable parameter.
+            // Because the bind expression infers excepted from derived environments,
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
             var parameter = (this.Parameter is VariableExpression variable) ?
                 variable.CreateWithFreeVariableIfUndefined(scoped, context) :
-                this.Parameter.Visit(scoped, context);
-            var expression = this.Expression.Visit(scoped, context);
+                this.Parameter.VisitInferring(scoped, context);
+            var expression = this.Expression.VisitInferring(scoped, context);
 
             return new LambdaExpression(parameter, expression);
         }
 
-        protected internal override TraverseResults Traverse(System.Func<Expression, int, Expression> yc, int rank)
+        protected internal override TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> yc, int rank)
         {
             this.Parameter = yc(this.Parameter, rank);
             this.Expression = yc(this.Expression, rank);
 
-            return TraverseResults.RequeireHigherOrder;
+            return TraverseInferringResults.RequeireHigherOrder;
         }
 
         protected internal override IEnumerable<XObject> CreateXmlChildren(FormatStringContext context) =>

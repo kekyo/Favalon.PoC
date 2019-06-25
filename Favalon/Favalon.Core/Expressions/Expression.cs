@@ -10,7 +10,7 @@ namespace Favalon.Expressions
 {
     public abstract class Expression
     {
-        protected internal enum TraverseResults
+        protected internal enum TraverseInferringResults
         {
             Finished,
             RequeireHigherOrder
@@ -24,11 +24,11 @@ namespace Favalon.Expressions
         public virtual bool ShowInAnnotation => 
             true;
 
-        protected internal virtual Expression Visit(Environment environment, InferContext context) =>
+        protected internal virtual Expression VisitInferring(Environment environment, InferContext context) =>
             this;
 
-        protected internal virtual TraverseResults Traverse(System.Func<Expression, int, Expression> ycon, int rank) =>
-            TraverseResults.Finished;
+        protected internal virtual TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> ycon, int rank) =>
+            TraverseInferringResults.Finished;
 
         protected internal abstract string FormatReadableString(FormatStringContext context);
 

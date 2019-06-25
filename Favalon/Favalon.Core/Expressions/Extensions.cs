@@ -33,12 +33,17 @@ namespace Favalon.Expressions
                 Concat(expression.CreateXmlChildren(context)).
                 ToArray<object>());
 
-        public static Expression Infer(this Expression expression, Environment environment, int rank = 0)
+        public static TExpression Infer<TExpression>(this TExpression expression, Environment environment, int rank = 0)
+            where TExpression : Expression
         {
             var context = new InferContext();
-            var visited = expression.Visit(environment, context);
+
+            // (visited is partially mutable in this sequence.)
+            var visited = expression.VisitInferring(environment, context);
             var fixup = context.FixupHigherOrders(visited, rank);
-            return context.AggregateFreeVariables(fixup, rank);
+            // (fixup is immutable)
+
+            return (TExpression)fixup;
         }
     }
 }

@@ -81,8 +81,10 @@ namespace Favalon.Expressions.Internals
 
         public Expression FixupHigherOrders(Expression expression, int rank)
         {
-            var current = expression;
+            // Inferring final step.
 
+            // Replace unified higher orders.
+            var current = expression;
             if (current is IdentityExpression identity)
             {
                 if (identities.TryGetValue(identity, out var resolved))
@@ -91,22 +93,13 @@ namespace Favalon.Expressions.Internals
                 }
             }
 
-            if (current.Traverse(this.FixupHigherOrders, rank) == Expression.TraverseResults.RequeireHigherOrder)
+            // Recursive check onto higher order expressions.
+            if (current.TraverseInferring(this.FixupHigherOrders, rank) == Expression.TraverseInferringResults.RequeireHigherOrder)
             {
                 current.HigherOrder = this.FixupHigherOrders(current.HigherOrder, rank + 1);
             }
 
             return current;
-        }
-
-        public Expression AggregateFreeVariables(Expression expression, int rank)
-        {
-            if (expression.Traverse(this.AggregateFreeVariables, rank) == Expression.TraverseResults.RequeireHigherOrder)
-            {
-                expression.HigherOrder = this.AggregateFreeVariables(expression.HigherOrder, rank + 1);
-            }
-
-            return expression;
         }
     }
 }

@@ -30,10 +30,10 @@ namespace Favalon.Expressions
                 $"{this.Function.GetReadableString(context)} ({this.Argument.GetReadableString(context)})" :
                 $"{this.Function.GetReadableString(context)} {this.Argument.GetReadableString(context)}";
 
-        protected internal override Expression Visit(Environment environment, InferContext context)
+        protected internal override Expression VisitInferring(Environment environment, InferContext context)
         {
-            var function = this.Function.Visit(environment, context);
-            var argument = this.Argument.Visit(environment, context);
+            var function = this.Function.VisitInferring(environment, context);
+            var argument = this.Argument.VisitInferring(environment, context);
 
             var resultHigherOrder = environment.CreateFreeVariable();
 
@@ -43,12 +43,12 @@ namespace Favalon.Expressions
             return new ApplyExpression(function, argument, resultHigherOrder);
         }
 
-        protected internal override TraverseResults Traverse(System.Func<Expression, int, Expression> yc, int rank)
+        protected internal override TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> yc, int rank)
         {
             this.Function = yc(this.Function, rank);
             this.Argument = yc(this.Argument, rank);
 
-            return TraverseResults.RequeireHigherOrder;
+            return TraverseInferringResults.RequeireHigherOrder;
         }
 
         protected internal override IEnumerable<XObject> CreateXmlChildren(FormatStringContext context) =>

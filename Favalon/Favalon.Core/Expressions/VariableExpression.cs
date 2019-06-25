@@ -30,7 +30,7 @@ namespace Favalon.Expressions
             }
         }
 
-        protected internal override Expression Visit(Environment environment, InferContext context)
+        protected internal override Expression VisitInferring(Environment environment, InferContext context)
         {
             if (environment.TryGetNamedExpression(this.Name, out var resolved))
             {
@@ -42,8 +42,8 @@ namespace Favalon.Expressions
             }
         }
 
-        protected internal override TraverseResults Traverse(System.Func<Expression, int, Expression> yc, int rank) =>
-            TraverseResults.RequeireHigherOrder;
+        protected internal override TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> yc, int rank) =>
+            TraverseInferringResults.RequeireHigherOrder;
 
         /////////////////////////////////////////////////////////////////////////
 

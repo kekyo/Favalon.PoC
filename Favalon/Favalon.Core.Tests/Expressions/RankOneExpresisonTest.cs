@@ -151,7 +151,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = System.Int32 in x", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("*", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("*", actual.Bound.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -167,7 +167,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = System.Int32 in y", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("*", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("*", actual.Bound.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -183,7 +183,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = y in x", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("*", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("*", actual.Bound.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -199,7 +199,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = y in x", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("*", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("*", actual.Bound.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -215,7 +215,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = y System.Int32 in y", actual.ReadableString);
             Assert.AreEqual("* -> 'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("'a", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("'a", actual.Bound.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -231,7 +231,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = y System.Int32 System.Int64 in y", actual.ReadableString);
             Assert.AreEqual("* -> * -> 'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("'T2", actual.Variable.HigherOrder.StrictReadableString);
+            Assert.AreEqual("'T2", actual.Bound.HigherOrder.StrictReadableString);
         }
 
         [Test]
@@ -247,7 +247,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = y (z System.Int32) in y", actual.ReadableString);
             Assert.AreEqual("'a -> 'b", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("'T3", actual.Variable.HigherOrder.StrictReadableString);
+            Assert.AreEqual("'T3", actual.Bound.HigherOrder.StrictReadableString);
         }
 
         [Test]
@@ -263,7 +263,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = System.Int32 in x = y -> x in x", actual.ReadableString);
             Assert.AreEqual("'a -> *", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("*", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("*", actual.Bound.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -282,7 +282,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = System.Int32 in x", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("*", actual.Variable.HigherOrder.ReadableString);
+            Assert.AreEqual("*", actual.Bound.HigherOrder.ReadableString);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////

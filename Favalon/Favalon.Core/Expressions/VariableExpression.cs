@@ -2,7 +2,13 @@
 
 namespace Favalon.Expressions
 {
-    public sealed class VariableExpression : IdentityExpression
+    public interface IVariableExpression :
+        IIdentityExpression
+    {
+    }
+
+    public sealed class VariableExpression :
+        IdentityExpression<VariableExpression>, IVariableExpression
     {
         internal VariableExpression(string name, Expression higherOrder, TextRange textRange) :
             base(higherOrder, textRange) =>
@@ -14,7 +20,7 @@ namespace Favalon.Expressions
 
         public override string Name { get; }
 
-        internal VariableExpression CreateWithFreeVariableIfUndefined(ExpressionEnvironment environment, InferContext context)
+        public VariableExpression CreateWithFreeVariableIfUndefined(ExpressionEnvironment environment)
         {
             if (this.HigherOrder is UndefinedExpression)
             {
@@ -30,7 +36,7 @@ namespace Favalon.Expressions
             }
         }
 
-        protected internal override Expression VisitInferring(ExpressionEnvironment environment, InferContext context)
+        protected internal override VariableExpression VisitInferring(ExpressionEnvironment environment, InferContext context)
         {
             if (environment.TryGetBoundExpression(this.Name, out var resolved))
             {
@@ -38,16 +44,11 @@ namespace Favalon.Expressions
             }
             else
             {
-                return this.CreateWithFreeVariableIfUndefined(environment, context);
+                return this.CreateWithFreeVariableIfUndefined(environment);
             }
         }
 
-        protected internal override TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> yc, int rank) =>
+        protected internal override TraverseInferringResults FixupHigherOrders(InferContext context, int rank) =>
             TraverseInferringResults.RequeireHigherOrder;
-
-        /////////////////////////////////////////////////////////////////////////
-
-        public static implicit operator VariableExpression(string name) =>
-            new VariableExpression(name, TextRange.Unknown);
     }
 }

@@ -18,13 +18,22 @@
         public static KindExpression Kind() =>
             KindExpression.Instance;
 
-        public static ApplyExpression Apply(Expression function, Expression argument, TextRange textRange) =>
-            new ApplyExpression(function, argument, textRange);
+        public static ApplyExpression<TFunctionExpression, TArgumentExpression> Apply<TFunctionExpression, TArgumentExpression>(
+            TFunctionExpression function, TArgumentExpression argument, TextRange textRange)
+            where TFunctionExpression : Expression<TFunctionExpression>
+            where TArgumentExpression : Expression<TArgumentExpression> =>
+            new ApplyExpression<TFunctionExpression, TArgumentExpression>(function, argument, textRange);
 
-        public static BindExpression Bind(VariableExpression variable, Expression expression, Expression body, TextRange textRange) =>
-            new BindExpression(variable, expression, body, textRange);
+        public static BindExpression<TExpressionExpression, TBodyExpression> Bind<TExpressionExpression, TBodyExpression>(
+            VariableExpression variable, TExpressionExpression expression, TBodyExpression body, TextRange textRange)
+            where TExpressionExpression : Expression<TExpressionExpression>
+            where TBodyExpression : Expression<TBodyExpression> =>
+            new BindExpression<TExpressionExpression, TBodyExpression>(variable, expression, body, textRange);
 
-        public static LambdaExpression Lambda(IdentityExpression parameter, Expression expression, TextRange textRange) =>
-            new LambdaExpression(parameter, expression, textRange);
+        public static LambdaExpression<TParameterExpression, TExpressionExpression> Lambda<TParameterExpression, TExpressionExpression>(
+            TParameterExpression parameter, TExpressionExpression expression, TextRange textRange)
+            where TParameterExpression : Expression<TParameterExpression>, IVariableExpression
+            where TExpressionExpression : Expression<TExpressionExpression> =>
+            new LambdaExpression<TParameterExpression, TExpressionExpression>(parameter, expression, textRange);
     }
 }

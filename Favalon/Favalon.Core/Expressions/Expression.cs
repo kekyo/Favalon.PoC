@@ -8,7 +8,19 @@ using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
-    public abstract partial class Expression
+    public interface IExpression
+    {
+        IExpression HigherOrder { get; }
+        TextRange TextRange { get; }
+
+        string ReadableString { get; }
+        string StrictReadableString { get; }
+        XElement Xml { get; }
+        XElement StrictXml { get; }
+    }
+
+    public abstract partial class Expression :
+        IExpression
     {
         protected internal enum TraverseInferringResults
         {
@@ -16,26 +28,25 @@ namespace Favalon.Expressions
             RequeireHigherOrder
         }
 
-        protected Expression(Expression higherOrder, TextRange textRange)
+        private protected Expression(Expression higherOrder, TextRange textRange)
         {
             this.HigherOrder = higherOrder;
             this.TextRange = textRange;
         }
 
         public Expression HigherOrder { get; private set; }
-
-        public readonly TextRange TextRange;
-
-        public virtual bool ShowInAnnotation => 
-            true;
+        IExpression IExpression.HigherOrder =>
+            this.HigherOrder;
 
         internal virtual void SetHigherOrder(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
-        protected internal virtual Expression VisitInferring(ExpressionEnvironment environment, InferContext context) =>
-            this;
+        public TextRange TextRange { get; }
 
-        protected internal virtual TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> ycon, int rank) =>
+        public virtual bool ShowInAnnotation => 
+            true;
+
+        protected internal virtual TraverseInferringResults FixupHigherOrders(InferContext context, int rank) =>
             TraverseInferringResults.Finished;
 
         protected internal abstract string FormatReadableString(FormatContext context);
@@ -57,10 +68,16 @@ namespace Favalon.Expressions
 
         public XElement StrictXml =>
             this.CreateXml(new FormatContext(true, true, true));
+    }
 
-        /////////////////////////////////////////////////////////////////////////
+    public abstract class Expression<TExpression> : Expression
+        where TExpression : Expression<TExpression>
+    {
+        protected Expression(Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange)
+        { }
 
-        public static implicit operator Expression(string name) =>
-            new VariableExpression(name, TextRange.Unknown);
+        protected internal virtual TExpression VisitInferring(ExpressionEnvironment environment, InferContext context) =>
+            (TExpression)this;
     }
 }

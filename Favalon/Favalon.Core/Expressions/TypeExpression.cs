@@ -1,6 +1,7 @@
 ﻿namespace Favalon.Expressions
 {
-    public sealed class TypeExpression : IdentityExpression
+    public sealed class TypeExpression :
+        IdentityExpression<TypeExpression>, IVariableExpression
     {
         internal TypeExpression(string name, TextRange textRange) :
             base(KindExpression.Instance, textRange) =>

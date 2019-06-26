@@ -5,8 +5,8 @@ namespace Favalon.Expressions.Internals
 {
     public sealed class InferContext
     {
-        private readonly Dictionary<IdentityExpression, Expression> identities =
-            new Dictionary<IdentityExpression, Expression>();
+        private readonly Dictionary<IIdentityExpression, Expression> identities =
+            new Dictionary<IIdentityExpression, Expression>();
 
         internal InferContext() { }
 
@@ -35,9 +35,9 @@ namespace Favalon.Expressions.Internals
             }
 
             // Pair of identities / one of identity (Include fallbacked freeVariable)
-            if (expression1 is IdentityExpression identity1)
+            if (expression1 is IIdentityExpression identity1)
             {
-                if (expression2 is IdentityExpression identity2)
+                if (expression2 is IIdentityExpression identity2)
                 {
                     // Unify identity2 into identity1 if aren't same.
                     if (!identity1.Equals(identity2))
@@ -56,7 +56,7 @@ namespace Favalon.Expressions.Internals
                 }
                 return;
             }
-            else if (expression2 is IdentityExpression identity2)
+            else if (expression2 is IIdentityExpression identity2)
             {
                 if (identities.TryGetValue(identity2, out var resolved))
                 {
@@ -71,8 +71,8 @@ namespace Favalon.Expressions.Internals
             }
 
             // Unify lambdas each parameters and expressions.
-            if ((expression1 is LambdaExpression lambda1) &&
-                (expression2 is LambdaExpression lambda2))
+            if ((expression1 is ILambdaExpression lambda1) &&
+                (expression2 is ILambdaExpression lambda2))
             {
                 this.UnifyExpression(lambda1.Parameter, lambda2.Parameter);
                 this.UnifyExpression(lambda1.Expression, lambda2.Expression);
@@ -80,13 +80,14 @@ namespace Favalon.Expressions.Internals
             }
         }
 
-        public Expression FixupHigherOrders(Expression expression, int rank)
+        public TExpression FixupHigherOrders<TExpression>(TExpression expression, int rank)
+            where TExpression : Expression
         {
             // Inferring final step.
 
             // Replace unified higher orders.
-            var current = expression;
-            if (current is IdentityExpression identity)
+            Expression current = expression;
+            if (current is IIdentityExpression identity)
             {
                 if (identities.TryGetValue(identity, out var resolved))
                 {
@@ -95,12 +96,12 @@ namespace Favalon.Expressions.Internals
             }
 
             // Recursive check onto higher order expressions.
-            if (current.TraverseInferring(this.FixupHigherOrders, rank) == Expression.TraverseInferringResults.RequeireHigherOrder)
+            if (current.FixupHigherOrders(this, rank) == Expression.TraverseInferringResults.RequeireHigherOrder)
             {
                 current.SetHigherOrder(this.FixupHigherOrders(current.HigherOrder, rank + 1));
             }
 
-            return current;
+            return (TExpression)current;
         }
 
         public override string ToString() =>

@@ -3,7 +3,8 @@ using System;
 
 namespace Favalon.Expressions
 {
-    public sealed class FreeVariableExpression : IdentityExpression,
+    public sealed class FreeVariableExpression :
+        IdentityExpression<FreeVariableExpression>, IVariableExpression,
         IEquatable<FreeVariableExpression>, IComparable<FreeVariableExpression>
     {
         public readonly long Index;
@@ -41,7 +42,7 @@ namespace Favalon.Expressions
         bool IEquatable<FreeVariableExpression>.Equals(FreeVariableExpression other) =>
             this.Equals(other);
 
-        public override bool Equals(IdentityExpression other) =>
+        public override bool Equals(IIdentityExpression other) =>
             other is FreeVariableExpression freeVariable ? this.Equals(freeVariable) : false;
 
         public int CompareTo(FreeVariableExpression other) =>

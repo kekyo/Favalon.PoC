@@ -4,9 +4,12 @@ using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
-    public sealed class BindExpression : Expression
+    public sealed class BindExpression<TExpressionExpression, TBodyExpression> :
+        Expression<BindExpression<TExpressionExpression, TBodyExpression>>
+        where TExpressionExpression : Expression<TExpressionExpression>
+        where TBodyExpression : Expression<TBodyExpression>
     {
-        internal BindExpression(VariableExpression bound, Expression expression, Expression body, TextRange textRange) :
+        internal BindExpression(VariableExpression bound, TExpressionExpression expression, TBodyExpression body, TextRange textRange) :
             base(body.HigherOrder, textRange)
         {
             this.Bound = bound;
@@ -15,13 +18,14 @@ namespace Favalon.Expressions
         }
 
         public VariableExpression Bound { get; private set; }
-        public Expression Expression { get; private set; }
-        public Expression Body { get; private set; }
+        public TExpressionExpression Expression { get; private set; }
+        public TBodyExpression Body { get; private set; }
 
         protected internal override string FormatReadableString(FormatContext context) =>
             $"{this.Bound.GetReadableString(context)} = {this.Expression.GetReadableString(context)} in {this.Body.GetReadableString(context)}";
 
-        protected internal override Expression VisitInferring(ExpressionEnvironment environment, InferContext context)
+        protected internal override BindExpression<TExpressionExpression, TBodyExpression> VisitInferring(
+            ExpressionEnvironment environment, InferContext context)
         {
             // Bind expression scope details:
             // let x = y in z
@@ -37,21 +41,21 @@ namespace Favalon.Expressions
             // Because the bind expression infers excepted from derived environments,
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
-            var bound = this.Bound.CreateWithFreeVariableIfUndefined(scoped, context);
+            var bound = this.Bound.CreateWithFreeVariableIfUndefined(scoped);
 
             context.UnifyExpression(bound.HigherOrder, expression.HigherOrder);
             scoped.Bind(bound.Name, expression);
 
             var body = this.Body.VisitInferring(scoped, context);
 
-            return new BindExpression(bound, expression, body, this.TextRange);
+            return new BindExpression<TExpressionExpression, TBodyExpression>(bound, expression, body, this.TextRange);
         }
 
-        protected internal override TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> yc, int rank)
+        protected internal override TraverseInferringResults FixupHigherOrders(InferContext context, int rank)
         {
-            this.Bound = (VariableExpression)yc(this.Bound, rank);
-            this.Expression = yc(this.Expression, rank);
-            this.Body = yc(this.Body, rank);
+            this.Bound = (VariableExpression)context.FixupHigherOrders(this.Bound, rank);
+            this.Expression = context.FixupHigherOrders(this.Expression, rank);
+            this.Body = context.FixupHigherOrders(this.Body, rank);
 
             return TraverseInferringResults.RequeireHigherOrder;
         }

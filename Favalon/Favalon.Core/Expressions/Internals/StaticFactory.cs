@@ -21,13 +21,22 @@
         public static KindExpression Kind() =>
             KindExpression.Instance;
 
-        public static ApplyExpression Apply(Expression function, Expression argument) =>
-            new ApplyExpression(function, argument, TextRange.Unknown);
+        public static ApplyExpression<TFunctionExpression, TArgumentExpression> Apply<TFunctionExpression, TArgumentExpression>(
+            TFunctionExpression function, TArgumentExpression argument)
+            where TFunctionExpression : Expression<TFunctionExpression>
+            where TArgumentExpression : Expression<TArgumentExpression> =>
+            new ApplyExpression<TFunctionExpression, TArgumentExpression>(function, argument, TextRange.Unknown);
 
-        public static BindExpression Bind(VariableExpression variable, Expression expression, Expression body) =>
-            new BindExpression(variable, expression, body, TextRange.Unknown);
+        public static BindExpression<TExpressionExpression, TBodyExpression> Bind<TExpressionExpression, TBodyExpression>(
+            VariableExpression variable, TExpressionExpression expression, TBodyExpression body)
+            where TExpressionExpression : Expression<TExpressionExpression>
+            where TBodyExpression : Expression<TBodyExpression> =>
+            new BindExpression<TExpressionExpression, TBodyExpression>(variable, expression, body, TextRange.Unknown);
 
-        public static LambdaExpression Lambda(IdentityExpression parameter, Expression expression) =>
-            new LambdaExpression(parameter, expression, TextRange.Unknown);
+        public static LambdaExpression<TParameterExpression, TExpressionExpression> Lambda<TParameterExpression, TExpressionExpression>(
+            TParameterExpression parameter, TExpressionExpression expression)
+            where TParameterExpression : Expression<TParameterExpression>, IVariableExpression
+            where TExpressionExpression : Expression<TExpressionExpression> =>
+            new LambdaExpression<TParameterExpression, TExpressionExpression>(parameter, expression, TextRange.Unknown);
     }
 }

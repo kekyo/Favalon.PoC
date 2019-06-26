@@ -11,7 +11,7 @@ namespace Favalon.Expressions
             expression.GetType().Name.Replace("Expression", string.Empty);
 
         private static string InternalFormatReadableString(this Expression expression, FormatContext context) =>
-            (expression is TermExpression) ?
+            (expression is ITermExpression) ?
                 expression.FormatReadableString(context) :
                 $"({expression.FormatReadableString(context)})";
 
@@ -35,7 +35,7 @@ namespace Favalon.Expressions
                 ToArray<object>());
 
         public static TExpression Infer<TExpression>(this TExpression expression, ExpressionEnvironment environment, int rank = 0)
-            where TExpression : Expression
+            where TExpression : Expression<TExpression>
         {
             var context = new InferContext();
 

@@ -4,7 +4,12 @@ using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
-    public sealed class ApplyExpression : Expression
+    public interface IApplyExpression :
+        IExpression
+    {
+    }
+
+    public sealed class ApplyExpression : Expression, IApplyExpression
     {
         // f x
         private ApplyExpression(Expression function, Expression argument, Expression higherOrder, TextRange textRange) :
@@ -30,12 +35,13 @@ namespace Favalon.Expressions
                 $"{this.Function.GetReadableString(context)} ({this.Argument.GetReadableString(context)})" :
                 $"{this.Function.GetReadableString(context)} {this.Argument.GetReadableString(context)}";
 
-        protected internal override Expression VisitInferring(ExpressionEnvironment environment, InferContext context)
+        protected internal override Expression VisitInferring(
+            ExpressionEnvironment environment, InferContext context)
         {
             var function = this.Function.VisitInferring(environment, context);
             var argument = this.Argument.VisitInferring(environment, context);
 
-            var resultHigherOrder = environment.CreateFreeVariable(this.TextRange);
+            var resultHigherOrder = environment.CreatePlaceholder(this.TextRange);
 
             var variableHigherOrder = new LambdaExpression(argument.HigherOrder, resultHigherOrder, this.TextRange);
             context.UnifyExpression(function.HigherOrder, variableHigherOrder);
@@ -43,10 +49,10 @@ namespace Favalon.Expressions
             return new ApplyExpression(function, argument, resultHigherOrder, this.TextRange);
         }
 
-        protected internal override TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> yc, int rank)
+        protected internal override TraverseInferringResults FixupHigherOrders(InferContext context, int rank)
         {
-            this.Function = yc(this.Function, rank);
-            this.Argument = yc(this.Argument, rank);
+            this.Function = context.FixupHigherOrders(this.Function, rank);
+            this.Argument = context.FixupHigherOrders(this.Argument, rank);
 
             return TraverseInferringResults.RequeireHigherOrder;
         }

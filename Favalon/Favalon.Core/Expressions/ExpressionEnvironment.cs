@@ -33,8 +33,8 @@ namespace Favalon.Expressions
         internal ExpressionEnvironment NewScope() =>
             new ExpressionEnvironment(this, indexCell);
 
-        public FreeVariableExpression CreateFreeVariable(TextRange textRange) =>
-            new FreeVariableExpression(indexCell.Next(), textRange);
+        public PlaceholderExpression CreatePlaceholder(TextRange textRange) =>
+            new PlaceholderExpression(indexCell.Next(), textRange);
 
         internal bool TryGetBoundExpression(string boundName, out Expression expression)
         {
@@ -58,6 +58,11 @@ namespace Favalon.Expressions
 
         public void Bind(string boundName, Expression expression)
         {
+            if ((expression is VariableExpression variable) && (variable.Name == boundName))
+            {
+                throw new System.InvalidOperationException();
+            }
+
             if (boundExpressions == null)
             {
                 boundExpressions = new Dictionary<string, Expression>();

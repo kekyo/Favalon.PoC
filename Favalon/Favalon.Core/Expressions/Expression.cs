@@ -8,7 +8,19 @@ using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
-    public abstract partial class Expression
+    public interface IExpression
+    {
+        Expression HigherOrder { get; }
+        TextRange TextRange { get; }
+
+        string ReadableString { get; }
+        string StrictReadableString { get; }
+        XElement Xml { get; }
+        XElement StrictXml { get; }
+    }
+
+    public abstract partial class Expression :
+        IExpression
     {
         protected internal enum TraverseInferringResults
         {
@@ -16,7 +28,7 @@ namespace Favalon.Expressions
             RequeireHigherOrder
         }
 
-        protected Expression(Expression higherOrder, TextRange textRange)
+        private protected Expression(Expression higherOrder, TextRange textRange)
         {
             this.HigherOrder = higherOrder;
             this.TextRange = textRange;
@@ -24,18 +36,17 @@ namespace Favalon.Expressions
 
         public Expression HigherOrder { get; private set; }
 
-        public readonly TextRange TextRange;
+        internal virtual void SetHigherOrder(Expression higherOrder) =>
+            this.HigherOrder = higherOrder;
+
+        public TextRange TextRange { get; }
 
         public virtual bool ShowInAnnotation => 
             true;
 
-        internal virtual void SetHigherOrder(Expression higherOrder) =>
-            this.HigherOrder = higherOrder;
-
         protected internal virtual Expression VisitInferring(ExpressionEnvironment environment, InferContext context) =>
             this;
-
-        protected internal virtual TraverseInferringResults TraverseInferring(System.Func<Expression, int, Expression> ycon, int rank) =>
+        protected internal virtual TraverseInferringResults FixupHigherOrders(InferContext context, int rank) =>
             TraverseInferringResults.Finished;
 
         protected internal abstract string FormatReadableString(FormatContext context);
@@ -57,10 +68,5 @@ namespace Favalon.Expressions
 
         public XElement StrictXml =>
             this.CreateXml(new FormatContext(true, true, true));
-
-        /////////////////////////////////////////////////////////////////////////
-
-        public static implicit operator Expression(string name) =>
-            new VariableExpression(name, TextRange.Unknown);
     }
 }

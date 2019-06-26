@@ -77,7 +77,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x 123
-            var expression = Apply("x", Constant(123));
+            var expression = Apply(Variable("x"), Constant(123));
 
             var actual = expression.Infer(environment);
 
@@ -109,7 +109,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x y:System.Int32
-            var expression = Apply("x", Variable("y", Type("System.Int32")));
+            var expression = Apply(Variable("x"), Variable("y", Type("System.Int32")));
 
             var actual = expression.Infer(environment);
 
@@ -127,7 +127,7 @@ namespace Favalon.Expressions
             environment.Bind("v", Constant(123));
 
             // x v
-            var expression = Apply("x", "v");
+            var expression = Apply(Variable("x"), Variable("v"));
 
             var actual = expression.Infer(environment);
 
@@ -145,7 +145,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x = 123 in x
-            var expression = Bind("x", Constant(123), "x");
+            var expression = Bind(Variable("x"), Constant(123), Variable("x"));
 
             var actual = expression.Infer(environment);
 
@@ -161,7 +161,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x = 123 in y
-            var expression = Bind("x", Constant(123), "y");
+            var expression = Bind(Variable("x"), Constant(123), Variable("y", environment.FreeVariable()));
 
             var actual = expression.Infer(environment);
 
@@ -177,7 +177,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x = y:System.Int32 in x
-            var expression = Bind("x", Variable("y", Type("System.Int32")), "x");
+            var expression = Bind(Variable("x"), Variable("y", Type("System.Int32")), Variable("x"));
 
             var actual = expression.Infer(environment);
 
@@ -193,7 +193,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x:System.Int32 = y in x
-            var expression = Bind(Variable("x", Type("System.Int32")), "y", "x");
+            var expression = Bind(Variable("x", Type("System.Int32")), Variable("y"), Variable("x"));
 
             var actual = expression.Infer(environment);
 
@@ -209,7 +209,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x = y 123 in x
-            var expression = Bind("x", Apply("y", Constant(123)), "x");
+            var expression = Bind(Variable("x"), Apply(Variable("y"), Constant(123)), Variable("x"));
 
             var actual = expression.Infer(environment);
 
@@ -225,7 +225,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x = y 123 456 in y
-            var expression = Bind("x", Apply(Apply("y", Constant(123)), Constant(456)), "x");
+            var expression = Bind(Variable("x"), Apply(Apply(Variable("y"), Constant(123)), Constant(456)), Variable("x"));
 
             var actual = expression.Infer(environment);
 
@@ -241,7 +241,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x = y (z 123) in x
-            var expression = Bind("x", Apply("y", Apply("z", Constant(123))), "x");
+            var expression = Bind(Variable("x"), Apply(Variable("y"), Apply(Variable("z"), Constant(123))), Variable("x"));
 
             var actual = expression.Infer(environment);
 
@@ -258,7 +258,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x = 123 in x = y -> x in x
-            var expression = Bind("x", Constant(123), Bind("x", Lambda("y", "x"), "x"));
+            var expression = Bind(Variable("x"), Constant(123), Bind(Variable("x"), Lambda(Variable("y"), Variable("x")), Variable("x")));
 
             var actual = expression.Infer(environment);
 
@@ -274,10 +274,10 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x = y 456
-            environment.Bind("x", Lambda("y", Constant(456)));
+            environment.Bind("x", Lambda(Variable("y"), Constant(456)));
 
             // x = 123 in x
-            var expression = Bind("x", Constant(123), "x");
+            var expression = Bind(Variable("x"), Constant(123), Variable("x"));
 
             var actual = expression.Infer(environment);
 
@@ -295,7 +295,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x -> y 123
-            var expression = Lambda("x", Apply("y", Constant(123)));
+            var expression = Lambda(Variable("x"), Apply(Variable("y"), Constant(123)));
 
             var actual = expression.Infer(environment);
 
@@ -309,7 +309,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x -> x y
-            var expression = Lambda("x", Apply("x", "y"));
+            var expression = Lambda(Variable("x"), Apply(Variable("x"), Variable("y")));
 
             var actual = expression.Infer(environment);
 
@@ -323,7 +323,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x -> y -> x y
-            var expression = Lambda("x", Lambda("y", Apply("x", "y")));
+            var expression = Lambda(Variable("x"), Lambda(Variable("y"), Apply(Variable("x"), Variable("y"))));
 
             var actual = expression.Infer(environment);
 
@@ -337,7 +337,7 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x -> y -> x -> x 123
-            var expression = Lambda("x", Lambda("y", Lambda("x", Apply("x", Constant(123)))));
+            var expression = Lambda(Variable("x"), Lambda(Variable("y"), Lambda(Variable("x"), Apply(Variable("x"), Constant(123)))));
 
             var actual = expression.Infer(environment);
 

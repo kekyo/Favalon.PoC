@@ -1,6 +1,6 @@
 ﻿namespace Favalon.Expressions.Internals
 {
-    internal sealed class UndefinedExpression : Expression
+    public sealed class UndefinedExpression : Expression
     {
         // Dead end expression.
 

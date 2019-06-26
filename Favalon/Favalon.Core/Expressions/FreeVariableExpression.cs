@@ -1,53 +1,53 @@
 ﻿using Favalon.Expressions.Internals;
-using System;
 
 namespace Favalon.Expressions
 {
-    public sealed class FreeVariableExpression : IdentityExpression,
-        IEquatable<FreeVariableExpression>, IComparable<FreeVariableExpression>
+    public sealed class FreeVariableExpression : VariableExpression
     {
-        public readonly long Index;
+        internal FreeVariableExpression(string name, Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange) =>
+            this.Name = name;
 
-        internal FreeVariableExpression(long index, TextRange textRange) :
-            base(UndefinedExpression.Instance, textRange) =>
-            this.Index = index;
+        internal FreeVariableExpression(string name, TextRange textRange) :
+            this(name, UndefinedExpression.Instance, textRange)
+        { }
 
-        public override string Name =>
-            $"'{this.Index}";
+        public override string Name { get; }
 
-        protected internal override string FormatReadableString(FormatContext context)
+        public FreeVariableExpression CloneWithPlaceholderIfUndefined(ExpressionEnvironment environment)
         {
-            if (context.StrictNaming)
+            if (this.HigherOrder is UndefinedExpression)
             {
-                return this.Name;
+                var placeholderHigherOrder = environment.CreatePlaceholder(this.HigherOrder.TextRange);
+
+                // HACK: Environment.Bind can accept without same named free variable.
+                //   NamedPlaceholderExpression is registered by owned variable.
+                environment.Bind(
+                    this.Name,
+                    new NamedPlaceholderExpression(this.Name, placeholderHigherOrder, this.TextRange));
+
+                return new FreeVariableExpression(this.Name, placeholderHigherOrder, this.TextRange);
             }
             else
             {
-                var adjustedIndex = context.GetAdjustedIndex(this);
-
-                var ch = (char)('a' + (adjustedIndex % ('z' - 'a' + 1)));
-                var suffixIndex = adjustedIndex / ('z' - 'a' + 1);
-                var suffix = (suffixIndex >= 1) ? suffixIndex.ToString() : string.Empty;
-                return $"'{ch}{suffix}";
+                return new FreeVariableExpression(this.Name, this.HigherOrder, this.TextRange);
             }
         }
 
-        public override int GetHashCode() =>
-            this.Index.GetHashCode();
+        protected internal override Expression VisitInferring(
+            ExpressionEnvironment environment, InferContext context)
+        {
+            if (environment.TryGetBoundExpression(this.Name, out var resolved))
+            {
+                return new FreeVariableExpression(this.Name, resolved.HigherOrder, this.TextRange);
+            }
+            else
+            {
+                return this.CloneWithPlaceholderIfUndefined(environment);
+            }
+        }
 
-        public bool Equals(FreeVariableExpression other) =>
-            this.Index.Equals(other.Index);
-
-        bool IEquatable<FreeVariableExpression>.Equals(FreeVariableExpression other) =>
-            this.Equals(other);
-
-        public override bool Equals(IdentityExpression other) =>
-            other is FreeVariableExpression freeVariable ? this.Equals(freeVariable) : false;
-
-        public int CompareTo(FreeVariableExpression other) =>
-            this.Index.CompareTo(other.Index);
-
-        int IComparable<FreeVariableExpression>.CompareTo(FreeVariableExpression other) =>
-            this.CompareTo(other);
+        protected internal override TraverseInferringResults FixupHigherOrders(InferContext context, int rank) =>
+            TraverseInferringResults.RequeireHigherOrder;
     }
 }

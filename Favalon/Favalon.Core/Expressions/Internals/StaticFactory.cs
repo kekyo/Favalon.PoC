@@ -5,13 +5,13 @@
         public static ConstantExpression Constant(object value) =>
             new ConstantExpression(value, TextRange.Unknown);
 
-        public static VariableExpression Variable(string name) =>
-            new VariableExpression(name, TextRange.Unknown);
-        public static VariableExpression Variable(string name, Expression higherOrder) =>
-            new VariableExpression(name, higherOrder, TextRange.Unknown);
+        public static FreeVariableExpression Variable(string name) =>
+            new FreeVariableExpression(name, TextRange.Unknown);
+        public static FreeVariableExpression Variable(string name, Expression higherOrder) =>
+            new FreeVariableExpression(name, higherOrder, TextRange.Unknown);
 
-        public static FreeVariableExpression FreeVariable(this ExpressionEnvironment environment) =>
-            environment.CreateFreeVariable(TextRange.Unknown);
+        public static PlaceholderExpression FreeVariable(this ExpressionEnvironment environment) =>
+            environment.CreatePlaceholder(TextRange.Unknown);
 
         public static TypeExpression Type(string name) =>
             new TypeExpression(name, TextRange.Unknown);
@@ -24,10 +24,10 @@
         public static ApplyExpression Apply(Expression function, Expression argument) =>
             new ApplyExpression(function, argument, TextRange.Unknown);
 
-        public static BindExpression Bind(VariableExpression variable, Expression expression, Expression body) =>
+        public static BindExpression Bind(FreeVariableExpression variable, Expression expression, Expression body) =>
             new BindExpression(variable, expression, body, TextRange.Unknown);
 
-        public static LambdaExpression Lambda(IdentityExpression parameter, Expression expression) =>
+        public static LambdaExpression Lambda(Expression parameter, Expression expression) =>
             new LambdaExpression(parameter, expression, TextRange.Unknown);
     }
 }

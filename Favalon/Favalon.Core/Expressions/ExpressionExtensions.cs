@@ -11,7 +11,7 @@ namespace Favalon.Expressions
             expression.GetType().Name.Replace("Expression", string.Empty);
 
         private static string InternalFormatReadableString(this Expression expression, FormatContext context) =>
-            (expression is TermExpression) ?
+            (expression is ITermExpression) ?
                 expression.FormatReadableString(context) :
                 $"({expression.FormatReadableString(context)})";
 

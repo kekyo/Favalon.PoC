@@ -242,15 +242,15 @@ namespace Favalon.Expressions
         {
             var environment = ExpressionEnvironment.Create();
 
-            // x = y 123 in y
-            var expression = Bind("x", Apply("y", Constant(123)), "y");
+            // x = y 123 in x
+            var expression = Bind("x", Apply("y", Constant(123)), "x");
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("x = y 123 in y", actual.ReadableString);
-            Assert.AreEqual("System.Int32 -> 'a", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("x = y 123 in x", actual.ReadableString);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("'a", actual.Bound.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'a", ((ApplyExpression)actual.Expression).Function.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -259,12 +259,14 @@ namespace Favalon.Expressions
             var environment = ExpressionEnvironment.Create();
 
             // x = y 123 456 in y
-            var expression = Bind("x", Apply(Apply("y", Constant(123)), Constant(456)), "y");
+            var expression = Bind("x", Apply(Apply("y", Constant(123)), Constant(456)), "x");
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("x = y 123 456 in y", actual.ReadableString);
-            Assert.AreEqual("System.Int32 -> System.Int32 -> 'a", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("x = y 123 456 in x", actual.ReadableString);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("System.Int32 -> System.Int32 -> 'a", ((ApplyExpression)((ApplyExpression)actual.Expression).Function).Function.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -272,13 +274,16 @@ namespace Favalon.Expressions
         {
             var environment = ExpressionEnvironment.Create();
 
-            // x = y (z 123) in y
-            var expression = Bind("x", Apply("y", Apply("z", Constant(123))), "y");
+            // x = y (z 123) in x
+            var expression = Bind("x", Apply("y", Apply("z", Constant(123))), "x");
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("x = y (z 123) in y", actual.ReadableString);
-            Assert.AreEqual("'a -> 'b", actual.HigherOrder.ReadableString);
+            Assert.AreEqual("x = y (z 123) in x", actual.ReadableString);
+            Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
+
+            Assert.AreEqual("'a -> 'b", ((ApplyExpression)actual.Expression).Function.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'a", ((ApplyExpression)((ApplyExpression)actual.Expression).Argument).Function.HigherOrder.ReadableString);
         }
 
         [Test]

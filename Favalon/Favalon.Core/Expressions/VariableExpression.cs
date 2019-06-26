@@ -19,10 +19,7 @@ namespace Favalon.Expressions
             if (this.HigherOrder is UndefinedExpression)
             {
                 var freeVariableHigherOrder = environment.CreateFreeVariable(this.HigherOrder.TextRange);
-                var variable = new VariableExpression(this.Name, freeVariableHigherOrder, this.TextRange);
-                //environment.Bind(this, variable);
-
-                return variable;
+                return new VariableExpression(this.Name, freeVariableHigherOrder, this.TextRange);
             }
             else
             {
@@ -43,7 +40,6 @@ namespace Favalon.Expressions
             else
             {
                 var bound = this.CreateWithFreeVariableIfUndefined(environment);
-                environment.Bind(this, bound);
                 return bound;
             }
         }

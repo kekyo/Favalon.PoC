@@ -7,15 +7,22 @@
         internal UndefinedExpression() : base(null!, TextRange.Unknown)
         { }
 
+        private void Initialize() =>
+            base.SetHigherOrder(Instance);  // Make infinite recursivity.
+
         public override bool ShowInAnnotation =>
             false;
 
-        protected internal override string FormatReadableString(FormatContext context) =>
-            "(Undefined)";
+        internal override void SetHigherOrder(Expression higherOrder) =>
+            throw new System.InvalidOperationException($"Cannot annotate undefined: ?:{higherOrder}");
 
-        public static readonly UndefinedExpression Instance = new UndefinedExpression();
+        protected internal override string FormatReadableString(FormatContext context) =>
+            context.StrictNaming ? "(Undefined)" : "?";
+
+        public static readonly UndefinedExpression Instance =
+            new UndefinedExpression();
 
         static UndefinedExpression() =>
-            Instance.HigherOrder = Instance;  // Infinite recursivity.
+            Instance.Initialize();
     }
 }

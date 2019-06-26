@@ -10,6 +10,9 @@ namespace Favalon.Expressions
             base(Type(value.GetType(), textRange), textRange) =>
             this.Value = value;
 
+        internal override void SetHigherOrder(Expression higherOrder) =>
+            throw new System.InvalidOperationException($"Cannot annotate constant: {this}:{higherOrder}");
+
         protected internal override string FormatReadableString(FormatContext context) =>
             this.Value is string ? $"\"{this.Value}\"" : this.Value.ToString();
     }

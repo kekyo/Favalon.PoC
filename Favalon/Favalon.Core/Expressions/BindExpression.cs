@@ -21,6 +21,22 @@ namespace Favalon.Expressions
         protected internal override string FormatReadableString(FormatContext context) =>
             $"{this.Bound.GetReadableString(context)} = {this.Expression.GetReadableString(context)} in {this.Body.GetReadableString(context)}";
 
+        internal static (FreeVariableExpression bound, Expression expression) InternalVisit(
+            ExpressionEnvironment environment, InferContext context, FreeVariableExpression bound, Expression expression)
+        {
+            var e = expression.VisitInferring(environment, context);
+
+            // Force replacing with new free variable.
+            // Because the bind expression infers excepted from derived environments,
+            // but uses variable expression instead simple name string.
+            // It requires annotation processing.
+            var b = bound.CloneWithPlaceholderIfUndefined(environment);
+
+            context.UnifyExpression(bound.HigherOrder, expression.HigherOrder);
+
+            return (b, e);
+        }
+
         protected internal override Expression VisitInferring(
             ExpressionEnvironment environment, InferContext context)
         {
@@ -32,15 +48,8 @@ namespace Favalon.Expressions
             //     +-inner--+
 
             var scoped = environment.NewScope();
-            var expression = this.Expression.VisitInferring(scoped, context);
+            var (bound, expression) = InternalVisit(scoped, context, this.Bound, this.Expression);
 
-            // Force replacing with new free variable.
-            // Because the bind expression infers excepted from derived environments,
-            // but uses variable expression instead simple name string.
-            // It requires annotation processing.
-            var bound = this.Bound.CloneWithPlaceholderIfUndefined(scoped);
-
-            context.UnifyExpression(bound.HigherOrder, expression.HigherOrder);
             scoped.Bind(bound.Name, expression);
 
             var body = this.Body.VisitInferring(scoped, context);

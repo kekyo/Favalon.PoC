@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Favalon.Expressions.Internals;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon.Expressions
@@ -68,6 +69,20 @@ namespace Favalon.Expressions
                 boundExpressions = new Dictionary<string, Expression>();
             }
             boundExpressions[boundName] = expression;
+        }
+
+        public void Bind(FreeVariableExpression bound, Expression expression)
+        {
+            var context = new InferContext();
+            var (b, e) = BindExpression.InternalVisit(this, context, bound, expression);
+            b = context.FixupHigherOrders(b, 0);
+            e = context.FixupHigherOrders(e, 0);
+
+            if (boundExpressions == null)
+            {
+                boundExpressions = new Dictionary<string, Expression>();
+            }
+            boundExpressions[b.Name] = e;
         }
 
         public override string ToString() =>

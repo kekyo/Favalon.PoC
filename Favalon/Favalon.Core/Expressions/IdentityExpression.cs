@@ -9,9 +9,7 @@ namespace Favalon.Expressions
         string Name { get; }
     }
 
-    public abstract class IdentityExpression<TIdentityExpression> :
-        TermExpression<TIdentityExpression>, IIdentityExpression
-        where TIdentityExpression : TermExpression<TIdentityExpression>, IIdentityExpression
+    public abstract class IdentityExpression : TermExpression, IIdentityExpression
     {
         protected IdentityExpression(Expression higherOrder, TextRange textRange) :
             base(higherOrder, textRange)

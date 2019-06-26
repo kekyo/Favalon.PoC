@@ -2,8 +2,7 @@
 
 namespace Favalon.Expressions
 {
-    public sealed class ConstantExpression :
-        TermExpression<ConstantExpression>
+    public sealed class ConstantExpression : TermExpression
     {
         public readonly object Value;
 

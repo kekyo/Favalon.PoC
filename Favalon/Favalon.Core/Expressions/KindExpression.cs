@@ -2,8 +2,7 @@
 
 namespace Favalon.Expressions
 {
-    public sealed class KindExpression :
-        IdentityExpression<KindExpression>
+    public sealed class KindExpression : IdentityExpression
     {
         private KindExpression() :
             base(UndefinedExpression.Instance, TextRange.Unknown)

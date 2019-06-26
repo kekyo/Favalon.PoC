@@ -5,9 +5,7 @@
     {
     }
 
-    public abstract class TermExpression<TTermExpression> :
-        Expression<TTermExpression>, ITermExpression
-        where TTermExpression : Expression<TTermExpression>, ITermExpression
+    public abstract class TermExpression : Expression, ITermExpression
     {
         protected TermExpression(Expression higherOrder, TextRange textRange) :
             base(higherOrder, textRange)

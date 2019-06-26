@@ -11,31 +11,23 @@ namespace Favalon.Expressions
         Expression Expression { get; }
     }
 
-    public sealed class LambdaExpression<TParameterExpression, TExpressionExpression> :
-        Expression<LambdaExpression<TParameterExpression, TExpressionExpression>>, ILambdaExpression
-        where TParameterExpression : Expression<TParameterExpression>, IVariableExpression
-        where TExpressionExpression : Expression<TExpressionExpression>
+    public sealed class LambdaExpression : Expression, ILambdaExpression
     {
         // 'a -> 'b
-        private LambdaExpression(TParameterExpression parameter, TExpressionExpression expression, Expression higherOrder, TextRange textRange) :
+        private LambdaExpression(Expression parameter, Expression expression, Expression higherOrder, TextRange textRange) :
             base(higherOrder, textRange)
         {
             this.Parameter = parameter;
             this.Expression = expression;
         }
 
-        internal LambdaExpression(TParameterExpression parameter, TExpressionExpression expression, TextRange textRange) :
-            this(parameter, expression, new LambdaExpression<Expression, Expression>(parameter.HigherOrder, expression.HigherOrder, KindExpression.Instance, textRange), textRange)
+        internal LambdaExpression(Expression parameter, Expression expression, TextRange textRange) :
+            this(parameter, expression, new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, KindExpression.Instance, textRange), textRange)
         {
         }
 
-        public TParameterExpression Parameter { get; private set; }
-        public TExpressionExpression Expression { get; private set; }
-
-        Expression ILambdaExpression.Parameter =>
-            this.Parameter;
-        Expression ILambdaExpression.Expression =>
-            this.Expression;
+        public Expression Parameter { get; private set; }
+        public Expression Expression { get; private set; }
 
         public override bool ShowInAnnotation =>
             this.Parameter.ShowInAnnotation && this.Expression.ShowInAnnotation;
@@ -48,7 +40,7 @@ namespace Favalon.Expressions
                 $"{this.Parameter.GetReadableString(context)} {arrow} {this.Expression.GetReadableString(context)}";
         }
 
-        protected internal override LambdaExpression<TParameterExpression, TExpressionExpression> VisitInferring(
+        protected internal override Expression VisitInferring(
             ExpressionEnvironment environment, InferContext context)
         {
             var scoped = environment.NewScope();
@@ -57,12 +49,12 @@ namespace Favalon.Expressions
             // Because the bind expression infers excepted from derived environments,
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
-            var parameter = (this.Parameter is VariableExpression variable) ?
-                (TParameterExpression)variable.CreateWithFreeVariableIfUndefined(scoped) :
+            var parameter = (this.Parameter is FreeVariableExpression freeVariable) ?
+                freeVariable.CloneWithPlaceholderIfUndefined(scoped) :
                 this.Parameter.VisitInferring(scoped, context);
             var expression = this.Expression.VisitInferring(scoped, context);
 
-            return new LambdaExpression<TParameterExpression, TExpressionExpression>(parameter, expression, this.TextRange);
+            return new LambdaExpression(parameter, expression, this.TextRange);
         }
 
         protected internal override TraverseInferringResults FixupHigherOrders(InferContext context, int rank)

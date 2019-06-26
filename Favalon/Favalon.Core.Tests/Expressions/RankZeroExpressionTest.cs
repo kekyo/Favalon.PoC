@@ -216,7 +216,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = y 123 in x", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("System.Int32 -> 'a", actual.Expression.Function.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'a", ((ApplyExpression)actual.Expression).Function.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -232,7 +232,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = y 123 456 in x", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("System.Int32 -> System.Int32 -> 'a", actual.Expression.Function.Function.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> System.Int32 -> 'a", ((ApplyExpression)((ApplyExpression)actual.Expression).Function).Function.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -248,8 +248,8 @@ namespace Favalon.Expressions
             Assert.AreEqual("x = y (z 123) in x", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
-            Assert.AreEqual("'a -> 'b", actual.Expression.Function.HigherOrder.ReadableString);
-            Assert.AreEqual("System.Int32 -> 'a", actual.Expression.Argument.Function.HigherOrder.ReadableString);
+            Assert.AreEqual("'a -> 'b", ((ApplyExpression)actual.Expression).Function.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'a", ((ApplyExpression)((ApplyExpression)actual.Expression).Argument).Function.HigherOrder.ReadableString);
         }
 
         [Test]

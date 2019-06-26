@@ -10,7 +10,7 @@ namespace Favalon.Expressions
 {
     public interface IExpression
     {
-        IExpression HigherOrder { get; }
+        Expression HigherOrder { get; }
         TextRange TextRange { get; }
 
         string ReadableString { get; }
@@ -35,8 +35,6 @@ namespace Favalon.Expressions
         }
 
         public Expression HigherOrder { get; private set; }
-        IExpression IExpression.HigherOrder =>
-            this.HigherOrder;
 
         internal virtual void SetHigherOrder(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
@@ -46,6 +44,8 @@ namespace Favalon.Expressions
         public virtual bool ShowInAnnotation => 
             true;
 
+        protected internal virtual Expression VisitInferring(ExpressionEnvironment environment, InferContext context) =>
+            this;
         protected internal virtual TraverseInferringResults FixupHigherOrders(InferContext context, int rank) =>
             TraverseInferringResults.Finished;
 
@@ -68,16 +68,5 @@ namespace Favalon.Expressions
 
         public XElement StrictXml =>
             this.CreateXml(new FormatContext(true, true, true));
-    }
-
-    public abstract class Expression<TExpression> : Expression
-        where TExpression : Expression<TExpression>
-    {
-        protected Expression(Expression higherOrder, TextRange textRange) :
-            base(higherOrder, textRange)
-        { }
-
-        protected internal virtual TExpression VisitInferring(ExpressionEnvironment environment, InferContext context) =>
-            (TExpression)this;
     }
 }

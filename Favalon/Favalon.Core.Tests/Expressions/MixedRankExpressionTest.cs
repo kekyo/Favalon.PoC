@@ -20,7 +20,7 @@ namespace Favalon.Expressions
             // Expression Call(VariableExpression function, Expression argument);
 
             // int "123"
-            var expression = Apply("int", Constant("123"));
+            var expression = Apply(Variable("int"), Constant("123"));
 
             var actual = expression.Infer(environment);
 

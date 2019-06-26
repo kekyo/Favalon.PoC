@@ -35,7 +35,7 @@ namespace Favalon.Expressions
                 ToArray<object>());
 
         public static TExpression Infer<TExpression>(this TExpression expression, ExpressionEnvironment environment, int rank = 0)
-            where TExpression : Expression<TExpression>
+            where TExpression : Expression
         {
             var context = new InferContext();
 

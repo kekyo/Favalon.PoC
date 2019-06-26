@@ -13,9 +13,9 @@ namespace Favalon.Expressions.Internals
         public void UnifyExpression(Expression expression1, Expression expression2)
         {
             // Pair of placehoders / one of freeVariable
-            if (expression1 is FreeVariableExpression freeVariable1)
+            if (expression1 is PlaceholderExpression freeVariable1)
             {
-                if (expression2 is FreeVariableExpression freeVariable2)
+                if (expression2 is PlaceholderExpression freeVariable2)
                 {
                     // Unify freeVariable2 into freeVariable1 if aren't same.
                     if (!freeVariable1.Equals(freeVariable2))
@@ -27,7 +27,7 @@ namespace Favalon.Expressions.Internals
 
                 // Fallback freeVariable1 below.
             }
-            else if (expression2 is FreeVariableExpression)
+            else if (expression2 is PlaceholderExpression)
             {
                 // Swap primary expression and re-examine it.
                 this.UnifyExpression(expression2, expression1);

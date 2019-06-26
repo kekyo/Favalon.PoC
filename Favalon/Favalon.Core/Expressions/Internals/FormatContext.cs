@@ -4,7 +4,7 @@ namespace Favalon.Expressions.Internals
 {
     public sealed class FormatContext
     {
-        private SortedDictionary<FreeVariableExpression, int> freeVariables;
+        private SortedDictionary<PlaceholderExpression, int> freeVariables;
 
         public readonly bool WithAnnotation;
         public readonly bool FancySymbols;
@@ -12,7 +12,7 @@ namespace Favalon.Expressions.Internals
 
         private FormatContext(
             bool withAnnotation, bool strictNaming, bool fancySymbols,
-            SortedDictionary<FreeVariableExpression, int> freeVariables)
+            SortedDictionary<PlaceholderExpression, int> freeVariables)
         {
             this.WithAnnotation = withAnnotation;
             this.FancySymbols = fancySymbols;
@@ -21,14 +21,14 @@ namespace Favalon.Expressions.Internals
         }
 
         internal FormatContext(bool withAnnotation, bool strictNaming, bool fancySymbols) :
-            this(withAnnotation, strictNaming, fancySymbols, new SortedDictionary<FreeVariableExpression, int>())
+            this(withAnnotation, strictNaming, fancySymbols, new SortedDictionary<PlaceholderExpression, int>())
         {
         }
 
         public FormatContext NewDerived(bool? withAnnotation, bool? fancySymbols) =>
             new FormatContext(withAnnotation ?? this.WithAnnotation, this.StrictNaming, fancySymbols ?? this.FancySymbols, freeVariables);
 
-        internal int GetAdjustedIndex(FreeVariableExpression freeVariable)
+        internal int GetAdjustedIndex(PlaceholderExpression freeVariable)
         {
             if (!freeVariables.TryGetValue(freeVariable, out var index))
             {

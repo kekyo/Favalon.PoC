@@ -31,14 +31,17 @@ namespace Favalon.Expressions
         {
             if (environment.GetBoundExpression(this.Name) is (VariableExpression b, Expression e))
             {
-                var bound = b.CreateWithFreeVariableIfUndefined(environment);
-                var expression = e.VisitInferring(environment, context);
+                var scoped = environment.NewScope();
+
+                var expression = e.VisitInferring(scoped, context);
+                var bound = b.CreateWithFreeVariableIfUndefined(scoped);
 
                 context.UnifyExpression(bound.HigherOrder, expression.HigherOrder);
                 return bound;
             }
             else
             {
+                // TODO: Undefined variable here. Do we have to raise exception?
                 var bound = this.CreateWithFreeVariableIfUndefined(environment);
                 return bound;
             }

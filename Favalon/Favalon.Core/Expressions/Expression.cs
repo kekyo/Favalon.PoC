@@ -22,12 +22,15 @@ namespace Favalon.Expressions
             this.TextRange = textRange;
         }
 
-        public Expression HigherOrder { get; internal set; }
+        public Expression HigherOrder { get; private set; }
 
         public readonly TextRange TextRange;
 
         public virtual bool ShowInAnnotation => 
             true;
+
+        internal virtual void SetHigherOrder(Expression higherOrder) =>
+            this.HigherOrder = higherOrder;
 
         protected internal virtual Expression VisitInferring(ExpressionEnvironment environment, InferContext context) =>
             this;

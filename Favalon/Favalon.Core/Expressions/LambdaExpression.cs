@@ -41,9 +41,17 @@ namespace Favalon.Expressions
             // Because the bind expression infers excepted from derived environments,
             // but uses variable expression instead simple name string.
             // It requires annotation processing.
-            var parameter = (this.Parameter is VariableExpression variable) ?
-                variable.CreateWithFreeVariableIfUndefined(scoped) :
-                this.Parameter.VisitInferring(scoped, context);
+            Expression parameter;
+            if ((this.Parameter is VariableExpression variable) && (variable.HigherOrder is UndefinedExpression))
+            {
+                parameter = variable.CreateWithFreeVariableIfUndefined(scoped);
+                scoped.Bind(variable, parameter);
+            }
+            else
+            {
+                parameter = this.Parameter.VisitInferring(scoped, context);
+            }
+
             var expression = this.Expression.VisitInferring(scoped, context);
 
             return new LambdaExpression(parameter, expression, this.TextRange);

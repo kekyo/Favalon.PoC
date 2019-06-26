@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon.Expressions
 {
@@ -62,6 +63,16 @@ namespace Favalon.Expressions
             }
             boundExpressions[bound.Name] = (bound, expression);
         }
+
+        public override string ToString() =>
+            string.Format("Scope [{0}]: {1}",
+                this.parent!.Traverse(environemnt => environemnt.parent!).Count(),
+                string.Join(", ", this.
+                    Traverse(environemnt => environemnt.parent!).
+                    Where(environment => environment.boundExpressions != null).
+                    SelectMany(environment => environment.boundExpressions).
+                    GroupBy(entry => entry.Key, entry => entry.Value).
+                    Select(g => $"{g.Key}={g.First().bound.ReadableString}[{g.First().expression.ReadableString}]")));
 
         public static ExpressionEnvironment Create() =>
             new ExpressionEnvironment();

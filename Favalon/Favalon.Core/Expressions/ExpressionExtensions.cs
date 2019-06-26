@@ -1,4 +1,5 @@
 ﻿using Favalon.Expressions.Internals;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -44,6 +45,17 @@ namespace Favalon.Expressions
             // (fixup is immutable)
 
             return (TExpression)fixup;
+        }
+
+        internal static IEnumerable<T> Traverse<T>(this T value, System.Func<T, T> next)
+            where T : class
+        {
+            var current = value;
+            while (current != null)
+            {
+                yield return current;
+                current = next(current);
+            }
         }
     }
 }

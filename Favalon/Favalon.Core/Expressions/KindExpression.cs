@@ -14,6 +14,9 @@ namespace Favalon.Expressions
         public override bool ShowInAnnotation =>
             false;
 
+        internal override void SetHigherOrder(Expression higherOrder) =>
+            throw new System.InvalidOperationException($"Cannot annotate at kind: *:{higherOrder}");
+
         protected internal override string FormatReadableString(FormatContext context) =>
             context.StrictNaming ? "(Kind)" : "*";
 

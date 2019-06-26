@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon.Expressions.Internals
 {
@@ -96,10 +97,13 @@ namespace Favalon.Expressions.Internals
             // Recursive check onto higher order expressions.
             if (current.TraverseInferring(this.FixupHigherOrders, rank) == Expression.TraverseInferringResults.RequeireHigherOrder)
             {
-                current.HigherOrder = this.FixupHigherOrders(current.HigherOrder, rank + 1);
+                current.SetHigherOrder(this.FixupHigherOrders(current.HigherOrder, rank + 1));
             }
 
             return current;
         }
+
+        public override string ToString() =>
+            string.Join(", ", identities.Select(entry => $"{entry.Key.ReadableString}={entry.Value.ReadableString}"));
     }
 }

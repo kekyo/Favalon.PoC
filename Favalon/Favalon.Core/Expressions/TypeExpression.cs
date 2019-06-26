@@ -11,5 +11,8 @@
             this.Name = type.FullName;
 
         public override string Name { get; }
+
+        internal override void SetHigherOrder(Expression higherOrder) =>
+            throw new System.InvalidOperationException($"Cannot annotate type: {this.Name}:{higherOrder}");
     }
 }

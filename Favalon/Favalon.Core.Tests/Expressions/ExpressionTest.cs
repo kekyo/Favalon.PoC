@@ -5,20 +5,18 @@ namespace Favalon.Expressions
     using static Internals.StaticFactory;
 
     [TestFixture]
-    public sealed class MixedRankExpressionTest
+    public sealed class ExpressionTest
     {
         [Test]
         public void MethodCall()
         {
             var environment = Environment.Create();
+
+            // System.Int32.Parse = System.String -> System.Int32
             environment.Register(Variable("System.Int32.Parse", Lambda(Type("System.String"), Type("System.Int32"))));
 
-            // 123 <-- int("123")
-            // int = a -> System.Int32.Parse a
-            // environment.Bind("int", Lambda("a", Call("System.Int32.Parse", "a")));
+            // int = System.Int32.Parse
             environment.Bind(Variable("int"), Variable("System.Int32.Parse"));
-
-            // Expression Call(VariableExpression function, Expression argument);
 
             // int "123"
             var expression = Apply(Variable("int"), Constant("123"));

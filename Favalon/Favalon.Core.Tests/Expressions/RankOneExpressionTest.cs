@@ -97,7 +97,7 @@ namespace Favalon.Expressions
             environment.Register(Variable("x"));
 
             // x:(* -> 'a) System.Int32
-            var expression = Apply(Variable("x", Lambda(Kind(), environment.FreeVariable())), Type("System.Int32"));
+            var expression = Apply(Variable("x", Lambda(Kind(), environment.Placeholder())), Type("System.Int32"));
 
             var actual = expression.Infer(environment);
 

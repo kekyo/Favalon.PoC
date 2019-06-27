@@ -96,7 +96,7 @@ namespace Favalon.Expressions
             environment.Register(Variable("x"));
 
             // x:(System.Int32 -> 'a) 123
-            var expression = Apply(Variable("x", Lambda(Type("System.Int32"), environment.FreeVariable())), Constant(123));
+            var expression = Apply(Variable("x", Lambda(Type("System.Int32"), environment.Placeholder())), Constant(123));
 
             var actual = expression.Infer(environment);
 
@@ -167,7 +167,7 @@ namespace Favalon.Expressions
             environment.Register(Variable("y"));
 
             // x = 123 in y
-            var expression = Bind(Variable("x"), Constant(123), Variable("y", environment.FreeVariable()));
+            var expression = Bind(Variable("x"), Constant(123), Variable("y", environment.Placeholder()));
 
             var actual = expression.Infer(environment);
 

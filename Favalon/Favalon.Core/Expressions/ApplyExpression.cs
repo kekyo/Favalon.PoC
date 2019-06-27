@@ -4,12 +4,7 @@ using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
-    public interface IApplyExpression :
-        IExpression
-    {
-    }
-
-    public sealed class ApplyExpression : Expression, IApplyExpression
+    public sealed class ApplyExpression : Expression
     {
         // f x
         private ApplyExpression(Expression function, Expression argument, Expression higherOrder, TextRange textRange) :

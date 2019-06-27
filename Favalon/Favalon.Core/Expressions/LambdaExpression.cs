@@ -4,14 +4,7 @@ using System.Xml.Linq;
 
 namespace Favalon.Expressions
 {
-    public interface ILambdaExpression :
-        IExpression
-    {
-        Expression Parameter { get; }
-        Expression Expression { get; }
-    }
-
-    public sealed class LambdaExpression : Expression, ILambdaExpression
+    public sealed class LambdaExpression : Expression
     {
         // 'a -> 'b
         private LambdaExpression(Expression parameter, Expression expression, Expression higherOrder, TextRange textRange) :
@@ -35,7 +28,7 @@ namespace Favalon.Expressions
         protected internal override string FormatReadableString(FormatContext context)
         {
             var arrow = context.FancySymbols ? "→" : "->";
-            return (this.Parameter is ILambdaExpression) ?
+            return (this.Parameter is LambdaExpression) ?
                 $"({this.Parameter.GetReadableString(context)}) {arrow} {this.Expression.GetReadableString(context)}" :
                 $"{this.Parameter.GetReadableString(context)} {arrow} {this.Expression.GetReadableString(context)}";
         }

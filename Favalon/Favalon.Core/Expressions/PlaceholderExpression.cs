@@ -45,7 +45,7 @@ namespace Favalon.Expressions
         bool IEquatable<PlaceholderExpression>.Equals(PlaceholderExpression other) =>
             this.Equals(other);
 
-        public override bool Equals(IIdentityExpression other) =>
+        public override bool Equals(IdentityExpression other) =>
             other is PlaceholderExpression placeholder ? this.Equals(placeholder) : false;
 
         public int CompareTo(PlaceholderExpression other) =>

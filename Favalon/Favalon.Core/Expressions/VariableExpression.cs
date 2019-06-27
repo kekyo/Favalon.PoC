@@ -2,12 +2,7 @@
 
 namespace Favalon.Expressions
 {
-    public interface IVariableExpression :
-        IIdentityExpression
-    {
-    }
-
-    public abstract class VariableExpression : IdentityExpression, IVariableExpression
+    public abstract class VariableExpression : IdentityExpression
     {
         private protected VariableExpression(Expression higherOrder, TextRange textRange) :
             base(higherOrder, textRange)

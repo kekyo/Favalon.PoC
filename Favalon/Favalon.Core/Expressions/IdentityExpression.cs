@@ -3,13 +3,7 @@ using System;
 
 namespace Favalon.Expressions
 {
-    public interface IIdentityExpression :
-        ITermExpression, IEquatable<IIdentityExpression>
-    {
-        string Name { get; }
-    }
-
-    public abstract class IdentityExpression : TermExpression, IIdentityExpression
+    public abstract class IdentityExpression : TermExpression, IEquatable<IdentityExpression>
     {
         protected IdentityExpression(Expression higherOrder, TextRange textRange) :
             base(higherOrder, textRange)
@@ -23,13 +17,13 @@ namespace Favalon.Expressions
         public override int GetHashCode() =>
             this.Name.GetHashCode();
 
-        public virtual bool Equals(IIdentityExpression other) =>
+        public virtual bool Equals(IdentityExpression other) =>
             this.Name.Equals(other.Name);
 
-        bool IEquatable<IIdentityExpression>.Equals(IIdentityExpression other) =>
+        bool IEquatable<IdentityExpression>.Equals(IdentityExpression other) =>
             this.Equals(other);
 
         public override bool Equals(object obj) =>
-            obj is IIdentityExpression identity ? this.Equals(identity) : false;
+            obj is IdentityExpression identity ? this.Equals(identity) : false;
     }
 }

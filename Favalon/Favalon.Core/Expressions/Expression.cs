@@ -1,26 +1,11 @@
 ﻿using Favalon.Expressions.Internals;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
-
-[assembly:InternalsVisibleTo("Favalon.Core.Tests")]
 
 namespace Favalon.Expressions
 {
-    public interface IExpression
-    {
-        Expression HigherOrder { get; }
-        TextRange TextRange { get; }
-
-        string ReadableString { get; }
-        string StrictReadableString { get; }
-        XElement Xml { get; }
-        XElement StrictXml { get; }
-    }
-
-    public abstract partial class Expression :
-        IExpression
+    public abstract partial class Expression
     {
         protected internal enum TraverseInferringResults
         {

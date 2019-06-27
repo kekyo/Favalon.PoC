@@ -28,7 +28,7 @@ namespace Favalon.Expressions
             Environment environment, InferContext context)
         {
             // TODO: Correct real constructor argument type.
-            var higherOrder = new LambdaExpression(UndefinedExpression.Instance, this.Argument, this.TextRange);
+            var higherOrder = new LambdaExpression(environment.CreatePlaceholder(this.TextRange), this.Argument, this.TextRange);
             return new NewExpression(this.Argument, higherOrder, this.TextRange);
         }
 

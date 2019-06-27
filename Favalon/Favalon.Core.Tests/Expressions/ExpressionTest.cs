@@ -33,11 +33,11 @@ namespace Favalon.Expressions
             var environment = Environment.Create();
 
             // new System.Collections.ArrayList ()
-            var expression = Apply(New(Type("System.Collections.ArrayList")), Constant("()"));
+            var expression = Apply(New(Type("System.Collections.ArrayList")), Constant(123));
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("new System.Collections.ArrayList ()", actual.ReadableString);
+            Assert.AreEqual("new System.Collections.ArrayList 123", actual.ReadableString);
             Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);
         }
 

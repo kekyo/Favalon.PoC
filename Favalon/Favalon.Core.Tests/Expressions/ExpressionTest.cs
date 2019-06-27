@@ -26,5 +26,36 @@ namespace Favalon.Expressions
             Assert.AreEqual("int \"123\"", actual.ReadableString);
             Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
         }
+
+        [Test]
+        public void New()
+        {
+            var environment = Environment.Create();
+            environment.Register(Variable("new", Lambda(Kind(), environment.Placeholder())));
+
+            // new System.Collections.ArrayList
+            var expression = Apply(Variable("new"), Type("System.Collections.ArrayList"));
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("new System.Collections.ArrayList", actual.ReadableString);
+            Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);
+        }
+
+        //[Test]
+        //public void NewWithCompositionedType()
+        //{
+        //    var environment = Environment.Create();
+        //    environment.Register(Variable("new", Lambda(Kind(), environment.Placeholder())));
+        //    environment.Register(Variable("list", Lambda(Kind(), Kind())));
+
+        //    // new (list System.Int32)
+        //    var expression = Apply(Variable("new"), Apply(Variable("list"), Type("System.Int32")));
+
+        //    var actual = expression.Infer(environment);
+
+        //    Assert.AreEqual("list System.Int32", actual.ReadableString);
+        //    Assert.AreEqual("*", actual.HigherOrder.ReadableString);
+        //}
     }
 }

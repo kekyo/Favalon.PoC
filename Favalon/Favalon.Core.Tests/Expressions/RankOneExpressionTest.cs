@@ -364,5 +364,23 @@ namespace Favalon.Expressions
 
             Assert.AreEqual("'a", actual.Parameter.HigherOrder.ReadableString);
         }
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [Test]
+        public void TypeComposition()
+        {
+            var environment = Environment.Create();
+            environment.Register(Variable("list", Lambda(Kind(), Kind())));
+
+            // list System.Int32
+            var expression = Apply(Variable("list"), Type("System.Int32"));
+
+            var actual = expression.Infer(environment);
+
+            Assert.AreEqual("list System.Int32", actual.ReadableString);
+            Assert.AreEqual("*", actual.HigherOrder.ReadableString);
+        }
     }
 }

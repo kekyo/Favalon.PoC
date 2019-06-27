@@ -44,7 +44,7 @@ namespace Favalon.Expressions
         {
             var environment = Environment.Create();
 
-            environment.Bind("x", Constant(123));
+            environment.Bind(Variable("x"), Constant(123));
 
             // x
             var expression = Variable("x");
@@ -124,7 +124,7 @@ namespace Favalon.Expressions
         {
             var environment = Environment.Create();
 
-            environment.Bind("v", Constant(123));
+            environment.Bind(Variable("v"), Constant(123));
 
             // x v
             var expression = Apply(Variable("x"), Variable("v"));
@@ -274,7 +274,7 @@ namespace Favalon.Expressions
             var environment = Environment.Create();
 
             // x = y 456
-            environment.Bind("x", Lambda(Variable("y"), Constant(456)));
+            environment.Bind(Variable("x"), Lambda(Variable("y"), Constant(456)));
 
             // x = 123 in x
             var expression = Bind(Variable("x"), Constant(123), Variable("x"));

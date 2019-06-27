@@ -19,13 +19,6 @@ namespace Favalon.Expressions
             if (this.HigherOrder is UndefinedExpression)
             {
                 var placeholderHigherOrder = environment.CreatePlaceholder(this.HigherOrder.TextRange);
-
-                // HACK: Environment.Bind can accept without same named free variable.
-                //   NamedPlaceholderExpression is registered by owned variable.
-                environment.Bind(
-                    this.Name,
-                    new NamedPlaceholderExpression(this.Name, placeholderHigherOrder, this.TextRange));
-
                 return new FreeVariableExpression(this.Name, placeholderHigherOrder, this.TextRange);
             }
             else

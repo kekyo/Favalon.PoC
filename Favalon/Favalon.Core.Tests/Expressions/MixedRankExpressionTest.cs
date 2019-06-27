@@ -15,7 +15,7 @@ namespace Favalon.Expressions
             // 123 <-- int("123")
             // int = a -> System.Int32.Parse a
             // environment.Bind("int", Lambda("a", Call("System.Int32.Parse", "a")));
-            environment.Bind("int", Variable("System.Int32.Parse", Lambda(Type("System.String"), Type("System.Int32"))));
+            environment.Bind(Variable("int"), Variable("System.Int32.Parse", Lambda(Type("System.String"), Type("System.Int32"))));
 
             // Expression Call(VariableExpression function, Expression argument);
 

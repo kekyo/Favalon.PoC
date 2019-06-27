@@ -50,7 +50,7 @@ namespace Favalon.Expressions
             var scoped = environment.NewScope();
             var (bound, expression) = InternalVisit(scoped, context, this.Bound, this.Expression);
 
-            scoped.Bind(bound.Name, expression);
+            scoped.Bind(bound, expression);
 
             var body = this.Body.VisitInferring(scoped, context);
 

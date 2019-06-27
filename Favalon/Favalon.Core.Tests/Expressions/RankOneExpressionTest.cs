@@ -44,7 +44,7 @@ namespace Favalon.Expressions
         {
             var environment = Environment.Create();
 
-            environment.Bind("TFoo", Type("TBar"));
+            environment.Bind(Variable("TFoo"), Type("TBar"));
 
             // TFoo
             var expression = Variable("TFoo");
@@ -124,7 +124,7 @@ namespace Favalon.Expressions
         {
             var environment = Environment.Create();
 
-            environment.Bind("v", Type("System.Int32"));
+            environment.Bind(Variable("v"), Type("System.Int32"));
 
             // x v
             var expression = Apply(Variable("x"), Variable("v"));
@@ -274,7 +274,7 @@ namespace Favalon.Expressions
             var environment = Environment.Create();
 
             // x = y System.Int64
-            environment.Bind("x", Lambda(Variable("y"), Type("System.Int64")).Infer(environment));
+            environment.Bind(Variable("x"), Lambda(Variable("y"), Type("System.Int64")).Infer(environment));
 
             // x = System.Int32 in x
             var expression = Bind(Variable("x"), Type("System.Int32"), Variable("x"));
@@ -308,7 +308,7 @@ namespace Favalon.Expressions
         {
             var environment = Environment.Create();
 
-            environment.Bind("y", Type("TY"));
+            environment.Bind(Variable("y"), Type("TY"));
 
             // x -> x y
             var expression = Lambda(Variable("x"), Apply(Variable("x"), Variable("y")));

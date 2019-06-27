@@ -57,33 +57,22 @@ namespace Favalon.Expressions
             return false;
         }
 
-        public void Bind(string boundName, Expression expression)
-        {
-            if ((expression is VariableExpression variable) && (variable.Name == boundName))
-            {
-                throw new System.InvalidOperationException();
-            }
-
-            if (boundExpressions == null)
-            {
-                boundExpressions = new Dictionary<string, Expression>();
-            }
-            boundExpressions[boundName] = expression;
-        }
-
         public void Bind(FreeVariableExpression bound, Expression expression)
         {
             var context = new InferContext();
             var (b, e) = BindExpression.InternalVisit(this, context, bound, expression);
-            b = context.FixupHigherOrders(b, 0);
-            e = context.FixupHigherOrders(e, 0);
+            var fb = context.FixupHigherOrders(b, 0);
+            var fe = context.FixupHigherOrders(e, 0);
 
             if (boundExpressions == null)
             {
                 boundExpressions = new Dictionary<string, Expression>();
             }
-            boundExpressions[b.Name] = e;
+            boundExpressions[fb.Name] = fe;
         }
+
+        internal void RegisterVariable(FreeVariableExpression freeVariable) =>
+            this.Bind(freeVariable, new NamedPlaceholderExpression(freeVariable.Name, freeVariable.HigherOrder, freeVariable.TextRange));
 
         public override string ToString() =>
             string.Format("Scope {0}: [{1}]",

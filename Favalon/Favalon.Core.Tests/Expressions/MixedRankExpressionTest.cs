@@ -8,14 +8,15 @@ namespace Favalon.Expressions
     public sealed class MixedRankExpressionTest
     {
         [Test]
-        public void Generator1()
+        public void MethodCall()
         {
             var environment = Environment.Create();
+            environment.Register(Variable("System.Int32.Parse", Lambda(Type("System.String"), Type("System.Int32"))));
 
             // 123 <-- int("123")
             // int = a -> System.Int32.Parse a
             // environment.Bind("int", Lambda("a", Call("System.Int32.Parse", "a")));
-            environment.Bind(Variable("int"), Variable("System.Int32.Parse", Lambda(Type("System.String"), Type("System.Int32"))));
+            environment.Bind(Variable("int"), Variable("System.Int32.Parse"));
 
             // Expression Call(VariableExpression function, Expression argument);
 

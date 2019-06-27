@@ -5,22 +5,32 @@ namespace Favalon.Expressions.Internals
 {
     public sealed class InferContext
     {
-        private readonly Dictionary<IIdentityExpression, Expression> identities =
-            new Dictionary<IIdentityExpression, Expression>();
+        private readonly Dictionary<IdentityExpression, Expression> identities =
+            new Dictionary<IdentityExpression, Expression>();
 
         internal InferContext() { }
 
         public void UnifyExpression(Expression expression1, Expression expression2)
         {
-            // Pair of placehoders / one of freeVariable
-            if (expression1 is PlaceholderExpression freeVariable1)
+            if (expression1.Equals(expression2))
             {
-                if (expression2 is PlaceholderExpression freeVariable2)
+                return;
+            }
+
+            if ((expression1 is UndefinedExpression) || (expression2 is UndefinedExpression))
+            {
+                return;
+            }
+
+            // Pair of placehoders / one of placeholder
+            if (expression1 is PlaceholderExpression placeholder1)
+            {
+                if (expression2 is PlaceholderExpression placeholder2)
                 {
                     // Unify freeVariable2 into freeVariable1 if aren't same.
-                    if (!freeVariable1.Equals(freeVariable2))
+                    if (!placeholder1.Equals(placeholder2))
                     {
-                        identities[freeVariable1] = freeVariable2;
+                        identities[placeholder1] = placeholder2;
                     }
                     return;
                 }
@@ -35,9 +45,9 @@ namespace Favalon.Expressions.Internals
             }
 
             // Pair of identities / one of identity (Include fallbacked freeVariable)
-            if (expression1 is IIdentityExpression identity1)
+            if (expression1 is IdentityExpression identity1)
             {
-                if (expression2 is IIdentityExpression identity2)
+                if (expression2 is IdentityExpression identity2)
                 {
                     // Unify identity2 into identity1 if aren't same.
                     if (!identity1.Equals(identity2))
@@ -56,7 +66,7 @@ namespace Favalon.Expressions.Internals
                 }
                 return;
             }
-            else if (expression2 is IIdentityExpression identity2)
+            else if (expression2 is IdentityExpression identity2)
             {
                 if (identities.TryGetValue(identity2, out var resolved))
                 {
@@ -71,13 +81,15 @@ namespace Favalon.Expressions.Internals
             }
 
             // Unify lambdas each parameters and expressions.
-            if ((expression1 is ILambdaExpression lambda1) &&
-                (expression2 is ILambdaExpression lambda2))
+            if ((expression1 is LambdaExpression lambda1) &&
+                (expression2 is LambdaExpression lambda2))
             {
                 this.UnifyExpression(lambda1.Parameter, lambda2.Parameter);
                 this.UnifyExpression(lambda1.Expression, lambda2.Expression);
                 return;
             }
+
+            // TODO: raise error?
         }
 
         public TExpression FixupHigherOrders<TExpression>(TExpression expression, int rank)
@@ -87,11 +99,15 @@ namespace Favalon.Expressions.Internals
 
             // Replace unified higher orders.
             Expression current = expression;
-            if (current is IIdentityExpression identity)
+            while (current is IdentityExpression identity)
             {
                 if (identities.TryGetValue(identity, out var resolved))
                 {
                     current = resolved;
+                }
+                else
+                {
+                    break;
                 }
             }
 
@@ -105,6 +121,6 @@ namespace Favalon.Expressions.Internals
         }
 
         public override string ToString() =>
-            string.Join(", ", identities.Select(entry => $"{entry.Key.ReadableString}=>{entry.Value.ReadableString}"));
+            string.Join(", ", identities.Select(entry => $"{entry.Key.StrictReadableString}=>{entry.Value.StrictReadableString}"));
     }
 }

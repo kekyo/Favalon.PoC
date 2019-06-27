@@ -57,7 +57,7 @@ namespace Favalon.Expressions
             return false;
         }
 
-        public void Bind(FreeVariableExpression bound, Expression expression)
+        public FreeVariableExpression Bind(FreeVariableExpression bound, Expression expression)
         {
             var context = new InferContext();
             var (b, e) = BindExpression.InternalVisit(this, context, bound, expression);
@@ -69,10 +69,16 @@ namespace Favalon.Expressions
                 boundExpressions = new Dictionary<string, Expression>();
             }
             boundExpressions[fb.Name] = fe;
+
+            return fb;
         }
 
-        internal void RegisterVariable(FreeVariableExpression freeVariable) =>
-            this.Bind(freeVariable, new NamedPlaceholderExpression(freeVariable.Name, freeVariable.HigherOrder, freeVariable.TextRange));
+        internal FreeVariableExpression Register(FreeVariableExpression freeVariable)
+        {
+            var cloned = freeVariable.CloneWithPlaceholderIfUndefined(this);
+            this.Bind(freeVariable, new NamedPlaceholderExpression(cloned.Name, cloned.HigherOrder, cloned.TextRange));
+            return cloned;
+        }
 
         public override string ToString() =>
             string.Format("Scope {0}: [{1}]",
@@ -82,7 +88,13 @@ namespace Favalon.Expressions
                     Where(environment => environment.boundExpressions != null).
                     SelectMany(environment => environment.boundExpressions).
                     GroupBy(entry => entry.Key, entry => entry.Value).
-                    Select(g => $"{g.Key}=>{g.First().ReadableString}")));
+                    Select(g =>
+                    {
+                        var expression = g.First();
+                        return (expression is NamedPlaceholderExpression) ?
+                            expression.StrictReadableString :
+                            $"{g.Key}=>{expression.StrictReadableString}";
+                    })));
 
         public static Environment Create() =>
             new Environment();

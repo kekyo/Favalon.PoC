@@ -14,7 +14,7 @@ namespace Favalon.Expressions
 
         public override string Name { get; }
 
-        public FreeVariableExpression CloneWithPlaceholderIfUndefined(Environment environment)
+        internal FreeVariableExpression CloneWithPlaceholderIfUndefined(Environment environment)
         {
             if (this.HigherOrder is UndefinedExpression)
             {
@@ -32,11 +32,12 @@ namespace Favalon.Expressions
         {
             if (environment.TryGetBoundExpression(this.Name, out var resolved))
             {
+                context.UnifyExpression(this.HigherOrder, resolved.HigherOrder);
                 return new FreeVariableExpression(this.Name, resolved.HigherOrder, this.TextRange);
             }
             else
             {
-                return this.CloneWithPlaceholderIfUndefined(environment);
+                throw new System.ArgumentException(this.ReadableString);
             }
         }
 

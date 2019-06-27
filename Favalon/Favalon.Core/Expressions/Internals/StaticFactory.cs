@@ -10,7 +10,7 @@
         public static FreeVariableExpression Variable(string name, Expression higherOrder) =>
             new FreeVariableExpression(name, higherOrder, TextRange.Unknown);
 
-        public static PlaceholderExpression FreeVariable(this ExpressionEnvironment environment) =>
+        public static PlaceholderExpression FreeVariable(this Environment environment) =>
             environment.CreatePlaceholder(TextRange.Unknown);
 
         public static TypeExpression Type(string name) =>

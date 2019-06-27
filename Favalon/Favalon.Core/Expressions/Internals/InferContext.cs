@@ -105,6 +105,6 @@ namespace Favalon.Expressions.Internals
         }
 
         public override string ToString() =>
-            string.Join(", ", identities.Select(entry => $"{entry.Key.ReadableString}={entry.Value.ReadableString}"));
+            string.Join(", ", identities.Select(entry => $"{entry.Key.ReadableString}=>{entry.Value.ReadableString}"));
     }
 }

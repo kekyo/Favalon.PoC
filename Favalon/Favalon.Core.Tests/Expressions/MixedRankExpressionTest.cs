@@ -10,7 +10,7 @@ namespace Favalon.Expressions
         [Test]
         public void Generator1()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // 123 <-- int("123")
             // int = a -> System.Int32.Parse a

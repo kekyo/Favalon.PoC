@@ -22,7 +22,7 @@ namespace Favalon.Expressions
             $"{this.Bound.GetReadableString(context)} = {this.Expression.GetReadableString(context)} in {this.Body.GetReadableString(context)}";
 
         internal static (FreeVariableExpression bound, Expression expression) InternalVisit(
-            ExpressionEnvironment environment, InferContext context, FreeVariableExpression bound, Expression expression)
+            Environment environment, InferContext context, FreeVariableExpression bound, Expression expression)
         {
             var e = expression.VisitInferring(environment, context);
 
@@ -32,13 +32,13 @@ namespace Favalon.Expressions
             // It requires annotation processing.
             var b = bound.CloneWithPlaceholderIfUndefined(environment);
 
-            context.UnifyExpression(bound.HigherOrder, expression.HigherOrder);
+            context.UnifyExpression(b.HigherOrder, e.HigherOrder);
 
             return (b, e);
         }
 
         protected internal override Expression VisitInferring(
-            ExpressionEnvironment environment, InferContext context)
+            Environment environment, InferContext context)
         {
             // Bind expression scope details:
             // let x = y in z

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Favalon.Expressions
 {
-    public sealed class ExpressionEnvironment
+    public sealed class Environment
     {
         private sealed class IndexCell
         {
@@ -15,31 +15,31 @@ namespace Favalon.Expressions
                 $"Index={index}";
         }
 
-        private readonly ExpressionEnvironment? parent;
+        private readonly Environment? parent;
         private Dictionary<string, Expression>? boundExpressions;
         private IndexCell indexCell;
 
-        private ExpressionEnvironment(ExpressionEnvironment parent, IndexCell indexCell)
+        private Environment(Environment parent, IndexCell indexCell)
         {
             this.parent = parent;
             this.indexCell = indexCell;
         }
 
-        private ExpressionEnvironment() =>
+        private Environment() =>
             indexCell = new IndexCell();
 
         public void Reset() =>
             boundExpressions = null;
 
-        internal ExpressionEnvironment NewScope() =>
-            new ExpressionEnvironment(this, indexCell);
+        internal Environment NewScope() =>
+            new Environment(this, indexCell);
 
         public PlaceholderExpression CreatePlaceholder(TextRange textRange) =>
             new PlaceholderExpression(indexCell.Next(), textRange);
 
         internal bool TryGetBoundExpression(string boundName, out Expression expression)
         {
-            ExpressionEnvironment? current = this;
+            Environment? current = this;
             do
             {
                 if (current.boundExpressions != null)
@@ -86,16 +86,16 @@ namespace Favalon.Expressions
         }
 
         public override string ToString() =>
-            string.Format("Scope [{0}]: {1}",
+            string.Format("Scope {0}: [{1}]",
                 this.parent!.Traverse(environemnt => environemnt.parent!).Count(),
                 string.Join(", ", this.
                     Traverse(environemnt => environemnt.parent!).
                     Where(environment => environment.boundExpressions != null).
                     SelectMany(environment => environment.boundExpressions).
                     GroupBy(entry => entry.Key, entry => entry.Value).
-                    Select(g => $"{g.Key}={g.First().ReadableString}")));
+                    Select(g => $"{g.Key}=>{g.First().ReadableString}")));
 
-        public static ExpressionEnvironment Create() =>
-            new ExpressionEnvironment();
+        public static Environment Create() =>
+            new Environment();
     }
 }

@@ -41,7 +41,7 @@ namespace Favalon.Expressions
         }
 
         protected internal override Expression VisitInferring(
-            ExpressionEnvironment environment, InferContext context)
+            Environment environment, InferContext context)
         {
             var scoped = environment.NewScope();
 

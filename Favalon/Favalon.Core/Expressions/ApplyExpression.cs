@@ -36,7 +36,7 @@ namespace Favalon.Expressions
                 $"{this.Function.GetReadableString(context)} {this.Argument.GetReadableString(context)}";
 
         protected internal override Expression VisitInferring(
-            ExpressionEnvironment environment, InferContext context)
+            Environment environment, InferContext context)
         {
             var function = this.Function.VisitInferring(environment, context);
             var argument = this.Argument.VisitInferring(environment, context);

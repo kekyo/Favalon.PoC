@@ -12,7 +12,7 @@ namespace Favalon.Expressions
         [Test]
         public void FromInteger()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // 123
             var expression = Constant(123);
@@ -28,7 +28,7 @@ namespace Favalon.Expressions
         [Test]
         public void FromVariable1()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x
             var expression = Variable("x");
@@ -42,7 +42,7 @@ namespace Favalon.Expressions
         [Test]
         public void FromVariable2()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             environment.Bind("x", Constant(123));
 
@@ -58,7 +58,7 @@ namespace Favalon.Expressions
         [Test]
         public void FromVariableWithAnnotation()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x:System.Int32
             var expression = Variable("x", Type("System.Int32"));
@@ -74,7 +74,7 @@ namespace Favalon.Expressions
         [Test]
         public void ApplyVariableAndInteger()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x 123
             var expression = Apply(Variable("x"), Constant(123));
@@ -90,7 +90,7 @@ namespace Favalon.Expressions
         [Test]
         public void ApplyAnnotatedVariableAndInteger()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x:(System.Int32 -> 'a) 123
             var expression = Apply(Variable("x", Lambda(Type("System.Int32"), environment.FreeVariable())), Constant(123));
@@ -106,7 +106,7 @@ namespace Favalon.Expressions
         [Test]
         public void ApplyVariableAndAnnotatedVariable()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x y:System.Int32
             var expression = Apply(Variable("x"), Variable("y", Type("System.Int32")));
@@ -122,7 +122,7 @@ namespace Favalon.Expressions
         [Test]
         public void ApplyRegisteredIntegerExpression()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             environment.Bind("v", Constant(123));
 
@@ -142,7 +142,7 @@ namespace Favalon.Expressions
         [Test]
         public void BindInteger()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x = 123 in x
             var expression = Bind(Variable("x"), Constant(123), Variable("x"));
@@ -158,7 +158,7 @@ namespace Favalon.Expressions
         [Test]
         public void BindFreeVariable()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x = 123 in y
             var expression = Bind(Variable("x"), Constant(123), Variable("y", environment.FreeVariable()));
@@ -174,7 +174,7 @@ namespace Favalon.Expressions
         [Test]
         public void BindAnnotatedVariable1()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x = y:System.Int32 in x
             var expression = Bind(Variable("x"), Variable("y", Type("System.Int32")), Variable("x"));
@@ -190,7 +190,7 @@ namespace Favalon.Expressions
         [Test]
         public void BindAnnotatedVariable2()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x:System.Int32 = y in x
             var expression = Bind(Variable("x", Type("System.Int32")), Variable("y"), Variable("x"));
@@ -206,7 +206,7 @@ namespace Favalon.Expressions
         [Test]
         public void BindFunction1()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x = y 123 in x
             var expression = Bind(Variable("x"), Apply(Variable("y"), Constant(123)), Variable("x"));
@@ -222,7 +222,7 @@ namespace Favalon.Expressions
         [Test]
         public void BindFunction2()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x = y 123 456 in y
             var expression = Bind(Variable("x"), Apply(Apply(Variable("y"), Constant(123)), Constant(456)), Variable("x"));
@@ -238,7 +238,7 @@ namespace Favalon.Expressions
         [Test]
         public void BindFunction3()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x = y (z 123) in x
             var expression = Bind(Variable("x"), Apply(Variable("y"), Apply(Variable("z"), Constant(123))), Variable("x"));
@@ -255,7 +255,7 @@ namespace Favalon.Expressions
         [Test]
         public void BindShadowed1()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x = 123 in x = y -> x in x
             var expression = Bind(Variable("x"), Constant(123), Bind(Variable("x"), Lambda(Variable("y"), Variable("x")), Variable("x")));
@@ -271,7 +271,7 @@ namespace Favalon.Expressions
         [Test]
         public void BindShadowed2()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x = y 456
             environment.Bind("x", Lambda(Variable("y"), Constant(456)));
@@ -292,7 +292,7 @@ namespace Favalon.Expressions
         [Test]
         public void LambdaFunction1()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x -> y 123
             var expression = Lambda(Variable("x"), Apply(Variable("y"), Constant(123)));
@@ -306,7 +306,7 @@ namespace Favalon.Expressions
         [Test]
         public void LambdaFunction2()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x -> x y
             var expression = Lambda(Variable("x"), Apply(Variable("x"), Variable("y")));
@@ -320,7 +320,7 @@ namespace Favalon.Expressions
         [Test]
         public void LambdaFunction3()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x -> y -> x y
             var expression = Lambda(Variable("x"), Lambda(Variable("y"), Apply(Variable("x"), Variable("y"))));
@@ -334,7 +334,7 @@ namespace Favalon.Expressions
         [Test]
         public void LambdaShadowed1()
         {
-            var environment = ExpressionEnvironment.Create();
+            var environment = Environment.Create();
 
             // x -> y -> x -> x 123
             var expression = Lambda(Variable("x"), Lambda(Variable("y"), Lambda(Variable("x"), Apply(Variable("x"), Constant(123)))));

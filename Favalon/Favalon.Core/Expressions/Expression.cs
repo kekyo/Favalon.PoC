@@ -44,7 +44,7 @@ namespace Favalon.Expressions
         public virtual bool ShowInAnnotation => 
             true;
 
-        protected internal virtual Expression VisitInferring(ExpressionEnvironment environment, InferContext context) =>
+        protected internal virtual Expression VisitInferring(Environment environment, InferContext context) =>
             this;
         protected internal virtual TraverseInferringResults FixupHigherOrders(InferContext context, int rank) =>
             TraverseInferringResults.Finished;

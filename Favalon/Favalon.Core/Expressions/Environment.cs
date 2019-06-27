@@ -16,8 +16,8 @@ namespace Favalon.Expressions
         }
 
         private readonly Environment? parent;
-        private Dictionary<string, Expression>? boundExpressions;
-        private IndexCell indexCell;
+        private readonly IndexCell indexCell;
+        private Dictionary<FreeVariableExpression, Expression>? boundExpressions;
 
         private Environment(Environment parent, IndexCell indexCell)
         {
@@ -37,14 +37,14 @@ namespace Favalon.Expressions
         public PlaceholderExpression CreatePlaceholder(TextRange textRange) =>
             new PlaceholderExpression(indexCell.Next(), textRange);
 
-        internal bool TryGetBoundExpression(string boundName, out Expression expression)
+        internal bool TryGetBoundExpression(FreeVariableExpression bound, out Expression expression)
         {
             Environment? current = this;
             do
             {
                 if (current.boundExpressions != null)
                 {
-                    if (current.boundExpressions.TryGetValue(boundName, out expression))
+                    if (current.boundExpressions.TryGetValue(bound, out expression))
                     {
                         return true;
                     }
@@ -66,9 +66,9 @@ namespace Favalon.Expressions
 
             if (boundExpressions == null)
             {
-                boundExpressions = new Dictionary<string, Expression>();
+                boundExpressions = new Dictionary<FreeVariableExpression, Expression>();
             }
-            boundExpressions[fb.Name] = fe;
+            boundExpressions[fb] = fe;
 
             return fb;
         }

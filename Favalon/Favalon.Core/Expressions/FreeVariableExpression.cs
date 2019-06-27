@@ -30,7 +30,7 @@ namespace Favalon.Expressions
         protected internal override Expression VisitInferring(
             Environment environment, InferContext context)
         {
-            if (environment.TryGetBoundExpression(this.Name, out var resolved))
+            if (environment.TryGetBoundExpression(this, out var resolved))
             {
                 context.UnifyExpression(this.HigherOrder, resolved.HigherOrder);
                 return new FreeVariableExpression(this.Name, resolved.HigherOrder, this.TextRange);

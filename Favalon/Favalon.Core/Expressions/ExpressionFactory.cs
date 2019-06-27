@@ -28,5 +28,8 @@
         public static LambdaExpression Lambda(
             Expression parameter, Expression expression, TextRange textRange) =>
             new LambdaExpression(parameter, expression, textRange);
+
+        public static NewExpression New(IdentityExpression argument, TextRange textRange) =>
+            new NewExpression(argument, textRange);
     }
 }

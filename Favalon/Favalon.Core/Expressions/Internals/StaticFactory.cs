@@ -29,5 +29,8 @@
 
         public static LambdaExpression Lambda(Expression parameter, Expression expression) =>
             new LambdaExpression(parameter, expression, TextRange.Unknown);
+
+        public static NewExpression New(IdentityExpression argument) =>
+            new NewExpression(argument, TextRange.Unknown);
     }
 }

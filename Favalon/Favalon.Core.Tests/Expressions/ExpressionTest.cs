@@ -28,17 +28,16 @@ namespace Favalon.Expressions
         }
 
         [Test]
-        public void New()
+        public void New1()
         {
             var environment = Environment.Create();
-            environment.Register(Variable("new", Lambda(Kind(), environment.Placeholder())));
 
-            // new System.Collections.ArrayList
-            var expression = Apply(Variable("new"), Type("System.Collections.ArrayList"));
+            // new System.Collections.ArrayList ()
+            var expression = Apply(New(Type("System.Collections.ArrayList")), Constant("()"));
 
             var actual = expression.Infer(environment);
 
-            Assert.AreEqual("new System.Collections.ArrayList", actual.ReadableString);
+            Assert.AreEqual("new System.Collections.ArrayList ()", actual.ReadableString);
             Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);
         }
 

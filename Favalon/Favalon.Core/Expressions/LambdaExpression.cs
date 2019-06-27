@@ -7,7 +7,7 @@ namespace Favalon.Expressions
     public sealed class LambdaExpression : Expression
     {
         // 'a -> 'b
-        private LambdaExpression(Expression parameter, Expression expression, Expression higherOrder, TextRange textRange) :
+        internal LambdaExpression(Expression parameter, Expression expression, Expression higherOrder, TextRange textRange) :
             base(higherOrder, textRange)
         {
             this.Parameter = parameter;

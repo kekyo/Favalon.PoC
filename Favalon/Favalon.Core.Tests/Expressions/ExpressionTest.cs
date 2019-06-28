@@ -21,7 +21,7 @@ namespace Favalon.Expressions
             // int "123"
             var expression = Apply(Variable("int"), Constant("123"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("int \"123\"", actual.ReadableString);
             Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
@@ -35,7 +35,7 @@ namespace Favalon.Expressions
             // new System.Collections.ArrayList ()
             var expression = Apply(New(Type("System.Collections.ArrayList")), Constant(123));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("new System.Collections.ArrayList 123", actual.ReadableString);
             Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);
@@ -52,7 +52,7 @@ namespace Favalon.Expressions
             var expression = Apply(Apply(Variable("new"), Type("System.Collections.ArrayList")), Constant(123));
             //var expression = Apply(Variable("new"), Type("System.Collections.ArrayList"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("new System.Collections.ArrayList 123", actual.ReadableString);
             Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);

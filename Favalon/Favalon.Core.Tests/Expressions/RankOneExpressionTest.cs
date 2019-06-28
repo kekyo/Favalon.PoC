@@ -17,7 +17,7 @@ namespace Favalon.Expressions
             // System.Int32
             var expression = Type("System.Int32");
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("System.Int32", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
@@ -34,7 +34,7 @@ namespace Favalon.Expressions
             // TFoo
             var expression = Variable("TFoo");
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("TFoo", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
@@ -50,7 +50,7 @@ namespace Favalon.Expressions
             // TFoo
             var expression = Variable("TFoo");
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("TFoo", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
@@ -65,7 +65,7 @@ namespace Favalon.Expressions
             // x:*
             var expression = Variable("x", Kind());
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
@@ -82,7 +82,7 @@ namespace Favalon.Expressions
             // x System.Int32
             var expression = Apply(Variable("x"), Type("System.Int32"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x System.Int32", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
@@ -99,7 +99,7 @@ namespace Favalon.Expressions
             // x:(* -> 'a) System.Int32
             var expression = Apply(Variable("x", Lambda(Kind(), environment.Placeholder())), Type("System.Int32"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x System.Int32", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
@@ -117,7 +117,7 @@ namespace Favalon.Expressions
             // x y:*
             var expression = Apply(Variable("x"), Variable("y", Kind()));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x y", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
@@ -135,7 +135,7 @@ namespace Favalon.Expressions
             // x v
             var expression = Apply(Variable("x"), Variable("v"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x v", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
@@ -153,7 +153,7 @@ namespace Favalon.Expressions
             // x = System.Int32 in x
             var expression = Bind(Variable("x"), Type("System.Int32"), Variable("x"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x = System.Int32 in x", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
@@ -170,7 +170,7 @@ namespace Favalon.Expressions
             // x = System.Int32 in y
             var expression = Bind(Variable("x"), Type("System.Int32"), Variable("y"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x = System.Int32 in y", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
@@ -187,7 +187,7 @@ namespace Favalon.Expressions
             // x = y:* in x
             var expression = Bind(Variable("x"), Variable("y", Kind()), Variable("x"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x = y in x", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
@@ -204,7 +204,7 @@ namespace Favalon.Expressions
             // x:* = y in x
             var expression = Bind(Variable("x", Kind()), Variable("y"), Variable("x"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x = y in x", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
@@ -221,7 +221,7 @@ namespace Favalon.Expressions
             // x = y System.Int32 in x
             var expression = Bind(Variable("x"), Apply(Variable("y"), Type("System.Int32")), Variable("x"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x = y System.Int32 in x", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
@@ -238,7 +238,7 @@ namespace Favalon.Expressions
             // x = y System.Int32 System.Int64 in x
             var expression = Bind(Variable("x"), Apply(Apply(Variable("y"), Type("System.Int32")), Type("System.Int64")), Variable("x"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x = y System.Int32 System.Int64 in x", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
@@ -256,7 +256,7 @@ namespace Favalon.Expressions
             // x = y (z System.Int32) in x
             var expression = Bind(Variable("x"), Apply(Variable("y"), Apply(Variable("z"), Type("System.Int32"))), Variable("x"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x = y (z System.Int32) in x", actual.ReadableString);
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
@@ -273,7 +273,7 @@ namespace Favalon.Expressions
             // x = System.Int32 in x = y -> x in x
             var expression = Bind(Variable("x"), Type("System.Int32"), Bind(Variable("x"), Lambda(Variable("y"), Variable("x")), Variable("x")));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x = System.Int32 in x = y -> x in x", actual.ReadableString);
             Assert.AreEqual("'a -> *", actual.HigherOrder.ReadableString);
@@ -292,7 +292,7 @@ namespace Favalon.Expressions
             // x = System.Int32 in x
             var expression = Bind(Variable("x"), Type("System.Int32"), Variable("x"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x = System.Int32 in x", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);
@@ -311,7 +311,7 @@ namespace Favalon.Expressions
             // x -> y System.Int32
             var expression = Lambda(Variable("x"), Apply(Variable("y"), Type("System.Int32")));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x -> y System.Int32", actual.ReadableString);
             Assert.AreEqual("'a -> 'b", actual.HigherOrder.ReadableString);
@@ -327,7 +327,7 @@ namespace Favalon.Expressions
             // x -> x y
             var expression = Lambda(Variable("x"), Apply(Variable("x"), Variable("y")));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x -> x y", actual.ReadableString);
             Assert.AreEqual("(* -> 'a) -> 'a", actual.HigherOrder.ReadableString);
@@ -357,7 +357,7 @@ namespace Favalon.Expressions
             // x -> y -> x -> x System.Int32
             var expression = Lambda(Variable("x"), Lambda(Variable("y"), Lambda(Variable("x"), Apply(Variable("x"), Type("System.Int32")))));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("x -> y -> x -> x System.Int32", actual.ReadableString);
             Assert.AreEqual("'a -> 'b -> (* -> 'c) -> 'c", actual.HigherOrder.ReadableString);
@@ -377,7 +377,7 @@ namespace Favalon.Expressions
             // list System.Int32
             var expression = Apply(Variable("list"), Type("System.Int32"));
 
-            var actual = expression.Infer(environment);
+            var actual = environment.Infer(expression);
 
             Assert.AreEqual("list System.Int32", actual.ReadableString);
             Assert.AreEqual("*", actual.HigherOrder.ReadableString);

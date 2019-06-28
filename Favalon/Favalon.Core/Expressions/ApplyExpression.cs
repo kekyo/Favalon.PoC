@@ -35,13 +35,12 @@ namespace Favalon.Expressions
         {
             var function = this.Function.VisitInferring(environment, context);
             var argument = this.Argument.VisitInferring(environment, context);
+            var higherOrder = this.VisitInferringHigherOrder(environment, context);
 
-            var resultHigherOrder = environment.CreatePlaceholder(this.TextRange);
-
-            var variableHigherOrder = new LambdaExpression(argument.HigherOrder, resultHigherOrder, this.TextRange);
+            var variableHigherOrder = new LambdaExpression(argument.HigherOrder, higherOrder, this.TextRange);
             context.UnifyExpression(function.HigherOrder, variableHigherOrder);
 
-            return new ApplyExpression(function, argument, resultHigherOrder, this.TextRange);
+            return new ApplyExpression(function, argument, higherOrder, this.TextRange);
         }
 
         protected internal override TraverseInferringResults FixupHigherOrders(InferContext context, int rank)

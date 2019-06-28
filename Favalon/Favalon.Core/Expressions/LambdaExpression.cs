@@ -47,7 +47,12 @@ namespace Favalon.Expressions
                 this.Parameter.VisitInferring(scoped, context);
             var expression = this.Expression.VisitInferring(scoped, context);
 
-            return new LambdaExpression(parameter, expression, this.TextRange);
+            var newHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, KindExpression.Instance, this.HigherOrder.TextRange);
+            var higherOrder = this.VisitInferringHigherOrder(scoped, context);
+
+            context.UnifyExpression(higherOrder, newHigherOrder);
+
+            return new LambdaExpression(parameter, expression, newHigherOrder, this.TextRange);
         }
 
         protected internal override TraverseInferringResults FixupHigherOrders(InferContext context, int rank)

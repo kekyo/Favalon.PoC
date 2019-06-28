@@ -29,6 +29,20 @@ namespace Favalon.Expressions
         public virtual bool ShowInAnnotation => 
             true;
 
+        protected internal Expression VisitInferringHigherOrder(Environment environment, InferContext context)
+        {
+            if (this.HigherOrder is UndefinedExpression)
+            {
+                return environment.CreatePlaceholder(this.TextRange);
+            }
+            else
+            {
+                var visited = this.HigherOrder.VisitInferring(environment, context);
+                context.UnifyExpression(this.HigherOrder, visited);
+                return visited;
+            }
+        }
+
         protected internal virtual Expression VisitInferring(Environment environment, InferContext context) =>
             this;
         protected internal virtual TraverseInferringResults FixupHigherOrders(InferContext context, int rank) =>

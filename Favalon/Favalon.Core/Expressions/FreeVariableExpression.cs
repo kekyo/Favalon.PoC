@@ -32,8 +32,10 @@ namespace Favalon.Expressions
         {
             if (environment.TryGetBoundExpression(this, out var resolved))
             {
-                context.UnifyExpression(this.HigherOrder, resolved.HigherOrder);
-                return new FreeVariableExpression(this.Name, resolved.HigherOrder, this.TextRange);
+                var higherOrder = resolved.VisitInferringHigherOrder(environment, context);
+                context.UnifyExpression(this.HigherOrder, higherOrder);
+
+                return new FreeVariableExpression(this.Name, higherOrder, this.TextRange);
             }
             else
             {

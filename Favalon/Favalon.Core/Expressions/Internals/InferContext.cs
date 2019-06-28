@@ -12,6 +12,9 @@ namespace Favalon.Expressions.Internals
 
         public void UnifyExpression(Expression expression1, Expression expression2)
         {
+            // NOTE: Argument direction expression1 --> expression2 is important.
+            //   It contains processing forward direction, but excepts placeholder and identity expressions.
+
             if (expression1.Equals(expression2))
             {
                 return;

@@ -6,13 +6,17 @@ namespace Favalon.Expressions
 {
     public sealed class BindExpression : Expression
     {
-        internal BindExpression(FreeVariableExpression bound, Expression expression, Expression body, TextRange textRange) :
-            base(body.HigherOrder, textRange)
+        private BindExpression(FreeVariableExpression bound, Expression expression, Expression body, Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange)
         {
             this.Bound = bound;
             this.Expression = expression;
             this.Body = body;
         }
+
+        internal BindExpression(FreeVariableExpression bound, Expression expression, Expression body, TextRange textRange) :
+            this(bound, expression, body, body.HigherOrder, textRange)
+        { }
 
         public FreeVariableExpression Bound { get; private set; }
         public Expression Expression { get; private set; }
@@ -53,8 +57,10 @@ namespace Favalon.Expressions
             scoped.Bind(bound, expression);
 
             var body = this.Body.VisitInferring(scoped, context);
+            var higherOrder = this.VisitInferringHigherOrder(scoped, context);
+            context.UnifyExpression(higherOrder, body.HigherOrder);
 
-            return new BindExpression(bound, expression, body, this.TextRange);
+            return new BindExpression(bound, expression, body, higherOrder, this.TextRange);
         }
 
         protected internal override TraverseInferringResults FixupHigherOrders(InferContext context, int rank)
@@ -62,7 +68,6 @@ namespace Favalon.Expressions
             this.Bound = context.FixupHigherOrders(this.Bound, rank);
             this.Expression = context.FixupHigherOrders(this.Expression, rank);
             this.Body = context.FixupHigherOrders(this.Body, rank);
-
             return TraverseInferringResults.RequeireHigherOrder;
         }
 

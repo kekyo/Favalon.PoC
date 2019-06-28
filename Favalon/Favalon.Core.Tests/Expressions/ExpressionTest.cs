@@ -28,7 +28,7 @@ namespace Favalon.Expressions
         }
 
         [Test]
-        public void New1()
+        public void ApplyNewAndType()
         {
             var environment = Environment.Create();
 
@@ -41,20 +41,21 @@ namespace Favalon.Expressions
             Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);
         }
 
-        //[Test]
-        //public void NewWithCompositionedType()
-        //{
-        //    var environment = Environment.Create();
-        //    environment.Register(Variable("new", Lambda(Kind(), environment.Placeholder())));
-        //    environment.Register(Variable("list", Lambda(Kind(), Kind())));
+        [Test]
+        public void ApplyWithNewOperator()
+        {
+            var environment = Environment.Create();
+            //environment.Bind(Variable("new"), New(environment.Placeholder(Kind())));
+            environment.Bind(Variable("new"), Lambda(Variable("ty"), New(Variable("ty"))));
 
-        //    // new (list System.Int32)
-        //    var expression = Apply(Variable("new"), Apply(Variable("list"), Type("System.Int32")));
+            // new System.Collections.ArrayList ()
+            var expression = Apply(Apply(Variable("new"), Type("System.Collections.ArrayList")), Constant(123));
+            //var expression = Apply(Variable("new"), Type("System.Collections.ArrayList"));
 
-        //    var actual = expression.Infer(environment);
+            var actual = expression.Infer(environment);
 
-        //    Assert.AreEqual("list System.Int32", actual.ReadableString);
-        //    Assert.AreEqual("*", actual.HigherOrder.ReadableString);
-        //}
+            Assert.AreEqual("new System.Collections.ArrayList 123", actual.ReadableString);
+            Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);
+        }
     }
 }

@@ -11,7 +11,9 @@
             new FreeVariableExpression(name, higherOrder, TextRange.Unknown);
 
         public static PlaceholderExpression Placeholder(this Environment environment) =>
-            environment.CreatePlaceholder(TextRange.Unknown);
+            environment.CreatePlaceholder(UndefinedExpression.Instance, TextRange.Unknown);
+        public static PlaceholderExpression Placeholder(this Environment environment, Expression higherOrder) =>
+            environment.CreatePlaceholder(higherOrder, TextRange.Unknown);
 
         public static TypeExpression Type(string name) =>
             new TypeExpression(name, TextRange.Unknown);

@@ -35,7 +35,9 @@ namespace Favalon.Expressions
             new Environment(this, indexCell);
 
         public PlaceholderExpression CreatePlaceholder(TextRange textRange) =>
-            new PlaceholderExpression(indexCell.Next(), textRange);
+            this.CreatePlaceholder(UndefinedExpression.Instance, textRange);
+        public PlaceholderExpression CreatePlaceholder(Expression higherOrder, TextRange textRange) =>
+            new PlaceholderExpression(indexCell.Next(), higherOrder, textRange);
 
         internal bool TryGetBoundExpression(FreeVariableExpression bound, out Expression expression)
         {
@@ -93,7 +95,7 @@ namespace Favalon.Expressions
                         var expression = g.First();
                         return (expression is NamedPlaceholderExpression) ?
                             expression.StrictReadableString :
-                            $"{g.Key}=>{expression.StrictReadableString}";
+                            $"{g.Key.StrictReadableString}=>{expression.StrictReadableString}";
                     })));
 
         public static Environment Create() =>

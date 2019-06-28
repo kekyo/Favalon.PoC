@@ -12,7 +12,7 @@ namespace Favalon.Expressions
             this.Argument = argument;
 
         internal NewExpression(IdentityExpression argument, TextRange textRange) :
-            this(argument, new LambdaExpression(UndefinedExpression.Instance, argument, textRange), textRange)
+            this(argument, new LambdaExpression(UndefinedExpression.Instance, UndefinedExpression.Instance, textRange), textRange)
         {
         }
 
@@ -22,13 +22,16 @@ namespace Favalon.Expressions
             this.Argument.ShowInAnnotation;
 
         protected internal override string FormatReadableString(FormatContext context) =>
-            $"new {this.Argument.Name}";
+            $"new {this.Argument.FormatReadableString(context)}";
 
         protected internal override Expression VisitInferring(
             Environment environment, InferContext context)
         {
             // TODO: Correct real constructor argument type.
-            var higherOrder = new LambdaExpression(environment.CreatePlaceholder(this.TextRange), this.Argument, this.TextRange);
+            var higherOrder = new LambdaExpression(
+                environment.CreatePlaceholder(this.TextRange),
+                environment.CreatePlaceholder(this.Argument, this.TextRange),
+                this.TextRange);
             return new NewExpression(this.Argument, higherOrder, this.TextRange);
         }
 

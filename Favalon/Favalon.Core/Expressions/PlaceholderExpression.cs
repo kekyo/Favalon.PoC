@@ -8,13 +8,9 @@ namespace Favalon.Expressions
     {
         public readonly long Index;
 
-        private PlaceholderExpression(long index, Expression higherOrder, TextRange textRange) :
+        internal PlaceholderExpression(long index, Expression higherOrder, TextRange textRange) :
             base(higherOrder, textRange) =>
             this.Index = index;
-
-        internal PlaceholderExpression(long index, TextRange textRange) :
-            this(index, UndefinedExpression.Instance, textRange)
-        { }
 
         public override string Name =>
             $"'{this.Index}";

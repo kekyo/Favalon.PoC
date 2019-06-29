@@ -8,7 +8,7 @@ namespace Favalon.Expressions
     public sealed class UnitExpression : ConstantExpression
     {
         private UnitExpression() :
-            base(new VariableExpression(typeof(Unit).FullName, KindExpression.Instance))
+            base(new TypeExpression(typeof(Unit).FullName))
         { }
 
         internal override object GetValue() =>

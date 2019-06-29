@@ -27,35 +27,35 @@ namespace Favalon.Expressions
             Assert.AreEqual("System.Int32", actual.HigherOrder.ReadableString);
         }
 
-        [Test]
-        public void ApplyNewAndType()
-        {
-            var environment = Environment.Create();
+        //[Test]
+        //public void ApplyNewAndType()
+        //{
+        //    var environment = Environment.Create();
 
-            // new System.Collections.ArrayList ()
-            var expression = Apply(New(Type("System.Collections.ArrayList")), Constant(123));
+        //    // new System.Collections.ArrayList ()
+        //    var expression = Apply(New(Type("System.Collections.ArrayList")), Constant(123));
 
-            var actual = environment.Infer(expression);
+        //    var actual = environment.Infer(expression);
 
-            Assert.AreEqual("new System.Collections.ArrayList 123", actual.ReadableString);
-            Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);
-        }
+        //    Assert.AreEqual("new System.Collections.ArrayList 123", actual.ReadableString);
+        //    Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);
+        //}
 
-        [Test]
-        public void ApplyWithNewOperator()
-        {
-            var environment = Environment.Create();
-            //environment.Bind(Variable("new"), New(environment.Placeholder(Kind())));
-            environment.Bind(Variable("new"), Lambda(Variable("ty"), New(Variable("ty"))));
+        //[Test]
+        //public void ApplyWithNewOperator()
+        //{
+        //    var environment = Environment.Create();
+        //    //environment.Bind(Variable("new"), New(environment.Placeholder(Kind())));
+        //    environment.Bind(Variable("new"), Lambda(Variable("ty"), New(Variable("ty"))));
 
-            // new System.Collections.ArrayList ()
-            var expression = Apply(Apply(Variable("new"), Type("System.Collections.ArrayList")), Constant(123));
-            //var expression = Apply(Variable("new"), Type("System.Collections.ArrayList"));
+        //    // new System.Collections.ArrayList ()
+        //    var expression = Apply(Apply(Variable("new"), Type("System.Collections.ArrayList")), Constant(123));
+        //    //var expression = Apply(Variable("new"), Type("System.Collections.ArrayList"));
 
-            var actual = environment.Infer(expression);
+        //    var actual = environment.Infer(expression);
 
-            Assert.AreEqual("new System.Collections.ArrayList 123", actual.ReadableString);
-            Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);
-        }
+        //    Assert.AreEqual("new System.Collections.ArrayList 123", actual.ReadableString);
+        //    Assert.AreEqual("System.Collections.ArrayList", actual.HigherOrder.ReadableString);
+        //}
     }
 }

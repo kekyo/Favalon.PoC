@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions.Internals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,11 +21,11 @@ namespace Favalon.Expressions
         public override string ReadableString =>
             $"{this.Function} {this.Parameter}";
 
-        protected override Expression VisitInferring(Environment environment)
+        protected override Expression VisitInferring(Environment environment, InferContext context)
         {
-            var function = VisitInferring(environment, this.Function);
-            var parameter = VisitInferring(environment, this.Parameter);
-            var higherOrder = VisitInferring(environment, this.HigherOrder);
+            var function = VisitInferring(environment, this.Function, context);
+            var parameter = VisitInferring(environment, this.Parameter, context);
+            var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
             return new ApplyExpression(function, parameter, higherOrder);
         }
     }

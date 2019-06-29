@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -9,45 +10,72 @@ namespace Favalon.Expressions
 {
     public sealed class Environment
     {
+        private sealed class IndexHolder
+        {
+            private int index;
+
+            [DebuggerNonUserCode]
+            public int Next() =>
+                index++;
+        }
+
         private readonly Environment? parent;
-        private Dictionary<string, TermExpression>? boundExpressions;
+        private readonly IndexHolder indexHolder;
+        private Dictionary<VariableExpression, TermExpression>? boundExpressions;
 
-        private Environment(Environment parent) =>
+        private Environment(Environment parent)
+        {
             this.parent = parent;
+            this.indexHolder = parent.indexHolder;
+        }
 
-        private Environment()
-        { }
+        private Environment() =>
+            indexHolder = new IndexHolder();
 
         public Environment NewScope() =>
             new Environment(this);
 
-        internal (VariableExpression bound, TermExpression expression) InternalBind(VariableExpression bound, TermExpression expression)
-        {
-            var ve = Expression.VisitInferring(this, expression);
-            var vb = Expression.VisitInferring(this, bound);
+        internal PlaceholderExpression CreatePlaceholder(TermExpression higherOrder) =>
+            new PlaceholderExpression(indexHolder.Next(), higherOrder);
 
-            this.Unify(vb.HigherOrder, ve.HigherOrder);
-            //this.SetBound(vb, ve);
+        internal (BoundVariableExpression bound, TermExpression expression) InternalBind(BoundVariableExpression bound, TermExpression expression, InferContext context)
+        {
+            var ve = Expression.VisitInferring(this, expression, context);
+            var vb = Expression.VisitInferring(this, bound, context);
+
+            this.Unify(ve.HigherOrder, vb.HigherOrder);
+            this.SetBound(vb, ve);
 
             return (vb, ve);
         }
 
-        public void Bind(VariableExpression bound, TermExpression expression) =>
-            this.InternalBind(bound, expression);
+        public void Bind(BoundVariableExpression bound, TermExpression expression)
+        {
+            var context = new InferContext();
+            this.InternalBind(bound, expression, context);
+        }
 
-        internal TermExpression? GetBound(VariableExpression bound) =>
+        public void Register(BoundVariableExpression variable)
+        {
+            var context = new InferContext();
+            var higherOrder = Expression.VisitInferringHigherOrder(this, variable.HigherOrder, context);
+            var freeVariable = new FreeVariableExpression(variable.Name, higherOrder);
+            this.SetBound(variable, freeVariable);
+        }
+
+        internal TermExpression? GetBound(VariableExpression variable) =>
             this.Traverse(environment => environment.parent!).
             Select(environment => (environment.boundExpressions != null) ?
-                environment.boundExpressions.TryGetValue(bound.Name, out var expression) ? expression : null : null).
+                environment.boundExpressions.TryGetValue(variable, out var expression) ? expression : null : null).
             FirstOrDefault(expression => expression != null);
 
         private void SetBound(VariableExpression bound, TermExpression expression)
         {
             if (boundExpressions == null)
             {
-                boundExpressions = new Dictionary<string, TermExpression>();
+                boundExpressions = new Dictionary<VariableExpression, TermExpression>();
             }
-            boundExpressions[bound.Name] = expression;
+            boundExpressions[bound] = expression;
         }
 
         internal void Unify(TermExpression expression1, TermExpression expression2)
@@ -55,7 +83,7 @@ namespace Favalon.Expressions
             // NOTE: Argument direction expression1 --> expression2 is important.
             //   It contains processing forward direction, but excepts identity expressions.
 
-            // TODO: Occurrence check (detect recursive declaration)
+            // TODO: Occurrence check (detect infinite recursive declaration)
 
             if (expression1.Equals(expression2))
             {
@@ -67,8 +95,31 @@ namespace Favalon.Expressions
                 return;
             }
 
+            // Pair of placehoders / one of placeholder
+            if (expression1 is PlaceholderExpression placeholder1)
+            {
+                if (expression2 is PlaceholderExpression placeholder2)
+                {
+                    // Unify placeholder2 into placeholder1 if aren't same.
+                    if (!placeholder1.Equals(placeholder2))
+                    {
+                        this.SetBound(placeholder1, placeholder2);
+                    }
+                }
+                else
+                {
+                    this.SetBound(placeholder1, expression2);
+                }
+                return;
+            }
+            else if (expression2 is PlaceholderExpression placeholder2)
+            {
+                this.SetBound(placeholder2, expression1);
+                return;
+            }
+
             // Pair of variables / one of identity
-            if (expression1 is VariableExpression identity1)
+            if (expression1 is BoundVariableExpression identity1)
             {
                 if (expression2 is VariableExpression identity2)
                 {
@@ -89,7 +140,7 @@ namespace Favalon.Expressions
                 }
                 return;
             }
-            else if (expression2 is VariableExpression identity2)
+            else if (expression2 is BoundVariableExpression identity2)
             {
                 if (this.GetBound(identity2) is TermExpression resolved)
                 {
@@ -115,11 +166,16 @@ namespace Favalon.Expressions
             // TODO: raise error?
         }
 
+        public TermExpression Infer(VariableExpression variable) =>
+            this.Infer<TermExpression>(variable);
+
         public TExpression Infer<TExpression>(TExpression expression)
-            where TExpression : Expression
+            where TExpression : TermExpression
         {
-            var phase1 = Expression.VisitInferring(this, expression);
-            return phase1;
+            var context = new InferContext();
+            var visited = Expression.VisitInferring(this, expression, context);
+            context.Resolve();
+            return visited;
         }
 
         public static Environment Create() =>

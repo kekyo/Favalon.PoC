@@ -9,7 +9,6 @@ namespace Favalon.Expressions
     {
         protected ValueExpression(TermExpression higherOrder) :
             base(higherOrder)
-        {
-        }
+        { }
     }
 }

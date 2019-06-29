@@ -1,0 +1,23 @@
+﻿using Favalon.Expressions.Internals;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Favalon.Expressions
+{
+    public sealed class TypeExpression : TermExpression
+    {
+        public readonly string TypeName;
+
+        internal TypeExpression(string typeName) :
+            base(KindExpression.Instance) =>
+            this.TypeName = typeName;
+
+        public override string ReadableString =>
+            this.TypeName;
+
+        protected override Expression VisitInferring(Environment environment, InferContext context) =>
+            this;
+    }
+}

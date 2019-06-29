@@ -262,7 +262,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
             Assert.AreEqual("'a -> 'b", ((ApplyExpression)actual.Expression).Function.HigherOrder.ReadableString);
-            Assert.AreEqual("* -> 'a", ((ApplyExpression)((ApplyExpression)actual.Expression).Argument).Function.HigherOrder.ReadableString);
+            Assert.AreEqual("* -> 'a", ((ApplyExpression)((ApplyExpression)actual.Expression).Parameter).Function.HigherOrder.ReadableString);
         }
 
         [Test]
@@ -287,7 +287,7 @@ namespace Favalon.Expressions
             var environment = Environment.Create();
 
             // x = y System.Int64
-            environment.Bind(Variable("x"), Lambda(Variable("y"), Type("System.Int64")).Infer(environment));
+            environment.Bind(Variable("x"), Lambda(Variable("y"), Type("System.Int64")));
 
             // x = System.Int32 in x
             var expression = Bind(Variable("x"), Type("System.Int32"), Variable("x"));

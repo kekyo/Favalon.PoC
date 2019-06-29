@@ -8,11 +8,11 @@ namespace Favalon.Expressions
 {
     public sealed class BindExpression : TermExpression
     {
-        public readonly VariableExpression Bound;
+        public readonly BoundVariableExpression Bound;
         public readonly TermExpression Expression;
         public readonly TermExpression Body;
 
-        internal BindExpression(VariableExpression bound, TermExpression expression, TermExpression body, TermExpression higherOrder) :
+        internal BindExpression(BoundVariableExpression bound, TermExpression expression, TermExpression body, TermExpression higherOrder) :
             base(higherOrder)
         {
             this.Bound = bound;
@@ -23,13 +23,13 @@ namespace Favalon.Expressions
         public override string ReadableString =>
             $"{this.Bound} = {this.Expression} in {this.Body}";
 
-        protected override Expression VisitInferring(Environment environment)
+        protected override Expression VisitInferring(Environment environment, InferContext context)
         {
             var newScope = environment.NewScope();
 
-            var (bound, expression) = newScope.InternalBind(this.Bound, this.Expression);
-            var body = VisitInferring(newScope, this.Body);
-            var higherOrder = VisitInferring(newScope, this.HigherOrder);
+            var (bound, expression) = newScope.InternalBind(this.Bound, this.Expression, context);
+            var body = VisitInferring(newScope, this.Body, context);
+            var higherOrder = VisitInferringHigherOrder(newScope, this.HigherOrder, context);
 
             return new BindExpression(bound, expression, body, higherOrder);
         }

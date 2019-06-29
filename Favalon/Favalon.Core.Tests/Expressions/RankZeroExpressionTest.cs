@@ -161,7 +161,7 @@ namespace Favalon.Expressions
         }
 
         [Test]
-        public void BindFreeVariable()
+        public void BindVariable()
         {
             var environment = Environment.Create();
             environment.Register(Variable("y"));
@@ -261,7 +261,7 @@ namespace Favalon.Expressions
             Assert.AreEqual("'a", actual.HigherOrder.ReadableString);
 
             Assert.AreEqual("'a -> 'b", ((ApplyExpression)actual.Expression).Function.HigherOrder.ReadableString);
-            Assert.AreEqual("System.Int32 -> 'a", ((ApplyExpression)((ApplyExpression)actual.Expression).Argument).Function.HigherOrder.ReadableString);
+            Assert.AreEqual("System.Int32 -> 'a", ((ApplyExpression)((ApplyExpression)actual.Expression).Parameter).Function.HigherOrder.ReadableString);
         }
 
         [Test]

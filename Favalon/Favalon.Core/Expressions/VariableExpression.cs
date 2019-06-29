@@ -1,25 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
 namespace Favalon.Expressions
 {
-    public sealed class VariableExpression : TermExpression
+    public abstract class VariableExpression : TermExpression, IEquatable<VariableExpression?>
     {
-        public readonly string Name;
+        [DebuggerNonUserCode]
+        internal VariableExpression(TermExpression higherOrder) :
+            base(higherOrder)
+        { }
 
-        internal VariableExpression(string name, TermExpression higherOrder) :
-            base(higherOrder) =>
-            this.Name = name;
+        public abstract string Name { get; }
 
         public override string ReadableString =>
             this.Name;
 
-        protected override Expression VisitInferring(Environment environment)
-        {
-            var higherOrder = VisitInferring(environment, this.HigherOrder);
-            return new VariableExpression(this.Name, higherOrder);
-        }
+        public override int GetHashCode() =>
+            this.Name.GetHashCode();
+
+        public virtual bool Equals(VariableExpression? other) =>
+            (other == null) ? false :
+            object.ReferenceEquals(this, other) ? true :
+            this.Name.Equals(other.Name);
+
+        public override bool Equals(object obj) =>
+            this.Equals(obj as VariableExpression);
     }
 }

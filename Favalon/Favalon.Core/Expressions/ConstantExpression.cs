@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Favalon.Expressions.Internals;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -7,6 +9,7 @@ namespace Favalon.Expressions
 {
     public abstract class ConstantExpression : ValueExpression
     {
+        [DebuggerNonUserCode]
         internal ConstantExpression(TermExpression higherOrder) :
             base(higherOrder)
         { }
@@ -16,7 +19,7 @@ namespace Favalon.Expressions
 
         internal abstract object GetValue();
 
-        protected override sealed Expression VisitInferring(Environment environment) =>
+        protected override sealed Expression VisitInferring(Environment environment, InferContext context) =>
             this;
 
         internal static ConstantExpression Create(object value) =>
@@ -31,8 +34,8 @@ namespace Favalon.Expressions
 
     public abstract class ConstantExpression<T> : ConstantExpression
     {
-        private static readonly VariableExpression higherOrder =
-            new VariableExpression(typeof(T).FullName, KindExpression.Instance);
+        private static readonly TypeExpression higherOrder =
+            new TypeExpression(typeof(T).FullName);
 
         public new readonly T Value;
 
@@ -40,6 +43,7 @@ namespace Favalon.Expressions
             base(higherOrder) =>
             this.Value = value;
 
+        [DebuggerNonUserCode]
         internal override sealed object GetValue() =>
             this.Value!;
     }

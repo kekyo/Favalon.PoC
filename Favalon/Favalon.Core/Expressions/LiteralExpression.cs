@@ -10,7 +10,7 @@ namespace Favalon.Expressions
         public new readonly object Value;
 
         internal LiteralExpression(object value) :
-            base(new VariableExpression(value.GetType().FullName, KindExpression.Instance)) =>
+            base(new TypeExpression(value.GetType().FullName)) =>
             this.Value = value;
 
         internal override object GetValue() =>

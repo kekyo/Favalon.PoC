@@ -9,13 +9,16 @@ namespace Favalon.Expressions
     public sealed class KindExpression : TermExpression
     {
         private KindExpression() :
-            base(UndefinedExpression.Instance)
+            base(null!)
         { }
 
         public override string ReadableString =>
             "*";
 
-        protected override Expression VisitInferring(Environment environment) =>
+        public override string ToString() =>
+            $"Kind: *";
+
+        protected override Expression VisitInferring(Environment environment, InferContext context) =>
             this;
 
         public static readonly KindExpression Instance = new KindExpression();

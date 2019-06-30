@@ -27,6 +27,8 @@ namespace Favalon.Expressions
         {
             var newScope = environment.NewScope();
 
+            newScope.Register((VariableExpression)this.Parameter);
+
             var parameter = VisitInferring(newScope, this.Parameter, context);
             var expression = VisitInferring(newScope, this.Expression, context);
             var higherOrder = VisitInferringHigherOrder(newScope, this.HigherOrder, context);

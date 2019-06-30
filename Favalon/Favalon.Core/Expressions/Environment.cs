@@ -50,7 +50,7 @@ namespace Favalon.Expressions
         public void Bind(BoundVariableExpression bound, TermExpression expression) =>
             this.SetBoundExpression(bound, expression);
 
-        public void Register(BoundVariableExpression variable) =>
+        public void Register(VariableExpression variable) =>
             this.SetBoundExpression(variable, new FreeVariableExpression(variable.Name, variable.HigherOrder));
 
         internal void Unify(TermExpression expression1, TermExpression expression2)

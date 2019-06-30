@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Favalon.Expressions
 {
-    public sealed class PlaceholderExpression : VariableExpression, IEquatable<PlaceholderExpression?>
+    public sealed class PlaceholderExpression : VariableExpression, IEquatable<PlaceholderExpression?>, IComparable<PlaceholderExpression>
     {
         public readonly int Index;
 
@@ -68,5 +68,8 @@ namespace Favalon.Expressions
 
         public override bool Equals(object obj) =>
             this.Equals(obj as PlaceholderExpression);
+
+        public int CompareTo(PlaceholderExpression other) =>
+            this.Index.CompareTo(other.Index);
     }
 }

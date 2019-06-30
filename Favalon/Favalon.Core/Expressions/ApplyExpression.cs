@@ -19,13 +19,19 @@ namespace Favalon.Expressions
         }
 
         protected override string FormatReadableString(FormatContext context) =>
-            $"{FormatReadableString(context, this.Function)} {FormatReadableString(context, this.Parameter)}";
+            (this.Parameter is ApplyExpression) ?
+                $"{FormatReadableString(context, this.Function)} ({FormatReadableString(context, this.Parameter)})" :
+                $"{FormatReadableString(context, this.Function)} {FormatReadableString(context, this.Parameter)}";
 
         protected override Expression VisitInferring(Environment environment, InferContext context)
         {
             var function = VisitInferring(environment, this.Function, context);
             var parameter = VisitInferring(environment, this.Parameter, context);
             var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
+
+            var variableHigherOrder = new LambdaExpression(parameter.HigherOrder, higherOrder, UndefinedExpression.Instance);
+            Unify(environment, function.HigherOrder, variableHigherOrder);
+
             return new ApplyExpression(function, parameter, higherOrder);
         }
 

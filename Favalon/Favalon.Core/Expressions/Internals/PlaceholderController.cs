@@ -20,16 +20,25 @@ namespace Favalon.Expressions.Internals
         public void AddRelated(PlaceholderExpression placeholder, TermExpression expression) =>
             relatedExpressions[placeholder] = expression;
 
-        public TermExpression? GetRelated(PlaceholderExpression placeholder)
+        public TermExpression? GetRelated(InferContext context, PlaceholderExpression placeholder)
         {
             var current = placeholder;
             while (true)
             {
                 if (relatedExpressions.TryGetValue(current, out var expression))
                 {
-                    if (expression is PlaceholderExpression p)
+                    context.TouchedInResolving(current);
+
+                    if (expression is PlaceholderExpression pe)
                     {
-                        current = p;
+                        current = pe;
+                    }
+                    else if (expression is LambdaExpression le)
+                    {
+                        var rp = (le.Parameter is PlaceholderExpression lpp) ? (this.GetRelated(context, lpp) ?? lpp) : le.Parameter;
+                        var re = (le.Expression is PlaceholderExpression lpe) ? (this.GetRelated(context, lpe) ?? lpe) : le.Expression;
+                        var rho = (le.HigherOrder is PlaceholderExpression lpho) ? (this.GetRelated(context, lpho) ?? lpho) : le.HigherOrder;
+                        return new LambdaExpression(rp, re, rho);
                     }
                     else
                     {

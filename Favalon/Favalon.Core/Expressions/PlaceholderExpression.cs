@@ -36,7 +36,7 @@ namespace Favalon.Expressions
 
         protected override Expression VisitInferring(Environment environment, InferContext context)
         {
-            if (environment.GetRelatedExpression(this) is TermExpression related)
+            if (environment.GetRelatedExpression(context, this) is TermExpression related)
             {
                 var relatedHigherOrder = VisitInferringHigherOrder(environment, related.HigherOrder, context);
                 var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
@@ -51,13 +51,9 @@ namespace Favalon.Expressions
             }
         }
 
-        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
-        {
-            context.TouchedInResolving(this);
-
-            return (environment.GetRelatedExpression(this) is TermExpression related) ?
+        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context) =>
+            (environment.GetRelatedExpression(context, this) is TermExpression related) ?
                 (true, related) : (false, this);
-        }
 
         public override int GetHashCode() =>
             this.Index.GetHashCode();

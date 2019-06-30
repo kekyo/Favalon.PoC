@@ -29,8 +29,8 @@ namespace Favalon.Expressions
         internal PlaceholderExpression CreatePlaceholder(TermExpression higherOrder) =>
             placeholderController.Create(higherOrder);
 
-        internal TermExpression? GetRelatedExpression(PlaceholderExpression placeholder) =>
-            placeholderController.GetRelated(placeholder);
+        internal TermExpression? GetRelatedExpression(InferContext context, PlaceholderExpression placeholder) =>
+            placeholderController.GetRelated(context, placeholder);
 
         internal TermExpression? GetBoundExpression(VariableExpression variable) =>
             this.Traverse(environment => environment.parent!).

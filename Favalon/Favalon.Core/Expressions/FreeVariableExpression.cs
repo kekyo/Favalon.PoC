@@ -18,17 +18,23 @@ namespace Favalon.Expressions
         {
             // NOTE: Inferring process will resolve only higher order information.
             //   It'll not process for reducing.
-            if (environment.GetBound(this) is TermExpression term)
+            if (environment.GetBoundExpression(this) is TermExpression term)
             {
                 var termHigherOrder = VisitInferringHigherOrder(environment, term.HigherOrder, context);
                 var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
                 Unify(environment, termHigherOrder, higherOrder);
-                return new FreeVariableExpression(this.Name, higherOrder);
+                return new FreeVariableExpression(this.Name, termHigherOrder);
             }
             else
             {
                 throw new ArgumentException($"Couldn't resolve variable.", this.Name);
             }
+        }
+
+        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
+        {
+            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+            return rho ? (true, new FreeVariableExpression(this.Name, higherOrder)) : (false, this);
         }
     }
 }

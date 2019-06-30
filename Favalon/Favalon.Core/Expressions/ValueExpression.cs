@@ -7,7 +7,7 @@ namespace Favalon.Expressions
 {
     public abstract class ValueExpression : TermExpression
     {
-        protected ValueExpression(TermExpression higherOrder) :
+        private protected ValueExpression(TermExpression higherOrder) :
             base(higherOrder)
         { }
     }

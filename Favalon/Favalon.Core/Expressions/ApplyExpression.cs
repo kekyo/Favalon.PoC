@@ -28,5 +28,13 @@ namespace Favalon.Expressions
             var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
             return new ApplyExpression(function, parameter, higherOrder);
         }
+
+        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
+        {
+            var (rf, function) = VisitResolving(environment, this.Function, context);
+            var (rp, parameter) = VisitResolving(environment, this.Parameter, context);
+            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+            return (rf || rp || rho) ? (true, new ApplyExpression(function, parameter, higherOrder)) : (false, this);
+        }
     }
 }

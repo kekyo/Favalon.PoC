@@ -28,8 +28,15 @@ namespace Favalon.Expressions
             var parameter = VisitInferring(newScope, this.Parameter, context);
             var expression = VisitInferring(newScope, this.Expression, context);
             var higherOrder = VisitInferringHigherOrder(newScope, this.HigherOrder, context);
-
             return new LambdaExpression(parameter, expression, higherOrder);
+        }
+
+        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
+        {
+            var (rp, parameter) = VisitResolving(environment, this.Parameter, context);
+            var (re, expression) = VisitResolving(environment, this.Expression, context);
+            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+            return (rp || re || rho) ? (true, new LambdaExpression(parameter, expression, higherOrder)) : (false, this);
         }
     }
 }

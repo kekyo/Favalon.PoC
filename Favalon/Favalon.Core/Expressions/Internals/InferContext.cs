@@ -8,31 +8,32 @@ namespace Favalon.Expressions.Internals
 {
     public sealed class InferContext
     {
-        private readonly Queue<Action> resolvers = new Queue<Action>();
+        private readonly HashSet<PlaceholderExpression> touchedPlaceholders =
+            new HashSet<PlaceholderExpression>();
 
-        [DebuggerNonUserCode]
+        [DebuggerStepThrough]
         internal InferContext()
         { }
 
         public int Rank { get; private set; }
 
-        [DebuggerNonUserCode]
+        public IEnumerable<PlaceholderExpression> TouchedPlaceholders =>
+            touchedPlaceholders;
+
+        [DebuggerStepThrough]
         internal void RaiseRank() =>
             this.Rank++;
-        [DebuggerNonUserCode]
+        [DebuggerStepThrough]
         internal void DropRank() =>
             this.Rank--;
 
-        [DebuggerNonUserCode]
-        public void Register(Action resolver) =>
-            resolvers.Enqueue(resolver);
+        internal void TouchedInResolving(PlaceholderExpression placeholder) =>
+            touchedPlaceholders.Add(placeholder);
 
-        internal void Resolve()
+        public override string ToString()
         {
-            while (resolvers.Count >= 1)
-            {
-                resolvers.Dequeue()();
-            }
+            var touched = string.Join(",", touchedPlaceholders.Select(touched => $"'{touched.ReadableString}"));
+            return $"Rank={this.Rank}, Touched=[{touched}]";
         }
     }
 }

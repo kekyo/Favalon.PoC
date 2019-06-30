@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions.Internals;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,8 +9,8 @@ namespace Favalon.Expressions
 {
     public abstract class VariableExpression : TermExpression, IEquatable<VariableExpression?>
     {
-        [DebuggerNonUserCode]
-        internal VariableExpression(TermExpression higherOrder) :
+        [DebuggerStepperBoundary]
+        private protected VariableExpression(TermExpression higherOrder) :
             base(higherOrder)
         { }
 

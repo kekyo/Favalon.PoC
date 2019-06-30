@@ -19,5 +19,8 @@ namespace Favalon.Expressions
 
         protected override Expression VisitInferring(Environment environment, InferContext context) =>
             this;
+
+        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context) =>
+            (false, this);
     }
 }

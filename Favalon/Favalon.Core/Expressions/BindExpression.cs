@@ -27,11 +27,26 @@ namespace Favalon.Expressions
         {
             var newScope = environment.NewScope();
 
-            var (bound, expression) = newScope.InternalBind(this.Bound, this.Expression, context);
+            var expression = VisitInferring(newScope, this.Expression, context);
+            var bound = VisitInferring(newScope, this.Bound, context);
+            Unify(newScope, bound.HigherOrder, expression.HigherOrder);
+
+            newScope.SetBoundExpression(bound, expression);
+
             var body = VisitInferring(newScope, this.Body, context);
             var higherOrder = VisitInferringHigherOrder(newScope, this.HigherOrder, context);
+            Unify(newScope, body.HigherOrder, higherOrder);
 
-            return new BindExpression(bound, expression, body, higherOrder);
+            return new BindExpression(bound, expression, body, body.HigherOrder);
+        }
+
+        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
+        {
+            var (rb, bound) = VisitResolving(environment, this.Bound, context);
+            var (re, expression) = VisitResolving(environment, this.Expression, context);
+            var (r, body) = VisitResolving(environment, this.Body, context);
+            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+            return (rb || re || r || rho) ? (true, new BindExpression(bound, expression, body, higherOrder)) : (false, this);
         }
     }
 }

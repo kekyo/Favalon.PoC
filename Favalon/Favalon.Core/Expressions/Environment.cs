@@ -10,66 +10,35 @@ namespace Favalon.Expressions
 {
     public sealed class Environment
     {
-        private sealed class IndexHolder
-        {
-            private int index;
-
-            [DebuggerNonUserCode]
-            public int Next() =>
-                index++;
-        }
-
         private readonly Environment? parent;
-        private readonly IndexHolder indexHolder;
+        private readonly PlaceholderController placeholderController;
         private Dictionary<VariableExpression, TermExpression>? boundExpressions;
 
         private Environment(Environment parent)
         {
             this.parent = parent;
-            this.indexHolder = parent.indexHolder;
+            this.placeholderController = parent.placeholderController;
         }
 
         private Environment() =>
-            indexHolder = new IndexHolder();
+            placeholderController = new PlaceholderController();
 
         public Environment NewScope() =>
             new Environment(this);
 
         internal PlaceholderExpression CreatePlaceholder(TermExpression higherOrder) =>
-            new PlaceholderExpression(indexHolder.Next(), higherOrder);
+            placeholderController.Create(higherOrder);
 
-        internal (BoundVariableExpression bound, TermExpression expression) InternalBind(BoundVariableExpression bound, TermExpression expression, InferContext context)
-        {
-            var ve = Expression.VisitInferring(this, expression, context);
-            var vb = Expression.VisitInferring(this, bound, context);
+        internal TermExpression? GetRelatedExpression(PlaceholderExpression placeholder) =>
+            placeholderController.GetRelated(placeholder);
 
-            this.Unify(ve.HigherOrder, vb.HigherOrder);
-            this.SetBound(vb, ve);
-
-            return (vb, ve);
-        }
-
-        public void Bind(BoundVariableExpression bound, TermExpression expression)
-        {
-            var context = new InferContext();
-            this.InternalBind(bound, expression, context);
-        }
-
-        public void Register(BoundVariableExpression variable)
-        {
-            var context = new InferContext();
-            var higherOrder = Expression.VisitInferringHigherOrder(this, variable.HigherOrder, context);
-            var freeVariable = new FreeVariableExpression(variable.Name, higherOrder);
-            this.SetBound(variable, freeVariable);
-        }
-
-        internal TermExpression? GetBound(VariableExpression variable) =>
+        internal TermExpression? GetBoundExpression(VariableExpression variable) =>
             this.Traverse(environment => environment.parent!).
             Select(environment => (environment.boundExpressions != null) ?
                 environment.boundExpressions.TryGetValue(variable, out var expression) ? expression : null : null).
             FirstOrDefault(expression => expression != null);
 
-        private void SetBound(VariableExpression bound, TermExpression expression)
+        internal void SetBoundExpression(VariableExpression bound, TermExpression expression)
         {
             if (boundExpressions == null)
             {
@@ -77,6 +46,12 @@ namespace Favalon.Expressions
             }
             boundExpressions[bound] = expression;
         }
+
+        public void Bind(BoundVariableExpression bound, TermExpression expression) =>
+            this.SetBoundExpression(bound, expression);
+
+        public void Register(BoundVariableExpression variable) =>
+            this.SetBoundExpression(variable, new FreeVariableExpression(variable.Name, variable.HigherOrder));
 
         internal void Unify(TermExpression expression1, TermExpression expression2)
         {
@@ -103,18 +78,18 @@ namespace Favalon.Expressions
                     // Unify placeholder2 into placeholder1 if aren't same.
                     if (!placeholder1.Equals(placeholder2))
                     {
-                        this.SetBound(placeholder1, placeholder2);
+                        placeholderController.AddRelated(placeholder1, placeholder2);
                     }
                 }
                 else
                 {
-                    this.SetBound(placeholder1, expression2);
+                    placeholderController.AddRelated(placeholder1, expression2);
                 }
                 return;
             }
             else if (expression2 is PlaceholderExpression placeholder2)
             {
-                this.SetBound(placeholder2, expression1);
+                placeholderController.AddRelated(placeholder2, expression1);
                 return;
             }
 
@@ -126,30 +101,30 @@ namespace Favalon.Expressions
                     // Unify identity2 into identity1 if aren't same.
                     if (!identity1.Equals(identity2))
                     {
-                        this.SetBound(identity1, expression2);
+                        this.SetBoundExpression(identity1, expression2);
                     }
                 }
-                else if (this.GetBound(identity1) is TermExpression resolved)
+                else if (this.GetBoundExpression(identity1) is TermExpression resolved)
                 {
                     this.Unify(expression2, resolved);
                 }
                 else
                 {
                     // Unify expression2 into identity1.
-                    this.SetBound(identity1, expression2);
+                    this.SetBoundExpression(identity1, expression2);
                 }
                 return;
             }
             else if (expression2 is BoundVariableExpression identity2)
             {
-                if (this.GetBound(identity2) is TermExpression resolved)
+                if (this.GetBoundExpression(identity2) is TermExpression resolved)
                 {
                     this.Unify(expression1, resolved);
                 }
                 else
                 {
                     // Unify expression1 into identity2.
-                    this.SetBound(identity2, expression1);
+                    this.SetBoundExpression(identity2, expression1);
                 }
                 return;
             }
@@ -173,9 +148,10 @@ namespace Favalon.Expressions
             where TExpression : TermExpression
         {
             var context = new InferContext();
-            var visited = Expression.VisitInferring(this, expression, context);
-            context.Resolve();
-            return visited;
+            var inferred = Expression.VisitInferring(this, expression, context);
+            var (_, resolved) = Expression.VisitResolving(this, inferred, context);
+            placeholderController.Remove(context.TouchedPlaceholders);
+            return resolved;
         }
 
         public static Environment Create() =>

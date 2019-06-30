@@ -19,5 +19,11 @@ namespace Favalon.Expressions
             var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
             return new BoundVariableExpression(this.Name, higherOrder);
         }
+
+        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
+        {
+            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+            return rho ? (true, new BoundVariableExpression(this.Name, higherOrder)) : (false, this);
+        }
     }
 }

@@ -27,8 +27,27 @@ namespace Favalon.Expressions
 
         protected override Expression VisitInferring(Environment environment, InferContext context)
         {
-            var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
-            return new PlaceholderExpression(this.Index, higherOrder);
+            if (environment.GetRelatedExpression(this) is TermExpression related)
+            {
+                var relatedHigherOrder = VisitInferringHigherOrder(environment, related.HigherOrder, context);
+                var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
+                Unify(environment, relatedHigherOrder, higherOrder);
+
+                return new PlaceholderExpression(this.Index, relatedHigherOrder);
+            }
+            else
+            {
+                var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
+                return new PlaceholderExpression(this.Index, higherOrder);
+            }
+        }
+
+        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
+        {
+            context.TouchedInResolving(this);
+
+            return (environment.GetRelatedExpression(this) is TermExpression related) ?
+                (true, related) : (false, this);
         }
 
         public override int GetHashCode() =>

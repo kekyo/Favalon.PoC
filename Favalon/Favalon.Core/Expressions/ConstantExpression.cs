@@ -9,7 +9,7 @@ namespace Favalon.Expressions
 {
     public abstract class ConstantExpression : ValueExpression
     {
-        [DebuggerNonUserCode]
+        [DebuggerStepperBoundary]
         internal ConstantExpression(TermExpression higherOrder) :
             base(higherOrder)
         { }
@@ -21,6 +21,9 @@ namespace Favalon.Expressions
 
         protected override sealed Expression VisitInferring(Environment environment, InferContext context) =>
             this;
+
+        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context) =>
+            (false, this);
 
         internal static ConstantExpression Create(object value) =>
             value switch
@@ -43,7 +46,7 @@ namespace Favalon.Expressions
             base(higherOrder) =>
             this.Value = value;
 
-        [DebuggerNonUserCode]
+        [DebuggerStepperBoundary]
         internal override sealed object GetValue() =>
             this.Value!;
     }

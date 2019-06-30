@@ -18,8 +18,8 @@ namespace Favalon.Expressions
             this.Parameter = parameter;
         }
 
-        public override string ReadableString =>
-            $"{this.Function} {this.Parameter}";
+        protected override string FormatReadableString(FormatContext context) =>
+            $"{FormatReadableString(context, this.Function)} {FormatReadableString(context, this.Parameter)}";
 
         protected override Expression VisitInferring(Environment environment, InferContext context)
         {

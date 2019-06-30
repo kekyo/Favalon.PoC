@@ -14,6 +14,9 @@ namespace Favalon.Expressions
 
         public override string Name { get; }
 
+        protected override string FormatReadableString(FormatContext context) =>
+            this.Name;
+
         protected override Expression VisitInferring(Environment environment, InferContext context)
         {
             // NOTE: Inferring process will resolve only higher order information.

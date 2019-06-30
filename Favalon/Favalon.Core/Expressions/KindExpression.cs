@@ -12,7 +12,7 @@ namespace Favalon.Expressions
             base(null!)
         { }
 
-        public override string ReadableString =>
+        protected override string FormatReadableString(FormatContext context) =>
             "*";
 
         public override string ToString() =>

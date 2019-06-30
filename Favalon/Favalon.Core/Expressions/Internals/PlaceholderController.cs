@@ -18,7 +18,7 @@ namespace Favalon.Expressions.Internals
 
         [DebuggerStepThrough]
         public void AddRelated(PlaceholderExpression placeholder, TermExpression expression) =>
-            relatedExpressions.Add(placeholder, expression);
+            relatedExpressions[placeholder] = expression;
 
         [DebuggerStepThrough]
         public TermExpression? GetRelated(PlaceholderExpression placeholder) =>

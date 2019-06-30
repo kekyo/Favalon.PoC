@@ -17,16 +17,25 @@ namespace Favalon.Expressions
             this.HigherOrder = higherOrder;
         }
 
-        public abstract string ReadableString { get; }
+        public string ReadableString =>
+            this.FormatReadableString(new FormatContext(true, false, false));
 
-        public override string ToString() =>
-            $"{this.GetType().Name.Replace("Expression", string.Empty)}: {this.ReadableString}:{this.HigherOrder.ReadableString}";
+        public override string ToString()
+        {
+            var context = new FormatContext(true, true, false);
+            return $"{this.GetType().Name.Replace("Expression", string.Empty)}: {this.FormatReadableString(context)}:{this.HigherOrder.FormatReadableString(context)}";
+        }
+
+        protected abstract string FormatReadableString(FormatContext context);
 
         protected abstract Expression VisitInferring(Environment environment, InferContext context);
 
         protected abstract (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context);
 
         /////////////////////////////////////////////////////////////////////////
+
+        protected static string FormatReadableString(FormatContext context, Expression expression) =>
+            expression.FormatReadableString(context);
 
         protected internal static TExpression VisitInferring<TExpression>(Environment environment, TExpression expression, InferContext context)
             where TExpression : TermExpression =>

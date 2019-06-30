@@ -16,9 +16,6 @@ namespace Favalon.Expressions
 
         public abstract string Name { get; }
 
-        public override string ReadableString =>
-            this.Name;
-
         public override int GetHashCode() =>
             this.Name.GetHashCode();
 

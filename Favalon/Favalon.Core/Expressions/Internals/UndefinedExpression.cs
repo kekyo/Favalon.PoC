@@ -11,23 +11,11 @@ namespace Favalon.Expressions.Internals
             base(null!)
         { }
 
-        public override string ReadableString =>
+        protected override string FormatReadableString(FormatContext context) =>
             "?";
 
         public override string ToString() =>
             $"Undefined: ?";
-
-        //protected override Expression VisitInferring(Environment environment, InferContext context) =>
-        //    context.Rank switch
-        //    {
-        //        0 => (Expression)environment.CreatePlaceholder(environment.CreatePlaceholder(KindExpression.Instance)),
-        //        1 => environment.CreatePlaceholder(KindExpression.Instance),
-        //        2 => KindExpression.Instance,
-        //        _ => null!
-        //    };
-
-        //protected override Expression VisitInferring(Environment environment, InferContext context) =>
-        //    this;
 
         protected override Expression VisitInferring(Environment environment, InferContext context) =>
             environment.CreatePlaceholder(Instance);

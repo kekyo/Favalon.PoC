@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions.Internals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Favalon.Expressions
         internal override object GetValue() =>
             Unit.Value;
 
-        public override string ReadableString =>
+        protected override string FormatReadableString(FormatContext context) =>
             Unit.Value.ToString();
 
         public static readonly UnitExpression Instance = new UnitExpression();

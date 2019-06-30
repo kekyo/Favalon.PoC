@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions.Internals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace Favalon.Expressions
             base(value)
         { }
 
-        public override string ReadableString =>
+        protected override string FormatReadableString(FormatContext context) =>
             $"\"{this.Value}\"";
     }
 }

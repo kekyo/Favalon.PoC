@@ -14,16 +14,25 @@ namespace Favalon.Expressions
             base(higherOrder) =>
             this.Index = index;
 
-        public override string Name
+        protected override string FormatReadableString(FormatContext context)
         {
-            get
+            if (context.StrictNaming)
             {
-                var ch = (char)('a' + (this.Index % ('z' - 'a' + 1)));
-                var suffixIndex = this.Index / ('z' - 'a' + 1);
+                return this.Name;
+            }
+            else
+            {
+                var index = context.GetAdjustedIndex(this);
+
+                var ch = (char)('a' + (index % ('z' - 'a' + 1)));
+                var suffixIndex = index / ('z' - 'a' + 1);
                 var suffix = (suffixIndex >= 1) ? suffixIndex.ToString() : string.Empty;
                 return $"'{ch}{suffix}";
             }
         }
+
+        public override string Name =>
+            $"'{this.Index}";
 
         protected override Expression VisitInferring(Environment environment, InferContext context)
         {

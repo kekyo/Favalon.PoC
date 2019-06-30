@@ -14,7 +14,7 @@ namespace Favalon.Expressions
             base(KindExpression.Instance) =>
             this.TypeName = typeName;
 
-        public override string ReadableString =>
+        protected override string FormatReadableString(FormatContext context) =>
             this.TypeName;
 
         protected override Expression VisitInferring(Environment environment, InferContext context) =>

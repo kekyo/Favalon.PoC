@@ -42,10 +42,16 @@ namespace Favalon.Expressions
 
         protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
         {
-            var (rb, bound) = VisitResolving(environment, this.Bound, context);
-            var (re, expression) = VisitResolving(environment, this.Expression, context);
-            var (r, body) = VisitResolving(environment, this.Body, context);
-            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+            var newScope = environment.NewScope();
+
+            var (re, expression) = VisitResolving(newScope, this.Expression, context);
+            var (rb, bound) = VisitResolving(newScope, this.Bound, context);
+
+            newScope.SetBoundExpression(bound, expression);
+
+            var (r, body) = VisitResolving(newScope, this.Body, context);
+            var (rho, higherOrder) = VisitResolvingHigherOrder(newScope, this.HigherOrder, context);
+
             return (rb || re || r || rho) ? (true, new BindExpression(bound, expression, body, higherOrder)) : (false, this);
         }
     }

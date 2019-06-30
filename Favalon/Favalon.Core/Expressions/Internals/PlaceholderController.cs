@@ -20,13 +20,38 @@ namespace Favalon.Expressions.Internals
         public void AddRelated(PlaceholderExpression placeholder, TermExpression expression) =>
             relatedExpressions[placeholder] = expression;
 
-        [DebuggerStepThrough]
-        public TermExpression? GetRelated(PlaceholderExpression placeholder) =>
-            relatedExpressions.TryGetValue(placeholder, out var expression) ? expression : null;
+        public TermExpression? GetRelated(PlaceholderExpression placeholder)
+        {
+            var current = placeholder;
+            while (true)
+            {
+                if (relatedExpressions.TryGetValue(current, out var expression))
+                {
+                    if (expression is PlaceholderExpression p)
+                    {
+                        current = p;
+                    }
+                    else
+                    {
+                        return expression;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
 
-        [DebuggerStepThrough]
         public void Remove(IEnumerable<PlaceholderExpression> placeholders)
         {
+            // TODO: We have to except implicitly depending between the placeholder and another placeholder.
+
+            // A --> B   (X)
+            // B --> C   (X)
+            // D --> B   * missed B
+            // Remove list: A, B
+
             foreach (var placeholder in placeholders)
             {
                 relatedExpressions.Remove(placeholder);

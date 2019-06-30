@@ -18,13 +18,10 @@ namespace Favalon.Expressions
         }
 
         public string ReadableString =>
-            this.FormatReadableString(new FormatContext(true, false, false));
+            FormatReadableString(new FormatContext(false, false, false), this);
 
-        public override string ToString()
-        {
-            var context = new FormatContext(true, true, false);
-            return $"{this.GetType().Name.Replace("Expression", string.Empty)}: {this.FormatReadableString(context)}:{this.HigherOrder.FormatReadableString(context)}";
-        }
+        public override string ToString() =>
+            $"{this.GetType().Name.Replace("Expression", string.Empty)}: {FormatReadableString(new FormatContext(true, true, false), this)}";
 
         protected abstract string FormatReadableString(FormatContext context);
 
@@ -35,7 +32,9 @@ namespace Favalon.Expressions
         /////////////////////////////////////////////////////////////////////////
 
         protected static string FormatReadableString(FormatContext context, Expression expression) =>
-            expression.FormatReadableString(context);
+            (context.WithAnnotation && !(expression.HigherOrder is UndefinedExpression)) ?
+                $"{expression.FormatReadableString(context)}:{expression.HigherOrder.FormatReadableString(context.NewDerived(false, null))}" :
+                expression.FormatReadableString(context);
 
         protected internal static TExpression VisitInferring<TExpression>(Environment environment, TExpression expression, InferContext context)
             where TExpression : TermExpression =>

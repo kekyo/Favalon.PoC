@@ -6,9 +6,27 @@ using System.Text;
 
 using Favalon.Expressions.Internals;
 
+namespace Favalon.Expressions.Internals
+{
+    public interface IInferringEnvironment
+    {
+        IInferringEnvironment NewScope();
+
+        PlaceholderExpression CreatePlaceholder(TermExpression higherOrder);
+
+        TermExpression? GetBoundHigherOrder(VariableExpression variable);
+
+        void Unify(TermExpression expression1, TermExpression expression2);
+    }
+
+    public interface IResolvingEnvironment
+    {
+    }
+}
+
 namespace Favalon.Expressions
 {
-    public sealed class Environment
+    public sealed class Environment : IInferringEnvironment, IResolvingEnvironment
     {
         private readonly Environment? parent;
         private readonly PlaceholderController placeholderController;
@@ -23,16 +41,19 @@ namespace Favalon.Expressions
         private Environment() =>
             placeholderController = new PlaceholderController();
 
-        public Environment NewScope() =>
+        IInferringEnvironment IInferringEnvironment.NewScope() =>
             new Environment(this);
 
-        internal PlaceholderExpression CreatePlaceholder(TermExpression higherOrder) =>
+        public PlaceholderExpression CreatePlaceholder(TermExpression higherOrder) =>
+            placeholderController.Create(higherOrder);
+
+        PlaceholderExpression IInferringEnvironment.CreatePlaceholder(TermExpression higherOrder) =>
             placeholderController.Create(higherOrder);
 
         internal TermExpression? GetRelatedExpression(InferContext context, PlaceholderExpression placeholder) =>
             placeholderController.GetRelated(context, placeholder);
 
-        internal TermExpression? GetBoundExpression(VariableExpression variable) =>
+        private TermExpression? GetBoundExpression(VariableExpression variable) =>
             this.Traverse(environment => environment.parent!).
             Select(environment => (environment.boundExpressions != null) ?
                 environment.boundExpressions.TryGetValue(variable, out var expression) ? expression : null : null).
@@ -47,13 +68,13 @@ namespace Favalon.Expressions
             boundExpressions[bound] = expression;
         }
 
+        TermExpression? IInferringEnvironment.GetBoundHigherOrder(VariableExpression variable) =>
+            this.GetBoundExpression(variable)?.HigherOrder;
+
         public void Bind(BoundVariableExpression bound, TermExpression expression) =>
             this.SetBoundExpression(bound, expression);
 
-        public void Register(VariableExpression variable) =>
-            this.SetBoundExpression(variable, new FreeVariableExpression(variable.Name, variable.HigherOrder));
-
-        internal void Unify(TermExpression expression1, TermExpression expression2)
+        private void Unify(TermExpression expression1, TermExpression expression2)
         {
             // NOTE: Argument direction expression1 --> expression2 is important.
             //   It contains processing forward direction, but excepts identity expressions.
@@ -140,6 +161,9 @@ namespace Favalon.Expressions
 
             // TODO: raise error?
         }
+
+        void IInferringEnvironment.Unify(TermExpression expression1, TermExpression expression2) =>
+            this.Unify(expression1, expression2);
 
         public TermExpression Infer(VariableExpression variable) =>
             this.Infer<TermExpression>(variable);

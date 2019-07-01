@@ -6,11 +6,13 @@ using System.Text;
 
 namespace Favalon.Expressions
 {
-    public sealed class KindExpression : TermExpression
+    public sealed class KindExpression : PseudoVariableExpression
     {
-        private KindExpression() :
-            base(null!)
+        private KindExpression()
         { }
+
+        public override string Name =>
+            "*";
 
         protected override string FormatReadableString(FormatContext context) =>
             "*";

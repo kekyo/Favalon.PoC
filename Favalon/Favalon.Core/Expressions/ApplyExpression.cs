@@ -23,7 +23,7 @@ namespace Favalon.Expressions
                 $"{FormatReadableString(context, this.Function)} ({FormatReadableString(context, this.Parameter)})" :
                 $"{FormatReadableString(context, this.Function)} {FormatReadableString(context, this.Parameter)}";
 
-        protected override Expression VisitInferring(Environment environment, InferContext context)
+        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {
             var function = VisitInferring(environment, this.Function, context);
             var parameter = VisitInferring(environment, this.Parameter, context);
@@ -35,7 +35,7 @@ namespace Favalon.Expressions
             return new ApplyExpression(function, parameter, higherOrder);
         }
 
-        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
+        protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context)
         {
             var (rf, function) = VisitResolving(environment, this.Function, context);
             var (rp, parameter) = VisitResolving(environment, this.Parameter, context);

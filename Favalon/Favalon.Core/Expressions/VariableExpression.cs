@@ -9,7 +9,6 @@ namespace Favalon.Expressions
 {
     public abstract class VariableExpression : TermExpression, IEquatable<VariableExpression?>
     {
-        [DebuggerStepperBoundary]
         private protected VariableExpression(TermExpression higherOrder) :
             base(higherOrder)
         { }

@@ -17,13 +17,13 @@ namespace Favalon.Expressions
         protected override string FormatReadableString(FormatContext context) =>
             this.Name;
 
-        protected override Expression VisitInferring(Environment environment, InferContext context)
+        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {
             // NOTE: Inferring process will resolve only higher order information.
             //   It'll not process for reducing.
-            if (environment.GetBoundExpression(this) is TermExpression term)
+            if (environment.GetBoundHigherOrder(this) is TermExpression termHigherOrder)
             {
-                var termHigherOrder = VisitInferringHigherOrder(environment, term.HigherOrder, context);
+                termHigherOrder = VisitInferringHigherOrder(environment, termHigherOrder, context);
                 var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
                 Unify(environment, termHigherOrder, higherOrder);
                 return new FreeVariableExpression(this.Name, termHigherOrder);
@@ -34,7 +34,7 @@ namespace Favalon.Expressions
             }
         }
 
-        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
+        protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context)
         {
             var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
             return rho ? (true, new FreeVariableExpression(this.Name, higherOrder)) : (false, this);

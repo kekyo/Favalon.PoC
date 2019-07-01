@@ -5,11 +5,13 @@ using System.Text;
 
 namespace Favalon.Expressions.Internals
 {
-    public sealed class UndefinedExpression : TermExpression
+    public sealed class UndefinedExpression : PseudoVariableExpression
     {
-        private UndefinedExpression() :
-            base(null!)
+        private UndefinedExpression()
         { }
+
+        public override string Name =>
+            "?";
 
         protected override string FormatReadableString(FormatContext context) =>
             "?";
@@ -17,11 +19,11 @@ namespace Favalon.Expressions.Internals
         public override string ToString() =>
             $"Undefined: ?";
 
-        protected override Expression VisitInferring(Environment environment, InferContext context) =>
+        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context) =>
             environment.CreatePlaceholder(Instance);
 
-        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context) =>
-            (false, this);
+        protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context) =>
+            throw new InvalidOperationException();
 
         public static readonly UndefinedExpression Instance = new UndefinedExpression();
     }

@@ -25,9 +25,9 @@ namespace Favalon.Expressions
 
         protected abstract string FormatReadableString(FormatContext context);
 
-        protected abstract Expression VisitInferring(Environment environment, InferContext context);
+        protected abstract Expression VisitInferring(IInferringEnvironment environment, InferContext context);
 
-        protected abstract (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context);
+        protected abstract (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context);
 
         /////////////////////////////////////////////////////////////////////////
 
@@ -36,11 +36,13 @@ namespace Favalon.Expressions
                 $"{expression.FormatReadableString(context)}:{expression.HigherOrder.FormatReadableString(context.NewDerived(false, null))}" :
                 expression.FormatReadableString(context);
 
-        protected internal static TExpression VisitInferring<TExpression>(Environment environment, TExpression expression, InferContext context)
+        protected internal static TExpression VisitInferring<TExpression>(
+            IInferringEnvironment environment, TExpression expression, InferContext context)
             where TExpression : TermExpression =>
             (TExpression)expression.VisitInferring(environment, context);
 
-        protected internal static TermExpression VisitInferringHigherOrder(Environment environment, TermExpression higherOrder, InferContext context)
+        protected internal static TermExpression VisitInferringHigherOrder(
+            IInferringEnvironment environment, TermExpression higherOrder, InferContext context)
         {
             context.RaiseRank();
             try
@@ -53,14 +55,16 @@ namespace Favalon.Expressions
             }
         }
 
-        protected internal static (bool isResolved, TExpression resolved) VisitResolving<TExpression>(Environment environment, TExpression expression, InferContext context)
+        protected internal static (bool isResolved, TExpression resolved) VisitResolving<TExpression>(
+            IResolvingEnvironment environment, TExpression expression, InferContext context)
             where TExpression : Expression
         {
             var (isResolved, resolved) = expression.VisitResolving(environment, context);
             return (isResolved, (TExpression)resolved);
         }
 
-        protected internal static (bool isResolved, TermExpression resolved) VisitResolvingHigherOrder(Environment environment, TermExpression higherOrder, InferContext context)
+        protected internal static (bool isResolved, TermExpression resolved) VisitResolvingHigherOrder(
+            IResolvingEnvironment environment, TermExpression higherOrder, InferContext context)
         {
             context.RaiseRank();
             try
@@ -73,7 +77,7 @@ namespace Favalon.Expressions
             }
         }
 
-        protected internal static void Unify(Environment environment, TermExpression expression1, TermExpression expression2) =>
+        protected internal static void Unify(IInferringEnvironment environment, TermExpression expression1, TermExpression expression2) =>
             environment.Unify(expression1, expression2);
     }
 }

@@ -23,7 +23,7 @@ namespace Favalon.Expressions
         protected override string FormatReadableString(FormatContext context) =>
             $"{FormatReadableString(context, this.Bound)} = {FormatReadableString(context, this.Expression)} in {FormatReadableString(context, this.Body)}";
 
-        protected override Expression VisitInferring(Environment environment, InferContext context)
+        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {
             var newScope = environment.NewScope();
 
@@ -40,17 +40,15 @@ namespace Favalon.Expressions
             return new BindExpression(bound, expression, body, body.HigherOrder);
         }
 
-        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context)
+        protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context)
         {
-            var newScope = environment.NewScope();
+            var (re, expression) = VisitResolving(environment, this.Expression, context);
+            var (rb, bound) = VisitResolving(environment, this.Bound, context);
 
-            var (re, expression) = VisitResolving(newScope, this.Expression, context);
-            var (rb, bound) = VisitResolving(newScope, this.Bound, context);
+            environment.SetBoundExpression(bound, expression);
 
-            newScope.SetBoundExpression(bound, expression);
-
-            var (r, body) = VisitResolving(newScope, this.Body, context);
-            var (rho, higherOrder) = VisitResolvingHigherOrder(newScope, this.HigherOrder, context);
+            var (r, body) = VisitResolving(environment, this.Body, context);
+            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
 
             return (rb || re || r || rho) ? (true, new BindExpression(bound, expression, body, higherOrder)) : (false, this);
         }

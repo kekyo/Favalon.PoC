@@ -34,7 +34,7 @@ namespace Favalon.Expressions
         public override string Name =>
             $"'{this.Index}";
 
-        protected override Expression VisitInferring(Environment environment, InferContext context)
+        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {
             if (environment.GetRelatedExpression(context, this) is TermExpression related)
             {
@@ -51,7 +51,7 @@ namespace Favalon.Expressions
             }
         }
 
-        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context) =>
+        protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context) =>
             (environment.GetRelatedExpression(context, this) is TermExpression related) ?
                 (true, related) : (false, this);
 

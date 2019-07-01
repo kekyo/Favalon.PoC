@@ -19,10 +19,10 @@ namespace Favalon.Expressions
 
         internal abstract object GetValue();
 
-        protected override sealed Expression VisitInferring(Environment environment, InferContext context) =>
+        protected override sealed Expression VisitInferring(IInferringEnvironment environment, InferContext context) =>
             this;
 
-        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context) =>
+        protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context) =>
             (false, this);
 
         internal static ConstantExpression Create(object value) =>

@@ -23,6 +23,7 @@ namespace Favalon.Expressions.Internals
         public TermExpression? GetRelated(InferContext context, PlaceholderExpression placeholder)
         {
             var current = placeholder;
+            PlaceholderExpression? found = null;
             while (true)
             {
                 if (relatedExpressions.TryGetValue(current, out var expression))
@@ -31,7 +32,7 @@ namespace Favalon.Expressions.Internals
 
                     if (expression is PlaceholderExpression pe)
                     {
-                        current = pe;
+                        found = pe;
                     }
                     else if (expression is LambdaExpression le)
                     {
@@ -47,8 +48,10 @@ namespace Favalon.Expressions.Internals
                 }
                 else
                 {
-                    return null;
+                    return found;
                 }
+
+                current = found;
             }
         }
 

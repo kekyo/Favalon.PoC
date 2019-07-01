@@ -18,10 +18,11 @@ namespace Favalon.Expressions
             this.Parameter = parameter;
         }
 
-        protected override string FormatReadableString(FormatContext context) =>
-            (this.Parameter is ApplyExpression) ?
-                $"{FormatReadableString(context, this.Function)} ({FormatReadableString(context, this.Parameter)})" :
-                $"{FormatReadableString(context, this.Function)} {FormatReadableString(context, this.Parameter)}";
+        protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context) =>
+            ((this.Parameter is ApplyExpression) ?
+                $"{FormatReadableString(context, this.Function, true)} ({FormatReadableString(context, this.Parameter, false)})" :
+                $"{FormatReadableString(context, this.Function, true)} {FormatReadableString(context, this.Parameter, true)}",
+            true);
 
         protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {

@@ -14,11 +14,11 @@ namespace Favalon.Expressions
             base(higherOrder) =>
             this.Index = index;
 
-        protected override string FormatReadableString(FormatContext context)
+        protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context)
         {
             if (context.StrictNaming)
             {
-                return this.Name;
+                return (this.Name, false);
             }
             else
             {
@@ -27,7 +27,7 @@ namespace Favalon.Expressions
                 var ch = (char)('a' + (index % ('z' - 'a' + 1)));
                 var suffixIndex = index / ('z' - 'a' + 1);
                 var suffix = (suffixIndex >= 1) ? suffixIndex.ToString() : string.Empty;
-                return $"'{ch}{suffix}";
+                return ($"'{ch}{suffix}", false);
             }
         }
 
@@ -44,8 +44,7 @@ namespace Favalon.Expressions
         {
             if (environment.GetRelatedExpression(context, this) is TermExpression related)
             {
-                var (rho, higherOrder) = VisitResolvingHigherOrder(environment, related.HigherOrder, context);
-                return rho ? (true, new PlaceholderExpression(this.Index, higherOrder)) : (false, this);
+                return (true, related);
             }
             else
             {

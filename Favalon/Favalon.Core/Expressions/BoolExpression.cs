@@ -13,7 +13,7 @@ namespace Favalon.Expressions
         {
         }
 
-        protected override string FormatReadableString(FormatContext context) =>
-            this.Value.ToString();
+        protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context) =>
+            (this.Value.ToString(), false);
     }
 }

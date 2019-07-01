@@ -15,8 +15,8 @@ namespace Favalon.Expressions
         internal override object GetValue() =>
             Unit.Value;
 
-        protected override string FormatReadableString(FormatContext context) =>
-            Unit.Value.ToString();
+        protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context) =>
+            (Unit.Value.ToString(), false);
 
         public static readonly UnitExpression Instance = new UnitExpression();
     }

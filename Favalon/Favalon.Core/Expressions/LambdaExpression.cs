@@ -18,10 +18,11 @@ namespace Favalon.Expressions
             this.Expression = expression;
         }
 
-        protected override string FormatReadableString(FormatContext context) =>
-            context.FancySymbols ?
-                $"{FormatReadableString(context, this.Parameter)} → {FormatReadableString(context, this.Expression)}" :
-                $"{FormatReadableString(context, this.Parameter)} -> {FormatReadableString(context, this.Expression)}";
+        protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context)
+        {
+            var arrow = context.FancySymbols ? "→" : "->";
+            return ($"{FormatReadableString(context, this.Parameter, true)} {arrow} {FormatReadableString(context, this.Expression, false)}", true);
+        }
 
         protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {
@@ -47,7 +48,10 @@ namespace Favalon.Expressions
             }
 
             var expression = VisitInferring(newScope, this.Expression, context);
+
             var higherOrder = VisitInferringHigherOrder(newScope, this.HigherOrder, context);
+            var newHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, higherOrder.HigherOrder);
+            Unify(newScope, higherOrder, newHigherOrder);
 
             return new LambdaExpression(parameter, expression, higherOrder);
         }

@@ -12,7 +12,7 @@ namespace Favalon.Expressions
             base(value)
         { }
 
-        protected override string FormatReadableString(FormatContext context) =>
-            $"\"{this.Value}\"";
+        protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context) =>
+            ($"\"{this.Value}\"", false);
     }
 }

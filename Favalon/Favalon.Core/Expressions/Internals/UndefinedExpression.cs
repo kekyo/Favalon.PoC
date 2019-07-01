@@ -13,8 +13,8 @@ namespace Favalon.Expressions.Internals
         public override string Name =>
             "?";
 
-        protected override string FormatReadableString(FormatContext context) =>
-            "?";
+        protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context) =>
+            ("?", false);
 
         public override string ToString() =>
             $"Undefined: ?";

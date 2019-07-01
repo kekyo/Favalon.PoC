@@ -14,8 +14,8 @@ namespace Favalon.Expressions
 
         public override string Name { get; }
 
-        protected override string FormatReadableString(FormatContext context) =>
-            this.Name;
+        protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context) =>
+            (this.Name, false);
 
         protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {

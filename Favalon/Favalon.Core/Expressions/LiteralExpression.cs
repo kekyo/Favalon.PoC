@@ -17,7 +17,7 @@ namespace Favalon.Expressions
         internal override object GetValue() =>
             this.Value;
 
-        protected override string FormatReadableString(FormatContext context) =>
-            this.Value.ToString();
+        protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context) =>
+            (this.Value.ToString(), !this.Value.GetType().IsPrimitive);
     }
 }

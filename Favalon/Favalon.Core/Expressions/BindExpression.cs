@@ -20,8 +20,8 @@ namespace Favalon.Expressions
             this.Body = body;
         }
 
-        protected override string FormatReadableString(FormatContext context) =>
-            $"{FormatReadableString(context, this.Bound)} = {FormatReadableString(context, this.Expression)} in {FormatReadableString(context, this.Body)}";
+        protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context) =>
+            ($"{FormatReadableString(context, this.Bound, false)} = {FormatReadableString(context, this.Expression, false)} in {FormatReadableString(context, this.Body, false)}", true);
 
         protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {

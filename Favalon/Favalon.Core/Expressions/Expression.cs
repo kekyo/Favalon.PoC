@@ -18,23 +18,29 @@ namespace Favalon.Expressions
         }
 
         public string ReadableString =>
-            FormatReadableString(new FormatContext(false, false, false), this);
+            FormatReadableString(new FormatContext(false, false, false), this, false);
 
         public override string ToString() =>
-            $"{this.GetType().Name.Replace("Expression", string.Empty)}: {FormatReadableString(new FormatContext(true, true, false), this)}";
+            $"{this.GetType().Name.Replace("Expression", string.Empty)}: {FormatReadableString(new FormatContext(true, true, false), this, false)}";
 
-        protected abstract string FormatReadableString(FormatContext context);
+        protected abstract (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context);
 
         protected abstract Expression VisitInferring(IInferringEnvironment environment, InferContext context);
 
         protected abstract (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context);
 
         /////////////////////////////////////////////////////////////////////////
+        
+        private static string FormatEnclosingParenthesesIfRequired(FormatContext context, Expression expression, bool encloseParenthesesIfRequired)
+        {
+            var (formatted, rp) = expression.FormatReadableString(context);
+            return (rp && encloseParenthesesIfRequired) ? $"({formatted})" : formatted;
+        }
 
-        protected static string FormatReadableString(FormatContext context, Expression expression) =>
+        protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired) =>
             (context.WithAnnotation && !(expression.HigherOrder is UndefinedExpression)) ?
-                $"{expression.FormatReadableString(context)}:{expression.HigherOrder.FormatReadableString(context.NewDerived(false, null))}" :
-                expression.FormatReadableString(context);
+                $"{FormatEnclosingParenthesesIfRequired(context, expression, true)}:{FormatEnclosingParenthesesIfRequired(context.NewDerived(false, null), expression.HigherOrder, true)}" :
+                FormatEnclosingParenthesesIfRequired(context, expression, encloseParenthesesIfRequired);
 
         protected internal static TExpression VisitInferring<TExpression>(
             IInferringEnvironment environment, TExpression expression, InferContext context)

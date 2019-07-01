@@ -23,7 +23,7 @@ namespace Favalon.Expressions.Internals
             environment.CreatePlaceholder(Instance);
 
         protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context) =>
-            throw new InvalidOperationException();
+            (false, this);
 
         public static readonly UndefinedExpression Instance = new UndefinedExpression();
     }

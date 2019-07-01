@@ -8,7 +8,6 @@ namespace Favalon.Expressions
 {
     public abstract class TermExpression : Expression
     {
-        [DebuggerStepperBoundary]
         protected TermExpression(TermExpression higherOrder) :
             base(higherOrder)
         {

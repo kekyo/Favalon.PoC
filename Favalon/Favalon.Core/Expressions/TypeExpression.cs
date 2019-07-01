@@ -17,10 +17,10 @@ namespace Favalon.Expressions
         protected override string FormatReadableString(FormatContext context) =>
             this.TypeName;
 
-        protected override Expression VisitInferring(Environment environment, InferContext context) =>
+        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context) =>
             this;
 
-        protected override (bool isResolved, Expression resolved) VisitResolving(Environment environment, InferContext context) =>
+        protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context) =>
             (false, this);
     }
 }

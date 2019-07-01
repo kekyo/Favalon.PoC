@@ -16,11 +16,16 @@ namespace Favalon.Expressions.Internals
 
         TermExpression? GetBoundHigherOrder(VariableExpression variable);
 
+        void SetBoundExpression(VariableExpression bound, TermExpression expression);
+
+        TermExpression? GetRelatedExpression(InferContext context, PlaceholderExpression placeholder);
+
         void Unify(TermExpression expression1, TermExpression expression2);
     }
 
     public interface IResolvingEnvironment
     {
+        TermExpression? GetRelatedExpression(InferContext context, PlaceholderExpression placeholder);
     }
 }
 
@@ -50,7 +55,9 @@ namespace Favalon.Expressions
         PlaceholderExpression IInferringEnvironment.CreatePlaceholder(TermExpression higherOrder) =>
             placeholderController.Create(higherOrder);
 
-        internal TermExpression? GetRelatedExpression(InferContext context, PlaceholderExpression placeholder) =>
+        TermExpression? IInferringEnvironment.GetRelatedExpression(InferContext context, PlaceholderExpression placeholder) =>
+            placeholderController.GetRelated(context, placeholder);
+        TermExpression? IResolvingEnvironment.GetRelatedExpression(InferContext context, PlaceholderExpression placeholder) =>
             placeholderController.GetRelated(context, placeholder);
 
         private TermExpression? GetBoundExpression(VariableExpression variable) =>
@@ -67,6 +74,9 @@ namespace Favalon.Expressions
             }
             boundExpressions[bound] = expression;
         }
+
+        void IInferringEnvironment.SetBoundExpression(VariableExpression bound, TermExpression expression) =>
+            this.SetBoundExpression(bound, expression);
 
         TermExpression? IInferringEnvironment.GetBoundHigherOrder(VariableExpression variable) =>
             this.GetBoundExpression(variable)?.HigherOrder;

@@ -36,24 +36,23 @@ namespace Favalon.Expressions
 
         protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {
+            var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
+            return new PlaceholderExpression(this.Index, higherOrder);
+        }
+
+        protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context)
+        {
             if (environment.GetRelatedExpression(context, this) is TermExpression related)
             {
-                var relatedHigherOrder = VisitInferringHigherOrder(environment, related.HigherOrder, context);
-                var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
-                Unify(environment, relatedHigherOrder, higherOrder);
-
-                return new PlaceholderExpression(this.Index, relatedHigherOrder);
+                var (rho, higherOrder) = VisitResolvingHigherOrder(environment, related.HigherOrder, context);
+                return rho ? (true, new PlaceholderExpression(this.Index, higherOrder)) : (false, this);
             }
             else
             {
-                var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
-                return new PlaceholderExpression(this.Index, higherOrder);
+                var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+                return rho ? (true, new PlaceholderExpression(this.Index, higherOrder)) : (false, this);
             }
         }
-
-        protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context) =>
-            (environment.GetRelatedExpression(context, this) is TermExpression related) ?
-                (true, related) : (false, this);
 
         public override int GetHashCode() =>
             this.Index.GetHashCode();

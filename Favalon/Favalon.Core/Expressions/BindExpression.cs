@@ -44,9 +44,6 @@ namespace Favalon.Expressions
         {
             var (re, expression) = VisitResolving(environment, this.Expression, context);
             var (rb, bound) = VisitResolving(environment, this.Bound, context);
-
-            environment.SetBoundExpression(bound, expression);
-
             var (r, body) = VisitResolving(environment, this.Body, context);
             var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
 

@@ -27,20 +27,23 @@ namespace Favalon.Expressions
         {
             var newScope = environment.NewScope();
 
+            // Undefined or Kind
             VariableExpression parameter;
-            if (this.Parameter is PseudoVariableExpression)
+            switch (this.Parameter)
             {
-                parameter = environment.CreatePlaceholder(UndefinedExpression.Instance);
-                newScope.Register(parameter);
-            }
-            else if (this.Parameter is VariableExpression variable)
-            {
-                newScope.Register(variable);
-                parameter = VisitInferring(newScope, variable, context);
-            }
-            else
-            {
-                throw new ArgumentException("Invalid lambda parameter expression.", this.Parameter.ReadableString);
+                case UndefinedExpression _:
+                    parameter = environment.CreatePlaceholder(UndefinedExpression.Instance);
+                    newScope.SetBoundExpression(parameter, parameter);
+                    break;
+                case KindExpression _:
+                    parameter = KindExpression.Instance;
+                    break;
+                case VariableExpression variable:
+                    newScope.SetBoundExpression(variable, variable);
+                    parameter = VisitInferring(newScope, variable, context);
+                    break;
+                default:
+                    throw new ArgumentException("Invalid lambda parameter expression.", this.Parameter.ReadableString);
             }
 
             var expression = VisitInferring(newScope, this.Expression, context);

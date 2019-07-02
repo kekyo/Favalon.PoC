@@ -23,21 +23,21 @@ namespace Favalon.Expressions
         protected override (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context) =>
             ($"{FormatReadableString(context, this.Bound, false)} = {FormatReadableString(context, this.Expression, false)} in {FormatReadableString(context, this.Body, false)}", true);
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
+        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context, TermExpression higherOrderHint)
         {
             var newScope = environment.NewScope();
 
-            var expression = VisitInferring(newScope, this.Expression, context);
-            var bound = VisitInferring(newScope, this.Bound, context);
-            Unify(newScope, bound.HigherOrder, expression.HigherOrder);
+            var expression = VisitInferring(newScope, context, this.Expression, this.Bound.HigherOrder);
+            var bound = VisitInferring(newScope, context, this.Bound, UndefinedExpression.Instance);
+            Unify___(newScope, bound.HigherOrder, expression.HigherOrder);
 
             newScope.SetBoundExpression(bound, expression);
 
-            var body = VisitInferring(newScope, this.Body, context);
-            var higherOrder = VisitInferringHigherOrder(newScope, this.HigherOrder, context);
-            Unify(newScope, body.HigherOrder, higherOrder);
+            var body = VisitInferring(newScope, context, this.Body, higherOrderHint);
+            var higherOrder = VisitInferring(newScope, context, this.HigherOrder, higherOrderHint);
+            Unify___(newScope, higherOrder, body.HigherOrder);
 
-            return new BindExpression(bound, expression, body, body.HigherOrder);
+            return new BindExpression(bound, expression, body, higherOrder);
         }
 
         protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context)
@@ -45,7 +45,7 @@ namespace Favalon.Expressions
             var (re, expression) = VisitResolving(environment, this.Expression, context);
             var (rb, bound) = VisitResolving(environment, this.Bound, context);
             var (r, body) = VisitResolving(environment, this.Body, context);
-            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+            var (rho, higherOrder) = VisitResolving(environment, this.HigherOrder, context);
 
             return (rb || re || r || rho) ? (true, new BindExpression(bound, expression, body, higherOrder)) : (false, this);
         }

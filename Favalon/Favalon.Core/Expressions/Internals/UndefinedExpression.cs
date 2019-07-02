@@ -19,8 +19,8 @@ namespace Favalon.Expressions.Internals
         public override string ToString() =>
             $"Undefined: ?";
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context) =>
-            environment.CreatePlaceholder(Instance);
+        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context, TermExpression higherOrderHint) =>
+            environment.CreatePlaceholder(higherOrderHint);
 
         protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context) =>
             (false, this);

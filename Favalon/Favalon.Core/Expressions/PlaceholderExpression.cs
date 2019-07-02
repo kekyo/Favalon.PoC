@@ -36,7 +36,7 @@ namespace Favalon.Expressions
 
         protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {
-            var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
+            var higherOrder = VisitInferring(environment, this.HigherOrder, context);
             return new PlaceholderExpression(this.Index, higherOrder);
         }
 
@@ -48,7 +48,7 @@ namespace Favalon.Expressions
             }
             else
             {
-                var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+                var (rho, higherOrder) = VisitResolving(environment, this.HigherOrder, context);
                 return rho ? (true, new PlaceholderExpression(this.Index, higherOrder)) : (false, this);
             }
         }

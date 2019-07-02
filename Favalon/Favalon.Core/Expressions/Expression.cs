@@ -25,7 +25,7 @@ namespace Favalon.Expressions
 
         protected abstract (string formatted, bool requiredParentheses) FormatReadableString(FormatContext context);
 
-        protected abstract Expression VisitInferring(IInferringEnvironment environment, InferContext context);
+        protected abstract Expression VisitInferring(IInferringEnvironment environment, InferContext context, TermExpression higherOrderHint);
 
         protected abstract (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context);
 
@@ -43,23 +43,9 @@ namespace Favalon.Expressions
                 FormatEnclosingParenthesesIfRequired(context, expression, encloseParenthesesIfRequired);
 
         protected internal static TExpression VisitInferring<TExpression>(
-            IInferringEnvironment environment, TExpression expression, InferContext context)
+            IInferringEnvironment environment, InferContext context, TExpression expression, TermExpression higherOrderHint)
             where TExpression : TermExpression =>
-            (TExpression)expression.VisitInferring(environment, context);
-
-        protected internal static TermExpression VisitInferringHigherOrder(
-            IInferringEnvironment environment, TermExpression higherOrder, InferContext context)
-        {
-            context.RaiseRank();
-            try
-            {
-                return VisitInferring(environment, higherOrder, context);
-            }
-            finally
-            {
-                context.DropRank();
-            }
-        }
+            (TExpression)expression.VisitInferring(environment, context, higherOrderHint);
 
         protected internal static (bool isResolved, TExpression resolved) VisitResolving<TExpression>(
             IResolvingEnvironment environment, TExpression expression, InferContext context)
@@ -69,21 +55,10 @@ namespace Favalon.Expressions
             return (isResolved, (TExpression)resolved);
         }
 
-        protected internal static (bool isResolved, TermExpression resolved) VisitResolvingHigherOrder(
-            IResolvingEnvironment environment, TermExpression higherOrder, InferContext context)
-        {
-            context.RaiseRank();
-            try
-            {
-                return VisitResolving(environment, higherOrder, context);
-            }
-            finally
-            {
-                context.DropRank();
-            }
-        }
+        protected internal static void Unify___(IInferringEnvironment environment, TermExpression expression1, TermExpression expression2) =>
+            environment.Unify___(expression1, expression2);
 
-        protected internal static void Unify(IInferringEnvironment environment, TermExpression expression1, TermExpression expression2) =>
+        protected internal static TermExpression Unify(IInferringEnvironment environment, TermExpression expression1, TermExpression expression2) =>
             environment.Unify(expression1, expression2);
     }
 }

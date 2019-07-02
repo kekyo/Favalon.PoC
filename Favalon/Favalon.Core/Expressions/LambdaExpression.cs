@@ -49,9 +49,9 @@ namespace Favalon.Expressions
 
             var expression = VisitInferring(newScope, this.Expression, context);
 
-            var higherOrder = VisitInferringHigherOrder(newScope, this.HigherOrder, context);
+            var higherOrder = VisitInferring(newScope, this.HigherOrder, context);
             var newHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, higherOrder.HigherOrder);
-            Unify(newScope, higherOrder, newHigherOrder);
+            Unify___(newScope, higherOrder, newHigherOrder);
 
             return new LambdaExpression(parameter, expression, higherOrder);
         }
@@ -60,7 +60,7 @@ namespace Favalon.Expressions
         {
             var (rp, parameter) = VisitResolving(environment, this.Parameter, context);
             var (re, expression) = VisitResolving(environment, this.Expression, context);
-            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+            var (rho, higherOrder) = VisitResolving(environment, this.HigherOrder, context);
 
             return (rp || re || rho) ? (true, new LambdaExpression(parameter, expression, higherOrder)) : (false, this);
         }

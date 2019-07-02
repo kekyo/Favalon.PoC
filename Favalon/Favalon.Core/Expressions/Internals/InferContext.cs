@@ -15,25 +15,13 @@ namespace Favalon.Expressions.Internals
         internal InferContext()
         { }
 
-        public int Rank { get; private set; }
-
         public IEnumerable<PlaceholderExpression> TouchedPlaceholders =>
             touchedPlaceholders;
-
-        [DebuggerStepThrough]
-        internal void RaiseRank() =>
-            this.Rank++;
-        [DebuggerStepThrough]
-        internal void DropRank() =>
-            this.Rank--;
 
         internal void TouchedInResolving(PlaceholderExpression placeholder) =>
             touchedPlaceholders.Add(placeholder);
 
-        public override string ToString()
-        {
-            var touched = string.Join(",", touchedPlaceholders.Select(touched => $"'{touched.ReadableString}"));
-            return $"Rank={this.Rank}, Touched=[{touched}]";
-        }
+        public override string ToString() =>
+            string.Join(",", touchedPlaceholders.Select(touched => $"'{touched.ReadableString}"));
     }
 }

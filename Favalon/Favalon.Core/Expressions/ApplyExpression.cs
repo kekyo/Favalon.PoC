@@ -24,14 +24,15 @@ namespace Favalon.Expressions
                 $"{FormatReadableString(context, this.Function, true)} {FormatReadableString(context, this.Parameter, true)}",
             true);
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
+        protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context, TermExpression higherOrderHint)
         {
-            var function = VisitInferring(environment, this.Function, context);
-            var parameter = VisitInferring(environment, this.Parameter, context);
-            var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
+            var parameter = VisitInferring(environment, context, this.Parameter, UndefinedExpression.Instance);
+            var higherOrder = VisitInferring(environment, context, this.HigherOrder, higherOrderHint);
 
             var functionHigherOrder = new LambdaExpression(parameter.HigherOrder, higherOrder, UndefinedExpression.Instance);
-            Unify(environment, function.HigherOrder, functionHigherOrder);
+            var function = VisitInferring(environment, context, this.Function, functionHigherOrder);
+
+            Unify___(environment, function.HigherOrder, functionHigherOrder);
 
             return new ApplyExpression(function, parameter, higherOrder);
         }
@@ -40,7 +41,7 @@ namespace Favalon.Expressions
         {
             var (rf, function) = VisitResolving(environment, this.Function, context);
             var (rp, parameter) = VisitResolving(environment, this.Parameter, context);
-            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+            var (rho, higherOrder) = VisitResolving(environment, this.HigherOrder, context);
             return (rf || rp || rho) ? (true, new ApplyExpression(function, parameter, higherOrder)) : (false, this);
         }
     }

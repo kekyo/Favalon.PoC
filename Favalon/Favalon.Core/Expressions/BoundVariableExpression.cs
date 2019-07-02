@@ -19,13 +19,13 @@ namespace Favalon.Expressions
 
         protected override Expression VisitInferring(IInferringEnvironment environment, InferContext context)
         {
-            var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
+            var higherOrder = VisitInferring(environment, this.HigherOrder, context);
             return new BoundVariableExpression(this.Name, higherOrder);
         }
 
         protected override (bool isResolved, Expression resolved) VisitResolving(IResolvingEnvironment environment, InferContext context)
         {
-            var (rho, higherOrder) = VisitResolvingHigherOrder(environment, this.HigherOrder, context);
+            var (rho, higherOrder) = VisitResolving(environment, this.HigherOrder, context);
             return rho ? (true, new BoundVariableExpression(this.Name, higherOrder)) : (false, this);
         }
     }

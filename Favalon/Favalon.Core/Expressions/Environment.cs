@@ -20,7 +20,8 @@ namespace Favalon.Expressions.Internals
 
         TermExpression? GetRelatedExpression(InferContext context, PlaceholderExpression placeholder);
 
-        void Unify(TermExpression expression1, TermExpression expression2);
+        void Unify___(TermExpression expression1, TermExpression expression2);
+        TermExpression Unify(TermExpression expression1, TermExpression expression2);
     }
 
     public interface IResolvingEnvironment
@@ -84,7 +85,7 @@ namespace Favalon.Expressions
         public void Bind(BoundVariableExpression bound, TermExpression expression) =>
             this.SetBoundExpression(bound, expression);
 
-        private void Unify(TermExpression expression1, TermExpression expression2)
+        private void Unify__(TermExpression expression1, TermExpression expression2)
         {
             // NOTE: Argument direction expression1 --> expression2 is important.
             //   It contains processing forward direction, but excepts identity expressions.
@@ -103,7 +104,7 @@ namespace Favalon.Expressions
             if (expression1 is KindExpression)
             {
                 // Swap
-                Unify(expression2, expression1);
+                Unify__(expression2, expression1);
                 return;
             }
 
@@ -143,7 +144,7 @@ namespace Favalon.Expressions
                 }
                 else if (this.GetBoundExpression(identity1) is TermExpression resolved)
                 {
-                    this.Unify(expression2, resolved);
+                    this.Unify__(expression2, resolved);
                 }
                 else
                 {
@@ -156,7 +157,7 @@ namespace Favalon.Expressions
             {
                 if (this.GetBoundExpression(identity2) is TermExpression resolved)
                 {
-                    this.Unify(expression1, resolved);
+                    this.Unify__(expression1, resolved);
                 }
                 else
                 {
@@ -170,29 +171,41 @@ namespace Favalon.Expressions
             if ((expression1 is LambdaExpression lambda1) &&
                 (expression2 is LambdaExpression lambda2))
             {
-                this.Unify(lambda1.Parameter, lambda2.Parameter);
-                this.Unify(lambda1.Expression, lambda2.Expression);
+                this.Unify__(lambda1.Parameter, lambda2.Parameter);
+                this.Unify__(lambda1.Expression, lambda2.Expression);
                 return;
             }
 
             // TODO: raise error?
         }
 
-        void IInferringEnvironment.Unify(TermExpression expression1, TermExpression expression2) =>
+        void IInferringEnvironment.Unify___(TermExpression expression1, TermExpression expression2) =>
+            this.Unify__(expression1, expression2);
+
+        private TermExpression Unify(TermExpression expression1, TermExpression expression2)
+        {
+            return null!;
+        }
+
+        TermExpression IInferringEnvironment.Unify(TermExpression expression1, TermExpression expression2) =>
             this.Unify(expression1, expression2);
 
         public TermExpression Infer(VariableExpression variable) =>
             this.Infer<TermExpression>(variable);
 
-        public TExpression Infer<TExpression>(TExpression expression)
+        public TExpression Infer<TExpression>(TExpression expression, TermExpression higherOrderHint)
             where TExpression : TermExpression
         {
             var context = new InferContext();
-            var intermediate = Expression.VisitInferring(this, expression, context);
+            var intermediate = Expression.VisitInferring(this, context, expression, higherOrderHint);
             var (_, resolved) = Expression.VisitResolving(this, intermediate, context);
             placeholderController.Remove(context.TouchedPlaceholders);
             return resolved;
         }
+
+        public TExpression Infer<TExpression>(TExpression expression)
+            where TExpression : TermExpression =>
+            this.Infer(expression, UndefinedExpression.Instance);
 
         public static Environment Create() =>
             new Environment();

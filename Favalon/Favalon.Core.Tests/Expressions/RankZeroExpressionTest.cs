@@ -335,6 +335,21 @@ namespace Favalon.Expressions
         public void LambdaFunction3()
         {
             var environment = Environment.Create();
+            environment.Register(Variable("z"));
+
+            // x -> y -> z
+            var expression = Lambda(Variable("x"), Lambda(Variable("y"), Variable("z")));
+
+            var actual = environment.Infer(expression);
+
+            Assert.AreEqual("x -> y -> z", actual.ReadableString);
+            Assert.AreEqual("'a -> 'b -> 'c", actual.HigherOrder.ReadableString);
+        }
+
+        [Test]
+        public void LambdaFunction4()
+        {
+            var environment = Environment.Create();
 
             // x -> y -> x y
             var expression = Lambda(Variable("x"), Lambda(Variable("y"), Apply(Variable("x"), Variable("y"))));

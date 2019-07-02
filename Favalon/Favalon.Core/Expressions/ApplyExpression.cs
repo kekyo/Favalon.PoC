@@ -30,8 +30,8 @@ namespace Favalon.Expressions
             var parameter = VisitInferring(environment, this.Parameter, context);
             var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
 
-            var variableHigherOrder = new LambdaExpression(parameter.HigherOrder, higherOrder, UndefinedExpression.Instance);
-            Unify(environment, function.HigherOrder, variableHigherOrder);
+            var functionHigherOrder = new LambdaExpression(parameter.HigherOrder, higherOrder, UndefinedExpression.Instance);
+            Unify(environment, function.HigherOrder, functionHigherOrder);
 
             return new ApplyExpression(function, parameter, higherOrder);
         }

@@ -79,6 +79,7 @@ namespace Favalon.Expressions.Internals
         public static BindExpression Bind(BoundVariableExpression bound, TermExpression expression, TermExpression body) =>
             new BindExpression(bound, expression, body, body.HigherOrder);
 
+        // For testing purpose.
         public static void Register(this Environment environment, VariableExpression variable)
         {
             if (variable is FreeVariableExpression)

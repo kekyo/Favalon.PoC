@@ -26,6 +26,7 @@ namespace Favalon.Expressions
                 termHigherOrder = VisitInferringHigherOrder(environment, termHigherOrder, context);
                 var higherOrder = VisitInferringHigherOrder(environment, this.HigherOrder, context);
                 Unify(environment, termHigherOrder, higherOrder);
+
                 return new FreeVariableExpression(this.Name, termHigherOrder);
             }
             else

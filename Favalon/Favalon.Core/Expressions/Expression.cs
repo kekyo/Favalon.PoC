@@ -38,7 +38,7 @@ namespace Favalon.Expressions
         }
 
         protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired) =>
-            (context.WithAnnotation && !(expression.HigherOrder is UndefinedExpression)) ?
+            (context.WithAnnotation && (expression.HigherOrder != null) && !(expression.HigherOrder is UndefinedExpression)) ?
                 $"{FormatEnclosingParenthesesIfRequired(context, expression, true)}:{FormatEnclosingParenthesesIfRequired(context.NewDerived(false, null), expression.HigherOrder, true)}" :
                 FormatEnclosingParenthesesIfRequired(context, expression, encloseParenthesesIfRequired);
 

@@ -100,6 +100,12 @@ namespace Favalon.Expressions
             {
                 return;
             }
+            if (expression1 is KindExpression)
+            {
+                // Swap
+                Unify(expression2, expression1);
+                return;
+            }
 
             // Pair of placehoders / one of placeholder
             if (expression1 is PlaceholderExpression placeholder1)
@@ -182,8 +188,8 @@ namespace Favalon.Expressions
             where TExpression : TermExpression
         {
             var context = new InferContext();
-            var inferred = Expression.VisitInferring(this, expression, context);
-            var (_, resolved) = Expression.VisitResolving(this, inferred, context);
+            var intermediate = Expression.VisitInferring(this, expression, context);
+            var (_, resolved) = Expression.VisitResolving(this, intermediate, context);
             placeholderController.Remove(context.TouchedPlaceholders);
             return resolved;
         }

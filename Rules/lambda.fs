@@ -1,245 +1,33 @@
 //==================================
 Lambda 1:
-a -> b
-(a:? -> b:?):?
-1:-------------------
-(a:? -> b:?):'1                     : Hint('1)
-(a:'2 -> b:?):'1                    : Hint('2)
-(a:'2 -> b:'3):'1                   : Hint('3), Memoize('1 => ('2 -> '3))
-2:-------------------
-(a:'2 -> b:'3):('2 -> '3)           : Update('1 => ('2 -> '3))
-3:-------------------
-'2 -> '3
-
-//==================================
-Lambda 2:
-a -> b:System.Int32
-(a:? -> b:System.Int32):?
-1:-------------------
-(a:? -> b:System.Int32):'1                     : Hint('1)
-(a:'2 -> b:System.Int32):'1                    : Hint('2)
-(a:'2 -> b:System.Int32):'1                    : Memoize('1 => ('2 -> System.Int32))
-2:-------------------
-(a:'2 -> b:System.Int32):('2 -> System.Int32)  : Update('1 => ('2 -> System.Int32))
-3:-------------------
-'2 -> System.Int32
-
-//==================================
-Lambda 3:
-a:System.Int32 -> b
-(a:System.Int32 -> b:?):?
-1:-------------------
-(a:System.Int32 -> b:?):'1                     : Hint('1)
-(a:System.Int32 -> b:'2):'1                    : Hint('2), Memoize('1 => (System.Int32 -> '2))
-2:-------------------
-(a:System.Int32 -> b:'2):(System.Int32 -> '2)  : Update('1 => (System.Int32 -> '2))
-3:-------------------
-System.Int32 -> '2
-
-//==================================
-Lambda 4:
-a -> b -> c
-(a:? -> (b:? -> c:?):?):?
-1:-------------------
-(a:? -> (b:? -> c:?):?):'1                              : Hint('1)
-(a:'2 -> (b:? -> c:?):?):'1                             : Hint('1)
-(a:'2 -> (b:? -> c:?):'3):'1                            : Hint('1), Memoize('1 => ('2 -> '3))
-(a:'2 -> (b:'4 -> c:?):'3):'1                           : Hint('4)
-(a:'2 -> (b:'4 -> c:'5):'3):'1                          : Hint('5), Memoize('3 => ('4 -> '5))
-2:-------------------
-(a:'2 -> (b:'4 -> c:'5):('4 -> '5)):'1                  : Update('3 => ('4 -> '5))
-(a:'2 -> (b:'4 -> c:'5):('4 -> '5)):('2 -> '3)          : Update('1 => ('2 -> '3))
-(a:'2 -> (b:'4 -> c:'5):('4 -> '5)):('2 -> ('4 -> '5))  : Update('3 => ('4 -> '5))
-3:-------------------
-'2 -> ('4 -> '5)
-'2 -> '4 -> '5
-
-//==================================
-Lambda 5:
-a -> b -> c:System.Int32
-(a:? -> (b:? -> c:System.Int32):?):?
-1:-------------------
-(a:? -> (b:? -> c:System.Int32):?):'1
-(a:'2 -> (b:? -> c:System.Int32):?):'1
-(a:'2 -> (b:? -> c:System.Int32):'3):'1                 : Memoize('1 => ('2 -> '3))
-(a:'2 -> (b:'4 -> c:System.Int32):'3):'1                : Memoize('3 => ('4 -> System.Int32))
-2:-------------------
-(a:'2 -> (b:'4 -> c:System.Int32):('4 -> System.Int32)):'1                : Update('3 => ('4 -> System.Int32))
-(a:'2 -> (b:'4 -> c:System.Int32):('4 -> System.Int32)):('2 -> '3)        : Update('1 => ('2 -> '3))
-(a:'2 -> (b:'4 -> c:System.Int32):('4 -> System.Int32)):('2 -> ('4 -> System.Int32))     : Update('3 => ('4 -> System.Int32))
-3:-------------------
-'2 -> ('4 -> System.Int32)
-'2 -> '4 -> System.Int32
-
-//==================================
-Lambda 6:
-a -> b:System.Int32 -> c
-(a:? -> (b:System.Int32 -> c:?):?):?
-1:-------------------
-(a:? -> (b:System.Int32 -> c:?):?):'1
-(a:'2 -> (b:System.Int32 -> c:?):?):'1
-(a:'2 -> (b:System.Int32 -> c:?):'3):'1                 : Memoize('1 => ('2 -> '3))
-(a:'2 -> (b:System.Int32 -> c:'4):'3):'1                : Memoize('3 => (System.Int32 -> '4))
-2:-------------------
-(a:'2 -> (b:System.Int32 -> c:'4):(System.Int32 -> '4)):'1               : Update('3 => (System.Int32 -> '4))
-(a:'2 -> (b:System.Int32 -> c:'4):(System.Int32 -> '4)):('2 -> '3)       : Update('1 => ('2 -> '3))
-(a:'2 -> (b:System.Int32 -> c:'4):(System.Int32 -> '4)):('2 -> (System.Int32 -> '4))       : Update('3 => (System.Int32 -> '4))
-3:-------------------
-'2 -> (System.Int32 -> '4)
-'2 -> System.Int32 -> '4
-
-//==================================
-Lambda 7:
-a:System.Int32 -> b -> c
-(a:System.Int32 -> (b:? -> c:?):?):?
-1:-------------------
-(a:System.Int32 -> (b:? -> c:?):?):'1
-(a:System.Int32 -> (b:? -> c:?):'2):'1                  : Memoize('1 => (System.Int32 -> '2))
-(a:System.Int32 -> (b:'3 -> c:?):'2):'1
-(a:System.Int32 -> (b:'3 -> c:'4):'2):'1                : Memoize('2 => ('3 -> '4))
-2:-------------------
-(a:System.Int32 -> (b:'3 -> c:'4):('3 -> '4)):'1                : Update('2 => ('3 -> '4))
-(a:System.Int32 -> (b:'3 -> c:'4):('3 -> '4)):(System.Int32 -> '2)                 : Update('1 => (System.Int32 -> '2))
-(a:System.Int32 -> (b:'3 -> c:'4):('3 -> '4)):(System.Int32 -> ('3 -> '4))         : Update('2 => ('3 -> '4))
-3:-------------------
-System.Int32 -> ('3 -> '4)
-System.Int32 -> '3 -> '4
-
-//==================================
-Lambda 8:
-(a -> b) -> c
-((a:? -> b:?):? -> c:?):?
-1:-------------------
-((a:? -> b:?):? -> c:?):'1
-((a:? -> b:?):'2 -> c:?):'1
-((a:'3 -> b:?):'2 -> c:?):'1
-((a:'3 -> b:'4):'2 -> c:?):'1                           : Memoize('2 => ('3 -> '4))
-2:-------------------
-((a:'3 -> b:'4):('3 -> '4) -> c:?):'1                   : Update('2 => ('3 -> '4))
-((a:'3 -> b:'4):('3 -> '4) -> c:'5):'1                  : Memoize('1 => (('3 -> '4) -> '5))
-((a:'3 -> b:'4):('3 -> '4) -> c:'5):(('3 -> '4) -> '5)  : Update('1 => (('3 -> '4) -> '5))
-3:-------------------
-('3 -> '4) -> '5
-
-//==================================
-Lambda 9:
-(a -> b) -> c:System.Int32
-((a:? -> b:?):? -> c:System.Int32):?
-1:-------------------
-((a:? -> b:?):? -> c:System.Int32):'1
-((a:? -> b:?):'2 -> c:System.Int32):'1
-((a:'3 -> b:?):'2 -> c:System.Int32):'1
-((a:'3 -> b:'4):'2 -> c:System.Int32):'1                 : Memoize('2 => ('3 -> '4))
-2:-------------------
-((a:'3 -> b:'4):('3 -> '4) -> c:System.Int32):'1         : Update('2 => ('3 -> '4))
-((a:'3 -> b:'4):('3 -> '4) -> c:System.Int32):'1         : Memoize('1 => (('3 -> '4) -> System.Int32))
-((a:'3 -> b:'4):('3 -> '4) -> c:System.Int32):(('3 -> '4) -> System.Int32)         : Update('1 => (('3 -> '4) -> System.Int32))
-3:-------------------
-('3 -> '4) -> System.Int32
-
-//==================================
-Lambda 10:
-(a -> b):(System.Int32 -> ?) -> c
-((a:? -> b:?):(System.Int32 -> ?) -> c:?):?
-1:-------------------
-((a:? -> b:?):(System.Int32 -> ?) -> c:?):'1
-((a:? -> b:?):(System.Int32 -> '2) -> c:?):'1
-((a:System.Int32 -> b:'2):(System.Int32 -> '2) -> c:?):'1
-((a:System.Int32 -> b:'2):(System.Int32 -> '2) -> c:'3):'1            : Memoize('1 => ((System.Int32 -> '2) -> '3))
-2:-------------------
-((a:System.Int32 -> b:'2):(System.Int32 -> '2) -> c:'3):((System.Int32 -> '2) -> '3)     : Update('1 => ((System.Int32 -> '2) -> '3))
-3:-------------------
-(System.Int32 -> '2) -> '3
-
-//==================================
-Lambda 11:
-(a -> b:System.Int32) -> c
-((a:? -> b:System.Int32):? -> c:?):?
-1:-------------------
-((a:? -> b:System.Int32):? -> c:?):'1
-((a:? -> b:System.Int32):'2 -> c:?):'1
-((a:'3 -> b:System.Int32):'2 -> c:?):'1                         : Memoize('2 => ('3 -> System.Int32))
-2:-------------------
-((a:'3 -> b:System.Int32):('3 -> System.Int32) -> c:?):'1       : Update('2 => ('3 -> System.Int32))
-((a:'3 -> b:System.Int32):('3 -> System.Int32) -> c:'4):'1      : Memoize('1 => (('3 -> System.Int32) -> '4))
-((a:'3 -> b:System.Int32):('3 -> System.Int32) -> c:'4):(('3 -> System.Int32) -> '4)      : Update('1 => (('3 -> System.Int32) -> '4))
-3:-------------------
-('3 -> System.Int32) -> '4
-
-//==================================
-Lambda 12:
-(a:System.Int32 -> b) -> c
-((a:System.Int32 -> b:?):? -> c:?):?
-1:-------------------
-((a:System.Int32 -> b:?):? -> c:?):'1
-((a:System.Int32 -> b:?):'2 -> c:?):'1
-((a:System.Int32 -> b:'3):'2 -> c:?):'1                           : Memoize('2 => (System.Int32 -> '3))
-2:-------------------
-((a:System.Int32 -> b:'3):(System.Int32 -> '3) -> c:?):'1         : Update('2 => (System.Int32 -> '3))
-((a:System.Int32 -> b:'3):(System.Int32 -> '3) -> c:'4):'1        : Memoize('1 => ((System.Int32 -> '3) -> '4))
-((a:System.Int32 -> b:'3):(System.Int32 -> '3) -> c:'4):((System.Int32 -> '3) -> '4)        : Update('1 => ((System.Int32 -> '3) -> '4))
-3:-------------------
-(System.Int32 -> '3) -> '4
-
-//==================================
-Lambda 13:
-a:System.Int32 -> b -> c:System.Int32
-(a:System.Int32 -> (b:? -> c:System.Int32):?):?
-1:-------------------
-(a:System.Int32 -> (b:? -> c:System.Int32):?):'1
-(a:System.Int32 -> (b:? -> c:System.Int32):'2):'1                 : Memoize('1 => (System.Int32 -> '2))
-(a:System.Int32 -> (b:'3 -> c:System.Int32):'2):'1                : Memoize('2 => ('3 -> System.Int32))
-2:-------------------
-(a:System.Int32 -> (b:'3 -> c:System.Int32):('3 -> System.Int32)):'1            : Update('2 => ('3 -> System.Int32))
-(a:System.Int32 -> (b:'3 -> c:System.Int32):('3 -> System.Int32)):(System.Int32 -> '2)            : Update('1 => (System.Int32 -> '2))
-(a:System.Int32 -> (b:'3 -> c:System.Int32):('3 -> System.Int32)):(System.Int32 -> ('3 -> System.Int32))            : Update('2 => ('3 -> System.Int32))
-3:-------------------
-System.Int32 -> ('3 -> System.Int32)
-System.Int32 -> '3 -> System.Int32
-
-//==================================
-Lambda 14:
-(a:System.Int32 -> b) -> c:System.Int32
-((a:System.Int32 -> b:?):? -> c:System.Int32):?
-1:-------------------
-((a:System.Int32 -> b:?):? -> c:System.Int32):'1
-((a:System.Int32 -> b:?):'2 -> c:System.Int32):'1
-((a:System.Int32 -> b:'3):'2 -> c:System.Int32):'1                : Memoize('2 => (System.Int32 -> '3))
-2:-------------------
-((a:System.Int32 -> b:'3):(System.Int32 -> '3) -> c:System.Int32):'1                : Update('2 => (System.Int32 -> '3)), Memoize('1 => ((System.Int32 -> '3) -> System.Int32))
-((a:System.Int32 -> b:'3):(System.Int32 -> '3) -> c:System.Int32):((System.Int32 -> '3) -> System.Int32)                : Update('1 => ((System.Int32 -> '3) -> System.Int32))
-3:-------------------
-(System.Int32 -> '3) -> System.Int32
-
-//==================================
-Lambda 15:
 a -> a
 (a:? -> a:?):?
 1:-------------------
 (a:? -> a:?):'1
-(a:'2 -> a:?):'1                      : Bind(a:'2)
-(a:'2 -> a:'2):'1                     : Lookup(a => '2), Memoize('1 => ('2 -> '2))
+(a:'2 -> a:?):'1                     : Bind(a:'2)
+(a:'2 -> a:'2):'1                    : Lookup(a => '2), Memoize('1 => ('2 -> '2))
 2:-------------------
-(a:'2 -> a:'2):('2 -> '2)             : Update('1 => ('2 -> '2))
+(a:'2 -> a:'2):('2 -> '2)            : Update('1 => ('2 -> '2))
 3:-------------------
 '2 -> '2
 
 //==================================
-Lambda 16:
+Lambda 2:
 a -> a:System.Int32
 (a:? -> a:System.Int32):?
 1:-------------------
 (a:? -> a:System.Int32):'1
-(a:'2 -> a:System.Int32):'1                     : Bind(a:'2)
+(a:'2 -> a:System.Int32):'1          : Bind(a:'2)
+(a:'2 -> a:System.Int32):'1          : Lookup(a => '2), Memoize('2 => System.Int32), Memoize('1 => ('2 -> System.Int32))
 2:-------------------
-(a:'2 -> a:System.Int32):'1                     : Lookup(a => '2), Memoize('2 => System.Int32)
-(a:System.Int32 -> a:System.Int32):'1           : Update('2 => System.Int32), Memoize('1 => (System.Int32 -> System.Int32))
-(a:System.Int32 -> a:System.Int32):(System.Int32 -> System.Int32)           : Update('1 => (System.Int32 -> System.Int32))
+(a:System.Int32 -> a:System.Int32):'1          : Update('2 => System.Int32)
+(a:System.Int32 -> a:System.Int32):('2 -> System.Int32)          : Update('1 => ('2 -> System.Int32))
+(a:System.Int32 -> a:System.Int32):(System.Int32 -> System.Int32)          : Update('2 => System.Int32)
 3:-------------------
 System.Int32 -> System.Int32
 
 //==================================
-Lambda 17:
+Lambda 3:
 a:System.Int32 -> a
 (a:System.Int32 -> a:?):?
 1:-------------------

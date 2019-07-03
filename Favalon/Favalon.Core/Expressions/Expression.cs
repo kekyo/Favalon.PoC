@@ -7,17 +7,19 @@ namespace Favalon.Expressions
 {
     public abstract class Expression
     {
-        protected Expression(Expression? higherOrder) =>
+        protected Expression(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
-        public readonly Expression? HigherOrder;
+        public readonly Expression HigherOrder;
 
         protected abstract string FormatReadableString();
+        protected static string FormatReadableString(Expression expression) =>
+            expression.FormatReadableString();
 
         public string ReadableString =>
             (this.HigherOrder is Expression higherOrder) ?
-                $"{this.ReadableString}:{higherOrder}" :
-                this.ReadableString;
+                $"({this.FormatReadableString()}):({higherOrder.FormatReadableString()})" :
+                this.FormatReadableString();
 
         public override string ToString()
         {

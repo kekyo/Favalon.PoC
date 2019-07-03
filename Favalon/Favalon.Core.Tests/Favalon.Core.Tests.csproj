@@ -17,8 +17,4 @@
     <ProjectReference Include="..\Favalon.Core\Favalon.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Expressions\" />
-  </ItemGroup>
-
 </Project>

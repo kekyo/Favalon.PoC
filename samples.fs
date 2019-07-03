@@ -363,9 +363,133 @@ Lambda 12:
 ((a:System.Int32 -> b:?):? -> c:?):'1
 ((a:System.Int32 -> b:?):'2 -> c:?):'1
 ((a:System.Int32 -> b:'3):'2 -> c:?):'1                           : Memoize('2 => (System.Int32 -> '3))
+2:-------------------
 ((a:System.Int32 -> b:'3):(System.Int32 -> '3) -> c:?):'1         : Update('2 => (System.Int32 -> '3))
 ((a:System.Int32 -> b:'3):(System.Int32 -> '3) -> c:'4):'1        : Memoize('1 => ((System.Int32 -> '3) -> '4))
 ((a:System.Int32 -> b:'3):(System.Int32 -> '3) -> c:'4):((System.Int32 -> '3) -> '4)        : Update('1 => ((System.Int32 -> '3) -> '4))
 3:-------------------
 (System.Int32 -> '3) -> '4
 
+//==================================
+Lambda 13:
+a:System.Int32 -> (b -> c:System.Int32)
+(a:System.Int32 -> (b:? -> c:System.Int32):?):?
+1:-------------------
+(a:System.Int32 -> (b:? -> c:System.Int32):?):'1
+(a:System.Int32 -> (b:? -> c:System.Int32):'2):'1                 : Memoize('1 => (System.Int32 -> '2))
+(a:System.Int32 -> (b:'3 -> c:System.Int32):'2):'1                : Memoize('2 => ('3 -> System.Int32))
+2:-------------------
+(a:System.Int32 -> (b:'3 -> c:System.Int32):('3 -> System.Int32)):'1            : Update('2 => ('3 -> System.Int32))
+(a:System.Int32 -> (b:'3 -> c:System.Int32):('3 -> System.Int32)):(System.Int32 -> '2)            : Update('1 => (System.Int32 -> '2))
+(a:System.Int32 -> (b:'3 -> c:System.Int32):('3 -> System.Int32)):(System.Int32 -> ('3 -> System.Int32))            : Update('2 => ('3 -> System.Int32))
+3:-------------------
+System.Int32 -> ('3 -> System.Int32)
+
+//==================================
+Lambda 14:
+(a:System.Int32 -> b) -> c:System.Int32
+((a:System.Int32 -> b:?):? -> c:System.Int32):?
+1:-------------------
+((a:System.Int32 -> b:?):? -> c:System.Int32):'1
+((a:System.Int32 -> b:?):'2 -> c:System.Int32):'1
+((a:System.Int32 -> b:'3):'2 -> c:System.Int32):'1                : Memoize('2 => (System.Int32 -> '3))
+2:-------------------
+((a:System.Int32 -> b:'3):(System.Int32 -> '3) -> c:System.Int32):'1                : Update('2 => (System.Int32 -> '3)), Memoize('1 => ((System.Int32 -> '3) -> System.Int32))
+((a:System.Int32 -> b:'3):(System.Int32 -> '3) -> c:System.Int32):((System.Int32 -> '3) -> System.Int32)                : Update('1 => ((System.Int32 -> '3) -> System.Int32))
+3:-------------------
+(System.Int32 -> '3) -> System.Int32
+
+//==================================
+Lambda 15:
+a -> a
+(a:? -> a:?):?
+1:-------------------
+(a:? -> a:?):'1
+(a:'2 -> a:?):'1                      : Bind(a:'2)
+(a:'2 -> a:'2):'1                     : Lookup(a => '2), Memoize('1 => ('2 -> '2))
+2:-------------------
+(a:'2 -> a:'2):('2 -> '2)             : Update('1 => ('2 -> '2))
+3:-------------------
+'2 -> '2
+
+//==================================
+Lambda 16:
+a -> a:System.Int32
+(a:? -> a:System.Int32):?
+1:-------------------
+(a:? -> a:System.Int32):'1
+(a:'2 -> a:System.Int32):'1                     : Bind(a:'2)
+2:-------------------
+(a:'2 -> a:System.Int32):'1                     : Lookup(a => '2), Memoize('2 => System.Int32)
+(a:System.Int32 -> a:System.Int32):'1           : Update('2 => System.Int32), Memoize('1 => (System.Int32 -> System.Int32))
+(a:System.Int32 -> a:System.Int32):(System.Int32 -> System.Int32)           : Update('1 => (System.Int32 -> System.Int32))
+3:-------------------
+System.Int32 -> System.Int32
+
+//==================================
+Lambda 17:
+a:System.Int32 -> a
+(a:System.Int32 -> a:?):?
+1:-------------------
+(a:System.Int32 -> a:?):'1
+(a:System.Int32 -> a:?):'1                      : Bind(a:System.Int32)
+(a:System.Int32 -> a:System.Int32):'1           : Lookup(a => System.Int32), Memoize('1 => (System.Int32 -> System.Int32))
+2:-------------------
+(a:System.Int32 -> a:System.Int32):(System.Int32 -> System.Int32)           : Update('1 => (System.Int32 -> System.Int32))
+3:-------------------
+System.Int32 -> System.Int32
+
+/////////////////////////////////////////////////////////////////////////////////
+
+//==================================
+Apply and Lambda 1:
+a -> b c
+(a:? -> (b:? c:?):?):?
+1:-------------------
+(a:? -> (b:? c:?):?):'1
+(a:'2 -> (b:? c:?):?):'1
+(a:'2 -> (b:? c:?):'3):'1                         : Memoize('1 => ('2 -> '3))
+(a:'2 -> (b:? c:'4):'3):'1
+(a:'2 -> (b:('4 -> '3) c:'4):'3):'1
+2:-------------------
+(a:'2 -> (b:('4 -> '3) c:'4):'3):('2 -> '3)       : Update('1 => ('2 -> '3))
+3:-------------------
+'2 -> '3
+
+//==================================
+Apply and Lambda 2:
+a -> a b
+(a:? -> (a:? b:?):?):?
+1:-------------------
+(a:? -> (a:? b:?):?):'1
+(a:'2 -> (a:? b:?):?):'1                          : Bind(a:'2)
+(a:'2 -> (a:? b:?):'3):'1                         : Memoize('1 => ('2 -> '3))
+(a:'2 -> (a:? b:'4):'3):'1
+(a:'2 -> (a:('4 -> '3) b:'4):'3):'1               : Lookup(a => '2), Memoize('2 => ('4 -> '3)))
+2:-------------------
+(a:('4 -> '3) -> (a:('4 -> '3) b:'4):'3):'1       : Update('2 => ('4 -> '3)))
+(a:('4 -> '3) -> (a:('4 -> '3) b:'4):'3):('2 -> '3)       : Update('1 => ('2 -> '3))
+(a:('4 -> '3) -> (a:('4 -> '3) b:'4):'3):(('4 -> '3) -> '3)       : Update('2 => ('4 -> '3)))
+3:-------------------
+('4 -> '3) -> '3
+
+//==================================
+Apply and Lambda 3:
+a -> b -> a b
+(a:? -> (b:? -> (a:? b:?):?):?):?
+1:-------------------
+(a:? -> (b:? -> (a:? b:?):?):?):'1
+(a:'2 -> (b:? -> (a:? b:?):?):?):'1                       : Bind(a:'2)
+(a:'2 -> (b:? -> (a:? b:?):?):'3):'1                      : Memoize('1 => ('2 -> '3))
+(a:'2 -> (b:'4 -> (a:? b:?):?):'3):'1                     : Bind(b:'4)
+(a:'2 -> (b:'4 -> (a:? b:?):'5):'3):'1                    : Memoize('3 => ('4 -> '5))
+(a:'2 -> (b:'4 -> (a:? b:'4):'5):'3):'1                   : Lookup(b => '4)
+(a:'2 -> (b:'4 -> (a:('4 -> '5) b:'4):'5):'3):'1          : Lookup(a => '2), Memoize('2 => ('4 -> '5))
+2:-------------------
+(a:'2 -> (b:'4 -> (a:('4 -> '5) b:'4):'5):('4 -> '5)):'1                  : Update('3 => ('4 -> '5))
+(a:('4 -> '5) -> (b:'4 -> (a:('4 -> '5) b:'4):'5):('4 -> '5)):'1          : Update('2 => ('4 -> '5))
+(a:('4 -> '5) -> (b:'4 -> (a:('4 -> '5) b:'4):'5):('4 -> '5)):('2 -> '3)  : Update('1 => ('2 -> '3))
+(a:('4 -> '5) -> (b:'4 -> (a:('4 -> '5) b:'4):'5):('4 -> '5)):(('4 -> '5) -> '3)            : Update('2 => ('4 -> '5))
+(a:('4 -> '5) -> (b:'4 -> (a:('4 -> '5) b:'4):'5):('4 -> '5)):(('4 -> '5) -> ('4 -> '5))    : Update('3 => ('4 -> '5))
+3:-------------------
+('4 -> '5) -> ('4 -> '5)

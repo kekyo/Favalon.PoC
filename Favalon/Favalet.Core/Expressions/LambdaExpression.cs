@@ -30,7 +30,11 @@ namespace Favalet.Expressions
 
         protected override Expression VisitResolving(Environment environment)
         {
-            return this;
+            var parameter = VisitResolving(environment, this.Parameter);
+            var expression = VisitResolving(environment, this.Expression);
+            var higherOrder = VisitResolving(environment, this.HigherOrder);
+
+            return new LambdaExpression(parameter, expression, higherOrder);
         }
     }
 }

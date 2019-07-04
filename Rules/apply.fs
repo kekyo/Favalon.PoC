@@ -110,6 +110,7 @@ Apply 9:
 (a:? (b:? c:?):?):System.Int32
 1:-------------------
 (a:? (b:? c:?):'1):System.Int32
+(a:? (b:? c:?):'1):System.Int32
 (a:? (b:? c:'2):'1):System.Int32
 (a:? (b:('2 -> '1) c:'2):'1):System.Int32
 (a:('1 -> System.Int32) (b:('2 -> '1) c:'2):'1):System.Int32
@@ -152,9 +153,9 @@ a (b:(System.Int32 -> ?) c)
 (a:? (b:(System.Int32 -> ?) c:?):'2):'1
 (a:? (b:(System.Int32 -> ?) c:'3):'2):'1
 (a:? (b:(System.Int32 -> '2) c:'3):'2):'1                           : Memoize('3 => System.Int32)
+(a:('2 -> '1) (b:(System.Int32 -> '2) c:'3):'2):'1
 2:-------------------
-(a:? (b:(System.Int32 -> '2) c:System.Int32):'2):'1                 : Update('3 => System.Int32)
-(a:('2 -> '1) (b:(System.Int32 -> '2) c:System.Int32):'2):'1
+(a:('2 -> '1) (b:(System.Int32 -> '2) c:System.Int32):'2):'1                 : Update('3 => System.Int32)
 3:-------------------
 '1
 

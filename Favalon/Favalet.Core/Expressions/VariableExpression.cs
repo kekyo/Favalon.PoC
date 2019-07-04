@@ -23,7 +23,10 @@ namespace Favalet.Expressions
             return new VariableExpression(this.Name, higherOrder);
         }
 
-        protected override Expression VisitResolving(Environment environment) =>
-            this;
+        protected override Expression VisitResolving(Environment environment)
+        {
+            var higherOrder = VisitResolving(environment, this.HigherOrder);
+            return new VariableExpression(this.Name, higherOrder);
+        }
     }
 }

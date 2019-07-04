@@ -234,8 +234,8 @@ namespace Favalet.Expressions
             (a:? (b:? c:?):'1):System.Int32
             (a:? (b:? c:'2):'1):System.Int32
             (a:? (b:('2 -> '1) c:'2):'1):System.Int32
-            2:-------------------
             (a:('1 -> System.Int32) (b:('2 -> '1) c:'2):'1):System.Int32
+            2:-------------------
             3:-------------------
             System.Int32
             */
@@ -313,9 +313,9 @@ namespace Favalet.Expressions
             (a:? (b:(System.Int32 -> ?) c:?):'2):'1
             (a:? (b:(System.Int32 -> ?) c:'3):'2):'1
             (a:? (b:(System.Int32 -> '2) c:'3):'2):'1                           : Memoize('3 => System.Int32)
+            (a:('2 -> '1) (b:(System.Int32 -> '2) c:'3):'2):'1
             2:-------------------
-            (a:? (b:(System.Int32 -> '2) c:System.Int32):'2):'1                 : Update('3 => System.Int32)
-            (a:('2 -> '1) (b:(System.Int32 -> '2) c:System.Int32):'2):'1
+            (a:('2 -> '1) (b:(System.Int32 -> '2) c:System.Int32):'2):'1                 : Update('3 => System.Int32)
             3:-------------------
             '1
             */
@@ -344,7 +344,6 @@ namespace Favalet.Expressions
             (a:((System.Int32 -> '4) -> '1) (b:('3 -> '2) c:'3):'2):'1                       : Memoize('2 => (System.Int32 -> '4))
             2:-------------------
             (a:((System.Int32 -> '4) -> '1) (b:('3 -> '2) c:'3):(System.Int32 -> '4)):'1     : Update('2 => (System.Int32 -> '4))
-
             (a:((System.Int32 -> '4) -> '1) (b:('3 -> (System.Int32 -> '4)) c:'3):(System.Int32 -> '4)):'1     : Update('2 => (System.Int32 -> '4))
             */
 
@@ -352,7 +351,7 @@ namespace Favalet.Expressions
             Assert.AreEqual("(a:((System.Int32 -> ?) -> ?) (b:? c:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:((System.Int32 -> '4) -> '1) (b:('3 -> (System.Int32 -> '4)) c:'3):(System.Int32 -> '4)):'1", inferred.StrictReadableString);
+            Assert.AreEqual("(a:((System.Int32 -> '4) -> '1) (b:('3 -> System.Int32 -> '4) c:'3):(System.Int32 -> '4)):'1", inferred.StrictReadableString);
         }
     }
 }

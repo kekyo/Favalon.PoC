@@ -18,7 +18,7 @@ namespace Favalet.Expressions
             throw new InvalidOperationException();
 
         protected override Expression VisitResolving(Environment environment) =>
-            throw new InvalidOperationException();
+            this;
 
         public static readonly UndefinedExpression Instance = new UndefinedExpression();
     }

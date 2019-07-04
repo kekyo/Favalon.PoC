@@ -16,6 +16,9 @@ namespace Favalet.Expressions
         internal PlaceholderExpression CreatePlaceholder(Expression higherOrder) =>
             placehoderController.Create(higherOrder);
 
+        internal Expression? Lookup(PlaceholderExpression placeholder) =>
+            placehoderController.Lookup(placeholder);
+
         public Expression Infer(Expression expression, Expression higherOrderHint)
         {
             var partial = Expression.VisitInferring(this, expression, higherOrderHint);

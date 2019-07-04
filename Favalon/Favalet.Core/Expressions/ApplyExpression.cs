@@ -30,20 +30,16 @@ namespace Favalet.Expressions
             var function = VisitInferring(environment, this.Function,
                 new LambdaExpression(argument.HigherOrder, higherOrder, UndefinedExpression.Instance));
 
-            // Apply3: Update()
-            //if (function.HigherOrder is LambdaExpression functionHigherOrder)
-            //{
-            //    var updated = Unify(environment, argument.HigherOrder, functionHigherOrder.Parameter);
-            //    UpdateHigherOrder(argument, updated);
-            //}
-
             return new ApplyExpression(function, argument, higherOrder);
         }
 
         protected override Expression VisitResolving(Environment environment)
         {
-            return this;
-        }
+            var argument = VisitResolving(environment, this.Argument);
+            var function = VisitResolving(environment, this.Function);
+            var higherOrder = VisitResolving(environment, this.HigherOrder);
 
+            return new ApplyExpression(function, argument, higherOrder);
+        }
     }
 }

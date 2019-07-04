@@ -22,24 +22,8 @@ namespace Favalet.Expressions
             return lambda;
         }
 
-        internal Expression Unify(Expression expression1, Expression expression2)
+        private Expression Unify2(Expression expression1, Expression expression2)
         {
-            if (expression2 is UndefinedExpression)
-            {
-                if (expression1 is UndefinedExpression)
-                {
-                    return this.CreatePlaceholder(UndefinedExpression.Instance);
-                }
-                else
-                {
-                    return expression1;
-                }
-            }
-            else if (expression1 is UndefinedExpression)
-            {
-                return expression2;
-            }
-
             if (expression1.Equals(expression2))
             {
                 return expression1;
@@ -94,6 +78,72 @@ namespace Favalet.Expressions
             }
 
             throw new ArgumentException($"Cannot unifying: between \"{expression1.ReadableString}\" and \"{expression2.ReadableString}\"");
+        }
+
+        internal Expression Unify(Expression expression1, Expression expression2)
+        {
+            if (expression2 is UndefinedExpression)
+            {
+                if (expression1 is UndefinedExpression)
+                {
+                    return this.CreatePlaceholder(UndefinedExpression.Instance);
+                }
+                else
+                {
+                    return expression1;
+                }
+            }
+            else if (expression1 is UndefinedExpression)
+            {
+                return expression2;
+            }
+
+            return this.Unify2(expression1, expression2);
+        }
+
+        internal Expression Unify(Expression expression1, Expression expression2, Expression expression3)
+        {
+            if (expression3 is UndefinedExpression)
+            {
+                if (expression2 is UndefinedExpression)
+                {
+                    if (expression1 is UndefinedExpression)
+                    {
+                        return this.CreatePlaceholder(UndefinedExpression.Instance);
+                    }
+                    else
+                    {
+                        return expression1;
+                    }
+                }
+                else if (expression1 is UndefinedExpression)
+                {
+                    return expression2;
+                }
+                else
+                {
+                    return this.Unify2(expression1, expression2);
+                }
+            }
+            else if (expression2 is UndefinedExpression)
+            {
+                if (expression1 is UndefinedExpression)
+                {
+                    return expression3;
+                }
+                else
+                {
+                    return this.Unify2(expression1, expression3);
+                }
+            }
+            else if (expression1 is UndefinedExpression)
+            {
+                return this.Unify2(expression2, expression3);
+            }
+            else
+            {
+                return this.Unify2(expression1, this.Unify2(expression2, expression3));
+            }
         }
     }
 }

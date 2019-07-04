@@ -11,6 +11,9 @@ namespace Favalet.Expressions
         protected static Expression Unify(
             Environment environment, Expression expression1, Expression expression2) =>
             environment.Unify(expression1, expression2);
+        protected static Expression Unify(
+            Environment environment, Expression expression1, Expression expression2, Expression expression3) =>
+            environment.Unify(expression1, expression2, expression3);
 
         protected static Expression CreatePlaceholderIfRequired(
             Environment environment, Expression from) =>

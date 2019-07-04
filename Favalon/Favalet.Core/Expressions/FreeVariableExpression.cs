@@ -20,15 +20,14 @@ namespace Favalet.Expressions
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
         {
-            var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
-
             if (Lookup(environment, this) is Expression bound)
             {
-                var variableHigherOrder = Unify(environment, higherOrder, bound.HigherOrder);
-                return new FreeVariableExpression(this.Name, variableHigherOrder);
+                var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder, bound.HigherOrder);
+                return new FreeVariableExpression(this.Name, higherOrder);
             }
             else
             {
+                var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
                 return new FreeVariableExpression(this.Name, higherOrder);
             }
         }

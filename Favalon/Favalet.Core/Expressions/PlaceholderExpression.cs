@@ -19,13 +19,13 @@ namespace Favalet.Expressions
             switch (context.FormatNaming)
             {
                 case FormatNamings.Strict:
+                    return $"'{this.Index}";
+                default:
                     var index = context.GetAdjustedIndex(this);
                     var ch = (char)('a' + (index % ('z' - 'a' + 1)));
                     var suffixIndex = index / ('z' - 'a' + 1);
                     var suffix = (suffixIndex >= 1) ? suffixIndex.ToString() : string.Empty;
                     return $"'{ch}{suffix}";
-                default:
-                    return $"'{this.Index}";
             }
         }
 

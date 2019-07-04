@@ -8,10 +8,15 @@ namespace Favalet.Expressions
 {
     partial class Expression
     {
-        protected Expression CreatePlaceholderIfRequired(Environment environment, Expression expressionHint, Expression higherOrder) =>
-            (expressionHint is UndefinedExpression) ?
-                environment.CreatePlaceholder(higherOrder) :
-                expressionHint;
+        protected static Expression CreatePlaceholderIfRequired(
+            Environment environment, Expression expressionHint1, Expression expressionHint2, Expression higherOrder) =>
+            (expressionHint2 is UndefinedExpression) ? ((expressionHint1 is UndefinedExpression) ? environment.CreatePlaceholder(higherOrder) : expressionHint1) :
+            !(expressionHint1 is UndefinedExpression) ?
+                throw new ArgumentException($"Cannot unifying: between \"{expressionHint1.ReadableString}\" and \"{expressionHint2.ReadableString}\"") :
+                expressionHint2;
+        protected static Expression CreatePlaceholderIfRequired(
+            Environment environment, Expression expressionHint, Expression higherOrder) =>
+            (expressionHint is UndefinedExpression) ? environment.CreatePlaceholder(higherOrder) : expressionHint;
 
         protected internal static Expression VisitInferring(Environment environment, Expression expression, Expression higherOrderHint) =>
             expression.VisitInferring(environment, higherOrderHint);
@@ -24,18 +29,13 @@ namespace Favalet.Expressions
                 result.Formatted;
         }
 
-        private static bool IsRequiredAnnotation(FormatContext context, Expression expression)
-        {
-            switch (context.FormatAnnotation)
+        private static bool IsRequiredAnnotation(FormatContext context, Expression expression) =>
+            context.FormatAnnotation switch
             {
-                case FormatAnnotations.Strict:
-                    return true;
-                case FormatAnnotations.Without:
-                    return false;
-                default:
-                    return !(expression.HigherOrder is PseudoExpression);
-            }
-        }
+                FormatAnnotations.Strict => true,
+                FormatAnnotations.Without => false,
+                _ => (expression.HigherOrder != null) && !(expression.HigherOrder is PseudoExpression)
+            };
 
         protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired) =>
             IsRequiredAnnotation(context, expression) ?

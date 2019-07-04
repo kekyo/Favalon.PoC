@@ -27,5 +27,10 @@ namespace Favalet.Expressions
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
             throw new NotImplementedException();
+
+        protected override Expression VisitResolving(Environment environment)
+        {
+            return this;
+        }
     }
 }

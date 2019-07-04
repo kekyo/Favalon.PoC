@@ -16,11 +16,11 @@ namespace Favalet.Expressions
             Environment environment, Expression from) =>
             (from is UndefinedExpression) ? environment.CreatePlaceholder(UndefinedExpression.Instance) : from;
 
-        protected static void UpdateHigherOrder(Expression expression, Expression higherOrder) =>
-            expression.UpdateHigherOrder(higherOrder);
-
         protected internal static Expression VisitInferring(Environment environment, Expression expression, Expression higherOrderHint) =>
             expression.VisitInferring(environment, higherOrderHint);
+
+        protected internal static Expression VisitResolving(Environment environment, Expression expression) =>
+            expression.VisitResolving(environment);
 
         private string FormatReadableString(FormatContext context, bool encloseParenthesesIfRequired)
         {

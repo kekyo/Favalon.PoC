@@ -17,6 +17,9 @@ namespace Favalet.Expressions
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
             throw new InvalidOperationException();
 
+        protected override Expression VisitResolving(Environment environment) =>
+            throw new InvalidOperationException();
+
         public static readonly UndefinedExpression Instance = new UndefinedExpression();
     }
 }

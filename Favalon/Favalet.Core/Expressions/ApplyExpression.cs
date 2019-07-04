@@ -31,13 +31,19 @@ namespace Favalet.Expressions
                 new LambdaExpression(argument.HigherOrder, higherOrder, UndefinedExpression.Instance));
 
             // Apply3: Update()
-            if (function.HigherOrder is LambdaExpression functionHigherOrder)
-            {
-                var updated = Unify(environment, argument.HigherOrder, functionHigherOrder.Parameter);
-                UpdateHigherOrder(argument, updated);
-            }
+            //if (function.HigherOrder is LambdaExpression functionHigherOrder)
+            //{
+            //    var updated = Unify(environment, argument.HigherOrder, functionHigherOrder.Parameter);
+            //    UpdateHigherOrder(argument, updated);
+            //}
 
             return new ApplyExpression(function, argument, higherOrder);
         }
+
+        protected override Expression VisitResolving(Environment environment)
+        {
+            return this;
+        }
+
     }
 }

@@ -16,10 +16,13 @@ namespace Favalet.Expressions
         internal PlaceholderExpression CreatePlaceholder(Expression higherOrder) =>
             placehoderController.Create(higherOrder);
 
-        public Expression Infer(Expression expression, Expression higherOrderHint) =>
-            Expression.VisitInferring(this, expression, higherOrderHint);
+        public Expression Infer(Expression expression, Expression higherOrderHint)
+        {
+            var partial = Expression.VisitInferring(this, expression, higherOrderHint);
+            return Expression.VisitResolving(this, partial);
+        }
         public Expression Infer(Expression expression) =>
-            Expression.VisitInferring(this, expression, UndefinedExpression.Instance);
+            this.Infer(expression, UndefinedExpression.Instance);
 
         public TExpression Infer<TExpression>(TExpression expression, Expression higherOrderHint)
             where TExpression : Expression =>

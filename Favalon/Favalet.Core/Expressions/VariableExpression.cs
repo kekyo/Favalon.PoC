@@ -22,5 +22,8 @@ namespace Favalet.Expressions
             var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
             return new VariableExpression(this.Name, higherOrder);
         }
+
+        protected override Expression VisitResolving(Environment environment) =>
+            this;
     }
 }

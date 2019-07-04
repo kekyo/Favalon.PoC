@@ -14,7 +14,9 @@ namespace Favalet.Expressions
         public Expression HigherOrder { get; private set; }
 
         protected abstract Expression VisitInferring(Environment environment, Expression higherOrderHint);
+        protected abstract Expression VisitResolving(Environment environment);
 
+        [Obsolete]
         internal void UpdateHigherOrder(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 

@@ -38,6 +38,11 @@ namespace Favalet.Expressions
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
             new LiteralExpression(this.Value, new VariableExpression(this.GetTypeName(), KindExpression.Instance));
 
+        protected override Expression VisitResolving(Environment environment)
+        {
+            return this;
+        }
+
         public override int GetHashCode() =>
             this.Value.GetHashCode();
 

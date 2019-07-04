@@ -298,5 +298,61 @@ namespace Favalet.Expressions
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:('2 -> '1) (b:(System.Int32 -> '2) c:System.Int32):'2):'1", inferred.StrictReadableString);
         }
+
+        [Test]
+        public void Apply12()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Apply 12:
+            a (b:(System.Int32 -> ?) c)
+            (a:? (b:(System.Int32 -> ?) c:?):?):?
+            1:-------------------
+            (a:? (b:(System.Int32 -> ?) c:?):?):'1
+            (a:? (b:(System.Int32 -> ?) c:?):'2):'1
+            (a:? (b:(System.Int32 -> ?) c:'3):'2):'1
+            (a:? (b:(System.Int32 -> '2) c:'3):'2):'1                           : Memoize('3 => System.Int32)
+            2:-------------------
+            (a:? (b:(System.Int32 -> '2) c:System.Int32):'2):'1                 : Update('3 => System.Int32)
+            (a:('2 -> '1) (b:(System.Int32 -> '2) c:System.Int32):'2):'1
+            3:-------------------
+            '1
+            */
+
+            var expression = Apply(Variable("a"), Apply(Variable("b", Lambda(Variable("System.Int32"), Undefined())), Variable("c")));
+            Assert.AreEqual("(a:? (b:(System.Int32 -> ?) c:?):?):?", expression.StrictReadableString);
+
+            var inferred = environment.Infer(expression);
+            Assert.AreEqual("(a:('2 -> '1) (b:(System.Int32 -> '2) c:System.Int32):'2):'1", inferred.StrictReadableString);
+        }
+
+        [Test]
+        public void Apply13()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Apply 13:
+            a:(System.Int32 -> ? -> ?) (b c)
+            (a:((System.Int32 -> ?) -> ?) (b:? c:?):?):?
+            1:-------------------
+            (a:((System.Int32 -> ?) -> ?) (b:? c:?):?):'1
+            (a:((System.Int32 -> ?) -> ?) (b:? c:?):'2):'1
+            (a:((System.Int32 -> ?) -> ?) (b:? c:'3):'2):'1
+            (a:((System.Int32 -> ?) -> ?) (b:('3 -> '2) c:'3):'2):'1
+            (a:((System.Int32 -> '4) -> '1) (b:('3 -> '2) c:'3):'2):'1                       : Memoize('2 => (System.Int32 -> '4))
+            2:-------------------
+            (a:((System.Int32 -> '4) -> '1) (b:('3 -> '2) c:'3):(System.Int32 -> '4)):'1     : Update('2 => (System.Int32 -> '4))
+
+            (a:((System.Int32 -> '4) -> '1) (b:('3 -> (System.Int32 -> '4)) c:'3):(System.Int32 -> '4)):'1     : Update('2 => (System.Int32 -> '4))
+            */
+
+            var expression = Apply(Variable("a", Lambda(Lambda(Variable("System.Int32"), Undefined()), Undefined())), Apply(Variable("b"), Variable("c")));
+            Assert.AreEqual("(a:((System.Int32 -> ?) -> ?) (b:? c:?):?):?", expression.StrictReadableString);
+
+            var inferred = environment.Infer(expression);
+            Assert.AreEqual("(a:((System.Int32 -> '4) -> '1) (b:('3 -> (System.Int32 -> '4)) c:'3):(System.Int32 -> '4)):'1", inferred.StrictReadableString);
+        }
     }
 }

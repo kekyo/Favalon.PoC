@@ -25,8 +25,25 @@ namespace Favalet.Expressions
                 $"{FormatReadableString(context, this.Parameter, true)} {arrow} {FormatReadableString(context, this.Expression, false)}");
         }
 
-        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
-            throw new NotImplementedException();
+        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
+        {
+            var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
+
+            var parameter = VisitInferring(environment, this.Parameter, UndefinedExpression.Instance);
+
+            // TODO:
+            if (parameter is VariableExpression bound)
+            {
+                Memoize(environment, bound, bound);
+            }
+
+            var expression = VisitInferring(environment, this.Expression, UndefinedExpression.Instance);
+
+            var lambdaHigherOrder = Unify(environment, higherOrder,
+                new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UndefinedExpression.Instance));
+
+            return new LambdaExpression(parameter, expression, lambdaHigherOrder);
+        }
 
         protected override Expression VisitResolving(Environment environment)
         {

@@ -11,14 +11,10 @@ namespace Favalet.Expressions
         protected Expression(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
-        public Expression HigherOrder { get; private set; }
+        public readonly Expression HigherOrder;
 
         protected abstract Expression VisitInferring(Environment environment, Expression higherOrderHint);
         protected abstract Expression VisitResolving(Environment environment);
-
-        [Obsolete]
-        internal void UpdateHigherOrder(Expression higherOrder) =>
-            this.HigherOrder = higherOrder;
 
         protected abstract FormattedString FormatReadableString(FormatContext context);
 

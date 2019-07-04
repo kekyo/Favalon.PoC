@@ -16,9 +16,13 @@ namespace Favalet.Expressions
             Environment environment, Expression from) =>
             (from is UndefinedExpression) ? environment.CreatePlaceholder(UndefinedExpression.Instance) : from;
 
+        protected static void Memoize(
+            Environment environment, Expression symbol, Expression expression) =>
+            environment.Memoize(symbol, expression);
+
         protected static Expression? Lookup(
-            Environment environment, PlaceholderExpression placeholder) =>
-            environment.Lookup(placeholder);
+            Environment environment, Expression symbol) =>
+            environment.Lookup(symbol);
 
         protected internal static Expression VisitInferring(Environment environment, Expression expression, Expression higherOrderHint) =>
             expression.VisitInferring(environment, higherOrderHint);

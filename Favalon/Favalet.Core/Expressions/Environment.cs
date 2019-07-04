@@ -16,8 +16,11 @@ namespace Favalet.Expressions
         internal PlaceholderExpression CreatePlaceholder(Expression higherOrder) =>
             placehoderController.Create(higherOrder);
 
-        internal Expression? Lookup(PlaceholderExpression placeholder) =>
-            placehoderController.Lookup(placeholder);
+        internal void Memoize(Expression symbol, Expression expression) =>
+            placehoderController.Memoize(symbol, expression);
+
+        internal Expression? Lookup(Expression symbol) =>
+            placehoderController.Lookup(symbol);
 
         public Expression Infer(Expression expression, Expression higherOrderHint)
         {

@@ -30,9 +30,9 @@ namespace Favalet.Expressions
             */
 
             var expression = Apply(Variable("a"), Variable("b"));
+            Assert.AreEqual("(a:? b:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-
             Assert.AreEqual("(a:('2 -> '1) b:'2):'1", inferred.StrictReadableString);
         }
 
@@ -54,9 +54,9 @@ namespace Favalet.Expressions
             */
 
             var expression = Apply(Variable("a"), Variable("b", Variable("System.Int32")));
+            Assert.AreEqual("(a:? b:System.Int32):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-
             Assert.AreEqual("(a:(System.Int32 -> '1) b:System.Int32):'1", inferred.StrictReadableString);
         }
 
@@ -80,9 +80,9 @@ namespace Favalet.Expressions
             */
 
             var expression = Apply(Variable("a", Lambda(Variable("System.Int32"), Undefined())), Variable("b"));
+            Assert.AreEqual("(a:(System.Int32 -> ?) b:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-
             Assert.AreEqual("(a:(System.Int32 -> '1) b:System.Int32):'1", inferred.StrictReadableString);
         }
 
@@ -107,9 +107,9 @@ namespace Favalet.Expressions
             */
 
             var expression = Apply(Apply(Variable("a"), Variable("b")), Variable("c"));
+            Assert.AreEqual("((a:? b:?):? c:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-
             Assert.AreEqual("((a:('3 -> '2 -> '1) b:'3):('2 -> '1) c:'2):'1", inferred.StrictReadableString);
         }
 
@@ -133,9 +133,9 @@ namespace Favalet.Expressions
             */
 
             var expression = Apply(Apply(Variable("a"), Variable("b")), Variable("c", Variable("System.Int32")));
+            Assert.AreEqual("((a:? b:?):? c:System.Int32):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-
             Assert.AreEqual("((a:('2 -> System.Int32 -> '1) b:'2):(System.Int32 -> '1) c:System.Int32):'1", inferred.StrictReadableString);
         }
 
@@ -159,9 +159,9 @@ namespace Favalet.Expressions
             */
 
             var expression = Apply(Apply(Variable("a"), Variable("b", Variable("System.Int32"))), Variable("c"));
+            Assert.AreEqual("((a:? b:System.Int32):? c:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-
             Assert.AreEqual("((a:(System.Int32 -> '2 -> '1) b:System.Int32):('2 -> '1) c:'2):'1", inferred.StrictReadableString);
         }
 
@@ -187,9 +187,9 @@ namespace Favalet.Expressions
             */
 
             var expression = Apply(Apply(Variable("a", Lambda(Variable("System.Int32"), Undefined())), Variable("b")), Variable("c"));
+            Assert.AreEqual("((a:(System.Int32 -> ?) b:?):? c:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-
             Assert.AreEqual("((a:(System.Int32 -> '2 -> '1) b:System.Int32):('2 -> '1) c:'2):'1", inferred.StrictReadableString);
         }
 
@@ -214,9 +214,9 @@ namespace Favalet.Expressions
             */
 
             var expression = Apply(Variable("a"), Apply(Variable("b"), Variable("c")));
+            Assert.AreEqual("(a:? (b:? c:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-
             Assert.AreEqual("(a:('2 -> '1) (b:('3 -> '2) c:'3):'2):'1", inferred.StrictReadableString);
         }
 
@@ -241,10 +241,36 @@ namespace Favalet.Expressions
             */
 
             var expression = Apply(Variable("a"), Apply(Variable("b"), Variable("c")), Variable("System.Int32"));
+            Assert.AreEqual("(a:? (b:? c:?):?):System.Int32", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-
             Assert.AreEqual("(a:('1 -> System.Int32) (b:('2 -> '1) c:'2):'1):System.Int32", inferred.StrictReadableString);
+        }
+
+        [Test]
+        public void Apply10()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Apply 10:
+            a (b c):System.Int32
+            (a:? (b:? c:?):System.Int32):?
+            1:-------------------
+            (a:? (b:? c:?):System.Int32):'1
+            (a:? (b:? c:'2):System.Int32):'1
+            (a:? (b:('2 -> System.Int32) c:'2):System.Int32):'1
+            (a:(System.Int32 -> '1) (b:('2 -> System.Int32) c:'2):System.Int32):'1
+            2:-------------------
+            3:-------------------
+            '1
+            */
+
+            var expression = Apply(Variable("a"), Apply(Variable("b"), Variable("c"), Variable("System.Int32")));
+            Assert.AreEqual("(a:? (b:? c:?):System.Int32):?", expression.StrictReadableString);
+
+            var inferred = environment.Infer(expression);
+            Assert.AreEqual("(a:(System.Int32 -> '1) (b:('2 -> System.Int32) c:'2):System.Int32):'1", inferred.StrictReadableString);
         }
     }
 }

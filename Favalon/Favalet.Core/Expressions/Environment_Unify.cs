@@ -7,6 +7,21 @@ namespace Favalet.Expressions
 {
     partial class Environment
     {
+        private Expression UnifyLambda(LambdaExpression lambda1, Expression expression2)
+        {
+            var parameter = this.Unify(lambda1.Parameter, UndefinedExpression.Instance);
+            var expression = this.Unify(lambda1.Expression, UndefinedExpression.Instance);
+
+            var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UndefinedExpression.Instance);
+            var lambda = new LambdaExpression(parameter, expression, lambdaHigherOrder);
+
+            if (expression2 is PlaceholderExpression placeholder)
+            {
+                placehoderController.Memoize(placeholder, lambda);
+            }
+            return lambda;
+        }
+
         internal Expression Unify(Expression expression1, Expression expression2)
         {
             if (expression2 is UndefinedExpression)
@@ -59,40 +74,12 @@ namespace Favalet.Expressions
                 }
                 else
                 {
-                    var parameter = this.Unify(lambda2.Parameter, UndefinedExpression.Instance);
-                    var expression = this.Unify(lambda2.Expression, UndefinedExpression.Instance);
-
-                    var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UndefinedExpression.Instance);
-                    var lambda = new LambdaExpression(parameter, expression, lambdaHigherOrder);
-
-                    if (expression1 is PlaceholderExpression placeholder11)
-                    {
-                        placehoderController.Memoize(placeholder11, lambda);
-                        return lambda;
-                    }
-                    else
-                    {
-                        return lambda;
-                    }
+                    return this.UnifyLambda(lambda2, expression1);
                 }
             }
             else if (expression1 is LambdaExpression lambda12)
             {
-                var parameter = this.Unify(lambda12.Parameter, UndefinedExpression.Instance);
-                var expression = this.Unify(lambda12.Expression, UndefinedExpression.Instance);
-
-                var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UndefinedExpression.Instance);
-                var lambda = new LambdaExpression(parameter, expression, lambdaHigherOrder);
-
-                if (expression2 is PlaceholderExpression placeholder21)
-                {
-                    placehoderController.Memoize(placeholder21, lambda);
-                    return lambda;
-                }
-                else
-                {
-                    return lambda;
-                }
+                return this.UnifyLambda(lambda12, expression2);
             }
 
             if (expression1 is PlaceholderExpression placeholder13)

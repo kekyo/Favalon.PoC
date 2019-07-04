@@ -20,9 +20,7 @@ namespace Favalet.Expressions
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
             FormattedString.RequiredEnclosing(
-                (this.Argument is ApplyExpression) ?
-                    $"{FormatReadableString(context, this.Function, true)} ({FormatReadableString(context, this.Argument, false)})" :
-                    $"{FormatReadableString(context, this.Function, true)} {FormatReadableString(context, this.Argument, true)}");
+                $"{FormatReadableString(context, this.Function, true)} {FormatReadableString(context, this.Argument, true)}");
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
         {

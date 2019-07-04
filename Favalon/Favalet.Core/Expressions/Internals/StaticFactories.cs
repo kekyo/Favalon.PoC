@@ -18,10 +18,10 @@ namespace Favalet.Expressions.Internals
         public static LiteralExpression Literal(object value) =>
             new LiteralExpression(value, UndefinedExpression.Instance);
 
-        public static VariableExpression Variable(string name, Expression higherOrder) =>
-            new VariableExpression(name, higherOrder);
-        public static VariableExpression Variable(string name) =>
-            new VariableExpression(name, UndefinedExpression.Instance);
+        public static FreeVariableExpression Variable(string name, Expression higherOrder) =>
+            new FreeVariableExpression(name, higherOrder);
+        public static FreeVariableExpression Variable(string name) =>
+            new FreeVariableExpression(name, UndefinedExpression.Instance);
 
         public static ApplyExpression Apply(Expression function, Expression argument, Expression higherOrder) =>
             new ApplyExpression(function, argument, higherOrder);

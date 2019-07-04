@@ -6,45 +6,10 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public sealed class VariableExpression : Expression, IEquatable<VariableExpression>
+    public abstract class VariableExpression : Expression
     {
-        public VariableExpression(string name, Expression higherOrder) :
-            base(higherOrder) =>
-        this.Name = name;
-
-        public readonly string Name;
-
-        protected override FormattedString FormatReadableString(FormatContext context) =>
-            this.Name;
-
-        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
-        {
-            var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
-
-            if (Lookup(environment, this) is Expression bound)
-            {
-                var variableHigherOrder = Unify(environment, higherOrder, bound.HigherOrder);
-                return new VariableExpression(this.Name, variableHigherOrder);
-            }
-            else
-            {
-                return new VariableExpression(this.Name, higherOrder);
-            }
-        }
-
-        protected override Expression VisitResolving(Environment environment)
-        {
-            var higherOrder = VisitResolving(environment, this.HigherOrder);
-            return new VariableExpression(this.Name, higherOrder);
-        }
-
-        public override int GetHashCode() =>
-            this.Name.GetHashCode();
-
-        public bool Equals(VariableExpression? other) =>
-            other?.Name.Equals(this.Name) ?? false;
-
-        public override bool Equals(object obj) =>
-            this.Equals(obj as VariableExpression);
+        protected VariableExpression(Expression higherOrder) :
+            base(higherOrder)
+        { }
     }
 }

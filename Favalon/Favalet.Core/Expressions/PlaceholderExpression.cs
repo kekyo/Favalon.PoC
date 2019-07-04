@@ -6,7 +6,8 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public sealed class PlaceholderExpression : Expression, IEquatable<PlaceholderExpression?>, IComparable<PlaceholderExpression>
+    public sealed class PlaceholderExpression :
+        VariableExpression, IEquatable<PlaceholderExpression?>, IComparable<PlaceholderExpression>
     {
         public PlaceholderExpression(int index, Expression higherOrder) :
             base(higherOrder) =>

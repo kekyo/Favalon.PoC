@@ -31,7 +31,6 @@ namespace Favalet.Expressions
 
             var parameter = VisitInferring(environment, this.Parameter, UndefinedExpression.Instance);
 
-            // TODO:
             if (parameter is VariableExpression bound)
             {
                 Memoize(environment, bound, bound);

@@ -36,7 +36,7 @@ namespace Favalet.Expressions
         }
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
-            new LiteralExpression(this.Value, new VariableExpression(this.GetTypeName(), KindExpression.Instance));
+            new LiteralExpression(this.Value, new FreeVariableExpression(this.GetTypeName(), KindExpression.Instance));
 
         protected override Expression VisitResolving(Environment environment)
         {

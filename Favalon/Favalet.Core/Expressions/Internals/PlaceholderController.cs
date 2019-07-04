@@ -8,8 +8,8 @@ namespace Favalet.Expressions.Internals
     internal sealed class PlaceholderController
     {
         private int index = 1;
-        private readonly Dictionary<Expression, Expression> memoizedExpressions =
-            new Dictionary<Expression, Expression>();
+        private readonly Dictionary<VariableExpression, Expression> memoizedExpressions =
+            new Dictionary<VariableExpression, Expression>();
 
         public PlaceholderController()
         { }
@@ -17,10 +17,10 @@ namespace Favalet.Expressions.Internals
         public PlaceholderExpression Create(Expression higherOrder) =>
             new PlaceholderExpression(index++, higherOrder);
 
-        public void Memoize(Expression symbol, Expression expression) =>
+        public void Memoize(VariableExpression symbol, Expression expression) =>
             memoizedExpressions.Add(symbol, expression);
 
-        public Expression? Lookup(Expression symbol) =>
+        public Expression? Lookup(VariableExpression symbol) =>
             memoizedExpressions.TryGetValue(symbol, out var expression) ? expression : null;
     }
 }

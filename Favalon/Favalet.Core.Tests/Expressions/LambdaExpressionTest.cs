@@ -12,7 +12,7 @@ namespace Favalet.Expressions
     public sealed class LambdaExpressionTest
     {
         [Test]
-        public void Apply1()
+        public void Lambda1()
         {
             var environment = Environment.Create();
 

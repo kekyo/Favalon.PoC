@@ -30,6 +30,23 @@ namespace Favalet.Expressions
                 return expression1;
             }
 
+            if (expression1 is PlaceholderExpression placeholder12)
+            {
+                if (placehoderController.Lookup(placeholder12) is Expression lookup)
+                {
+                    return lookup;
+                    //return this.Unify(lookup, expression2);
+                }
+            }
+            if (expression2 is PlaceholderExpression placeholder22)
+            {
+                if (placehoderController.Lookup(placeholder22) is Expression lookup)
+                {
+                    return lookup;
+                    //return this.Unify(lookup, expression1);
+                }
+            }
+
             if (expression2 is LambdaExpression lambda2)
             {
                 if (expression1 is LambdaExpression lambda11)
@@ -78,31 +95,15 @@ namespace Favalet.Expressions
                 }
             }
 
-            if (expression1 is PlaceholderExpression placeholder12)
+            if (expression1 is PlaceholderExpression placeholder13)
             {
-                if (placehoderController.Lookup(placeholder12) is Expression lookup)
-                {
-                    return lookup;
-                    //return this.Unify(lookup, expression2);
-                }
-                else
-                {
-                    placehoderController.Memoize(placeholder12, expression2);
-                    return expression2;
-                }
+                placehoderController.Memoize(placeholder13, expression2);
+                return expression2;
             }
-            if (expression2 is PlaceholderExpression placeholder22)
+            if (expression2 is PlaceholderExpression placeholder23)
             {
-                if (placehoderController.Lookup(placeholder22) is Expression lookup)
-                {
-                    return lookup;
-                    //return this.Unify(lookup, expression1);
-                }
-                else
-                {
-                    placehoderController.Memoize(placeholder22, expression1);
-                    return expression1;
-                }
+                placehoderController.Memoize(placeholder23, expression1);
+                return expression1;
             }
 
             throw new ArgumentException($"Cannot unifying: between \"{expression1.ReadableString}\" and \"{expression2.ReadableString}\"");

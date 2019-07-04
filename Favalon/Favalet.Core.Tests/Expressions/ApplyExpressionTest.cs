@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Favalon.Expressions
+namespace Favalet.Expressions
 {
-    using static StaticFactories;
+    using static Internals.StaticFactories;
 
     [TestFixture]
     public sealed class ApplyExpressionTest

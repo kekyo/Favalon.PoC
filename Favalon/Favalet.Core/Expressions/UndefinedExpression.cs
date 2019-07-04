@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Favalet.Expressions.Internals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Favalon.Expressions
+namespace Favalet.Expressions
 {
     public sealed class UndefinedExpression : Expression
     {
@@ -11,7 +12,7 @@ namespace Favalon.Expressions
             base(null!)
         { }
 
-        protected override string FormatReadableString() =>
+        protected override FormattedString FormatReadableString(FormatContext context) =>
             "?";
 
         public static readonly UndefinedExpression Instance = new UndefinedExpression();

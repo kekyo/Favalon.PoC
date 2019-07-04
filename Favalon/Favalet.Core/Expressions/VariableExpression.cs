@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Favalet.Expressions.Internals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Favalon.Expressions
+namespace Favalet.Expressions
 {
     public sealed class VariableExpression : Expression
     {
@@ -13,7 +14,7 @@ namespace Favalon.Expressions
 
         public readonly string Name;
 
-        protected override string FormatReadableString() =>
+        protected override FormattedString FormatReadableString(FormatContext context) =>
             this.Name;
     }
 }

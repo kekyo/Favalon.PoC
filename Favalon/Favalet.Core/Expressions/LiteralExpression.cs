@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public sealed class LiteralExpression : Expression
+    public sealed class LiteralExpression : Expression, IEquatable<LiteralExpression?>
     {
         public LiteralExpression(object value, Expression higherOrder) :
             base(higherOrder) =>
@@ -37,5 +37,14 @@ namespace Favalet.Expressions
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
             new LiteralExpression(this.Value, new VariableExpression(this.GetTypeName(), KindExpression.Instance));
+
+        public override int GetHashCode() =>
+            this.Value.GetHashCode();
+
+        public bool Equals(LiteralExpression? other) =>
+            other?.Value.Equals(this.Value) ?? false;
+
+        public override bool Equals(object obj) =>
+            this.Equals(obj as LiteralExpression);
     }
 }

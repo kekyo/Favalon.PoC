@@ -11,9 +11,12 @@ namespace Favalet.Expressions
         protected Expression(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
-        public readonly Expression HigherOrder;
+        public Expression HigherOrder { get; private set; }
 
         protected abstract Expression VisitInferring(Environment environment, Expression higherOrderHint);
+
+        internal void UpdateHigherOrder(Expression higherOrder) =>
+            this.HigherOrder = higherOrder;
 
         protected abstract FormattedString FormatReadableString(FormatContext context);
 
@@ -25,7 +28,7 @@ namespace Favalet.Expressions
         public override string ToString()
         {
             var name = this.GetType().Name.Replace("Expression", string.Empty);
-            return $"{name}: {this.ReadableString}";
+            return $"{name}: {FormatReadableString(new FormatContext(FormatAnnotations.SuppressPseudos, FormatNamings.Strict), this, false)}";
         }
     }
 }

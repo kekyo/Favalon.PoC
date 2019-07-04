@@ -8,15 +8,16 @@ namespace Favalet.Expressions
 {
     partial class Expression
     {
+        protected static Expression Unify(
+            Environment environment, Expression expression1, Expression expression2) =>
+            environment.Unify(expression1, expression2);
+
         protected static Expression CreatePlaceholderIfRequired(
-            Environment environment, Expression expressionHint1, Expression expressionHint2, Expression higherOrder) =>
-            (expressionHint2 is UndefinedExpression) ? ((expressionHint1 is UndefinedExpression) ? environment.CreatePlaceholder(higherOrder) : expressionHint1) :
-            !(expressionHint1 is UndefinedExpression) ?
-                throw new ArgumentException($"Cannot unifying: between \"{expressionHint1.ReadableString}\" and \"{expressionHint2.ReadableString}\"") :
-                expressionHint2;
-        protected static Expression CreatePlaceholderIfRequired(
-            Environment environment, Expression expressionHint, Expression higherOrder) =>
-            (expressionHint is UndefinedExpression) ? environment.CreatePlaceholder(higherOrder) : expressionHint;
+            Environment environment, Expression from) =>
+            (from is UndefinedExpression) ? environment.CreatePlaceholder(UndefinedExpression.Instance) : from;
+
+        protected static void UpdateHigherOrder(Expression expression, Expression higherOrder) =>
+            expression.UpdateHigherOrder(higherOrder);
 
         protected internal static Expression VisitInferring(Environment environment, Expression expression, Expression higherOrderHint) =>
             expression.VisitInferring(environment, higherOrderHint);

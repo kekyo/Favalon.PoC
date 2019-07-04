@@ -26,10 +26,18 @@ namespace Favalet.Expressions
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
         {
-            var higherOrder = CreatePlaceholderIfRequired(environment, higherOrderHint, UndefinedExpression.Instance);
+            var higherOrder = CreatePlaceholderIfRequired(environment, higherOrderHint);
             var argument = VisitInferring(environment, this.Argument, UndefinedExpression.Instance);
             var function = VisitInferring(environment, this.Function,
                 new LambdaExpression(argument.HigherOrder, higherOrder, UndefinedExpression.Instance));
+
+            // Apply3: Update()
+            if (function.HigherOrder is LambdaExpression functionHigherOrder)
+            {
+                var updated = Unify(environment, argument.HigherOrder, functionHigherOrder.Parameter);
+                UpdateHigherOrder(argument, updated);
+            }
+
             return new ApplyExpression(function, argument, higherOrder);
         }
     }

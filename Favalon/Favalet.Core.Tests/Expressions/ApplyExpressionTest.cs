@@ -59,5 +59,31 @@ namespace Favalet.Expressions
 
             Assert.AreEqual("(a:(System.Int32 -> '1) b:System.Int32):'1", inferred.StrictReadableString);
         }
+
+        [Test]
+        public void Apply3()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Apply 3:
+            a:(System.Int32 -> ?) b
+            (a:(System.Int32 -> ?) b:?):?
+            1:-------------------
+            (a:(System.Int32 -> ?) b:?):'1               : Hint('1)
+            (a:(System.Int32 -> ?) b:'2):'1              : Hint('2)
+            (a:(System.Int32 -> '1) b:'2):'1             : Hint('2 -> '1), Memoize('2 => System.Int32)
+            2:-------------------
+            (a:(System.Int32 -> '1) b:System.Int32):'1   : Update('2 => System.Int32)
+            3:-------------------
+            '1
+            */
+
+            var expression = Apply(Variable("a", Lambda(Variable("System.Int32"), Undefined())), Variable("b"));
+
+            var inferred = environment.Infer(expression);
+
+            Assert.AreEqual("(a:(System.Int32 -> '1) b:System.Int32):'1", inferred.StrictReadableString);
+        }
     }
 }

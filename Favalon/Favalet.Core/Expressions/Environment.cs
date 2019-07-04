@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public sealed class Environment
+    public sealed partial class Environment
     {
         private readonly PlaceholderController placehoderController = new PlaceholderController();
 

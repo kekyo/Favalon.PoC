@@ -19,7 +19,7 @@ namespace Favalet.Expressions
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
         {
-            var higherOrder = CreatePlaceholderIfRequired(environment, higherOrderHint, this.HigherOrder, UndefinedExpression.Instance);
+            var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
             return new VariableExpression(this.Name, higherOrder);
         }
     }

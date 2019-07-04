@@ -231,10 +231,11 @@ namespace Favalet.Expressions
             (a:? (b:? c:?):?):System.Int32
             1:-------------------
             (a:? (b:? c:?):'1):System.Int32
-            (a:('1 -> System.Int32) (b:? c:?):'1):System.Int32
-            (a:('1 -> System.Int32) (b:? c:'2):'1):System.Int32
-            (a:('1 -> System.Int32) (b:('2 -> '1) c:'2):'1):System.Int32
+            (a:? (b:? c:?):'1):System.Int32
+            (a:? (b:? c:'2):'1):System.Int32
+            (a:? (b:('2 -> '1) c:'2):'1):System.Int32
             2:-------------------
+            (a:('1 -> System.Int32) (b:('2 -> '1) c:'2):'1):System.Int32
             3:-------------------
             System.Int32
             */

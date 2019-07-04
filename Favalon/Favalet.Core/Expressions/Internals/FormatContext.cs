@@ -2,22 +2,11 @@
 
 namespace Favalet.Expressions.Internals
 {
-    public struct FormattedString
+    public enum FormatAnnotations
     {
-        public readonly string Formatted;
-        public readonly bool RequiredEncloseParentheses;
-
-        private FormattedString(string formatted, bool requiredEncloseParentheses)
-        {
-            this.Formatted = formatted;
-            this.RequiredEncloseParentheses = requiredEncloseParentheses;
-        }
-
-        public static implicit operator FormattedString(string formatted) =>
-            new FormattedString(formatted, false);
-
-        public static FormattedString RequiredEnclose(string formatted) =>
-            new FormattedString(formatted, true);
+        Without,
+        Strict,
+        SuppressPseudos
     }
 
     public enum FormatNamings
@@ -32,24 +21,24 @@ namespace Favalet.Expressions.Internals
         private readonly SortedDictionary<PlaceholderExpression, int> freeVariables;
 
         private FormatContext(
-            bool withAnnotation, FormatNamings formatNaming,
+            FormatAnnotations formatAnnotation, FormatNamings formatNaming,
             SortedDictionary<PlaceholderExpression, int> freeVariables)
         {
-            this.WithAnnotation = withAnnotation;
+            this.FormatAnnotation = formatAnnotation;
             this.FormatNaming = formatNaming;
             this.freeVariables = freeVariables;
         }
 
-        public readonly bool WithAnnotation;
+        public readonly FormatAnnotations FormatAnnotation;
         public readonly FormatNamings FormatNaming;
 
-        internal FormatContext(bool withAnnotation, FormatNamings formatNaming) :
-            this(withAnnotation, formatNaming, new SortedDictionary<PlaceholderExpression, int>())
+        internal FormatContext(FormatAnnotations formatAnnotation, FormatNamings formatNaming) :
+            this(formatAnnotation, formatNaming, new SortedDictionary<PlaceholderExpression, int>())
         {
         }
 
-        public FormatContext NewDerived(bool? withAnnotation, FormatNamings? formatNaming) =>
-            new FormatContext(withAnnotation ?? this.WithAnnotation,formatNaming ?? this.FormatNaming, freeVariables);
+        public FormatContext NewDerived(FormatAnnotations? formatAnnotation, FormatNamings? formatNaming) =>
+            new FormatContext(formatAnnotation ?? this.FormatAnnotation, formatNaming ?? this.FormatNaming, freeVariables);
 
         internal int GetAdjustedIndex(PlaceholderExpression freeVariable)
         {

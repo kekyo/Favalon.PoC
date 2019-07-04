@@ -6,17 +6,13 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public sealed class KindExpression : PseudoExpression
+    public abstract class PseudoExpression : Expression
     {
-        private KindExpression()
+        private protected PseudoExpression() :
+            base(null!)
         { }
-
-        protected override FormattedString FormatReadableString(FormatContext context) =>
-            "*";
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
             throw new NotImplementedException();
-
-        public static readonly KindExpression Instance = new KindExpression();
     }
 }

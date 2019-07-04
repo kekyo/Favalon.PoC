@@ -16,5 +16,11 @@ namespace Favalet.Expressions
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
             this.Name;
+
+        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
+        {
+            var higherOrder = CreatePlaceholderIfRequired(environment, higherOrderHint, UndefinedExpression.Instance);
+            return new VariableExpression(this.Name, higherOrder);
+        }
     }
 }

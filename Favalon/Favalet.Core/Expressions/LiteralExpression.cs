@@ -16,5 +16,8 @@ namespace Favalet.Expressions
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
             (this.Value is string) ? $"\"{this.Value}\"" : this.Value.ToString();
+
+        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
+            throw new NotImplementedException();
     }
 }

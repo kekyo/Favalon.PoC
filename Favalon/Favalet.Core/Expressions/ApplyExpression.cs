@@ -8,20 +8,29 @@ namespace Favalet.Expressions
 {
     public sealed class ApplyExpression : Expression
     {
-        public ApplyExpression(Expression function, Expression parameter, Expression higherOrder) :
+        public ApplyExpression(Expression function, Expression argument, Expression higherOrder) :
             base(higherOrder)
         {
             this.Function = function;
-            this.Parameter = parameter;
+            this.Argument = argument;
         }
 
         public readonly Expression Function;
-        public readonly Expression Parameter;
+        public readonly Expression Argument;
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
-            FormattedString.RequiredEnclose(
-                (this.Parameter is ApplyExpression) ?
-                    $"{FormatReadableString(context, this.Function, true)} ({FormatReadableString(context, this.Parameter, false)})" :
-                    $"{FormatReadableString(context, this.Function, true)} {FormatReadableString(context, this.Parameter, true)}");
+            FormattedString.RequiredEnclosing(
+                (this.Argument is ApplyExpression) ?
+                    $"{FormatReadableString(context, this.Function, true)} ({FormatReadableString(context, this.Argument, false)})" :
+                    $"{FormatReadableString(context, this.Function, true)} {FormatReadableString(context, this.Argument, true)}");
+
+        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
+        {
+            var higherOrder = CreatePlaceholderIfRequired(environment, higherOrderHint, UndefinedExpression.Instance);
+            var argument = VisitInferring(environment, this.Argument, UndefinedExpression.Instance);
+            var function = VisitInferring(environment, this.Function,
+                new LambdaExpression(argument.HigherOrder, higherOrder, UndefinedExpression.Instance));
+            return new ApplyExpression(function, argument, higherOrder);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public sealed class PlaceholderExpression : Expression
+    public sealed class PlaceholderExpression : Expression, IComparable<PlaceholderExpression>
     {
         public PlaceholderExpression(int index, Expression higherOrder) :
             base(higherOrder) =>
@@ -28,5 +28,11 @@ namespace Favalet.Expressions
                     return $"'{this.Index}";
             }
         }
+
+        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
+            throw new NotImplementedException();
+
+        public int CompareTo(PlaceholderExpression other) =>
+            this.Index.CompareTo(other.Index);
     }
 }

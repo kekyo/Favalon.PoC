@@ -6,30 +6,21 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public abstract class Expression
+    public abstract partial class Expression
     {
         protected Expression(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
         public readonly Expression HigherOrder;
 
+        protected abstract Expression VisitInferring(Environment environment, Expression higherOrderHint);
+
         protected abstract FormattedString FormatReadableString(FormatContext context);
 
-        private string FormatReadableString(FormatContext context, bool encloseParenthesesIfRequired)
-        {
-            var result = this.FormatReadableString(context);
-            return (encloseParenthesesIfRequired && result.RequiredEncloseParentheses) ?
-                $"({result.Formatted})" :
-                result.Formatted;
-        }
-
-        protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired) =>
-            (context.WithAnnotation && expression.HigherOrder is Expression higherOrder) ?
-                $"{expression.FormatReadableString(context, true)}:{higherOrder.FormatReadableString(context.NewDerived(false, null), true)}" :
-                expression.FormatReadableString(context, encloseParenthesesIfRequired);
-
         public string ReadableString =>
-            FormatReadableString(new FormatContext(true, FormatNamings.Standard), this, false);
+            FormatReadableString(new FormatContext(FormatAnnotations.SuppressPseudos, FormatNamings.Standard), this, false);
+        public string StrictReadableString =>
+            FormatReadableString(new FormatContext(FormatAnnotations.Strict, FormatNamings.Strict), this, false);
 
         public override string ToString()
         {

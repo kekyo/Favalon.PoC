@@ -19,17 +19,18 @@ namespace Favalet.Expressions
             //a b
             //(a:? b:?):?
             //1:-------------------
-            //(a:? b :?):'1
-            //(a:? b : '2):'1
-            //(a: ('2 -> '1) b: '2):'1
+            //(a:? b:?):'1
+            //(a:? b:'2):'1
+            //(a:('2 -> '1) b:'2):'1
             //2:-------------------
             //3:-------------------
             //'1
+
             var expression = Apply(Variable("a"), Variable("b"));
 
             var inferred = environment.Infer(expression);
 
-            Assert.AreEqual("'1", inferred.HigherOrder.ReadableString);
+            Assert.AreEqual("(a:('2 -> '1) b:'2):'1", inferred.ReadableString);
         }
     }
 }

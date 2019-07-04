@@ -32,39 +32,75 @@ namespace Favalet.Expressions
 
             if (expression2 is LambdaExpression lambda2)
             {
-                if (expression1 is LambdaExpression lambda1)
+                if (expression1 is LambdaExpression lambda11)
                 {
-                    var parameter = this.Unify(lambda1.Parameter, lambda2.Parameter);
-                    var expression = this.Unify(lambda1.Expression, lambda2.Expression);
+                    var parameter = this.Unify(lambda11.Parameter, lambda2.Parameter);
+                    var expression = this.Unify(lambda11.Expression, lambda2.Expression);
                     var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UndefinedExpression.Instance);
 
                     return new LambdaExpression(parameter, expression, lambdaHigherOrder);
                 }
+                else
+                {
+                    var parameter = this.Unify(lambda2.Parameter, UndefinedExpression.Instance);
+                    var expression = this.Unify(lambda2.Expression, UndefinedExpression.Instance);
+
+                    var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UndefinedExpression.Instance);
+                    var lambda = new LambdaExpression(parameter, expression, lambdaHigherOrder);
+
+                    if (expression1 is PlaceholderExpression placeholder11)
+                    {
+                        placehoderController.Memoize(placeholder11, lambda);
+                        return lambda;
+                    }
+                    else
+                    {
+                        return lambda;
+                    }
+                }
+            }
+            else if (expression1 is LambdaExpression lambda12)
+            {
+                var parameter = this.Unify(lambda12.Parameter, UndefinedExpression.Instance);
+                var expression = this.Unify(lambda12.Expression, UndefinedExpression.Instance);
+
+                var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UndefinedExpression.Instance);
+                var lambda = new LambdaExpression(parameter, expression, lambdaHigherOrder);
+
+                if (expression2 is PlaceholderExpression placeholder21)
+                {
+                    placehoderController.Memoize(placeholder21, lambda);
+                    return lambda;
+                }
+                else
+                {
+                    return lambda;
+                }
             }
 
-            if (expression1 is PlaceholderExpression placeholder1)
+            if (expression1 is PlaceholderExpression placeholder12)
             {
-                if (placehoderController.Lookup(placeholder1) is Expression lookup)
+                if (placehoderController.Lookup(placeholder12) is Expression lookup)
                 {
                     return lookup;
                     //return this.Unify(lookup, expression2);
                 }
                 else
                 {
-                    placehoderController.Memoize(placeholder1, expression2);
+                    placehoderController.Memoize(placeholder12, expression2);
                     return expression2;
                 }
             }
-            if (expression2 is PlaceholderExpression placeholder2)
+            if (expression2 is PlaceholderExpression placeholder22)
             {
-                if (placehoderController.Lookup(placeholder2) is Expression lookup)
+                if (placehoderController.Lookup(placeholder22) is Expression lookup)
                 {
                     return lookup;
                     //return this.Unify(lookup, expression1);
                 }
                 else
                 {
-                    placehoderController.Memoize(placeholder2, expression1);
+                    placehoderController.Memoize(placeholder22, expression1);
                     return expression1;
                 }
             }

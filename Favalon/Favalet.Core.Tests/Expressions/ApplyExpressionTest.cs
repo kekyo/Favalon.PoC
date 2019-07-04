@@ -342,6 +342,11 @@ namespace Favalet.Expressions
             (a:((System.Int32 -> ?) -> ?) (b:? c:'3):'2):'1
             (a:((System.Int32 -> ?) -> ?) (b:('3 -> '2) c:'3):'2):'1
             (a:((System.Int32 -> '4) -> '1) (b:('3 -> '2) c:'3):'2):'1                       : Memoize('2 => (System.Int32 -> '4))
+
+            (System.Int32 -> ?) -> ?
+            '2                  -> '1
+
+
             2:-------------------
             (a:((System.Int32 -> '4) -> '1) (b:('3 -> '2) c:'3):(System.Int32 -> '4)):'1     : Update('2 => (System.Int32 -> '4))
 

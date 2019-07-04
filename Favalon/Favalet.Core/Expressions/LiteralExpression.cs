@@ -1,6 +1,7 @@
 ﻿using Favalet.Expressions.Internals;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 using System.Text;
 
@@ -8,8 +9,8 @@ namespace Favalet.Expressions
 {
     public sealed class LiteralExpression : Expression
     {
-        public LiteralExpression(object value) :
-            base(new VariableExpression(value.GetType().FullName, KindExpression.Instance)) =>
+        public LiteralExpression(object value, Expression higherOrder) :
+            base(higherOrder) =>
         this.Value = value;
 
         public readonly object Value;
@@ -17,7 +18,24 @@ namespace Favalet.Expressions
         protected override FormattedString FormatReadableString(FormatContext context) =>
             (this.Value is string) ? $"\"{this.Value}\"" : this.Value.ToString();
 
+        private string GetTypeName()
+        {
+#if NETSTANDARD1_0
+            var type = this.Value.GetType().GetTypeInfo();
+#else
+            var type = this.Value.GetType();
+#endif
+            if (type.IsPrimitive)
+            {
+                return "Numeric";
+            }
+            else
+            {
+                return type.FullName;
+            }
+        }
+
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
-            throw new NotImplementedException();
+            new LiteralExpression(this.Value, new VariableExpression(this.GetTypeName(), KindExpression.Instance));
     }
 }

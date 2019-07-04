@@ -7,6 +7,11 @@ namespace Favalet.Expressions.Internals
 {
     public static class StaticFactories
     {
+        public static LiteralExpression Literal(object value, Expression higherOrder) =>
+            new LiteralExpression(value, higherOrder);
+        public static LiteralExpression Literal(object value) =>
+            new LiteralExpression(value, UndefinedExpression.Instance);
+
         public static VariableExpression Variable(string name, Expression higherOrder) =>
             new VariableExpression(name, higherOrder);
         public static VariableExpression Variable(string name) =>

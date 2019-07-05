@@ -6,9 +6,9 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public abstract class VariableExpression : Expression
+    public abstract class ValueExpression : Expression
     {
-        protected VariableExpression(Expression higherOrder) :
+        protected ValueExpression(Expression higherOrder) :
             base(higherOrder)
         { }
     }

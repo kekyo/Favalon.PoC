@@ -1,12 +1,13 @@
 ﻿using Favalet.Expressions.Additionals;
+using Favalet.Expressions.Internals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Favalet.Expressions.Internals
+namespace Favalet.Expressions
 {
-    public static class StaticFactories
+    partial class Expression
     {
         public static UnspecifiedExpression Unspecified() =>
             UnspecifiedExpression.Instance;

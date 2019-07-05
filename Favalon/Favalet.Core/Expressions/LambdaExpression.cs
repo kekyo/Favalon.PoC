@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public sealed class LambdaExpression : Expression
+    public sealed class LambdaExpression : ValueExpression
     {
         internal LambdaExpression(Expression parameter, Expression expression, Expression higherOrder) :
             base(higherOrder)

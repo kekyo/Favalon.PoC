@@ -15,7 +15,7 @@ namespace Favalet.Expressions
             this.Expression = expression;
         }
 
-        public readonly BoundVariableExpression Bound;
+        public new readonly BoundVariableExpression Bound;
         public readonly Expression Expression;
 
         protected override FormattedString FormatReadableString(FormatContext context) =>

@@ -5,9 +5,9 @@ using System.Reflection;
 using System.Linq;
 using System.Text;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Additionals
 {
-    public sealed class LiteralExpression : Expression, IEquatable<LiteralExpression?>
+    public sealed class LiteralExpression : ValueExpression, IEquatable<LiteralExpression?>
     {
         internal LiteralExpression(object value, Expression higherOrder) :
             base(higherOrder) =>

@@ -12,11 +12,11 @@ namespace Favalet.Expressions
             base(name, higherOrder)
         { }
 
-        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
+        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
         {
-            if (Lookup(environment, this) is Expression bound)
+            if (environment.Lookup(this) is Expression bound)
             {
-                var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder, bound.HigherOrder);
+                var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder, bound.HigherOrder);
                 return new FreeVariableExpression(this.Name, higherOrder);
             }
             else
@@ -25,9 +25,9 @@ namespace Favalet.Expressions
             }
         }
 
-        protected override Expression VisitResolving(Environment environment)
+        protected override Expression VisitResolving(IResolvingEnvironment environment)
         {
-            var higherOrder = VisitResolving(environment, this.HigherOrder);
+            var higherOrder = environment.Visit(this.HigherOrder);
             return new FreeVariableExpression(this.Name, higherOrder);
         }
     }

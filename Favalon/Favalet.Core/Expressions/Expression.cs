@@ -13,8 +13,8 @@ namespace Favalet.Expressions
 
         public readonly Expression HigherOrder;
 
-        protected abstract Expression VisitInferring(Environment environment, Expression higherOrderHint);
-        protected abstract Expression VisitResolving(Environment environment);
+        protected abstract Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint);
+        protected abstract Expression VisitResolving(IResolvingEnvironment environment);
 
         protected abstract FormattedString FormatReadableString(FormatContext context);
 

@@ -12,10 +12,10 @@ namespace Favalet.Expressions
             base(null!)
         { }
 
-        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
+        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
             throw new NotImplementedException();
 
-        protected override Expression VisitResolving(Environment environment) =>
+        protected override Expression VisitResolving(IResolvingEnvironment environment) =>
             this;
     }
 }

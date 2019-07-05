@@ -22,21 +22,21 @@ namespace Favalet.Expressions
             FormattedString.RequiredEnclosing(
                 $"{FormatReadableString(context, this.Bound, true)} = {FormatReadableString(context, this.Expression, context.FormatNaming != FormatNamings.Friendly)}");
 
-        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
+        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
         {
-            var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
+            var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
 
-            var bound = VisitInferring(environment, this.Bound, higherOrder);
-            var expression = VisitInferring(environment, this.Expression, bound.HigherOrder);
+            var bound = environment.Visit(this.Bound, higherOrder);
+            var expression = environment.Visit(this.Expression, bound.HigherOrder);
 
             return new BindExpression(bound, expression, expression.HigherOrder);
         }
 
-        protected override Expression VisitResolving(Environment environment)
+        protected override Expression VisitResolving(IResolvingEnvironment environment)
         {
-            var bound = VisitResolving(environment, this.Bound);
-            var expression = VisitResolving(environment, this.Expression);
-            var higherOrder = VisitResolving(environment, this.HigherOrder);
+            var bound = environment.Visit(this.Bound);
+            var expression = environment.Visit(this.Expression);
+            var higherOrder = environment.Visit(this.HigherOrder);
 
             return new BindExpression(bound, expression, higherOrder);
         }

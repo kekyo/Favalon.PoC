@@ -6,6 +6,8 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
+    using static Favalet.Expressions.Expression;
+
     partial class Environment
     {
         private Expression UnifyLambda(LambdaExpression lambda1, Expression expression2)
@@ -102,7 +104,10 @@ namespace Favalet.Expressions
             return this.Unify2(expression1, expression2);
         }
 
-        internal Expression Unify(Expression expression1, Expression expression2, Expression expression3)
+        Expression IInferringEnvironment.Unify(Expression expression1, Expression expression2) =>
+            this.Unify(expression1, expression2);
+
+        Expression IInferringEnvironment.Unify(Expression expression1, Expression expression2, Expression expression3)
         {
             if (expression3 is UnspecifiedExpression)
             {

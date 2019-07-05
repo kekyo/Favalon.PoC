@@ -30,11 +30,11 @@ namespace Favalet.Expressions.Internals
             }
         }
 
-        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
+        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
             throw new NotImplementedException();
 
-        protected override Expression VisitResolving(Environment environment) =>
-            (Lookup(environment, this) is Expression lookup) ? lookup : this;
+        protected override Expression VisitResolving(IResolvingEnvironment environment) =>
+            (environment.Lookup(this) is Expression lookup) ? lookup : this;
 
         public override int GetHashCode() =>
             this.Index;

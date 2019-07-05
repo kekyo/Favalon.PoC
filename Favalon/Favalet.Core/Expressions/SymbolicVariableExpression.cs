@@ -19,19 +19,19 @@ namespace Favalet.Expressions
             this.Name;
 
         private protected TExpression VisitInferringImplicitly<TExpression>(
-            Environment environment, Func<string, Expression, TExpression> generator, Expression higherOrderHint)
+            IInferringEnvironment environment, Func<string, Expression, TExpression> generator, Expression higherOrderHint)
             where TExpression : VariableExpression
         {
-            if (Lookup(environment, this) is Expression bound)
+            if (environment.Lookup(this) is Expression bound)
             {
-                var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder, bound.HigherOrder);
+                var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder, bound.HigherOrder);
                 return generator(this.Name, higherOrder);
             }
             else
             {
-                var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
+                var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
                 var variable = generator(this.Name, higherOrder);
-                Memoize(environment, this, variable);
+                environment.Memoize(this, variable);
                 return variable;
             }
         }

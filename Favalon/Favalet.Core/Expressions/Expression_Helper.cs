@@ -8,32 +8,33 @@ namespace Favalet.Expressions
 {
     partial class Expression
     {
-        protected static Expression Unify(
-            Environment environment, Expression expression1, Expression expression2) =>
-            environment.Unify(expression1, expression2);
-        protected static Expression Unify(
-            Environment environment, Expression expression1, Expression expression2, Expression expression3) =>
-            environment.Unify(expression1, expression2, expression3);
+        protected internal interface IInferringEnvironment
+        {
+            Expression Unify(Expression expression1, Expression expression2);
+            Expression Unify(Expression expression1, Expression expression2, Expression expression3);
 
-        protected static Expression CreatePlaceholderIfRequired(
-            Environment environment, Expression from) =>
-            (from is UnspecifiedExpression) ? environment.CreatePlaceholder(UnspecifiedExpression.Instance) : from;
+            Expression CreatePlaceholderIfRequired(Expression from);
 
-        protected static void Memoize(
-            Environment environment, VariableExpression symbol, Expression expression) =>
-            environment.Memoize(symbol, expression);
+            void Memoize(VariableExpression symbol, Expression expression);
 
-        protected static Expression? Lookup(
-            Environment environment, VariableExpression symbol) =>
-            environment.Lookup(symbol);
+            Expression? Lookup(VariableExpression symbol);
 
-        protected internal static TExpression VisitInferring<TExpression>(Environment environment, TExpression expression, Expression higherOrderHint)
-            where TExpression : Expression =>
-            (TExpression)expression.VisitInferring(environment, higherOrderHint);
+            TExpression Visit<TExpression>(TExpression expression, Expression higherOrderHint)
+                where TExpression : Expression;
+        }
 
-        protected internal static TExpression VisitResolving<TExpression>(Environment environment, TExpression expression)
-            where TExpression : Expression =>
-            (TExpression)expression.VisitResolving(environment);
+        protected internal interface IResolvingEnvironment
+        {
+            Expression? Lookup(VariableExpression symbol);
+
+            TExpression Visit<TExpression>(TExpression expression)
+                where TExpression : Expression;
+        }
+
+        internal Expression InternalVisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
+            this.VisitInferring(environment, higherOrderHint);
+        internal Expression InternalVisitResolving(IResolvingEnvironment environment) =>
+            this.VisitResolving(environment);
 
         private string FormatReadableString(FormatContext context, bool encloseParenthesesIfRequired)
         {

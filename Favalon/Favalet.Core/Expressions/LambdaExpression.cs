@@ -25,24 +25,24 @@ namespace Favalet.Expressions
                 $"{FormatReadableString(context, this.Parameter, true)} {arrow} {FormatReadableString(context, this.Expression, context.FormatNaming != FormatNamings.Friendly)}");
         }
 
-        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
+        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
         {
-            var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
+            var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
 
-            var parameter = VisitInferring(environment, this.Parameter, UnspecifiedExpression.Instance);
-            var expression = VisitInferring(environment, this.Expression, UnspecifiedExpression.Instance);
+            var parameter = environment.Visit(this.Parameter, UnspecifiedExpression.Instance);
+            var expression = environment.Visit(this.Expression, UnspecifiedExpression.Instance);
 
-            var lambdaHigherOrder = Unify(environment, higherOrder,
+            var lambdaHigherOrder = environment.Unify(higherOrder,
                 new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UnspecifiedExpression.Instance));
 
             return new LambdaExpression(parameter, expression, lambdaHigherOrder);
         }
 
-        protected override Expression VisitResolving(Environment environment)
+        protected override Expression VisitResolving(IResolvingEnvironment environment)
         {
-            var parameter = VisitResolving(environment, this.Parameter);
-            var expression = VisitResolving(environment, this.Expression);
-            var higherOrder = VisitResolving(environment, this.HigherOrder);
+            var parameter = environment.Visit(this.Parameter);
+            var expression = environment.Visit(this.Expression);
+            var higherOrder = environment.Visit(this.HigherOrder);
 
             return new LambdaExpression(parameter, expression, higherOrder);
         }

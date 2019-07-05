@@ -12,15 +12,15 @@ namespace Favalet.Expressions
             base(name, higherOrder)
         { }
 
-        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
+        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
             this.VisitInferringImplicitly(
                 environment,
                 (name, higherOrder) => new BoundVariableExpression(name, higherOrder),
                 higherOrderHint);
 
-        protected override Expression VisitResolving(Environment environment)
+        protected override Expression VisitResolving(IResolvingEnvironment environment)
         {
-            var higherOrder = VisitResolving(environment, this.HigherOrder);
+            var higherOrder = environment.Visit(this.HigherOrder);
             return new BoundVariableExpression(this.Name, higherOrder);
         }
     }

@@ -35,10 +35,10 @@ namespace Favalet.Expressions
             }
         }
 
-        protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
+        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
             new LiteralExpression(this.Value, new FreeVariableExpression(this.GetTypeName(), KindExpression.Instance));
 
-        protected override Expression VisitResolving(Environment environment) =>
+        protected override Expression VisitResolving(IResolvingEnvironment environment) =>
             this;
 
         public override int GetHashCode() =>

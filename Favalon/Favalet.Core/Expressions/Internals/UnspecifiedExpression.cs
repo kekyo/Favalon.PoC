@@ -14,6 +14,6 @@ namespace Favalet.Expressions.Internals
         protected override FormattedString FormatReadableString(FormatContext context) =>
             (context.FormatNaming == FormatNamings.Strict) ? "(Unspecified)" : "?";
 
-        public static readonly UnspecifiedExpression Instance = new UnspecifiedExpression();
+        internal static readonly UnspecifiedExpression Instance = new UnspecifiedExpression();
     }
 }

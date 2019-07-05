@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    using static Internals.StaticFactories;
+    using static StaticFactories;
 
     [TestFixture]
     public sealed class LambdaExpressionTest

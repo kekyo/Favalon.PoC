@@ -9,10 +9,10 @@ namespace Favalet.Expressions
 {
     partial class Expression
     {
-        public static UnspecifiedExpression Unspecified() =>
+        public static readonly UnspecifiedExpression Unspecified =
             UnspecifiedExpression.Instance;
 
-        public static KindExpression Kind() =>
+        public static readonly KindExpression Kind =
             KindExpression.Instance;
 
         public static LiteralExpression Literal(object value, Expression higherOrder) =>
@@ -24,11 +24,6 @@ namespace Favalet.Expressions
             new FreeVariableExpression(name, higherOrder);
         public static SymbolicVariableExpression Free(string name) =>
             new FreeVariableExpression(name, UnspecifiedExpression.Instance);
-
-        public static SymbolicVariableExpression Implicit(string name, Expression higherOrder) =>
-            new ImplicitVariableExpression(name, higherOrder);
-        public static SymbolicVariableExpression Implicit(string name) =>
-            new ImplicitVariableExpression(name, UnspecifiedExpression.Instance);
 
         public static BoundVariableExpression Bound(string name, Expression higherOrder) =>
             new BoundVariableExpression(name, higherOrder);

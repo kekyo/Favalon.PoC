@@ -9,7 +9,7 @@ namespace Favalet.Expressions
     public abstract class SymbolicVariableExpression :
         VariableExpression, IEquatable<SymbolicVariableExpression?>
     {
-        private protected SymbolicVariableExpression(string name, Expression higherOrder) :
+        protected SymbolicVariableExpression(string name, Expression higherOrder) :
             base(higherOrder) =>
             this.Name = name;
 
@@ -18,7 +18,7 @@ namespace Favalet.Expressions
         protected override FormattedString FormatReadableString(FormatContext context) =>
             this.Name;
 
-        private protected TExpression VisitInferringImplicitly<TExpression>(
+        private protected TExpression VisitInferringImplicitVariable<TExpression>(
             IInferringEnvironment environment, Func<string, Expression, TExpression> generator, Expression higherOrderHint)
             where TExpression : VariableExpression
         {

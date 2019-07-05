@@ -1,56 +1,57 @@
 ﻿using Favalet.Expressions.Additionals;
+using Favalet.Expressions.Internals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Favalet.Expressions.Internals
+namespace Favalet.Expressions
 {
     public static class StaticFactories
     {
-        public static UnspecifiedExpression Unspecified() =>
-            UnspecifiedExpression.Instance;
+        public static UnspecifiedExpression Unspecified =>
+            Expression.Unspecified;
 
-        public static KindExpression Kind() =>
-            KindExpression.Instance;
+        public static KindExpression Kind =>
+            Expression.Kind;
 
         public static LiteralExpression Literal(object value, Expression higherOrder) =>
-            new LiteralExpression(value, higherOrder);
+            Expression.Literal(value, higherOrder);
         public static LiteralExpression Literal(object value) =>
-            new LiteralExpression(value, UnspecifiedExpression.Instance);
+            Expression.Literal(value, Unspecified);
 
         public static SymbolicVariableExpression Free(string name, Expression higherOrder) =>
-            new FreeVariableExpression(name, higherOrder);
+            Expression.Free(name, higherOrder);
         public static SymbolicVariableExpression Free(string name) =>
-            new FreeVariableExpression(name, UnspecifiedExpression.Instance);
+            Expression.Free(name, Unspecified);
 
         public static SymbolicVariableExpression Implicit(string name, Expression higherOrder) =>
-            new ImplicitVariableExpression(name, higherOrder);
+            ImplicitVariableExpression.Create(name, higherOrder);
         public static SymbolicVariableExpression Implicit(string name) =>
-            new ImplicitVariableExpression(name, UnspecifiedExpression.Instance);
+            ImplicitVariableExpression.Create(name, Unspecified);
 
         public static BoundVariableExpression Bound(string name, Expression higherOrder) =>
-            new BoundVariableExpression(name, higherOrder);
+            Expression.Bound(name, higherOrder);
         public static BoundVariableExpression Bound(string name) =>
-            new BoundVariableExpression(name, UnspecifiedExpression.Instance);
+            Expression.Bound(name, Unspecified);
 
         public static ApplyExpression Apply(Expression function, Expression argument, Expression higherOrder) =>
-            new ApplyExpression(function, argument, higherOrder);
+            Expression.Apply(function, argument, higherOrder);
         public static ApplyExpression Apply(Expression function, Expression argument) =>
-            new ApplyExpression(function, argument, UnspecifiedExpression.Instance);
+            Expression.Apply(function, argument, Unspecified);
 
         public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression, Expression higherOrder) =>
-            new LambdaExpression(parameter, expression, higherOrder);
+            Expression.Lambda(parameter, expression, higherOrder);
         public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression) =>
-            new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance);
+            Expression.Lambda(parameter, expression, Unspecified);
         public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression, Expression higherOrder) =>
-            new LambdaExpression(parameter, expression, higherOrder);
+            Expression.Lambda(parameter, expression, higherOrder);
         public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression) =>
-            new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance);
+            Expression.Lambda(parameter, expression, Unspecified);
 
         public static BindExpression Bind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
-            new BindExpression(bound, expression, higherOrder);
+            Expression.Bind(bound, expression, higherOrder);
         public static BindExpression Bind(BoundVariableExpression bound, Expression expression) =>
-            new BindExpression(bound, expression, UnspecifiedExpression.Instance);
+            Expression.Bind(bound, expression, Unspecified);
     }
 }

@@ -8,12 +8,12 @@ namespace Favalet.Expressions.Internals
 {
     public sealed class ImplicitVariableExpression : SymbolicVariableExpression
     {
-        internal ImplicitVariableExpression(string name, Expression higherOrder) :
+        private ImplicitVariableExpression(string name, Expression higherOrder) :
             base(name, higherOrder)
         { }
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            this.VisitInferringImplicitly(
+            this.VisitInferringImplicitVariable(
                 environment,
                 (name, higherOrder) => new ImplicitVariableExpression(name, higherOrder),
                 higherOrderHint);
@@ -23,5 +23,8 @@ namespace Favalet.Expressions.Internals
             var higherOrder = environment.Visit(this.HigherOrder);
             return new ImplicitVariableExpression(this.Name, higherOrder);
         }
+
+        public static ImplicitVariableExpression Create(string name, Expression higherOrder) =>
+            new ImplicitVariableExpression(name, higherOrder);
     }
 }

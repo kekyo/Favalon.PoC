@@ -13,7 +13,7 @@ namespace Favalet.Expressions
         { }
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            this.VisitInferringImplicitly(
+            this.VisitInferringImplicitVariable(
                 environment,
                 (name, higherOrder) => new BoundVariableExpression(name, higherOrder),
                 higherOrderHint);

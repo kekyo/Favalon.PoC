@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    using static Internals.StaticFactories;
+    using static StaticFactories;
 
     [TestFixture]
     public sealed class ApplyExpressionTest
@@ -79,7 +79,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Implicit("a", Lambda(Bound("System.Int32"), Unspecified())), Implicit("b"));
+            var expression = Apply(Implicit("a", Lambda(Bound("System.Int32"), Unspecified)), Implicit("b"));
             Assert.AreEqual("(a:(System.Int32 -> ?) b:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -186,7 +186,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Apply(Implicit("a", Lambda(Bound("System.Int32"), Unspecified())), Implicit("b")), Implicit("c"));
+            var expression = Apply(Apply(Implicit("a", Lambda(Bound("System.Int32"), Unspecified)), Implicit("b")), Implicit("c"));
             Assert.AreEqual("((a:(System.Int32 -> ?) b:?):? c:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -320,7 +320,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Implicit("a"), Apply(Implicit("b", Lambda(Bound("System.Int32"), Unspecified())), Implicit("c")));
+            var expression = Apply(Implicit("a"), Apply(Implicit("b", Lambda(Bound("System.Int32"), Unspecified)), Implicit("c")));
             Assert.AreEqual("(a:? (b:(System.Int32 -> ?) c:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -347,7 +347,7 @@ namespace Favalet.Expressions
             (a:((System.Int32 -> '4) -> '1) (b:('3 -> (System.Int32 -> '4)) c:'3):(System.Int32 -> '4)):'1     : Update('2 => (System.Int32 -> '4))
             */
 
-            var expression = Apply(Implicit("a", Lambda(Lambda(Bound("System.Int32"), Unspecified()), Unspecified())), Apply(Implicit("b"), Implicit("c")));
+            var expression = Apply(Implicit("a", Lambda(Lambda(Bound("System.Int32"), Unspecified), Unspecified)), Apply(Implicit("b"), Implicit("c")));
             Assert.AreEqual("(a:((System.Int32 -> ?) -> ?) (b:? c:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);

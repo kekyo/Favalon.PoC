@@ -18,26 +18,22 @@ namespace Favalet.Expressions
         protected override FormattedString FormatReadableString(FormatContext context) =>
             this.Name;
 
-        internal Expression VisitInferringImplicitly(Environment environment, Expression higherOrderHint)
+        private protected TExpression VisitInferringImplicitly<TExpression>(
+            Environment environment, Func<string, Expression, TExpression> generator, Expression higherOrderHint)
+            where TExpression : VariableExpression
         {
             if (Lookup(environment, this) is Expression bound)
             {
                 var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder, bound.HigherOrder);
-                return new FreeVariableExpression(this.Name, higherOrder);
+                return generator(this.Name, higherOrder);
             }
             else
             {
                 var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
-                var variable = new FreeVariableExpression(this.Name, higherOrder);
-                Memoize(environment, variable, variable);
+                var variable = generator(this.Name, higherOrder);
+                Memoize(environment, this, variable);
                 return variable;
             }
-        }
-
-        protected override Expression VisitResolving(Environment environment)
-        {
-            var higherOrder = VisitResolving(environment, this.HigherOrder);
-            return new FreeVariableExpression(this.Name, higherOrder);
         }
 
         public override int GetHashCode() =>

@@ -27,11 +27,13 @@ namespace Favalet.Expressions
             Environment environment, VariableExpression symbol) =>
             environment.Lookup(symbol);
 
-        protected internal static Expression VisitInferring(Environment environment, Expression expression, Expression higherOrderHint) =>
-            expression.VisitInferring(environment, higherOrderHint);
+        protected internal static TExpression VisitInferring<TExpression>(Environment environment, TExpression expression, Expression higherOrderHint)
+            where TExpression : Expression =>
+            (TExpression)expression.VisitInferring(environment, higherOrderHint);
 
-        protected internal static Expression VisitResolving(Environment environment, Expression expression) =>
-            expression.VisitResolving(environment);
+        protected internal static TExpression VisitResolving<TExpression>(Environment environment, TExpression expression)
+            where TExpression : Expression =>
+            (TExpression)expression.VisitResolving(environment);
 
         private string FormatReadableString(FormatContext context, bool encloseParenthesesIfRequired)
         {

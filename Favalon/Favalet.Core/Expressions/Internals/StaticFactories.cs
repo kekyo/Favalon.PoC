@@ -18,14 +18,14 @@ namespace Favalet.Expressions.Internals
         public static LiteralExpression Literal(object value) =>
             new LiteralExpression(value, UnspecifiedExpression.Instance);
 
-        public static FreeVariableExpression Free(string name, Expression higherOrder) =>
+        public static SymbolicVariableExpression Free(string name, Expression higherOrder) =>
             new FreeVariableExpression(name, higherOrder);
-        public static FreeVariableExpression Free(string name) =>
+        public static SymbolicVariableExpression Free(string name) =>
             new FreeVariableExpression(name, UnspecifiedExpression.Instance);
 
-        public static ImplicitVariableExpression Implicit(string name, Expression higherOrder) =>
+        public static SymbolicVariableExpression Implicit(string name, Expression higherOrder) =>
             new ImplicitVariableExpression(name, higherOrder);
-        public static ImplicitVariableExpression Implicit(string name) =>
+        public static SymbolicVariableExpression Implicit(string name) =>
             new ImplicitVariableExpression(name, UnspecifiedExpression.Instance);
 
         public static BoundVariableExpression Bound(string name, Expression higherOrder) =>
@@ -46,5 +46,10 @@ namespace Favalet.Expressions.Internals
             new LambdaExpression(parameter, expression, higherOrder);
         public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression) =>
             new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance);
+
+        public static BindExpression Bind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
+            new BindExpression(bound, expression, higherOrder);
+        public static BindExpression Bind(BoundVariableExpression bound, Expression expression) =>
+            new BindExpression(bound, expression, UnspecifiedExpression.Instance);
     }
 }

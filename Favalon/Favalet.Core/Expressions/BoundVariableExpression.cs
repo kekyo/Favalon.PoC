@@ -13,6 +13,15 @@ namespace Favalet.Expressions
         { }
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint) =>
-            this.VisitInferringImplicitly(environment, higherOrderHint);
+            this.VisitInferringImplicitly(
+                environment,
+                (name, higherOrder) => new BoundVariableExpression(name, higherOrder),
+                higherOrderHint);
+
+        protected override Expression VisitResolving(Environment environment)
+        {
+            var higherOrder = VisitResolving(environment, this.HigherOrder);
+            return new BoundVariableExpression(this.Name, higherOrder);
+        }
     }
 }

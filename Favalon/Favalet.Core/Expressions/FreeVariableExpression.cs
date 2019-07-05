@@ -24,5 +24,11 @@ namespace Favalet.Expressions
                 throw new InvalidOperationException($"Cannot find variable. Name={this.Name}");
             }
         }
+
+        protected override Expression VisitResolving(Environment environment)
+        {
+            var higherOrder = VisitResolving(environment, this.HigherOrder);
+            return new FreeVariableExpression(this.Name, higherOrder);
+        }
     }
 }

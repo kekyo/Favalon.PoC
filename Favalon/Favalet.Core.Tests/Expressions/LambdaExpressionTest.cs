@@ -217,5 +217,36 @@ namespace Favalet.Expressions
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:'2 -> (b:System.Int32 -> a:'2):(System.Int32 -> '2)):('2 -> (System.Int32 -> '2))", inferred.StrictReadableString);
         }
+
+        [Test]
+        public void Lambda8()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Lambda 8:
+            a:System.Int32 -> b -> a
+            (a:System.Int32 -> (b:? -> a:?):?):?
+            1:-------------------
+            (a:System.Int32 -> (b:? -> a:?):?):'1
+            (a:System.Int32 -> (b:? -> a:?):?):'1             : Bind(a:System.Int32)
+            (a:System.Int32 -> (b:? -> a:?):'2):'1            : Memoize('1 => (System.Int32 -> '2))
+            (a:System.Int32 -> (b:'3 -> a:?):'2):'1           : Bind(b:'3)
+            (a:System.Int32 -> (b:'3 -> a:System.Int32):'2):'1           : Lookup(a:System.Int32), Memoize('2 => ('3 -> System.Int32))
+            2:-------------------
+            (a:System.Int32 -> (b:'3 -> a:System.Int32):('3 -> System.Int32)):'1           : Update('2 => ('3 -> System.Int32))
+            (a:System.Int32 -> (b:'3 -> a:System.Int32):('3 -> System.Int32)):(System.Int32 -> '2)           : Update('1 => (System.Int32 -> '2))
+            (a:System.Int32 -> (b:'3 -> a:System.Int32):('3 -> System.Int32)):(System.Int32 -> ('3 -> System.Int32))           : Update('2 => ('3 -> System.Int32))
+            3:-------------------
+            System.Int32 -> ('3 -> System.Int32)
+            System.Int32 -> '3 -> System.Int32
+            */
+
+            var expression = Lambda(Variable("a", Variable("System.Int32")), Lambda(Variable("b"), Variable("a")));
+            Assert.AreEqual("(a:System.Int32 -> (b:? -> a:?):?):?", expression.StrictReadableString);
+
+            var inferred = environment.Infer(expression);
+            Assert.AreEqual("(a:System.Int32 -> (b:'3 -> a:System.Int32):('3 -> System.Int32)):(System.Int32 -> ('3 -> System.Int32))", inferred.StrictReadableString);
+        }
     }
 }

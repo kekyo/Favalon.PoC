@@ -125,9 +125,9 @@ a:System.Int32 -> b -> a
 (a:System.Int32 -> (b:'3 -> a:?):'2):'1           : Bind(b:'3)
 (a:System.Int32 -> (b:'3 -> a:System.Int32):'2):'1           : Lookup(a:System.Int32), Memoize('2 => ('3 -> System.Int32))
 2:-------------------
-(a:System.Int32 -> (b:'3 -> a:System.Int32):('3 -> System.Int32):'1           : Update('2 => ('3 -> System.Int32))
-(a:System.Int32 -> (b:'3 -> a:System.Int32):('3 -> System.Int32):(System.Int32 -> '2)           : Update('1 => (System.Int32 -> '2))
-(a:System.Int32 -> (b:'3 -> a:System.Int32):('3 -> System.Int32):(System.Int32 -> ('3 -> System.Int32))           : Update('2 => ('3 -> System.Int32))
+(a:System.Int32 -> (b:'3 -> a:System.Int32):('3 -> System.Int32)):'1           : Update('2 => ('3 -> System.Int32))
+(a:System.Int32 -> (b:'3 -> a:System.Int32):('3 -> System.Int32)):(System.Int32 -> '2)           : Update('1 => (System.Int32 -> '2))
+(a:System.Int32 -> (b:'3 -> a:System.Int32):('3 -> System.Int32)):(System.Int32 -> ('3 -> System.Int32))           : Update('2 => ('3 -> System.Int32))
 3:-------------------
 System.Int32 -> ('3 -> System.Int32)
 System.Int32 -> '3 -> System.Int32

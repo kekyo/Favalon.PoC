@@ -17,7 +17,7 @@ namespace Favalet.Expressions
 
         protected static Expression CreatePlaceholderIfRequired(
             Environment environment, Expression from) =>
-            (from is UndefinedExpression) ? environment.CreatePlaceholder(UndefinedExpression.Instance) : from;
+            (from is UnspecifiedExpression) ? environment.CreatePlaceholder(UnspecifiedExpression.Instance) : from;
 
         protected static void Memoize(
             Environment environment, VariableExpression symbol, Expression expression) =>

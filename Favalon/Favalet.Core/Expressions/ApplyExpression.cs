@@ -26,9 +26,9 @@ namespace Favalet.Expressions
         {
             var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
 
-            var argument = VisitInferring(environment, this.Argument, UndefinedExpression.Instance);
+            var argument = VisitInferring(environment, this.Argument, UnspecifiedExpression.Instance);
             var function = VisitInferring(environment, this.Function,
-                new LambdaExpression(argument.HigherOrder, higherOrder, UndefinedExpression.Instance));
+                new LambdaExpression(argument.HigherOrder, higherOrder, UnspecifiedExpression.Instance));
 
             return new ApplyExpression(function, argument, higherOrder);
         }

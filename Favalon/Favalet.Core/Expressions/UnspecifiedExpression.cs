@@ -6,14 +6,14 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public sealed class KindExpression : PseudoExpression
+    public sealed class UnspecifiedExpression : PseudoExpression
     {
-        private KindExpression()
+        private UnspecifiedExpression()
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
-            "*";
+            "?";
 
-        public static readonly KindExpression Instance = new KindExpression();
+        public static readonly UnspecifiedExpression Instance = new UnspecifiedExpression();
     }
 }

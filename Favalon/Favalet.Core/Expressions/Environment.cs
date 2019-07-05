@@ -28,14 +28,14 @@ namespace Favalet.Expressions
             return Expression.VisitResolving(this, partial);
         }
         public Expression Infer(Expression expression) =>
-            this.Infer(expression, UndefinedExpression.Instance);
+            this.Infer(expression, UnspecifiedExpression.Instance);
 
         public TExpression Infer<TExpression>(TExpression expression, Expression higherOrderHint)
             where TExpression : Expression =>
             (TExpression)this.Infer((Expression)expression, higherOrderHint);
         public TExpression Infer<TExpression>(TExpression expression)
             where TExpression : Expression =>
-            (TExpression)this.Infer((Expression)expression, UndefinedExpression.Instance);
+            (TExpression)this.Infer((Expression)expression, UnspecifiedExpression.Instance);
 
         public static Environment Create() =>
             new Environment();

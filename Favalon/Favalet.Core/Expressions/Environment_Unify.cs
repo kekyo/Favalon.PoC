@@ -9,10 +9,10 @@ namespace Favalet.Expressions
     {
         private Expression UnifyLambda(LambdaExpression lambda1, Expression expression2)
         {
-            var parameter = this.Unify(lambda1.Parameter, UndefinedExpression.Instance);
-            var expression = this.Unify(lambda1.Expression, UndefinedExpression.Instance);
+            var parameter = this.Unify(lambda1.Parameter, UnspecifiedExpression.Instance);
+            var expression = this.Unify(lambda1.Expression, UnspecifiedExpression.Instance);
 
-            var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UndefinedExpression.Instance);
+            var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UnspecifiedExpression.Instance);
             var lambda = new LambdaExpression(parameter, expression, lambdaHigherOrder);
 
             if (expression2 is PlaceholderExpression placeholder)
@@ -52,7 +52,7 @@ namespace Favalet.Expressions
                 {
                     var parameter = this.Unify(lambda11.Parameter, lambda2.Parameter);
                     var expression = this.Unify(lambda11.Expression, lambda2.Expression);
-                    var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UndefinedExpression.Instance);
+                    var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UnspecifiedExpression.Instance);
 
                     return new LambdaExpression(parameter, expression, lambdaHigherOrder);
                 }
@@ -82,18 +82,18 @@ namespace Favalet.Expressions
 
         internal Expression Unify(Expression expression1, Expression expression2)
         {
-            if (expression2 is UndefinedExpression)
+            if (expression2 is UnspecifiedExpression)
             {
-                if (expression1 is UndefinedExpression)
+                if (expression1 is UnspecifiedExpression)
                 {
-                    return this.CreatePlaceholder(UndefinedExpression.Instance);
+                    return this.CreatePlaceholder(UnspecifiedExpression.Instance);
                 }
                 else
                 {
                     return expression1;
                 }
             }
-            else if (expression1 is UndefinedExpression)
+            else if (expression1 is UnspecifiedExpression)
             {
                 return expression2;
             }
@@ -103,20 +103,20 @@ namespace Favalet.Expressions
 
         internal Expression Unify(Expression expression1, Expression expression2, Expression expression3)
         {
-            if (expression3 is UndefinedExpression)
+            if (expression3 is UnspecifiedExpression)
             {
-                if (expression2 is UndefinedExpression)
+                if (expression2 is UnspecifiedExpression)
                 {
-                    if (expression1 is UndefinedExpression)
+                    if (expression1 is UnspecifiedExpression)
                     {
-                        return this.CreatePlaceholder(UndefinedExpression.Instance);
+                        return this.CreatePlaceholder(UnspecifiedExpression.Instance);
                     }
                     else
                     {
                         return expression1;
                     }
                 }
-                else if (expression1 is UndefinedExpression)
+                else if (expression1 is UnspecifiedExpression)
                 {
                     return expression2;
                 }
@@ -125,9 +125,9 @@ namespace Favalet.Expressions
                     return this.Unify2(expression1, expression2);
                 }
             }
-            else if (expression2 is UndefinedExpression)
+            else if (expression2 is UnspecifiedExpression)
             {
-                if (expression1 is UndefinedExpression)
+                if (expression1 is UnspecifiedExpression)
                 {
                     return expression3;
                 }
@@ -136,7 +136,7 @@ namespace Favalet.Expressions
                     return this.Unify2(expression1, expression3);
                 }
             }
-            else if (expression1 is UndefinedExpression)
+            else if (expression1 is UnspecifiedExpression)
             {
                 return this.Unify2(expression2, expression3);
             }

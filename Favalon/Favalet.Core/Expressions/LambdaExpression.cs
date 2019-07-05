@@ -29,17 +29,17 @@ namespace Favalet.Expressions
         {
             var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
 
-            var parameter = VisitInferring(environment, this.Parameter, UndefinedExpression.Instance);
+            var parameter = VisitInferring(environment, this.Parameter, UnspecifiedExpression.Instance);
 
             if (parameter is VariableExpression bound)
             {
                 Memoize(environment, bound, bound);
             }
 
-            var expression = VisitInferring(environment, this.Expression, UndefinedExpression.Instance);
+            var expression = VisitInferring(environment, this.Expression, UnspecifiedExpression.Instance);
 
             var lambdaHigherOrder = Unify(environment, higherOrder,
-                new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UndefinedExpression.Instance));
+                new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UnspecifiedExpression.Instance));
 
             return new LambdaExpression(parameter, expression, lambdaHigherOrder);
         }

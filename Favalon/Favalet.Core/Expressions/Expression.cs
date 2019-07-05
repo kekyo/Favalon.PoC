@@ -19,18 +19,24 @@ namespace Favalet.Expressions
         protected abstract FormattedString FormatReadableString(FormatContext context);
 
         public string ReadableString =>
-            FormatReadableString(new FormatContext(FormatAnnotations.SuppressPseudoes, FormatNamings.Standard), this, false);
+            FormatReadableString(new FormatContext(
+                FormatAnnotations.Standard, FormatNamings.Friendly, FormatOperators.Standard),
+                this, false);
         public string StrictReadableString =>
-            FormatReadableString(new FormatContext(FormatAnnotations.Strict, FormatNamings.Strict), this, false);
+            FormatReadableString(new FormatContext(
+                FormatAnnotations.Always, FormatNamings.Standard, FormatOperators.Standard),
+                this, false);
 
         public string FormatReadableString(
-            FormatAnnotations formatAnnotation, FormatNamings formatNaming, bool encloseParenthesesIfRequired = false) =>
-            FormatReadableString(new FormatContext(formatAnnotation, formatNaming), this, encloseParenthesesIfRequired);
+            FormatAnnotations formatAnnotation, FormatNamings formatNaming, FormatOperators formatOperator,
+            bool encloseParenthesesIfRequired = false) =>
+            FormatReadableString(new FormatContext(
+                formatAnnotation, formatNaming, formatOperator), this, encloseParenthesesIfRequired);
 
         public override string ToString()
         {
             var name = this.GetType().Name.Replace("Expression", string.Empty);
-            return $"{name}: {FormatReadableString(new FormatContext(FormatAnnotations.SuppressPseudoes, FormatNamings.Strict), this, false)}";
+            return $"{name}: {FormatReadableString(new FormatContext(FormatAnnotations.Standard, FormatNamings.Standard, FormatOperators.Standard), this, false)}";
         }
     }
 }

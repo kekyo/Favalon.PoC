@@ -20,9 +20,9 @@ namespace Favalet.Expressions
 
         protected override FormattedString FormatReadableString(FormatContext context)
         {
-            var arrow = (context.FormatNaming == FormatNamings.Fancy) ? "→" : "->";
+            var arrow = (context.FormatOperator == FormatOperators.Fancy) ? "→" : "->";
             return FormattedString.RequiredEnclosing(
-                $"{FormatReadableString(context, this.Parameter, true)} {arrow} {FormatReadableString(context, this.Expression, context.FormatNaming == FormatNamings.Strict)}");
+                $"{FormatReadableString(context, this.Parameter, true)} {arrow} {FormatReadableString(context, this.Expression, context.FormatNaming != FormatNamings.Friendly)}");
         }
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)

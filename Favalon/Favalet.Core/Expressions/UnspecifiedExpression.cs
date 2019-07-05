@@ -12,7 +12,7 @@ namespace Favalet.Expressions
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
-            "?";
+            (context.FormatNaming == FormatNamings.Strict) ? "(Unspecified)" : "?";
 
         public static readonly UnspecifiedExpression Instance = new UnspecifiedExpression();
     }

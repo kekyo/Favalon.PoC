@@ -28,8 +28,9 @@ namespace Favalet.Expressions
 
             var bound = environment.Visit(this.Bound, higherOrder);
             var expression = environment.Visit(this.Expression, bound.HigherOrder);
+            var expressionHigherOrder = environment.Unify(bound.HigherOrder, expression.HigherOrder);
 
-            return new BindExpression(bound, expression, expression.HigherOrder);
+            return new BindExpression(bound, expression, expressionHigherOrder);
         }
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)

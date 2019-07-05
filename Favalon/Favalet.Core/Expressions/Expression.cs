@@ -23,6 +23,10 @@ namespace Favalet.Expressions
         public string StrictReadableString =>
             FormatReadableString(new FormatContext(FormatAnnotations.Strict, FormatNamings.Strict), this, false);
 
+        public string FormatReadableString(
+            FormatAnnotations formatAnnotation, FormatNamings formatNaming, bool encloseParenthesesIfRequired = false) =>
+            FormatReadableString(new FormatContext(formatAnnotation, formatNaming), this, encloseParenthesesIfRequired);
+
         public override string ToString()
         {
             var name = this.GetType().Name.Replace("Expression", string.Empty);

@@ -6,7 +6,7 @@ namespace Favalet.Expressions.Internals
     {
         Without,
         Strict,
-        SuppressPseudos
+        SuppressPseudoes
     }
 
     public enum FormatNamings

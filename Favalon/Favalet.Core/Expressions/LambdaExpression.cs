@@ -22,7 +22,7 @@ namespace Favalet.Expressions
         {
             var arrow = (context.FormatNaming == FormatNamings.Fancy) ? "→" : "->";
             return FormattedString.RequiredEnclosing(
-                $"{FormatReadableString(context, this.Parameter, true)} {arrow} {FormatReadableString(context, this.Expression, false)}");
+                $"{FormatReadableString(context, this.Parameter, true)} {arrow} {FormatReadableString(context, this.Expression, context.FormatNaming == FormatNamings.Strict)}");
         }
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)

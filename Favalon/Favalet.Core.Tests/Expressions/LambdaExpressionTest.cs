@@ -119,7 +119,7 @@ namespace Favalet.Expressions
             Assert.AreEqual("(a:? -> (b:? -> a:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:'2 -> (b:'4 -> a:'2):('4 -> '2)):('2 -> '4 -> '2)", inferred.StrictReadableString);
+            Assert.AreEqual("(a:'2 -> (b:'4 -> a:'2):('4 -> '2)):('2 -> ('4 -> '2))", inferred.StrictReadableString);
         }
     }
 }

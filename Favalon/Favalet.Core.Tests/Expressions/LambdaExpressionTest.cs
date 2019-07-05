@@ -90,5 +90,36 @@ namespace Favalet.Expressions
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:System.Int32 -> a:System.Int32):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
         }
+
+        [Test]
+        public void Lambda4()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Lambda 4:
+            a -> b -> a
+            (a:? -> (b:? -> a:?):?):?
+            1:-------------------
+            (a:? -> (b:? -> a:?):?):'1
+            (a:'2 -> (b:? -> a:?):?):'1                     : Bind(a:'2)
+            (a:'2 -> (b:? -> a:?):'3):'1                    : Memoize('1 => ('2 -> '3))
+            (a:'2 -> (b:'4 -> a:?):'3):'1                   : Bind(b:'4)
+            (a:'2 -> (b:'4 -> a:'2):'3):'1                  : Lookup(a => '2), Memoize('3 => ('4 -> '2))
+            2:-------------------
+            (a:'2 -> (b:'4 -> a:'2):('4 -> '2)):'1          : Update('3 => ('4 -> '2))
+            (a:'2 -> (b:'4 -> a:'2):('4 -> '2)):('2 -> '3)  : Update('1 => ('2 -> '3))
+            (a:'2 -> (b:'4 -> a:'2):('4 -> '2)):('2 -> ('4 -> '2))      : Update('3 => ('4 -> '2))
+            3:-------------------
+            '2 -> ('4 -> '2)
+            '2 -> '4 -> '2
+            */
+
+            var expression = Lambda(Variable("a"), Lambda(Variable("b"), Variable("a")));
+            Assert.AreEqual("(a:? -> (b:? -> a:?):?):?", expression.StrictReadableString);
+
+            var inferred = environment.Infer(expression);
+            Assert.AreEqual("(a:'2 -> (b:'4 -> a:'2):('4 -> '2)):('2 -> '4 -> '2)", inferred.StrictReadableString);
+        }
     }
 }

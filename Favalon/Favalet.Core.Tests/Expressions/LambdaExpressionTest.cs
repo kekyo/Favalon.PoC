@@ -30,7 +30,7 @@ namespace Favalet.Expressions
             '2 -> '2
             */
 
-            var expression = Lambda(Variable("a"), Variable("a"));
+            var expression = Lambda(Bound("a"), Free("a"));
             Assert.AreEqual("(a:? -> a:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -58,7 +58,7 @@ namespace Favalet.Expressions
             System.Int32 -> System.Int32
             */
 
-            var expression = Lambda(Variable("a"), Variable("a", Variable("System.Int32")));
+            var expression = Lambda(Bound("a"), Free("a", Free("System.Int32")));
             Assert.AreEqual("(a:? -> a:System.Int32):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -84,7 +84,7 @@ namespace Favalet.Expressions
             System.Int32 -> System.Int32
             */
 
-            var expression = Lambda(Variable("a", Variable("System.Int32")), Variable("a"));
+            var expression = Lambda(Bound("a", Free("System.Int32")), Free("a"));
             Assert.AreEqual("(a:System.Int32 -> a:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -115,7 +115,7 @@ namespace Favalet.Expressions
             '2 -> '4 -> '2
             */
 
-            var expression = Lambda(Variable("a"), Lambda(Variable("b"), Variable("a")));
+            var expression = Lambda(Bound("a"), Lambda(Bound("b"), Free("a")));
             Assert.AreEqual("(a:? -> (b:? -> a:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -146,7 +146,7 @@ namespace Favalet.Expressions
             '2 -> '4 -> '4
             */
 
-            var expression = Lambda(Variable("a"), Lambda(Variable("b"), Variable("b")));
+            var expression = Lambda(Bound("a"), Lambda(Bound("b"), Free("b")));
             Assert.AreEqual("(a:? -> (b:? -> b:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -180,7 +180,7 @@ namespace Favalet.Expressions
             System.Int32 -> '4 -> System.Int32
             */
 
-            var expression = Lambda(Variable("a"), Lambda(Variable("b"), Variable("a", Variable("System.Int32"))));
+            var expression = Lambda(Bound("a"), Lambda(Bound("b"), Free("a", Free("System.Int32"))));
             Assert.AreEqual("(a:? -> (b:? -> a:System.Int32):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -211,7 +211,7 @@ namespace Favalet.Expressions
             '2 -> System.Int32 -> '2
             */
 
-            var expression = Lambda(Variable("a"), Lambda(Variable("b", Variable("System.Int32")), Variable("a")));
+            var expression = Lambda(Bound("a"), Lambda(Bound("b", Free("System.Int32")), Free("a")));
             Assert.AreEqual("(a:? -> (b:System.Int32 -> a:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -242,7 +242,7 @@ namespace Favalet.Expressions
             System.Int32 -> '3 -> System.Int32
             */
 
-            var expression = Lambda(Variable("a", Variable("System.Int32")), Lambda(Variable("b"), Variable("a")));
+            var expression = Lambda(Bound("a", Free("System.Int32")), Lambda(Bound("b"), Free("a")));
             Assert.AreEqual("(a:System.Int32 -> (b:? -> a:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);

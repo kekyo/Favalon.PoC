@@ -8,7 +8,7 @@ namespace Favalet.Expressions
 {
     public abstract class VariableExpression : Expression
     {
-        protected VariableExpression(Expression higherOrder) :
+        private protected VariableExpression(Expression higherOrder) :
             base(higherOrder)
         { }
     }

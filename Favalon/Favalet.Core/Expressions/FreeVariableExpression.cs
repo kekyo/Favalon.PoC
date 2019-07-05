@@ -6,17 +6,11 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public sealed class FreeVariableExpression :
-        VariableExpression, IEquatable<FreeVariableExpression?>
+    public sealed class FreeVariableExpression : SymbolicVariableExpression
     {
-        public FreeVariableExpression(string name, Expression higherOrder) :
-            base(higherOrder) =>
-        this.Name = name;
-
-        public readonly string Name;
-
-        protected override FormattedString FormatReadableString(FormatContext context) =>
-            this.Name;
+        internal FreeVariableExpression(string name, Expression higherOrder) :
+            base(name, higherOrder)
+        { }
 
         protected override Expression VisitInferring(Environment environment, Expression higherOrderHint)
         {
@@ -27,24 +21,8 @@ namespace Favalet.Expressions
             }
             else
             {
-                var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
-                return new FreeVariableExpression(this.Name, higherOrder);
+                throw new InvalidOperationException($"Cannot find variable. Name={this.Name}");
             }
         }
-
-        protected override Expression VisitResolving(Environment environment)
-        {
-            var higherOrder = VisitResolving(environment, this.HigherOrder);
-            return new FreeVariableExpression(this.Name, higherOrder);
-        }
-
-        public override int GetHashCode() =>
-            this.Name.GetHashCode();
-
-        public bool Equals(FreeVariableExpression? other) =>
-            other?.Name.Equals(this.Name) ?? false;
-
-        public override bool Equals(object obj) =>
-            this.Equals(obj as FreeVariableExpression);
     }
 }

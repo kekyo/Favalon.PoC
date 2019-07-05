@@ -8,7 +8,7 @@ namespace Favalet.Expressions
 {
     public sealed class ApplyExpression : Expression
     {
-        public ApplyExpression(Expression function, Expression argument, Expression higherOrder) :
+        internal ApplyExpression(Expression function, Expression argument, Expression higherOrder) :
             base(higherOrder)
         {
             this.Function = function;

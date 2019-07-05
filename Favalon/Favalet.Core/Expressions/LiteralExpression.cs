@@ -9,9 +9,9 @@ namespace Favalet.Expressions
 {
     public sealed class LiteralExpression : Expression, IEquatable<LiteralExpression?>
     {
-        public LiteralExpression(object value, Expression higherOrder) :
+        internal LiteralExpression(object value, Expression higherOrder) :
             base(higherOrder) =>
-        this.Value = value;
+            this.Value = value;
 
         public readonly object Value;
 

@@ -8,7 +8,7 @@ namespace Favalet.Expressions
 {
     public sealed class LambdaExpression : Expression
     {
-        public LambdaExpression(Expression parameter, Expression expression, Expression higherOrder) :
+        internal LambdaExpression(Expression parameter, Expression expression, Expression higherOrder) :
             base(higherOrder)
         {
             this.Parameter = parameter;
@@ -30,12 +30,6 @@ namespace Favalet.Expressions
             var higherOrder = Unify(environment, higherOrderHint, this.HigherOrder);
 
             var parameter = VisitInferring(environment, this.Parameter, UnspecifiedExpression.Instance);
-
-            if (parameter is VariableExpression bound)
-            {
-                Memoize(environment, bound, bound);
-            }
-
             var expression = VisitInferring(environment, this.Expression, UnspecifiedExpression.Instance);
 
             var lambdaHigherOrder = Unify(environment, higherOrder,

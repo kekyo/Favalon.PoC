@@ -29,7 +29,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Variable("a"), Variable("b"));
+            var expression = Apply(Implicit("a"), Implicit("b"));
             Assert.AreEqual("(a:? b:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -53,7 +53,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Variable("a"), Variable("b", Variable("System.Int32")));
+            var expression = Apply(Implicit("a"), Implicit("b", Implicit("System.Int32")));
             Assert.AreEqual("(a:? b:System.Int32):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -79,7 +79,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Variable("a", Lambda(Variable("System.Int32"), Undefined())), Variable("b"));
+            var expression = Apply(Implicit("a", Lambda(Bound("System.Int32"), Unspecified())), Implicit("b"));
             Assert.AreEqual("(a:(System.Int32 -> ?) b:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -106,7 +106,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Apply(Variable("a"), Variable("b")), Variable("c"));
+            var expression = Apply(Apply(Implicit("a"), Implicit("b")), Implicit("c"));
             Assert.AreEqual("((a:? b:?):? c:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -132,7 +132,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Apply(Variable("a"), Variable("b")), Variable("c", Variable("System.Int32")));
+            var expression = Apply(Apply(Implicit("a"), Implicit("b")), Implicit("c", Implicit("System.Int32")));
             Assert.AreEqual("((a:? b:?):? c:System.Int32):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -158,7 +158,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Apply(Variable("a"), Variable("b", Variable("System.Int32"))), Variable("c"));
+            var expression = Apply(Apply(Implicit("a"), Implicit("b", Implicit("System.Int32"))), Implicit("c"));
             Assert.AreEqual("((a:? b:System.Int32):? c:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -186,7 +186,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Apply(Variable("a", Lambda(Variable("System.Int32"), Undefined())), Variable("b")), Variable("c"));
+            var expression = Apply(Apply(Implicit("a", Lambda(Bound("System.Int32"), Unspecified())), Implicit("b")), Implicit("c"));
             Assert.AreEqual("((a:(System.Int32 -> ?) b:?):? c:?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -213,7 +213,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Variable("a"), Apply(Variable("b"), Variable("c")));
+            var expression = Apply(Implicit("a"), Apply(Implicit("b"), Implicit("c")));
             Assert.AreEqual("(a:? (b:? c:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -240,7 +240,7 @@ namespace Favalet.Expressions
             System.Int32
             */
 
-            var expression = Apply(Variable("a"), Apply(Variable("b"), Variable("c")), Variable("System.Int32"));
+            var expression = Apply(Implicit("a"), Apply(Implicit("b"), Implicit("c")), Implicit("System.Int32"));
             Assert.AreEqual("(a:? (b:? c:?):?):System.Int32", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -266,7 +266,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Variable("a"), Apply(Variable("b"), Variable("c"), Variable("System.Int32")));
+            var expression = Apply(Implicit("a"), Apply(Implicit("b"), Implicit("c"), Implicit("System.Int32")));
             Assert.AreEqual("(a:? (b:? c:?):System.Int32):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -292,7 +292,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Variable("a"), Apply(Variable("b"), Variable("c", Variable("System.Int32"))));
+            var expression = Apply(Implicit("a"), Apply(Implicit("b"), Implicit("c", Implicit("System.Int32"))));
             Assert.AreEqual("(a:? (b:? c:System.Int32):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -320,7 +320,7 @@ namespace Favalet.Expressions
             '1
             */
 
-            var expression = Apply(Variable("a"), Apply(Variable("b", Lambda(Variable("System.Int32"), Undefined())), Variable("c")));
+            var expression = Apply(Implicit("a"), Apply(Implicit("b", Lambda(Bound("System.Int32"), Unspecified())), Implicit("c")));
             Assert.AreEqual("(a:? (b:(System.Int32 -> ?) c:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
@@ -347,7 +347,7 @@ namespace Favalet.Expressions
             (a:((System.Int32 -> '4) -> '1) (b:('3 -> (System.Int32 -> '4)) c:'3):(System.Int32 -> '4)):'1     : Update('2 => (System.Int32 -> '4))
             */
 
-            var expression = Apply(Variable("a", Lambda(Lambda(Variable("System.Int32"), Undefined()), Undefined())), Apply(Variable("b"), Variable("c")));
+            var expression = Apply(Implicit("a", Lambda(Lambda(Bound("System.Int32"), Unspecified()), Unspecified())), Apply(Implicit("b"), Implicit("c")));
             Assert.AreEqual("(a:((System.Int32 -> ?) -> ?) (b:? c:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);

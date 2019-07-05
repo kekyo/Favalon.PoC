@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Internals
 {
     public sealed class PlaceholderExpression :
         VariableExpression, IEquatable<PlaceholderExpression?>, IComparable<PlaceholderExpression>
     {
-        public PlaceholderExpression(int index, Expression higherOrder) :
+        internal PlaceholderExpression(int index, Expression higherOrder) :
             base(higherOrder) =>
-        this.Index = index;
+            this.Index = index;
 
         public readonly int Index;
 

@@ -26,11 +26,10 @@ namespace Favalet.Expressions
         {
             var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
 
-            var bound = environment.Visit(this.Bound, higherOrder);
-            var expression = environment.Visit(this.Expression, bound.HigherOrder);
-            var expressionHigherOrder = environment.Unify(bound.HigherOrder, expression.HigherOrder);
+            var expression = environment.Visit(this.Expression, higherOrder);
+            var bound = environment.Visit(this.Bound, expression.HigherOrder);
 
-            return new BindExpression(bound, expression, expressionHigherOrder);
+            return new BindExpression(bound, expression, bound.HigherOrder);
         }
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)

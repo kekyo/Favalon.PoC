@@ -22,10 +22,9 @@ namespace Favalet.Expressions
             (a:? = 123:?):?
             1:-------------------
             (a:? = 123:?):'1
-            (a:'1 = 123:?):'1
-            (a:'1 = 123:Numeric):'1                      : Memoize('1 => Numeric)
+            (a:? = 123:Numeric):'1                       : Memoize('1 => Numeric)
+            (a:Numeric = 123:Numeric):'1
             2:-------------------
-            (a:Numeric = 123:Numeric):'1                 : Update('1 => Numeric)
             (a:Numeric = 123:Numeric):Numeric            : Update('1 => Numeric)
             3:-------------------
             Numeric
@@ -49,10 +48,10 @@ namespace Favalet.Expressions
             (a:? = (b:? -> b:?):?):?
             1:-------------------
             (a:? = (b:? -> b:?):?):'1
-            (a:'1 = (b:? -> b:?):?):'1
-            (a:'1 = (b:? -> b:?):'1):'1
-            (a:'1 = (b:'2 -> b:?):'1):'1                 : Bind(b:'2)
-            (a:'1 = (b:'2 -> b:'2):'1):'1                : Lookup(b => '2), Memoize('1 => ('2 -> '2))
+            (a:? = (b:? -> b:?):'1):'1
+            (a:? = (b:'2 -> b:?):'1):'1                  : Bind(b:'2)
+            (a:? = (b:'2 -> b:'2):'1):'1                 : Lookup(b => '2), Memoize('1 => ('2 -> '2))
+            (a:'1 = (b:'2 -> b:'2):'1):'1
             2:-------------------
             (a:'1 = (b:'2 -> b:'2):('2 -> '2)):'1                        : Update('1 => ('2 -> '2))
             (a:('2 -> '2) = (b:'2 -> b:'2):('2 -> '2)):'1                : Update('1 => ('2 -> '2))
@@ -96,7 +95,7 @@ namespace Favalet.Expressions
             Assert.AreEqual("(a:? = (b:? -> b:System.Int32):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32) ", inferred.StrictReadableString);
+            Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
         }
     }
 }

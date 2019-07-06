@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace Favalet.Expressions.Additionals
 {
@@ -35,8 +36,13 @@ namespace Favalet.Expressions.Additionals
             }
         }
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            new LiteralExpression(this.Value, new FreeVariableExpression(this.GetTypeName(), KindExpression.Instance));
+        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
+        {
+            var typedHigherOrder = new FreeVariableExpression(this.GetTypeName(), KindExpression.Instance);
+            var higherOrder = environment.Unify(typedHigherOrder, higherOrderHint);
+
+            return new LiteralExpression(this.Value, higherOrder);
+        }
 
         protected override Expression VisitResolving(IResolvingEnvironment environment) =>
             this;

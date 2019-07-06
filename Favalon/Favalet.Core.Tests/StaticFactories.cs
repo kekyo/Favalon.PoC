@@ -1,11 +1,12 @@
-﻿using Favalet.Expressions.Additionals;
+﻿using Favalet.Expressions;
+using Favalet.Expressions.Additionals;
 using Favalet.Expressions.Internals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Favalet.Expressions
+namespace Favalet
 {
     public static class StaticFactories
     {
@@ -15,10 +16,8 @@ namespace Favalet.Expressions
         public static KindExpression Kind =>
             Expression.Kind;
 
-        public static LiteralExpression Literal(object value, Expression higherOrder) =>
-            Expression.Literal(value, higherOrder);
         public static LiteralExpression Literal(object value) =>
-            Expression.Literal(value, Unspecified);
+            Expression.Literal(value);
 
         public static SymbolicVariableExpression Free(string name, Expression higherOrder) =>
             Expression.Free(name, higherOrder);
@@ -53,5 +52,10 @@ namespace Favalet.Expressions
             Expression.Bind(bound, expression, higherOrder);
         public static BindExpression Bind(BoundVariableExpression bound, Expression expression) =>
             Expression.Bind(bound, expression, Unspecified);
+
+        public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
+            Expression.RecursiveBind(bound, expression, higherOrder);
+        public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression) =>
+            Expression.RecursiveBind(bound, expression, Unspecified);
     }
 }

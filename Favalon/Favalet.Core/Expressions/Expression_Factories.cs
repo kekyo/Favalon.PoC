@@ -15,8 +15,6 @@ namespace Favalet.Expressions
         public static readonly KindExpression Kind =
             KindExpression.Instance;
 
-        public static LiteralExpression Literal(object value, Expression higherOrder) =>
-            new LiteralExpression(value, higherOrder);
         public static LiteralExpression Literal(object value) =>
             new LiteralExpression(value, UnspecifiedExpression.Instance);
 
@@ -45,8 +43,13 @@ namespace Favalet.Expressions
             new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance);
 
         public static BindExpression Bind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
-            new BindExpression(bound, expression, higherOrder);
+            new BindExpression(bound, expression, false, higherOrder);
         public static BindExpression Bind(BoundVariableExpression bound, Expression expression) =>
-            new BindExpression(bound, expression, UnspecifiedExpression.Instance);
+            new BindExpression(bound, expression, false, UnspecifiedExpression.Instance);
+
+        public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
+            new BindExpression(bound, expression, true, higherOrder);
+        public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression) =>
+            new BindExpression(bound, expression, true, UnspecifiedExpression.Instance);
     }
 }

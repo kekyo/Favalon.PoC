@@ -97,5 +97,35 @@ namespace Favalet.Expressions
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
         }
+
+        [Test]
+        public void Bind4()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Bind 4:
+            a = b:System.Int32 -> b
+            (a:? = (b:System.Int32 -> b:?):?):?
+            1:-------------------
+            (a:? = (b:System.Int32 -> b:?):?):'1
+            (a:'1 = (b:System.Int32 -> b:?):?):'1
+            (a:'1 = (b:System.Int32 -> b:?):'1):'1
+            (a:'1 = (b:System.Int32 -> b:?):'1):'1                   : Bind(b:System.Int32)
+            (a:'1 = (b:System.Int32 -> b:System.Int32):'1):'1        : Lookup(b => System.Int32), Memoize('1 => (System.Int32 -> System.Int32))
+            2:-------------------
+            (a:'1 = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1        : Update('1 => (System.Int32 -> System.Int32))
+            (a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1        : Update('1 => (System.Int32 -> System.Int32))
+            (a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)        : Update('1 => (System.Int32 -> System.Int32))
+            3:-------------------
+            System.Int32 -> System.Int32
+            */
+
+            var expression = Bind(Bound("a"), Lambda(Bound("b", Implicit("System.Int32")), Free("b")));
+            Assert.AreEqual("(a:? = (b:System.Int32 -> b:?):?):?", expression.StrictReadableString);
+
+            var inferred = environment.Infer(expression);
+            Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
+        }
     }
 }

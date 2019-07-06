@@ -127,5 +127,60 @@ namespace Favalet.Expressions
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
         }
+
+        [Test]
+        public void Bind5()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Bind 5:
+            a:System.Int32 = b -> b
+            (a:System.Int32 = (b:? -> b:?):?):?
+            1:-------------------
+            (a:System.Int32 = (b:? -> b:?):?):'1
+            (a:System.Int32 = (b:? -> b:?):'1):'1
+            (a:System.Int32 = (b:'2 -> b:?):'1):'1                      : Bind(b:'2)
+            (a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Lookup(b => '2)
+            (a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1
+            (a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Unification problem (('2 -> '2) => System.Int32)
+            */
+
+            var expression = Bind(Bound("a", Implicit("System.Int32")), Lambda(Bound("b"), Free("b")));
+            Assert.AreEqual("(a:System.Int32 = (b:? -> b:?):?):?", expression.StrictReadableString);
+
+            Assert.Throws<ArgumentException>(() => environment.Infer(expression));
+        }
+
+        [Test]
+        public void Bind6()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Bind 6:
+            a:(System.Int32 -> ?) = b -> b
+            (a:(System.Int32 -> ?) = (b:? -> b:?):?):?
+            1:-------------------
+            (a:(System.Int32 -> ?) = (b:? -> b:?):?):'1
+            (a:(System.Int32 -> '2) = (b:? -> b:?):?):'1        : Memoize('1 => (System.Int32 -> '2))
+            (a:(System.Int32 -> '2) = (b:? -> b:?):(System.Int32 -> '2)):'1
+            (a:(System.Int32 -> '2) = (b:System.Int32 -> b:?):(System.Int32 -> '2)):'1      : Bind(b:System.Int32)
+            (a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> '2)):'1     : Lookup(b => System.Int32), Memoize((System.Int32 -> '2) => (System.Int32 -> System.Int32))
+            2:-------------------
+            (a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1     : Update((System.Int32 -> '2) => (System.Int32 -> System.Int32))
+            (a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> '2)       : Update('1 => (System.Int32 -> '2))
+            (a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> '2)       : Update((System.Int32 -> '2) => (System.Int32 -> System.Int32))
+            (a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)       : Update((System.Int32 -> '2) => (System.Int32 -> System.Int32))
+            3:-------------------
+            System.Int32 -> System.Int32
+            */
+
+            var expression = Bind(Bound("a", Lambda(Bound("System.Int32"), Unspecified)), Lambda(Bound("b"), Free("b")));
+            Assert.AreEqual("(a:(System.Int32 -> ?) = (b:? -> b:?):?):?", expression.StrictReadableString);
+
+            var inferred = environment.Infer(expression);
+            Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
+        }
     }
 }

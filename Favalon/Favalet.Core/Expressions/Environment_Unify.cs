@@ -1,6 +1,7 @@
 ﻿using Favalet.Expressions.Internals;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -21,6 +22,11 @@ namespace Favalet.Expressions
             if (expression2 is PlaceholderExpression placeholder)
             {
                 placehoderController.Memoize(placeholder, lambda);
+            }
+            else
+            {
+                Debug.Assert(!(expression2 is LambdaExpression));
+                throw new ArgumentException($"Cannot unifying: between \"{lambda1.ReadableString}\" and \"{expression2.ReadableString}\"");
             }
             return lambda;
         }

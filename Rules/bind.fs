@@ -69,10 +69,11 @@ a:System.Int32 = b -> b
 (a:System.Int32 = (b:? -> b:?):?):?
 1:-------------------
 (a:System.Int32 = (b:? -> b:?):?):'1
-(a:System.Int32 = (b:? -> b:?):?):'1                : Memoize('1 => System.Int32)
-(a:System.Int32 = (b:? -> b:?):System.Int32):'1
-(a:System.Int32 = (b:'2 -> b:?):System.Int32):'1              : Bind(b:'2)
-(a:System.Int32 = (b:'2 -> b:'2):System.Int32):'1             : Lookup(b => '2), // Unification problem (('2 -> '2) => System.Int32)
+(a:System.Int32 = (b:? -> b:?):'1):'1
+(a:System.Int32 = (b:'2 -> b:?):'1):'1                      : Bind(b:'2)
+(a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Lookup(b => '2)
+(a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1
+(a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Unification problem (('2 -> '2) => System.Int32)
 
 //==================================
 Bind 6:

@@ -17,7 +17,7 @@ namespace Favalet.Expressions
             var environment = Environment.Create();
 
             /*
-            Recursive Bind 1:
+            Recursive bind 1:
             rec a = 123
             (rec a:? = 123:?):?
             1:-------------------
@@ -39,112 +39,112 @@ namespace Favalet.Expressions
         }
 
         [Test]
-        public void Bind2()
+        public void RecursiveBind2()
         {
             var environment = Environment.Create();
 
             /*
-            Bind 2:
-            a = b -> b
-            (a:? = (b:? -> b:?):?):?
+            Recursive bind 2:
+            rec a = b -> b
+            (rec a:? = (b:? -> b:?):?):?
             1:-------------------
-            (a:? = (b:? -> b:?):?):'1
-            (a:? = (b:? -> b:?):'1):'1
-            (a:? = (b:'2 -> b:?):'1):'1                  : Bind(b:'2)
-            (a:? = (b:'2 -> b:'2):'1):'1                 : Lookup(b => '2), Memoize('1 => ('2 -> '2))
-            (a:'1 = (b:'2 -> b:'2):'1):'1
+            (rec a:? = (b:? -> b:?):?):'1
+            (rec a:? = (b:? -> b:?):'1):'1
+            (rec a:? = (b:'2 -> b:?):'1):'1                  : Bind(b:'2)
+            (rec a:? = (b:'2 -> b:'2):'1):'1                 : Lookup(b => '2), Memoize('1 => ('2 -> '2))
+            (rec a:'1 = (b:'2 -> b:'2):'1):'1
             2:-------------------
-            (a:'1 = (b:'2 -> b:'2):('2 -> '2)):'1                        : Update('1 => ('2 -> '2))
-            (a:('2 -> '2) = (b:'2 -> b:'2):('2 -> '2)):'1                : Update('1 => ('2 -> '2))
-            (a:('2 -> '2) = (b:'2 -> b:'2):('2 -> '2)):('2 -> '2)        : Update('1 => ('2 -> '2))
+            (rec a:'1 = (b:'2 -> b:'2):('2 -> '2)):'1                        : Update('1 => ('2 -> '2))
+            (rec a:('2 -> '2) = (b:'2 -> b:'2):('2 -> '2)):'1                : Update('1 => ('2 -> '2))
+            (rec a:('2 -> '2) = (b:'2 -> b:'2):('2 -> '2)):('2 -> '2)        : Update('1 => ('2 -> '2))
             3:-------------------
             '2 -> '2
             */
 
-            var expression = Bind(Bound("a"), Lambda(Bound("b"), Free("b")));
-            Assert.AreEqual("(a:? = (b:? -> b:?):?):?", expression.StrictReadableString);
+            var expression = RecursiveBind(Bound("a"), Lambda(Bound("b"), Free("b")));
+            Assert.AreEqual("(rec a:? = (b:? -> b:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:('2 -> '2) = (b:'2 -> b:'2):('2 -> '2)):('2 -> '2)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:('2 -> '2) = (b:'2 -> b:'2):('2 -> '2)):('2 -> '2)", inferred.StrictReadableString);
         }
 
         [Test]
-        public void Bind3()
+        public void RecursiveBind3()
         {
             var environment = Environment.Create();
 
             /*
-            Bind 3:
-            a = b -> b:System.Int32
-            (a:? = (b:? -> b:System.Int32):?):?
+            Recursive bind 3:
+            rec a = b -> b:System.Int32
+            (rec a:? = (b:? -> b:System.Int32):?):?
             1:-------------------
-            (a:? = (b:? -> b:System.Int32):?):'1
-            (a:'1 = (b:? -> b:System.Int32):?):'1
-            (a:'1 = (b:? -> b:System.Int32):'1):'1
-            (a:'1 = (b:'2 -> b:System.Int32):'1):'1      : Bind(b:'2)
-            (a:'1 = (b:'2 -> b:System.Int32):'1):'1      : Lookup(b => '2), Memoize('2 => System.Int32)
+            (rec a:? = (b:? -> b:System.Int32):?):'1
+            (rec a:'1 = (b:? -> b:System.Int32):?):'1
+            (rec a:'1 = (b:? -> b:System.Int32):'1):'1
+            (rec a:'1 = (b:'2 -> b:System.Int32):'1):'1      : Bind(b:'2)
+            (rec a:'1 = (b:'2 -> b:System.Int32):'1):'1      : Lookup(b => '2), Memoize('2 => System.Int32)
             2:-------------------
-            (a:'1 = (b:System.Int32 -> b:System.Int32):'1):'1      : Update('2 => System.Int32), Memoize('1 => (System.Int32 -> System.Int32))
-            (a:'1 = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1      : Update('1 => (System.Int32 -> System.Int32))
-            (a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1      : Update('1 => (System.Int32 -> System.Int32))
-            (a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)      : Update('1 => (System.Int32 -> System.Int32))
+            (rec a:'1 = (b:System.Int32 -> b:System.Int32):'1):'1      : Update('2 => System.Int32), Memoize('1 => (System.Int32 -> System.Int32))
+            (rec a:'1 = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1      : Update('1 => (System.Int32 -> System.Int32))
+            (rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1      : Update('1 => (System.Int32 -> System.Int32))
+            (rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)      : Update('1 => (System.Int32 -> System.Int32))
             3:-------------------
             System.Int32 -> System.Int32
             */
 
-            var expression = Bind(Bound("a"), Lambda(Bound("b"), Free("b", Implicit("System.Int32"))));
-            Assert.AreEqual("(a:? = (b:? -> b:System.Int32):?):?", expression.StrictReadableString);
+            var expression = RecursiveBind(Bound("a"), Lambda(Bound("b"), Free("b", Implicit("System.Int32"))));
+            Assert.AreEqual("(rec a:? = (b:? -> b:System.Int32):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
         }
 
         [Test]
-        public void Bind4()
+        public void RecursiveBind4()
         {
             var environment = Environment.Create();
 
             /*
-            Bind 4:
-            a = b:System.Int32 -> b
-            (a:? = (b:System.Int32 -> b:?):?):?
+            Recursive bind 4:
+            rec a = b:System.Int32 -> b
+            (rec a:? = (b:System.Int32 -> b:?):?):?
             1:-------------------
-            (a:? = (b:System.Int32 -> b:?):?):'1
-            (a:'1 = (b:System.Int32 -> b:?):?):'1
-            (a:'1 = (b:System.Int32 -> b:?):'1):'1
-            (a:'1 = (b:System.Int32 -> b:?):'1):'1                   : Bind(b:System.Int32)
-            (a:'1 = (b:System.Int32 -> b:System.Int32):'1):'1        : Lookup(b => System.Int32), Memoize('1 => (System.Int32 -> System.Int32))
+            (rec a:? = (b:System.Int32 -> b:?):?):'1
+            (rec a:'1 = (b:System.Int32 -> b:?):?):'1
+            (rec a:'1 = (b:System.Int32 -> b:?):'1):'1
+            (rec a:'1 = (b:System.Int32 -> b:?):'1):'1                   : Bind(b:System.Int32)
+            (rec a:'1 = (b:System.Int32 -> b:System.Int32):'1):'1        : Lookup(b => System.Int32), Memoize('1 => (System.Int32 -> System.Int32))
             2:-------------------
-            (a:'1 = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1        : Update('1 => (System.Int32 -> System.Int32))
-            (a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1        : Update('1 => (System.Int32 -> System.Int32))
-            (a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)        : Update('1 => (System.Int32 -> System.Int32))
+            (rec a:'1 = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1        : Update('1 => (System.Int32 -> System.Int32))
+            (rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1        : Update('1 => (System.Int32 -> System.Int32))
+            (rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)        : Update('1 => (System.Int32 -> System.Int32))
             3:-------------------
             System.Int32 -> System.Int32
             */
 
-            var expression = Bind(Bound("a"), Lambda(Bound("b", Implicit("System.Int32")), Free("b")));
-            Assert.AreEqual("(a:? = (b:System.Int32 -> b:?):?):?", expression.StrictReadableString);
+            var expression = RecursiveBind(Bound("a"), Lambda(Bound("b", Implicit("System.Int32")), Free("b")));
+            Assert.AreEqual("(rec a:? = (b:System.Int32 -> b:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
         }
 
         [Test]
-        public void Bind5()
+        public void RecursiveBind5()
         {
             var environment = Environment.Create();
 
             /*
-            Bind 5:
-            a:System.Int32 = b -> b
-            (a:System.Int32 = (b:? -> b:?):?):?
+            Recursive bind 5:
+            rec a:System.Int32 = b -> b
+            (rec a:System.Int32 = (b:? -> b:?):?):?
             1:-------------------
-            (a:System.Int32 = (b:? -> b:?):?):'1
-            (a:System.Int32 = (b:? -> b:?):'1):'1
-            (a:System.Int32 = (b:'2 -> b:?):'1):'1                      : Bind(b:'2)
-            (a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Lookup(b => '2)
-            (a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1
-            (a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Unification problem (('2 -> '2) => System.Int32)
+            (rec a:System.Int32 = (b:? -> b:?):?):'1
+            (rec a:System.Int32 = (b:? -> b:?):'1):'1
+            (rec a:System.Int32 = (b:'2 -> b:?):'1):'1                      : Bind(b:'2)
+            (rec a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Lookup(b => '2)
+            (rec a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1
+            (rec a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Unification problem (('2 -> '2) => System.Int32)
             */
 
             var expression = Bind(Bound("a", Implicit("System.Int32")), Lambda(Bound("b"), Free("b")));
@@ -154,25 +154,25 @@ namespace Favalet.Expressions
         }
 
         [Test]
-        public void Bind6()
+        public void RecursiveBind6()
         {
             var environment = Environment.Create();
 
             /*
-            Bind 6:
-            a:(System.Int32 -> ?) = b -> b
-            (a:(System.Int32 -> ?) = (b:? -> b:?):?):?
+            Recursive bind 6:
+            rec a:(System.Int32 -> ?) = b -> b
+            (rec a:(System.Int32 -> ?) = (b:? -> b:?):?):?
             1:-------------------
-            (a:(System.Int32 -> ?) = (b:? -> b:?):?):'1
-            (a:(System.Int32 -> '2) = (b:? -> b:?):?):'1        : Memoize('1 => (System.Int32 -> '2))
-            (a:(System.Int32 -> '2) = (b:? -> b:?):(System.Int32 -> '2)):'1
-            (a:(System.Int32 -> '2) = (b:System.Int32 -> b:?):(System.Int32 -> '2)):'1      : Bind(b:System.Int32)
-            (a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> '2)):'1     : Lookup(b => System.Int32), Memoize((System.Int32 -> '2) => (System.Int32 -> System.Int32))
+            (rec a:(System.Int32 -> ?) = (b:? -> b:?):?):'1
+            (rec a:(System.Int32 -> '2) = (b:? -> b:?):?):'1        : Memoize('1 => (System.Int32 -> '2))
+            (rec a:(System.Int32 -> '2) = (b:? -> b:?):(System.Int32 -> '2)):'1
+            (rec a:(System.Int32 -> '2) = (b:System.Int32 -> b:?):(System.Int32 -> '2)):'1      : Bind(b:System.Int32)
+            (rec a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> '2)):'1     : Lookup(b => System.Int32), Memoize((System.Int32 -> '2) => (System.Int32 -> System.Int32))
             2:-------------------
-            (a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1     : Update((System.Int32 -> '2) => (System.Int32 -> System.Int32))
-            (a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> '2)       : Update('1 => (System.Int32 -> '2))
-            (a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> '2)       : Update((System.Int32 -> '2) => (System.Int32 -> System.Int32))
-            (a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)       : Update((System.Int32 -> '2) => (System.Int32 -> System.Int32))
+            (rec a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1     : Update((System.Int32 -> '2) => (System.Int32 -> System.Int32))
+            (rec a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> '2)       : Update('1 => (System.Int32 -> '2))
+            (rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> '2)       : Update((System.Int32 -> '2) => (System.Int32 -> System.Int32))
+            (rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)       : Update((System.Int32 -> '2) => (System.Int32 -> System.Int32))
             3:-------------------
             System.Int32 -> System.Int32
             */

@@ -30,24 +30,36 @@ namespace Favalet.Expressions.Internals
             {
                 if (currentSymbol is VariableExpression variable)
                 {
-                    if (memoizedExpressions.TryGetValue(variable, out var expression)) 
+                    if (memoizedExpressions.TryGetValue(variable, out var memoized)) 
                     {
-                        if (expression.Equals(variable))
+                        if (memoized.Equals(variable))
                         {
-                            return expression;
+                            return memoized;
+                        }
+                        else if (memoized is LambdaExpression lambda)
+                        {
+                            var parameter = ((lambda.Parameter is VariableExpression p) ? this.Lookup(p) : null) ?? lambda.Parameter;
+                            var expression = ((lambda.Expression is VariableExpression e) ? this.Lookup(e) : null) ?? lambda.Expression;
+                            //var higherOrder = ((lambda.HigherOrder is VariableExpression ho) ? this.Lookup(ho) : null) ?? lambda.HigherOrder;
+                            //var newLambda = new LambdaExpression(parameter, expression, higherOrder);
+
+                            var newLambda = new LambdaExpression(parameter, expression, lambda.HigherOrder);
+
+                            foundSymbol = variable;
+                            foundExpression = newLambda;
                         }
                         else
                         {
                             foundSymbol = variable;
-                            foundExpression = expression;
+                            foundExpression = memoized;
                              
-                            currentSymbol = expression;
+                            currentSymbol = memoized;
                             continue;
                         }
                     }
                 }
 
-                // Make short circuit.
+                // Make faster when updates with short circuit.
                 if (foundSymbol != null)
                 {
                     Debug.Assert(foundExpression != null);

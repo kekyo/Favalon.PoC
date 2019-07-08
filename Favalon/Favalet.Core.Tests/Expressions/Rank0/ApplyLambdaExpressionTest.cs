@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Rank0
 {
     using static StaticFactories;
 

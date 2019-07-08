@@ -36,7 +36,7 @@ namespace Favalet.Expressions
                 var bound = environment.Visit(this.Bound, higherOrder);
                 var expression = environment.Visit(this.Expression, bound.HigherOrder);
 
-                return new BindExpression(bound, expression, true, bound.HigherOrder);
+                return new BindExpression(bound, expression, true, expression.HigherOrder);
             }
             else
             {

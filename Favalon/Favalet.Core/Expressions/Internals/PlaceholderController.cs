@@ -21,7 +21,7 @@ namespace Favalet.Expressions.Internals
         public void Memoize(VariableExpression symbol, Expression expression) =>
             memoizedExpressions.Add(symbol, expression);
 
-        public Expression? Lookup(VariableExpression symbol)
+        private Expression? Lookup(VariableExpression symbol0, VariableExpression symbol, HashSet<VariableExpression> collected)
         {
             Expression currentSymbol = symbol;
             VariableExpression? foundSymbol = null;
@@ -36,12 +36,16 @@ namespace Favalet.Expressions.Internals
                         {
                             return memoized;
                         }
-                        else if (memoized is LambdaExpression lambda)
+
+                        if (!collected.Add(variable))
                         {
-                            var parameter = ((lambda.Parameter is VariableExpression p) ? this.Lookup(p) : null) ?? lambda.Parameter;
-                            var expression = ((lambda.Expression is VariableExpression e) ? this.Lookup(e) : null) ?? lambda.Expression;
-                            //var higherOrder = ((lambda.HigherOrder is VariableExpression ho) ? this.Lookup(ho) : null) ?? lambda.HigherOrder;
-                            //var newLambda = new LambdaExpression(parameter, expression, higherOrder);
+                            throw new ArgumentException($"Recursive unification problem: {symbol0.StrictReadableString}");
+                        }
+
+                        if (memoized is LambdaExpression lambda)
+                        {
+                            var parameter = ((lambda.Parameter is VariableExpression p) ? this.Lookup(symbol0, p, collected) : null) ?? lambda.Parameter;
+                            var expression = ((lambda.Expression is VariableExpression e) ? this.Lookup(symbol0, e, collected) : null) ?? lambda.Expression;
 
                             var newLambda = new LambdaExpression(parameter, expression, lambda.HigherOrder);
 
@@ -69,5 +73,8 @@ namespace Favalet.Expressions.Internals
                 return foundExpression;
             }
         }
+
+        public Expression? Lookup(VariableExpression symbol) =>
+            this.Lookup(symbol, symbol, new HashSet<VariableExpression>());
     }
 }

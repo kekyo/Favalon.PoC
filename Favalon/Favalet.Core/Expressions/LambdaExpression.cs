@@ -28,14 +28,15 @@ namespace Favalet.Expressions
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
         {
             var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
+            var lambdaHigherOrder = higherOrder as LambdaExpression;
 
-            var parameter = environment.Visit(this.Parameter, UnspecifiedExpression.Instance);
-            var expression = environment.Visit(this.Expression, UnspecifiedExpression.Instance);
+            var parameter = environment.Visit(this.Parameter, lambdaHigherOrder?.Parameter ?? UnspecifiedExpression.Instance);
+            var expression = environment.Visit(this.Expression, lambdaHigherOrder?.Expression ?? UnspecifiedExpression.Instance);
 
-            var lambdaHigherOrder = environment.Unify(higherOrder,
+            var newLambdaHigherOrder = environment.Unify(higherOrder,
                 new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UnspecifiedExpression.Instance));
 
-            return new LambdaExpression(parameter, expression, lambdaHigherOrder);
+            return new LambdaExpression(parameter, expression, newLambdaHigherOrder);
         }
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)

@@ -147,8 +147,8 @@ namespace Favalet.Expressions
             (rec a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Unification problem (('2 -> '2) => System.Int32)
             */
 
-            var expression = Bind(Bound("a", Implicit("System.Int32")), Lambda(Bound("b"), Free("b")));
-            Assert.AreEqual("(a:System.Int32 = (b:? -> b:?):?):?", expression.StrictReadableString);
+            var expression = RecursiveBind(Bound("a", Implicit("System.Int32")), Lambda(Bound("b"), Free("b")));
+            Assert.AreEqual("(rec a:System.Int32 = (b:? -> b:?):?):?", expression.StrictReadableString);
 
             Assert.Throws<ArgumentException>(() => environment.Infer(expression));
         }
@@ -177,11 +177,87 @@ namespace Favalet.Expressions
             System.Int32 -> System.Int32
             */
 
-            var expression = Bind(Bound("a", Lambda(Bound("System.Int32"), Unspecified)), Lambda(Bound("b"), Free("b")));
-            Assert.AreEqual("(a:(System.Int32 -> ?) = (b:? -> b:?):?):?", expression.StrictReadableString);
+            var expression = RecursiveBind(Bound("a", Lambda(Bound("System.Int32"), Unspecified)), Lambda(Bound("b"), Free("b")));
+            Assert.AreEqual("(rec a:(System.Int32 -> ?) = (b:? -> b:?):?):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
+        }
+
+        [Test]
+        public void RecursiveBind7()
+        {
+            var environment = Environment.Create();
+
+            /*
+            rec a = b -> a
+            (rec a:? = (b:? -> a:?):?):?
+            1:-------------------
+            (rec a:? = (b:? -> a:?):?):'1
+            (rec a:'1 = (b:? -> a:?):?):'1                  : RecBind(a:'1)
+            (rec a:'1 = (b:? -> a:?):'1):'1
+            (rec a:'1 = (b:'2 -> a:?):'1):'1                : Bind(b:'2)
+            (rec a:'1 = (b:'2 -> a:'1):('2 -> '1)):'1               : Lookup(a => '1), Memoize('1 => ('2 -> '1))
+            2:-------------------
+            (rec a:'1 = (b:'2 -> a:'1):('2 -> '1)):'1       : Update('1 => ('2 -> '1))     // Recursive unification problem ('1 => ('2 -> '1))
+            */
+
+            var expression = RecursiveBind(Bound("a"), Lambda(Bound("b"), Free("a")));
+            Assert.AreEqual("(rec a:? = (b:? -> a:?):?):?", expression.StrictReadableString);
+
+            Assert.Throws<ArgumentException>(() => environment.Infer(expression));
+        }
+
+        [Test]
+        public void RecursiveBind8()
+        {
+            var environment = Environment.Create();
+
+            /*
+            rec a = rec b = a b
+            (rec a:? = (rec b:? = (a:? b:?):?):?):?
+            1:-------------------
+            (rec a:? = (rec b:? = (a:? b:?):?):?):'1
+            (rec a:'1 = (rec b:? = (a:? b:?):?):?):'1               : RecBind(a:'1)
+            (rec a:'1 = (rec b:? = (a:? b:?):?):'1):'1
+            (rec a:'1 = (rec b:'1 = (a:? b:?):?):'1):'1             : RecBind(b:'1)
+            (rec a:'1 = (rec b:'1 = (a:? b:?):'1):'1):'1
+            (rec a:'1 = (rec b:'1 = (a:? b:'1):'1):'1):'1           : Lookup(b => '1)
+            (rec a:'1 = (rec b:'1 = (a:('1 -> '1) b:'1):'1):'1):'1           : Memoize('1 => ('1 -> '1))
+            2:-------------------
+            (rec a:'1 = (rec b:'1 = (a:'1 b:'1):'1):'1):'1          : Update('1 => ('1 -> '1))     // Recursive unification problem ('1 => ('1 -> '1))
+            */
+
+            var expression = RecursiveBind(Bound("a"), RecursiveBind(Bound("b"), Apply(Free("a"), Free("b"))));
+            Assert.AreEqual("(rec a:? = (rec b:? = (a:? b:?):?):?):?", expression.StrictReadableString);
+
+            Assert.Throws<ArgumentException>(() => environment.Infer(expression));
+        }
+
+        [Test]
+        public void RecursiveBind9()
+        {
+            var environment = Environment.Create();
+
+            /*
+            rec a = a b
+            (rec a:? = (a:? b:?):?):?
+            1:-------------------
+            (rec a:? = (a:? b:?):?):'1
+            (rec a:'1 = (a:? b:?):?):'1
+            (rec a:'1 = (a:? b:?):'1):'1
+            (rec a:'1 = (a:? b:'2):'1):'1
+            (rec a:'1 = (a:('2 -> '1) b:'2):'1):'1                   : Memoize('1 => ('2 -> '1))
+            2:-------------------
+            (rec a:'1 = (a:('2 -> '1) b:'2):('2 -> '1)):'1           : Update('1 => ('2 -> '1))     // Recursive unification problem ('1 => ('1 -> '1))
+            3:-------------------
+            '2 -> '1
+            */
+
+            var expression = RecursiveBind(Bound("a"), Apply(Free("a"), Implicit("b")));
+            Assert.AreEqual("(rec a:? = (a:? b:?):?):?", expression.StrictReadableString);
+
+            Assert.Throws<ArgumentException>(() => environment.Infer(expression));
         }
     }
 }

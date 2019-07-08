@@ -182,5 +182,30 @@ namespace Favalet.Expressions
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
         }
+
+        [Test]
+        public void Bind7()
+        {
+            var environment = Environment.Create();
+
+            /*
+            a = b -> a
+            (a:? = (b:? -> a:?):?):?
+            1:-------------------
+            (a:? = (b:? -> a:?):?):'1
+            (a:'1 = (b:? -> a:?):?):'1                  : Bind(a:'1)
+            (a:'1 = (b:? -> a:?):'1):'1
+            (a:'1 = (b:'2 -> a:?):'1):'1                : Bind(b:'2)
+            (a:'1 = (b:'2 -> a:'1):'1):'1               : Lookup(a => '1), Memoize('1 => ('2 -> '1))
+            2:-------------------
+            (a:'1 = (b:'2 -> a:'1):('2 -> '1)):'1       : Update('1 => ('2 -> '1))
+            (a:('2 -> '1) = (b:'2 -> a:'1):('2 -> '1)):'1       : Update('1 => ('2 -> '1))     // Recursive unification problem ('1 => ('2 -> '1))
+            */
+
+            var expression = Bind(Bound("a"), Lambda(Bound("b"), Free("a")));
+            Assert.AreEqual("(a:? = (b:? -> a:?):?):?", expression.StrictReadableString);
+
+            Assert.Throws<ArgumentException>(() => environment.Infer(expression));
+        }
     }
 }

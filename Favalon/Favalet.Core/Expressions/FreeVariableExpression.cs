@@ -21,7 +21,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                throw new InvalidOperationException($"Cannot find variable. Name={this.Name}");
+                throw new ArgumentException($"Cannot find variable: Name={this.Name}");
             }
         }
 

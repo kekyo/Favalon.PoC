@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Favalet.Expressions
 {
-    public sealed class FreeVariableExpression : SymbolicVariableExpression
+    public class FreeVariableExpression : SymbolicVariableExpression
     {
         internal FreeVariableExpression(string name, Expression higherOrder) :
             base(name, higherOrder)

@@ -6,9 +6,6 @@
             base(typeName, higherOrder)
         { }
 
-        public override bool IsAlwaysVisibleInAnnotation =>
-            this.Name != "%";
-
         protected override FormattedString FormatReadableString(FormatContext context) =>
             (context.FormatNaming == FormatNamings.Strict) ? "(Type)" : base.FormatReadableString(context);
 
@@ -27,6 +24,6 @@
             new TypeExpression(typeName, KindExpression.Instance);
 
         public static readonly TypeExpression Instance =
-            new TypeExpression("%", KindExpression.Instance);
+            new TypeExpression("?", KindExpression.Instance);
     }
 }

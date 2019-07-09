@@ -19,10 +19,10 @@ namespace Favalet.Expressions.Rank0
             /*
             Bind 1:
             a = 123
-            (a:? = 123:?):?
+            (a:_ = 123:_):_
             1:-------------------
-            (a:? = 123:?):'1
-            (a:? = 123:Numeric):'1                       : Memoize('1 => Numeric)
+            (a:_ = 123:_):'1
+            (a:_ = 123:Numeric):'1                       : Memoize('1 => Numeric)
             (a:Numeric = 123:Numeric):'1
             2:-------------------
             (a:Numeric = 123:Numeric):Numeric            : Update('1 => Numeric)
@@ -31,7 +31,7 @@ namespace Favalet.Expressions.Rank0
             */
 
             var expression = Bind(Bound("a"), Literal(123));
-            Assert.AreEqual("(a:? = 123:?):?", expression.StrictReadableString);
+            Assert.AreEqual("(a:_ = 123:_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:Numeric = 123:Numeric):Numeric", inferred.StrictReadableString);
@@ -45,12 +45,12 @@ namespace Favalet.Expressions.Rank0
             /*
             Bind 2:
             a = b -> b
-            (a:? = (b:? -> b:?):?):?
+            (a:_ = (b:_ -> b:_):_):_
             1:-------------------
-            (a:? = (b:? -> b:?):?):'1
-            (a:? = (b:? -> b:?):'1):'1
-            (a:? = (b:'2 -> b:?):'1):'1                  : Bind(b:'2)
-            (a:? = (b:'2 -> b:'2):'1):'1                 : Lookup(b => '2), Memoize('1 => ('2 -> '2))
+            (a:_ = (b:_ -> b:_):_):'1
+            (a:_ = (b:_ -> b:_):'1):'1
+            (a:_ = (b:'2 -> b:_):'1):'1                  : Bind(b:'2)
+            (a:_ = (b:'2 -> b:'2):'1):'1                 : Lookup(b => '2), Memoize('1 => ('2 -> '2))
             (a:'1 = (b:'2 -> b:'2):'1):'1
             2:-------------------
             (a:'1 = (b:'2 -> b:'2):('2 -> '2)):'1                        : Update('1 => ('2 -> '2))
@@ -61,7 +61,7 @@ namespace Favalet.Expressions.Rank0
             */
 
             var expression = Bind(Bound("a"), Lambda(Bound("b"), Free("b")));
-            Assert.AreEqual("(a:? = (b:? -> b:?):?):?", expression.StrictReadableString);
+            Assert.AreEqual("(a:_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:('2 -> '2) = (b:'2 -> b:'2):('2 -> '2)):('2 -> '2)", inferred.StrictReadableString);
@@ -75,11 +75,11 @@ namespace Favalet.Expressions.Rank0
             /*
             Bind 3:
             a = b -> b:System.Int32
-            (a:? = (b:? -> b:System.Int32):?):?
+            (a:_ = (b:_ -> b:System.Int32):_):_
             1:-------------------
-            (a:? = (b:? -> b:System.Int32):?):'1
-            (a:'1 = (b:? -> b:System.Int32):?):'1
-            (a:'1 = (b:? -> b:System.Int32):'1):'1
+            (a:_ = (b:_ -> b:System.Int32):_):'1
+            (a:'1 = (b:_ -> b:System.Int32):_):'1
+            (a:'1 = (b:_ -> b:System.Int32):'1):'1
             (a:'1 = (b:'2 -> b:System.Int32):'1):'1      : Bind(b:'2)
             (a:'1 = (b:'2 -> b:System.Int32):'1):'1      : Lookup(b => '2), Memoize('2 => System.Int32)
             2:-------------------
@@ -92,7 +92,7 @@ namespace Favalet.Expressions.Rank0
             */
 
             var expression = Bind(Bound("a"), Lambda(Bound("b"), Free("b", Implicit("System.Int32"))));
-            Assert.AreEqual("(a:? = (b:? -> b:System.Int32):?):?", expression.StrictReadableString);
+            Assert.AreEqual("(a:_ = (b:_ -> b:System.Int32):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
@@ -106,12 +106,12 @@ namespace Favalet.Expressions.Rank0
             /*
             Bind 4:
             a = b:System.Int32 -> b
-            (a:? = (b:System.Int32 -> b:?):?):?
+            (a:_ = (b:System.Int32 -> b:_):_):_
             1:-------------------
-            (a:? = (b:System.Int32 -> b:?):?):'1
-            (a:'1 = (b:System.Int32 -> b:?):?):'1
-            (a:'1 = (b:System.Int32 -> b:?):'1):'1
-            (a:'1 = (b:System.Int32 -> b:?):'1):'1                   : Bind(b:System.Int32)
+            (a:_ = (b:System.Int32 -> b:_):_):'1
+            (a:'1 = (b:System.Int32 -> b:_):_):'1
+            (a:'1 = (b:System.Int32 -> b:_):'1):'1
+            (a:'1 = (b:System.Int32 -> b:_):'1):'1                   : Bind(b:System.Int32)
             (a:'1 = (b:System.Int32 -> b:System.Int32):'1):'1        : Lookup(b => System.Int32), Memoize('1 => (System.Int32 -> System.Int32))
             2:-------------------
             (a:'1 = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1        : Update('1 => (System.Int32 -> System.Int32))
@@ -122,7 +122,7 @@ namespace Favalet.Expressions.Rank0
             */
 
             var expression = Bind(Bound("a"), Lambda(Bound("b", Implicit("System.Int32")), Free("b")));
-            Assert.AreEqual("(a:? = (b:System.Int32 -> b:?):?):?", expression.StrictReadableString);
+            Assert.AreEqual("(a:_ = (b:System.Int32 -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
@@ -136,18 +136,18 @@ namespace Favalet.Expressions.Rank0
             /*
             Bind 5:
             a:System.Int32 = b -> b
-            (a:System.Int32 = (b:? -> b:?):?):?
+            (a:System.Int32 = (b:_ -> b:_):_):_
             1:-------------------
-            (a:System.Int32 = (b:? -> b:?):?):'1
-            (a:System.Int32 = (b:? -> b:?):'1):'1
-            (a:System.Int32 = (b:'2 -> b:?):'1):'1                      : Bind(b:'2)
+            (a:System.Int32 = (b:_ -> b:_):_):'1
+            (a:System.Int32 = (b:_ -> b:_):'1):'1
+            (a:System.Int32 = (b:'2 -> b:_):'1):'1                      : Bind(b:'2)
             (a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Lookup(b => '2)
             (a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1
             (a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Unification problem (('2 -> '2) => System.Int32)
             */
 
             var expression = Bind(Bound("a", Implicit("System.Int32")), Lambda(Bound("b"), Free("b")));
-            Assert.AreEqual("(a:System.Int32 = (b:? -> b:?):?):?", expression.StrictReadableString);
+            Assert.AreEqual("(a:System.Int32 = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
             Assert.Throws<ArgumentException>(() => environment.Infer(expression));
         }
@@ -159,13 +159,13 @@ namespace Favalet.Expressions.Rank0
 
             /*
             Bind 6:
-            a:(System.Int32 -> ?) = b -> b
-            (a:(System.Int32 -> ?) = (b:? -> b:?):?):?
+            a:(System.Int32 -> _) = b -> b
+            (a:(System.Int32 -> _) = (b:_ -> b:_):_):_
             1:-------------------
-            (a:(System.Int32 -> ?) = (b:? -> b:?):?):'1
-            (a:(System.Int32 -> '2) = (b:? -> b:?):?):'1        : Memoize('1 => (System.Int32 -> '2))
-            (a:(System.Int32 -> '2) = (b:? -> b:?):(System.Int32 -> '2)):'1
-            (a:(System.Int32 -> '2) = (b:System.Int32 -> b:?):(System.Int32 -> '2)):'1      : Bind(b:System.Int32)
+            (a:(System.Int32 -> _) = (b:_ -> b:_):_):'1
+            (a:(System.Int32 -> '2) = (b:_ -> b:_):_):'1        : Memoize('1 => (System.Int32 -> '2))
+            (a:(System.Int32 -> '2) = (b:_ -> b:_):(System.Int32 -> '2)):'1
+            (a:(System.Int32 -> '2) = (b:System.Int32 -> b:_):(System.Int32 -> '2)):'1      : Bind(b:System.Int32)
             (a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> '2)):'1     : Lookup(b => System.Int32), Memoize((System.Int32 -> '2) => (System.Int32 -> System.Int32))
             2:-------------------
             (a:(System.Int32 -> '2) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):'1     : Update((System.Int32 -> '2) => (System.Int32 -> System.Int32))
@@ -177,7 +177,7 @@ namespace Favalet.Expressions.Rank0
             */
 
             var expression = Bind(Bound("a", Lambda(Bound("System.Int32"), Unspecified)), Lambda(Bound("b"), Free("b")));
-            Assert.AreEqual("(a:(System.Int32 -> ?) = (b:? -> b:?):?):?", expression.StrictReadableString);
+            Assert.AreEqual("(a:(System.Int32 -> _) = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
@@ -190,12 +190,12 @@ namespace Favalet.Expressions.Rank0
 
             /*
             a = b -> a
-            (a:? = (b:? -> a:?):?):?
+            (a:_ = (b:_ -> a:_):_):_
             1:-------------------
-            (a:? = (b:? -> a:?):?):'1
-            (a:'1 = (b:? -> a:?):?):'1                  : Bind(a:'1)
-            (a:'1 = (b:? -> a:?):'1):'1
-            (a:'1 = (b:'2 -> a:?):'1):'1                : Bind(b:'2)
+            (a:_ = (b:_ -> a:_):_):'1
+            (a:'1 = (b:_ -> a:_):_):'1                  : Bind(a:'1)
+            (a:'1 = (b:_ -> a:_):'1):'1
+            (a:'1 = (b:'2 -> a:_):'1):'1                : Bind(b:'2)
             (a:'1 = (b:'2 -> a:'1):'1):'1               : Lookup(a => '1), Memoize('1 => ('2 -> '1))
             2:-------------------
             (a:'1 = (b:'2 -> a:'1):('2 -> '1)):'1       : Update('1 => ('2 -> '1))
@@ -203,7 +203,7 @@ namespace Favalet.Expressions.Rank0
             */
 
             var expression = Bind(Bound("a"), Lambda(Bound("b"), Free("a")));
-            Assert.AreEqual("(a:? = (b:? -> a:?):?):?", expression.StrictReadableString);
+            Assert.AreEqual("(a:_ = (b:_ -> a:_):_):_", expression.StrictReadableString);
 
             Assert.Throws<ArgumentException>(() => environment.Infer(expression));
         }

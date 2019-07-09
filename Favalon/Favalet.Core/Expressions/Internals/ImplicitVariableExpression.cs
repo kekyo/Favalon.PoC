@@ -6,9 +6,6 @@
             base(name, higherOrder)
         { }
 
-        public override bool IsAlwaysVisibleInAnnotation =>
-           true;
-
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
             this.VisitInferringImplicitVariable(
                 environment,

@@ -15,8 +15,6 @@ namespace Favalet.Expressions
 
         public readonly string Name;
 
-        public abstract bool IsAlwaysVisibleInAnnotation { get; }
-
         protected override FormattedString FormatReadableString(FormatContext context) =>
             this.Name;
 

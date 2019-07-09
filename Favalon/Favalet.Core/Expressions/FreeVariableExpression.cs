@@ -12,9 +12,6 @@ namespace Favalet.Expressions
             base(name, higherOrder)
         { }
 
-        public override bool IsAlwaysVisibleInAnnotation =>
-          true;
-
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
         {
             if (environment.Lookup(this) is Expression bound)

@@ -36,28 +36,5 @@ namespace Favalet.Expressions
             this.VisitInferring(environment, higherOrderHint);
         internal Expression InternalVisitResolving(IResolvingEnvironment environment) =>
             this.VisitResolving(environment);
-
-        private string FormatReadableString(FormatContext context, bool encloseParenthesesIfRequired)
-        {
-            var result = this.FormatReadableString(context);
-            return (encloseParenthesesIfRequired && result.RequiredEnclosingParentheses) ?
-                $"({result.Formatted})" :
-                result.Formatted;
-        }
-
-        private static bool IsRequiredAnnotation(FormatContext context, Expression expression) =>
-            context.FormatAnnotation switch
-            {
-                FormatAnnotations.Always => true,
-                FormatAnnotations.Without => false,
-                _ when expression.HigherOrder is UnspecifiedExpression => false,
-                _ when expression.HigherOrder is SymbolicVariableExpression variable => variable.IsAlwaysVisibleInAnnotation,
-                _ => expression.HigherOrder != null
-            };
-
-        protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired) =>
-            IsRequiredAnnotation(context, expression) ?
-                $"{expression.FormatReadableString(context, true)}:{expression.HigherOrder.FormatReadableString(context.NewDerived(FormatAnnotations.Without, null, null), true)}" :
-                expression.FormatReadableString(context, encloseParenthesesIfRequired);
     }
 }

@@ -8,9 +8,6 @@ namespace Favalet.Expressions.Specialized
             base(kindName, higherOrder)
         { }
 
-        public override bool IsAlwaysVisibleInAnnotation =>
-            false;
-
         protected override FormattedString FormatReadableString(FormatContext context) =>
             (context.FormatNaming == FormatNamings.Strict) ? "(Kind)" : "*";
 

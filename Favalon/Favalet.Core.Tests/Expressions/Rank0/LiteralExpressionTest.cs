@@ -19,7 +19,7 @@ namespace Favalet.Expressions.Rank0
             /*
             Literal1:
             123
-            123:?
+            123:_
             1:-------------------
             123:Numeric
             2:-------------------
@@ -28,7 +28,7 @@ namespace Favalet.Expressions.Rank0
              */
 
             var expression = Literal(123);
-            Assert.AreEqual("123:?", expression.StrictReadableString);
+            Assert.AreEqual("123:_", expression.StrictReadableString);
 
             var inferred = environment.Infer<Expression>(expression);
             Assert.AreEqual("123:Numeric", inferred.StrictReadableString);
@@ -42,7 +42,7 @@ namespace Favalet.Expressions.Rank0
             /*
             Literal2:
             "ABC"
-            "ABC":?
+            "ABC":_
             1:-------------------
             "ABC":System.String
             2:-------------------
@@ -51,7 +51,7 @@ namespace Favalet.Expressions.Rank0
              */
 
             var expression = Literal("ABC");
-            Assert.AreEqual("\"ABC\":?", expression.StrictReadableString);
+            Assert.AreEqual("\"ABC\":_", expression.StrictReadableString);
 
             var inferred = environment.Infer<Expression>(expression);
             Assert.AreEqual("\"ABC\":System.String", inferred.StrictReadableString);

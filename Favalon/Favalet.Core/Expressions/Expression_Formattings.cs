@@ -64,5 +64,28 @@ namespace Favalet.Expressions
                 return index;
             }
         }
+
+        private string FormatReadableString(FormatContext context, bool encloseParenthesesIfRequired)
+        {
+            var result = this.FormatReadableString(context);
+            return (encloseParenthesesIfRequired && result.RequiredEnclosingParentheses) ?
+                $"({result.Formatted})" :
+                result.Formatted;
+        }
+
+        private static bool IsRequiredAnnotation(FormatContext context, Expression expression) =>
+            context.FormatAnnotation switch
+            {
+                FormatAnnotations.Always => true,
+                FormatAnnotations.Without => false,
+                _ when expression is TypeExpression type => !type.Equals(TypeExpression.Instance),
+                _ when expression.HigherOrder is UnspecifiedExpression => false,
+                _ => expression.HigherOrder != null
+            };
+
+        protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired) =>
+            IsRequiredAnnotation(context, expression) ?
+                $"{expression.FormatReadableString(context, true)}:{expression.HigherOrder.FormatReadableString(context.NewDerived(FormatAnnotations.Without, null, null), true)}" :
+                expression.FormatReadableString(context, encloseParenthesesIfRequired);
     }
 }

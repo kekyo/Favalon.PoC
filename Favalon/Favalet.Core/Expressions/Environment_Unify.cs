@@ -86,25 +86,33 @@ namespace Favalet.Expressions
             throw new ArgumentException($"Cannot unifying: between \"{expression1.ReadableString}\" and \"{expression2.ReadableString}\"");
         }
 
+        private Expression CreatePlaceholderIfRequired(Expression expression) =>
+            expression switch
+            {
+                UnspecifiedExpression _ => this.CreatePlaceholder(UnspecifiedExpression.Instance),
+                TypeExpression _ => this.CreatePlaceholder(KindExpression.Instance),
+                _ when expression.HigherOrder is TypeExpression => this.CreatePlaceholder(TypeExpression.Instance),
+                _ => expression
+            };
+
         internal Expression Unify(Expression expression1, Expression expression2)
         {
+            Expression result;
+
             if (expression2 is UnspecifiedExpression)
             {
-                if (expression1 is UnspecifiedExpression)
-                {
-                    return this.CreatePlaceholder(UnspecifiedExpression.Instance);
-                }
-                else
-                {
-                    return expression1;
-                }
+                result = expression1;
             }
             else if (expression1 is UnspecifiedExpression)
             {
-                return expression2;
+                result = expression2;
+            }
+            else
+            {
+                result = this.Unify2(expression1, expression2);
             }
 
-            return this.Unify2(expression1, expression2);
+            return this.CreatePlaceholderIfRequired(result);
         }
 
         Expression IInferringEnvironment.Unify(Expression expression1, Expression expression2) =>
@@ -112,47 +120,44 @@ namespace Favalet.Expressions
 
         Expression IInferringEnvironment.Unify(Expression expression1, Expression expression2, Expression expression3)
         {
+            Expression result;
+
             if (expression3 is UnspecifiedExpression)
             {
                 if (expression2 is UnspecifiedExpression)
                 {
-                    if (expression1 is UnspecifiedExpression)
-                    {
-                        return this.CreatePlaceholder(UnspecifiedExpression.Instance);
-                    }
-                    else
-                    {
-                        return expression1;
-                    }
+                    result = expression1;
                 }
                 else if (expression1 is UnspecifiedExpression)
                 {
-                    return expression2;
+                    result = expression2;
                 }
                 else
                 {
-                    return this.Unify2(expression1, expression2);
+                    result = this.Unify2(expression1, expression2);
                 }
             }
             else if (expression2 is UnspecifiedExpression)
             {
                 if (expression1 is UnspecifiedExpression)
                 {
-                    return expression3;
+                    result = expression3;
                 }
                 else
                 {
-                    return this.Unify2(expression1, expression3);
+                    result = this.Unify2(expression1, expression3);
                 }
             }
             else if (expression1 is UnspecifiedExpression)
             {
-                return this.Unify2(expression2, expression3);
+                result = this.Unify2(expression2, expression3);
             }
             else
             {
-                return this.Unify2(expression1, this.Unify2(expression2, expression3));
+                result = this.Unify2(expression1, this.Unify2(expression2, expression3));
             }
+
+            return this.CreatePlaceholderIfRequired(result);
         }
     }
 }

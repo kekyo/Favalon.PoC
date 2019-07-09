@@ -1,4 +1,5 @@
 ﻿using Favalet.Expressions.Internals;
+using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,7 +50,9 @@ namespace Favalet.Expressions
             {
                 FormatAnnotations.Always => true,
                 FormatAnnotations.Without => false,
-                _ => (expression.HigherOrder != null) && !(expression.HigherOrder is PseudoExpression)
+                _ when expression.HigherOrder is UnspecifiedExpression => false,
+                _ when expression.HigherOrder is SymbolicVariableExpression variable => variable.IsAlwaysVisibleInAnnotation,
+                _ => expression.HigherOrder != null
             };
 
         protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired) =>

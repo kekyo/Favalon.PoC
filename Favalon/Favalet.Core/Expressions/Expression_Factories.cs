@@ -7,17 +7,14 @@ namespace Favalet.Expressions
     {
         public static readonly UnspecifiedExpression Unspecified =
             UnspecifiedExpression.Instance;
-        public static readonly UnspecifiedTypeExpression UnspecifiedType =
-            UnspecifiedTypeExpression.Instance;
 
         public static readonly KindExpression Kind =
             KindExpression.Instance;
+        public static readonly TypeExpression Type =
+            TypeExpression.Instance;
 
         public static LiteralExpression Literal(object value) =>
             new LiteralExpression(value, UnspecifiedExpression.Instance);
-
-        public static TypeExpression Type(string typeName) =>
-            new TypeExpression(typeName);
 
         public static SymbolicVariableExpression Free(string name, Expression higherOrder) =>
             new FreeVariableExpression(name, higherOrder);

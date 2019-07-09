@@ -29,8 +29,8 @@ namespace Favalet.Expressions.Rank1
             '1
             */
 
-            var expression = Apply(Implicit("a"), Implicit("b"));
-            Assert.AreEqual("(a:? b:?):?", expression.StrictReadableString);
+            var expression = Apply(Implicit("a", Type), Implicit("b", Type));
+            Assert.AreEqual("(a:% b:%):?", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:('2 -> '1) b:'2):'1", inferred.StrictReadableString);

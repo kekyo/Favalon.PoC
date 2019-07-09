@@ -1,10 +1,6 @@
-﻿using Favalet.Expressions.Internals;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 
-namespace Favalet.Expressions.Internals
+namespace Favalet.Expressions.Specialized
 {
     public sealed class PlaceholderExpression :
         VariableExpression, IEquatable<PlaceholderExpression?>, IComparable<PlaceholderExpression>

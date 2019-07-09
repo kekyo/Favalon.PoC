@@ -1,18 +1,19 @@
 ﻿using Favalet.Expressions.Internals;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Favalet.Expressions.Internals
+namespace Favalet.Expressions.Specialized
 {
     public sealed class UnspecifiedExpression : PseudoExpression
     {
-        private UnspecifiedExpression()
+        private UnspecifiedExpression() :
+            base(null!)
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
             (context.FormatNaming == FormatNamings.Strict) ? "(Unspecified)" : "?";
+
+        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
+            throw new NotImplementedException();
 
         internal static readonly UnspecifiedExpression Instance = new UnspecifiedExpression();
     }

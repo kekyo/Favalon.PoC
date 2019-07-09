@@ -1,14 +1,11 @@
 ﻿using Favalet.Expressions.Internals;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Specialized
 {
     public sealed class KindExpression : PseudoExpression
     {
-        private KindExpression()
+        private KindExpression() :
+            base(null!)
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>

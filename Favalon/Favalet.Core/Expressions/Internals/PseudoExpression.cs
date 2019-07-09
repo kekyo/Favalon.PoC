@@ -1,15 +1,11 @@
-﻿using Favalet.Expressions.Internals;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Internals
 {
     public abstract class PseudoExpression : Expression
     {
-        private protected PseudoExpression() :
-            base(null!)
+        private protected PseudoExpression(Expression higherOrder) :
+            base(higherOrder)
         { }
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>

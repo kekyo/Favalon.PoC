@@ -1,4 +1,4 @@
-﻿using Favalet.Expressions.Internals;
+﻿using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 
 namespace Favalet.Expressions

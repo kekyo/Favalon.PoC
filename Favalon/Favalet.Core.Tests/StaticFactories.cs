@@ -1,10 +1,7 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Additionals;
 using Favalet.Expressions.Internals;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Favalet.Expressions.Specialized;
 
 namespace Favalet
 {
@@ -12,12 +9,17 @@ namespace Favalet
     {
         public static UnspecifiedExpression Unspecified =>
             Expression.Unspecified;
+        public static readonly UnspecifiedTypeExpression UnspecifiedType =
+            Expression.UnspecifiedType;
 
         public static KindExpression Kind =>
             Expression.Kind;
 
         public static LiteralExpression Literal(object value) =>
             Expression.Literal(value);
+
+        public static TypeExpression Type(string typeName) =>
+            Expression.Type(typeName);
 
         public static SymbolicVariableExpression Free(string name, Expression higherOrder) =>
             Expression.Free(name, higherOrder);

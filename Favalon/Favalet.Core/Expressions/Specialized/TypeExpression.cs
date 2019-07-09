@@ -1,29 +1,17 @@
-﻿namespace Favalet.Expressions.Specialized
+﻿using Favalet.Expressions.Internals;
+
+namespace Favalet.Expressions.Specialized
 {
-    public sealed class TypeExpression : SymbolicVariableExpression
+    public sealed class TypeExpression : PseudoExpression
     {
-        private TypeExpression(string typeName, Expression higherOrder) :
-            base(typeName, higherOrder)
+        private TypeExpression() :
+            base(KindExpression.Instance)
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
-            (context.FormatNaming == FormatNamings.Strict) ? "(Type)" : base.FormatReadableString(context);
+            (context.FormatNaming == FormatNamings.Strict) ? "(Type)" : "?";
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
-        {
-            var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
-            var variable = new TypeExpression(this.Name, higherOrder);
-            environment.Memoize(this, variable);
-            return variable;
-        }
-
-        protected override Expression VisitResolving(IResolvingEnvironment environment) =>
-            this;
-
-        public static TypeExpression Create(string typeName) =>
-            new TypeExpression(typeName, KindExpression.Instance);
-
-        public static readonly TypeExpression Instance =
-            new TypeExpression("?", KindExpression.Instance);
+        internal static readonly TypeExpression Instance =
+            new TypeExpression();
     }
 }

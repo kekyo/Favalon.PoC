@@ -5,12 +5,16 @@ namespace Favalet.Expressions
 {
     partial class Expression
     {
-        public static readonly UnspecifiedExpression Unspecified =
+        public static UnspecifiedExpression Unspecified =>
             UnspecifiedExpression.Instance;
+        public static UnspecifiedExpression UnspecifiedKind =>
+            UnspecifiedExpression.Kind;
+        public static UnspecifiedExpression UnspecifiedType =>
+            UnspecifiedExpression.Type;
 
-        public static readonly KindExpression Kind =
+        public static KindExpression Kind =>
             KindExpression.Instance;
-        public static readonly TypeExpression Type =
+        public static TypeExpression Type =>
             TypeExpression.Instance;
 
         public static LiteralExpression Literal(object value) =>

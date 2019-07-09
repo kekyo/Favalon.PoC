@@ -1,12 +1,11 @@
-﻿using Favalet.Expressions.Internals;
-using System;
+﻿using System;
 
 namespace Favalet.Expressions.Specialized
 {
     public sealed class UnspecifiedExpression : Expression
     {
-        private UnspecifiedExpression() :
-            base(null!)
+        private UnspecifiedExpression(Expression higherOrder) :
+            base(higherOrder)
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
@@ -19,6 +18,10 @@ namespace Favalet.Expressions.Specialized
             this;
 
         internal static readonly UnspecifiedExpression Instance =
-            new UnspecifiedExpression();
+            new UnspecifiedExpression(null!);
+        internal static new readonly UnspecifiedExpression Kind =
+            new UnspecifiedExpression(KindExpression.Instance);
+        internal static new readonly UnspecifiedExpression Type =
+            new UnspecifiedExpression(TypeExpression.Instance);
     }
 }

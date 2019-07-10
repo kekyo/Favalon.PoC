@@ -30,7 +30,7 @@ namespace Favalet.Expressions
             var expression = environment.Visit(this.Expression, lambdaHigherOrder?.Expression ?? UnspecifiedExpression.Instance);
 
             var newLambdaHigherOrder = environment.Unify(higherOrder,
-                new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, Unspecified));
+                Create(parameter.HigherOrder, expression.HigherOrder));
 
             return new LambdaExpression(parameter, expression, newLambdaHigherOrder);
         }

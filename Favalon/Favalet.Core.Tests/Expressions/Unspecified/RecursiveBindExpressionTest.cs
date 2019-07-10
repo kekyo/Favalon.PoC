@@ -93,10 +93,10 @@ namespace Favalet.Expressions.Unspecified
             */
 
             var expression = RecursiveBind(Bound("a"), Lambda(Bound("b"), Free("b", Implicit("System.Int32"))));
-            Assert.AreEqual("(rec a:_ = (b:_ -> b:System.Int32):_):_", expression.StrictReadableString);
+            Assert.AreEqual("(rec a:_ = (b:_ -> b:System.Int32:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _):_ = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _):_):(System.Int32:_ -> System.Int32:_):(_ -> _):_", inferred.StrictReadableString);
         }
 
         [Test]
@@ -123,10 +123,10 @@ namespace Favalet.Expressions.Unspecified
             */
 
             var expression = RecursiveBind(Bound("a"), Lambda(Bound("b", Implicit("System.Int32")), Free("b")));
-            Assert.AreEqual("(rec a:_ = (b:System.Int32 -> b:_):_):_", expression.StrictReadableString);
+            Assert.AreEqual("(rec a:_ = (b:System.Int32:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _):_ = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _):_):(System.Int32:_ -> System.Int32:_):(_ -> _):_", inferred.StrictReadableString);
         }
 
         [Test]
@@ -140,17 +140,24 @@ namespace Favalet.Expressions.Unspecified
             (rec a:System.Int32 = (b:_ -> b:_):_):_
             1:-------------------
             (rec a:System.Int32 = (b:_ -> b:_):_):'1
-            (rec a:System.Int32 = (b:_ -> b:_):'1):'1
-            (rec a:System.Int32 = (b:'2 -> b:_):'1):'1                      : Bind(b:'2)
-            (rec a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Lookup(b => '2)
-            (rec a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1
-            (rec a:System.Int32 = (b:'2 -> b:'2):('2 -> '2)):'1             : Unification problem (('2 -> '2) => System.Int32)
+            (rec a:System.Int32 = (b:_ -> b:_):_):'1                        : Bind(a:System.Int32)
+            (rec a:System.Int32 = (b:_ -> b:_):System.Int32):'1
+            (rec a:System.Int32 = (b:'2 -> b:_):System.Int32):'1            : Bind(b:'2)
+            (rec a:System.Int32 = (b:'2 -> b:'2):System.Int32):'1           : Lookup(b => '2)    // Unification problem (('2 -> '2) => System.Int32)
             */
 
             var expression = RecursiveBind(Bound("a", Implicit("System.Int32")), Lambda(Bound("b"), Free("b")));
-            Assert.AreEqual("(rec a:System.Int32 = (b:_ -> b:_):_):_", expression.StrictReadableString);
+            Assert.AreEqual("(rec a:System.Int32:_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
-            Assert.Throws<ArgumentException>(() => environment.Infer(expression));
+            try
+            {
+                environment.Infer(expression);
+                Assert.Fail();
+            }
+            catch (ArgumentException ex)
+            {
+                Assert.AreEqual("Cannot unify: between \"('2:_ -> '2:_):(_ -> _):_\" and \"System.Int32:_\"", ex.Message);
+            }
         }
 
         [Test]
@@ -178,10 +185,10 @@ namespace Favalet.Expressions.Unspecified
             */
 
             var expression = RecursiveBind(Bound("a", Lambda(Bound("System.Int32"), Unspecified)), Lambda(Bound("b"), Free("b")));
-            Assert.AreEqual("(rec a:(System.Int32 -> _) = (b:_ -> b:_):_):_", expression.StrictReadableString);
+            Assert.AreEqual("(rec a:(System.Int32:_ -> _):_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(rec a:(System.Int32 -> System.Int32) = (b:System.Int32 -> b:System.Int32):(System.Int32 -> System.Int32)):(System.Int32 -> System.Int32)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _):_ = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _):_):(System.Int32:_ -> System.Int32:_):(_ -> _):_", inferred.StrictReadableString);
         }
 
         [Test]
@@ -194,10 +201,10 @@ namespace Favalet.Expressions.Unspecified
             (rec a:_ = (b:_ -> a:_):_):_
             1:-------------------
             (rec a:_ = (b:_ -> a:_):_):'1
-            (rec a:'1 = (b:_ -> a:_):_):'1                  : RecBind(a:'1)
+            (rec a:'1 = (b:_ -> a:_):_):'1                  : Bind(a:'1)
             (rec a:'1 = (b:_ -> a:_):'1):'1
             (rec a:'1 = (b:'2 -> a:_):'1):'1                : Bind(b:'2)
-            (rec a:'1 = (b:'2 -> a:'1):('2 -> '1)):'1               : Lookup(a => '1), Memoize('1 => ('2 -> '1))
+            (rec a:'1 = (b:'2 -> a:'1):('2 -> '1)):'1       : Lookup(a => '1), Memoize('1 => ('2 -> '1))
             2:-------------------
             (rec a:'1 = (b:'2 -> a:'1):('2 -> '1)):'1       : Update('1 => ('2 -> '1))     // Recursive unification problem ('1 => ('2 -> '1))
             */
@@ -205,7 +212,15 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), Lambda(Bound("b"), Free("a")));
             Assert.AreEqual("(rec a:_ = (b:_ -> a:_):_):_", expression.StrictReadableString);
 
-            Assert.Throws<ArgumentException>(() => environment.Infer(expression));
+            try
+            {
+                environment.Infer(expression);
+                Assert.Fail();
+            }
+            catch (ArgumentException ex)
+            {
+                Assert.AreEqual("Recursive unification problem: '1:_ ... ('2:_ -> '1:_):(_ -> _):_", ex.Message);
+            }
         }
 
         [Test]
@@ -218,9 +233,9 @@ namespace Favalet.Expressions.Unspecified
             (rec a:_ = (rec b:_ = (a:_ b:_):_):_):_
             1:-------------------
             (rec a:_ = (rec b:_ = (a:_ b:_):_):_):'1
-            (rec a:'1 = (rec b:_ = (a:_ b:_):_):_):'1               : RecBind(a:'1)
+            (rec a:'1 = (rec b:_ = (a:_ b:_):_):_):'1               : Bind(a:'1)
             (rec a:'1 = (rec b:_ = (a:_ b:_):_):'1):'1
-            (rec a:'1 = (rec b:'1 = (a:_ b:_):_):'1):'1             : RecBind(b:'1)
+            (rec a:'1 = (rec b:'1 = (a:_ b:_):_):'1):'1             : Bind(b:'1)
             (rec a:'1 = (rec b:'1 = (a:_ b:_):'1):'1):'1
             (rec a:'1 = (rec b:'1 = (a:_ b:'1):'1):'1):'1           : Lookup(b => '1)
             (rec a:'1 = (rec b:'1 = (a:('1 -> '1) b:'1):'1):'1):'1           : Memoize('1 => ('1 -> '1))
@@ -231,7 +246,15 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), RecursiveBind(Bound("b"), Apply(Free("a"), Free("b"))));
             Assert.AreEqual("(rec a:_ = (rec b:_ = (a:_ b:_):_):_):_", expression.StrictReadableString);
 
-            Assert.Throws<ArgumentException>(() => environment.Infer(expression));
+            try
+            {
+                environment.Infer(expression);
+                Assert.Fail();
+            }
+            catch (ArgumentException ex)
+            {
+                Assert.AreEqual("Recursive unification problem: '1:_ ... ('1:_ -> '1:_):(_ -> _):_", ex.Message);
+            }
         }
 
         [Test]
@@ -249,7 +272,7 @@ namespace Favalet.Expressions.Unspecified
             (rec a:'1 = (a:_ b:'2):'1):'1
             (rec a:'1 = (a:('2 -> '1) b:'2):'1):'1                   : Memoize('1 => ('2 -> '1))
             2:-------------------
-            (rec a:'1 = (a:('2 -> '1) b:'2):('2 -> '1)):'1           : Update('1 => ('2 -> '1))     // Recursive unification problem ('1 => ('1 -> '1))
+            (rec a:'1 = (a:('2 -> '1) b:'2):('2 -> '1)):'1           : Update('1 => ('2 -> '1))     // Recursive unification problem ('1 => ('2 -> '1))
             3:-------------------
             '2 -> '1
             */
@@ -257,7 +280,15 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), Apply(Free("a"), Implicit("b")));
             Assert.AreEqual("(rec a:_ = (a:_ b:_):_):_", expression.StrictReadableString);
 
-            Assert.Throws<ArgumentException>(() => environment.Infer(expression));
+            try
+            {
+                environment.Infer(expression);
+                Assert.Fail();
+            }
+            catch (ArgumentException ex)
+            {
+                Assert.AreEqual("Recursive unification problem: '1:_ ... ('2:_ -> '1:_):(_ -> _):_", ex.Message);
+            }
         }
     }
 }

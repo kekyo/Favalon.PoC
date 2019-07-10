@@ -33,7 +33,7 @@ namespace Favalet.Expressions
             else if (!(expression2 is KindExpression || expression2 is TypeExpression))
             {
                 Debug.Assert(!(expression2 is LambdaExpression));
-                throw new ArgumentException($"Cannot unifying: between \"{lambda1.StrictReadableString}\" and \"{expression2.StrictReadableString}\"");
+                throw new ArgumentException($"Cannot unify: between \"{lambda1.StrictReadableString}\" and \"{expression2.StrictReadableString}\"");
             }
 
             return lambda;
@@ -98,7 +98,7 @@ namespace Favalet.Expressions
                 return expression1;
             }
 
-            throw new ArgumentException($"Cannot unifying: between \"{expression1.ReadableString}\" and \"{expression2.ReadableString}\"");
+            throw new ArgumentException($"Cannot unify: between \"{expression1.ReadableString}\" and \"{expression2.ReadableString}\"");
         }
 
         private Expression CreatePlaceholderIfRequired(Expression expression) =>

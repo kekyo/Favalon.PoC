@@ -38,7 +38,7 @@ namespace Favalet.Expressions.Internals
 
                         if (!collected.Add(variable))
                         {
-                            throw new ArgumentException($"Recursive unification problem: {symbol0.StrictReadableString}");
+                            throw new ArgumentException($"Recursive unification problem: {symbol0.StrictReadableString} ... {memoized.StrictReadableString}");
                         }
 
                         if (memoized is LambdaExpression lambda)

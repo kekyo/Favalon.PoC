@@ -156,7 +156,7 @@ namespace Favalet.Expressions.Unspecified
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("Cannot unifying: between \"('2:_ -> '2:_):(_ -> _):_\" and \"System.Int32:_\"", ex.Message);
+                Assert.AreEqual("Cannot unify: between \"('2:_ -> '2:_):(_ -> _):_\" and \"System.Int32:_\"", ex.Message);
             }
         }
 

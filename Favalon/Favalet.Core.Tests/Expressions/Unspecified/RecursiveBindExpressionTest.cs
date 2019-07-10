@@ -32,7 +32,7 @@ namespace Favalet.Expressions.Unspecified
             */
 
             var expression = RecursiveBind(Bound("a"), Literal(123));
-            Assert.AreEqual("(rec a:_ = 123:?:*):_", expression.StrictReadableString);
+            Assert.AreEqual("(rec a:_ = 123:?):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(rec a:Numeric:* = 123:Numeric:*):Numeric:*", inferred.StrictReadableString);

@@ -31,7 +31,7 @@ namespace Favalet.Expressions.Unspecified
             */
 
             var expression = Bind(Bound("a"), Literal(123));
-            Assert.AreEqual("(a:_ = 123:?:*):_", expression.StrictReadableString);
+            Assert.AreEqual("(a:_ = 123:?):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:Numeric:* = 123:Numeric:*):Numeric:*", inferred.StrictReadableString);

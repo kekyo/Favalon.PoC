@@ -74,25 +74,26 @@ namespace Favalet.Expressions
         }
 
         private static bool IsRequiredAnnotation(FormatContext context, Expression expression) =>
-            context.FormatAnnotation switch
+            (context.FormatAnnotation, expression, expression.HigherOrder) switch
             {
-                FormatAnnotations.Always => true,
-                FormatAnnotations.Without => false,
-                _ when expression is TypeExpression type => !type.Equals(TypeExpression.Instance),
-                _ when expression.HigherOrder is UnspecifiedExpression => false,
+                (_, LambdaExpression _, UnspecifiedExpression _) => false,
+                (FormatAnnotations.Always, _, Expression _) => true,
+                (FormatAnnotations.Without, _, Expression _) => false,
+                (_, _, TypeExpression type) => !type.Equals(TypeExpression.Instance),
+                (_, _, UnspecifiedExpression _) => false,
                 _ => expression.HigherOrder != null
             };
 
         protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired)
         {
-            if (expression.HigherOrder is Expression higherOrder && IsRequiredAnnotation(context, expression))
+            if (IsRequiredAnnotation(context, expression))
             {
                 var variable = expression.FormatReadableString(context, true);
                 var annotation = FormatReadableString(
                     (context.FormatAnnotation == FormatAnnotations.Always) ?
                         context :
                         context.NewDerived(FormatAnnotations.Without, null, null),
-                    higherOrder,
+                    expression.HigherOrder,
                     true);
                 return $"{variable}:{annotation}";
             }

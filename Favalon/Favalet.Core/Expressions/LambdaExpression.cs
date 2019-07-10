@@ -1,9 +1,4 @@
-﻿using Favalet.Expressions.Internals;
-using Favalet.Expressions.Specialized;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Favalet.Expressions.Specialized;
 
 namespace Favalet.Expressions
 {
@@ -35,7 +30,7 @@ namespace Favalet.Expressions
             var expression = environment.Visit(this.Expression, lambdaHigherOrder?.Expression ?? UnspecifiedExpression.Instance);
 
             var newLambdaHigherOrder = environment.Unify(higherOrder,
-                new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UnspecifiedExpression.Instance));
+                new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, Unspecified));
 
             return new LambdaExpression(parameter, expression, newLambdaHigherOrder);
         }
@@ -48,5 +43,12 @@ namespace Favalet.Expressions
 
             return new LambdaExpression(parameter, expression, higherOrder);
         }
+
+        internal static LambdaExpression Create(Expression parameter, Expression expression) =>
+            (parameter.HigherOrder, expression.HigherOrder) switch
+            {
+                (Expression pho, Expression eho) => new LambdaExpression(parameter, expression, Create(pho, eho)),
+                _ => new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance)
+            };
     }
 }

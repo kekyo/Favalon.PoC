@@ -1,8 +1,4 @@
 ﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Favalet.Expressions.Unspecified
 {
@@ -38,7 +34,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:_ -> (a:_ b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:('4 -> '3) -> (a:('4 -> '3) b:'4):'3):(('4 -> '3) -> '3)", inferred.StrictReadableString);
+            Assert.AreEqual("(a:('4:_ -> '3:_):(_ -> _):_ -> (a:('4:_ -> '3:_):(_ -> _):_ b:'4:_):'3:_):(('4:_ -> '3:_):(_ -> _):_ -> '3:_):(_ -> _):_", inferred.StrictReadableString);
         }
 
         [Test]
@@ -73,7 +69,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:_ -> (b:_ -> (a:_ b:_):_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:('4 -> '5) -> (b:'4 -> (a:('4 -> '5) b:'4):'5):('4 -> '5)):(('4 -> '5) -> ('4 -> '5))", inferred.StrictReadableString);
+            Assert.AreEqual("(a:('4:_ -> '5:_):(_ -> _):_ -> (b:'4:_ -> (a:('4:_ -> '5:_):(_ -> _):_ b:'4:_):'5:_):('4:_ -> '5:_):(_ -> _):_):(('4:_ -> '5:_):(_ -> _):_ -> ('4:_ -> '5:_):(_ -> _):_):(_ -> (_ -> _):_):_", inferred.StrictReadableString);
         }
     }
 }

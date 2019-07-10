@@ -23,8 +23,7 @@ namespace Favalet.Expressions
             var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
 
             var argument = environment.Visit(this.Argument, UnspecifiedExpression.Instance);
-            var function = environment.Visit(this.Function,
-                new LambdaExpression(argument.HigherOrder, higherOrder, UnspecifiedExpression.Instance));
+            var function = environment.Visit(this.Function, LambdaExpression.Create(argument.HigherOrder, higherOrder));
 
             return new ApplyExpression(function, argument, higherOrder);
         }

@@ -1,4 +1,4 @@
-﻿namespace Favalet.Expressions.Internals
+namespace Favalet.Expressions.Internals
 {
     public sealed class ImplicitVariableExpression : SymbolicVariableExpression
     {

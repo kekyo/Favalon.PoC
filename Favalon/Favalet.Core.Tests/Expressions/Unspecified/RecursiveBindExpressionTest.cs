@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,10 +32,10 @@ namespace Favalet.Expressions.Unspecified
             */
 
             var expression = RecursiveBind(Bound("a"), Literal(123));
-            Assert.AreEqual("(rec a:_ = 123:_):_", expression.StrictReadableString);
+            Assert.AreEqual("(rec a:_ = 123:?:*):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(rec a:Numeric = 123:Numeric):Numeric", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:Numeric:* = 123:Numeric:*):Numeric:*", inferred.StrictReadableString);
         }
 
         [Test]
@@ -65,7 +65,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(rec a:_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(rec a:('2 -> '2) = (b:'2 -> b:'2):('2 -> '2)):('2 -> '2)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:('2:_ -> '2:_):(_ -> _):_ = (b:'2:_ -> b:'2:_):('2:_ -> '2:_):(_ -> _):_):('2:_ -> '2:_):(_ -> _):_", inferred.StrictReadableString);
         }
 
         [Test]

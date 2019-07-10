@@ -1,4 +1,4 @@
-﻿namespace Favalet.Expressions
+namespace Favalet.Expressions
 {
     partial class Expression
     {

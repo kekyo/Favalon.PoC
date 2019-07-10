@@ -1,4 +1,4 @@
-﻿using Favalet.Expressions.Additionals;
+using Favalet.Expressions.Additionals;
 using Favalet.Expressions.Specialized;
 
 namespace Favalet.Expressions

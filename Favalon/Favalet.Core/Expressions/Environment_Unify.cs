@@ -1,4 +1,4 @@
-﻿using Favalet.Expressions.Specialized;
+using Favalet.Expressions.Specialized;
 using System;
 using System.Diagnostics;
 
@@ -33,7 +33,7 @@ namespace Favalet.Expressions
             else if (!(expression2 is KindExpression || expression2 is TypeExpression))
             {
                 Debug.Assert(!(expression2 is LambdaExpression));
-                throw new ArgumentException($"Cannot unifying: between \"{lambda1.ReadableString}\" and \"{expression2.ReadableString}\"");
+                throw new ArgumentException($"Cannot unifying: between \"{lambda1.StrictReadableString}\" and \"{expression2.StrictReadableString}\"");
             }
 
             return lambda;

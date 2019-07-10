@@ -1,4 +1,4 @@
-﻿using Favalet.Expressions.Specialized;
+using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 
 namespace Favalet.Expressions
@@ -76,7 +76,7 @@ namespace Favalet.Expressions
         private static bool IsRequiredAnnotation(FormatContext context, Expression expression) =>
             (context.FormatAnnotation, expression, expression.HigherOrder) switch
             {
-                (_, LambdaExpression _, UnspecifiedExpression _) => false,
+                //(_, LambdaExpression _, UnspecifiedExpression _) => false,
                 (FormatAnnotations.Always, _, Expression _) => true,
                 (FormatAnnotations.Without, _, Expression _) => false,
                 (_, _, TypeExpression type) => !type.Equals(TypeExpression.Instance),

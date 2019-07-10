@@ -1,4 +1,4 @@
-﻿using Favalet.Expressions.Specialized;
+using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

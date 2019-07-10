@@ -18,7 +18,7 @@ namespace Favalet.Expressions
             TypeExpression.Instance;
 
         public static LiteralExpression Literal(object value) =>
-            new LiteralExpression(value, UnspecifiedExpression.Instance);
+            new LiteralExpression(value, TypeExpression.Instance);
 
         public static SymbolicVariableExpression Free(string name, Expression higherOrder) =>
             new FreeVariableExpression(name, higherOrder);

@@ -30,16 +30,21 @@ namespace Favalet.Expressions
             {
                 placehoderController.Memoize(placeholder, lambda);
             }
-            else
+            else if (!(expression2 is KindExpression || expression2 is TypeExpression))
             {
                 Debug.Assert(!(expression2 is LambdaExpression));
                 throw new ArgumentException($"Cannot unifying: between \"{lambda1.ReadableString}\" and \"{expression2.ReadableString}\"");
             }
+
             return lambda;
         }
 
         private Expression Unify2(Expression expression1, Expression expression2)
         {
+            Debug.Assert(
+                !(expression1 is UnspecifiedExpression) &&
+                !(expression2 is UnspecifiedExpression));
+
             if (expression1.Equals(expression2))
             {
                 return expression1;

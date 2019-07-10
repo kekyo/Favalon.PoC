@@ -83,9 +83,23 @@ namespace Favalet.Expressions
                 _ => expression.HigherOrder != null
             };
 
-        protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired) =>
-            IsRequiredAnnotation(context, expression) ?
-                $"{expression.FormatReadableString(context, true)}:{expression.HigherOrder.FormatReadableString(context.NewDerived(FormatAnnotations.Without, null, null), true)}" :
-                expression.FormatReadableString(context, encloseParenthesesIfRequired);
+        protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired)
+        {
+            if (expression.HigherOrder is Expression higherOrder && IsRequiredAnnotation(context, expression))
+            {
+                var variable = expression.FormatReadableString(context, true);
+                var annotation = FormatReadableString(
+                    (context.FormatAnnotation == FormatAnnotations.Always) ?
+                        context :
+                        context.NewDerived(FormatAnnotations.Without, null, null),
+                    higherOrder,
+                    true);
+                return $"{variable}:{annotation}";
+            }
+            else
+            {
+                return expression.FormatReadableString(context, encloseParenthesesIfRequired);
+            }
+        }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Favalet.Expressions.Rank0
+namespace Favalet.Expressions.Variable
 {
     using static StaticFactories;
 
@@ -28,10 +28,10 @@ namespace Favalet.Expressions.Rank0
              */
 
             var expression = Literal(123);
-            Assert.AreEqual("123:_", expression.StrictReadableString);
+            Assert.AreEqual("123:?:*", expression.StrictReadableString);
 
             var inferred = environment.Infer<Expression>(expression);
-            Assert.AreEqual("123:Numeric", inferred.StrictReadableString);
+            Assert.AreEqual("123:Numeric:*", inferred.StrictReadableString);
         }
 
         [Test]
@@ -51,10 +51,10 @@ namespace Favalet.Expressions.Rank0
              */
 
             var expression = Literal("ABC");
-            Assert.AreEqual("\"ABC\":_", expression.StrictReadableString);
+            Assert.AreEqual("\"ABC\":?:*", expression.StrictReadableString);
 
             var inferred = environment.Infer<Expression>(expression);
-            Assert.AreEqual("\"ABC\":System.String", inferred.StrictReadableString);
+            Assert.AreEqual("\"ABC\":System.String:*", inferred.StrictReadableString);
         }
     }
 }

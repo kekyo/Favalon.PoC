@@ -16,8 +16,14 @@ namespace Favalet.Expressions
         public PlaceholderExpression CreatePlaceholder(Expression higherOrder) =>
             placehoderController.Create(higherOrder);
 
-        Expression IInferringEnvironment.CreatePlaceholderIfRequired(Expression from) =>
-            (from is UnspecifiedExpression) ? this.CreatePlaceholder(UnspecifiedExpression.Instance) : from;
+        private Expression CreatePlaceholderIfRequired(Expression from) =>
+            from switch
+            {
+                UnspecifiedExpression _ => this.CreatePlaceholder(UnspecifiedExpression.Instance),
+                TypeExpression _ => this.CreatePlaceholder(KindExpression.Instance),
+                _ when from.HigherOrder is TypeExpression => this.CreatePlaceholder(TypeExpression.Instance),
+                _ => from
+            };
 
         void IInferringEnvironment.Memoize(VariableExpression symbol, Expression expression) =>
             placehoderController.Memoize(symbol, expression);

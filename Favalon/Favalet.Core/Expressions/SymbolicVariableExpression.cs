@@ -1,4 +1,5 @@
 using Favalet.Expressions.Internals;
+using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,13 +25,13 @@ namespace Favalet.Expressions
         {
             if (environment.Lookup(this) is Expression bound)
             {
-                var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder, bound.HigherOrder);
-                return generator(this.Name, higherOrder);
+                var newHigherOrder = environment.Unify(higherOrderHint, this.HigherOrder, bound.HigherOrder);
+                return generator(this.Name, newHigherOrder);
             }
             else
             {
-                var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
-                var variable = generator(this.Name, higherOrder);
+                var newHigherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
+                var variable = generator(this.Name, newHigherOrder);
                 environment.Memoize(this, variable);
                 return variable;
             }

@@ -7,8 +7,6 @@ namespace Favalet.Expressions
             Expression Unify(Expression expression1, Expression expression2);
             Expression Unify(Expression expression1, Expression expression2, Expression expression3);
 
-            Expression CreatePlaceholderIfRequired(Expression from);
-
             void Memoize(VariableExpression symbol, Expression expression);
 
             Expression? Lookup(VariableExpression symbol);

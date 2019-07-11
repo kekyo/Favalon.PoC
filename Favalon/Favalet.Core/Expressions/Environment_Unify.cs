@@ -101,15 +101,6 @@ namespace Favalet.Expressions
             throw new ArgumentException($"Cannot unify: between \"{expression1.ReadableString}\" and \"{expression2.ReadableString}\"");
         }
 
-        private Expression CreatePlaceholderIfRequired(Expression expression) =>
-            expression switch
-            {
-                UnspecifiedExpression _ => this.CreatePlaceholder(UnspecifiedExpression.Instance),
-                TypeExpression _ => this.CreatePlaceholder(KindExpression.Instance),
-                _ when expression.HigherOrder is TypeExpression => this.CreatePlaceholder(TypeExpression.Instance),
-                _ => expression
-            };
-
         internal Expression Unify(Expression expression1, Expression expression2)
         {
             Expression result;

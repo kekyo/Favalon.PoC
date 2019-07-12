@@ -91,7 +91,8 @@ namespace Favalet.Expressions
         private static bool IsRequiredAnnotation(FormatContext context, Expression expression) =>
             (context.FormatAnnotation, expression, expression.HigherOrder) switch
             {
-                (_, TypeExpression _, KindExpression _) => false,       // ?:* => ?
+                (_, KindExpression _, Rank3Expression _) => false,      // "*:(Rank3)" => "*"
+                (_, TypeExpression _, KindExpression _) => false,       // "?:*" => "?"
                 (FormatAnnotations.Always, _, Expression _) => true,
                 (FormatAnnotations.Without, _, Expression _) => false,
                 (_, _, TypeExpression type) => !type.Equals(TypeExpression.Instance),

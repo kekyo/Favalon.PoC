@@ -35,6 +35,7 @@ namespace Favalet.Expressions
             from switch
             {
                 UnspecifiedExpression _ => this.CreatePlaceholder(UnspecifiedExpression.Instance),
+                KindExpression _ => this.CreatePlaceholder(Rank3Expression.Instance),
                 TypeExpression _ => this.CreatePlaceholder(KindExpression.Instance),
                 _ when from.HigherOrder is TypeExpression => this.CreatePlaceholder(TypeExpression.Instance),
                 _ => from

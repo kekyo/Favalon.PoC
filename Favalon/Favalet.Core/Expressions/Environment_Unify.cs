@@ -25,18 +25,8 @@ namespace Favalet.Expressions
     {
         private Expression UnifyLambda(LambdaExpression lambda1, Expression expression2)
         {
-            var unspecified2 = (lambda1.Parameter.HigherOrder, lambda1.Expression.HigherOrder, expression2.HigherOrder) switch {
-                (_, _, KindExpression _) => UnspecifiedExpression.Kind,
-                (KindExpression _, _, _) => UnspecifiedExpression.Kind,
-                (_, KindExpression _, _) => UnspecifiedExpression.Kind,
-                (_, _, TypeExpression _) => UnspecifiedExpression.Type,
-                (TypeExpression _, _, _) => UnspecifiedExpression.Type,
-                (_, TypeExpression _, _) => UnspecifiedExpression.Type,
-                _ => UnspecifiedExpression.Instance
-            };
-
-            var parameter = this.Unify(lambda1.Parameter, unspecified2);
-            var expression = this.Unify(lambda1.Expression, unspecified2);
+            var parameter = this.Unify(lambda1.Parameter, UnspecifiedExpression.Instance);
+            var expression = this.Unify(lambda1.Expression, UnspecifiedExpression.Instance);
 
             var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UnspecifiedExpression.Instance);
             var lambda = new LambdaExpression(parameter, expression, lambdaHigherOrder);
@@ -58,8 +48,11 @@ namespace Favalet.Expressions
         {
             var fixedExpression = (placeholder.HigherOrder, expression) switch
             {
-                (UnspecifiedExpression _, KindExpression _) => placeholder.InternalCloneWithHigherOrder(null!),
+                (UnspecifiedExpression _, Rank3Expression _) => throw new InvalidOperationException(),
+                (UnspecifiedExpression _, KindExpression _) => placeholder.InternalCloneWithHigherOrder(Rank3Expression.Instance),
                 (UnspecifiedExpression _, TypeExpression _) => placeholder.InternalCloneWithHigherOrder(KindExpression.Instance),
+                (Rank3Expression _, KindExpression _) => placeholder,
+                (KindExpression _, TypeExpression _) => placeholder,
                 _ => expression
             };
 

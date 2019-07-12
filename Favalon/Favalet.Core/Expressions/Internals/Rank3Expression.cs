@@ -13,26 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+using Favalet.Expressions.Internals;
 
 namespace Favalet.Expressions.Specialized
 {
-    public sealed class UnspecifiedExpression : Expression
+    internal sealed class Rank3Expression : PseudoExpression
     {
-        private UnspecifiedExpression() :
+        private Rank3Expression() :
             base(null!)
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
-            (context.FormatNaming == FormatNamings.Strict) ? "(Unspecified)" : "_";
+            (context.FormatNaming == FormatNamings.Strict) ? "(Rank3)" : "#";
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            throw new NotImplementedException();
-
-        protected override Expression VisitResolving(IResolvingEnvironment environment) =>
-            this;
-
-        internal static readonly UnspecifiedExpression Instance =
-            new UnspecifiedExpression();
+        internal static readonly Rank3Expression Instance =
+            new Rank3Expression();
     }
 }

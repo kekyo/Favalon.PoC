@@ -15,7 +15,7 @@
 
 using System;
 
-namespace Favalet.Expressions.Internals
+namespace Favalet.Expressions.Specialized
 {
     public abstract class PseudoExpression : Expression
     {

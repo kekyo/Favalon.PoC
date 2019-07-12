@@ -143,8 +143,87 @@ namespace Favalet.Expressions.Variable
             '1:*
             */
 
-            var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Type, Unspecified)), Implicit("b", Type));
+            var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Type)), Implicit("b", Type));
             Assert.AreEqual("(a:(System.Int32:* -> ?):_ b:?):_", expression.StrictReadableString);
+
+            var inferred = environment.Infer(expression);
+            Assert.AreEqual("(a:(System.Int32:* -> '1:*):(* -> *):_ b:System.Int32:*):'1:*", inferred.StrictReadableString);
+        }
+
+        [Test]
+        public void Apply3_2()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Apply 3:
+            a:(System.Int32:* -> _) b:?
+            (a:(System.Int32:* -> _) b:?):?
+            1:-------------------
+            (a:(System.Int32:* -> _) b:?):'1:*                   : Hint('1)
+            (a:(System.Int32:* -> _) b:'2:*):'1:*                : Hint('2)
+            (a:(System.Int32:* -> '1:*) b:'2:*):'1:*             : Hint('2 -> '1), Memoize('2 => System.Int32)
+            2:-------------------
+            (a:(System.Int32:* -> '1:*) b:System.Int32:*):'1:*   : Update('2 => System.Int32)
+            3:-------------------
+            '1:*
+            */
+
+            var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Unspecified)), Implicit("b", Type), Type);
+            Assert.AreEqual("(a:(System.Int32:* -> _):_ b:?):?", expression.StrictReadableString);
+
+            var inferred = environment.Infer(expression);
+            Assert.AreEqual("(a:(System.Int32:* -> '1:*):(* -> *):_ b:System.Int32:*):'1:*", inferred.StrictReadableString);
+        }
+
+        [Test]
+        public void Apply3_3()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Apply 3:
+            a:(System.Int32:* -> ?) b:?
+            (a:(System.Int32:* -> ?) b:?):?
+            1:-------------------
+            (a:(System.Int32:* -> ?) b:?):'1:*                   : Hint('1)
+            (a:(System.Int32:* -> ?) b:'2:*):'1:*                : Hint('2)
+            (a:(System.Int32:* -> '1:*) b:'2:*):'1:*             : Hint('2 -> '1), Memoize('2 => System.Int32)
+            2:-------------------
+            (a:(System.Int32:* -> '1:*) b:System.Int32:*):'1:*   : Update('2 => System.Int32)
+            3:-------------------
+            '1:*
+            */
+
+            var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Type)), Implicit("b", Type), Type);
+            Assert.AreEqual("(a:(System.Int32:* -> ?):_ b:?):?", expression.StrictReadableString);
+
+            var inferred = environment.Infer(expression);
+            Assert.AreEqual("(a:(System.Int32:* -> '1:*):(* -> *):_ b:System.Int32:*):'1:*", inferred.StrictReadableString);
+        }
+
+        [Test]
+        public void Apply3_4()
+        {
+            var environment = Environment.Create();
+
+            /*
+            Apply 3:
+            a:(System.Int32:* -> _) b:?
+            (a:(System.Int32:* -> _):* b:?):_
+            1:-------------------
+            (a:(System.Int32:* -> _):* b:?):'1:_                   : Hint('1)
+            (a:(System.Int32:* -> _):* b:'2:*):'1:_                : Hint('2)
+            (a:(System.Int32:* -> _):(* -> *) b:'2:*):'1:_             : Hint('2 -> '1)
+            (a:(System.Int32:* -> '1:*):(* -> *) b:'2:*):'1:_          : Memoize('2 => System.Int32)
+            2:-------------------
+            (a:(System.Int32:* -> '1:*):(* -> *) b:System.Int32:*):'1:*        : Update('2 => System.Int32)
+            3:-------------------
+            '1:*
+            */
+
+            var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Unspecified, Kind)), Implicit("b", Type));
+            Assert.AreEqual("(a:(System.Int32:* -> _):* b:?):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
             Assert.AreEqual("(a:(System.Int32:* -> '1:*):(* -> *):_ b:System.Int32:*):'1:*", inferred.StrictReadableString);

@@ -14,14 +14,13 @@
 // limitations under the License.
 
 using Favalet.Expressions.Internals;
-using System;
 
 namespace Favalet.Expressions.Specialized
 {
     public sealed class KindExpression : PseudoExpression
     {
         private KindExpression() :
-            base(null!)
+            base(Rank3Expression.Instance)
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>

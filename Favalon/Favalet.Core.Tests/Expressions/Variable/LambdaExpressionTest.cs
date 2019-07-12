@@ -34,22 +34,22 @@ namespace Favalet.Expressions.Variable
             /*
             Lambda 1:
             a -> a
-            (a:_ -> a:_):_
+            (a:? -> a:?):_
             1:-------------------
-            (a:_ -> a:_):'1
-            (a:'2 -> a:_):'1                     : Bind(a:'2)
-            (a:'2 -> a:'2):'1                    : Lookup(a => '2), Memoize('1 => ('2 -> '2))
+            (a:? -> a:?):'1:_
+            (a:'2:* -> a:?):'1:_                           : Bind(a:'2)
+            (a:'2:* -> a:'2:*):'1:_                        : Lookup(a => '2), Memoize('1 => ('2 -> '2))
             2:-------------------
-            (a:'2 -> a:'2):('2 -> '2)            : Update('1 => ('2 -> '2))
+            (a:'2:* -> a:'2:*):('2:* -> '2:*):_            : Update('1 => ('2 -> '2))
             3:-------------------
-            '2 -> '2
+            '2:* -> '2:*
             */
 
             var expression = Lambda(Bound("a", Type), Free("a", Type));
             Assert.AreEqual("(a:? -> a:?):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:'2:* -> a:'2:*):('2:* -> '2:*):(* -> *)", inferred.StrictReadableString);
+            Assert.AreEqual("(a:'2:* -> a:'2:*):('2:* -> '2:*):(* -> *):_", inferred.StrictReadableString);
         }
 #if false
         [Test]

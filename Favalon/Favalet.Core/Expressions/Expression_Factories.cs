@@ -22,10 +22,6 @@ namespace Favalet.Expressions
     {
         public static UnspecifiedExpression Unspecified =>
             UnspecifiedExpression.Instance;
-        public static UnspecifiedExpression UnspecifiedKind =>
-            UnspecifiedExpression.Kind;
-        public static UnspecifiedExpression UnspecifiedType =>
-            UnspecifiedExpression.Type;
 
         public static KindExpression Kind =>
             KindExpression.Instance;

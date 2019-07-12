@@ -49,7 +49,7 @@ namespace Favalet.Expressions.Variable
             Assert.AreEqual("(a:? -> a:?):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:'2:* -> a:'2:*):('2:* -> '2:*):(* -> *):_", inferred.StrictReadableString);
+            Assert.AreEqual("(a:'2:* -> a:'2:*):('2:* -> '2:*):(* -> *)", inferred.StrictReadableString);
         }
 #if false
         [Test]

@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using Favalet.Expressions.Specialized;
+using System.ComponentModel;
 
 namespace Favalet.Expressions
 {
@@ -38,7 +39,7 @@ namespace Favalet.Expressions
             var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
 
             var argument = environment.Visit(this.Argument, UnspecifiedExpression.Instance);
-            var function = environment.Visit(this.Function, LambdaExpression.Create(argument.HigherOrder, higherOrder));
+            var function = environment.Visit(this.Function, LambdaExpression.CreateRecursive(argument.HigherOrder, higherOrder));
 
             return new ApplyExpression(function, argument, higherOrder);
         }
@@ -52,12 +53,14 @@ namespace Favalet.Expressions
             return new ApplyExpression(function, argument, higherOrder);
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void Deconstruct(out Expression function, out Expression argument)
         {
             function = this.Function;
             argument = this.Argument;
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void Deconstruct(out Expression function, out Expression argument, out Expression higherOrder)
         {
             function = this.Function;

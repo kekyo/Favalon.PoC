@@ -79,7 +79,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:('2:_ -> '2:_):(_ -> _):_ = (b:'2:_ -> b:'2:_):('2:_ -> '2:_):(_ -> _):_):('2:_ -> '2:_):(_ -> _):_", inferred.StrictReadableString);
+            Assert.AreEqual("(a:('2:_ -> '2:_):(_ -> _) = (b:'2:_ -> b:'2:_):('2:_ -> '2:_):(_ -> _)):('2:_ -> '2:_):(_ -> _)", inferred.StrictReadableString);
         }
 
         [Test]
@@ -110,7 +110,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:_ = (b:_ -> b:System.Int32:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:(System.Int32:_ -> System.Int32:_):(_ -> _):_ = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _):_):(System.Int32:_ -> System.Int32:_):(_ -> _):_", inferred.StrictReadableString);
+            Assert.AreEqual("(a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.StrictReadableString);
         }
 
         [Test]
@@ -140,7 +140,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:_ = (b:System.Int32:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:(System.Int32:_ -> System.Int32:_):(_ -> _):_ = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _):_):(System.Int32:_ -> System.Int32:_):(_ -> _):_", inferred.StrictReadableString);
+            Assert.AreEqual("(a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.StrictReadableString);
         }
 
         [Test]
@@ -171,7 +171,7 @@ namespace Favalet.Expressions.Unspecified
             }
             catch (ArgumentException ex)
             {
-                Assert.AreEqual("Cannot unify: between \"('2:_ -> '2:_):(_ -> _):_\" and \"System.Int32:_\"", ex.Message);
+                Assert.AreEqual("Cannot unify: between \"('2:_ -> '2:_):(_ -> _)\" and \"System.Int32:_\"", ex.Message);
             }
         }
 
@@ -203,7 +203,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:(System.Int32:_ -> _):_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:(System.Int32:_ -> System.Int32:_):(_ -> _):_ = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _):_):(System.Int32:_ -> System.Int32:_):(_ -> _):_", inferred.StrictReadableString);
+            Assert.AreEqual("(a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.StrictReadableString);
         }
 
         [Test]

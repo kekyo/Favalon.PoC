@@ -15,6 +15,9 @@
 
 namespace Favalet.Expressions.Specialized
 {
+    /// <summary>
+    /// It's truly pseudo expression usable only marking upper level of kind.
+    /// </summary>
     internal sealed class Rank3Expression : PseudoExpression
     {
         private Rank3Expression() :

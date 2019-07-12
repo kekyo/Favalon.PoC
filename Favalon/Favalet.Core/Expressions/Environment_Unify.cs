@@ -28,7 +28,7 @@ namespace Favalet.Expressions
             var parameter = this.Unify(lambda1.Parameter, UnspecifiedExpression.Instance);
             var expression = this.Unify(lambda1.Expression, UnspecifiedExpression.Instance);
 
-            var lambda = LambdaExpression.Create(parameter, expression);
+            var lambda = LambdaExpression.CreateRecursive(parameter, expression);
 
             if (expression2 is PlaceholderExpression placeholder)
             {
@@ -92,7 +92,7 @@ namespace Favalet.Expressions
                     var parameter = this.Unify(lambda11.Parameter, lambda2.Parameter);
                     var expression = this.Unify(lambda11.Expression, lambda2.Expression);
 
-                    return LambdaExpression.Create(parameter, expression);
+                    return LambdaExpression.CreateRecursive(parameter, expression);
                 }
                 else
                 {

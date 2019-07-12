@@ -15,6 +15,7 @@
 
 using Favalet.Expressions.Specialized;
 using System;
+using System.ComponentModel;
 
 namespace Favalet.Expressions
 {
@@ -46,7 +47,7 @@ namespace Favalet.Expressions
             var expression = environment.Visit(this.Expression, lambdaHigherOrder?.Expression ?? UnspecifiedExpression.Instance);
 
             var newLambdaHigherOrder = environment.Unify(higherOrder,
-                Create(parameter.HigherOrder, expression.HigherOrder));
+                CreateRecursive(parameter.HigherOrder, expression.HigherOrder));
 
             return new LambdaExpression(parameter, expression, newLambdaHigherOrder);
         }
@@ -55,17 +56,19 @@ namespace Favalet.Expressions
         {
             var parameter = environment.Visit(this.Parameter);
             var expression = environment.Visit(this.Expression);
-            var higherOrder = environment.Visit(this.HigherOrder);
+            var higherOrder = (this.HigherOrder != null) ? environment.Visit(this.HigherOrder) : null!;
 
             return new LambdaExpression(parameter, expression, higherOrder);
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void Deconstruct(out Expression parameter, out Expression expression)
         {
             parameter = this.Parameter;
             expression = this.Expression;
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void Deconstruct(out Expression parameter, out Expression expression, out Expression higherOrder)
         {
             parameter = this.Parameter;
@@ -74,22 +77,42 @@ namespace Favalet.Expressions
         }
 
         internal static LambdaExpression Create(Expression parameter, Expression expression) =>
+            new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance);
+
+        internal static LambdaExpression CreateRecursive(Expression parameter, Expression expression) =>
             (parameter.HigherOrder, expression.HigherOrder) switch
             {
-                (Rank3Expression _, Expression _) => throw new InvalidOperationException(),
-                (Expression _, Rank3Expression _) => throw new InvalidOperationException(),
-                (KindExpression _, Expression _) => new LambdaExpression(parameter, expression, KindExpression.Instance),
-                (Expression _, KindExpression _) => new LambdaExpression(parameter, expression, KindExpression.Instance),
-                (TypeExpression _, Expression _) => new LambdaExpression(parameter, expression, TypeExpression.Instance),
-                (Expression _, TypeExpression _) => new LambdaExpression(parameter, expression, TypeExpression.Instance),
-                (UnspecifiedExpression _, UnspecifiedExpression _) => Unspecified,
-                _ => new LambdaExpression(parameter, expression, Create(parameter.HigherOrder, expression.HigherOrder))
+                (Rank3Expression _, Expression _) => new LambdaExpression(parameter, expression, Rank3Expression.Instance),
+                (Expression _, Rank3Expression _) => new LambdaExpression(parameter, expression, Rank3Expression.Instance),
+                (KindExpression _, Expression _) => new LambdaExpression(parameter, expression,
+                    CreateRecursive(parameter.HigherOrder, expression.HigherOrder)),
+                (Expression _, KindExpression _) => new LambdaExpression(parameter, expression,
+                    CreateRecursive(parameter.HigherOrder, expression.HigherOrder)),
+                (TypeExpression _, Expression _) => new LambdaExpression(parameter, expression,
+                    CreateRecursive(parameter.HigherOrder, expression.HigherOrder)),
+                (Expression _, TypeExpression _) => new LambdaExpression(parameter, expression,
+                    CreateRecursive(parameter.HigherOrder, expression.HigherOrder)),
+                (UnspecifiedExpression _, UnspecifiedExpression _) => new LambdaExpression(parameter, expression,
+                    unspecified),
+                (UnspecifiedExpression _, Expression _) => new LambdaExpression(parameter, expression,
+                    CreateRecursive(UnspecifiedExpression.Instance, expression.HigherOrder)),
+                (Expression _, UnspecifiedExpression _) => new LambdaExpression(parameter, expression,
+                    CreateRecursive(parameter.HigherOrder, UnspecifiedExpression.Instance)),
+                (Expression _, null) => new LambdaExpression(parameter, expression,
+                    CreateRecursive(parameter.HigherOrder, UnspecifiedExpression.Instance)),
+                (null, Expression _) => new LambdaExpression(parameter, expression,
+                    CreateRecursive(UnspecifiedExpression.Instance, expression.HigherOrder)),
+                _ => new LambdaExpression(parameter, expression,
+                    CreateRecursive(parameter.HigherOrder, expression.HigherOrder))
             };
 
-        private static new readonly LambdaExpression Unspecified =
+        private static readonly LambdaExpression unspecified =
             new LambdaExpression(UnspecifiedExpression.Instance, UnspecifiedExpression.Instance, null!);
-
-        static LambdaExpression() =>
-            Unspecified.InternalSetHigherOrder(Unspecified);
+        private static readonly LambdaExpression rank3 =
+            new LambdaExpression(Rank3Expression.Instance, Rank3Expression.Instance, null!);
+        private static readonly LambdaExpression kind =
+            new LambdaExpression(KindExpression.Instance, KindExpression.Instance, rank3);
+        private static readonly LambdaExpression type =
+            new LambdaExpression(TypeExpression.Instance, TypeExpression.Instance, kind);
     }
 }

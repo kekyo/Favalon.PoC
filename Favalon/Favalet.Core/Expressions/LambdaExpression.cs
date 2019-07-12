@@ -14,12 +14,13 @@
 // limitations under the License.
 
 using Favalet.Expressions.Specialized;
+using System;
 
 namespace Favalet.Expressions
 {
     public sealed class LambdaExpression : ValueExpression
     {
-        internal LambdaExpression(Expression parameter, Expression expression, Expression higherOrder) :
+        private LambdaExpression(Expression parameter, Expression expression, Expression higherOrder) :
             base(higherOrder)
         {
             this.Parameter = parameter;
@@ -59,11 +60,36 @@ namespace Favalet.Expressions
             return new LambdaExpression(parameter, expression, higherOrder);
         }
 
+        public void Deconstruct(out Expression parameter, out Expression expression)
+        {
+            parameter = this.Parameter;
+            expression = this.Expression;
+        }
+
+        public void Deconstruct(out Expression parameter, out Expression expression, out Expression higherOrder)
+        {
+            parameter = this.Parameter;
+            expression = this.Expression;
+            higherOrder = this.HigherOrder;
+        }
+
         internal static LambdaExpression Create(Expression parameter, Expression expression) =>
             (parameter.HigherOrder, expression.HigherOrder) switch
             {
-                (Expression pho, Expression eho) => new LambdaExpression(parameter, expression, Create(pho, eho)),
-                _ => new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance)
+                (Rank3Expression _, Expression _) => throw new InvalidOperationException(),
+                (Expression _, Rank3Expression _) => throw new InvalidOperationException(),
+                (KindExpression _, Expression _) => new LambdaExpression(parameter, expression, KindExpression.Instance),
+                (Expression _, KindExpression _) => new LambdaExpression(parameter, expression, KindExpression.Instance),
+                (TypeExpression _, Expression _) => new LambdaExpression(parameter, expression, TypeExpression.Instance),
+                (Expression _, TypeExpression _) => new LambdaExpression(parameter, expression, TypeExpression.Instance),
+                (UnspecifiedExpression _, UnspecifiedExpression _) => Unspecified,
+                _ => new LambdaExpression(parameter, expression, Create(parameter.HigherOrder, expression.HigherOrder))
             };
+
+        private static new readonly LambdaExpression Unspecified =
+            new LambdaExpression(UnspecifiedExpression.Instance, UnspecifiedExpression.Instance, null!);
+
+        static LambdaExpression() =>
+            Unspecified.InternalSetHigherOrder(Unspecified);
     }
 }

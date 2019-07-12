@@ -222,13 +222,13 @@ namespace Favalet.Expressions.Variable
             '1:*
             */
 
-            var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Unspecified, Kind)), Implicit("b", Type));
+            var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Unspecified)), Implicit("b", Type));
             Assert.AreEqual("(a:(System.Int32:* -> _):* b:?):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:(System.Int32:* -> '1:*):(* -> *):_ b:System.Int32:*):'1:*", inferred.StrictReadableString);
+            Assert.AreEqual("(a:(System.Int32:* -> '1:_):(* -> _):_ b:System.Int32:*):'1:_", inferred.StrictReadableString);
         }
-#if false
+
         [Test]
         public void Apply4()
         {
@@ -255,7 +255,7 @@ namespace Favalet.Expressions.Variable
             var inferred = environment.Infer(expression);
             Assert.AreEqual("((a:('3:_ -> ('2:_ -> '1:_):(_ -> _):_):(_ -> (_ -> _):_):_ b:'3:_):('2:_ -> '1:_):(_ -> _):_ c:'2:_):'1:_", inferred.StrictReadableString);
         }
-
+#if false
         [Test]
         public void Apply5()
         {

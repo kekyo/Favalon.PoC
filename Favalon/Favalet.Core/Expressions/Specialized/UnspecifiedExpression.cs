@@ -34,5 +34,8 @@ namespace Favalet.Expressions.Specialized
 
         internal static readonly UnspecifiedExpression Instance =
             new UnspecifiedExpression();
+
+        static UnspecifiedExpression() =>
+            Instance.InternalSetHigherOrder(Instance);
     }
 }

@@ -28,8 +28,7 @@ namespace Favalet.Expressions
             var parameter = this.Unify(lambda1.Parameter, UnspecifiedExpression.Instance);
             var expression = this.Unify(lambda1.Expression, UnspecifiedExpression.Instance);
 
-            var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UnspecifiedExpression.Instance);
-            var lambda = new LambdaExpression(parameter, expression, lambdaHigherOrder);
+            var lambda = LambdaExpression.Create(parameter, expression);
 
             if (expression2 is PlaceholderExpression placeholder)
             {
@@ -92,9 +91,8 @@ namespace Favalet.Expressions
                 {
                     var parameter = this.Unify(lambda11.Parameter, lambda2.Parameter);
                     var expression = this.Unify(lambda11.Expression, lambda2.Expression);
-                    var lambdaHigherOrder = new LambdaExpression(parameter.HigherOrder, expression.HigherOrder, UnspecifiedExpression.Instance);
 
-                    return new LambdaExpression(parameter, expression, lambdaHigherOrder);
+                    return LambdaExpression.Create(parameter, expression);
                 }
                 else
                 {

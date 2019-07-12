@@ -53,14 +53,10 @@ namespace Favalet
         public static ApplyExpression Apply(Expression function, Expression argument) =>
             Expression.Apply(function, argument, Unspecified);
 
-        public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression, Expression higherOrder) =>
-            Expression.Lambda(parameter, expression, higherOrder);
         public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression) =>
-            Expression.Lambda(parameter, expression, Unspecified);
-        public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression, Expression higherOrder) =>
-            Expression.Lambda(parameter, expression, higherOrder);
+            Expression.Lambda(parameter, expression);
         public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression) =>
-            Expression.Lambda(parameter, expression, Unspecified);
+            Expression.Lambda(parameter, expression);
 
         public static BindExpression Bind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
             Expression.Bind(bound, expression, higherOrder);

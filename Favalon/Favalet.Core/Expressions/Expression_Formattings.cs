@@ -93,10 +93,12 @@ namespace Favalet.Expressions
             {
                 (_, KindExpression _, Rank3Expression _) => false,      // "*:(Rank3)" => "*"
                 (_, TypeExpression _, KindExpression _) => false,       // "?:*" => "?"
+                (_, UnspecifiedExpression _, UnspecifiedExpression _) => false,        // "_:_" => "_" 
+                (_, LambdaExpression(UnspecifiedExpression _, UnspecifiedExpression _), LambdaExpression(UnspecifiedExpression _, UnspecifiedExpression _) _) => false,    // "(_ -> _):(_ -> _)" => "(_ -> _)"
                 (FormatAnnotations.Always, _, Expression _) => true,
                 (FormatAnnotations.Without, _, Expression _) => false,
-                (_, _, TypeExpression type) => !type.Equals(TypeExpression.Instance),
                 (_, _, UnspecifiedExpression _) => false,
+                (_, _, TypeExpression type) => !type.Equals(TypeExpression.Instance),
                 _ => expression.HigherOrder != null
             };
 

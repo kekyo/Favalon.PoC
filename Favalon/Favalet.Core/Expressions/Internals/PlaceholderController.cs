@@ -61,7 +61,7 @@ namespace Favalet.Expressions.Internals
                             var parameter = ((lambda.Parameter is VariableExpression p) ? this.Lookup(symbol0, p, collected) : null) ?? lambda.Parameter;
                             var expression = ((lambda.Expression is VariableExpression e) ? this.Lookup(symbol0, e, collected) : null) ?? lambda.Expression;
 
-                            var newLambda = new LambdaExpression(parameter, expression, lambda.HigherOrder);
+                            var newLambda = LambdaExpression.Create(parameter, expression);
 
                             foundSymbol = variable;
                             foundExpression = newLambda;

@@ -46,14 +46,10 @@ namespace Favalet.Expressions
         public static ApplyExpression Apply(Expression function, Expression argument) =>
             new ApplyExpression(function, argument, UnspecifiedExpression.Instance);
 
-        public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression, Expression higherOrder) =>
-            new LambdaExpression(parameter, expression, higherOrder);
         public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression) =>
-            new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance);
-        public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression, Expression higherOrder) =>
-            new LambdaExpression(parameter, expression, higherOrder);
+            LambdaExpression.Create(parameter, expression);
         public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression) =>
-            new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance);
+            LambdaExpression.Create(parameter, expression);
 
         public static BindExpression Bind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
             new BindExpression(bound, expression, false, higherOrder);

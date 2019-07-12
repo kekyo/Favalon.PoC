@@ -51,5 +51,18 @@ namespace Favalet.Expressions
 
             return new ApplyExpression(function, argument, higherOrder);
         }
+
+        public void Deconstruct(out Expression function, out Expression argument)
+        {
+            function = this.Function;
+            argument = this.Argument;
+        }
+
+        public void Deconstruct(out Expression function, out Expression argument, out Expression higherOrder)
+        {
+            function = this.Function;
+            argument = this.Argument;
+            higherOrder = this.HigherOrder;
+        }
     }
 }

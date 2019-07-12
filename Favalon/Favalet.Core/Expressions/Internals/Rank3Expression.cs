@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet.Expressions.Internals;
-
 namespace Favalet.Expressions.Specialized
 {
     internal sealed class Rank3Expression : PseudoExpression

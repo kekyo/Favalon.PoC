@@ -49,5 +49,8 @@ namespace Favalet.Expressions
             newExpression.HigherOrder = higherOrder;
             return newExpression;
         }
+
+        internal Expression InternalSetHigherOrder(Expression higherOrder) =>
+            this.HigherOrder = higherOrder;
     }
 }

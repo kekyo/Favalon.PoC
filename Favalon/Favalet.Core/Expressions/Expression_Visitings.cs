@@ -42,5 +42,12 @@ namespace Favalet.Expressions
             this.VisitInferring(environment, higherOrderHint);
         internal Expression InternalVisitResolving(IResolvingEnvironment environment) =>
             this.VisitResolving(environment);
+
+        internal Expression InternalCloneWithHigherOrder(Expression higherOrder)
+        {
+            var newExpression = (Expression)this.MemberwiseClone();
+            newExpression.HigherOrder = higherOrder;
+            return newExpression;
+        }
     }
 }

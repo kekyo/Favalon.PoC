@@ -136,18 +136,18 @@ namespace Favalet.Expressions.Variable
             1:-------------------
             (a:(System.Int32:* -> ?) b:?):'1:_                   : Hint('1)
             (a:(System.Int32:* -> ?) b:'2:*):'1:_                : Hint('2)
-            (a:(System.Int32:* -> '1:_) b:'2:*):'1:_             : Hint('2 -> '1), Memoize('2 => System.Int32)
+            (a:(System.Int32:* -> '1:*) b:'2:*):'1:_             : Hint('2 -> '1), Memoize('2 => System.Int32)
             2:-------------------
-            (a:(System.Int32:* -> '1:_) b:System.Int32:*):'1:_   : Update('2 => System.Int32)
+            (a:(System.Int32:* -> '1:*) b:System.Int32:*):'1:*   : Update('2 => System.Int32)
             3:-------------------
-            '1:_
+            '1:*
             */
 
             var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Type, Unspecified)), Implicit("b", Type));
             Assert.AreEqual("(a:(System.Int32:* -> ?):_ b:?):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:(System.Int32:* -> '3:*):(* -> *):_ b:System.Int32:*):'3:*", inferred.StrictReadableString);
+            Assert.AreEqual("(a:(System.Int32:* -> '1:*):(* -> *):_ b:System.Int32:*):'1:*", inferred.StrictReadableString);
         }
 #if false
         [Test]

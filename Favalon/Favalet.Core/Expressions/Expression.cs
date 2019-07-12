@@ -20,7 +20,7 @@ namespace Favalet.Expressions
         protected Expression(Expression higherOrder) =>
             this.HigherOrder = higherOrder;
 
-        public readonly Expression HigherOrder;
+        public Expression HigherOrder { get; private set; }
 
         protected abstract Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint);
         protected abstract Expression VisitResolving(IResolvingEnvironment environment);

@@ -47,9 +47,6 @@ namespace Favalet.Expressions.Specialized
         protected override Expression VisitResolving(IResolvingEnvironment environment) =>
             (environment.Lookup(this) is Expression lookup) ? lookup : this;
 
-        internal PlaceholderExpression ReplaceHigherOrder(Expression higherOrder) =>
-            new PlaceholderExpression(this.Index, higherOrder);
-
         public override int GetHashCode() =>
             this.Index;
 

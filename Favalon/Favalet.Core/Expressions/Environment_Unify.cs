@@ -56,10 +56,10 @@ namespace Favalet.Expressions
 
         private Expression UnifyPlaceholder(PlaceholderExpression placeholder, Expression expression)
         {
-            var fixedExpression = (placeholder.HigherOrder, expression.HigherOrder) switch
+            var fixedExpression = (placeholder.HigherOrder, expression) switch
             {
-                (UnspecifiedExpression _, TypeExpression _) => placeholder.ReplaceHigherOrder(KindExpression.Instance),
-                (UnspecifiedExpression _, Expression _) => placeholder.ReplaceHigherOrder(expression.HigherOrder),
+                (UnspecifiedExpression _, KindExpression _) => placeholder.InternalCloneWithHigherOrder(null!),
+                (UnspecifiedExpression _, TypeExpression _) => placeholder.InternalCloneWithHigherOrder(KindExpression.Instance),
                 _ => expression
             };
 
@@ -83,7 +83,6 @@ namespace Favalet.Expressions
                 if (placehoderController.Lookup(placeholder12) is Expression lookup)
                 {
                     return lookup;
-                    //return this.Unify(lookup, expression2);
                 }
             }
             if (expression2 is PlaceholderExpression placeholder22)
@@ -91,7 +90,6 @@ namespace Favalet.Expressions
                 if (placehoderController.Lookup(placeholder22) is Expression lookup)
                 {
                     return lookup;
-                    //return this.Unify(lookup, expression1);
                 }
             }
 
@@ -117,13 +115,11 @@ namespace Favalet.Expressions
 
             if (expression1 is PlaceholderExpression placeholder13)
             {
-                placehoderController.Memoize(placeholder13, expression2);
-                return expression2;
+                return this.UnifyPlaceholder(placeholder13, expression2);
             }
             if (expression2 is PlaceholderExpression placeholder23)
             {
-                placehoderController.Memoize(placeholder23, expression1);
-                return expression1;
+                return this.UnifyPlaceholder(placeholder23, expression1);
             }
 
             throw new ArgumentException($"Cannot unify: between \"{expression1.ReadableString}\" and \"{expression2.ReadableString}\"");

@@ -72,7 +72,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:_ b:System.Int32:_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:(System.Int32:_ -> '1:_):(_ -> _) b:System.Int32:_):'1:_", inferred.StrictReadableString);
+            Assert.AreEqual("(a:(System.Int32:_ -> '1:_):(_ -> _) b:System.Int32:_):'1:_", inferred.AnnotatedReadableString);
         }
 
         [Test]

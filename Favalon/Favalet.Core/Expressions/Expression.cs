@@ -31,6 +31,10 @@ namespace Favalet.Expressions
             FormatReadableString(new FormatContext(
                 FormatAnnotations.Standard, FormatNamings.Friendly, FormatOperators.Standard),
                 this, false);
+        public string AnnotatedReadableString =>
+            FormatReadableString(new FormatContext(
+                FormatAnnotations.Annotated, FormatNamings.Friendly, FormatOperators.Standard),
+                this, false);
         public string StrictReadableString =>
             FormatReadableString(new FormatContext(
                 FormatAnnotations.Always, FormatNamings.Standard, FormatOperators.Standard),

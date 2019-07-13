@@ -98,7 +98,8 @@ namespace Favalet.Expressions
                 (_, LambdaExpression(Expression p, Expression e), Expression _) => IsRequiredAnnotation(context, p) || IsRequiredAnnotation(context, e),    // "(_ -> _):..." => "(_ -> _)"
                 (FormatAnnotations.Always, _, Expression _) => true,
                 (FormatAnnotations.Without, _, Expression _) => false,
-                (_, _, UnspecifiedExpression _) => false,
+                (FormatAnnotations.Annotated, _, _) => !(expression.HigherOrder is UnspecifiedExpression),
+                (_ , _, UnspecifiedExpression _) => false,
                 (_, _, TypeExpression type) => !type.Equals(TypeExpression.Instance),
                 _ => expression.HigherOrder != null
             };
@@ -109,7 +110,7 @@ namespace Favalet.Expressions
             {
                 var variable = expression.FormatReadableString(context, true);
                 var annotation = FormatReadableString(
-                    (context.FormatAnnotation == FormatAnnotations.Always) ?
+                    (context.FormatAnnotation >= FormatAnnotations.Annotated) ?
                         context :
                         context.NewDerived(FormatAnnotations.Without, null, null),
                     expression.HigherOrder,

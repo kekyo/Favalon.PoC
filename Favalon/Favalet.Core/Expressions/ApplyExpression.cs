@@ -36,12 +36,13 @@ namespace Favalet.Expressions
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
         {
-            var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
+            var higherOrder = environment.Visit(this.HigherOrder, UnspecifiedExpression.Instance);
+            var unifiedHigherOrder = environment.Unify(higherOrderHint, higherOrder);
 
             var argument = environment.Visit(this.Argument, UnspecifiedExpression.Instance);
-            var function = environment.Visit(this.Function, LambdaExpression.CreateRecursive(argument.HigherOrder, higherOrder));
+            var function = environment.Visit(this.Function, LambdaExpression.CreateRecursive(argument.HigherOrder, unifiedHigherOrder));
 
-            return new ApplyExpression(function, argument, higherOrder);
+            return new ApplyExpression(function, argument, unifiedHigherOrder);
         }
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)

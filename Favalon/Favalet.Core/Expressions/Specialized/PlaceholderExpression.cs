@@ -41,8 +41,13 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            throw new NotImplementedException();
+        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
+        {
+            var higherOrder = environment.Visit(this.HigherOrder, UnspecifiedExpression.Instance);
+            var unifiedHigherOrder = environment.Unify(higherOrderHint, higherOrder);
+
+            return new PlaceholderExpression(this.Index, unifiedHigherOrder);
+        }
 
         protected override Expression VisitResolving(IResolvingEnvironment environment) =>
             (environment.Lookup(this) is Expression lookup) ? lookup : this;

@@ -14,7 +14,6 @@
 // limitations under the License.
 
 using Favalet.Expressions.Specialized;
-using System;
 using System.ComponentModel;
 
 namespace Favalet.Expressions
@@ -40,13 +39,14 @@ namespace Favalet.Expressions
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
         {
-            var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
-            var lambdaHigherOrder = higherOrder as LambdaExpression;
+            var higherOrder = environment.Visit(this.HigherOrder, UnspecifiedExpression.Instance);
+            var unifiedHigherOrder = environment.Unify(higherOrderHint, higherOrder);
+            var lambdaHigherOrder = unifiedHigherOrder as LambdaExpression;
 
             var parameter = environment.Visit(this.Parameter, lambdaHigherOrder?.Parameter ?? UnspecifiedExpression.Instance);
             var expression = environment.Visit(this.Expression, lambdaHigherOrder?.Expression ?? UnspecifiedExpression.Instance);
 
-            var newLambdaHigherOrder = environment.Unify(higherOrder,
+            var newLambdaHigherOrder = environment.Unify(unifiedHigherOrder,
                 CreateRecursive(parameter.HigherOrder, expression.HigherOrder));
 
             return new LambdaExpression(parameter, expression, newLambdaHigherOrder);

@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Favalet.Expressions.Specialized
 {
     public abstract class PseudoExpression : Expression
@@ -24,7 +22,7 @@ namespace Favalet.Expressions.Specialized
         { }
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            throw new InvalidOperationException();
+            this;
 
         protected override Expression VisitResolving(IResolvingEnvironment environment) =>
             this;

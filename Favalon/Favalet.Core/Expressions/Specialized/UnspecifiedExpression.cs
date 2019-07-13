@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Favalet.Expressions.Specialized
 {
     public sealed class UnspecifiedExpression : Expression
@@ -27,7 +25,7 @@ namespace Favalet.Expressions.Specialized
             (context.FormatNaming == FormatNamings.Strict) ? "(Unspecified)" : "_";
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            throw new NotImplementedException();
+            this;
 
         protected override Expression VisitResolving(IResolvingEnvironment environment) =>
             this;

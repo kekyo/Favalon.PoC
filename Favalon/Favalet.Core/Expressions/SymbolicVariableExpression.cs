@@ -38,15 +38,17 @@ namespace Favalet.Expressions
             IInferringEnvironment environment, Func<string, Expression, TExpression> generator, Expression higherOrderHint)
             where TExpression : VariableExpression
         {
+            var higherOrder = environment.Visit(this.HigherOrder, UnspecifiedExpression.Instance);
+
             if (environment.Lookup(this) is Expression bound)
             {
-                var newHigherOrder = environment.Unify(higherOrderHint, this.HigherOrder, bound.HigherOrder);
-                return generator(this.Name, newHigherOrder);
+                var unifiedHigherOrder = environment.Unify(higherOrderHint, higherOrder, bound.HigherOrder);
+                return generator(this.Name, unifiedHigherOrder);
             }
             else
             {
-                var newHigherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
-                var variable = generator(this.Name, newHigherOrder);
+                var unifiedHigherOrder = environment.Unify(higherOrderHint, higherOrder);
+                var variable = generator(this.Name, unifiedHigherOrder);
                 environment.Memoize(this, variable);
                 return variable;
             }

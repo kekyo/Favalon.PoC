@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet.Expressions.Specialized;
 using System;
 
 namespace Favalet.Expressions
@@ -27,8 +28,9 @@ namespace Favalet.Expressions
         {
             if (environment.Lookup(this) is Expression bound)
             {
-                var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder, bound.HigherOrder);
-                return new FreeVariableExpression(this.Name, higherOrder);
+                var higherOrder = environment.Visit(this.HigherOrder, UnspecifiedExpression.Instance);
+                var unifiedHigherOrder = environment.Unify(higherOrderHint, higherOrder, bound.HigherOrder);
+                return new FreeVariableExpression(this.Name, unifiedHigherOrder);
             }
             else
             {

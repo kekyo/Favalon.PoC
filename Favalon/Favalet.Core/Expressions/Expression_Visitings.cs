@@ -13,12 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet.Expressions.Specialized;
+
 namespace Favalet.Expressions
 {
     partial class Expression
     {
         protected internal interface IInferringEnvironment
         {
+            PlaceholderExpression CreatePlaceholder(Expression higherOrder);
+
             Expression Unify(Expression expression1, Expression expression2);
             Expression Unify(Expression expression1, Expression expression2, Expression expression3);
 

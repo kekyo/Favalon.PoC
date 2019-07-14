@@ -46,7 +46,7 @@ namespace Favalet.Expressions.Variable
             Assert.AreEqual("123:?", expression.StrictReadableString);
 
             var inferred = environment.Infer<Expression>(expression);
-            Assert.AreEqual("123:Numeric:*", inferred.StrictReadableString);
+            Assert.AreEqual("123:Numeric:*", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace Favalet.Expressions.Variable
             Assert.AreEqual("\"ABC\":?", expression.StrictReadableString);
 
             var inferred = environment.Infer<Expression>(expression);
-            Assert.AreEqual("\"ABC\":System.String:*", inferred.StrictReadableString);
+            Assert.AreEqual("\"ABC\":System.String:*", inferred.AnnotatedReadableString);
         }
     }
 }

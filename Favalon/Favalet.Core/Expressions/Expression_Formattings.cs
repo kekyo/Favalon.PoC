@@ -91,6 +91,7 @@ namespace Favalet.Expressions
         private static bool IsRequiredAnnotation(FormatContext context, Expression expression) =>
             (context.FormatAnnotation, expression, expression.HigherOrder) switch
             {
+                (_, _, null) => false,
                 (_, _, Rank3Expression _) => false,                                                         // "...:#" => "..."
                 (_, TypeExpression _, KindExpression _) => false,                                           // "?:*" => "?"
                 (_, LambdaExpression(TypeExpression _, TypeExpression _), KindExpression _) => false,       // "(? -> ?):*" => "(? -> ?)"
@@ -101,7 +102,7 @@ namespace Favalet.Expressions
                 (FormatAnnotations.Annotated, _, _) => !(expression.HigherOrder is UnspecifiedExpression),
                 (_ , _, UnspecifiedExpression _) => false,
                 (_, _, TypeExpression type) => !type.Equals(TypeExpression.Instance),
-                _ => expression.HigherOrder != null
+                _ => true
             };
 
         protected static string FormatReadableString(FormatContext context, Expression expression, bool encloseParenthesesIfRequired)

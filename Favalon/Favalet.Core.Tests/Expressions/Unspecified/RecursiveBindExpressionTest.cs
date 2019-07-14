@@ -50,7 +50,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(rec a:_ = 123:?):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(rec a:Numeric:* = 123:Numeric:*):Numeric:*", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:Numeric:* = 123:Numeric:*):Numeric:*", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(rec a:_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(rec a:('2:_ -> '2:_):(_ -> _) = (b:'2:_ -> b:'2:_):('2:_ -> '2:_):(_ -> _)):('2:_ -> '2:_):(_ -> _)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:('2:_ -> '2:_):(_ -> _) = (b:'2:_ -> b:'2:_):('2:_ -> '2:_):(_ -> _)):('2:_ -> '2:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -111,7 +111,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(rec a:_ = (b:_ -> b:System.Int32:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -141,7 +141,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(rec a:_ = (b:System.Int32:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -203,7 +203,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(rec a:(System.Int32:_ -> _):_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.StrictReadableString);
+            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]

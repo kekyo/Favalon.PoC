@@ -25,7 +25,7 @@ namespace Favalet.Expressions.Specialized
             (context.FormatNaming == FormatNamings.Strict) ? "(Unspecified)" : "_";
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            this;
+            environment.CreatePlaceholder(higherOrderHint);
 
         protected override Expression VisitResolving(IResolvingEnvironment environment) =>
             this;

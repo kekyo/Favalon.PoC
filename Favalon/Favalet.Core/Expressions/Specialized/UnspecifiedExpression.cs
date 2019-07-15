@@ -25,15 +25,12 @@ namespace Favalet.Expressions.Specialized
             (context.FormatNaming == FormatNamings.Strict) ? "(Unspecified)" : "_";
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            environment.CreatePlaceholder(higherOrderHint);
+            this;
 
         protected override Expression VisitResolving(IResolvingEnvironment environment) =>
             this;
 
         internal static readonly UnspecifiedExpression Instance =
             new UnspecifiedExpression();
-
-        static UnspecifiedExpression() =>
-            Instance.InternalSetHigherOrder(Instance);
     }
 }

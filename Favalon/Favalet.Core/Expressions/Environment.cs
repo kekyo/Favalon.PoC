@@ -49,6 +49,9 @@ namespace Favalet.Expressions
         Expression? IResolvingEnvironment.Lookup(VariableExpression symbol) =>
             placehoderController.Lookup(symbol);
 
+        private TExpression Visit<TExpression>(TExpression expression, Expression higherOrderHint)
+            where TExpression : Expression =>
+            (TExpression)expression.InternalVisitInferring(this, higherOrderHint);
         TExpression IInferringEnvironment.Visit<TExpression>(TExpression expression, Expression higherOrderHint) =>
             (TExpression)expression.InternalVisitInferring(this, higherOrderHint);
         TExpression IResolvingEnvironment.Visit<TExpression>(TExpression expression) =>

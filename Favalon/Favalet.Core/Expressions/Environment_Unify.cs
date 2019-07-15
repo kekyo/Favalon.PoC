@@ -25,14 +25,23 @@ namespace Favalet.Expressions
     {
         private Expression UnifyLambda(LambdaExpression lambda1, Expression expression2)
         {
-            var parameter = this.Unify(lambda1.Parameter, UnspecifiedExpression.Instance);
-            var expression = this.Unify(lambda1.Expression, UnspecifiedExpression.Instance);
+            Debug.Assert((lambda1 is Expression) && (expression2 is Expression));
 
-            var lambda = LambdaExpression.CreateRecursive(parameter, expression);
+            var (lambda2Parameter, lambda2Expression) = expression2 is LambdaExpression lambda2 ?
+                (lambda2.Parameter, lambda2.Expression) :
+                (UnspecifiedExpression.Instance, UnspecifiedExpression.Instance);
+
+            var parameter = this.Unify(lambda1.Parameter, lambda2Parameter);
+            var expression = this.Unify(lambda1.Expression, lambda2Expression);
+
+            var visitedParameter = this.Visit(parameter, UnspecifiedExpression.Instance);
+            var visitedExpression = this.Visit(expression, UnspecifiedExpression.Instance);
+
+            var newLambda = LambdaExpression.Create(visitedParameter, visitedExpression);
 
             if (expression2 is PlaceholderExpression placeholder)
             {
-                placehoderController.Memoize(placeholder, lambda);
+                placehoderController.Memoize(placeholder, newLambda);
             }
             else if (!(expression2 is KindExpression || expression2 is TypeExpression))
             {
@@ -40,11 +49,13 @@ namespace Favalet.Expressions
                 throw new ArgumentException($"Cannot unify: between \"{lambda1.StrictReadableString}\" and \"{expression2.StrictReadableString}\"");
             }
 
-            return lambda;
+            return newLambda;
         }
 
         private Expression UnifyPlaceholder(PlaceholderExpression placeholder, Expression expression)
         {
+            Debug.Assert((placeholder is Expression) && (expression is Expression));
+
             var fixedExpression = (placeholder.HigherOrder, expression) switch
             {
                 (UnspecifiedExpression _, Rank3Expression _) => throw new InvalidOperationException(),
@@ -61,6 +72,7 @@ namespace Favalet.Expressions
 
         private Expression Unify2(Expression expression1, Expression expression2)
         {
+            Debug.Assert((expression1 is Expression) && (expression2 is Expression));
             Debug.Assert(
                 !(expression1 is UnspecifiedExpression) &&
                 !(expression2 is UnspecifiedExpression));
@@ -85,23 +97,13 @@ namespace Favalet.Expressions
                 }
             }
 
-            if (expression2 is LambdaExpression lambda2)
+            if (expression1 is LambdaExpression lambda1)
             {
-                if (expression1 is LambdaExpression lambda11)
-                {
-                    var parameter = this.Unify(lambda11.Parameter, lambda2.Parameter);
-                    var expression = this.Unify(lambda11.Expression, lambda2.Expression);
-
-                    return LambdaExpression.CreateRecursive(parameter, expression);
-                }
-                else
-                {
-                    return this.UnifyLambda(lambda2, expression1);
-                }
+                return this.UnifyLambda(lambda1, expression2);
             }
-            else if (expression1 is LambdaExpression lambda12)
+            else if (expression2 is LambdaExpression lambda2)
             {
-                return this.UnifyLambda(lambda12, expression2);
+                return this.UnifyLambda(lambda2, expression1);
             }
 
             if (expression1 is PlaceholderExpression placeholder13)
@@ -118,6 +120,8 @@ namespace Favalet.Expressions
 
         internal Expression Unify(Expression expression1, Expression expression2)
         {
+            Debug.Assert((expression1 is Expression) && (expression2 is Expression));
+
             Expression result;
 
             if (expression2 is UnspecifiedExpression)
@@ -141,6 +145,8 @@ namespace Favalet.Expressions
 
         Expression IInferringEnvironment.Unify(Expression expression1, Expression expression2, Expression expression3)
         {
+            Debug.Assert((expression1 is Expression) && (expression2 is Expression) && (expression3 is Expression));
+
             Expression result;
 
             if (expression3 is UnspecifiedExpression)

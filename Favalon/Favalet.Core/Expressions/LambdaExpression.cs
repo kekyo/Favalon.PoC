@@ -41,15 +41,17 @@ namespace Favalet.Expressions
         {
             var higherOrder = environment.Visit(this.HigherOrder, UnspecifiedExpression.Instance);
             var unifiedHigherOrder = environment.Unify(higherOrderHint, higherOrder);
-            var lambdaHigherOrder = unifiedHigherOrder as LambdaExpression;
 
-            var parameter = environment.Visit(this.Parameter, lambdaHigherOrder?.Parameter ?? UnspecifiedExpression.Instance);
-            var expression = environment.Visit(this.Expression, lambdaHigherOrder?.Expression ?? UnspecifiedExpression.Instance);
+            var (parameter, expression) = unifiedHigherOrder is LambdaExpression lambdaHigherOrder ?
+                (environment.Visit(this.Parameter, lambdaHigherOrder.Parameter),
+                 environment.Visit(this.Expression, lambdaHigherOrder.Expression)):
+                (environment.Visit(this.Parameter, UnspecifiedExpression.Instance),
+                 environment.Visit(this.Expression, UnspecifiedExpression.Instance));
 
-            var newLambdaHigherOrder = environment.Unify(unifiedHigherOrder,
-                CreateRecursive(parameter.HigherOrder, expression.HigherOrder));
+            var newLambdaHigherOrder = Create(parameter.HigherOrder, expression.HigherOrder);
+            var newUnifiedLambdaHigherOrder = environment.Unify(unifiedHigherOrder, newLambdaHigherOrder);
 
-            return new LambdaExpression(parameter, expression, newLambdaHigherOrder);
+            return new LambdaExpression(parameter, expression, newUnifiedLambdaHigherOrder);
         }
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)

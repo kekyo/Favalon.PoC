@@ -40,7 +40,11 @@ namespace Favalet.Expressions
             var unifiedHigherOrder = environment.Unify(higherOrderHint, higherOrder);
 
             var argument = environment.Visit(this.Argument, UnspecifiedExpression.Instance);
-            var function = environment.Visit(this.Function, LambdaExpression.CreateRecursive(argument.HigherOrder, unifiedHigherOrder));
+
+            var newLambda = LambdaExpression.Create(argument.HigherOrder, unifiedHigherOrder);
+            var visitedLambda = environment.Visit(newLambda, UnspecifiedExpression.Instance);
+
+            var function = environment.Visit(this.Function, visitedLambda);
 
             return new ApplyExpression(function, argument, unifiedHigherOrder);
         }

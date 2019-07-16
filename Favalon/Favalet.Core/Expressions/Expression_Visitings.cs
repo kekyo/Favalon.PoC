@@ -24,8 +24,6 @@ namespace Favalet.Expressions
             PlaceholderExpression CreatePlaceholder(Expression higherOrder);
 
             Expression Unify(Expression expression1, Expression expression2);
-            Expression Unify(Expression expression1, Expression expression2, Expression expression3);
-
             void Memoize(VariableExpression symbol, Expression expression);
 
             Expression? Lookup(VariableExpression symbol);
@@ -42,10 +40,12 @@ namespace Favalet.Expressions
                 where TExpression : Expression;
         }
 
+#line hidden
         internal Expression InternalVisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
             this.VisitInferring(environment, higherOrderHint);
         internal Expression InternalVisitResolving(IResolvingEnvironment environment) =>
             this.VisitResolving(environment);
+#line default
 
         internal Expression InternalCloneWithHigherOrder(Expression higherOrder)
         {

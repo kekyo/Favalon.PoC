@@ -21,11 +21,8 @@ namespace Favalet.Expressions
             base(name, higherOrder)
         { }
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            this.VisitInferringImplicitVariable(
-                environment,
-                (name, higherOrder) => new BoundVariableExpression(name, higherOrder),
-                higherOrderHint);
+        protected override Expression CreateExpressionOnVisitInferring(Expression higherOrder) =>
+            new BoundVariableExpression(this.Name, higherOrder);
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)
         {

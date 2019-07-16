@@ -96,6 +96,8 @@ namespace Favalet.Expressions
                 (_, TypeExpression _, KindExpression _) => false,                                           // "?:*" => "?"
                 (_, LambdaExpression(TypeExpression _, TypeExpression _), KindExpression _) => false,       // "(? -> ?):*" => "(? -> ?)"
                 (_, UnspecifiedExpression _, UnspecifiedExpression _) => false,                             // "_:_" => "_" 
+                (_, Expression _, LambdaExpression(UnspecifiedExpression _, Expression e)) => IsRequiredAnnotation(context, e),         // "...":(_ -> _) => "..." 
+                (_, Expression _, LambdaExpression(Expression p, UnspecifiedExpression _)) => IsRequiredAnnotation(context, p),         // "...":(_ -> _) => "..." 
                 (_, LambdaExpression(Expression p, Expression e), Expression _) => IsRequiredAnnotation(context, p) || IsRequiredAnnotation(context, e),    // "(_ -> _):..." => "(_ -> _)"
                 (FormatAnnotations.Always, _, Expression _) => true,
                 (FormatAnnotations.Without, _, Expression _) => false,

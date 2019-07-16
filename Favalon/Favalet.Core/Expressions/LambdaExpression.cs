@@ -14,7 +14,9 @@
 // limitations under the License.
 
 using Favalet.Expressions.Specialized;
+using System;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Favalet.Expressions
 {
@@ -39,26 +41,35 @@ namespace Favalet.Expressions
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
         {
-            var higherOrder = environment.Visit(this.HigherOrder, UnspecifiedExpression.Instance);
-            var unifiedHigherOrder = environment.Unify(higherOrderHint, higherOrder);
+            var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
 
-            var (parameter, expression) = unifiedHigherOrder is LambdaExpression lambdaHigherOrder ?
-                (environment.Visit(this.Parameter, lambdaHigherOrder.Parameter),
-                 environment.Visit(this.Expression, lambdaHigherOrder.Expression)):
-                (environment.Visit(this.Parameter, UnspecifiedExpression.Instance),
-                 environment.Visit(this.Expression, UnspecifiedExpression.Instance));
+            var visitedParameter = higherOrder switch
+            {
+                LambdaExpression(Expression parameter, Expression _) => environment.Visit(this.Parameter, parameter),
+                _ => environment.Visit(this.Parameter, UnspecifiedExpression.Instance),
+            };
 
-            var newLambdaHigherOrder = Create(parameter.HigherOrder, expression.HigherOrder);
-            var newUnifiedLambdaHigherOrder = environment.Unify(unifiedHigherOrder, newLambdaHigherOrder);
+            var visitedExpression = higherOrder switch
+            {
+                LambdaExpression(Expression _, Expression expression) => environment.Visit(this.Expression, expression),
+                _ => environment.Visit(this.Expression, UnspecifiedExpression.Instance),
+            };
 
-            return new LambdaExpression(parameter, expression, newUnifiedLambdaHigherOrder);
+            var visitedHigherOrder = new LambdaExpression(
+                visitedParameter.HigherOrder, visitedExpression.HigherOrder, UnspecifiedExpression.Instance);
+            if (!(higherOrder is LambdaExpression))
+            {
+                environment.Unify(higherOrder, visitedHigherOrder);
+            }
+
+            return new LambdaExpression(visitedParameter, visitedExpression, higherOrder);
         }
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)
         {
             var parameter = environment.Visit(this.Parameter);
             var expression = environment.Visit(this.Expression);
-            var higherOrder = (this.HigherOrder != null) ? environment.Visit(this.HigherOrder) : null!;
+            var higherOrder = environment.Visit(this.HigherOrder);
 
             return new LambdaExpression(parameter, expression, higherOrder);
         }
@@ -78,43 +89,55 @@ namespace Favalet.Expressions
             higherOrder = this.HigherOrder;
         }
 
-        internal static LambdaExpression Create(Expression parameter, Expression expression) =>
-            new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance);
+        internal static LambdaExpression Create(
+            Expression parameter, Expression expression, bool isRecursive)
+        {
+            Debug.Assert((parameter is Expression) && (expression is Expression));
 
-        internal static LambdaExpression CreateRecursive(Expression parameter, Expression expression) =>
-            (parameter.HigherOrder, expression.HigherOrder) switch
+            return (parameter, expression) switch
             {
-                (Rank3Expression _, Expression _) => new LambdaExpression(parameter, expression, Rank3Expression.Instance),
-                (Expression _, Rank3Expression _) => new LambdaExpression(parameter, expression, Rank3Expression.Instance),
-                (KindExpression _, Expression _) => new LambdaExpression(parameter, expression,
-                    CreateRecursive(parameter.HigherOrder, expression.HigherOrder)),
-                (Expression _, KindExpression _) => new LambdaExpression(parameter, expression,
-                    CreateRecursive(parameter.HigherOrder, expression.HigherOrder)),
-                (TypeExpression _, Expression _) => new LambdaExpression(parameter, expression,
-                    CreateRecursive(parameter.HigherOrder, expression.HigherOrder)),
-                (Expression _, TypeExpression _) => new LambdaExpression(parameter, expression,
-                    CreateRecursive(parameter.HigherOrder, expression.HigherOrder)),
-                (UnspecifiedExpression _, UnspecifiedExpression _) => new LambdaExpression(parameter, expression,
-                    unspecified),
-                (UnspecifiedExpression _, Expression _) => new LambdaExpression(parameter, expression,
-                    CreateRecursive(UnspecifiedExpression.Instance, expression.HigherOrder)),
-                (Expression _, UnspecifiedExpression _) => new LambdaExpression(parameter, expression,
-                    CreateRecursive(parameter.HigherOrder, UnspecifiedExpression.Instance)),
-                (Expression _, null) => new LambdaExpression(parameter, expression,
-                    CreateRecursive(parameter.HigherOrder, UnspecifiedExpression.Instance)),
-                (null, Expression _) => new LambdaExpression(parameter, expression,
-                    CreateRecursive(UnspecifiedExpression.Instance, expression.HigherOrder)),
-                _ => new LambdaExpression(parameter, expression,
-                    CreateRecursive(parameter.HigherOrder, expression.HigherOrder))
+                (UnspecifiedExpression _, UnspecifiedExpression _) =>
+                    new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance),
+                (Expression _, UnspecifiedExpression _) =>
+                    new LambdaExpression(parameter, UnspecifiedExpression.Instance, UnspecifiedExpression.Instance),
+                (UnspecifiedExpression _, Expression _) =>
+                    new LambdaExpression(UnspecifiedExpression.Instance, expression, UnspecifiedExpression.Instance),
+                _ => new LambdaExpression(parameter, expression, isRecursive ?
+                    (Expression)Create(parameter.HigherOrder, expression.HigherOrder, true) :
+                    UnspecifiedExpression.Instance),
             };
+        }
 
-        private static readonly LambdaExpression unspecified =
-            new LambdaExpression(UnspecifiedExpression.Instance, UnspecifiedExpression.Instance, null!);
-        private static readonly LambdaExpression rank3 =
-            new LambdaExpression(Rank3Expression.Instance, Rank3Expression.Instance, null!);
-        private static readonly LambdaExpression kind =
-            new LambdaExpression(KindExpression.Instance, KindExpression.Instance, rank3);
-        private static readonly LambdaExpression type =
-            new LambdaExpression(TypeExpression.Instance, TypeExpression.Instance, kind);
+        internal static LambdaExpression CreateWithPlaceholder(
+            IInferringEnvironment environment, Expression parameter, Expression expression, bool isRecursive)
+        {
+            Debug.Assert((parameter is Expression) && (expression is Expression));
+
+            return (parameter, expression) switch
+            {
+                (UnspecifiedExpression _, UnspecifiedExpression _) =>
+                    new LambdaExpression(parameter, expression, UnspecifiedExpression.Instance),
+                (Expression _, UnspecifiedExpression _) =>
+                    new LambdaExpression(
+                        parameter,
+                        environment.CreatePlaceholder(UnspecifiedExpression.Instance),
+                        isRecursive ?
+                            (Expression)CreateWithPlaceholder(environment, parameter.HigherOrder, UnspecifiedExpression.Instance, true) :
+                            UnspecifiedExpression.Instance),
+                (UnspecifiedExpression _, Expression _) =>
+                    new LambdaExpression(
+                        environment.CreatePlaceholder(UnspecifiedExpression.Instance),
+                        expression,
+                        isRecursive ?
+                            (Expression)CreateWithPlaceholder(environment, UnspecifiedExpression.Instance, expression.HigherOrder, true) :
+                            UnspecifiedExpression.Instance),
+                _ => new LambdaExpression(
+                    parameter,
+                    expression,
+                    isRecursive ?
+                        (Expression)CreateWithPlaceholder(environment, parameter.HigherOrder, expression.HigherOrder, true) :
+                        UnspecifiedExpression.Instance),
+            };
+        }
     }
 }

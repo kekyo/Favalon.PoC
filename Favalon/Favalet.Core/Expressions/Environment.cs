@@ -23,31 +23,22 @@ namespace Favalet.Expressions
     public sealed partial class Environment :
         IInferringEnvironment, IResolvingEnvironment
     {
-        private readonly PlaceholderController placehoderController = new PlaceholderController();
+        private readonly PlaceholderController placeholderController = new PlaceholderController();
 
         private Environment()
         { }
 
+#line hidden
         public PlaceholderExpression CreatePlaceholder(Expression higherOrder) =>
-            placehoderController.Create(higherOrder);
-
-        private Expression CreatePlaceholderIfRequired(Expression from) =>
-            from switch
-            {
-                UnspecifiedExpression _ => this.CreatePlaceholder(UnspecifiedExpression.Instance),
-                KindExpression _ => this.CreatePlaceholder(Rank3Expression.Instance),
-                TypeExpression _ => this.CreatePlaceholder(KindExpression.Instance),
-                _ when from.HigherOrder is TypeExpression => this.CreatePlaceholder(TypeExpression.Instance),
-                _ => from
-            };
+            placeholderController.Create(higherOrder);
 
         void IInferringEnvironment.Memoize(VariableExpression symbol, Expression expression) =>
-            placehoderController.Memoize(symbol, expression);
+            placeholderController.Memoize(symbol, expression);
 
         Expression? IInferringEnvironment.Lookup(VariableExpression symbol) =>
-            placehoderController.Lookup(symbol);
+            placeholderController.Lookup(symbol);
         Expression? IResolvingEnvironment.Lookup(VariableExpression symbol) =>
-            placehoderController.Lookup(symbol);
+            placeholderController.Lookup(symbol);
 
         private TExpression Visit<TExpression>(TExpression expression, Expression higherOrderHint)
             where TExpression : Expression =>
@@ -56,12 +47,15 @@ namespace Favalet.Expressions
             (TExpression)expression.InternalVisitInferring(this, higherOrderHint);
         TExpression IResolvingEnvironment.Visit<TExpression>(TExpression expression) =>
             (TExpression)expression.InternalVisitResolving(this);
+#line default
 
         public Expression Infer(Expression expression, Expression higherOrderHint)
         {
             var partial = expression.InternalVisitInferring(this, higherOrderHint);
             return partial.InternalVisitResolving(this);
         }
+
+#line hidden
         public Expression Infer(Expression expression) =>
             this.Infer(expression, UnspecifiedExpression.Instance);
 
@@ -71,6 +65,7 @@ namespace Favalet.Expressions
         public TExpression Infer<TExpression>(TExpression expression)
             where TExpression : Expression =>
             (TExpression)this.Infer((Expression)expression, UnspecifiedExpression.Instance);
+#line default
 
         public static Environment Create() =>
             new Environment();

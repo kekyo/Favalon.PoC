@@ -47,9 +47,9 @@ namespace Favalet.Expressions
             new ApplyExpression(function, argument, UnspecifiedExpression.Instance);
 
         public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression) =>
-            LambdaExpression.Create(parameter, expression);
+            LambdaExpression.Create(parameter, expression, false);
         public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression) =>
-            LambdaExpression.Create(parameter, expression);
+            LambdaExpression.Create(parameter, expression, false);
 
         public static BindExpression Bind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
             new BindExpression(bound, expression, false, higherOrder);

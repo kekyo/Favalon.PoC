@@ -55,8 +55,11 @@ namespace Favalet.Expressions.Additionals
             return new LiteralExpression(this.Value, higherOrder);
         }
 
-        protected override Expression VisitResolving(IResolvingEnvironment environment) =>
-            this;
+        protected override Expression VisitResolving(IResolvingEnvironment environment)
+        {
+            var higherOrder = environment.Visit(this.HigherOrder);
+            return new LiteralExpression(this.Value, higherOrder);
+        }
 
         public override int GetHashCode() =>
             this.Value.GetHashCode();

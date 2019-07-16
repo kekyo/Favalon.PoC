@@ -103,7 +103,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:System.Int32:_ -> a:_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:System.Int32:'2:_ -> a:System.Int32:'2:_):(System.Int32:'2:_ -> System.Int32:'2:_):('2:_ -> '2:_):(_ -> _)", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(a:System.Int32:'a -> a:System.Int32:'a):(System.Int32:'a -> System.Int32:'a):('a -> 'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -134,7 +134,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:_ -> (b:_ -> a:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:'2:_ -> (b:'4:_ -> a:'2:_):('4:_ -> '2:_):(_ -> _)):('2:_ -> ('4:_ -> '2:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(a:'a -> (b:'b -> a:'a):('b -> 'a)):('a -> 'b -> 'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -165,7 +165,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:_ -> (b:_ -> b:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:'2:_ -> (b:'4:_ -> b:'4:_):('4:_ -> '4:_):(_ -> _)):('2:_ -> ('4:_ -> '4:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(a:'a -> (b:'b -> b:'b):('b -> 'b)):('a -> 'b -> 'b)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -180,7 +180,7 @@ namespace Favalet.Expressions.Unspecified
             1:-------------------
             (a:_ -> (b:_ -> a:System.Int32):_):'1
             (a:'2 -> (b:_ -> a:System.Int32):_):'1          : Bind(a:'2)
-            (a:'2 -> (b:_ -> a:System.Int32):'3):'1         : Memoized('1 => ('2 -> '3))
+            (a:'2 -> (b:_ -> a:System.Int32):'3):'1         : //Memoized('1 => ('2 -> '3))
             (a:'2 -> (b:'4 -> a:System.Int32):'3):'1        : Bind(b:'4)
             (a:'2 -> (b:'4 -> a:System.Int32):'3):'1        : Lookup(a => '2), Memoized('2 => System.Int32)
             (a:'2 -> (b:'4 -> a:System.Int32):'3):'1        : Memoized('3 => ('4 -> System.Int32))
@@ -195,11 +195,11 @@ namespace Favalet.Expressions.Unspecified
             System.Int32 -> '4 -> System.Int32
             */
 
-            var expression = Lambda(Bound("a"), Lambda(Bound("b"), Free("a", Free("System.Int32"))));
+            var expression = Lambda(Bound("a"), Lambda(Bound("b"), Free("a", Implicit("System.Int32"))));
             Assert.AreEqual("(a:_ -> (b:_ -> a:System.Int32:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:System.Int32:_ -> (b:'4:_ -> a:System.Int32:_):('4:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> ('4:_ -> System.Int32:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(a:System.Int32:'a -> (b:'b -> a:System.Int32:'a):('b -> System.Int32:'a)):(System.Int32:'a -> 'b -> System.Int32:'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -230,7 +230,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:_ -> (b:System.Int32:_ -> a:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:'2:_ -> (b:System.Int32:'4:_ -> a:'2:_):(System.Int32:'4:_ -> '2:_):('4:_ -> _):(_ -> _)):('2:_ -> (System.Int32:'4:_ -> '2:_):('4:_ -> _):(_ -> _)):(_ -> ('4:_ -> _):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(a:'a -> (b:System.Int32:'b -> a:'a):(System.Int32:'b -> 'a)):('a -> System.Int32:'b -> 'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -261,7 +261,7 @@ namespace Favalet.Expressions.Unspecified
             Assert.AreEqual("(a:System.Int32:_ -> (b:_ -> a:_):_):_", expression.StrictReadableString);
 
             var inferred = environment.Infer(expression);
-            Assert.AreEqual("(a:System.Int32:'2:_ -> (b:'4:_ -> a:System.Int32:'2:_):('4:_ -> System.Int32:'2:_):(_ -> '2:_):(_ -> _)):(System.Int32:'2:_ -> ('4:_ -> System.Int32:'2:_):(_ -> '2:_):(_ -> _)):('2:_ -> (_ -> '2:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(a:System.Int32:'a -> (b:'b -> a:System.Int32:'a):('b -> System.Int32:'a)):(System.Int32:'a -> 'b -> System.Int32:'a)", inferred.AnnotatedReadableString);
         }
     }
 }

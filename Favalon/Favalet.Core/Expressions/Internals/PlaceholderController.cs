@@ -53,15 +53,22 @@ namespace Favalet.Expressions.Internals
 
                         if (!collected.Add(variable))
                         {
-                            throw new ArgumentException($"Recursive unification problem: {symbol0.StrictReadableString} ... {memoized.StrictReadableString}");
+                            throw new ArgumentException(
+                                $"Recursive unification problem: {symbol0.StrictReadableString} ... {memoized.StrictReadableString}");
                         }
 
                         if (memoized is LambdaExpression lambda)
                         {
-                            var parameter = ((lambda.Parameter is VariableExpression p) ? this.Lookup(symbol0, p, collected) : null) ?? lambda.Parameter;
-                            var expression = ((lambda.Expression is VariableExpression e) ? this.Lookup(symbol0, e, collected) : null) ?? lambda.Expression;
+                            var parameter = ((lambda.Parameter is VariableExpression p) ?
+                                this.Lookup(symbol0, p, new HashSet<VariableExpression>(collected)) :
+                                null) ??
+                                lambda.Parameter;
+                            var expression = ((lambda.Expression is VariableExpression e) ?
+                                this.Lookup(symbol0, e, new HashSet<VariableExpression>(collected)) :
+                                null) ??
+                                lambda.Expression;
 
-                            var newLambda = LambdaExpression.CreateRecursive(parameter, expression);
+                            var newLambda = LambdaExpression.Create(parameter, expression, true);
 
                             foundSymbol = variable;
                             foundExpression = newLambda;

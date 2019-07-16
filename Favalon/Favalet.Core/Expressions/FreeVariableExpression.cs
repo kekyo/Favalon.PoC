@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet.Expressions.Specialized;
 using System;
 
 namespace Favalet.Expressions
@@ -24,19 +23,11 @@ namespace Favalet.Expressions
             base(name, higherOrder)
         { }
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
-        {
-            if (environment.Lookup(this) is Expression bound)
-            {
-                var higherOrder = environment.Visit(this.HigherOrder, UnspecifiedExpression.Instance);
-                var unifiedHigherOrder = environment.Unify(higherOrderHint, higherOrder, bound.HigherOrder);
-                return new FreeVariableExpression(this.Name, unifiedHigherOrder);
-            }
-            else
-            {
-                throw new ArgumentException($"Cannot find variable: Name={this.Name}");
-            }
-        }
+        protected override Expression CreateExpressionOnVisitInferring(Expression higherOrder) =>
+            new FreeVariableExpression(this.Name, higherOrder);
+
+        protected override Expression VisitInferringOnBoundExpressionNotFound(IInferringEnvironment environment, Expression higherOrderHint) =>
+            throw new ArgumentException($"Cannot find variable: Name={this.Name}");
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)
         {

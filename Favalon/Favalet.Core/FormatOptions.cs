@@ -13,17 +13,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Favalet.Expressions
+namespace Favalet
 {
-    public static class ExpressionExtensions
+    public enum FormatAnnotations
     {
-        public static Expression? Apply(this Expression? function, Expression? argument) =>
-            (function, argument) switch
-            {
-                (Expression f, Expression a) => Expression.Apply(f, a),
-                (null, Expression a) => a,
-                (Expression f, null) => f,
-                _ => null
-            };
+        Without,
+        Standard,
+        Annotated,
+        Always
+    }
+
+    public enum FormatNamings
+    {
+        Friendly,
+        Standard,
+        Strict
+    }
+
+    public enum FormatOperators
+    {
+        Standard,
+        Fancy
     }
 }

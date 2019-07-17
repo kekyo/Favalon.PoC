@@ -22,12 +22,12 @@ using System.Threading.Tasks;
 namespace Favalon
 {
     [TestFixture]
-    public sealed class ReplParserTest
+    public sealed class ParserTest
     {
         [Test]
         public void ApplyVariables()
         {
-            var parser = new ReplParser();
+            var parser = Parser.Create();
             var expression = parser.Append("aaa bbb ccc");
             Assert.AreEqual("((aaa:_ bbb:_):_ ccc:_):_", expression?.StrictReadableString);
         }
@@ -35,7 +35,7 @@ namespace Favalon
         [Test]
         public void ApplyCombinedVariableAndNumeric()
         {
-            var parser = new ReplParser();
+            var parser = Parser.Create();
             var expression = parser.Append("aaa 123");
             Assert.AreEqual("(aaa:_ 123:?):_", expression?.StrictReadableString);
         }
@@ -43,7 +43,7 @@ namespace Favalon
         [Test]
         public void ApplyCombinedVariableAndSymbol()
         {
-            var parser = new ReplParser();
+            var parser = Parser.Create();
             var expression = parser.Append("aaa | bbb");
             Assert.AreEqual("((aaa:_ |:_):_ bbb:_):_", expression?.StrictReadableString);
         }

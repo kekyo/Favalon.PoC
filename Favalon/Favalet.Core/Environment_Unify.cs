@@ -13,14 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
 using System;
 using System.Diagnostics;
 
-namespace Favalet.Expressions
+namespace Favalet
 {
-    using static Favalet.Expressions.Expression;
-
     partial class Environment
     {
         private Expression UnifyLambda(LambdaExpression lambda1, LambdaExpression lambda2)
@@ -111,7 +110,7 @@ namespace Favalet.Expressions
         }
 
 #line hidden
-        Expression IInferringEnvironment.Unify(Expression expression1, Expression expression2) =>
+        Expression Expression.IInferringEnvironment.Unify(Expression expression1, Expression expression2) =>
             this.Unify(expression1, expression2);
 #line default
     }

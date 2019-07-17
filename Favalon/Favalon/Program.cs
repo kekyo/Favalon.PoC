@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet;
 using System;
 using System.Threading.Tasks;
 
@@ -22,21 +23,21 @@ namespace Favalon
     {
         public static async Task Main(string[] args)
         {
-            var environment = Favalet.Expressions.Environment.Create();
-            var parser = new ReplParser();
+            var environment = Favalet.Environment.Create();
+            var parser = Parser.Create();
 
             while (true)
             {
                 await Console.Out.WriteAsync("Favalon> ");
 
-                var line = await Console.In.InputAsync();
+                var line = await Console.In.ReadLineAsync();
+                if (parser.Append(line) is Expression expression)
+                {
+                    await Console.Out.WriteLineAsync($"parsed: {expression.AnnotatedReadableString}");
 
-                var expression = parser.Append(line);
-
-                await Console.Out.PrintAsync($"ast:      {expression?.AnnotatedReadableString}");
-
-                var inferred = environment.Infer(expression);
-                await Console.Out.PrintAsync($"inferred: {inferred?.AnnotatedReadableString}");
+                    var inferred = environment.Infer(expression);
+                    await Console.Out.WriteLineAsync($"inferred: {inferred.AnnotatedReadableString}");
+                }
             }
         }
     }

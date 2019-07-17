@@ -13,13 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet.Expressions;
+using Favalet;
 using System;
 using System.Globalization;
 
 namespace Favalon
 {
-    public sealed class ReplParser
+    public sealed class Parser
     {
         private enum States
         {
@@ -32,17 +32,19 @@ namespace Favalon
         private States state = States.Separation;
         private Expression? expression = null;
 
-        public ReplParser()
+        private Parser()
         { }
 
         public Expression? Append(string text)
         {
+            const char eol = '\xffff';
+
             var index = 0;
             var beginIndex = -1;
             char ch;
             do
             {
-                ch = (index < text.Length) ? text[index] : '\xffff';
+                ch = (index < text.Length) ? text[index] : eol;
                 index++;
                 switch (state)
                 {
@@ -62,7 +64,7 @@ namespace Favalon
                             beginIndex = index - 1;
                             state = States.Symbol;
                         }
-                        else if (char.IsWhiteSpace(ch) || (ch == '\xffff'))
+                        else if (char.IsWhiteSpace(ch) || (ch == eol))
                         {
                         }
                         else
@@ -74,7 +76,7 @@ namespace Favalon
                         if (char.IsLetterOrDigit(ch) || (ch == '_'))
                         {
                         }
-                        else if (char.IsWhiteSpace(ch) || (ch == '\xffff'))
+                        else if (char.IsWhiteSpace(ch) || (ch == eol))
                         {
                             var word = text.Substring(beginIndex, index - beginIndex - 1);
                             var freeVariable = Expression.Free(word);
@@ -92,7 +94,7 @@ namespace Favalon
                         if (char.IsDigit(ch) || (ch == ',') || (ch == '.'))
                         {
                         }
-                        else if (char.IsWhiteSpace(ch) || (ch == '\xffff'))
+                        else if (char.IsWhiteSpace(ch) || (ch == eol))
                         {
                             var numericString = text.Substring(beginIndex, index - beginIndex - 1);
                             var numeric =
@@ -113,7 +115,7 @@ namespace Favalon
                         if (CharUnicodeInfo.GetUnicodeCategory(ch) == UnicodeCategory.MathSymbol)
                         {
                         }
-                        else if (char.IsWhiteSpace(ch) || (ch == '\xffff'))
+                        else if (char.IsWhiteSpace(ch) || (ch == eol))
                         {
                             var word = text.Substring(beginIndex, index - beginIndex - 1);
                             var freeVariable = Expression.Free(word);
@@ -129,12 +131,15 @@ namespace Favalon
                         break;
                 }
             }
-            while ((index <= text.Length) && (ch != '\uffff'));
+            while ((index <= text.Length) && (ch != eol));
 
             var e = expression;
             expression = null;
 
             return e;
         }
+
+        public static Parser Create() =>
+            new Parser();
     }
 }

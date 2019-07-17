@@ -13,9 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
 
-namespace Favalet.Expressions
+namespace Favalet
 {
     partial class Expression
     {

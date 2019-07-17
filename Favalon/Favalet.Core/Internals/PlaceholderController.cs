@@ -13,12 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Favalet.Expressions.Internals
+namespace Favalet.Internals
 {
     internal sealed class PlaceholderController
     {

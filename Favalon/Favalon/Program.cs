@@ -23,16 +23,20 @@ namespace Favalon
         public static async Task Main(string[] args)
         {
             var environment = Favalet.Expressions.Environment.Create();
+            var parser = new ReplParser();
 
             while (true)
             {
                 await Console.Out.WriteAsync("Favalon> ");
-                var expression = await ReplParser.ParseAsync(Console.In);
 
-                await Console.Out.PrintAsync($"ast:      {expression.AnnotatedReadableString}");
+                var line = await Console.In.InputAsync();
+
+                var expression = parser.Append(line);
+
+                await Console.Out.PrintAsync($"ast:      {expression?.AnnotatedReadableString}");
 
                 var inferred = environment.Infer(expression);
-                await Console.Out.PrintAsync($"inferred: {inferred.AnnotatedReadableString}");
+                await Console.Out.PrintAsync($"inferred: {inferred?.AnnotatedReadableString}");
             }
         }
     }

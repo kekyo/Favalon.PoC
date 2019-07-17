@@ -20,8 +20,8 @@ namespace Favalet.Expressions.Specialized
     public sealed class PlaceholderExpression :
         VariableExpression, IEquatable<PlaceholderExpression?>, IComparable<PlaceholderExpression>
     {
-        internal PlaceholderExpression(int index, Expression higherOrder) :
-            base(higherOrder) =>
+        internal PlaceholderExpression(int index, Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange) =>
             this.Index = index;
 
         public readonly int Index;

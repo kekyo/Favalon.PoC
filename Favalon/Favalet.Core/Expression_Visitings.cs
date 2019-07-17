@@ -22,7 +22,7 @@ namespace Favalet
     {
         protected internal interface IInferringEnvironment
         {
-            PlaceholderExpression CreatePlaceholder(Expression higherOrder);
+            PlaceholderExpression CreatePlaceholder(Expression higherOrder, TextRange textRange);
 
             Expression Unify(Expression expression1, Expression expression2);
             void Memoize(VariableExpression symbol, Expression expression);
@@ -47,15 +47,5 @@ namespace Favalet
         internal Expression InternalVisitResolving(IResolvingEnvironment environment) =>
             this.VisitResolving(environment);
 #line default
-
-        internal Expression InternalCloneWithHigherOrder(Expression higherOrder)
-        {
-            var newExpression = (Expression)this.MemberwiseClone();
-            newExpression.HigherOrder = higherOrder;
-            return newExpression;
-        }
-
-        internal Expression InternalSetHigherOrder(Expression higherOrder) =>
-            this.HigherOrder = higherOrder;
     }
 }

@@ -17,10 +17,14 @@ namespace Favalet
 {
     public abstract partial class Expression
     {
-        protected Expression(Expression higherOrder) =>
+        protected Expression(Expression higherOrder, TextRange textRange)
+        {
             this.HigherOrder = higherOrder;
+            this.TextRange = textRange;
+        }
 
-        public Expression HigherOrder { get; private set; }
+        public readonly Expression HigherOrder;
+        public readonly TextRange TextRange;
 
         protected abstract Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint);
         protected abstract Expression VisitResolving(IResolvingEnvironment environment);

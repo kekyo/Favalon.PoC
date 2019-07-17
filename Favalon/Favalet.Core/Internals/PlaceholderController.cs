@@ -30,8 +30,8 @@ namespace Favalet.Internals
         public PlaceholderController()
         { }
 
-        public PlaceholderExpression Create(Expression higherOrder) =>
-            new PlaceholderExpression(index++, higherOrder);
+        public PlaceholderExpression Create(Expression higherOrder, TextRange textRange) =>
+            new PlaceholderExpression(index++, higherOrder, textRange);
 
         public void Memoize(VariableExpression symbol, Expression expression) =>
             memoizedExpressions.Add(symbol, expression);
@@ -69,7 +69,7 @@ namespace Favalet.Internals
                                 null) ??
                                 lambda.Expression;
 
-                            var newLambda = LambdaExpression.Create(parameter, expression, true);
+                            var newLambda = LambdaExpression.Create(parameter, expression, true, lambda.TextRange);
 
                             foundSymbol = variable;
                             foundExpression = newLambda;

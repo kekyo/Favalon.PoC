@@ -17,8 +17,8 @@ namespace Favalet.Expressions
 {
     public abstract class ValueExpression : Expression
     {
-        protected ValueExpression(Expression higherOrder) :
-            base(higherOrder)
+        protected ValueExpression(Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange)
         { }
     }
 }

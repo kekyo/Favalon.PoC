@@ -20,8 +20,8 @@ namespace Favalet.Expressions
 {
     public sealed class ApplyExpression : Expression
     {
-        internal ApplyExpression(Expression function, Expression argument, Expression higherOrder) :
-            base(higherOrder)
+        internal ApplyExpression(Expression function, Expression argument, Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange)
         {
             this.Function = function;
             this.Argument = argument;
@@ -41,10 +41,10 @@ namespace Favalet.Expressions
             var visitedArgument = environment.Visit(this.Argument, UnspecifiedExpression.Instance);
 
             var functionHigherOrder = LambdaExpression.Create(
-                visitedArgument.HigherOrder, higherOrder, true);
+                visitedArgument.HigherOrder, higherOrder, true, this.TextRange);
             var visitedFunction = environment.Visit(this.Function, functionHigherOrder);
 
-            return new ApplyExpression(visitedFunction, visitedArgument, higherOrder);
+            return new ApplyExpression(visitedFunction, visitedArgument, higherOrder, this.TextRange);
         }
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)
@@ -53,7 +53,7 @@ namespace Favalet.Expressions
             var function = environment.Visit(this.Function);
             var higherOrder = environment.Visit(this.HigherOrder);
 
-            return new ApplyExpression(function, argument, higherOrder);
+            return new ApplyExpression(function, argument, higherOrder, this.TextRange);
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]

@@ -13,14 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet.Expressions.Specialized;
+
 namespace Favalet
 {
     public static class ExpressionExtensions
     {
-        public static Expression? Apply(this Expression? function, Expression? argument) =>
+        public static Expression? Apply(this Expression? function, Expression? argument, TextRange textRange) =>
             (function, argument) switch
             {
-                (Expression f, Expression a) => Expression.Apply(f, a),
+                (Expression f, Expression a) => Expression.Apply(f, a, UnspecifiedExpression.Instance, textRange),
                 (null, Expression a) => a,
                 (Expression f, null) => f,
                 _ => null

@@ -17,8 +17,8 @@ namespace Favalet.Expressions
 {
     public sealed class BindExpression : Expression
     {
-        internal BindExpression(BoundVariableExpression bound, Expression expression, bool recursiveBind, Expression higherOrder) :
-            base(higherOrder)
+        internal BindExpression(BoundVariableExpression bound, Expression expression, bool recursiveBind, Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange)
         {
             this.Bound = bound;
             this.Expression = expression;
@@ -45,14 +45,14 @@ namespace Favalet.Expressions
                 var bound = environment.Visit(this.Bound, higherOrder);
                 var expression = environment.Visit(this.Expression, bound.HigherOrder);
 
-                return new BindExpression(bound, expression, true, expression.HigherOrder);
+                return new BindExpression(bound, expression, true, expression.HigherOrder, this.TextRange);
             }
             else
             {
                 var expression = environment.Visit(this.Expression, higherOrder);
                 var bound = environment.Visit(this.Bound, expression.HigherOrder);
 
-                return new BindExpression(bound, expression, false, bound.HigherOrder);
+                return new BindExpression(bound, expression, false, bound.HigherOrder, this.TextRange);
             }
         }
 
@@ -62,7 +62,7 @@ namespace Favalet.Expressions
             var expression = environment.Visit(this.Expression);
             var higherOrder = environment.Visit(this.HigherOrder);
 
-            return new BindExpression(bound, expression, this.RecursiveBind, higherOrder);
+            return new BindExpression(bound, expression, this.RecursiveBind, higherOrder, this.TextRange);
         }
     }
 }

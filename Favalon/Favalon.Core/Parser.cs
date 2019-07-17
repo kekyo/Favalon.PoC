@@ -35,7 +35,7 @@ namespace Favalon
         private Parser()
         { }
 
-        public Expression? Append(string text)
+        public Expression? Append(string text, TextRange textRange)
         {
             const char eol = '\xffff';
 
@@ -79,7 +79,7 @@ namespace Favalon
                         else if (char.IsWhiteSpace(ch) || (ch == eol))
                         {
                             var word = text.Substring(beginIndex, index - beginIndex - 1);
-                            var freeVariable = Expression.Free(word);
+                            var freeVariable = Expression.Free(word, Expression.Unspecified, textRange.Subtract((beginIndex, index)));
                             expression = expression.Apply(freeVariable);
 
                             beginIndex = -1;

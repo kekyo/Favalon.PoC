@@ -29,8 +29,8 @@ namespace Favalet
         { }
 
 #line hidden
-        public PlaceholderExpression CreatePlaceholder(Expression higherOrder) =>
-            placeholderController.Create(higherOrder);
+        public PlaceholderExpression CreatePlaceholder(Expression higherOrder, TextRange textRange) =>
+            placeholderController.Create(higherOrder, textRange);
 
         void Expression.IInferringEnvironment.Memoize(VariableExpression symbol, Expression expression) =>
             placeholderController.Memoize(symbol, expression);

@@ -13,21 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Favalet.Expressions.Specialized
 {
     public sealed class UnspecifiedExpression : Expression
     {
         private UnspecifiedExpression() :
-            base(null!)
+            base(null!, TextRange.Unknown)
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
             (context.FormatNaming == FormatNamings.Strict) ? "(Unspecified)" : "_";
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            environment.CreatePlaceholder(higherOrderHint);
+            environment.CreatePlaceholder(higherOrderHint, TextRange.Unknown);
 
         protected override Expression VisitResolving(IResolvingEnvironment environment) =>
             this;

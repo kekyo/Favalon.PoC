@@ -21,7 +21,7 @@ namespace Favalet.Expressions.Specialized
     internal sealed class Rank3Expression : PseudoExpression
     {
         private Rank3Expression() :
-            base(null!)
+            base(null!, TextRange.Unknown)
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>

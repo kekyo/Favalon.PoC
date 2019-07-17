@@ -17,20 +17,20 @@ namespace Favalet.Expressions.Internals
 {
     public sealed class ImplicitVariableExpression : SymbolicVariableExpression
     {
-        private ImplicitVariableExpression(string name, Expression higherOrder) :
-            base(name, higherOrder)
+        private ImplicitVariableExpression(string name, Expression higherOrder, TextRange textRange) :
+            base(name, higherOrder, textRange)
         { }
 
         protected override Expression CreateExpressionOnVisitInferring(Expression higherOrder) =>
-            new ImplicitVariableExpression(this.Name, higherOrder);
+            new ImplicitVariableExpression(this.Name, higherOrder, this.TextRange);
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)
         {
             var higherOrder = environment.Visit(this.HigherOrder);
-            return new ImplicitVariableExpression(this.Name, higherOrder);
+            return new ImplicitVariableExpression(this.Name, higherOrder, this.TextRange);
         }
 
-        public static ImplicitVariableExpression Create(string name, Expression higherOrder) =>
-            new ImplicitVariableExpression(name, higherOrder);
+        public static ImplicitVariableExpression Create(string name, Expression higherOrder, TextRange textRange) =>
+            new ImplicitVariableExpression(name, higherOrder, textRange);
     }
 }

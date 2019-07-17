@@ -17,8 +17,8 @@ namespace Favalet.Expressions.Specialized
 {
     public abstract class PseudoExpression : Expression
     {
-        private protected PseudoExpression(Expression higherOrder) :
-            base(higherOrder)
+        private protected PseudoExpression(Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange)
         { }
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>

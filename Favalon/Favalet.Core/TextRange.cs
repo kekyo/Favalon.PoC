@@ -1,4 +1,19 @@
-﻿using System;
+﻿// This is part of Favalon project - https://github.com/kekyo/Favalon
+// Copyright (c) 2019 Kouji Matsui
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 
 namespace Favalet
 {
@@ -26,6 +41,11 @@ namespace Favalet
         public bool Contains(TextRange inside) =>
             this.Target.Equals(inside.Target) && this.Range.Contains(inside.Range);
 
+        public TextRange Subtract(Range range) =>
+            new TextRange(this.Target, this.Range.Subtract(range));
+        public TextRange Subtract(Position first, Position last) =>
+            new TextRange(this.Target, this.Range.Subtract(first, last));
+
         public override string ToString() =>
             $"{(this.Target.IsFile ? this.Target.LocalPath : this.Target.ToString())}({this.Range})";
 
@@ -48,13 +68,13 @@ namespace Favalet
         public static TextRange Create(Range range) =>
             new TextRange(unknown, range);
 
-        public static implicit operator TextRange(System.ValueTuple<string, int, int> textRange) =>
+        public static implicit operator TextRange(ValueTuple<string, int, int> textRange) =>
             new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3)));
-        public static implicit operator TextRange(System.ValueTuple<Uri, int, int> textRange) =>
+        public static implicit operator TextRange(ValueTuple<Uri, int, int> textRange) =>
            new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3)));
-        public static implicit operator TextRange(System.ValueTuple<string, int, int, int, int> textRange) =>
+        public static implicit operator TextRange(ValueTuple<string, int, int, int, int> textRange) =>
             new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3), Position.Create(textRange.Item4, textRange.Item5)));
-        public static implicit operator TextRange(System.ValueTuple<Uri, int, int, int, int> textRange) =>
+        public static implicit operator TextRange(ValueTuple<Uri, int, int, int, int> textRange) =>
             new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3), Position.Create(textRange.Item4, textRange.Item5)));
     }
 }

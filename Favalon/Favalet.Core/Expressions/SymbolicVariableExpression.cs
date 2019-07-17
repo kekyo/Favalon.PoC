@@ -21,8 +21,8 @@ namespace Favalet.Expressions
     public abstract class SymbolicVariableExpression :
         VariableExpression, IEquatable<SymbolicVariableExpression?>
     {
-        protected SymbolicVariableExpression(string name, Expression higherOrder) :
-            base(higherOrder) =>
+        protected SymbolicVariableExpression(string name, Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange) =>
             this.Name = name;
 
         public readonly string Name;
@@ -45,7 +45,7 @@ namespace Favalet.Expressions
             switch (this.HigherOrder, higherOrderHint)
             {
                 case (UnspecifiedExpression _, UnspecifiedExpression _):
-                    higherOrder = environment.CreatePlaceholder(UnspecifiedExpression.Instance);
+                    higherOrder = environment.CreatePlaceholder(UnspecifiedExpression.Instance, this.TextRange);
                     break;
                 case (UnspecifiedExpression _, Expression _):
                     higherOrder = VisitNonPlaceholder(environment, higherOrderHint);
@@ -80,7 +80,7 @@ namespace Favalet.Expressions
                 switch (this.HigherOrder, higherOrderHint, bound.HigherOrder)
                 {
                     case (UnspecifiedExpression _, UnspecifiedExpression _, UnspecifiedExpression _):
-                        higherOrder = environment.CreatePlaceholder(UnspecifiedExpression.Instance);
+                        higherOrder = environment.CreatePlaceholder(UnspecifiedExpression.Instance, this.TextRange);
                         break;
                     case (UnspecifiedExpression _, UnspecifiedExpression _, Expression _):
                         higherOrder = VisitNonPlaceholder(environment, bound.HigherOrder);

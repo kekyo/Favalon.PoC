@@ -21,8 +21,8 @@ namespace Favalet.Expressions.Additionals
 {
     public sealed class LiteralExpression : ValueExpression, IEquatable<LiteralExpression?>
     {
-        internal LiteralExpression(object value, Expression higherOrder) :
-            base(higherOrder) =>
+        internal LiteralExpression(object value, Expression higherOrder, TextRange textRange) :
+            base(higherOrder, textRange) =>
             this.Value = value;
 
         public readonly object Value;
@@ -49,16 +49,16 @@ namespace Favalet.Expressions.Additionals
 
         protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
         {
-            var typedHigherOrder = new FreeVariableExpression(this.GetTypeName(), KindExpression.Instance);
+            var typedHigherOrder = new FreeVariableExpression(this.GetTypeName(), KindExpression.Instance, this.TextRange);
             var higherOrder = environment.Unify(typedHigherOrder, higherOrderHint);
 
-            return new LiteralExpression(this.Value, higherOrder);
+            return new LiteralExpression(this.Value, higherOrder, this.TextRange);
         }
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)
         {
             var higherOrder = environment.Visit(this.HigherOrder);
-            return new LiteralExpression(this.Value, higherOrder);
+            return new LiteralExpression(this.Value, higherOrder, this.TextRange);
         }
 
         public override int GetHashCode() =>

@@ -29,37 +29,27 @@ namespace Favalet
         public static TypeExpression Type =>
             TypeExpression.Instance;
 
-        public static LiteralExpression Literal(object value) =>
-            new LiteralExpression(value, TypeExpression.Instance);
+        public static LiteralExpression Literal(object value, TextRange textRange) =>
+            new LiteralExpression(value, TypeExpression.Instance, textRange);
 
-        public static SymbolicVariableExpression Free(string name, Expression higherOrder) =>
-            new FreeVariableExpression(name, higherOrder);
-        public static SymbolicVariableExpression Free(string name) =>
-            new FreeVariableExpression(name, UnspecifiedExpression.Instance);
+        public static SymbolicVariableExpression Free(string name, Expression higherOrder, TextRange textRange) =>
+            new FreeVariableExpression(name, higherOrder, textRange);
 
-        public static BoundVariableExpression Bound(string name, Expression higherOrder) =>
-            new BoundVariableExpression(name, higherOrder);
-        public static BoundVariableExpression Bound(string name) =>
-            new BoundVariableExpression(name, UnspecifiedExpression.Instance);
+        public static BoundVariableExpression Bound(string name, Expression higherOrder, TextRange textRange) =>
+            new BoundVariableExpression(name, higherOrder, textRange);
 
-        public static ApplyExpression Apply(Expression function, Expression argument, Expression higherOrder) =>
-            new ApplyExpression(function, argument, higherOrder);
-        public static ApplyExpression Apply(Expression function, Expression argument) =>
-            new ApplyExpression(function, argument, UnspecifiedExpression.Instance);
+        public static ApplyExpression Apply(Expression function, Expression argument, Expression higherOrder, TextRange textRange) =>
+            new ApplyExpression(function, argument, higherOrder, textRange);
 
-        public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression) =>
-            LambdaExpression.Create(parameter, expression, false);
-        public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression) =>
-            LambdaExpression.Create(parameter, expression, false);
+        public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression, TextRange textRange) =>
+            LambdaExpression.Create(parameter, expression, false, textRange);
+        public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression, TextRange textRange) =>
+            LambdaExpression.Create(parameter, expression, false, textRange);
 
-        public static BindExpression Bind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
-            new BindExpression(bound, expression, false, higherOrder);
-        public static BindExpression Bind(BoundVariableExpression bound, Expression expression) =>
-            new BindExpression(bound, expression, false, UnspecifiedExpression.Instance);
+        public static BindExpression Bind(BoundVariableExpression bound, Expression expression, Expression higherOrder, TextRange textRange) =>
+            new BindExpression(bound, expression, false, higherOrder, textRange);
 
-        public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
-            new BindExpression(bound, expression, true, higherOrder);
-        public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression) =>
-            new BindExpression(bound, expression, true, UnspecifiedExpression.Instance);
+        public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression, Expression higherOrder, TextRange textRange) =>
+            new BindExpression(bound, expression, true, higherOrder, textRange);
     }
 }

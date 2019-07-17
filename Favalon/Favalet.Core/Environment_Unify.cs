@@ -40,7 +40,8 @@ namespace Favalet
                 this,
                 this.Unify(lambda.Parameter, UnspecifiedExpression.Instance),
                 this.Unify(lambda.Expression, UnspecifiedExpression.Instance),
-                true);
+                true,
+                lambda.TextRange);
 
             if (expression is PlaceholderExpression placeholder)
             {
@@ -75,7 +76,7 @@ namespace Favalet
             var result = (expression1, expression2) switch
             {
                 (UnspecifiedExpression _, UnspecifiedExpression _) =>
-                    this.CreatePlaceholder(UnspecifiedExpression.Instance),
+                    this.CreatePlaceholder(UnspecifiedExpression.Instance, expression1.TextRange),
 
                 (Expression _, Expression _) when expression1.Equals(expression2) =>
                     expression1,

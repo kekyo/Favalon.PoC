@@ -19,12 +19,12 @@ namespace Favalet.Expressions
 {
     public class FreeVariableExpression : SymbolicVariableExpression
     {
-        internal FreeVariableExpression(string name, Expression higherOrder) :
-            base(name, higherOrder)
+        internal FreeVariableExpression(string name, Expression higherOrder, TextRange textRange) :
+            base(name, higherOrder, textRange)
         { }
 
         protected override Expression CreateExpressionOnVisitInferring(Expression higherOrder) =>
-            new FreeVariableExpression(this.Name, higherOrder);
+            new FreeVariableExpression(this.Name, higherOrder, this.TextRange);
 
         protected override Expression VisitInferringOnBoundExpressionNotFound(IInferringEnvironment environment, Expression higherOrderHint) =>
             throw new ArgumentException($"Cannot find variable: Name={this.Name}");
@@ -32,7 +32,7 @@ namespace Favalet.Expressions
         protected override Expression VisitResolving(IResolvingEnvironment environment)
         {
             var higherOrder = environment.Visit(this.HigherOrder);
-            return new FreeVariableExpression(this.Name, higherOrder);
+            return new FreeVariableExpression(this.Name, higherOrder, this.TextRange);
         }
     }
 }

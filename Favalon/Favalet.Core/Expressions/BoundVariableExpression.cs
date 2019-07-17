@@ -17,17 +17,17 @@ namespace Favalet.Expressions
 {
     public sealed class BoundVariableExpression : SymbolicVariableExpression
     {
-        internal BoundVariableExpression(string name, Expression higherOrder) :
-            base(name, higherOrder)
+        internal BoundVariableExpression(string name, Expression higherOrder, TextRange textRange) :
+            base(name, higherOrder, textRange)
         { }
 
         protected override Expression CreateExpressionOnVisitInferring(Expression higherOrder) =>
-            new BoundVariableExpression(this.Name, higherOrder);
+            new BoundVariableExpression(this.Name, higherOrder, this.TextRange);
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)
         {
             var higherOrder = environment.Visit(this.HigherOrder);
-            return new BoundVariableExpression(this.Name, higherOrder);
+            return new BoundVariableExpression(this.Name, higherOrder, this.TextRange);
         }
     }
 }

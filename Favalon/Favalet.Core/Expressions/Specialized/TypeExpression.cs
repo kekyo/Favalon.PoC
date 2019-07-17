@@ -13,14 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet.Expressions.Internals;
-
 namespace Favalet.Expressions.Specialized
 {
     public sealed class TypeExpression : PseudoExpression
     {
         private TypeExpression() :
-            base(KindExpression.Instance)
+            base(KindExpression.Instance, TextRange.Unknown)
         { }
 
         protected override FormattedString FormatReadableString(FormatContext context) =>

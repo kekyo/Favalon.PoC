@@ -47,7 +47,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a", Type), Implicit("b", Type));
             Assert.AreEqual("(a:? b:?):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:('2:* -> '1:_):(* -> _) b:'2:*):'1:_", inferred.AnnotatedReadableString);
         }
 
@@ -72,7 +72,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a", Type), Implicit("b", Type), Type);
             Assert.AreEqual("(a:? b:?):?", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:('2:* -> '1:*):(* -> *) b:'2:*):'1:*", inferred.AnnotatedReadableString);
         }
 
@@ -96,7 +96,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a", Type), Implicit("b", Implicit("System.Int32", Kind)));
             Assert.AreEqual("(a:? b:System.Int32:*):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:(System.Int32:* -> '1:_):(* -> _) b:System.Int32:*):'1:_", inferred.AnnotatedReadableString);
         }
 
@@ -120,7 +120,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a", Type), Implicit("b", Implicit("System.Int32", Kind)), Type);
             Assert.AreEqual("(a:? b:System.Int32:*):?", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:(System.Int32:* -> '1:*):(* -> *) b:System.Int32:*):'1:*", inferred.AnnotatedReadableString);
         }
 
@@ -146,7 +146,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Type)), Implicit("b", Type));
             Assert.AreEqual("(a:(System.Int32:* -> ?):_ b:?):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:(System.Int32:* -> '1:*):(* -> *) b:System.Int32:*):'1:*", inferred.AnnotatedReadableString);
         }
 
@@ -172,7 +172,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Unspecified)), Implicit("b", Type), Type);
             Assert.AreEqual("(a:(System.Int32:* -> _):_ b:?):?", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:(System.Int32:* -> '1:*):(* -> *) b:System.Int32:*):'1:*", inferred.AnnotatedReadableString);
         }
 
@@ -198,7 +198,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Type)), Implicit("b", Type), Type);
             Assert.AreEqual("(a:(System.Int32:* -> ?):_ b:?):?", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:(System.Int32:* -> '1:*):(* -> *) b:System.Int32:*):'1:*", inferred.AnnotatedReadableString);
         }
 
@@ -225,7 +225,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a", Lambda(Bound("System.Int32", Kind), Unspecified)), Implicit("b", Type));
             Assert.AreEqual("(a:(System.Int32:* -> _):_ b:?):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:(System.Int32:* -> '1:_):(* -> _) b:System.Int32:*):'1:_", inferred.AnnotatedReadableString);
         }
 
@@ -252,7 +252,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Apply(Implicit("a"), Implicit("b")), Implicit("c"));
             Assert.AreEqual("((a:_ b:_):_ c:_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("((a:('3:_ -> ('2:_ -> '1:_):(_ -> _)):(_ -> (_ -> _)) b:'3:_):('2:_ -> '1:_):(_ -> _) c:'2:_):'1:_", inferred.AnnotatedReadableString);
         }
 #if false
@@ -278,7 +278,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Apply(Implicit("a"), Implicit("b")), Implicit("c", Implicit("System.Int32")));
             Assert.AreEqual("((a:_ b:_):_ c:System.Int32:_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("((a:('2:_ -> (System.Int32:_ -> '1:_):(_ -> _):_):(_ -> (_ -> _):_):_ b:'2:_):(System.Int32:_ -> '1:_):(_ -> _):_ c:System.Int32:_):'1:_", inferred.AnnotatedReadableString);
         }
 
@@ -304,7 +304,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Apply(Implicit("a"), Implicit("b", Implicit("System.Int32"))), Implicit("c"));
             Assert.AreEqual("((a:_ b:System.Int32:_):_ c:_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("((a:(System.Int32:_ -> ('2:_ -> '1:_):(_ -> _):_):(_ -> (_ -> _):_):_ b:System.Int32:_):('2:_ -> '1:_):(_ -> _):_ c:'2:_):'1:_", inferred.AnnotatedReadableString);
         }
 
@@ -332,7 +332,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Apply(Implicit("a", Lambda(Bound("System.Int32"), Unspecified)), Implicit("b")), Implicit("c"));
             Assert.AreEqual("((a:(System.Int32:_ -> _):_ b:_):_ c:_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("((a:(System.Int32:_ -> ('2:_ -> '1:_):(_ -> _):_):(_ -> (_ -> _):_):_ b:System.Int32:_):('2:_ -> '1:_):(_ -> _):_ c:'2:_):'1:_", inferred.AnnotatedReadableString);
         }
 
@@ -359,7 +359,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a"), Apply(Implicit("b"), Implicit("c")));
             Assert.AreEqual("(a:_ (b:_ c:_):_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:('2:_ -> '1:_):(_ -> _):_ (b:('3:_ -> '2:_):(_ -> _):_ c:'3:_):'2:_):'1:_", inferred.AnnotatedReadableString);
         }
 
@@ -386,7 +386,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a"), Apply(Implicit("b"), Implicit("c")), Implicit("System.Int32"));
             Assert.AreEqual("(a:_ (b:_ c:_):_):System.Int32:_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:('1:_ -> System.Int32:_):(_ -> _):_ (b:('2:_ -> '1:_):(_ -> _):_ c:'2:_):'1:_):System.Int32:_", inferred.AnnotatedReadableString);
         }
 
@@ -412,7 +412,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a"), Apply(Implicit("b"), Implicit("c"), Implicit("System.Int32")));
             Assert.AreEqual("(a:_ (b:_ c:_):System.Int32:_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:(System.Int32:_ -> '1:_):(_ -> _):_ (b:('2:_ -> System.Int32:_):(_ -> _):_ c:'2:_):System.Int32:_):'1:_", inferred.AnnotatedReadableString);
         }
 
@@ -438,7 +438,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a"), Apply(Implicit("b"), Implicit("c", Implicit("System.Int32"))));
             Assert.AreEqual("(a:_ (b:_ c:System.Int32:_):_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:('2:_ -> '1:_):(_ -> _):_ (b:(System.Int32:_ -> '2:_):(_ -> _):_ c:System.Int32:_):'2:_):'1:_", inferred.AnnotatedReadableString);
         }
 
@@ -466,7 +466,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a"), Apply(Implicit("b", Lambda(Bound("System.Int32"), Unspecified)), Implicit("c")));
             Assert.AreEqual("(a:_ (b:(System.Int32:_ -> _):_ c:_):_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:('2:_ -> '1:_):(_ -> _):_ (b:(System.Int32:_ -> '2:_):(_ -> _):_ c:System.Int32:_):'2:_):'1:_", inferred.AnnotatedReadableString);
         }
 
@@ -493,7 +493,7 @@ namespace Favalet.Expressions.Variable
             var expression = Apply(Implicit("a", Lambda(Lambda(Bound("System.Int32"), Unspecified), Unspecified)), Apply(Implicit("b"), Implicit("c")));
             Assert.AreEqual("(a:((System.Int32:_ -> _):_ -> _):_ (b:_ c:_):_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:((System.Int32:_ -> '4:_):(_ -> _):_ -> '1:_):((_ -> _):_ -> _):_ (b:('3:_ -> (System.Int32:_ -> '4:_):(_ -> _):_):(_ -> _):_ c:'3:_):(System.Int32:_ -> '4:_):(_ -> _):_):'1:_", inferred.AnnotatedReadableString);
         }
 #endif

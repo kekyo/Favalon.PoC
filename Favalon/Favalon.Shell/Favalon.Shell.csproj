@@ -5,6 +5,8 @@
     <TargetFrameworks>net45;netcoreapp2.2</TargetFrameworks>
     <LangVersion>8.0</LangVersion>
     <NullableContextOptions>enable</NullableContextOptions>
+    <AssemblyName>fash</AssemblyName>
+    <RootNamespace>Favalon</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

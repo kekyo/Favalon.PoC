@@ -23,10 +23,11 @@ namespace Favalet.Expressions
         {
             PlaceholderExpression CreatePlaceholder(Expression higherOrder, TextRange textRange);
 
-            Expression Unify(Expression expression1, Expression expression2);
-            void Memoize(VariableExpression symbol, Expression expression);
+            void Memoize(SymbolicVariableExpression symbol, Expression expression);
 
             Expression? Lookup(VariableExpression symbol);
+
+            Expression Unify(Expression expression1, Expression expression2);
 
             Expression RecordError(string details, Expression primaryExpression, params Expression[] expressions);
 

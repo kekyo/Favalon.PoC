@@ -101,6 +101,8 @@ namespace Favalet.Expressions.Basis
                     new LambdaExpression(parameter, UnspecifiedExpression.Instance, UnspecifiedExpression.Instance, textRange),
                 (UnspecifiedExpression _, Expression _) =>
                     new LambdaExpression(UnspecifiedExpression.Instance, expression, UnspecifiedExpression.Instance, textRange),
+                (KindExpression _, KindExpression _) =>
+                    new LambdaExpression(parameter, expression, Rank3Expression.Instance, textRange),
                 _ => new LambdaExpression(parameter, expression, isRecursive ?
                     (Expression)Create(parameter.HigherOrder, expression.HigherOrder, true, textRange) :
                     UnspecifiedExpression.Instance, textRange),
@@ -130,6 +132,8 @@ namespace Favalet.Expressions.Basis
                         isRecursive ?
                             (Expression)CreateWithPlaceholder(context, UnspecifiedExpression.Instance, expression.HigherOrder, true, textRange) :
                             UnspecifiedExpression.Instance, textRange),
+                (KindExpression _, KindExpression _) =>
+                    new LambdaExpression(parameter, expression, Rank3Expression.Instance, textRange),
                 _ => new LambdaExpression(
                     parameter,
                     expression,

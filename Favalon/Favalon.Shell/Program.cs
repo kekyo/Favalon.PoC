@@ -16,6 +16,8 @@
 using Favalet;
 using Favalet.Expressions;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,9 +25,58 @@ namespace Favalon
 {
     public static class Program
     {
+        private static IEnumerable<string> wc(IEnumerable<string> stdin)
+        {
+            var bc = 0;
+            var wc = 0;
+            var lc = 0;
+
+            foreach (var line in stdin)
+            {
+                bc += line.Length;
+                wc += line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                lc++;
+            }
+
+            yield return $"{bc},{wc},{lc}";
+        }
+
         public static async Task Main(string[] args)
         {
             var terrain = Terrain.Create();
+
+            var str = Expression.Bound("System.String", Expression.Kind, TextRange.Unknown);
+            terrain.Bind(str, str);
+
+            var seqstr = Expression.Bound("System.Collections.Generic.IEnumerable<System.String>", Expression.Kind, TextRange.Unknown);
+            terrain.Bind(seqstr, seqstr);
+
+            // wc = stdin:IE<s> -> stdin:IE<s>
+            terrain.Bind(
+                Expression.Bound("wc", Expression.Unspecified, TextRange.Unknown),
+                Expression.Lambda(
+                    Expression.Bound("stdin", str, TextRange.Unknown),
+                    Expression.Free("stdin", str, TextRange.Unknown),
+                    TextRange.Unknown));
+            // | = x:(IE<s> -> IE<s>) -> y:(IE<s> -> IE<s>) -> y x
+            terrain.Bind(
+                Expression.Bound("|", Expression.Unspecified, TextRange.Unknown),
+                Expression.Lambda(
+                    Expression.Bound("x",
+                        Expression.Lambda(str, str, TextRange.Unknown),
+                        TextRange.Unknown),
+                    Expression.Lambda(
+                        Expression.Bound("y",
+                            Expression.Lambda(str, str, TextRange.Unknown),
+                            TextRange.Unknown),
+                        Expression.Apply(
+                            Expression.Free("y", Expression.Unspecified, TextRange.Unknown),
+                            Expression.Free("x", Expression.Unspecified, TextRange.Unknown),
+                            Expression.Unspecified,
+                            TextRange.Unknown),
+                        TextRange.Unknown),
+                    TextRange.Unknown));
+
             var parser = Parser.Create();
 
             for (var line = 0; line < int.MaxValue; line++)

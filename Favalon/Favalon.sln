@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Favalon.sln.licenseheader = Favalon.sln.licenseheader
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Favalon", "Favalon\Favalon.csproj", "{D37CFB98-7580-4BF4-B4BE-BB689F04F6F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Favalon.Shell", "Favalon.Shell\Favalon.Shell.csproj", "{D37CFB98-7580-4BF4-B4BE-BB689F04F6F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Favalon.Core", "Favalon.Core\Favalon.Core.csproj", "{7DE4D82D-11B5-4D6E-AFD3-B7F00B139AC1}"
 EndProject

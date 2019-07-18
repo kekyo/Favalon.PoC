@@ -17,22 +17,23 @@ using System.ComponentModel;
 
 namespace Favalet.Expressions
 {
-    public struct InferResult
+    public struct InferResult<TExpression>
+        where TExpression : Expression
     {
-        public readonly Expression Expression;
+        public readonly TExpression Expression;
         public readonly InferErrorInformation[] ErrorInformations;
 
-        private InferResult(Expression expression, InferErrorInformation[] errorInformations)
+        private InferResult(TExpression expression, InferErrorInformation[] errorInformations)
         {
             this.Expression = expression;
             this.ErrorInformations = errorInformations;
         }
 
-        public static InferResult Create(Expression expression, InferErrorInformation[] errorInformations) =>
-            new InferResult(expression, errorInformations);
+        public static InferResult<TExpression> Create(TExpression expression, InferErrorInformation[] errorInformations) =>
+            new InferResult<TExpression>(expression, errorInformations);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void Deconstruct(out Expression? expression, out InferErrorInformation[] errorInformations)
+        public void Deconstruct(out TExpression? expression, out InferErrorInformation[] errorInformations)
         {
             expression = this.Expression;
             errorInformations = this.ErrorInformations;

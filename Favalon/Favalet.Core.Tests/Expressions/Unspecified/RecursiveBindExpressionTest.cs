@@ -49,7 +49,7 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), Literal(123));
             Assert.AreEqual("(rec a:_ = 123:?):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(rec a:Numeric:* = 123:Numeric:*):Numeric:*", inferred.AnnotatedReadableString);
         }
 
@@ -79,7 +79,7 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), Lambda(Bound("b"), Free("b")));
             Assert.AreEqual("(rec a:_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(rec a:('2:_ -> '2:_):(_ -> _) = (b:'2:_ -> b:'2:_):('2:_ -> '2:_):(_ -> _)):('2:_ -> '2:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
@@ -110,7 +110,7 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), Lambda(Bound("b"), Free("b", Implicit("System.Int32"))));
             Assert.AreEqual("(rec a:_ = (b:_ -> b:System.Int32:_):_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
@@ -140,7 +140,7 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), Lambda(Bound("b", Implicit("System.Int32")), Free("b")));
             Assert.AreEqual("(rec a:_ = (b:System.Int32:_ -> b:_):_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
@@ -166,7 +166,7 @@ namespace Favalet.Expressions.Unspecified
 
             try
             {
-                context.Infer(expression);
+                context.Infer(expression, Expression.Unspecified);
                 Assert.Fail();
             }
             catch (ArgumentException ex)
@@ -202,7 +202,7 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a", Lambda(Bound("System.Int32"), Unspecified)), Lambda(Bound("b"), Free("b")));
             Assert.AreEqual("(rec a:(System.Int32:_ -> _):_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
@@ -229,7 +229,7 @@ namespace Favalet.Expressions.Unspecified
 
             try
             {
-                context.Infer(expression);
+                context.Infer(expression, Expression.Unspecified);
                 Assert.Fail();
             }
             catch (ArgumentException ex)
@@ -263,7 +263,7 @@ namespace Favalet.Expressions.Unspecified
 
             try
             {
-                context.Infer(expression);
+                context.Infer(expression, Expression.Unspecified);
                 Assert.Fail();
             }
             catch (ArgumentException ex)
@@ -297,7 +297,7 @@ namespace Favalet.Expressions.Unspecified
 
             try
             {
-                context.Infer(expression);
+                context.Infer(expression, Expression.Unspecified);
                 Assert.Fail();
             }
             catch (ArgumentException ex)

@@ -48,7 +48,7 @@ namespace Favalet.Expressions.Variable
             var expression = Lambda(Bound("a"), Apply(Free("a"), Implicit("b")));
             Assert.AreEqual("(a:_ -> (a:_ b:_):_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:('4:_ -> '3:_):(_ -> _) -> (a:('4:_ -> '3:_):(_ -> _) b:'4:_):'3:_):(('4:_ -> '3:_):(_ -> _) -> '3:_):(_ -> _)", inferred.StrictReadableString);
         }
 
@@ -83,7 +83,7 @@ namespace Favalet.Expressions.Variable
             var expression = Lambda(Bound("a"), Lambda(Bound("b"), Apply(Free("a"), Free("b"))));
             Assert.AreEqual("(a:_ -> (b:_ -> (a:_ b:_):_):_):_", expression.StrictReadableString);
 
-            var inferred = context.Infer(expression);
+            var (inferred, errors) = context.Infer(expression, Expression.Unspecified);
             Assert.AreEqual("(a:('4:_ -> '5:_):(_ -> _) -> (b:'4:_ -> (a:('4:_ -> '5:_):(_ -> _) b:'4:_):'5:_):('4:_ -> '5:_):(_ -> _)):(('4:_ -> '5:_):(_ -> _) -> ('4:_ -> '5:_):(_ -> _)):(_ -> (_ -> _))", inferred.StrictReadableString);
         }
     }

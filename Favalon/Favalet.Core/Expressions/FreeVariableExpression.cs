@@ -27,7 +27,7 @@ namespace Favalet.Expressions
             new FreeVariableExpression(this.Name, higherOrder, this.TextRange);
 
         protected override Expression VisitInferringOnBoundExpressionNotFound(IInferringEnvironment environment, Expression higherOrderHint) =>
-            throw new ArgumentException($"Cannot find variable: Name={this.Name}");
+            environment.RecordError($"Cannot find variable: Name={this.Name}", this);
 
         protected override Expression VisitResolving(IResolvingEnvironment environment)
         {

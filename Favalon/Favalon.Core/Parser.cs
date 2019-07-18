@@ -14,7 +14,7 @@
 // limitations under the License.
 
 using Favalet;
-using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Favalon
@@ -32,15 +32,14 @@ namespace Favalon
 
         private readonly TextRange textRange;
         private States state = States.Detect;
-        private Expression? expression = null;
 
         private Parser(TextRange textRange) =>
             this.textRange = textRange;
 
-        public Expression? Append(string text, int line) =>
+        public ParseResult Append(string text, int line) =>
             this.Append(text, Range.Create(Position.Create(line, 0), Position.Create(line, text.Length - 1)));
 
-        public Expression? Append(string text, Range range)
+        public ParseResult Append(string text, Range range)
         {
             const char eol = '\xffff';
 
@@ -48,7 +47,18 @@ namespace Favalon
             var index = 0;
             var beginIndex = -1;
             StringBuilder? temp = null;
+            Expression? expression = null;
+            var errorInformations = new List<ParseErrorInformation>();
             char inch;
+
+            TextRange GetCurrentTextRange() =>
+                (beginIndex >= 0) ?
+                    textRange.Subtract(Position.Create(textRange.Range.First.Line, beginIndex), Position.Create(textRange.Range.Last.Line, index - 1)) :
+                    textRange.Subtract(Position.Create(textRange.Range.First.Line, index), Position.Create(textRange.Range.Last.Line, index));
+
+            void RecordError(string details) =>
+                errorInformations.Add(ParseErrorInformation.Create(details, GetCurrentTextRange()));
+
             do
             {
                 inch = (index < text.Length) ? text[index] : eol;
@@ -76,13 +86,13 @@ namespace Favalon
                         }
                         else
                         {
-                            throw new FormatException();
+                            RecordError("Invalid token at first.");
                         }
                         break;
                     case States.String:
                         if (inch == '"')
                         {
-                            var literal = Expression.Literal(temp?.ToString() ?? string.Empty, textRange.Subtract((beginIndex, index - 1)));
+                            var literal = Expression.Literal(temp?.ToString() ?? string.Empty, GetCurrentTextRange());
                             expression += literal;
                             temp?.Clear();
 
@@ -100,7 +110,7 @@ namespace Favalon
                         }
                         else
                         {
-                            throw new FormatException();
+                            RecordError("Invalid string token, reached end of line.");
                         }
                         break;
                     case States.StringEscaped:
@@ -112,7 +122,7 @@ namespace Favalon
                         }
                         else
                         {
-                            throw new FormatException();
+                            RecordError("Invalid string escape, reached end of line.");
                         }
                         break;
                     case States.Numeric:
@@ -125,7 +135,7 @@ namespace Favalon
                             var numeric =
                                 int.TryParse(numericString, out var i) ? i : long.TryParse(numericString, out var l) ? l :
                                 float.TryParse(numericString, out var f) ? f : double.Parse(numericString);
-                            var literal = Expression.Literal(numeric, textRange.Subtract((beginIndex, index - 1)));
+                            var literal = Expression.Literal(numeric, GetCurrentTextRange());
                             expression += literal;
 
                             beginIndex = -1;
@@ -133,7 +143,7 @@ namespace Favalon
                         }
                         else
                         {
-                            throw new FormatException();
+                            RecordError("Invalid numerical token at this location.");
                         }
                         break;
                     case States.Variable:
@@ -143,7 +153,7 @@ namespace Favalon
                         else if (char.IsWhiteSpace(inch) || (inch == eol))
                         {
                             var word = text.Substring(beginIndex, index - beginIndex - 1);
-                            var variable = Expression.Free(word, Expression.Unspecified, textRange.Subtract((beginIndex, index - 1)));
+                            var variable = Expression.Free(word, Expression.Unspecified, GetCurrentTextRange());
                             expression += variable;
 
                             beginIndex = -1;
@@ -151,17 +161,14 @@ namespace Favalon
                         }
                         else
                         {
-                            throw new FormatException();
+                            RecordError("Invalid variable token at this location.");
                         }
                         break;
                 }
             }
             while ((index <= text.Length) && (inch != eol));
 
-            var e = expression;
-            expression = null;
-
-            return e;
+            return ParseResult.Create(expression, errorInformations.ToArray()); ;
         }
 
         public static Parser Create() =>

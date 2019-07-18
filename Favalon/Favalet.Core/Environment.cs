@@ -17,6 +17,7 @@ using Favalet.Internals;
 using Favalet.Expressions;
 using Favalet.Expressions.Internals;
 using Favalet.Expressions.Specialized;
+using System.Collections.Generic;
 
 namespace Favalet
 {
@@ -24,6 +25,7 @@ namespace Favalet
         Expression.IInferringEnvironment, Expression.IResolvingEnvironment
     {
         private readonly PlaceholderController placeholderController = new PlaceholderController();
+        private readonly List<InferErrorInformation> errorInformations = new List<InferErrorInformation>();
 
         private Environment()
         { }
@@ -36,9 +38,9 @@ namespace Favalet
             placeholderController.Memoize(symbol, expression);
 
         Expression? Expression.IInferringEnvironment.Lookup(VariableExpression symbol) =>
-            placeholderController.Lookup(symbol);
+            placeholderController.Lookup(this, symbol);
         Expression? Expression.IResolvingEnvironment.Lookup(VariableExpression symbol) =>
-            placeholderController.Lookup(symbol);
+            placeholderController.Lookup(this, symbol);
 
         private TExpression Visit<TExpression>(TExpression expression, Expression higherOrderHint)
             where TExpression : Expression =>
@@ -48,21 +50,30 @@ namespace Favalet
         TExpression Expression.IResolvingEnvironment.Visit<TExpression>(TExpression expression) =>
             (TExpression)expression.InternalVisitResolving(this);
 
-        public Expression Infer(Expression expression) =>
-            this.Infer(expression, UnspecifiedExpression.Instance);
+        internal Expression RecordError(string details, Expression primaryExpression, params Expression[] expressions)
+        {
+            errorInformations.Add(InferErrorInformation.Create(details, primaryExpression, expressions));
+            return primaryExpression;
+        }
+
+        Expression Expression.IInferringEnvironment.RecordError(string details, Expression primaryExpression, Expression[] expressions) =>
+            this.RecordError(details, primaryExpression, expressions);
 
         public TExpression Infer<TExpression>(TExpression expression, Expression higherOrderHint)
             where TExpression : Expression =>
-            (TExpression)this.Infer((Expression)expression, higherOrderHint);
+            (TExpression)this.Infer((Expression)expression, higherOrderHint).Expression;
         public TExpression Infer<TExpression>(TExpression expression)
             where TExpression : Expression =>
-            (TExpression)this.Infer((Expression)expression, UnspecifiedExpression.Instance);
+            (TExpression)this.Infer((Expression)expression, UnspecifiedExpression.Instance).Expression;
 #line default
 
-        public Expression Infer(Expression expression, Expression higherOrderHint)
+        public InferResult Infer(Expression expression, Expression higherOrderHint)
         {
             var partial = expression.InternalVisitInferring(this, higherOrderHint);
-            return partial.InternalVisitResolving(this);
+            var inferred = partial.InternalVisitResolving(this);
+            var result = InferResult.Create(inferred, errorInformations.ToArray());
+            errorInformations.Clear();
+            return result;
         }
 
         public static Environment Create() =>

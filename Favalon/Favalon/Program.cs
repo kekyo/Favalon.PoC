@@ -15,6 +15,7 @@
 
 using Favalet;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Favalon
@@ -31,12 +32,22 @@ namespace Favalon
                 await Console.Out.WriteAsync("Favalon> ");
 
                 var text = await Console.In.ReadLineAsync();
-                if (parser.Append(text, line) is Expression expression)
+                switch (parser.Append(text, line))
                 {
-                    await Console.Out.WriteLineAsync($"parsed: {expression}");
+                    case ParseResult(Expression expression, _):
+                        await Console.Out.WriteLineAsync($"parsed: {expression}");
 
-                    var inferred = environment.Infer(expression);
-                    await Console.Out.WriteLineAsync($"inferred: {inferred}");
+                        var (inferred, errors) = environment.Infer(expression, Expression.Unspecified);
+
+                        await Task.WhenAll(errors.
+                            Select(error => Console.Out.WriteLineAsync(error.ToString())));
+
+                        await Console.Out.WriteLineAsync($"inferred: {inferred}");
+                        break;
+                    case ParseResult(_, ParseErrorInformation[] errors2):
+                        await Task.WhenAll(errors2.
+                            Select(error => Console.Out.WriteLineAsync(error.ToString())));
+                        break;
                 }
             }
         }

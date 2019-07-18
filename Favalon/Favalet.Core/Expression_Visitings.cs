@@ -29,6 +29,8 @@ namespace Favalet
 
             Expression? Lookup(VariableExpression symbol);
 
+            Expression RecordError(string details, Expression primaryExpression, params Expression[] expressions);
+
             TExpression Visit<TExpression>(TExpression expression, Expression higherOrderHint)
                 where TExpression : Expression;
         }

@@ -56,7 +56,7 @@ namespace Favalet
         {
             Debug.Assert((placeholder is Expression) && (expression is Expression));
 
-            if (placeholderController.Lookup(placeholder) is Expression lookup)
+            if (placeholderController.Lookup(this, placeholder) is Expression lookup)
             {
                 return this.Unify(lookup, expression);
             }
@@ -103,8 +103,10 @@ namespace Favalet
                 (LambdaExpression lambda, Expression _) =>
                     this.UnifyLambda(lambda, expression2),
 
-                _ => throw new ArgumentException(
-                    $"Cannot unify: between \"{expression1.ReadableString}\" and \"{expression2.ReadableString}\"")
+                _ => this.RecordError(
+                    $"Cannot unify: between \"{expression1.ReadableString}\" and \"{expression2.ReadableString}\"",
+                    expression1,
+                    expression2)
             };
 
             return result;

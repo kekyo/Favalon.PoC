@@ -16,7 +16,7 @@
 using Favalet.Expressions.Specialized;
 using System.ComponentModel;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Basis
 {
     public sealed class ApplyExpression : Expression
     {

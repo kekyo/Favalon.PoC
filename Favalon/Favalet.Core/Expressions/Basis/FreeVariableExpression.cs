@@ -13,9 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Basis
 {
     public class FreeVariableExpression : SymbolicVariableExpression
     {

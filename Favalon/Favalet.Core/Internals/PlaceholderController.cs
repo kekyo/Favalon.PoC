@@ -14,8 +14,8 @@
 // limitations under the License.
 
 using Favalet.Expressions;
+using Favalet.Expressions.Basis;
 using Favalet.Expressions.Specialized;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -37,7 +37,7 @@ namespace Favalet.Internals
             memoizedExpressions.Add(symbol, expression);
 
         private Expression? Lookup(
-            Terrain context, VariableExpression symbol0, VariableExpression symbol, HashSet<VariableExpression> collected)
+            Terrain terrain, VariableExpression symbol0, VariableExpression symbol, HashSet<VariableExpression> collected)
         {
             Expression currentSymbol = symbol;
             VariableExpression? foundSymbol = null;
@@ -55,7 +55,7 @@ namespace Favalet.Internals
 
                         if (!collected.Add(variable))
                         {
-                            return context.RecordError(
+                            return terrain.RecordError(
                                 $"Recursive unification problem: {symbol0.StrictReadableString} ... {memoized.StrictReadableString}",
                                 symbol0,
                                 memoized);
@@ -64,11 +64,11 @@ namespace Favalet.Internals
                         if (memoized is LambdaExpression lambda)
                         {
                             var parameter = ((lambda.Parameter is VariableExpression p) ?
-                                this.Lookup(context, symbol0, p, new HashSet<VariableExpression>(collected)) :
+                                this.Lookup(terrain, symbol0, p, new HashSet<VariableExpression>(collected)) :
                                 null) ??
                                 lambda.Parameter;
                             var expression = ((lambda.Expression is VariableExpression e) ?
-                                this.Lookup(context, symbol0, e, new HashSet<VariableExpression>(collected)) :
+                                this.Lookup(terrain, symbol0, e, new HashSet<VariableExpression>(collected)) :
                                 null) ??
                                 lambda.Expression;
 
@@ -99,7 +99,7 @@ namespace Favalet.Internals
             }
         }
 
-        public Expression? Lookup(Terrain context, VariableExpression symbol) =>
-            this.Lookup(context, symbol, symbol, new HashSet<VariableExpression>());
+        public Expression? Lookup(Terrain terrain, VariableExpression symbol) =>
+            this.Lookup(terrain, symbol, symbol, new HashSet<VariableExpression>());
     }
 }

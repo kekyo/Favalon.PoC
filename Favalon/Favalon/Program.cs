@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using Favalet;
+using Favalet.Expressions;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using Favalet.Expressions;
+using Favalet.Expressions.Basis;
 using Favalet.Expressions.Specialized;
 using System;
 using System.Diagnostics;

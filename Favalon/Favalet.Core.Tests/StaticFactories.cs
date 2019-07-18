@@ -15,6 +15,7 @@
 
 using Favalet.Expressions;
 using Favalet.Expressions.Additionals;
+using Favalet.Expressions.Basis;
 using Favalet.Expressions.Internals;
 using Favalet.Expressions.Specialized;
 

@@ -13,11 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet.Expressions;
 using Favalet.Expressions.Additionals;
+using Favalet.Expressions.Basis;
 using Favalet.Expressions.Specialized;
 
-namespace Favalet
+namespace Favalet.Expressions
 {
     partial class Expression
     {

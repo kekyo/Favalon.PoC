@@ -14,11 +14,10 @@
 // limitations under the License.
 
 using Favalet.Expressions.Specialized;
-using System;
 using System.ComponentModel;
 using System.Diagnostics;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Basis
 {
     public sealed class LambdaExpression : ValueExpression
     {

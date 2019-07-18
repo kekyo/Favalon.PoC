@@ -15,7 +15,7 @@
 
 using Favalet.Expressions.Specialized;
 
-namespace Favalet
+namespace Favalet.Expressions
 {
     public static class ExpressionExtensions
     {

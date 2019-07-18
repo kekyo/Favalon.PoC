@@ -15,7 +15,7 @@
 
 using System.ComponentModel;
 
-namespace Favalet
+namespace Favalet.Expressions
 {
     public struct InferResult
     {

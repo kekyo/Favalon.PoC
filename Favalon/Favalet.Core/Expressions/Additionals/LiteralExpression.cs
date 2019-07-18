@@ -47,17 +47,17 @@ namespace Favalet.Expressions.Additionals
             }
         }
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
+        protected override Expression VisitInferring(IInferringContext context, Expression higherOrderHint)
         {
             var typedHigherOrder = new FreeVariableExpression(this.GetTypeName(), KindExpression.Instance, this.TextRange);
-            var higherOrder = environment.Unify(typedHigherOrder, higherOrderHint);
+            var higherOrder = context.Unify(typedHigherOrder, higherOrderHint);
 
             return new LiteralExpression(this.Value, higherOrder, this.TextRange);
         }
 
-        protected override Expression VisitResolving(IResolvingEnvironment environment)
+        protected override Expression VisitResolving(IResolvingContext context)
         {
-            var higherOrder = environment.Visit(this.HigherOrder);
+            var higherOrder = context.Visit(this.HigherOrder);
             return new LiteralExpression(this.Value, higherOrder, this.TextRange);
         }
 

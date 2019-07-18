@@ -29,7 +29,7 @@ namespace Favalet.Expressions.Unspecified
         [Test]
         public void RecursiveBind1()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Recursive bind 1:
@@ -49,14 +49,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), Literal(123));
             Assert.AreEqual("(rec a:_ = 123:?):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(rec a:Numeric:* = 123:Numeric:*):Numeric:*", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void RecursiveBind2()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Recursive bind 2:
@@ -79,14 +79,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), Lambda(Bound("b"), Free("b")));
             Assert.AreEqual("(rec a:_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(rec a:('2:_ -> '2:_):(_ -> _) = (b:'2:_ -> b:'2:_):('2:_ -> '2:_):(_ -> _)):('2:_ -> '2:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void RecursiveBind3()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Recursive bind 3:
@@ -110,14 +110,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), Lambda(Bound("b"), Free("b", Implicit("System.Int32"))));
             Assert.AreEqual("(rec a:_ = (b:_ -> b:System.Int32:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void RecursiveBind4()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Recursive bind 4:
@@ -140,14 +140,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a"), Lambda(Bound("b", Implicit("System.Int32")), Free("b")));
             Assert.AreEqual("(rec a:_ = (b:System.Int32:_ -> b:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void RecursiveBind5()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Recursive bind 5:
@@ -166,7 +166,7 @@ namespace Favalet.Expressions.Unspecified
 
             try
             {
-                environment.Infer(expression);
+                context.Infer(expression);
                 Assert.Fail();
             }
             catch (ArgumentException ex)
@@ -178,7 +178,7 @@ namespace Favalet.Expressions.Unspecified
         [Test]
         public void RecursiveBind6()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Recursive bind 6:
@@ -202,14 +202,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = RecursiveBind(Bound("a", Lambda(Bound("System.Int32"), Unspecified)), Lambda(Bound("b"), Free("b")));
             Assert.AreEqual("(rec a:(System.Int32:_ -> _):_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void RecursiveBind7()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             rec a = b -> a
@@ -229,7 +229,7 @@ namespace Favalet.Expressions.Unspecified
 
             try
             {
-                environment.Infer(expression);
+                context.Infer(expression);
                 Assert.Fail();
             }
             catch (ArgumentException ex)
@@ -241,7 +241,7 @@ namespace Favalet.Expressions.Unspecified
         [Test]
         public void RecursiveBind8()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             rec a = rec b = a b
@@ -263,7 +263,7 @@ namespace Favalet.Expressions.Unspecified
 
             try
             {
-                environment.Infer(expression);
+                context.Infer(expression);
                 Assert.Fail();
             }
             catch (ArgumentException ex)
@@ -275,7 +275,7 @@ namespace Favalet.Expressions.Unspecified
         [Test]
         public void RecursiveBind9()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             rec a = a b
@@ -297,7 +297,7 @@ namespace Favalet.Expressions.Unspecified
 
             try
             {
-                environment.Infer(expression);
+                context.Infer(expression);
                 Assert.Fail();
             }
             catch (ArgumentException ex)

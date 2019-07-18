@@ -25,7 +25,7 @@ namespace Favalet.Expressions.Unspecified
         [Test]
         public void ApplyLambda1()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Apply and Lambda 1:
@@ -48,14 +48,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = Lambda(Bound("a"), Apply(Free("a"), Implicit("b")));
             Assert.AreEqual("(a:_ -> (a:_ b:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:('4:_ -> '3:_):(_ -> _) -> (a:('4:_ -> '3:_):(_ -> _) b:'4:_):'3:_):(('4:_ -> '3:_):(_ -> _) -> '3:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void ApplyLambda2()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Apply and Lambda 2:
@@ -83,7 +83,7 @@ namespace Favalet.Expressions.Unspecified
             var expression = Lambda(Bound("a"), Lambda(Bound("b"), Apply(Free("a"), Free("b"))));
             Assert.AreEqual("(a:_ -> (b:_ -> (a:_ b:_):_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:('4:_ -> '5:_):(_ -> _) -> (b:'4:_ -> (a:('4:_ -> '5:_):(_ -> _) b:'4:_):'5:_):('4:_ -> '5:_):(_ -> _)):(('4:_ -> '5:_):(_ -> _) -> ('4:_ -> '5:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
         }
     }

@@ -26,12 +26,12 @@ namespace Favalet.Expressions
         protected override Expression CreateExpressionOnVisitInferring(Expression higherOrder) =>
             new FreeVariableExpression(this.Name, higherOrder, this.TextRange);
 
-        protected override Expression VisitInferringOnBoundExpressionNotFound(IInferringEnvironment environment, Expression higherOrderHint) =>
-            environment.RecordError($"Cannot find variable: Name={this.Name}", this);
+        protected override Expression VisitInferringOnBoundExpressionNotFound(IInferringContext context, Expression higherOrderHint) =>
+            context.RecordError($"Cannot find variable: Name={this.Name}", this);
 
-        protected override Expression VisitResolving(IResolvingEnvironment environment)
+        protected override Expression VisitResolving(IResolvingContext context)
         {
-            var higherOrder = environment.Visit(this.HigherOrder);
+            var higherOrder = context.Visit(this.HigherOrder);
             return new FreeVariableExpression(this.Name, higherOrder, this.TextRange);
         }
     }

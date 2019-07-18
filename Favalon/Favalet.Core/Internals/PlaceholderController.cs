@@ -37,7 +37,7 @@ namespace Favalet.Internals
             memoizedExpressions.Add(symbol, expression);
 
         private Expression? Lookup(
-            Environment environment, VariableExpression symbol0, VariableExpression symbol, HashSet<VariableExpression> collected)
+            Terrain context, VariableExpression symbol0, VariableExpression symbol, HashSet<VariableExpression> collected)
         {
             Expression currentSymbol = symbol;
             VariableExpression? foundSymbol = null;
@@ -55,7 +55,7 @@ namespace Favalet.Internals
 
                         if (!collected.Add(variable))
                         {
-                            return environment.RecordError(
+                            return context.RecordError(
                                 $"Recursive unification problem: {symbol0.StrictReadableString} ... {memoized.StrictReadableString}",
                                 symbol0,
                                 memoized);
@@ -64,11 +64,11 @@ namespace Favalet.Internals
                         if (memoized is LambdaExpression lambda)
                         {
                             var parameter = ((lambda.Parameter is VariableExpression p) ?
-                                this.Lookup(environment, symbol0, p, new HashSet<VariableExpression>(collected)) :
+                                this.Lookup(context, symbol0, p, new HashSet<VariableExpression>(collected)) :
                                 null) ??
                                 lambda.Parameter;
                             var expression = ((lambda.Expression is VariableExpression e) ?
-                                this.Lookup(environment, symbol0, e, new HashSet<VariableExpression>(collected)) :
+                                this.Lookup(context, symbol0, e, new HashSet<VariableExpression>(collected)) :
                                 null) ??
                                 lambda.Expression;
 
@@ -99,7 +99,7 @@ namespace Favalet.Internals
             }
         }
 
-        public Expression? Lookup(Environment environment, VariableExpression symbol) =>
-            this.Lookup(environment, symbol, symbol, new HashSet<VariableExpression>());
+        public Expression? Lookup(Terrain context, VariableExpression symbol) =>
+            this.Lookup(context, symbol, symbol, new HashSet<VariableExpression>());
     }
 }

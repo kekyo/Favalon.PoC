@@ -21,10 +21,10 @@ namespace Favalet.Expressions.Specialized
             base(higherOrder, textRange)
         { }
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
+        protected override Expression VisitInferring(IInferringContext context, Expression higherOrderHint) =>
             this;
 
-        protected override Expression VisitResolving(IResolvingEnvironment environment) =>
+        protected override Expression VisitResolving(IResolvingContext context) =>
             this;
     }
 }

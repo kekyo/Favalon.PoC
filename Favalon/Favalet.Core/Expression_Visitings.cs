@@ -20,7 +20,7 @@ namespace Favalet
 {
     partial class Expression
     {
-        protected internal interface IInferringEnvironment
+        protected internal interface IInferringContext
         {
             PlaceholderExpression CreatePlaceholder(Expression higherOrder, TextRange textRange);
 
@@ -35,7 +35,7 @@ namespace Favalet
                 where TExpression : Expression;
         }
 
-        protected internal interface IResolvingEnvironment
+        protected internal interface IResolvingContext
         {
             Expression? Lookup(VariableExpression symbol);
 
@@ -44,10 +44,10 @@ namespace Favalet
         }
 
 #line hidden
-        internal Expression InternalVisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            this.VisitInferring(environment, higherOrderHint);
-        internal Expression InternalVisitResolving(IResolvingEnvironment environment) =>
-            this.VisitResolving(environment);
+        internal Expression InternalVisitInferring(IInferringContext context, Expression higherOrderHint) =>
+            this.VisitInferring(context, higherOrderHint);
+        internal Expression InternalVisitResolving(IResolvingContext context) =>
+            this.VisitResolving(context);
 #line default
     }
 }

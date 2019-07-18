@@ -24,9 +24,9 @@ namespace Favalet.Expressions.Internals
         protected override Expression CreateExpressionOnVisitInferring(Expression higherOrder) =>
             new ImplicitVariableExpression(this.Name, higherOrder, this.TextRange);
 
-        protected override Expression VisitResolving(IResolvingEnvironment environment)
+        protected override Expression VisitResolving(IResolvingContext context)
         {
-            var higherOrder = environment.Visit(this.HigherOrder);
+            var higherOrder = context.Visit(this.HigherOrder);
             return new ImplicitVariableExpression(this.Name, higherOrder, this.TextRange);
         }
 

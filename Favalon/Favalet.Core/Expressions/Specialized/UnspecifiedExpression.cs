@@ -24,10 +24,10 @@ namespace Favalet.Expressions.Specialized
         protected override FormattedString FormatReadableString(FormatContext context) =>
             (context.FormatNaming == FormatNamings.Strict) ? "(Unspecified)" : "_";
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
-            environment.CreatePlaceholder(higherOrderHint, TextRange.Unknown);
+        protected override Expression VisitInferring(IInferringContext context, Expression higherOrderHint) =>
+            context.CreatePlaceholder(higherOrderHint, TextRange.Unknown);
 
-        protected override Expression VisitResolving(IResolvingEnvironment environment) =>
+        protected override Expression VisitResolving(IResolvingContext context) =>
             this;
 
         internal static readonly UnspecifiedExpression Instance =

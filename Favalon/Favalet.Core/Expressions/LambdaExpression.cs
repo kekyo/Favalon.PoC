@@ -39,37 +39,37 @@ namespace Favalet.Expressions
                 $"{FormatReadableString(context, this.Parameter, true)} {arrow} {FormatReadableString(context, this.Expression, context.FormatNaming != FormatNamings.Friendly)}");
         }
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
+        protected override Expression VisitInferring(IInferringContext context, Expression higherOrderHint)
         {
-            var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
+            var higherOrder = context.Unify(higherOrderHint, this.HigherOrder);
 
             var visitedParameter = higherOrder switch
             {
-                LambdaExpression(Expression parameter, Expression _) => environment.Visit(this.Parameter, parameter),
-                _ => environment.Visit(this.Parameter, UnspecifiedExpression.Instance),
+                LambdaExpression(Expression parameter, Expression _) => context.Visit(this.Parameter, parameter),
+                _ => context.Visit(this.Parameter, UnspecifiedExpression.Instance),
             };
 
             var visitedExpression = higherOrder switch
             {
-                LambdaExpression(Expression _, Expression expression) => environment.Visit(this.Expression, expression),
-                _ => environment.Visit(this.Expression, UnspecifiedExpression.Instance),
+                LambdaExpression(Expression _, Expression expression) => context.Visit(this.Expression, expression),
+                _ => context.Visit(this.Expression, UnspecifiedExpression.Instance),
             };
 
             var visitedHigherOrder = new LambdaExpression(
                 visitedParameter.HigherOrder, visitedExpression.HigherOrder, UnspecifiedExpression.Instance, this.TextRange);
             if (!(higherOrder is LambdaExpression))
             {
-                environment.Unify(higherOrder, visitedHigherOrder);
+                context.Unify(higherOrder, visitedHigherOrder);
             }
 
             return new LambdaExpression(visitedParameter, visitedExpression, higherOrder, this.TextRange);
         }
 
-        protected override Expression VisitResolving(IResolvingEnvironment environment)
+        protected override Expression VisitResolving(IResolvingContext context)
         {
-            var parameter = environment.Visit(this.Parameter);
-            var expression = environment.Visit(this.Expression);
-            var higherOrder = environment.Visit(this.HigherOrder);
+            var parameter = context.Visit(this.Parameter);
+            var expression = context.Visit(this.Expression);
+            var higherOrder = context.Visit(this.HigherOrder);
 
             return new LambdaExpression(parameter, expression, higherOrder, this.TextRange);
         }
@@ -109,7 +109,7 @@ namespace Favalet.Expressions
         }
 
         internal static LambdaExpression CreateWithPlaceholder(
-            IInferringEnvironment environment, Expression parameter, Expression expression, bool isRecursive, TextRange textRange)
+            IInferringContext context, Expression parameter, Expression expression, bool isRecursive, TextRange textRange)
         {
             Debug.Assert((parameter is Expression) && (expression is Expression));
 
@@ -120,22 +120,22 @@ namespace Favalet.Expressions
                 (Expression _, UnspecifiedExpression _) =>
                     new LambdaExpression(
                         parameter,
-                        environment.CreatePlaceholder(UnspecifiedExpression.Instance, textRange),
+                        context.CreatePlaceholder(UnspecifiedExpression.Instance, textRange),
                         isRecursive ?
-                            (Expression)CreateWithPlaceholder(environment, parameter.HigherOrder, UnspecifiedExpression.Instance, true, textRange) :
+                            (Expression)CreateWithPlaceholder(context, parameter.HigherOrder, UnspecifiedExpression.Instance, true, textRange) :
                             UnspecifiedExpression.Instance, textRange),
                 (UnspecifiedExpression _, Expression _) =>
                     new LambdaExpression(
-                        environment.CreatePlaceholder(UnspecifiedExpression.Instance, textRange),
+                        context.CreatePlaceholder(UnspecifiedExpression.Instance, textRange),
                         expression,
                         isRecursive ?
-                            (Expression)CreateWithPlaceholder(environment, UnspecifiedExpression.Instance, expression.HigherOrder, true, textRange) :
+                            (Expression)CreateWithPlaceholder(context, UnspecifiedExpression.Instance, expression.HigherOrder, true, textRange) :
                             UnspecifiedExpression.Instance, textRange),
                 _ => new LambdaExpression(
                     parameter,
                     expression,
                     isRecursive ?
-                        (Expression)CreateWithPlaceholder(environment, parameter.HigherOrder, expression.HigherOrder, true, textRange) :
+                        (Expression)CreateWithPlaceholder(context, parameter.HigherOrder, expression.HigherOrder, true, textRange) :
                         UnspecifiedExpression.Instance, textRange),
             };
         }

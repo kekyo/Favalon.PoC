@@ -26,8 +26,8 @@ namespace Favalet
         public readonly Expression HigherOrder;
         public readonly TextRange TextRange;
 
-        protected abstract Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint);
-        protected abstract Expression VisitResolving(IResolvingEnvironment environment);
+        protected abstract Expression VisitInferring(IInferringContext context, Expression higherOrderHint);
+        protected abstract Expression VisitResolving(IResolvingContext context);
 
         protected abstract FormattedString FormatReadableString(FormatContext context);
 

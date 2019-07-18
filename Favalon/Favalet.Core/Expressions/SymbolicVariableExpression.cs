@@ -32,32 +32,32 @@ namespace Favalet.Expressions
 
         protected abstract Expression CreateExpressionOnVisitInferring(Expression higherOrder);
 
-        private static Expression VisitNonPlaceholder(IInferringEnvironment environment, Expression expression) =>
+        private static Expression VisitNonPlaceholder(IInferringContext context, Expression expression) =>
             expression is PlaceholderExpression ?
                 expression :
-                environment.Visit(expression, UnspecifiedExpression.Instance);
+                context.Visit(expression, UnspecifiedExpression.Instance);
 
         protected virtual Expression VisitInferringOnBoundExpressionNotFound(
-            IInferringEnvironment environment, Expression higherOrderHint)
+            IInferringContext context, Expression higherOrderHint)
         {
             Expression higherOrder;
 
             switch (this.HigherOrder, higherOrderHint)
             {
                 case (UnspecifiedExpression _, UnspecifiedExpression _):
-                    higherOrder = environment.CreatePlaceholder(UnspecifiedExpression.Instance, this.TextRange);
+                    higherOrder = context.CreatePlaceholder(UnspecifiedExpression.Instance, this.TextRange);
                     break;
                 case (UnspecifiedExpression _, Expression _):
-                    higherOrder = VisitNonPlaceholder(environment, higherOrderHint);
+                    higherOrder = VisitNonPlaceholder(context, higherOrderHint);
                     break;
                 case (Expression _, UnspecifiedExpression _):
-                    higherOrder = VisitNonPlaceholder(environment, this.HigherOrder);
+                    higherOrder = VisitNonPlaceholder(context, this.HigherOrder);
                     break;
                 case (Expression _, Expression _):
                     {
-                        var visitedHigherOrder = VisitNonPlaceholder(environment, this.HigherOrder);
-                        var visitedHigherOrderHint = VisitNonPlaceholder(environment, higherOrderHint);
-                        higherOrder = environment.Unify(visitedHigherOrder, visitedHigherOrderHint);
+                        var visitedHigherOrder = VisitNonPlaceholder(context, this.HigherOrder);
+                        var visitedHigherOrderHint = VisitNonPlaceholder(context, higherOrderHint);
+                        higherOrder = context.Unify(visitedHigherOrder, visitedHigherOrderHint);
                     }
                     break;
                 default:
@@ -65,60 +65,60 @@ namespace Favalet.Expressions
             }
 
             var result = this.CreateExpressionOnVisitInferring(higherOrder);
-            environment.Memoize(this, result);
+            context.Memoize(this, result);
 
             return result;
         }
 
         protected override Expression VisitInferring(
-            IInferringEnvironment environment, Expression higherOrderHint)
+            IInferringContext context, Expression higherOrderHint)
         {
-            if (environment.Lookup(this) is Expression bound)
+            if (context.Lookup(this) is Expression bound)
             {
                 Expression higherOrder;
 
                 switch (this.HigherOrder, higherOrderHint, bound.HigherOrder)
                 {
                     case (UnspecifiedExpression _, UnspecifiedExpression _, UnspecifiedExpression _):
-                        higherOrder = environment.CreatePlaceholder(UnspecifiedExpression.Instance, this.TextRange);
+                        higherOrder = context.CreatePlaceholder(UnspecifiedExpression.Instance, this.TextRange);
                         break;
                     case (UnspecifiedExpression _, UnspecifiedExpression _, Expression _):
-                        higherOrder = VisitNonPlaceholder(environment, bound.HigherOrder);
+                        higherOrder = VisitNonPlaceholder(context, bound.HigherOrder);
                         break;
                     case (UnspecifiedExpression _, Expression _, UnspecifiedExpression _):
-                        higherOrder = VisitNonPlaceholder(environment, higherOrderHint);
+                        higherOrder = VisitNonPlaceholder(context, higherOrderHint);
                         break;
                     case (Expression _, UnspecifiedExpression _, UnspecifiedExpression _):
-                        higherOrder = VisitNonPlaceholder(environment, this.HigherOrder);
+                        higherOrder = VisitNonPlaceholder(context, this.HigherOrder);
                         break;
                     case (UnspecifiedExpression _, Expression _, Expression _):
                         {
-                            var visitedHigherOrderHint = VisitNonPlaceholder(environment, higherOrderHint);
-                            var visitedBoundHigherOrder = VisitNonPlaceholder(environment, bound.HigherOrder);
-                            higherOrder = environment.Unify(visitedHigherOrderHint, visitedBoundHigherOrder);
+                            var visitedHigherOrderHint = VisitNonPlaceholder(context, higherOrderHint);
+                            var visitedBoundHigherOrder = VisitNonPlaceholder(context, bound.HigherOrder);
+                            higherOrder = context.Unify(visitedHigherOrderHint, visitedBoundHigherOrder);
                         }
                         break;
                     case (Expression _, Expression _, UnspecifiedExpression _):
                         {
-                            var visitedHigherOrder = VisitNonPlaceholder(environment, this.HigherOrder);
-                            var visitedHigherOrderHint = VisitNonPlaceholder(environment, higherOrderHint);
-                            higherOrder = environment.Unify(visitedHigherOrder, visitedHigherOrderHint);
+                            var visitedHigherOrder = VisitNonPlaceholder(context, this.HigherOrder);
+                            var visitedHigherOrderHint = VisitNonPlaceholder(context, higherOrderHint);
+                            higherOrder = context.Unify(visitedHigherOrder, visitedHigherOrderHint);
                         }
                         break;
                     case (Expression _, UnspecifiedExpression _, Expression _):
                         {
-                            var visitedHigherOrder = VisitNonPlaceholder(environment, this.HigherOrder);
-                            var visitedBoundHigherOrder = VisitNonPlaceholder(environment, bound.HigherOrder);
-                            higherOrder = environment.Unify(visitedHigherOrder, visitedBoundHigherOrder);
+                            var visitedHigherOrder = VisitNonPlaceholder(context, this.HigherOrder);
+                            var visitedBoundHigherOrder = VisitNonPlaceholder(context, bound.HigherOrder);
+                            higherOrder = context.Unify(visitedHigherOrder, visitedBoundHigherOrder);
                         }
                         break;
                     case (Expression _, Expression _, Expression _):
                         {
-                            var visitedHigherOrder = VisitNonPlaceholder(environment, this.HigherOrder);
-                            var visitedHigherOrderHint = VisitNonPlaceholder(environment, higherOrderHint);
-                            var visitedBoundHigherOrder = VisitNonPlaceholder(environment, bound.HigherOrder);
-                            higherOrder = environment.Unify(visitedHigherOrderHint, visitedBoundHigherOrder);
-                            higherOrder = environment.Unify(visitedHigherOrder, higherOrder);
+                            var visitedHigherOrder = VisitNonPlaceholder(context, this.HigherOrder);
+                            var visitedHigherOrderHint = VisitNonPlaceholder(context, higherOrderHint);
+                            var visitedBoundHigherOrder = VisitNonPlaceholder(context, bound.HigherOrder);
+                            higherOrder = context.Unify(visitedHigherOrderHint, visitedBoundHigherOrder);
+                            higherOrder = context.Unify(visitedHigherOrder, higherOrder);
                         }
                         break;
                     default:
@@ -129,7 +129,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return this.VisitInferringOnBoundExpressionNotFound(environment, higherOrderHint);
+                return this.VisitInferringOnBoundExpressionNotFound(context, higherOrderHint);
             }
         }
 

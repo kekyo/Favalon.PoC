@@ -29,7 +29,7 @@ namespace Favalet.Expressions.Variable
         [Test]
         public void Lambda1()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Lambda 1:
@@ -48,14 +48,14 @@ namespace Favalet.Expressions.Variable
             var expression = Lambda(Bound("a", Type), Free("a", Type));
             Assert.AreEqual("(a:? -> a:?):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:'2:* -> a:'2:*):('2:* -> '2:*):(* -> *)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Lambda2()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Lambda 2:
@@ -76,14 +76,14 @@ namespace Favalet.Expressions.Variable
             var expression = Lambda(Bound("a"), Free("a", Free("System.Int32")));
             Assert.AreEqual("(a:_ -> a:System.Int32:_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:System.Int32:_ -> a:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Lambda3()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Lambda 3:
@@ -102,14 +102,14 @@ namespace Favalet.Expressions.Variable
             var expression = Lambda(Bound("a", Free("System.Int32")), Free("a"));
             Assert.AreEqual("(a:System.Int32:_ -> a:_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:System.Int32:_ -> a:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Lambda4()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Lambda 4:
@@ -133,14 +133,14 @@ namespace Favalet.Expressions.Variable
             var expression = Lambda(Bound("a"), Lambda(Bound("b"), Free("a")));
             Assert.AreEqual("(a:_ -> (b:_ -> a:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:'2:_ -> (b:'4:_ -> a:'2:_):('4:_ -> '2:_):(_ -> _)):('2:_ -> ('4:_ -> '2:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Lambda5()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Lambda 5:
@@ -164,14 +164,14 @@ namespace Favalet.Expressions.Variable
             var expression = Lambda(Bound("a"), Lambda(Bound("b"), Free("b")));
             Assert.AreEqual("(a:_ -> (b:_ -> b:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:'2:_ -> (b:'4:_ -> b:'4:_):('4:_ -> '4:_):(_ -> _)):('2:_ -> ('4:_ -> '4:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Lambda6()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Lambda 6:
@@ -198,14 +198,14 @@ namespace Favalet.Expressions.Variable
             var expression = Lambda(Bound("a"), Lambda(Bound("b"), Free("a", Free("System.Int32"))));
             Assert.AreEqual("(a:_ -> (b:_ -> a:System.Int32:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:System.Int32:_ -> (b:'4:_ -> a:System.Int32:_):('4:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> ('4:_ -> System.Int32:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Lambda7()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Lambda 7:
@@ -229,14 +229,14 @@ namespace Favalet.Expressions.Variable
             var expression = Lambda(Bound("a"), Lambda(Bound("b", Free("System.Int32")), Free("a")));
             Assert.AreEqual("(a:_ -> (b:System.Int32:_ -> a:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:'2:_ -> (b:System.Int32:_ -> a:'2:_):(System.Int32:_ -> '2:_):(_ -> _)):('2:_ -> (System.Int32:_ -> '2:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Lambda8()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Lambda 8:
@@ -260,7 +260,7 @@ namespace Favalet.Expressions.Variable
             var expression = Lambda(Bound("a", Free("System.Int32")), Lambda(Bound("b"), Free("a")));
             Assert.AreEqual("(a:System.Int32:_ -> (b:_ -> a:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:System.Int32:_ -> (b:'3:_ -> a:System.Int32:_):('3:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> ('3:_ -> System.Int32:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
         }
     }

@@ -24,7 +24,7 @@ namespace Favalon
     {
         public static async Task Main(string[] args)
         {
-            var environment = Favalet.Environment.Create();
+            var terrain = Terrain.Create();
             var parser = Parser.Create();
 
             for (var line = 0; line < int.MaxValue; line++)
@@ -35,14 +35,17 @@ namespace Favalon
                 switch (parser.Append(text, line))
                 {
                     case ParseResult(Expression expression, _):
-                        await Console.Out.WriteLineAsync($"parsed: {expression}");
+                        await Console.Out.WriteLineAsync($"parsed: {expression.AnnotatedReadableString}");
 
-                        var (inferred, errors) = environment.Infer(expression, Expression.Unspecified);
+                        var (inferred, errors) = terrain.Infer(expression, Expression.Unspecified);
 
                         await Task.WhenAll(errors.
                             Select(error => Console.Out.WriteLineAsync(error.ToString())));
 
-                        await Console.Out.WriteLineAsync($"inferred: {inferred}");
+                        if (inferred != null)
+                        {
+                            await Console.Out.WriteLineAsync($"inferred: {inferred.AnnotatedReadableString}");
+                        }
                         break;
                     case ParseResult(_, ParseErrorInformation[] errors2):
                         await Task.WhenAll(errors2.

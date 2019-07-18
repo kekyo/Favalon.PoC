@@ -36,31 +36,31 @@ namespace Favalet.Expressions
                 $"{rec}{FormatReadableString(context, this.Bound, true)} = {FormatReadableString(context, this.Expression, context.FormatNaming != FormatNamings.Friendly)}");
         }
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
+        protected override Expression VisitInferring(IInferringContext context, Expression higherOrderHint)
         {
-            var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
+            var higherOrder = context.Unify(higherOrderHint, this.HigherOrder);
 
             if (this.RecursiveBind)
             {
-                var bound = environment.Visit(this.Bound, higherOrder);
-                var expression = environment.Visit(this.Expression, bound.HigherOrder);
+                var bound = context.Visit(this.Bound, higherOrder);
+                var expression = context.Visit(this.Expression, bound.HigherOrder);
 
                 return new BindExpression(bound, expression, true, expression.HigherOrder, this.TextRange);
             }
             else
             {
-                var expression = environment.Visit(this.Expression, higherOrder);
-                var bound = environment.Visit(this.Bound, expression.HigherOrder);
+                var expression = context.Visit(this.Expression, higherOrder);
+                var bound = context.Visit(this.Bound, expression.HigherOrder);
 
                 return new BindExpression(bound, expression, false, bound.HigherOrder, this.TextRange);
             }
         }
 
-        protected override Expression VisitResolving(IResolvingEnvironment environment)
+        protected override Expression VisitResolving(IResolvingContext context)
         {
-            var bound = environment.Visit(this.Bound);
-            var expression = environment.Visit(this.Expression);
-            var higherOrder = environment.Visit(this.HigherOrder);
+            var bound = context.Visit(this.Bound);
+            var expression = context.Visit(this.Expression);
+            var higherOrder = context.Visit(this.HigherOrder);
 
             return new BindExpression(bound, expression, this.RecursiveBind, higherOrder, this.TextRange);
         }

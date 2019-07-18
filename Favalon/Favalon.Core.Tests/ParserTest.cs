@@ -14,10 +14,6 @@
 // limitations under the License.
 
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Favalon
 {
@@ -28,24 +24,27 @@ namespace Favalon
         public void ApplyVariables()
         {
             var parser = Parser.Create();
-            var expression = parser.Append("aaa bbb ccc", 0);
+            var (expression, errors) = parser.Append("aaa bbb ccc", 0);
             Assert.AreEqual("((aaa:_ bbb:_):_ ccc:_):_", expression?.StrictReadableString);
+            Assert.AreEqual(0, errors.Length);
         }
 
         [Test]
         public void ApplyCombinedVariableAndNumeric()
         {
             var parser = Parser.Create();
-            var expression = parser.Append("aaa 123", 0);
+            var (expression, errors) = parser.Append("aaa 123", 0);
             Assert.AreEqual("(aaa:_ 123:?):_", expression?.StrictReadableString);
+            Assert.AreEqual(0, errors.Length);
         }
 
         [Test]
         public void ApplyCombinedVariableAndSymbol()
         {
             var parser = Parser.Create();
-            var expression = parser.Append("aaa | bbb", 0);
+            var (expression, errors) = parser.Append("aaa | bbb", 0);
             Assert.AreEqual("((aaa:_ |:_):_ bbb:_):_", expression?.StrictReadableString);
+            Assert.AreEqual(0, errors.Length);
         }
     }
 }

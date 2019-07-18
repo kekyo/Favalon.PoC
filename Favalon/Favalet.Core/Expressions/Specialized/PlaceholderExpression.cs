@@ -41,11 +41,11 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint) =>
+        protected override Expression VisitInferring(IInferringContext context, Expression higherOrderHint) =>
             this;
 
-        protected override Expression VisitResolving(IResolvingEnvironment environment) =>
-            (environment.Lookup(this) is Expression lookup) ? lookup : this;
+        protected override Expression VisitResolving(IResolvingContext context) =>
+            (context.Lookup(this) is Expression lookup) ? lookup : this;
 
         public override int GetHashCode() =>
             this.Index;

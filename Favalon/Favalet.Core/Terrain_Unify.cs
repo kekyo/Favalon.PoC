@@ -20,7 +20,7 @@ using System.Diagnostics;
 
 namespace Favalet
 {
-    partial class Environment
+    partial class Terrain
     {
         private Expression UnifyLambda(LambdaExpression lambda1, LambdaExpression lambda2)
         {
@@ -113,7 +113,7 @@ namespace Favalet
         }
 
 #line hidden
-        Expression Expression.IInferringEnvironment.Unify(Expression expression1, Expression expression2) =>
+        Expression Expression.IInferringContext.Unify(Expression expression1, Expression expression2) =>
             this.Unify(expression1, expression2);
 #line default
     }

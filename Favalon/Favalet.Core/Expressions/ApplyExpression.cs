@@ -34,24 +34,24 @@ namespace Favalet.Expressions
             FormattedString.RequiredEnclosing(
                 $"{FormatReadableString(context, this.Function, true)} {FormatReadableString(context, this.Argument, true)}");
 
-        protected override Expression VisitInferring(IInferringEnvironment environment, Expression higherOrderHint)
+        protected override Expression VisitInferring(IInferringContext context, Expression higherOrderHint)
         {
-            var higherOrder = environment.Unify(higherOrderHint, this.HigherOrder);
+            var higherOrder = context.Unify(higherOrderHint, this.HigherOrder);
 
-            var visitedArgument = environment.Visit(this.Argument, UnspecifiedExpression.Instance);
+            var visitedArgument = context.Visit(this.Argument, UnspecifiedExpression.Instance);
 
             var functionHigherOrder = LambdaExpression.Create(
                 visitedArgument.HigherOrder, higherOrder, true, this.TextRange);
-            var visitedFunction = environment.Visit(this.Function, functionHigherOrder);
+            var visitedFunction = context.Visit(this.Function, functionHigherOrder);
 
             return new ApplyExpression(visitedFunction, visitedArgument, higherOrder, this.TextRange);
         }
 
-        protected override Expression VisitResolving(IResolvingEnvironment environment)
+        protected override Expression VisitResolving(IResolvingContext context)
         {
-            var argument = environment.Visit( this.Argument);
-            var function = environment.Visit(this.Function);
-            var higherOrder = environment.Visit(this.HigherOrder);
+            var argument = context.Visit( this.Argument);
+            var function = context.Visit(this.Function);
+            var higherOrder = context.Visit(this.HigherOrder);
 
             return new ApplyExpression(function, argument, higherOrder, this.TextRange);
         }

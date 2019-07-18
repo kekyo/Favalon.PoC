@@ -21,33 +21,33 @@ using System.Collections.Generic;
 
 namespace Favalet
 {
-    public sealed partial class Environment :
-        Expression.IInferringEnvironment, Expression.IResolvingEnvironment
+    public sealed partial class Terrain :
+        Expression.IInferringContext, Expression.IResolvingContext
     {
         private readonly PlaceholderController placeholderController = new PlaceholderController();
         private readonly List<InferErrorInformation> errorInformations = new List<InferErrorInformation>();
 
-        private Environment()
+        private Terrain()
         { }
 
 #line hidden
         public PlaceholderExpression CreatePlaceholder(Expression higherOrder, TextRange textRange) =>
             placeholderController.Create(higherOrder, textRange);
 
-        void Expression.IInferringEnvironment.Memoize(VariableExpression symbol, Expression expression) =>
+        void Expression.IInferringContext.Memoize(VariableExpression symbol, Expression expression) =>
             placeholderController.Memoize(symbol, expression);
 
-        Expression? Expression.IInferringEnvironment.Lookup(VariableExpression symbol) =>
+        Expression? Expression.IInferringContext.Lookup(VariableExpression symbol) =>
             placeholderController.Lookup(this, symbol);
-        Expression? Expression.IResolvingEnvironment.Lookup(VariableExpression symbol) =>
+        Expression? Expression.IResolvingContext.Lookup(VariableExpression symbol) =>
             placeholderController.Lookup(this, symbol);
 
         private TExpression Visit<TExpression>(TExpression expression, Expression higherOrderHint)
             where TExpression : Expression =>
             (TExpression)expression.InternalVisitInferring(this, higherOrderHint);
-        TExpression Expression.IInferringEnvironment.Visit<TExpression>(TExpression expression, Expression higherOrderHint) =>
+        TExpression Expression.IInferringContext.Visit<TExpression>(TExpression expression, Expression higherOrderHint) =>
             (TExpression)expression.InternalVisitInferring(this, higherOrderHint);
-        TExpression Expression.IResolvingEnvironment.Visit<TExpression>(TExpression expression) =>
+        TExpression Expression.IResolvingContext.Visit<TExpression>(TExpression expression) =>
             (TExpression)expression.InternalVisitResolving(this);
 
         internal Expression RecordError(string details, Expression primaryExpression, params Expression[] expressions)
@@ -56,7 +56,7 @@ namespace Favalet
             return primaryExpression;
         }
 
-        Expression Expression.IInferringEnvironment.RecordError(string details, Expression primaryExpression, Expression[] expressions) =>
+        Expression Expression.IInferringContext.RecordError(string details, Expression primaryExpression, Expression[] expressions) =>
             this.RecordError(details, primaryExpression, expressions);
 
         public TExpression Infer<TExpression>(TExpression expression, Expression higherOrderHint)
@@ -76,7 +76,7 @@ namespace Favalet
             return result;
         }
 
-        public static Environment Create() =>
-            new Environment();
+        public static Terrain Create() =>
+            new Terrain();
     }
 }

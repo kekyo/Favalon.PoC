@@ -29,7 +29,7 @@ namespace Favalet.Expressions.Unspecified
         [Test]
         public void Bind1()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Bind 1:
@@ -48,14 +48,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = Bind(Bound("a"), Literal(123));
             Assert.AreEqual("(a:_ = 123:?):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:Numeric:* = 123:Numeric:*):Numeric:*", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Bind2()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Bind 2:
@@ -78,14 +78,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = Bind(Bound("a"), Lambda(Bound("b"), Free("b")));
             Assert.AreEqual("(a:_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:('a -> 'a) = (b:'a -> b:'a):('a -> 'a)):('a -> 'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Bind3()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Bind 3:
@@ -109,14 +109,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = Bind(Bound("a"), Lambda(Bound("b"), Free("b", Implicit("System.Int32"))));
             Assert.AreEqual("(a:_ = (b:_ -> b:System.Int32:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:(System.Int32:'a -> System.Int32:'a):('a -> 'a) = (b:System.Int32:'a -> b:System.Int32:'a):(System.Int32:'a -> System.Int32:'a):('a -> 'a)):(System.Int32:'a -> System.Int32:'a):('a -> 'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Bind4()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Bind 4:
@@ -139,14 +139,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = Bind(Bound("a"), Lambda(Bound("b", Implicit("System.Int32")), Free("b")));
             Assert.AreEqual("(a:_ = (b:System.Int32:_ -> b:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:(System.Int32:'a -> System.Int32:'a):('a -> 'a) = (b:System.Int32:'a -> b:System.Int32:'a):(System.Int32:'a -> System.Int32:'a):('a -> 'a)):(System.Int32:'a -> System.Int32:'a):('a -> 'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Bind5()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Bind 5:
@@ -166,7 +166,7 @@ namespace Favalet.Expressions.Unspecified
 
             try
             {
-                environment.Infer(expression);
+                context.Infer(expression);
                 Assert.Fail();
             }
             catch (ArgumentException ex)
@@ -178,7 +178,7 @@ namespace Favalet.Expressions.Unspecified
         [Test]
         public void Bind6()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             Bind 6:
@@ -202,14 +202,14 @@ namespace Favalet.Expressions.Unspecified
             var expression = Bind(Bound("a", Lambda(Bound("System.Int32"), Unspecified)), Lambda(Bound("b"), Free("b")));
             Assert.AreEqual("(a:(System.Int32:_ -> _):_ = (b:_ -> b:_):_):_", expression.StrictReadableString);
 
-            var inferred = environment.Infer(expression);
+            var inferred = context.Infer(expression);
             Assert.AreEqual("(a:(System.Int32:'a -> System.Int32:'a) = (b:System.Int32:'a -> b:System.Int32:'a):(System.Int32:'a -> System.Int32:'a):('a -> 'a)):(System.Int32:'a -> System.Int32:'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
         public void Bind7()
         {
-            var environment = Environment.Create();
+            var context = Terrain.Create();
 
             /*
             a = b -> a
@@ -230,7 +230,7 @@ namespace Favalet.Expressions.Unspecified
 
             try
             {
-                environment.Infer(expression);
+                context.Infer(expression);
                 Assert.Fail();
             }
             catch (ArgumentException ex)

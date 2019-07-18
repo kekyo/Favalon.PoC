@@ -31,41 +31,41 @@ namespace Favalet
             Expression.Type;
 
         public static LiteralExpression Literal(object value) =>
-            Expression.Literal(value);
+            Expression.Literal(value, TextRange.Unknown);
 
         public static SymbolicVariableExpression Free(string name, Expression higherOrder) =>
-            Expression.Free(name, higherOrder);
+            Expression.Free(name, higherOrder, TextRange.Unknown);
         public static SymbolicVariableExpression Free(string name) =>
-            Expression.Free(name, Unspecified);
+            Expression.Free(name, Unspecified, TextRange.Unknown);
 
         public static SymbolicVariableExpression Implicit(string name, Expression higherOrder) =>
-            ImplicitVariableExpression.Create(name, higherOrder);
+            ImplicitVariableExpression.Create(name, higherOrder, TextRange.Unknown);
         public static SymbolicVariableExpression Implicit(string name) =>
-            ImplicitVariableExpression.Create(name, Unspecified);
+            ImplicitVariableExpression.Create(name, Unspecified, TextRange.Unknown);
 
         public static BoundVariableExpression Bound(string name, Expression higherOrder) =>
-            Expression.Bound(name, higherOrder);
+            Expression.Bound(name, higherOrder, TextRange.Unknown);
         public static BoundVariableExpression Bound(string name) =>
-            Expression.Bound(name, Unspecified);
+            Expression.Bound(name, Unspecified, TextRange.Unknown);
 
         public static ApplyExpression Apply(Expression function, Expression argument, Expression higherOrder) =>
-            Expression.Apply(function, argument, higherOrder);
+            Expression.Apply(function, argument, higherOrder, TextRange.Unknown);
         public static ApplyExpression Apply(Expression function, Expression argument) =>
-            Expression.Apply(function, argument, Unspecified);
+            Expression.Apply(function, argument, Unspecified, TextRange.Unknown);
 
         public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression) =>
-            Expression.Lambda(parameter, expression);
+            Expression.Lambda(parameter, expression, TextRange.Unknown);
         public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression) =>
-            Expression.Lambda(parameter, expression);
+            Expression.Lambda(parameter, expression, TextRange.Unknown);
 
         public static BindExpression Bind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
-            Expression.Bind(bound, expression, higherOrder);
+            Expression.Bind(bound, expression, higherOrder, TextRange.Unknown);
         public static BindExpression Bind(BoundVariableExpression bound, Expression expression) =>
-            Expression.Bind(bound, expression, Unspecified);
+            Expression.Bind(bound, expression, Unspecified, TextRange.Unknown);
 
         public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
-            Expression.RecursiveBind(bound, expression, higherOrder);
+            Expression.RecursiveBind(bound, expression, higherOrder, TextRange.Unknown);
         public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression) =>
-            Expression.RecursiveBind(bound, expression, Unspecified);
+            Expression.RecursiveBind(bound, expression, Unspecified, TextRange.Unknown);
     }
 }

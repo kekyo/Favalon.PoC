@@ -26,17 +26,17 @@ namespace Favalon
             var environment = Favalet.Environment.Create();
             var parser = Parser.Create();
 
-            while (true)
+            for (var line = 0; line < int.MaxValue; line++)
             {
                 await Console.Out.WriteAsync("Favalon> ");
 
-                var line = await Console.In.ReadLineAsync();
-                if (parser.Append(line) is Expression expression)
+                var text = await Console.In.ReadLineAsync();
+                if (parser.Append(text, line) is Expression expression)
                 {
-                    await Console.Out.WriteLineAsync($"parsed: {expression.AnnotatedReadableString}");
+                    await Console.Out.WriteLineAsync($"parsed: {expression}");
 
                     var inferred = environment.Infer(expression);
-                    await Console.Out.WriteLineAsync($"inferred: {inferred.AnnotatedReadableString}");
+                    await Console.Out.WriteLineAsync($"inferred: {inferred}");
                 }
             }
         }

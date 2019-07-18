@@ -28,7 +28,7 @@ namespace Favalon
         public void ApplyVariables()
         {
             var parser = Parser.Create();
-            var expression = parser.Append("aaa bbb ccc");
+            var expression = parser.Append("aaa bbb ccc", 0);
             Assert.AreEqual("((aaa:_ bbb:_):_ ccc:_):_", expression?.StrictReadableString);
         }
 
@@ -36,7 +36,7 @@ namespace Favalon
         public void ApplyCombinedVariableAndNumeric()
         {
             var parser = Parser.Create();
-            var expression = parser.Append("aaa 123");
+            var expression = parser.Append("aaa 123", 0);
             Assert.AreEqual("(aaa:_ 123:?):_", expression?.StrictReadableString);
         }
 
@@ -44,7 +44,7 @@ namespace Favalon
         public void ApplyCombinedVariableAndSymbol()
         {
             var parser = Parser.Create();
-            var expression = parser.Append("aaa | bbb");
+            var expression = parser.Append("aaa | bbb", 0);
             Assert.AreEqual("((aaa:_ |:_):_ bbb:_):_", expression?.StrictReadableString);
         }
     }

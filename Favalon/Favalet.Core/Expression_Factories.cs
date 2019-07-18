@@ -51,5 +51,8 @@ namespace Favalet
 
         public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression, Expression higherOrder, TextRange textRange) =>
             new BindExpression(bound, expression, true, higherOrder, textRange);
+
+        public static Expression? operator +(Expression? lhs, Expression? rhs) =>
+            lhs.Apply(rhs);
     }
 }

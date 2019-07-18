@@ -17,9 +17,10 @@ using System;
 
 namespace Favalet
 {
-    public struct Position
+    public struct Position : IEquatable<Position>, IComparable<Position>, IComparable
     {
         public static readonly Position Empty = new Position(0, 0);
+        public static readonly Position MaxValue = new Position(int.MaxValue, int.MaxValue);
 
         public readonly int Line;
         public readonly int Column;
@@ -30,13 +31,41 @@ namespace Favalet
             this.Column = column;
         }
 
+        public override int GetHashCode() =>
+            this.Line.GetHashCode() ^ this.Column.GetHashCode();
+
+        public bool Equals(Position other) =>
+            (this.Line == other.Line) && (this.Column == other.Column);
+
+        public override bool Equals(object obj) =>
+            obj is Position position ? this.Equals(position) : false;
+
+        public int CompareTo(Position position) =>
+            this.Line.CompareTo(position.Line) switch
+            {
+                0 => this.Column.CompareTo(position.Column),
+                int result => result
+            };
+
+        int IComparable.CompareTo(object obj) =>
+            this.CompareTo((Position)obj);
+
         public override string ToString() =>
             $"{this.Line},{this.Column}";
 
         public static Position Create(int line, int column) =>
             new Position(line, column);
 
-        public static implicit operator Position(ValueTuple<int, int> position) =>
-            new Position(position.Item1, position.Item2);
+        public static implicit operator Position((int line, int column) position) =>
+            Create(position.line, position.column);
+
+        public static bool operator <(Position lhs, Position rhs) =>
+            lhs.CompareTo(rhs) < 0;
+        public static bool operator <=(Position lhs, Position rhs) =>
+            lhs.CompareTo(rhs) <= 0;
+        public static bool operator >(Position lhs, Position rhs) =>
+            lhs.CompareTo(rhs) > 0;
+        public static bool operator >=(Position lhs, Position rhs) =>
+            lhs.CompareTo(rhs) >= 0;
     }
 }

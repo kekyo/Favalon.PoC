@@ -15,7 +15,7 @@
 
 using Favalet;
 using System;
-using System.Globalization;
+using System.Text;
 
 namespace Favalon
 {
@@ -23,48 +23,55 @@ namespace Favalon
     {
         private enum States
         {
-            Separation,
-            AlphabeticalWord,
+            Detect,
+            String,
+            StringEscaped,
             Numeric,
-            Symbol
+            Variable,
         }
 
-        private States state = States.Separation;
+        private readonly TextRange textRange;
+        private States state = States.Detect;
         private Expression? expression = null;
 
-        private Parser()
-        { }
+        private Parser(TextRange textRange) =>
+            this.textRange = textRange;
 
-        public Expression? Append(string text, TextRange textRange)
+        public Expression? Append(string text, int line) =>
+            this.Append(text, Range.Create(Position.Create(line, 0), Position.Create(line, text.Length - 1)));
+
+        public Expression? Append(string text, Range range)
         {
             const char eol = '\xffff';
 
+            var textRange = this.textRange.Subtract(range);
             var index = 0;
             var beginIndex = -1;
-            char ch;
+            StringBuilder? temp = null;
+            char inch;
             do
             {
-                ch = (index < text.Length) ? text[index] : eol;
+                inch = (index < text.Length) ? text[index] : eol;
                 index++;
                 switch (state)
                 {
-                    case States.Separation:
-                        if (char.IsLetter(ch) || (ch == '_'))
+                    case States.Detect:
+                        if (inch == '"')
                         {
                             beginIndex = index - 1;
-                            state = States.AlphabeticalWord;
+                            state = States.String;
                         }
-                        else if (char.IsDigit(ch))
+                        else if (char.IsDigit(inch))
                         {
                             beginIndex = index - 1;
                             state = States.Numeric;
                         }
-                        else if (CharUnicodeInfo.GetUnicodeCategory(ch) == UnicodeCategory.MathSymbol)
+                        else if (char.IsLetter(inch) || char.IsSymbol(inch))
                         {
                             beginIndex = index - 1;
-                            state = States.Symbol;
+                            state = States.Variable;
                         }
-                        else if (char.IsWhiteSpace(ch) || (ch == eol))
+                        else if (char.IsWhiteSpace(inch) || (inch == eol))
                         {
                         }
                         else
@@ -72,18 +79,36 @@ namespace Favalon
                             throw new FormatException();
                         }
                         break;
-                    case States.AlphabeticalWord:
-                        if (char.IsLetterOrDigit(ch) || (ch == '_'))
+                    case States.String:
+                        if (inch == '"')
                         {
-                        }
-                        else if (char.IsWhiteSpace(ch) || (ch == eol))
-                        {
-                            var word = text.Substring(beginIndex, index - beginIndex - 1);
-                            var freeVariable = Expression.Free(word, Expression.Unspecified, textRange.Subtract((beginIndex, index)));
-                            expression = expression.Apply(freeVariable);
+                            var literal = Expression.Literal(temp?.ToString() ?? string.Empty, textRange.Subtract((beginIndex, index - 1)));
+                            expression += literal;
+                            temp?.Clear();
 
                             beginIndex = -1;
-                            state = States.Separation;
+                            state = States.Detect;
+                        }
+                        else if (inch == '\\')
+                        {
+                            state = States.StringEscaped;
+                        }
+                        else if (inch != eol)
+                        {
+                            temp ??= new StringBuilder();
+                            temp.Append(inch);
+                        }
+                        else
+                        {
+                            throw new FormatException();
+                        }
+                        break;
+                    case States.StringEscaped:
+                        if (inch != eol)
+                        {
+                            temp ??= new StringBuilder();
+                            temp.Append(inch);
+                            state = States.String;
                         }
                         else
                         {
@@ -91,38 +116,38 @@ namespace Favalon
                         }
                         break;
                     case States.Numeric:
-                        if (char.IsDigit(ch) || (ch == ',') || (ch == '.'))
+                        if (char.IsDigit(inch) || (inch == ',') || (inch == '.'))
                         {
                         }
-                        else if (char.IsWhiteSpace(ch) || (ch == eol))
+                        else if (char.IsWhiteSpace(inch) || (inch == eol))
                         {
                             var numericString = text.Substring(beginIndex, index - beginIndex - 1);
                             var numeric =
                                 int.TryParse(numericString, out var i) ? i : long.TryParse(numericString, out var l) ? l :
                                 float.TryParse(numericString, out var f) ? f : double.Parse(numericString);
-                            var literal = Expression.Literal(numeric);
-                            expression = expression.Apply(literal);
+                            var literal = Expression.Literal(numeric, textRange.Subtract((beginIndex, index - 1)));
+                            expression += literal;
 
                             beginIndex = -1;
-                            state = States.Separation;
+                            state = States.Detect;
                         }
                         else
                         {
                             throw new FormatException();
                         }
                         break;
-                    case States.Symbol:
-                        if (CharUnicodeInfo.GetUnicodeCategory(ch) == UnicodeCategory.MathSymbol)
+                    case States.Variable:
+                        if (char.IsLetterOrDigit(inch) || char.IsSymbol(inch))
                         {
                         }
-                        else if (char.IsWhiteSpace(ch) || (ch == eol))
+                        else if (char.IsWhiteSpace(inch) || (inch == eol))
                         {
                             var word = text.Substring(beginIndex, index - beginIndex - 1);
-                            var freeVariable = Expression.Free(word);
-                            expression = expression.Apply(freeVariable);
+                            var variable = Expression.Free(word, Expression.Unspecified, textRange.Subtract((beginIndex, index - 1)));
+                            expression += variable;
 
                             beginIndex = -1;
-                            state = States.Separation;
+                            state = States.Detect;
                         }
                         else
                         {
@@ -131,7 +156,7 @@ namespace Favalon
                         break;
                 }
             }
-            while ((index <= text.Length) && (ch != eol));
+            while ((index <= text.Length) && (inch != eol));
 
             var e = expression;
             expression = null;
@@ -140,6 +165,8 @@ namespace Favalon
         }
 
         public static Parser Create() =>
-            new Parser();
+            new Parser(TextRange.Create(Range.MaxValue));
+        public static Parser Create(TextRange textRange) =>
+            new Parser(textRange);
     }
 }

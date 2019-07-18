@@ -53,7 +53,7 @@ namespace Favalet
         public override string ToString()
         {
             var name = this.GetType().Name.Replace("Expression", string.Empty);
-            return $"{name}: {FormatReadableString(new FormatContext(FormatAnnotations.Standard, FormatNamings.Standard, FormatOperators.Standard), this, false)}";
+            return $"{this.TextRange}: {name}: {FormatReadableString(new FormatContext(FormatAnnotations.Standard, FormatNamings.Standard, FormatOperators.Standard), this, false)}";
         }
     }
 }

@@ -13,13 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Favalet
 {
     public struct Range
     {
         public static readonly Range Empty = Create(Position.Empty, Position.Empty);
+        public static readonly Range MaxValue = Create(Position.Empty, Position.MaxValue);
 
         public readonly Position First;
         public readonly Position Last;
@@ -34,8 +33,13 @@ namespace Favalet
             ((this.First.Line < inside.First.Line) || ((this.First.Line == inside.First.Line) && (this.First.Column <= inside.First.Column))) &&
             ((inside.Last.Line < this.Last.Line) || ((inside.Last.Line == this.Last.Line) && (inside.Last.Column <= this.Last.Column)));
 
+        public Range Combine(Range range) =>
+            this.Combine(range.First, range.Last);
+        public Range Combine(Position first, Position last) =>
+            new Range((this.First < first) ? this.First : first, (this.Last < last) ? this.Last : last);
+
         public Range Subtract(Range range) =>
-            new Range(this.Contains(Create(range.First)) ? range.First : this.First, this.Contains(Create(range.Last)) ? range.Last : this.Last);
+            this.Subtract(range.First, range.Last);
         public Range Subtract(Position first, Position last) =>
             new Range(this.Contains(Create(first)) ? first : this.First, this.Contains(Create(last)) ? last : this.Last);
 
@@ -49,9 +53,9 @@ namespace Favalet
         public static Range Create(Position first, Position last) =>
             new Range(first, last);
 
-        public static implicit operator Range(ValueTuple<int, int> range) =>
-            new Range(range, range);
-        public static implicit operator Range(ValueTuple<int, int, int, int> range) =>
-            new Range(Position.Create(range.Item1, range.Item2), Position.Create(range.Item3, range.Item4));
+        public static implicit operator Range((int line, int column) position) =>
+            Create(Position.Create(position.line, position.column));
+        public static implicit operator Range((int lineFirst, int columnFirst, int lineLast, int columnLast) range) =>
+            Create(Position.Create(range.lineFirst, range.columnFirst), Position.Create(range.lineLast, range.columnLast));
     }
 }

@@ -41,13 +41,26 @@ namespace Favalet
         public bool Contains(TextRange inside) =>
             this.Target.Equals(inside.Target) && this.Range.Contains(inside.Range);
 
+        public TextRange Combine(Range rhs) =>
+            new TextRange(this.Target, this.Range.Combine(rhs));
+        public TextRange Combine(Position first, Position last) =>
+            new TextRange(this.Target, this.Range.Combine(first, last));
+        public TextRange Combine(TextRange rhs) =>
+            this.Target.Equals(rhs.Target) ?
+                new TextRange(this.Target, this.Range.Combine(rhs.Range)) :
+                throw new InvalidOperationException();
+
         public TextRange Subtract(Range range) =>
             new TextRange(this.Target, this.Range.Subtract(range));
         public TextRange Subtract(Position first, Position last) =>
             new TextRange(this.Target, this.Range.Subtract(first, last));
+        public TextRange Subtract(TextRange rhs) =>
+            this.Target.Equals(rhs.Target) ?
+                new TextRange(this.Target, this.Range.Subtract(rhs.Range)) :
+                throw new InvalidOperationException();
 
         public override string ToString() =>
-            $"{(this.Target.IsFile ? this.Target.LocalPath : this.Target.ToString())}({this.Range})";
+            $"{((this.Target.IsAbsoluteUri && this.Target.IsFile) ? this.Target.LocalPath : this.Target.ToString())}({this.Range})";
 
         public override int GetHashCode() =>
             this.Target.GetHashCode() ^ this.Range.GetHashCode();
@@ -68,13 +81,13 @@ namespace Favalet
         public static TextRange Create(Range range) =>
             new TextRange(unknown, range);
 
-        public static implicit operator TextRange(ValueTuple<string, int, int> textRange) =>
-            new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3)));
-        public static implicit operator TextRange(ValueTuple<Uri, int, int> textRange) =>
-           new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3)));
-        public static implicit operator TextRange(ValueTuple<string, int, int, int, int> textRange) =>
-            new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3), Position.Create(textRange.Item4, textRange.Item5)));
-        public static implicit operator TextRange(ValueTuple<Uri, int, int, int, int> textRange) =>
-            new TextRange(textRange.Item1, Range.Create(Position.Create(textRange.Item2, textRange.Item3), Position.Create(textRange.Item4, textRange.Item5)));
+        public static implicit operator TextRange((string target, int line, int column) textRange) =>
+            new TextRange(textRange.target, Range.Create(Position.Create(textRange.line, textRange.column)));
+        public static implicit operator TextRange((Uri target, int line, int column) textRange) =>
+           new TextRange(textRange.target, Range.Create(Position.Create(textRange.line, textRange.column)));
+        public static implicit operator TextRange((string target, int lineFirst, int columnFirst, int lineLast, int columnLast) textRange) =>
+            new TextRange(textRange.target, Range.Create(Position.Create(textRange.lineFirst, textRange.columnFirst), Position.Create(textRange.lineLast, textRange.columnLast)));
+        public static implicit operator TextRange((Uri target, int lineFirst, int columnFirst, int lineLast, int columnLast) textRange) =>
+            new TextRange(textRange.target, Range.Create(Position.Create(textRange.lineFirst, textRange.columnFirst), Position.Create(textRange.lineLast, textRange.columnLast)));
     }
 }

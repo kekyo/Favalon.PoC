@@ -19,10 +19,10 @@ namespace Favalet
 {
     public static class ExpressionExtensions
     {
-        public static Expression? Apply(this Expression? function, Expression? argument, TextRange textRange) =>
+        public static Expression? Apply(this Expression? function, Expression? argument) =>
             (function, argument) switch
             {
-                (Expression f, Expression a) => Expression.Apply(f, a, UnspecifiedExpression.Instance, textRange),
+                (Expression f, Expression a) => Expression.Apply(f, a, UnspecifiedExpression.Instance, f.TextRange.Combine(a.TextRange)),
                 (null, Expression a) => a,
                 (Expression f, null) => f,
                 _ => null

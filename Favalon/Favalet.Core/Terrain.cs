@@ -14,16 +14,16 @@
 // limitations under the License.
 
 using Favalet.Internals;
-using Favalet.Expressions;
-using Favalet.Expressions.Basis;
-using Favalet.Expressions.Internals;
-using Favalet.Expressions.Specialized;
+using Favalet.Terms;
+using Favalet.Terms.Basis;
+using Favalet.Terms.Internals;
+using Favalet.Terms.Specialized;
 using System.Collections.Generic;
 
 namespace Favalet
 {
     public sealed partial class Terrain :
-        Expression.IInferringContext, Expression.IResolvingContext
+        Term.IInferringContext, Term.IResolvingContext
     {
         private readonly PlaceholderController placeholderController = new PlaceholderController();
         private readonly List<InferErrorInformation> errorInformations = new List<InferErrorInformation>();
@@ -32,48 +32,48 @@ namespace Favalet
         { }
 
 #line hidden
-        private PlaceholderExpression CreatePlaceholder(Expression higherOrder, TextRange textRange) =>
+        private PlaceholderTerm CreatePlaceholder(Term higherOrder, TextRange textRange) =>
             placeholderController.Create(higherOrder, textRange);
-        PlaceholderExpression Expression.IInferringContext.CreatePlaceholder(Expression higherOrder, TextRange textRange) =>
+        PlaceholderTerm Term.IInferringContext.CreatePlaceholder(Term higherOrder, TextRange textRange) =>
             placeholderController.Create(higherOrder, textRange);
 
-        public void Bind(BoundVariableExpression bound, Expression expression) =>
-            placeholderController.Memoize(bound, expression);
-        void Expression.IInferringContext.Memoize(SymbolicVariableExpression symbol, Expression expression) =>
-            placeholderController.Memoize(symbol, expression);
+        public void Bind(BoundVariableTerm bound, Term term) =>
+            placeholderController.Memoize(bound, term);
+        void Term.IInferringContext.Memoize(SymbolicVariableTerm symbol, Term term) =>
+            placeholderController.Memoize(symbol, term);
 
-        Expression? Expression.IInferringContext.Lookup(VariableExpression symbol) =>
+        Term? Term.IInferringContext.Lookup(VariableTerm symbol) =>
             placeholderController.Lookup(this, symbol);
-        Expression? Expression.IResolvingContext.Lookup(VariableExpression symbol) =>
+        Term? Term.IResolvingContext.Lookup(VariableTerm symbol) =>
             placeholderController.Lookup(this, symbol);
 
-        private TExpression Visit<TExpression>(TExpression expression, Expression higherOrderHint)
-            where TExpression : Expression =>
-            (TExpression)expression.InternalVisitInferring(this, higherOrderHint);
-        TExpression Expression.IInferringContext.Visit<TExpression>(TExpression expression, Expression higherOrderHint) =>
-            (TExpression)expression.InternalVisitInferring(this, higherOrderHint);
-        TExpression Expression.IResolvingContext.Visit<TExpression>(TExpression expression) =>
-            (TExpression)expression.InternalVisitResolving(this);
+        private TTerm Visit<TTerm>(TTerm term, Term higherOrderHint)
+            where TTerm : Term =>
+            (TTerm)term.InternalVisitInferring(this, higherOrderHint);
+        TTerm Term.IInferringContext.Visit<TTerm>(TTerm term, Term higherOrderHint) =>
+            (TTerm)term.InternalVisitInferring(this, higherOrderHint);
+        TTerm Term.IResolvingContext.Visit<TTerm>(TTerm term) =>
+            (TTerm)term.InternalVisitResolving(this);
 
-        internal Expression RecordError(string details, Expression primaryExpression, params Expression[] expressions)
+        internal Term RecordError(string details, Term primaryTerm, params Term[] terms)
         {
-            errorInformations.Add(InferErrorInformation.Create(details, primaryExpression, expressions));
-            return primaryExpression;
+            errorInformations.Add(InferErrorInformation.Create(details, primaryTerm, terms));
+            return primaryTerm;
         }
 
-        Expression Expression.IInferringContext.RecordError(string details, Expression primaryExpression, Expression[] expressions) =>
-            this.RecordError(details, primaryExpression, expressions);
+        Term Term.IInferringContext.RecordError(string details, Term primaryTerm, Term[] terms) =>
+            this.RecordError(details, primaryTerm, terms);
 
-        public InferResult<Expression> Infer(Expression expression, Expression higherOrderHint) =>
-            this.Infer<Expression>(expression, higherOrderHint);
+        public InferResult<Term> Infer(Term term, Term higherOrderHint) =>
+            this.Infer<Term>(term, higherOrderHint);
 #line default
 
-        public InferResult<TExpression> Infer<TExpression>(TExpression expression, Expression higherOrderHint)
-            where TExpression : Expression
+        public InferResult<TTerm> Infer<TTerm>(TTerm term, Term higherOrderHint)
+            where TTerm : Term
         {
-            var partial = expression.InternalVisitInferring(this, higherOrderHint);
+            var partial = term.InternalVisitInferring(this, higherOrderHint);
             var inferred = partial.InternalVisitResolving(this);
-            var result = InferResult<TExpression>.Create((TExpression)inferred, errorInformations.ToArray());
+            var result = InferResult<TTerm>.Create((TTerm)inferred, errorInformations.ToArray());
             errorInformations.Clear();
             return result;
         }

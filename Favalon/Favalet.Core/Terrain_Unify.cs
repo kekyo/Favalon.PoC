@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet.Expressions;
-using Favalet.Expressions.Basis;
-using Favalet.Expressions.Specialized;
+using Favalet.Terms;
+using Favalet.Terms.Basis;
+using Favalet.Terms.Specialized;
 using System;
 using System.Diagnostics;
 
@@ -23,28 +23,28 @@ namespace Favalet
 {
     partial class Terrain
     {
-        private Expression UnifyLambda(LambdaExpression lambda1, LambdaExpression lambda2)
+        private Term UnifyLambda(LambdaTerm lambda1, LambdaTerm lambda2)
         {
-            Debug.Assert((lambda1 is Expression) && (lambda2 is Expression));
+            Debug.Assert((lambda1 is Term) && (lambda2 is Term));
 
             this.Unify(lambda1.Parameter, lambda2.Parameter);
-            this.Unify(lambda1.Expression, lambda2.Expression);
+            this.Unify(lambda1.Term, lambda2.Term);
 
             return lambda2;
         }
 
-        private Expression UnifyLambda(LambdaExpression lambda, Expression expression)
+        private Term UnifyLambda(LambdaTerm lambda, Term term)
         {
-            Debug.Assert((lambda is Expression) && (expression is Expression));
+            Debug.Assert((lambda is Term) && (term is Term));
 
-            var newLambda = LambdaExpression.CreateWithPlaceholder(
+            var newLambda = LambdaTerm.CreateWithPlaceholder(
                 this,
-                this.Unify(lambda.Parameter, UnspecifiedExpression.Instance),
-                this.Unify(lambda.Expression, UnspecifiedExpression.Instance),
+                this.Unify(lambda.Parameter, UnspecifiedTerm.Instance),
+                this.Unify(lambda.Term, UnspecifiedTerm.Instance),
                 true,
                 lambda.TextRange);
 
-            if (expression is PlaceholderExpression placeholder)
+            if (term is PlaceholderTerm placeholder)
             {
                 placeholderController.Memoize(placeholder, newLambda);
             }
@@ -52,70 +52,70 @@ namespace Favalet
             return lambda;
         }
 
-        private Expression UnifyPlaceholder(
-            PlaceholderExpression placeholder, Expression expression)
+        private Term UnifyPlaceholder(
+            PlaceholderTerm placeholder, Term term)
         {
-            Debug.Assert((placeholder is Expression) && (expression is Expression));
+            Debug.Assert((placeholder is Term) && (term is Term));
 
-            if (placeholderController.Lookup(this, placeholder) is Expression lookup)
+            if (placeholderController.Lookup(this, placeholder) is Term lookup)
             {
-                return this.Unify(lookup, expression);
+                return this.Unify(lookup, term);
             }
 
-            if (!(expression is UnspecifiedExpression))
+            if (!(term is UnspecifiedTerm))
             {
-                placeholderController.Memoize(placeholder, expression);
+                placeholderController.Memoize(placeholder, term);
             }
 
             return placeholder;
         }
 
-        private Expression Unify(Expression expression1, Expression expression2)
+        private Term Unify(Term term1, Term term2)
         {
-            Debug.Assert((expression1 is Expression) && (expression2 is Expression));
+            Debug.Assert((term1 is Term) && (term2 is Term));
 
-            var result = (expression1, expression2) switch
+            var result = (term1, term2) switch
             {
-                (UnspecifiedExpression _, UnspecifiedExpression _) =>
-                    this.CreatePlaceholder(UnspecifiedExpression.Instance, expression1.TextRange),
+                (UnspecifiedTerm _, UnspecifiedTerm _) =>
+                    this.CreatePlaceholder(UnspecifiedTerm.Instance, term1.TextRange),
 
-                (Expression _, Expression _) when expression1.Equals(expression2) =>
-                    expression1,
+                (Term _, Term _) when term1.Equals(term2) =>
+                    term1,
 
-                (UnspecifiedExpression _, PlaceholderExpression placeholder) =>
-                    this.UnifyPlaceholder(placeholder, expression1),
-                (PlaceholderExpression placeholder, UnspecifiedExpression _) =>
-                    this.UnifyPlaceholder(placeholder, expression2),
+                (UnspecifiedTerm _, PlaceholderTerm placeholder) =>
+                    this.UnifyPlaceholder(placeholder, term1),
+                (PlaceholderTerm placeholder, UnspecifiedTerm _) =>
+                    this.UnifyPlaceholder(placeholder, term2),
 
-                (Expression _, PlaceholderExpression placeholder) =>
-                    this.UnifyPlaceholder(placeholder, expression1),
-                (PlaceholderExpression placeholder, Expression _) =>
-                    this.UnifyPlaceholder(placeholder, expression2),
+                (Term _, PlaceholderTerm placeholder) =>
+                    this.UnifyPlaceholder(placeholder, term1),
+                (PlaceholderTerm placeholder, Term _) =>
+                    this.UnifyPlaceholder(placeholder, term2),
 
-                (Expression _, UnspecifiedExpression _) =>
-                    expression1,
-                (UnspecifiedExpression _, Expression _) =>
-                    expression2,
+                (Term _, UnspecifiedTerm _) =>
+                    term1,
+                (UnspecifiedTerm _, Term _) =>
+                    term2,
 
-                (LambdaExpression lambda1, LambdaExpression lambda2) =>
+                (LambdaTerm lambda1, LambdaTerm lambda2) =>
                     this.UnifyLambda(lambda1, lambda2),
-                (Expression _, LambdaExpression lambda) =>
-                    this.UnifyLambda(lambda, expression1),
-                (LambdaExpression lambda, Expression _) =>
-                    this.UnifyLambda(lambda, expression2),
+                (Term _, LambdaTerm lambda) =>
+                    this.UnifyLambda(lambda, term1),
+                (LambdaTerm lambda, Term _) =>
+                    this.UnifyLambda(lambda, term2),
 
                 _ => this.RecordError(
-                    $"Cannot unify: between \"{expression1.ReadableString}\" and \"{expression2.ReadableString}\"",
-                    expression1,
-                    expression2)
+                    $"Cannot unify: between \"{term1.ReadableString}\" and \"{term2.ReadableString}\"",
+                    term1,
+                    term2)
             };
 
             return result;
         }
 
 #line hidden
-        Expression Expression.IInferringContext.Unify(Expression expression1, Expression expression2) =>
-            this.Unify(expression1, expression2);
+        Term Term.IInferringContext.Unify(Term term1, Term term2) =>
+            this.Unify(term1, term2);
 #line default
     }
 }

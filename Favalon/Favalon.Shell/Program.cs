@@ -14,7 +14,7 @@
 // limitations under the License.
 
 using Favalet;
-using Favalet.Expressions;
+using Favalet.Terms;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,34 +45,34 @@ namespace Favalon
         {
             var terrain = Terrain.Create();
 
-            var str = Expression.Bound("System.String", Expression.Kind, TextRange.Unknown);
+            var str = Term.Bound("System.String", Term.Kind, TextRange.Unknown);
             terrain.Bind(str, str);
 
-            var seqstr = Expression.Bound("System.Collections.Generic.IEnumerable<System.String>", Expression.Kind, TextRange.Unknown);
+            var seqstr = Term.Bound("System.Collections.Generic.IEnumerable<System.String>", Term.Kind, TextRange.Unknown);
             terrain.Bind(seqstr, seqstr);
 
             // wc = stdin:IE<s> -> stdin:IE<s>
             terrain.Bind(
-                Expression.Bound("wc", Expression.Unspecified, TextRange.Unknown),
-                Expression.Lambda(
-                    Expression.Bound("stdin", str, TextRange.Unknown),
-                    Expression.Free("stdin", str, TextRange.Unknown),
+                Term.Bound("wc", Term.Unspecified, TextRange.Unknown),
+                Term.Lambda(
+                    Term.Bound("stdin", str, TextRange.Unknown),
+                    Term.Free("stdin", str, TextRange.Unknown),
                     TextRange.Unknown));
             // | = x:(IE<s> -> IE<s>) -> y:(IE<s> -> IE<s>) -> y x
             terrain.Bind(
-                Expression.Bound("|", Expression.Unspecified, TextRange.Unknown),
-                Expression.Lambda(
-                    Expression.Bound("x",
-                        Expression.Lambda(str, str, TextRange.Unknown),
+                Term.Bound("|", Term.Unspecified, TextRange.Unknown),
+                Term.Lambda(
+                    Term.Bound("x",
+                        Term.Lambda(str, str, TextRange.Unknown),
                         TextRange.Unknown),
-                    Expression.Lambda(
-                        Expression.Bound("y",
-                            Expression.Lambda(str, str, TextRange.Unknown),
+                    Term.Lambda(
+                        Term.Bound("y",
+                            Term.Lambda(str, str, TextRange.Unknown),
                             TextRange.Unknown),
-                        Expression.Apply(
-                            Expression.Free("y", Expression.Unspecified, TextRange.Unknown),
-                            Expression.Free("x", Expression.Unspecified, TextRange.Unknown),
-                            Expression.Unspecified,
+                        Term.Apply(
+                            Term.Free("y", Term.Unspecified, TextRange.Unknown),
+                            Term.Free("x", Term.Unspecified, TextRange.Unknown),
+                            Term.Unspecified,
                             TextRange.Unknown),
                         TextRange.Unknown),
                     TextRange.Unknown));
@@ -86,10 +86,10 @@ namespace Favalon
                 var text = await Console.In.ReadLineAsync();
                 switch (parser.Append(text, line))
                 {
-                    case ParseResult(Expression expression, _):
-                        await Console.Out.WriteLineAsync($"parsed: {expression.AnnotatedReadableString}");
+                    case ParseResult(Term term, _):
+                        await Console.Out.WriteLineAsync($"parsed: {term.AnnotatedReadableString}");
 
-                        var (inferred, errors) = terrain.Infer(expression, Expression.Unspecified);
+                        var (inferred, errors) = terrain.Infer(term, Term.Unspecified);
 
                         await Task.WhenAll(errors.
                             Select(error => Console.Out.WriteLineAsync(error.ToString())));

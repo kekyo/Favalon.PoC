@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet.Expressions;
-using Favalet.Expressions.Basis;
-using Favalet.Expressions.Specialized;
+using Favalet.Terms;
+using Favalet.Terms.Basis;
+using Favalet.Terms.Specialized;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -24,29 +24,29 @@ namespace Favalet.Internals
     internal sealed class PlaceholderController
     {
         private int index = 1;
-        private readonly Dictionary<VariableExpression, Expression> memoizedExpressions =
-            new Dictionary<VariableExpression, Expression>();
+        private readonly Dictionary<VariableTerm, Term> memoizedTerms =
+            new Dictionary<VariableTerm, Term>();
 
         public PlaceholderController()
         { }
 
-        public PlaceholderExpression Create(Expression higherOrder, TextRange textRange) =>
-            new PlaceholderExpression(index++, higherOrder, textRange);
+        public PlaceholderTerm Create(Term higherOrder, TextRange textRange) =>
+            new PlaceholderTerm(index++, higherOrder, textRange);
 
-        public void Memoize(VariableExpression symbol, Expression expression) =>
-            memoizedExpressions.Add(symbol, expression);
+        public void Memoize(VariableTerm symbol, Term term) =>
+            memoizedTerms.Add(symbol, term);
 
-        private Expression? Lookup(
-            Terrain terrain, VariableExpression symbol0, VariableExpression symbol, HashSet<VariableExpression> collected)
+        private Term? Lookup(
+            Terrain terrain, VariableTerm symbol0, VariableTerm symbol, HashSet<VariableTerm> collected)
         {
-            Expression currentSymbol = symbol;
-            VariableExpression? foundSymbol = null;
-            Expression? foundExpression = null;
+            Term currentSymbol = symbol;
+            VariableTerm? foundSymbol = null;
+            Term? foundTerm = null;
             while (true)
             {
-                if (currentSymbol is VariableExpression variable)
+                if (currentSymbol is VariableTerm variable)
                 {
-                    if (memoizedExpressions.TryGetValue(variable, out var memoized)) 
+                    if (memoizedTerms.TryGetValue(variable, out var memoized)) 
                     {
                         if (memoized.Equals(variable))
                         {
@@ -61,26 +61,26 @@ namespace Favalet.Internals
                                 memoized);
                         }
 
-                        if (memoized is LambdaExpression lambda)
+                        if (memoized is LambdaTerm lambda)
                         {
-                            var parameter = ((lambda.Parameter is VariableExpression p) ?
-                                this.Lookup(terrain, symbol0, p, new HashSet<VariableExpression>(collected)) :
+                            var parameter = ((lambda.Parameter is VariableTerm p) ?
+                                this.Lookup(terrain, symbol0, p, new HashSet<VariableTerm>(collected)) :
                                 null) ??
                                 lambda.Parameter;
-                            var expression = ((lambda.Expression is VariableExpression e) ?
-                                this.Lookup(terrain, symbol0, e, new HashSet<VariableExpression>(collected)) :
+                            var term = ((lambda.Term is VariableTerm e) ?
+                                this.Lookup(terrain, symbol0, e, new HashSet<VariableTerm>(collected)) :
                                 null) ??
-                                lambda.Expression;
+                                lambda.Term;
 
-                            var newLambda = LambdaExpression.Create(parameter, expression, true, lambda.TextRange);
+                            var newLambda = LambdaTerm.Create(parameter, term, true, lambda.TextRange);
 
                             foundSymbol = variable;
-                            foundExpression = newLambda;
+                            foundTerm = newLambda;
                         }
                         else
                         {
                             foundSymbol = variable;
-                            foundExpression = memoized;
+                            foundTerm = memoized;
                              
                             currentSymbol = memoized;
                             continue;
@@ -91,15 +91,15 @@ namespace Favalet.Internals
                 // Make faster when updates with short circuit.
                 if (foundSymbol != null)
                 {
-                    Debug.Assert(foundExpression != null);
-                    memoizedExpressions[foundSymbol] = foundExpression;
+                    Debug.Assert(foundTerm != null);
+                    memoizedTerms[foundSymbol] = foundTerm;
                 }
 
-                return foundExpression;
+                return foundTerm;
             }
         }
 
-        public Expression? Lookup(Terrain terrain, VariableExpression symbol) =>
-            this.Lookup(terrain, symbol, symbol, new HashSet<VariableExpression>());
+        public Term? Lookup(Terrain terrain, VariableTerm symbol) =>
+            this.Lookup(terrain, symbol, symbol, new HashSet<VariableTerm>());
     }
 }

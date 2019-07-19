@@ -13,27 +13,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet.Terms;
 using System.ComponentModel;
 
-namespace Favalon
+namespace Favalet.Terms
 {
-    public struct ParseResult
+    public struct InferResult<TTerm>
+        where TTerm : Term
     {
-        public readonly Term? Term;
-        public readonly ParseErrorInformation[] ErrorInformations;
+        public readonly TTerm Term;
+        public readonly InferErrorInformation[] ErrorInformations;
 
-        private ParseResult(Term? term, ParseErrorInformation[] errorInformations)
+        private InferResult(TTerm term, InferErrorInformation[] errorInformations)
         {
             this.Term = term;
             this.ErrorInformations = errorInformations;
         }
 
-        public static ParseResult Create(Term? term, ParseErrorInformation[] errorInformations) =>
-            new ParseResult(term, errorInformations);
+        public static InferResult<TTerm> Create(TTerm term, InferErrorInformation[] errorInformations) =>
+            new InferResult<TTerm>(term, errorInformations);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void Deconstruct(out Term? term, out ParseErrorInformation[] errorInformations)
+        public void Deconstruct(out TTerm? term, out InferErrorInformation[] errorInformations)
         {
             term = this.Term;
             errorInformations = this.ErrorInformations;

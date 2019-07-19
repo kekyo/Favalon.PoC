@@ -14,7 +14,7 @@
 // limitations under the License.
 
 using Favalet;
-using Favalet.Expressions;
+using Favalet.Terms;
 using System.Collections.Generic;
 using System.Text;
 
@@ -48,7 +48,7 @@ namespace Favalon
             var index = 0;
             var beginIndex = -1;
             StringBuilder? temp = null;
-            Expression? expression = null;
+            Term? term = null;
             var errorInformations = new List<ParseErrorInformation>();
             char inch;
 
@@ -93,8 +93,8 @@ namespace Favalon
                     case States.String:
                         if (inch == '"')
                         {
-                            var literal = Expression.Literal(temp?.ToString() ?? string.Empty, GetCurrentTextRange());
-                            expression += literal;
+                            var literal = Term.Literal(temp?.ToString() ?? string.Empty, GetCurrentTextRange());
+                            term += literal;
                             temp?.Clear();
 
                             beginIndex = -1;
@@ -136,8 +136,8 @@ namespace Favalon
                             var numeric =
                                 int.TryParse(numericString, out var i) ? i : long.TryParse(numericString, out var l) ? l :
                                 float.TryParse(numericString, out var f) ? f : double.Parse(numericString);
-                            var literal = Expression.Literal(numeric, GetCurrentTextRange());
-                            expression += literal;
+                            var literal = Term.Literal(numeric, GetCurrentTextRange());
+                            term += literal;
 
                             beginIndex = -1;
                             state = States.Detect;
@@ -154,8 +154,8 @@ namespace Favalon
                         else if (char.IsWhiteSpace(inch) || (inch == eol))
                         {
                             var word = text.Substring(beginIndex, index - beginIndex - 1);
-                            var variable = Expression.Free(word, Expression.Unspecified, GetCurrentTextRange());
-                            expression += variable;
+                            var variable = Term.Free(word, Term.Unspecified, GetCurrentTextRange());
+                            term += variable;
 
                             beginIndex = -1;
                             state = States.Detect;
@@ -169,7 +169,7 @@ namespace Favalon
             }
             while ((index <= text.Length) && (inch != eol));
 
-            return ParseResult.Create(expression, errorInformations.ToArray()); ;
+            return ParseResult.Create(term, errorInformations.ToArray()); ;
         }
 
         public static Parser Create() =>

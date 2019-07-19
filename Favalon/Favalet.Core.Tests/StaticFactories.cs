@@ -13,60 +13,60 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet.Expressions;
-using Favalet.Expressions.Additionals;
-using Favalet.Expressions.Basis;
-using Favalet.Expressions.Internals;
-using Favalet.Expressions.Specialized;
+using Favalet.Terms;
+using Favalet.Terms.Additionals;
+using Favalet.Terms.Basis;
+using Favalet.Terms.Internals;
+using Favalet.Terms.Specialized;
 
 namespace Favalet
 {
     public static class StaticFactories
     {
-        public static UnspecifiedExpression Unspecified =>
-            Expression.Unspecified;
+        public static UnspecifiedTerm Unspecified =>
+            Term.Unspecified;
 
-        public static KindExpression Kind =>
-            Expression.Kind;
-        public static TypeExpression Type =>
-            Expression.Type;
+        public static KindTerm Kind =>
+            Term.Kind;
+        public static TypeTerm Type =>
+            Term.Type;
 
-        public static LiteralExpression Literal(object value) =>
-            Expression.Literal(value, TextRange.Unknown);
+        public static LiteralTerm Literal(object value) =>
+            Term.Literal(value, TextRange.Unknown);
 
-        public static SymbolicVariableExpression Free(string name, Expression higherOrder) =>
-            Expression.Free(name, higherOrder, TextRange.Unknown);
-        public static SymbolicVariableExpression Free(string name) =>
-            Expression.Free(name, Unspecified, TextRange.Unknown);
+        public static SymbolicVariableTerm Free(string name, Term higherOrder) =>
+            Term.Free(name, higherOrder, TextRange.Unknown);
+        public static SymbolicVariableTerm Free(string name) =>
+            Term.Free(name, Unspecified, TextRange.Unknown);
 
-        public static SymbolicVariableExpression Implicit(string name, Expression higherOrder) =>
-            ImplicitVariableExpression.Create(name, higherOrder, TextRange.Unknown);
-        public static SymbolicVariableExpression Implicit(string name) =>
-            ImplicitVariableExpression.Create(name, Unspecified, TextRange.Unknown);
+        public static SymbolicVariableTerm Implicit(string name, Term higherOrder) =>
+            ImplicitVariableTerm.Create(name, higherOrder, TextRange.Unknown);
+        public static SymbolicVariableTerm Implicit(string name) =>
+            ImplicitVariableTerm.Create(name, Unspecified, TextRange.Unknown);
 
-        public static BoundVariableExpression Bound(string name, Expression higherOrder) =>
-            Expression.Bound(name, higherOrder, TextRange.Unknown);
-        public static BoundVariableExpression Bound(string name) =>
-            Expression.Bound(name, Unspecified, TextRange.Unknown);
+        public static BoundVariableTerm Bound(string name, Term higherOrder) =>
+            Term.Bound(name, higherOrder, TextRange.Unknown);
+        public static BoundVariableTerm Bound(string name) =>
+            Term.Bound(name, Unspecified, TextRange.Unknown);
 
-        public static ApplyExpression Apply(Expression function, Expression argument, Expression higherOrder) =>
-            Expression.Apply(function, argument, higherOrder, TextRange.Unknown);
-        public static ApplyExpression Apply(Expression function, Expression argument) =>
-            Expression.Apply(function, argument, Unspecified, TextRange.Unknown);
+        public static ApplyTerm Apply(Term function, Term argument, Term higherOrder) =>
+            Term.Apply(function, argument, higherOrder, TextRange.Unknown);
+        public static ApplyTerm Apply(Term function, Term argument) =>
+            Term.Apply(function, argument, Unspecified, TextRange.Unknown);
 
-        public static LambdaExpression Lambda(BoundVariableExpression parameter, Expression expression) =>
-            Expression.Lambda(parameter, expression, TextRange.Unknown);
-        public static LambdaExpression Lambda(LambdaExpression parameter, Expression expression) =>
-            Expression.Lambda(parameter, expression, TextRange.Unknown);
+        public static LambdaTerm Lambda(BoundVariableTerm parameter, Term term) =>
+            Term.Lambda(parameter, term, TextRange.Unknown);
+        public static LambdaTerm Lambda(LambdaTerm parameter, Term term) =>
+            Term.Lambda(parameter, term, TextRange.Unknown);
 
-        public static BindExpression Bind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
-            Expression.Bind(bound, expression, higherOrder, TextRange.Unknown);
-        public static BindExpression Bind(BoundVariableExpression bound, Expression expression) =>
-            Expression.Bind(bound, expression, Unspecified, TextRange.Unknown);
+        public static BindTerm Bind(BoundVariableTerm bound, Term term, Term higherOrder) =>
+            Term.Bind(bound, term, higherOrder, TextRange.Unknown);
+        public static BindTerm Bind(BoundVariableTerm bound, Term term) =>
+            Term.Bind(bound, term, Unspecified, TextRange.Unknown);
 
-        public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression, Expression higherOrder) =>
-            Expression.RecursiveBind(bound, expression, higherOrder, TextRange.Unknown);
-        public static BindExpression RecursiveBind(BoundVariableExpression bound, Expression expression) =>
-            Expression.RecursiveBind(bound, expression, Unspecified, TextRange.Unknown);
+        public static BindTerm RecursiveBind(BoundVariableTerm bound, Term term, Term higherOrder) =>
+            Term.RecursiveBind(bound, term, higherOrder, TextRange.Unknown);
+        public static BindTerm RecursiveBind(BoundVariableTerm bound, Term term) =>
+            Term.RecursiveBind(bound, term, Unspecified, TextRange.Unknown);
     }
 }

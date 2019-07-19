@@ -24,8 +24,8 @@ namespace Favalon
         public void ApplyVariables()
         {
             var parser = Parser.Create();
-            var (expression, errors) = parser.Append("aaa bbb ccc", 0);
-            Assert.AreEqual("((aaa:_ bbb:_):_ ccc:_):_", expression?.StrictReadableString);
+            var (term, errors) = parser.Append("aaa bbb ccc", 0);
+            Assert.AreEqual("((aaa:_ bbb:_):_ ccc:_):_", term?.StrictReadableString);
             Assert.AreEqual(0, errors.Length);
         }
 
@@ -33,8 +33,8 @@ namespace Favalon
         public void ApplyCombinedVariableAndNumeric()
         {
             var parser = Parser.Create();
-            var (expression, errors) = parser.Append("aaa 123", 0);
-            Assert.AreEqual("(aaa:_ 123:?):_", expression?.StrictReadableString);
+            var (term, errors) = parser.Append("aaa 123", 0);
+            Assert.AreEqual("(aaa:_ 123:?):_", term?.StrictReadableString);
             Assert.AreEqual(0, errors.Length);
         }
 
@@ -42,8 +42,8 @@ namespace Favalon
         public void ApplyCombinedVariableAndSymbol()
         {
             var parser = Parser.Create();
-            var (expression, errors) = parser.Append("aaa | bbb", 0);
-            Assert.AreEqual("((aaa:_ |:_):_ bbb:_):_", expression?.StrictReadableString);
+            var (term, errors) = parser.Append("aaa | bbb", 0);
+            Assert.AreEqual("((aaa:_ |:_):_ bbb:_):_", term?.StrictReadableString);
             Assert.AreEqual(0, errors.Length);
         }
     }

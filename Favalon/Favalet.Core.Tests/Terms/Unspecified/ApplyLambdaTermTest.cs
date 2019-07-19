@@ -49,7 +49,7 @@ namespace Favalet.Terms.Unspecified
             Assert.AreEqual("(a:_ -> (a:_ b:_):_):_", term.StrictReadableString);
 
             var (inferred, errors) = context.Infer(term, Term.Unspecified);
-            Assert.AreEqual("(a:('4:_ -> '3:_):(_ -> _) -> (a:('4:_ -> '3:_):(_ -> _) b:'4:_):'3:_):(('4:_ -> '3:_):(_ -> _) -> '3:_):(_ -> _)", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(a:('a -> 'b) -> (a:('a -> 'b) b:'a):'b):(('a -> 'b) -> 'b)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -84,7 +84,25 @@ namespace Favalet.Terms.Unspecified
             Assert.AreEqual("(a:_ -> (b:_ -> (a:_ b:_):_):_):_", term.StrictReadableString);
 
             var (inferred, errors) = context.Infer(term, Term.Unspecified);
-            Assert.AreEqual("(a:('4:_ -> '5:_):(_ -> _) -> (b:'4:_ -> (a:('4:_ -> '5:_):(_ -> _) b:'4:_):'5:_):('4:_ -> '5:_):(_ -> _)):(('4:_ -> '5:_):(_ -> _) -> ('4:_ -> '5:_):(_ -> _)):(_ -> (_ -> _))", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(a:('a -> 'b) -> (b:'a -> (a:('a -> 'b) b:'a):'b):('a -> 'b)):(('a -> 'b) -> 'a -> 'b)", inferred.AnnotatedReadableString);
+        }
+
+        [Test]
+        public void ApplyLambda3()
+        {
+            var context = Terrain.Create();
+
+            /*
+            Apply and Lambda 2:
+            a -> b -> b a
+            (a:_ -> (b:_ -> (b:_ a:_):_):_):_
+            */
+
+            var term = Lambda(Bound("a"), Lambda(Bound("b"), Apply(Free("b"), Free("a"))));
+            Assert.AreEqual("(a:_ -> (b:_ -> (b:_ a:_):_):_):_", term.StrictReadableString);
+
+            var (inferred, errors) = context.Infer(term, Term.Unspecified);
+            Assert.AreEqual("(a:'a -> (b:('a -> 'b) -> (b:('a -> 'b) a:'a):'b):(('a -> 'b) -> 'b)):('a -> ('a -> 'b) -> 'b)", inferred.AnnotatedReadableString);
         }
     }
 }

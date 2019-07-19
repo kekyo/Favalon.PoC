@@ -13,8 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics;
+
 namespace Favalet.Terms
 {
+    [DebuggerDisplay("{AnnotatedReadableString}")]
     public abstract partial class Term
     {
         protected Term(Term higherOrder, TextRange textRange)

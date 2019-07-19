@@ -81,6 +81,21 @@ namespace Favalon
                         TextRange.Unknown),
                     TextRange.Unknown));
 
+            // | = a:_ -> b:_ -> b a
+            //terrain.Bind(
+            //    Term.Bound("|", Term.Unspecified, TextRange.Unknown),
+            //    Term.Lambda(
+            //        Term.Bound("a", Term.Unspecified, TextRange.Unknown),
+            //        Term.Lambda(
+            //            Term.Bound("b", Term.Unspecified, TextRange.Unknown),
+            //            Term.Apply(
+            //                Term.Free("b", Term.Unspecified, TextRange.Unknown),
+            //                Term.Free("a", Term.Unspecified, TextRange.Unknown),
+            //                Term.Unspecified,
+            //                TextRange.Unknown),
+            //            TextRange.Unknown),
+            //        TextRange.Unknown));
+
             var parser = Parser.Create();
 
             for (var line = 0; line < int.MaxValue; line++)

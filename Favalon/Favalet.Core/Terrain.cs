@@ -31,14 +31,20 @@ namespace Favalet
         private Terrain()
         { }
 
-#line hidden
+//#line hidden
         private PlaceholderTerm CreatePlaceholder(Term higherOrder, TextRange textRange) =>
             placeholderController.Create(higherOrder, textRange);
         PlaceholderTerm Term.IInferringContext.CreatePlaceholder(Term higherOrder, TextRange textRange) =>
             placeholderController.Create(higherOrder, textRange);
 
-        public void Bind(BoundVariableTerm bound, Term term) =>
-            placeholderController.Memoize(bound, term);
+        public void Bind(BoundVariableTerm bound, Term term)
+        {
+            var bind = Term.Bind(bound, term, UnspecifiedTerm.Instance, TextRange.Unknown);
+            var (inferred, errors) = this.Infer(bind, UnspecifiedTerm.Instance);
+
+            //placeholderController.Memoize(inferred.Bound, inferred.Term);
+        }
+
         void Term.IInferringContext.Memoize(SymbolicVariableTerm symbol, Term term) =>
             placeholderController.Memoize(symbol, term);
 

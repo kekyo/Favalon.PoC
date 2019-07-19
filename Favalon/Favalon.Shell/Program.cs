@@ -67,27 +67,12 @@ namespace Favalon
 
             // | = a -> b -> b a
             // | = a:IE<s> -> b:(IE<s> -> IE<s>) -> b a
-            terrain.Bind(
-                Term.Bound("|", Term.Unspecified, TextRange.Unknown),
-                Term.Lambda(
-                    Term.Bound("a", tystr, TextRange.Unknown),
-                    Term.Lambda(
-                        Term.Bound("b", Term.Lambda(tystr, tystr, TextRange.Unknown), TextRange.Unknown),
-                        Term.Apply(
-                            Term.Free("b", Term.Unspecified, TextRange.Unknown),
-                            Term.Free("a", Term.Unspecified, TextRange.Unknown),
-                            Term.Unspecified,
-                            TextRange.Unknown),
-                        TextRange.Unknown),
-                    TextRange.Unknown));
-
-            // | = a:_ -> b:_ -> b a
             //terrain.Bind(
             //    Term.Bound("|", Term.Unspecified, TextRange.Unknown),
             //    Term.Lambda(
-            //        Term.Bound("a", Term.Unspecified, TextRange.Unknown),
+            //        Term.Bound("a", tystr, TextRange.Unknown),
             //        Term.Lambda(
-            //            Term.Bound("b", Term.Unspecified, TextRange.Unknown),
+            //            Term.Bound("b", Term.Lambda(tystr, tystr, TextRange.Unknown), TextRange.Unknown),
             //            Term.Apply(
             //                Term.Free("b", Term.Unspecified, TextRange.Unknown),
             //                Term.Free("a", Term.Unspecified, TextRange.Unknown),
@@ -95,6 +80,21 @@ namespace Favalon
             //                TextRange.Unknown),
             //            TextRange.Unknown),
             //        TextRange.Unknown));
+
+            // | = a:_ -> b:_ -> b a
+            terrain.Bind(
+                Term.Bound("|", Term.Unspecified, TextRange.Unknown),
+                Term.Lambda(
+                    Term.Bound("a", Term.Unspecified, TextRange.Unknown),
+                    Term.Lambda(
+                        Term.Bound("b", Term.Unspecified, TextRange.Unknown),
+                        Term.Apply(
+                            Term.Free("b", Term.Unspecified, TextRange.Unknown),
+                            Term.Free("a", Term.Unspecified, TextRange.Unknown),
+                            Term.Unspecified,
+                            TextRange.Unknown),
+                        TextRange.Unknown),
+                    TextRange.Unknown));
 
             var parser = Parser.Create();
 
@@ -106,7 +106,7 @@ namespace Favalon
                 switch (parser.Append(text, line))
                 {
                     case ParseResult(Term term, _):
-                        await Console.Out.WriteLineAsync($"parsed: {term.StrictReadableString}");
+                        await Console.Out.WriteLineAsync($"parsed: {term.AnnotatedReadableString}");
 
                         var (inferred, errors) = terrain.Infer(term, Term.Unspecified);
 
@@ -115,7 +115,7 @@ namespace Favalon
 
                         if (inferred != null)
                         {
-                            await Console.Out.WriteLineAsync($"inferred: {inferred.StrictReadableString}");
+                            await Console.Out.WriteLineAsync($"inferred: {inferred.AnnotatedReadableString}");
                         }
                         break;
                     case ParseResult(_, ParseErrorInformation[] errors2):

@@ -45,33 +45,37 @@ namespace Favalon
         {
             var terrain = Terrain.Create();
 
-            var str = Term.Bound("System.String", Term.Kind, TextRange.Unknown);
-            terrain.Bind(str, str);
-
-            var seqstr = Term.Bound("System.Collections.Generic.IEnumerable<System.String>", Term.Kind, TextRange.Unknown);
-            terrain.Bind(seqstr, seqstr);
+            var tystr = Term.Bound("System.String", Term.Kind, TextRange.Unknown);
+            terrain.Bind(tystr, tystr);
 
             // wc = stdin:IE<s> -> stdin:IE<s>
             terrain.Bind(
                 Term.Bound("wc", Term.Unspecified, TextRange.Unknown),
                 Term.Lambda(
-                    Term.Bound("stdin", str, TextRange.Unknown),
-                    Term.Free("stdin", str, TextRange.Unknown),
+                    Term.Bound("stdin", tystr, TextRange.Unknown),
+                    Term.Free("stdin", tystr, TextRange.Unknown),
                     TextRange.Unknown));
-            // | = x:(IE<s> -> IE<s>) -> y:(IE<s> -> IE<s>) -> y x
+
+            // wc : System.String -> System.String
+            // let r = wc "abc"
+
+            // let r = "abc" | wc
+            // let r = | "abc" wc
+
+            // let | a b = b a
+            // let | = fun a -> fun b -> b a
+
+            // | = a -> b -> b a
+            // | = a:IE<s> -> b:(IE<s> -> IE<s>) -> b a
             terrain.Bind(
                 Term.Bound("|", Term.Unspecified, TextRange.Unknown),
                 Term.Lambda(
-                    Term.Bound("x",
-                        Term.Lambda(str, str, TextRange.Unknown),
-                        TextRange.Unknown),
+                    Term.Bound("a", tystr, TextRange.Unknown),
                     Term.Lambda(
-                        Term.Bound("y",
-                            Term.Lambda(str, str, TextRange.Unknown),
-                            TextRange.Unknown),
+                        Term.Bound("b", Term.Lambda(tystr, tystr, TextRange.Unknown), TextRange.Unknown),
                         Term.Apply(
-                            Term.Free("y", Term.Unspecified, TextRange.Unknown),
-                            Term.Free("x", Term.Unspecified, TextRange.Unknown),
+                            Term.Free("b", Term.Unspecified, TextRange.Unknown),
+                            Term.Free("a", Term.Unspecified, TextRange.Unknown),
                             Term.Unspecified,
                             TextRange.Unknown),
                         TextRange.Unknown),
@@ -87,7 +91,7 @@ namespace Favalon
                 switch (parser.Append(text, line))
                 {
                     case ParseResult(Term term, _):
-                        await Console.Out.WriteLineAsync($"parsed: {term.AnnotatedReadableString}");
+                        await Console.Out.WriteLineAsync($"parsed: {term.StrictReadableString}");
 
                         var (inferred, errors) = terrain.Infer(term, Term.Unspecified);
 
@@ -96,7 +100,7 @@ namespace Favalon
 
                         if (inferred != null)
                         {
-                            await Console.Out.WriteLineAsync($"inferred: {inferred.AnnotatedReadableString}");
+                            await Console.Out.WriteLineAsync($"inferred: {inferred.StrictReadableString}");
                         }
                         break;
                     case ParseResult(_, ParseErrorInformation[] errors2):

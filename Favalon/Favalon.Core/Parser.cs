@@ -57,8 +57,12 @@ namespace Favalon
                     textRange.Subtract(Position.Create(textRange.Range.First.Line, beginIndex), Position.Create(textRange.Range.Last.Line, index - 1)) :
                     textRange.Subtract(Position.Create(textRange.Range.First.Line, index), Position.Create(textRange.Range.Last.Line, index));
 
-            void RecordError(string details) =>
+            void RecordError(string details)
+            {
                 errorInformations.Add(ParseErrorInformation.Create(details, GetCurrentTextRange()));
+                beginIndex = -1;
+                state = States.Detect;
+            }
 
             do
             {

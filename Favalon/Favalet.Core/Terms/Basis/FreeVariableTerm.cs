@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet.Terms.Internals;
+
 namespace Favalet.Terms.Basis
 {
     public class FreeVariableTerm : SymbolicVariableTerm
@@ -22,10 +24,13 @@ namespace Favalet.Terms.Basis
         { }
 
         protected override Term CreateTermOnVisitInferring(Term higherOrder) =>
-            new FreeVariableTerm(this.Name, higherOrder, this.TextRange);
+            ImplicitVariableTerm.Create(this.Name, higherOrder, this.TextRange);
 
-        protected override Term VisitInferringOnBoundTermNotFound(IInferringContext context, Term higherOrderHint) =>
+        protected override Term VisitInferringOnBoundTermNotFound(IInferringContext context, Term higherOrderHint)
+        {
             context.RecordError($"Cannot find variable: Name={this.Name}", this);
+            return base.VisitInferringOnBoundTermNotFound(context, higherOrderHint);
+        }
 
         protected override Term VisitResolving(IResolvingContext context)
         {

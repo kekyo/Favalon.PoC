@@ -80,7 +80,7 @@ namespace Favalet.Terms.Unspecified
             Assert.AreEqual("(rec a:_ = (b:_ -> b:_):_):_", term.StrictReadableString);
 
             var (inferred, errors) = context.Infer(term, Term.Unspecified);
-            Assert.AreEqual("(rec a:('2:_ -> '2:_):(_ -> _) = (b:'2:_ -> b:'2:_):('2:_ -> '2:_):(_ -> _)):('2:_ -> '2:_):(_ -> _)", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(rec a:('a -> 'a) = (b:'a -> b:'a):('a -> 'a)):('a -> 'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -111,7 +111,7 @@ namespace Favalet.Terms.Unspecified
             Assert.AreEqual("(rec a:_ = (b:_ -> b:System.Int32:_):_):_", term.StrictReadableString);
 
             var (inferred, errors) = context.Infer(term, Term.Unspecified);
-            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(rec a:(System.Int32:'a -> System.Int32:'a):('a -> 'a) = (b:System.Int32:'a -> b:System.Int32:'a):(System.Int32:'a -> System.Int32:'a):('a -> 'a)):(System.Int32:'a -> System.Int32:'a):('a -> 'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -141,7 +141,7 @@ namespace Favalet.Terms.Unspecified
             Assert.AreEqual("(rec a:_ = (b:System.Int32:_ -> b:_):_):_", term.StrictReadableString);
 
             var (inferred, errors) = context.Infer(term, Term.Unspecified);
-            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(rec a:(System.Int32:'a -> System.Int32:'a):('a -> 'a) = (b:System.Int32:'a -> b:System.Int32:'a):(System.Int32:'a -> System.Int32:'a):('a -> 'a)):(System.Int32:'a -> System.Int32:'a):('a -> 'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -164,15 +164,9 @@ namespace Favalet.Terms.Unspecified
             var term = RecursiveBind(Bound("a", Implicit("System.Int32")), Lambda(Bound("b"), Free("b")));
             Assert.AreEqual("(rec a:System.Int32:_ = (b:_ -> b:_):_):_", term.StrictReadableString);
 
-            try
-            {
-                context.Infer(term, Term.Unspecified);
-                Assert.Fail();
-            }
-            catch (ArgumentException ex)
-            {
-                Assert.AreEqual("Cannot unify: between \"('2:_ -> '2:_):(_ -> _)\" and \"System.Int32:_\"", ex.Message);
-            }
+            var (inferred, errors) = context.Infer(term, Term.Unspecified);
+            Assert.IsNull(inferred);
+            Assert.AreEqual("Cannot unify: between \"('2:_ -> '2:_):(_ -> _)\" and \"System.Int32:_\"", errors.First().Details);
         }
 
         [Test]
@@ -203,7 +197,7 @@ namespace Favalet.Terms.Unspecified
             Assert.AreEqual("(rec a:(System.Int32:_ -> _):_ = (b:_ -> b:_):_):_", term.StrictReadableString);
 
             var (inferred, errors) = context.Infer(term, Term.Unspecified);
-            Assert.AreEqual("(rec a:(System.Int32:_ -> System.Int32:_):(_ -> _) = (b:System.Int32:_ -> b:System.Int32:_):(System.Int32:_ -> System.Int32:_):(_ -> _)):(System.Int32:_ -> System.Int32:_):(_ -> _)", inferred.AnnotatedReadableString);
+            Assert.AreEqual("(rec a:(System.Int32:'a -> System.Int32:'a):('a -> 'a) = (b:System.Int32:'a -> b:System.Int32:'a):(System.Int32:'a -> System.Int32:'a)):(System.Int32:'a -> System.Int32:'a)", inferred.AnnotatedReadableString);
         }
 
         [Test]
@@ -227,15 +221,8 @@ namespace Favalet.Terms.Unspecified
             var term = RecursiveBind(Bound("a"), Lambda(Bound("b"), Free("a")));
             Assert.AreEqual("(rec a:_ = (b:_ -> a:_):_):_", term.StrictReadableString);
 
-            try
-            {
-                context.Infer(term, Term.Unspecified);
-                Assert.Fail();
-            }
-            catch (ArgumentException ex)
-            {
-                Assert.AreEqual("Recursive unification problem: '1:_ ... ('2:_ -> '1:_):(_ -> _)", ex.Message);
-            }
+            var (inferred, errors) = context.Infer(term, Term.Unspecified);
+            Assert.AreEqual("Recursive unification problem: '1:_ ... ('2:_ -> '1:_):_", errors.First().Details);
         }
 
         [Test]
@@ -261,15 +248,8 @@ namespace Favalet.Terms.Unspecified
             var term = RecursiveBind(Bound("a"), RecursiveBind(Bound("b"), Apply(Free("a"), Free("b"))));
             Assert.AreEqual("(rec a:_ = (rec b:_ = (a:_ b:_):_):_):_", term.StrictReadableString);
 
-            try
-            {
-                context.Infer(term, Term.Unspecified);
-                Assert.Fail();
-            }
-            catch (ArgumentException ex)
-            {
-                Assert.AreEqual("Recursive unification problem: '1:_ ... ('1:_ -> '1:_):(_ -> _)", ex.Message);
-            }
+            var (inferred, errors) = context.Infer(term, Term.Unspecified);
+            Assert.AreEqual("Recursive unification problem: '1:_ ... '1:_ -> '1:_", errors.First().Details);
         }
 
         [Test]
@@ -295,15 +275,8 @@ namespace Favalet.Terms.Unspecified
             var term = RecursiveBind(Bound("a"), Apply(Free("a"), Implicit("b")));
             Assert.AreEqual("(rec a:_ = (a:_ b:_):_):_", term.StrictReadableString);
 
-            try
-            {
-                context.Infer(term, Term.Unspecified);
-                Assert.Fail();
-            }
-            catch (ArgumentException ex)
-            {
-                Assert.AreEqual("Recursive unification problem: '1:_ ... ('2:_ -> '1:_):(_ -> _)", ex.Message);
-            }
+            var (inferred, errors) = context.Infer(term, Term.Unspecified);
+            Assert.AreEqual("Recursive unification problem: '1:_ ... '2:_ -> '1:_", errors.First().Details);
         }
     }
 }

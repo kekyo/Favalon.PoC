@@ -14,13 +14,9 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Favalon
+namespace Favalon.Win32
 {
     internal static class NativeMethods
     {
@@ -71,7 +67,7 @@ namespace Favalon
             public ushort wRepeatCount;
             [FieldOffset(6), MarshalAs(UnmanagedType.U2)]
             //public VirtualKeys wVirtualKeyCode;
-            public ushort wVirtualKeyCode;
+            public VirtualKeys wVirtualKeyCode;
             [FieldOffset(8), MarshalAs(UnmanagedType.U2)]
             public ushort wVirtualScanCode;
             [FieldOffset(10)]
@@ -155,20 +151,7 @@ namespace Favalon
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr GetStdHandle(int type);
 
-        /*
-         * Version of ReadConsoleInput() that works with IME.
-         * Works around problems on Windows 8.
-         */
-        private const int IRSIZE = 10;
-        private static readonly INPUT_RECORD[] s_irCache = new INPUT_RECORD[IRSIZE];
-        private static uint s_dwIndex = 0;
-        private static uint s_dwMax = 0;
-
-        private const bool win8_or_later = true;    // TODO:
-
-#if true
-        public static KEY_EVENT_RECORD? ReadConsoleInput(
-            IntPtr hInput)
+        public static KEY_EVENT_RECORD? ReadConsoleInput(IntPtr hInput)
         {
             if (ReadConsoleInputW(hInput, out var record, 1, out var dwEvents))
             {
@@ -180,94 +163,5 @@ namespace Favalon
 
             return null;
         }
-#else
-        public static bool read_console_input(
-            IntPtr hInput,
-            INPUT_RECORD[] lpBuffer,
-            int nLength,
-            out uint lpEvents)
-        {
-            uint dwEvents;
-            uint head;
-            uint tail;
-            uint i;
-
-            if (nLength == -2)
-            {
-                lpEvents = 0;
-                return (s_dwMax > 0) ? true : false;
-            }
-
-            if (!win8_or_later)
-            {
-                if (nLength == -1)
-                    return PeekConsoleInputW(hInput, lpBuffer, 1, out lpEvents);
-                else
-                {
-                    lpEvents = 0;
-                    return ReadConsoleInputW(hInput, lpBuffer, 1, out dwEvents);
-                }
-            }
-
-            if (s_dwMax == 0)
-            {
-                if (nLength == -1)
-                    return PeekConsoleInputW(hInput, lpBuffer, 1, out lpEvents);
-                if (!ReadConsoleInputW(hInput, s_irCache, IRSIZE, out dwEvents))
-                {
-                    lpEvents = 0;
-                    return false;
-                }
-
-                s_dwIndex = 0;
-                s_dwMax = dwEvents;
-                if (dwEvents == 0)
-                {
-                    lpEvents = 0;
-                    return true;
-                }
-
-                if (s_dwMax > 1)
-                {
-                    head = 0;
-                    tail = s_dwMax - 1;
-                    while (head != tail)
-                    {
-                    if (s_irCache[head].EventType == WINDOW_BUFFER_SIZE_EVENT
-                        && s_irCache[head + 1].EventType
-                                      == WINDOW_BUFFER_SIZE_EVENT)
-                    {
-                        /* Remove duplicate event to avoid flicker. */
-                        for (i = head; i<tail; ++i)
-                        s_irCache[i] = s_irCache[i + 1];
-                        --tail;
-                        continue;
-                    }
-                    head++;
-                    }
-                    s_dwMax = tail + 1;
-                }
-            }
-
-            lpBuffer = s_irCache[s_dwIndex];
-            if (!(nLength == -1 || nLength == -2) && ++s_dwIndex >= s_dwMax)
-            s_dwMax = 0;
-            lpEvents = 1;
-            return true;
-        }
-
-        /*
-         * Version of PeekConsoleInput() that works with IME.
-         */
-        public static bool
-        peek_console_input(
-            IntPtr hInput,
-            INPUT_RECORD[] lpBuffer,
-            uint nLength,
-            out uint lpEvents)
-        {
-            return read_console_input(hInput, lpBuffer, -1, out lpEvents);
-        }
-#endif
     }
 }

@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Favalon
@@ -99,14 +100,16 @@ namespace Favalon
             var parser = Parser.Create();
 
 #if true
+            var reader = new ConsoleReader();
+            reader.Where(;
+
+
             while (true)
             {
-                if (ConsoleReader.Read() is char inch)
+                reader.Run();
+                if (!char.IsControl(inch))
                 {
-                    if (!char.IsControl(inch))
-                    {
-                        Console.Write(inch);
-                    }
+                    Console.Write(inch);
                 }
             }
 #else

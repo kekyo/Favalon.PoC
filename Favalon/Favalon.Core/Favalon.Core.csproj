@@ -4,7 +4,7 @@
     <TargetFrameworks>net40;net45;netstandard1.0;netstandard2.0</TargetFrameworks>
     <RootNamespace>Favalon</RootNamespace>
     <LangVersion>8.0</LangVersion>
-    <NullableContextOptions>enable</NullableContextOptions>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

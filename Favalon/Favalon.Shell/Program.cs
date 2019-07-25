@@ -98,6 +98,18 @@ namespace Favalon
 
             var parser = Parser.Create();
 
+#if true
+            while (true)
+            {
+                if (ConsoleReader.Read() is char inch)
+                {
+                    if (!char.IsControl(inch))
+                    {
+                        Console.Write(inch);
+                    }
+                }
+            }
+#else
             for (var line = 0; line < int.MaxValue; line++)
             {
                 await Console.Out.WriteAsync("Favalon> ");
@@ -124,6 +136,7 @@ namespace Favalon
                         break;
                 }
             }
+#endif
         }
     }
 }

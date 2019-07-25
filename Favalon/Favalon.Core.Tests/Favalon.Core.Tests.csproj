@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <RootNamespace>Favalon</RootNamespace>
     <LangVersion>8.0</LangVersion>
-    <NullableContextOptions>enable</NullableContextOptions>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

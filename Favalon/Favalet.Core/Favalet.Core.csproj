@@ -1,10 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net40;net45;netstandard1.0;netstandard2.0</TargetFrameworks>
     <RootNamespace>Favalet</RootNamespace>
     <LangVersion>8.0</LangVersion>
-    <NullableContextOptions>enable</NullableContextOptions>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

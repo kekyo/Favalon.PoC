@@ -121,18 +121,39 @@ namespace Favalon
         private const ushort WINDOW_BUFFER_SIZE_EVENT = 0x0004;
 
         [DllImport("kernel32.dll", EntryPoint = "PeekConsoleInputW", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool PeekConsoleInput(
+        public static extern bool PeekConsoleInputW(
             IntPtr hConsoleInput,
             [MarshalAs(UnmanagedType.LPArray), Out] INPUT_RECORD[] lpBuffer,
             uint nLength,
             out uint lpNumberOfEventsRead);
 
-        [DllImport("kernel32.dll", EntryPoint = "ReadConsoleInputW", CharSet = CharSet.Unicode, SetLastError = true)])]
-        private static extern bool ReadConsoleInput(
+        [DllImport("kernel32.dll", EntryPoint = "PeekConsoleInputW", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern bool PeekConsoleInputW(
+            IntPtr hConsoleInput,
+            out INPUT_RECORD lpBuffer,
+            uint nLength1,
+            out uint lpNumberOfEventsRead);
+
+        [DllImport("kernel32.dll", EntryPoint = "ReadConsoleInputW", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool ReadConsoleInputW(
             IntPtr hConsoleInput,
             [MarshalAs(UnmanagedType.LPArray), Out] INPUT_RECORD[] lpBuffer,
             uint nLength,
             out uint lpNumberOfEventsRead);
+
+        [DllImport("kernel32.dll", EntryPoint = "ReadConsoleInputW", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool ReadConsoleInputW(
+            IntPtr hConsoleInput,
+            out INPUT_RECORD lpBuffer,
+            uint nLength1,
+            out uint lpNumberOfEventsRead);
+
+        public const int STD_OUTPUT_HANDLE = -11;
+        public const int STD_INPUT_HANDLE = -10;
+        public const int STD_ERROR_HANDLE = -12;
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern IntPtr GetStdHandle(int type);
 
         /*
          * Version of ReadConsoleInput() that works with IME.
@@ -145,7 +166,22 @@ namespace Favalon
 
         private const bool win8_or_later = true;    // TODO:
 
-        static bool read_console_input(
+#if true
+        public static KEY_EVENT_RECORD? ReadConsoleInput(
+            IntPtr hInput)
+        {
+            if (ReadConsoleInputW(hInput, out var record, 1, out var dwEvents))
+            {
+                if (record.EventType == KEY_EVENT)
+                {
+                    return record.KeyEvent;
+                }
+            }
+
+            return null;
+        }
+#else
+        public static bool read_console_input(
             IntPtr hInput,
             INPUT_RECORD[] lpBuffer,
             int nLength,
@@ -165,19 +201,19 @@ namespace Favalon
             if (!win8_or_later)
             {
                 if (nLength == -1)
-                    return PeekConsoleInput(hInput, lpBuffer, 1, out lpEvents);
+                    return PeekConsoleInputW(hInput, lpBuffer, 1, out lpEvents);
                 else
                 {
                     lpEvents = 0;
-                    return ReadConsoleInput(hInput, lpBuffer, 1, out dwEvents);
+                    return ReadConsoleInputW(hInput, lpBuffer, 1, out dwEvents);
                 }
             }
 
             if (s_dwMax == 0)
             {
                 if (nLength == -1)
-                    return PeekConsoleInput(hInput, lpBuffer, 1, out lpEvents);
-                if (!ReadConsoleInput(hInput, s_irCache, IRSIZE, out dwEvents))
+                    return PeekConsoleInputW(hInput, lpBuffer, 1, out lpEvents);
+                if (!ReadConsoleInputW(hInput, s_irCache, IRSIZE, out dwEvents))
                 {
                     lpEvents = 0;
                     return false;
@@ -232,5 +268,6 @@ namespace Favalon
         {
             return read_console_input(hInput, lpBuffer, -1, out lpEvents);
         }
+#endif
     }
 }

@@ -15,11 +15,13 @@
 
 using Favalet;
 using Favalet.Terms;
+using Favalet.Terms.Basis;
+using Favalon.IO;
+using Favalon.Parsing;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Favalon
@@ -97,49 +99,48 @@ namespace Favalon
                         TextRange.Unknown),
                     TextRange.Unknown));
 
-            var parser = Parser.Create();
+            var console = InteractiveConsoleHost.Create();
+            var parser = ObservableParser.Create(console);
+            var cts = new CancellationTokenSource();
 
-#if true
-            var reader = new ConsoleReader();
-            reader.Where(;
+            console.Write("Favalon> ");
 
-
-            while (true)
+            using (parser.Subscribe(result =>
             {
-                reader.Run();
-                if (!char.IsControl(inch))
-                {
-                    Console.Write(inch);
-                }
-            }
-#else
-            for (var line = 0; line < int.MaxValue; line++)
-            {
-                await Console.Out.WriteAsync("Favalon> ");
+                console.WriteLine();
 
-                var text = await Console.In.ReadLineAsync();
-                switch (parser.Append(text, line))
+                switch (result)
                 {
+                    case ParseResult(FreeVariableTerm term, _) when term.Name == "exit":
+                        cts.Cancel();
+                        break;
+
                     case ParseResult(Term term, _):
-                        await Console.Out.WriteLineAsync($"parsed: {term.AnnotatedReadableString}");
-
+                        console.WriteLine($"parsed: {term.AnnotatedReadableString}");
                         var (inferred, errors) = terrain.Infer(term, Term.Unspecified);
-
-                        await Task.WhenAll(errors.
-                            Select(error => Console.Out.WriteLineAsync(error.ToString())));
-
+                        foreach (var error in errors)
+                        {
+                            console.WriteLine($"{error}");
+                        }
                         if (inferred != null)
                         {
-                            await Console.Out.WriteLineAsync($"inferred: {inferred.AnnotatedReadableString}");
+                            console.WriteLine($"inferred: {inferred.AnnotatedReadableString}");
                         }
                         break;
+
                     case ParseResult(_, ParseErrorInformation[] errors2):
-                        await Task.WhenAll(errors2.
-                            Select(error => Console.Out.WriteLineAsync(error.ToString())));
+                        foreach (var error in errors2)
+                        {
+                            console.WriteLine($"{error}");
+                        }
                         break;
                 }
+
+                console.Write("Favalon> ");
+            }))
+            {
+                await console.RunAsync(cts.Token);
             }
-#endif
         }
     }
 }

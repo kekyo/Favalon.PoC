@@ -18,9 +18,9 @@ using Favalet.Terms;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Favalon
+namespace Favalon.Parsing
 {
-    public sealed class Parser
+    public sealed class OldParser
     {
         private enum States
         {
@@ -34,7 +34,7 @@ namespace Favalon
         private readonly TextRange textRange;
         private States state = States.Detect;
 
-        private Parser(TextRange textRange) =>
+        private OldParser(TextRange textRange) =>
             this.textRange = textRange;
 
         public ParseResult Append(string text, int line) =>
@@ -176,9 +176,9 @@ namespace Favalon
             return ParseResult.Create(term, errorInformations.ToArray()); ;
         }
 
-        public static Parser Create() =>
-            new Parser(TextRange.Create(Range.MaxValue));
-        public static Parser Create(TextRange textRange) =>
-            new Parser(textRange);
+        public static OldParser Create() =>
+            new OldParser(TextRange.Create(Range.MaxValue));
+        public static OldParser Create(TextRange textRange) =>
+            new OldParser(textRange);
     }
 }

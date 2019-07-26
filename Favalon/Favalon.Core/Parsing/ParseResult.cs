@@ -16,7 +16,7 @@
 using Favalet.Terms;
 using System.ComponentModel;
 
-namespace Favalon
+namespace Favalon.Parsing
 {
     public struct ParseResult
     {

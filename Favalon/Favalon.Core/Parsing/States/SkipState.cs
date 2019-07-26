@@ -13,27 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet;
-using System.ComponentModel;
+using Favalon.IO;
 
-namespace Favalon
+namespace Favalon.Parsing.States
 {
-    public sealed class ParseErrorInformation : ErrorInformation
+    internal sealed class SkipState : State
     {
-        private ParseErrorInformation(string details, TextRange textRange) :
-            base(details) =>
-            this.TextRange = textRange;
+        private SkipState()
+        { }
 
-        public override TextRange TextRange { get; }
-
-        public static ParseErrorInformation Create(string details, TextRange textRange) =>
-            new ParseErrorInformation(details, textRange);
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public void Deconstruct(out string details, out TextRange textRange)
+        public override State Run(InteractiveInformation inch, StateContext context)
         {
-            details = this.Details;
-            textRange = this.TextRange;
+            if (char.IsWhiteSpace(inch.Character) || (inch.Character == '\r') || (inch.Character == '\n'))
+            {
+                return DetectState.Instance;
+            }
+            else
+            {
+                return this;
+            }
         }
+
+        public override void Finalize(StateContext context)
+        {
+        }
+
+        public static readonly State Instance = new SkipState();
     }
 }

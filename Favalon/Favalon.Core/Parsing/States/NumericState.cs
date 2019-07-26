@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet;
 using Favalet.Terms;
 using Favalon.IO;
 
@@ -23,15 +24,12 @@ namespace Favalon.Parsing.States
         private NumericState()
         { }
 
-        private void RunFinishing(StateContext context)
+        protected override Term MakeTerm(string token, TextRange textRange)
         {
-            var (numericString, textRange) = context.ExtractToken();
             var numeric =
-                int.TryParse(numericString, out var i) ? i : long.TryParse(numericString, out var l) ? l :
-                float.TryParse(numericString, out var f) ? f : double.Parse(numericString);
-
-            var literal = Term.Literal(numeric, textRange);
-            context.AppendTerm(literal);
+                int.TryParse(token, out var i) ? i : long.TryParse(token, out var l) ? l :
+                float.TryParse(token, out var f) ? f : double.Parse(token);
+            return Term.Literal(numeric, textRange);
         }
 
         public override State Run(InteractiveInformation inch, StateContext context)

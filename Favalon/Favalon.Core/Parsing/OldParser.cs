@@ -173,7 +173,7 @@ namespace Favalon.Parsing
             }
             while ((index <= text.Length) && (inch != eol));
 
-            return ParseResult.Create(term, errorInformations.ToArray()); ;
+            return ParseResult.Create(term, errorInformations.ToArray(), null);
         }
 
         public static OldParser Create() =>

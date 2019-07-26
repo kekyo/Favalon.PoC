@@ -17,9 +17,16 @@ using System.Diagnostics;
 
 namespace Favalet.Terms
 {
+    public interface ITraversableTerm
+    {
+        Term[] Children { get; }
+    }
+
     [DebuggerDisplay("{AnnotatedReadableString}")]
     public abstract partial class Term
     {
+        private static readonly Term[] emptyTerms = new Term[0];
+
         protected Term(Term higherOrder, TextRange textRange)
         {
             this.HigherOrder = higherOrder;

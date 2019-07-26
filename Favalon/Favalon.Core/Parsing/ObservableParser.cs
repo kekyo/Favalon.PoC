@@ -39,6 +39,14 @@ namespace Favalon.Parsing
 
         void IObserver<InteractiveInformation>.OnNext(InteractiveInformation value)
         {
+            if ((value.Character == ' ') && (value.Modifier == InteractiveModifiers.Control))
+            {
+                if (currentState.PeekResult(stateContext) is ParseResult result)
+                {
+                    base.OnNext(result);
+                }
+            }
+
             var newState = currentState.Run(value, stateContext);
 
             if (!char.IsControl(value.Character) && (value.Modifier == InteractiveModifiers.None))
@@ -46,7 +54,9 @@ namespace Favalon.Parsing
                 interactiveHost.Write(value.Character);
             }
 
-            if (!(currentState is DetectState) && newState is DetectState && State.IsTokenSeparator(value.Character))
+            if (!(currentState is DetectState) &&
+                (newState is DetectState) &&
+                State.IsTokenSeparator(value.Character))
             {
                 if (stateContext.ExtractResult() is ParseResult result)
                 {

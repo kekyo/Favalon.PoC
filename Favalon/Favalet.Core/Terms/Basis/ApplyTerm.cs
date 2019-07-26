@@ -18,7 +18,7 @@ using System.ComponentModel;
 
 namespace Favalet.Terms.Basis
 {
-    public sealed class ApplyTerm : Term
+    public sealed class ApplyTerm : Term, ITraversableTerm
     {
         internal ApplyTerm(Term function, Term argument, Term higherOrder, TextRange textRange) :
             base(higherOrder, textRange)
@@ -29,6 +29,9 @@ namespace Favalet.Terms.Basis
 
         public readonly Term Function;
         public readonly Term Argument;
+
+        public Term[] Children =>
+            new[] { this.Function, this.Argument };
 
         protected override FormattedString FormatReadableString(FormatContext context) =>
             FormattedString.RequiredEnclosing(

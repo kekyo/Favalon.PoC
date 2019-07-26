@@ -53,7 +53,7 @@ namespace Favalon
 
             // wc = stdin:IE<s> -> stdin:IE<s>
             terrain.Bind(
-                Term.Bound("wc", Term.Unspecified, TextRange.Unknown),
+                Term.Bound("wordcount", Term.Unspecified, TextRange.Unknown),
                 Term.Lambda(
                     Term.Bound("stdin", tystr, TextRange.Unknown),
                     Term.Free("stdin", tystr, TextRange.Unknown),
@@ -109,26 +109,39 @@ namespace Favalon
             {
                 console.WriteLine();
 
+                Term? WriteInfer(Term term)
+                {
+                    console.WriteLine($"parsed: {term.AnnotatedReadableString}");
+                    var (inferred, errors) = terrain.Infer(term, Term.Unspecified);
+                    foreach (var error in errors)
+                    {
+                        console.WriteLine($"{error}");
+                    }
+                    if (inferred != null)
+                    {
+                        console.WriteLine($"inferred: {inferred.AnnotatedReadableString}");
+                    }
+                    return inferred;
+                }
+
                 switch (result)
                 {
-                    case ParseResult(FreeVariableTerm term, _) when term.Name == "exit":
+                    case ParseResult(FreeVariableTerm term, _, _) when term.Name == "exit":
                         cts.Cancel();
                         break;
 
-                    case ParseResult(Term term, _):
-                        console.WriteLine($"parsed: {term.AnnotatedReadableString}");
-                        var (inferred, errors) = terrain.Infer(term, Term.Unspecified);
-                        foreach (var error in errors)
+                    case ParseResult(Term term, _, TextRange targetTextRange):
                         {
-                            console.WriteLine($"{error}");
-                        }
-                        if (inferred != null)
-                        {
-                            console.WriteLine($"inferred: {inferred.AnnotatedReadableString}");
+                            var inferred = WriteInfer(term);
+                            var targetTerms = inferred.ExtractTerms(targetTextRange);
                         }
                         break;
 
-                    case ParseResult(_, ParseErrorInformation[] errors2):
+                    case ParseResult(Term term, _, _):
+                        WriteInfer(term);
+                        break;
+
+                    case ParseResult(_, ParseErrorInformation[] errors2, _):
                         foreach (var error in errors2)
                         {
                             console.WriteLine($"{error}");

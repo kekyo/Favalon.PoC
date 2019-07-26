@@ -19,7 +19,7 @@ using System.Diagnostics;
 
 namespace Favalet.Terms.Basis
 {
-    public sealed class LambdaTerm : ValueTerm
+    public sealed class LambdaTerm : ValueTerm, ITraversableTerm
     {
         private LambdaTerm(Term parameter, Term term, Term higherOrder, TextRange textRange) :
             base(higherOrder, textRange)
@@ -30,6 +30,9 @@ namespace Favalet.Terms.Basis
 
         public readonly Term Parameter;
         public readonly Term Term;
+
+        public Term[] Children =>
+            new[] { this.Parameter, this.Term };
 
         protected override FormattedString FormatReadableString(FormatContext context)
         {

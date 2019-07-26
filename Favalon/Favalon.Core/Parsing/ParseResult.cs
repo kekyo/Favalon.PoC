@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet;
 using Favalet.Terms;
 using System.ComponentModel;
 
@@ -22,21 +23,24 @@ namespace Favalon.Parsing
     {
         public readonly Term? Term;
         public readonly ParseErrorInformation[] ErrorInformations;
+        public readonly TextRange? TargetTextRange;
 
-        private ParseResult(Term? term, ParseErrorInformation[] errorInformations)
+        private ParseResult(Term? term, ParseErrorInformation[] errorInformations, TextRange? targetTextRange)
         {
             this.Term = term;
             this.ErrorInformations = errorInformations;
+            this.TargetTextRange = targetTextRange;
         }
 
-        public static ParseResult Create(Term? term, ParseErrorInformation[] errorInformations) =>
-            new ParseResult(term, errorInformations);
+        public static ParseResult Create(Term? term, ParseErrorInformation[] errorInformations, TextRange? targetTextRange) =>
+            new ParseResult(term, errorInformations, targetTextRange);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void Deconstruct(out Term? term, out ParseErrorInformation[] errorInformations)
+        public void Deconstruct(out Term? term, out ParseErrorInformation[] errorInformations, out TextRange? targetTextRange)
         {
             term = this.Term;
             errorInformations = this.ErrorInformations;
+            targetTextRange = this.TargetTextRange;
         }
     }
 }

@@ -56,6 +56,9 @@ namespace Favalon.Parsing.States
         {
         }
 
+        public override ParseResult? PeekResult(StateContext context) =>
+            null;
+
         public static readonly State Instance = new DetectState();
     }
 }

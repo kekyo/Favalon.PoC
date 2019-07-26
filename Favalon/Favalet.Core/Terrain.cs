@@ -31,7 +31,7 @@ namespace Favalet
         private Terrain()
         { }
 
-//#line hidden
+#line hidden
         private PlaceholderTerm CreatePlaceholder(Term higherOrder, TextRange textRange) =>
             placeholderController.Create(higherOrder, textRange);
         PlaceholderTerm Term.IInferringContext.CreatePlaceholder(Term higherOrder, TextRange textRange) =>
@@ -40,9 +40,7 @@ namespace Favalet
         public void Bind(BoundVariableTerm bound, Term term)
         {
             var bind = Term.Bind(bound, term, UnspecifiedTerm.Instance, TextRange.Unknown);
-            var (inferred, errors) = this.Infer(bind, UnspecifiedTerm.Instance);
-
-            //placeholderController.Memoize(inferred.Bound, inferred.Term);
+            this.Infer(bind, UnspecifiedTerm.Instance);
         }
 
         void Term.IInferringContext.Memoize(SymbolicVariableTerm symbol, Term term) =>
@@ -53,9 +51,6 @@ namespace Favalet
         Term? Term.IResolvingContext.Lookup(VariableTerm symbol) =>
             placeholderController.Lookup(this, symbol);
 
-        private TTerm Visit<TTerm>(TTerm term, Term higherOrderHint)
-            where TTerm : Term =>
-            (TTerm)term.InternalVisitInferring(this, higherOrderHint);
         TTerm Term.IInferringContext.Visit<TTerm>(TTerm term, Term higherOrderHint) =>
             (TTerm)term.InternalVisitInferring(this, higherOrderHint);
         TTerm Term.IResolvingContext.Visit<TTerm>(TTerm term) =>
@@ -69,10 +64,10 @@ namespace Favalet
 
         Term Term.IInferringContext.RecordError(string details, Term primaryTerm, Term[] terms) =>
             this.RecordError(details, primaryTerm, terms);
+#line default
 
         public InferResult<Term> Infer(Term term, Term higherOrderHint) =>
             this.Infer<Term>(term, higherOrderHint);
-#line default
 
         public InferResult<TTerm> Infer<TTerm>(TTerm term, Term higherOrderHint)
             where TTerm : Term

@@ -41,6 +41,9 @@ namespace Favalet
         public bool Contains(TextRange inside) =>
             this.Target.Equals(inside.Target) && this.Range.Contains(inside.Range);
 
+        public bool Overlaps(TextRange inside) =>
+            this.Target.Equals(inside.Target) && this.Range.Overlaps(inside.Range);
+
         public TextRange Combine(Range rhs) =>
             new TextRange(this.Target, this.Range.Combine(rhs));
         public TextRange Combine(Position first, Position last) =>

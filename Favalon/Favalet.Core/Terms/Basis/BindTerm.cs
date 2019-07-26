@@ -15,7 +15,7 @@
 
 namespace Favalet.Terms.Basis
 {
-    public sealed class BindTerm : Term
+    public sealed class BindTerm : Term, ITraversableTerm
     {
         internal BindTerm(BoundVariableTerm bound, Term term, bool recursiveBind, Term higherOrder, TextRange textRange) :
             base(higherOrder, textRange)
@@ -28,6 +28,9 @@ namespace Favalet.Terms.Basis
         public new readonly BoundVariableTerm Bound;
         public readonly Term Term;
         public new readonly bool RecursiveBind;
+
+        public Term[] Children =>
+            new[] { this.Bound, this.Term };
 
         protected override FormattedString FormatReadableString(FormatContext context)
         {

@@ -14,6 +14,8 @@
 // limitations under the License.
 
 using Favalet.Terms.Specialized;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalet.Terms
 {
@@ -27,5 +29,19 @@ namespace Favalet.Terms
                 (Term f, null) => f,
                 _ => null
             };
+
+        public static IEnumerable<Term> ExtractTermsByTextRange(this Term term, TextRange targetTextRange)
+        {
+            IEnumerable<Term> TraverseChildren(Term term) =>
+                new[] { term }.
+                Concat((term is ITraversableTerm traversableTerm ?
+                    traversableTerm.Children.Concat(new[] { term.HigherOrder }) :
+                    new[] { term.HigherOrder }).
+                    Where(t => t != null).
+                    SelectMany(TraverseChildren)).
+                Where(t => !(t is ITraversableTerm));
+            return TraverseChildren(term).
+                Where(t => t.TextRange.Overlaps(targetTextRange));
+        }
     }
 }

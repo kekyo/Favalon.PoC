@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet;
 using Favalet.Terms;
 using Favalon.IO;
-using System.Text;
 
 namespace Favalon.Parsing.States
 {
@@ -24,13 +24,8 @@ namespace Favalon.Parsing.States
         private VariableState()
         { }
 
-        private void RunFinishing(StateContext context)
-        {
-            var (token, textRange) = context.ExtractToken();
-
-            var variable = Term.Free(token, Term.Unspecified, textRange);
-            context.AppendTerm(variable);
-        }
+        protected override Term MakeTerm(string token, TextRange textRange) =>
+            Term.Free(token, Term.Unspecified, textRange);
 
         public override State Run(InteractiveInformation inch, StateContext context)
         {

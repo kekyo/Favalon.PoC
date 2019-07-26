@@ -15,16 +15,16 @@
 
 using NUnit.Framework;
 
-namespace Favalon
+namespace Favalon.Parsing
 {
     [TestFixture]
-    public sealed class ParserTest
+    public sealed class OldParserTest
     {
         [Test]
         public void ApplyVariables()
         {
-            var parser = Parser.Create();
-            var (term, errors) = parser.Append("aaa bbb ccc", 0);
+            var parser = OldParser.Create();
+            var (term, errors, targetTextRange) = parser.Append("aaa bbb ccc", 0);
             Assert.AreEqual("((aaa:_ bbb:_):_ ccc:_):_", term?.StrictReadableString);
             Assert.AreEqual(0, errors.Length);
         }
@@ -32,8 +32,8 @@ namespace Favalon
         [Test]
         public void ApplyCombinedVariableAndNumeric()
         {
-            var parser = Parser.Create();
-            var (term, errors) = parser.Append("aaa 123", 0);
+            var parser = OldParser.Create();
+            var (term, errors, targetTextRange) = parser.Append("aaa 123", 0);
             Assert.AreEqual("(aaa:_ 123:?):_", term?.StrictReadableString);
             Assert.AreEqual(0, errors.Length);
         }
@@ -41,8 +41,8 @@ namespace Favalon
         [Test]
         public void ApplyCombinedVariableAndSymbol()
         {
-            var parser = Parser.Create();
-            var (term, errors) = parser.Append("aaa | bbb", 0);
+            var parser = OldParser.Create();
+            var (term, errors, targetTextRange) = parser.Append("aaa | bbb", 0);
             Assert.AreEqual("((aaa:_ |:_):_ bbb:_):_", term?.StrictReadableString);
             Assert.AreEqual(0, errors.Length);
         }

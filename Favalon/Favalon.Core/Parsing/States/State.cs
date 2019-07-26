@@ -13,7 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet;
+using Favalet.Terms;
 using Favalon.IO;
+using System;
+using System.Linq;
 
 namespace Favalon.Parsing.States
 {
@@ -21,10 +25,27 @@ namespace Favalon.Parsing.States
     {
         protected State() { }
 
-        public abstract State Run(InteractiveInformation inch, StateContext context);
-        public abstract void Finalize(StateContext context);
-
         public static bool IsTokenSeparator(char ch) =>
             char.IsWhiteSpace(ch) || (ch == '\r') || (ch == '\n');
+
+        protected virtual Term MakeTerm(string token, TextRange textRange) =>
+            throw new InvalidOperationException();
+
+        protected void RunFinishing(StateContext context)
+        {
+            var (token, textRange) = context.ExtractToken();
+            context.AppendTerm(this.MakeTerm(token, textRange));
+        }
+
+        public abstract State Run(InteractiveInformation inch, StateContext context);
+
+        public abstract void Finalize(StateContext context);
+
+        public virtual ParseResult? PeekResult(StateContext context)
+        {
+            var (token, textRange) = context.PeekToken();
+            var term = context.CurrentTerm + this.MakeTerm(token, textRange);
+            return ParseResult.Create(term, context.CurrentErrors.ToArray(), context.GetCurrentTextRange());
+        }
     }
 }

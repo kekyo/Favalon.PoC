@@ -29,6 +29,10 @@ namespace Favalon.Parsing.States
 
         public Position CurrentPosition { get; private set; }
         public Position? StartPosition { get; private set; }
+        public Term? CurrentTerm =>
+            currentTerm;
+        public IReadOnlyList<ParseErrorInformation> CurrentErrors =>
+            errors;
 
         private Term? currentTerm;
         private readonly StringBuilder token = new StringBuilder();
@@ -65,12 +69,20 @@ namespace Favalon.Parsing.States
                 this.currentTerm = null;
                 this.errors.Clear();
 
-                return ParseResult.Create(term, errors);
+                return ParseResult.Create(term, errors, null);
             }
             else
             {
                 return null;
             }
+        }
+
+        public (string, TextRange) PeekToken()
+        {
+            var textRange = this.GetCurrentTextRange();
+            var token = this.token.ToString();
+
+            return (token, textRange);
         }
 
         public void RecordError(string details)

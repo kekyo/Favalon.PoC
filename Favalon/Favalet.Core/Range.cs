@@ -33,6 +33,10 @@ namespace Favalet
             ((this.First.Line < inside.First.Line) || ((this.First.Line == inside.First.Line) && (this.First.Column <= inside.First.Column))) &&
             ((inside.Last.Line < this.Last.Line) || ((inside.Last.Line == this.Last.Line) && (inside.Last.Column <= this.Last.Column)));
 
+        public bool Overlaps(Range range) =>
+            ((this.First.Line < range.First.Line) || ((this.First.Line == range.First.Line) && (this.First.Column <= range.First.Column))) ||
+            ((range.Last.Line < this.Last.Line) || ((range.Last.Line == this.Last.Line) && (range.Last.Column <= this.Last.Column)));
+
         public Range Combine(Range range) =>
             this.Combine(range.First, range.Last);
         public Range Combine(Position first, Position last) =>

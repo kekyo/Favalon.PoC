@@ -17,12 +17,15 @@ namespace Favalet
 {
     public struct Range
     {
-        public static readonly Range Empty = Create(Position.Empty, Position.Empty);
-        public static readonly Range MaxValue = Create(Position.Empty, Position.MaxValue);
+        public static readonly Range Unknown = Create(Position.Unknown, Position.Unknown);
+        public static readonly Range MinValue = Create(Position.MinValue, Position.MinValue);
+        public static readonly Range MaxValue = Create(Position.MaxValue, Position.MaxValue);
+        public static readonly Range MaxLength = Create(Position.MinValue, Position.MaxValue);
 
         public readonly Position First;
         public readonly Position Last;
 
+#line hidden
         private Range(Position first, Position last)
         {
             this.First = first;
@@ -74,5 +77,6 @@ namespace Favalet
             Create(Position.Create(position.line, position.column));
         public static implicit operator Range((int lineFirst, int columnFirst, int lineLast, int columnLast) range) =>
             Create(Position.Create(range.lineFirst, range.columnFirst), Position.Create(range.lineLast, range.columnLast));
+#line default
     }
 }

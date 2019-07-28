@@ -22,7 +22,7 @@ namespace Favalon.IO
     public sealed class InteractiveConsoleHost : InteractiveHost
     {
         private InteractiveConsoleHost() :
-            base(TextRange.Create("console", Range.Create(Position.Empty, Position.MaxValue)))
+            base(TextRange.Create("console", Range.MaxLength))
         {
         }
 

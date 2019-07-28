@@ -177,7 +177,7 @@ namespace Favalon.Parsing
         }
 
         public static OldParser Create() =>
-            new OldParser(TextRange.Create(Range.MaxValue));
+            new OldParser(TextRange.Create(Range.MaxLength));
         public static OldParser Create(TextRange textRange) =>
             new OldParser(textRange);
     }

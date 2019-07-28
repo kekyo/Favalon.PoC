@@ -19,12 +19,14 @@ namespace Favalet
 {
     public struct Position : IEquatable<Position>, IComparable<Position>, IComparable
     {
-        public static readonly Position Empty = new Position(0, 0);
+        public static readonly Position Unknown = new Position(-1, -1);
+        public static readonly Position MinValue = new Position(0, 0);
         public static readonly Position MaxValue = new Position(int.MaxValue, int.MaxValue);
 
         public readonly int Line;
         public readonly int Column;
 
+#line hidden
         private Position(int line, int column)
         {
             this.Line = line;
@@ -73,5 +75,6 @@ namespace Favalet
             lhs.CompareTo(rhs) > 0;
         public static bool operator >=(Position lhs, Position rhs) =>
             lhs.CompareTo(rhs) >= 0;
+#line default
     }
 }

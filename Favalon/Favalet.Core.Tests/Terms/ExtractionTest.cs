@@ -39,8 +39,8 @@ namespace Favalet.Terms
                         Term.Free("a1", Term.Unspecified, TextRange.Create("Extract", (0, 15, 0, 16))),
                         Term.Unspecified,
                         TextRange.Create("Extract", (0, 12, 0, 16))),
-                    TextRange.Create("Extract", (0, 6, 0, 7))),
-                TextRange.Create("Extract", (0, 0, 0, 1)));
+                    TextRange.Create("Extract", (0, 6, 0, 16))),
+                TextRange.Create("Extract", (0, 0, 0, 16)));
 
             var extracted = term.ExtractTermsByOverlaps(TextRange.Create("Extract", (0, 12))).ToArray();
 
@@ -68,8 +68,8 @@ namespace Favalet.Terms
                         Term.Free("a1", Term.Unspecified, TextRange.Create("Extract", (0, 15, 0, 16))),
                         Term.Unspecified,
                         TextRange.Create("Extract", (0, 12, 0, 16))),
-                    TextRange.Create("Extract", (0, 6, 0, 7))),
-                TextRange.Create("Extract", (0, 0, 0, 1)));
+                    TextRange.Create("Extract", (0, 6, 0, 16))),
+                TextRange.Create("Extract", (0, 0, 0, 16)));
 
             var extracted = term.ExtractTermsByOverlaps(TextRange.Create("Extract", (0, 13))).ToArray();
 
@@ -98,8 +98,8 @@ namespace Favalet.Terms
                         Term.Free("a1", Term.Unspecified, TextRange.Create("Extract", (0, 15, 0, 16))),
                         Term.Unspecified,
                         TextRange.Create("Extract", (0, 12, 0, 16))),
-                    TextRange.Create("Extract", (0, 6, 0, 7))),
-                TextRange.Create("Extract", (0, 0, 0, 1)));
+                    TextRange.Create("Extract", (0, 6, 0, 16))),
+                TextRange.Create("Extract", (0, 0, 0, 16)));
 
             var extracted = term.ExtractTermsByOverlaps(TextRange.Create("Extract", (0, 13, 0, 15))).ToArray();
 

@@ -65,5 +65,11 @@ namespace Favalet.Terms
 
         public override string ToString() =>
             $"{this.TextRange}: {this.TermName}: {FormatReadableString(new FormatContext(FormatAnnotations.Standard, FormatNamings.Standard, FormatOperators.Standard), this, false)}";
+
+        public void Deconstruct(out Term higherOrder, out TextRange textRange)
+        {
+            higherOrder = this.HigherOrder;
+            textRange = this.TextRange;
+        }
     }
 }

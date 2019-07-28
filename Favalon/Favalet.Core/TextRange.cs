@@ -21,11 +21,12 @@ namespace Favalet
     {
         private static readonly Uri unknown = new Uri("unknown.fav", UriKind.RelativeOrAbsolute);
 
-        public static readonly TextRange Unknown = new TextRange(unknown, Range.Empty);
+        public static readonly TextRange Unknown = new TextRange(unknown, Range.Unknown);
 
         public readonly Uri Target;
         public readonly Range Range;
 
+#line hidden
         private TextRange(string target, Range range)
         {
             this.Target = new Uri(target, UriKind.RelativeOrAbsolute);
@@ -113,5 +114,6 @@ namespace Favalet
             new TextRange(textRange.target, Range.Create(Position.Create(textRange.lineFirst, textRange.columnFirst), Position.Create(textRange.lineLast, textRange.columnLast)));
         public static implicit operator TextRange((Uri target, int lineFirst, int columnFirst, int lineLast, int columnLast) textRange) =>
             new TextRange(textRange.target, Range.Create(Position.Create(textRange.lineFirst, textRange.columnFirst), Position.Create(textRange.lineLast, textRange.columnLast)));
+#line default
     }
 }

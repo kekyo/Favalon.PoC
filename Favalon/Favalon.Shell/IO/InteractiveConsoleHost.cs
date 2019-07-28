@@ -14,10 +14,11 @@
 // limitations under the License.
 
 using Favalet;
+using Favalon.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Favalon.IO
+namespace Favalon.Internals
 {
     public sealed class InteractiveConsoleHost : InteractiveHost
     {
@@ -31,10 +32,7 @@ namespace Favalon.IO
             var key = System.Console.ReadKey(true);
 
             var modifier = InteractiveModifiers.None;
-            if (key.Modifiers.HasFlag(System.ConsoleModifiers.Shift))
-            {
-                modifier |= InteractiveModifiers.Shift;
-            }
+
             if (key.Modifiers.HasFlag(System.ConsoleModifiers.Control))
             {
                 modifier |= InteractiveModifiers.Control;
@@ -47,20 +45,13 @@ namespace Favalon.IO
             base.OnNext(new InteractiveInformation(key.KeyChar, modifier));
         }
 
-        public async ValueTask RunAsync(CancellationToken cancellationToken)
+        public void Run(ref bool abort)
         {
             try
             {
-                while (!cancellationToken.IsCancellationRequested)
+                while (!abort)
                 {
-                    if (System.Console.KeyAvailable)
-                    {
-                        this.LoadKey();
-                    }
-                    else
-                    {
-                        await Task.Run(this.LoadKey).ConfigureAwait(false);
-                    }
+                    this.LoadKey();
                 }
             }
             finally

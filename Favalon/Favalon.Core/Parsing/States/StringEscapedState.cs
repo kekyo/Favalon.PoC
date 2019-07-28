@@ -29,12 +29,12 @@ namespace Favalon.Parsing.States
 
         public override State Run(InteractiveInformation inch, StateContext context)
         {
-            context.AppendToken(inch.Character);
+            context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
             return StringState.Instance;
         }
 
         public override void Finalize(StateContext context) =>
-            context.RecordError("Invalid string escape, reached end of line.");
+            context.RecordError("Invalid string escape, reached end of line.", context.CurrentPosition + 1);
 
         public static readonly State Instance = new StringEscapedState();
     }

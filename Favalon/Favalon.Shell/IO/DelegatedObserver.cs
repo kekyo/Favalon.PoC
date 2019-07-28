@@ -15,13 +15,24 @@
 
 using System;
 
-namespace Favalon.IO
+namespace Favalon.Internals
 {
-    [Flags]
-    public enum InteractiveModifiers
+    internal sealed class DelegatedObserver<T> : IObserver<T>
     {
-        None = 0,
-        Control = 1,
-        Alt = 2
+        private readonly Action<T> onNext;
+
+        public  DelegatedObserver(Action<T> onNext) =>
+            this.onNext = onNext;
+
+        public void OnCompleted()
+        {
+        }
+
+        public void OnError(Exception error)
+        {
+        }
+
+        public void OnNext(T value) =>
+            onNext(value);
     }
 }

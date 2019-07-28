@@ -33,6 +33,11 @@ namespace Favalet
             this.Column = column;
         }
 
+        public Position MoveColumn(int forwardChars) =>
+            new Position(this.Line, this.Column + forwardChars);
+        public Position MoveLine(int forwardLines, int newColumn = 0) =>
+            new Position(this.Line + forwardLines, newColumn);
+
         public override int GetHashCode() =>
             this.Line.GetHashCode() ^ this.Column.GetHashCode();
 
@@ -75,6 +80,11 @@ namespace Favalet
             lhs.CompareTo(rhs) > 0;
         public static bool operator >=(Position lhs, Position rhs) =>
             lhs.CompareTo(rhs) >= 0;
+
+        public static Position operator +(Position lhs, int value) =>
+            lhs.MoveColumn(value);
+        public static Position operator +(int value, Position rhs) =>
+            rhs.MoveColumn(value);
 #line default
     }
 }

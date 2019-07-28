@@ -32,21 +32,23 @@ namespace Favalon.Parsing.States
             if (inch.Character == '"')
             {
                 this.RunFinishing(context);
+                context.SkipTokenChar(context.CurrentPosition + 1);
                 return DetectState.Instance;
             }
             else if (inch.Character == '\\')
             {
+                context.SkipTokenChar(context.CurrentPosition + 1);
                 return StringEscapedState.Instance;
             }
             else
             {
-                context.AppendToken(inch.Character);
+                context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return this;
             }
         }
 
         public override void Finalize(StateContext context) =>
-            context.RecordError("Invalid string token, reached end of line.");
+            context.RecordError("Invalid string token, reached end of line.", context.CurrentPosition + 1);
 
         public static readonly State Instance = new StringState();
     }

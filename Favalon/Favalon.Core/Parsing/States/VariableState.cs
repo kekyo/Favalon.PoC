@@ -31,17 +31,18 @@ namespace Favalon.Parsing.States
         {
             if (char.IsLetterOrDigit(inch.Character) || char.IsSymbol(inch.Character))
             {
-                context.AppendToken(inch.Character);
+                context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return this;
             }
             else if (IsTokenSeparator(inch.Character))
             {
                 this.RunFinishing(context);
+                context.SkipTokenChar(context.CurrentPosition + 1);
                 return DetectState.Instance;
             }
             else
             {
-                context.RecordError("Invalid variable token at this location.");
+                context.RecordError("Invalid variable token at this location.", context.CurrentPosition + 1);
                 return SkipState.Instance;
             }
         }

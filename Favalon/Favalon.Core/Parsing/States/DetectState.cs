@@ -27,34 +27,35 @@ namespace Favalon.Parsing.States
             if (inch.Character == '"')
             {
                 context.RecordStartPosition();
+                context.SkipTokenChar(context.CurrentPosition + 1);
                 return StringState.Instance;
             }
             else if (char.IsDigit(inch.Character))
             {
                 context.RecordStartPosition();
-                context.AppendToken(inch.Character);
+                context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return NumericState.Instance;
             }
             else if (char.IsLetter(inch.Character) || char.IsSymbol(inch.Character))
             {
                 context.RecordStartPosition();
-                context.AppendToken(inch.Character);
+                context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return VariableState.Instance;
             }
             else if (IsTokenSeparator(inch.Character))
             {
+                context.SkipTokenChar(context.CurrentPosition + 1);
                 return this;
             }
             else
             {
-                context.RecordError("Invalid token at first.");
+                context.RecordError("Invalid token at first.", context.CurrentPosition + 1);
                 return this;
             }
         }
 
-        public override void Finalize(StateContext context)
-        {
-        }
+        public override void Finalize(StateContext context) =>
+            context.SkipTokenChar(context.CurrentPosition + 1);
 
         public override ParseResult? PeekResult(StateContext context) =>
             null;

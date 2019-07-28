@@ -16,11 +16,10 @@
 using Favalet;
 using Favalet.Terms;
 using Favalet.Terms.Basis;
-using Favalon.IO;
+using Favalon.Internals;
 using Favalon.Parsing;
 using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -44,7 +43,7 @@ namespace Favalon
             yield return $"{bc},{wc},{lc}";
         }
 
-        public static async Task Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
             var terrain = Terrain.Create();
 
@@ -101,11 +100,11 @@ namespace Favalon
 
             var console = InteractiveConsoleHost.Create();
             var parser = ObservableParser.Create(console);
-            var cts = new CancellationTokenSource();
+            var abort = false;
 
             console.Write("Favalon> ");
 
-            using (parser.Subscribe(result =>
+            using (parser.Subscribe(new DelegatedObserver<ParseResult>(result =>
             {
                 console.WriteLine();
 
@@ -127,12 +126,12 @@ namespace Favalon
                 switch (result)
                 {
                     case ParseResult(FreeVariableTerm term, _, _) when term.Name == "exit":
-                        cts.Cancel();
+                        abort = true;
                         break;
 
                     case ParseResult(Term term, _, TextRange targetTextRange):
+                        if (WriteInfer(term) is Term inferred)
                         {
-                            var inferred = WriteInfer(term);
                             var targetTerms = inferred.ExtractTermsByOverlaps(targetTextRange);
                         }
                         break;
@@ -149,11 +148,16 @@ namespace Favalon
                         break;
                 }
 
-                console.Write("Favalon> ");
-            }))
+                if (!abort)
+                {
+                    console.Write("Favalon> ");
+                }
+            })))
             {
-                await console.RunAsync(cts.Token);
+                console.Run(ref abort);
             }
+
+            return 0;
         }
     }
 }

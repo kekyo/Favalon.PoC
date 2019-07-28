@@ -29,17 +29,21 @@ namespace Favalon.Parsing.States
 
         public Position CurrentPosition { get; private set; }
         public Position? StartPosition { get; private set; }
-        public Term? CurrentTerm =>
-            currentTerm;
+        public Term? CurrentTerm { get; private set; }
         public IReadOnlyList<ParseErrorInformation> CurrentErrors =>
             errors;
 
-        private Term? currentTerm;
         private readonly StringBuilder token = new StringBuilder();
         private readonly List<ParseErrorInformation> errors = new List<ParseErrorInformation>();
 
-        public void AppendToken(char ch) =>
-            token.Append(ch);
+        public void AppendTokenChar(char ch, Position newPosition)
+        {
+            this.token.Append(ch);
+            this.CurrentPosition = newPosition;
+        }
+
+        public void SkipTokenChar(Position newPosition) =>
+            this.CurrentPosition = newPosition;
 
         public void RecordStartPosition() =>
             this.StartPosition = this.CurrentPosition;
@@ -61,12 +65,12 @@ namespace Favalon.Parsing.States
 
         public ParseResult? ExtractResult()
         {
-            var term = this.currentTerm;
+            var term = this.CurrentTerm;
             var errors = this.errors.ToArray();
 
             if (term is Term || errors.Length >= 1)
             {
-                this.currentTerm = null;
+                this.CurrentTerm = null;
                 this.errors.Clear();
 
                 return ParseResult.Create(term, errors, null);
@@ -85,13 +89,13 @@ namespace Favalon.Parsing.States
             return (token, textRange);
         }
 
-        public void RecordError(string details)
+        public void RecordError(string details, Position? newPosition)
         {
             this.errors.Add(ParseErrorInformation.Create(details, this.GetCurrentTextRange()));
-            this.StartPosition = null;
+            this.StartPosition = newPosition;
         }
 
         public void AppendTerm(Term term) =>
-            this.currentTerm += term;
+            this.CurrentTerm += term;
     }
 }

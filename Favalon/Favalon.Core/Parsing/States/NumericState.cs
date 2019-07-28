@@ -36,21 +36,23 @@ namespace Favalon.Parsing.States
         {
             if (char.IsDigit(inch.Character) || (inch.Character == '.'))
             {
-                context.AppendToken(inch.Character);
+                context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return this;
             }
             else if (inch.Character == '_')
             {
+                context.SkipTokenChar(context.CurrentPosition + 1);
                 return this;
             }
             else if (IsTokenSeparator(inch.Character))
             {
                 this.RunFinishing(context);
+                context.SkipTokenChar(context.CurrentPosition + 1);
                 return DetectState.Instance;
             }
             else
             {
-                context.RecordError("Invalid numerical token at this location.");
+                context.RecordError("Invalid numerical token at this location.", context.CurrentPosition + 1);
                 return SkipState.Instance;
             }
         }

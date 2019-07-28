@@ -133,7 +133,7 @@ namespace Favalon
                     case ParseResult(Term term, _, TextRange targetTextRange):
                         {
                             var inferred = WriteInfer(term);
-                            var targetTerms = inferred.ExtractTerms(targetTextRange);
+                            var targetTerms = inferred.ExtractTermsByOverlaps(targetTextRange);
                         }
                         break;
 

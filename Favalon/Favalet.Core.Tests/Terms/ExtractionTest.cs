@@ -25,8 +25,6 @@ namespace Favalet.Terms
         [Test]
         public void ExtractFromPoint1()
         {
-            var context = Terrain.Create();
-
             /*
             a1 -> b1 -> b1 a1
             01234567890123456
@@ -44,7 +42,7 @@ namespace Favalet.Terms
                     TextRange.Create("Extract", (0, 6, 0, 7))),
                 TextRange.Create("Extract", (0, 0, 0, 1)));
 
-            var extracted = term.ExtractTermsByTextRange(TextRange.Create("Extract", (0, 12))).ToArray();
+            var extracted = term.ExtractTermsByOverlaps(TextRange.Create("Extract", (0, 12))).ToArray();
 
             Assert.AreEqual(1, extracted.Length);
             Assert.IsTrue(extracted[0] switch {
@@ -56,8 +54,6 @@ namespace Favalet.Terms
         [Test]
         public void ExtractFromPoint2()
         {
-            var context = Terrain.Create();
-
             /*
             a1 -> b1 -> b1 a1
             01234567890123456
@@ -75,12 +71,47 @@ namespace Favalet.Terms
                     TextRange.Create("Extract", (0, 6, 0, 7))),
                 TextRange.Create("Extract", (0, 0, 0, 1)));
 
-            var extracted = term.ExtractTermsByTextRange(TextRange.Create("Extract", (0, 13))).ToArray();
+            var extracted = term.ExtractTermsByOverlaps(TextRange.Create("Extract", (0, 13))).ToArray();
 
             Assert.AreEqual(1, extracted.Length);
             Assert.IsTrue(extracted[0] switch
             {
                 FreeVariableTerm("b1", Term higherOrder, TextRange(_, Range(0, 12, 0, 13))) when (higherOrder == Term.Unspecified) => true,
+                _ => false
+            });
+        }
+
+        [Test]
+        public void ExtractFromRange()
+        {
+            /*
+            a1 -> b1 -> b1 a1
+            01234567890123456
+            */
+
+            var term = Term.Lambda(
+                Term.Bound("a1", Term.Unspecified, TextRange.Create("Extract", (0, 0, 0, 1))),
+                Term.Lambda(
+                    Term.Bound("b1", Term.Unspecified, TextRange.Create("Extract", (0, 6, 0, 7))),
+                    Term.Apply(
+                        Term.Free("b1", Term.Unspecified, TextRange.Create("Extract", (0, 12, 0, 13))),
+                        Term.Free("a1", Term.Unspecified, TextRange.Create("Extract", (0, 15, 0, 16))),
+                        Term.Unspecified,
+                        TextRange.Create("Extract", (0, 12, 0, 16))),
+                    TextRange.Create("Extract", (0, 6, 0, 7))),
+                TextRange.Create("Extract", (0, 0, 0, 1)));
+
+            var extracted = term.ExtractTermsByOverlaps(TextRange.Create("Extract", (0, 13, 0, 15))).ToArray();
+
+            Assert.AreEqual(2, extracted.Length);
+            Assert.IsTrue(extracted[0] switch
+            {
+                FreeVariableTerm("b1", Term higherOrder, TextRange(_, Range(0, 12, 0, 13))) when (higherOrder == Term.Unspecified) => true,
+                _ => false
+            });
+            Assert.IsTrue(extracted[1] switch
+            {
+                FreeVariableTerm("a1", Term higherOrder, TextRange(_, Range(0, 15, 0, 16))) when (higherOrder == Term.Unspecified) => true,
                 _ => false
             });
         }

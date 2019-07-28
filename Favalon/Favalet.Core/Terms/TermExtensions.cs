@@ -30,18 +30,16 @@ namespace Favalet.Terms
                 _ => null
             };
 
-        public static IEnumerable<Term> ExtractTermsByTextRange(this Term term, TextRange targetTextRange)
-        {
-            IEnumerable<Term> TraverseChildren(Term term) =>
-                new[] { term }.
-                Concat((term is ITraversableTerm traversableTerm ?
-                    traversableTerm.Children.Concat(new[] { term.HigherOrder }) :
-                    new[] { term.HigherOrder }).
-                    Where(t => t != null).
-                    SelectMany(TraverseChildren)).
-                Where(t => !(t is ITraversableTerm));
-            return TraverseChildren(term).
-                Where(t => t.TextRange.Overlaps(targetTextRange));
-        }
+        private static IEnumerable<Term> TraverseTermChildren(Term term) =>
+            new[] { term }.
+            Concat((term is ITraversableTerm traversableTerm ?
+                traversableTerm.Children.Concat(new[] { term.HigherOrder }) :
+                new[] { term.HigherOrder }).
+                Where(t => t != null).
+                SelectMany(TraverseTermChildren)).
+            Where(t => !(t is ITraversableTerm));
+
+        public static IEnumerable<Term> ExtractTermsByOverlaps(this Term term, TextRange targetTextRange) =>
+            TraverseTermChildren(term).Where(t => t.TextRange.Overlaps(targetTextRange));
     }
 }

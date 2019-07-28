@@ -22,7 +22,7 @@ namespace Favalet.Terms
         Term[] Children { get; }
     }
 
-    [DebuggerDisplay("{AnnotatedReadableString}")]
+    [DebuggerDisplay("{TermName}: {AnnotatedReadableString}")]
     public abstract partial class Term
     {
         private static readonly Term[] emptyTerms = new Term[0];
@@ -60,10 +60,10 @@ namespace Favalet.Terms
             FormatReadableString(new FormatContext(
                 formatAnnotation, formatNaming, formatOperator), this, encloseParenthesesIfRequired);
 
-        public override string ToString()
-        {
-            var name = this.GetType().Name.Replace("Term", string.Empty);
-            return $"{this.TextRange}: {name}: {FormatReadableString(new FormatContext(FormatAnnotations.Standard, FormatNamings.Standard, FormatOperators.Standard), this, false)}";
-        }
+        public string TermName =>
+            this.GetType().Name.Replace("Term", string.Empty);
+
+        public override string ToString() =>
+            $"{this.TextRange}: {this.TermName}: {FormatReadableString(new FormatContext(FormatAnnotations.Standard, FormatNamings.Standard, FormatOperators.Standard), this, false)}";
     }
 }

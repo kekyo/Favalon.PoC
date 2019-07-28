@@ -154,6 +154,96 @@ namespace Favalet
         }
 
         [Test]
+        public void Overlaps1()
+        {
+            var lhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+            var rhs = Range.Create(Position.Create(1, 5));
+
+            Assert.IsTrue(lhs.Overlaps(rhs));
+        }
+
+        [Test]
+        public void Overlaps2()
+        {
+            var lhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+            var rhs = Range.Create(Position.Create(1, 2));
+
+            Assert.IsFalse(lhs.Overlaps(rhs));
+        }
+
+        [Test]
+        public void Overlaps3()
+        {
+            var lhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+            var rhs = Range.Create(Position.Create(1, 9));
+
+            Assert.IsFalse(lhs.Overlaps(rhs));
+        }
+
+        [Test]
+        public void Overlaps4()
+        {
+            var lhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+            var rhs = Range.Create(Position.Create(1, 3));
+
+            Assert.IsTrue(lhs.Overlaps(rhs));
+        }
+
+        [Test]
+        public void Overlaps5()
+        {
+            var lhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+            var rhs = Range.Create(Position.Create(1, 8));
+
+            Assert.IsTrue(lhs.Overlaps(rhs));
+        }
+
+        [Test]
+        public void Overlaps6()
+        {
+            var lhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+            var rhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+
+            Assert.IsTrue(lhs.Overlaps(rhs));
+        }
+
+        [Test]
+        public void Overlaps7()
+        {
+            var lhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+            var rhs = Range.Create(Position.Create(1, 1), Position.Create(1, 4));
+
+            Assert.IsTrue(lhs.Overlaps(rhs));
+        }
+
+        [Test]
+        public void Overlaps8()
+        {
+            var lhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+            var rhs = Range.Create(Position.Create(1, 6), Position.Create(1, 9));
+
+            Assert.IsTrue(lhs.Overlaps(rhs));
+        }
+
+        [Test]
+        public void Overlaps9()
+        {
+            var lhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+            var rhs = Range.Create(Position.Create(1, 2), Position.Create(1, 9));
+
+            Assert.IsTrue(lhs.Overlaps(rhs));
+        }
+
+        [Test]
+        public void Overlaps10()
+        {
+            var lhs = Range.Create(Position.Create(1, 3), Position.Create(1, 8));
+            var rhs = Range.Create(Position.Create(1, 4), Position.Create(1, 7));
+
+            Assert.IsTrue(lhs.Overlaps(rhs));
+        }
+
+        [Test]
         public void Tuple1()
         {
             Range range = (1, 2);

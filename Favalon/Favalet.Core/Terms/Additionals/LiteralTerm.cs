@@ -70,5 +70,12 @@ namespace Favalet.Terms.Additionals
 
         public override bool Equals(object obj) =>
             this.Equals(obj as LiteralTerm);
+
+        public void Deconstruct(out object value, out Term higherOrder, out TextRange textRange)
+        {
+            value = this.Value;
+            higherOrder = this.HigherOrder;
+            textRange = this.TextRange;
+        }
     }
 }

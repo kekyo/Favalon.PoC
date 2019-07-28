@@ -51,6 +51,20 @@ namespace Favalet
                 this.First.ToString() :
                 $"{this.First},{this.Last}";
 
+        public void Deconstruct(out Position first, out Position last)
+        {
+            first = this.First;
+            last = this.Last;
+        }
+
+        public void Deconstruct(out int lineFirst, out int columnFirst, out int lineLast, out int columnLast)
+        {
+            lineFirst = this.First.Line;
+            columnFirst = this.First.Column;
+            lineLast = this.Last.Line;
+            columnLast = this.Last.Column;
+        }
+
         public static Range Create(Position position) =>
             new Range(position, position);
         public static Range Create(Position first, Position last) =>

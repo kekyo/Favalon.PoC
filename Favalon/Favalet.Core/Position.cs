@@ -53,6 +53,12 @@ namespace Favalet
         public override string ToString() =>
             $"{this.Line},{this.Column}";
 
+        public void Deconstruct(out int line, out int column)
+        {
+            line = this.Line;
+            column = this.Column;
+        }
+
         public static Position Create(int line, int column) =>
             new Position(line, column);
 

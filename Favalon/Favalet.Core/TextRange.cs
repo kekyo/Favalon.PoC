@@ -77,6 +77,27 @@ namespace Favalet
         public override bool Equals(object obj) =>
             obj is TextRange textRange ? this.Equals(textRange) : false;
 
+        public void Deconstruct(out Uri target, out Range range)
+        {
+            target = this.Target;
+            range = this.Range;
+        }
+
+        public void Deconstruct(out Uri target, out Position first, out Position last)
+        {
+            target = this.Target;
+            first = this.Range.First;
+            last = this.Range.Last;
+        }
+        public void Deconstruct(out Uri target, out int lineFirst, out int columnFirst, out int lineLast, out int columnLast)
+        {
+            target = this.Target;
+            lineFirst = this.Range.First.Line;
+            columnFirst = this.Range.First.Column;
+            lineLast = this.Range.Last.Line;
+            columnLast = this.Range.Last.Column;
+        }
+
         public static TextRange Create(string target, Range range) =>
             new TextRange(target, range);
         public static TextRange Create(Uri target, Range range) =>

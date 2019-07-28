@@ -58,5 +58,12 @@ namespace Favalet.Terms.Specialized
 
         public int CompareTo(PlaceholderTerm other) =>
             this.Index.CompareTo(other.Index);
+
+        public void Deconstruct(out int index, out Term higherOrder, out TextRange textRange)
+        {
+            index = this.Index;
+            higherOrder = this.HigherOrder;
+            textRange = this.TextRange;
+        }
     }
 }

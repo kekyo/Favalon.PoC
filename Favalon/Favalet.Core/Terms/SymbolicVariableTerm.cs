@@ -141,5 +141,12 @@ namespace Favalet.Terms
 
         public override bool Equals(object obj) =>
             this.Equals(obj as SymbolicVariableTerm);
+
+        public void Deconstruct(out string name, out Term higherOrder, out TextRange textRange)
+        {
+            name = this.Name;
+            higherOrder = this.HigherOrder;
+            textRange = this.TextRange;
+        }
     }
 }

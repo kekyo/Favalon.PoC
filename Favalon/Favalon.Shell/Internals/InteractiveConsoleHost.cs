@@ -42,7 +42,7 @@ namespace Favalon.Internals
                 modifier |= InteractiveModifiers.Alt;
             }
 
-            base.OnNext(new InteractiveInformation(key.KeyChar, modifier));
+            base.OnNext(InteractiveInformation.Create(key.KeyChar, modifier));
         }
 
         public void Abort() =>

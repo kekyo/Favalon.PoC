@@ -40,6 +40,7 @@ namespace Favalon.IO
         private readonly Dictionary<IObserver<T>, ObservableDisposable> observers =
             new Dictionary<IObserver<T>, ObservableDisposable>(EqualityComparer<object>.Default);
         private IObserver<T>[]? observersCache;
+        private ObservableBaseAwaitable<T>? awaitable;
 
         protected ObservableBase()
         {
@@ -102,6 +103,27 @@ namespace Favalon.IO
             foreach (var observer in this.GetObservers())
             {
                 observer.OnCompleted();
+            }
+        }
+
+        public ObservableBaseAwaitable<T> Awaitable
+        {
+            get
+            {
+                var awaitable = this.awaitable;
+                if (awaitable == null)
+                {
+                    lock (this)
+                    {
+                        awaitable = this.awaitable;
+                        if (awaitable == null)
+                        {
+                            awaitable = new ObservableBaseAwaitable<T>(this);
+                            this.awaitable = awaitable;
+                        }
+                    }
+                }
+                return awaitable;
             }
         }
 #line default

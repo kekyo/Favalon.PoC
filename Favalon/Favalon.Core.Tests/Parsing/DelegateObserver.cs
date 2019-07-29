@@ -13,22 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 
 namespace Favalon.Parsing
 {
-    [TestFixture]
-    public sealed class ObservableParserTest
+    public sealed class DelegateObserver<T> : IObserver<T>
     {
-        [Test]
-        public void ApplyVariables()
+        private readonly Queue<Action<T>> onNexts;
+
+        private DelegateObserver(Action<T>[] onNexts) =>
+            this.onNexts = new Queue<Action<T>>(onNexts);
+
+        public void OnNext(T value) =>
+            onNexts.Dequeue()(value);
+
+        public void OnCompleted()
         {
-            var host = InteractiveTestHost.Create("aaa bbb ccc");
-            host.Assert((level, text) => Assert.AreEqual("((aaa:_ bbb:_):_ ccc:_):_", text));
-
-            var parser = ObservableParser.Create(host);
-
-            parser.InteractiveHost.Run();
         }
+
+        public void OnError(Exception ex)
+        {
+        }
+
+        public static DelegateObserver<T> Create(params Action<T>[] onNexts) =>
+            new DelegateObserver<T>(onNexts);
     }
 }

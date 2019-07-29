@@ -19,52 +19,70 @@ using System;
 
 namespace Favalon.Parsing
 {
-    public abstract class ObservableParser
+    public abstract class InteractiveParser : ObservableBase<ParseResult>
     {
-        internal ObservableParser() { }
+        internal InteractiveParser() { }
 
-        public static ObservableParser<T> Create<T>(T interactiveHost)
+        public static InteractiveParser<T> Create<T>(T interactiveHost)
             where T : InteractiveHost =>
-            new ObservableParser<T>(interactiveHost);
+            new InteractiveParser<T>(interactiveHost);
     }
 
-    public sealed class ObservableParser<T> :
-        ObservableBase<ParseResult>, IObserver<InteractiveInformation>
-        where T : InteractiveHost
+    public sealed class InteractiveParser<THost> :
+        InteractiveParser, IObserver<InteractiveInformation>
+        where THost : InteractiveHost
     {
         private readonly StateContext stateContext;
         private readonly IDisposable interactiveHostDisposable;
         private State currentState = DetectState.Instance;
 
-        internal ObservableParser(T interactiveHost)
+        internal InteractiveParser(THost interactiveHost)
         {
-            this.InteractiveHost = interactiveHost;
-            stateContext = new StateContext(this.InteractiveHost.TextRange);
-            interactiveHostDisposable = this.InteractiveHost.Subscribe(this);
+            this.Host = interactiveHost;
+            stateContext = new StateContext(this.Host.TextRange);
+            interactiveHostDisposable = this.Host.Subscribe(this);
         }
 
         public void Dispose() =>
             interactiveHostDisposable.Dispose();
 
-        public T InteractiveHost { get; private set; }
+        public THost Host { get; private set; }
 
         void IObserver<InteractiveInformation>.OnNext(InteractiveInformation value)
         {
+            // Control-Space: suggesting
             if ((value.Character == ' ') && (value.Modifier == InteractiveModifiers.Control))
             {
+                // Peek partially terms
                 if (currentState.PeekResult(stateContext) is ParseResult result)
                 {
+                    // Push (Contans current position)
                     base.OnNext(result);
                 }
+
+                return;
             }
 
+            // Backspace
+            if (value.Character == '\u0008')
+            {
+                stateContext.SkipTokenChar(stateContext.CurrentPosition + -1);
+                this.Host.Write(value.Character);
+                return;
+            }
+
+            ///////////////////////////////////////////////////////////////
+
+            // Examine state
             var newState = currentState.Run(value, stateContext);
 
+            // Echo back character
             if (Utilities.CanFeedback(value.Character) && (value.Modifier == InteractiveModifiers.None))
             {
-                this.InteractiveHost.Write(value.Character);
+                this.Host.Write(value.Character);
             }
 
+            // Detedted enter sequence (CR/LF)
             var isEntered = (currentState, newState) switch
             {
                 (AfterEnterState _, DetectState _) => false,
@@ -74,26 +92,34 @@ namespace Favalon.Parsing
 
             if (isEntered)
             {
-                this.InteractiveHost.WriteLine();
+                // Echo back enter
+                this.Host.WriteLine();
 
+                // Extract result by inputted 1 line
                 if (stateContext.ExtractResult() is ParseResult result)
                 {
+                    // Push
                     base.OnNext(result);
                 }
             }
 
+            // Update next state
             currentState = newState;
         }
 
         void IObserver<InteractiveInformation>.OnCompleted()
         {
+            // Finalize this state
             currentState.Finalize(stateContext);
 
+            // Extract result by last 1 line
             if (stateContext.ExtractResult() is ParseResult result)
             {
+                // Push
                 base.OnNext(result);
             }
 
+            // Completed Rx
             base.OnCompleted();
         }
 

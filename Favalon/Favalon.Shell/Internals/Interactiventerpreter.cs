@@ -22,12 +22,13 @@ using System;
 
 namespace Favalon.Internals
 {
-    internal sealed class ObservableInterpreter : IObserver<ParseResult>, IDisposable
+    internal sealed class InteractiveInterpreter :
+        IObserver<ParseResult>, IDisposable
     {
-        private readonly ObservableParser<InteractiveConsoleHost> parser;
+        private readonly InteractiveParser<InteractiveConsoleHost> parser;
         private readonly IDisposable parserDisposable;
 
-        public ObservableInterpreter(ObservableParser<InteractiveConsoleHost> parser)
+        public InteractiveInterpreter(InteractiveParser<InteractiveConsoleHost> parser)
         {
             this.parser = parser;
             this.parserDisposable = this.parser.Subscribe(this);
@@ -42,15 +43,15 @@ namespace Favalon.Internals
 
         private Term? WriteInfer(Term term)
         {
-            parser.InteractiveHost.WriteLog(LogLevels.Information, $"parsed: {term.AnnotatedReadableString}");
+            parser.Host.WriteLog(LogLevels.Information, $"parsed: {term.AnnotatedReadableString}");
             var (inferred, errors) = Terrain.Infer(term, Term.Unspecified);
             foreach (var error in errors)
             {
-                parser.InteractiveHost.WriteLog(LogLevels.Error, $"{error}");
+                parser.Host.WriteLog(LogLevels.Error, $"{error}");
             }
             if (inferred != null)
             {
-                parser.InteractiveHost.WriteLog(LogLevels.Information, $"inferred: {inferred.AnnotatedReadableString}");
+                parser.Host.WriteLog(LogLevels.Information, $"inferred: {inferred.AnnotatedReadableString}");
             }
             return inferred;
         }
@@ -61,7 +62,7 @@ namespace Favalon.Internals
             switch (result)
             {
                 case ParseResult(FreeVariableTerm term, _, _) when term.Name == "exit":
-                    parser.InteractiveHost.Abort();
+                    parser.Host.Abort();
                     abort = true;
                     break;
 
@@ -79,24 +80,24 @@ namespace Favalon.Internals
                 case ParseResult(_, ParseErrorInformation[] errors2, _):
                     foreach (var error in errors2)
                     {
-                        parser.InteractiveHost.WriteLog(LogLevels.Error, $"{error}");
+                        parser.Host.WriteLog(LogLevels.Error, $"{error}");
                     }
                     break;
             }
 
             if (!abort)
             {
-                parser.InteractiveHost.Write("Favalon> ");
+                parser.Host.Write("Favalon> ");
             }
         }
 
         void IObserver<ParseResult>.OnCompleted() =>
-            parser.InteractiveHost.WriteLog(LogLevels.Information, "Exited Favalon.");
+            parser.Host.WriteLog(LogLevels.Information, "Exited Favalon.");
 
         void IObserver<ParseResult>.OnError(Exception ex) =>
-            parser.InteractiveHost.WriteLog(LogLevels.Error, ex.ToString());
+            parser.Host.WriteLog(LogLevels.Error, ex.ToString());
 
-        public static ObservableInterpreter Create(ObservableParser<InteractiveConsoleHost> parser) =>
-            new ObservableInterpreter(parser);
+        public static InteractiveInterpreter Create(InteractiveParser<InteractiveConsoleHost> parser) =>
+            new InteractiveInterpreter(parser);
     }
 }

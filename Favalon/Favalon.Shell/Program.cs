@@ -54,9 +54,9 @@ namespace Favalon
         public static int Main(string[] args)
         {
             var console = InteractiveConsoleHost.Create();
-            var parser = ObservableParser<InteractiveConsoleHost>.Create(console);
+            var parser = InteractiveParser<InteractiveConsoleHost>.Create(console);
 
-            using (var interpreter = ObservableInterpreter.Create(parser))
+            using (var interpreter = InteractiveInterpreter.Create(parser))
             {
                 InitializeTerrain(interpreter.Terrain);
 

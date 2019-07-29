@@ -16,6 +16,7 @@
 using Favalet;
 using Favalet.Terms;
 using Favalet.Terms.Basis;
+using Favalon.IO;
 using Favalon.Parsing;
 using System;
 
@@ -30,25 +31,26 @@ namespace Favalon.Internals
         {
             this.parser = parser;
             this.parserDisposable = this.parser.Subscribe(this);
+
+            this.Terrain = Terrain.Create();
         }
 
         public void Dispose() =>
             this.parserDisposable.Dispose();
 
-        public Terrain Terrain =>
-            Terrain.Create();
+        public Terrain Terrain { get; }
 
         private Term? WriteInfer(Term term)
         {
-            parser.InteractiveHost.WriteLine($"parsed: {term.AnnotatedReadableString}");
+            parser.InteractiveHost.WriteLine(FeedbackLevels.Information, $"parsed: {term.AnnotatedReadableString}");
             var (inferred, errors) = Terrain.Infer(term, Term.Unspecified);
             foreach (var error in errors)
             {
-                parser.InteractiveHost.WriteLine($"{error}");
+                parser.InteractiveHost.WriteLine(FeedbackLevels.Error, $"{error}");
             }
             if (inferred != null)
             {
-                parser.InteractiveHost.WriteLine($"inferred: {inferred.AnnotatedReadableString}");
+                parser.InteractiveHost.WriteLine(FeedbackLevels.Information, $"inferred: {inferred.AnnotatedReadableString}");
             }
             return inferred;
         }
@@ -77,22 +79,22 @@ namespace Favalon.Internals
                 case ParseResult(_, ParseErrorInformation[] errors2, _):
                     foreach (var error in errors2)
                     {
-                        parser.InteractiveHost.WriteLine($"{error}");
+                        parser.InteractiveHost.WriteLine(FeedbackLevels.Error, $"{error}");
                     }
                     break;
             }
 
             if (!abort)
             {
-                parser.InteractiveHost.Write("Favalon> ");
+                parser.InteractiveHost.Write(FeedbackLevels.Feedback, "Favalon> ");
             }
         }
 
         void IObserver<ParseResult>.OnCompleted() =>
-            parser.InteractiveHost.Write("Exited from Favalon.");
+            parser.InteractiveHost.Write(FeedbackLevels.Information, "Exited from Favalon.");
 
         void IObserver<ParseResult>.OnError(Exception ex) =>
-            parser.InteractiveHost.Write(ex.ToString());
+            parser.InteractiveHost.Write(FeedbackLevels.Error, ex.ToString());
 
         public static ObservableInterpreter Create(ObservableParser<InteractiveConsoleHost> parser) =>
             new ObservableInterpreter(parser);

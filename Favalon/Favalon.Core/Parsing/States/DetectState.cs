@@ -36,7 +36,7 @@ namespace Favalon.Parsing.States
                 context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return NumericState.Instance;
             }
-            else if (char.IsLetter(inch.Character) || char.IsSymbol(inch.Character))
+            else if (char.IsLetter(inch.Character) || IsUsableOperator(inch.Character))
             {
                 context.RecordStartPosition();
                 context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);

@@ -20,18 +20,19 @@ namespace Favalon.Parsing
 {
     public sealed class ParseErrorInformation : ErrorInformation
     {
-        private ParseErrorInformation(string details, TextRange textRange) :
-            base(details) =>
+        private ParseErrorInformation(bool isError, string details, TextRange textRange) :
+            base(isError, details) =>
             this.TextRange = textRange;
 
         public override TextRange TextRange { get; }
 
-        public static ParseErrorInformation Create(string details, TextRange textRange) =>
-            new ParseErrorInformation(details, textRange);
+        public static ParseErrorInformation Create(bool isError, string details, TextRange textRange) =>
+            new ParseErrorInformation(isError, details, textRange);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void Deconstruct(out string details, out TextRange textRange)
+        public void Deconstruct(out bool isError, out string details, out TextRange textRange)
         {
+            isError = this.IsError;
             details = this.Details;
             textRange = this.TextRange;
         }

@@ -18,6 +18,14 @@ using System;
 
 namespace Favalon.IO
 {
+    public enum FeedbackLevels
+    {
+        Feedback,
+        Information,
+        Warning,
+        Error
+    }
+
     public abstract class InteractiveHost :
         ObservableBase<InteractiveInformation>
     {
@@ -26,23 +34,23 @@ namespace Favalon.IO
 
         public TextRange TextRange { get; }
 
-        public abstract void Write(char ch);
+        public abstract void Write(FeedbackLevels level, char ch);
 
-        public virtual void Write(string text)
+        public virtual void Write(FeedbackLevels level, string text)
         {
             foreach (var ch in text)
             {
-                this.Write(ch);
+                this.Write(level, ch);
             }
         }
 
-        public virtual void WriteLine(string text)
+        public virtual void WriteLine(FeedbackLevels level, string text)
         {
-            this.Write(text);
-            this.Write(Environment.NewLine);
+            this.Write(level, text);
+            this.Write(level, Environment.NewLine);
         }
 
-        public virtual void WriteLine() =>
-            this.Write(Environment.NewLine);
+        public virtual void WriteLine(FeedbackLevels level) =>
+            this.Write(level, Environment.NewLine);
     }
 }

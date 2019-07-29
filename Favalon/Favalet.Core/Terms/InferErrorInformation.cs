@@ -19,8 +19,8 @@ namespace Favalet.Terms
 {
     public sealed class InferErrorInformation : ErrorInformation
     {
-        private InferErrorInformation(string details, Term primaryTerm, Term[] terms) :
-            base(details)
+        private InferErrorInformation(bool isError, string details, Term primaryTerm, Term[] terms) :
+            base(isError, details)
         {
             this.PrimaryTerm = primaryTerm;
             this.Terms = terms;
@@ -32,12 +32,13 @@ namespace Favalet.Terms
         public override TextRange TextRange =>
             this.PrimaryTerm.TextRange;
 
-        public static InferErrorInformation Create(string details, Term primaryTerm, params Term[] terms) =>
-            new InferErrorInformation(details, primaryTerm, terms);
+        public static InferErrorInformation Create(bool isError, string details, Term primaryTerm, params Term[] terms) =>
+            new InferErrorInformation(isError, details, primaryTerm, terms);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void Deconstruct(out string details, out Term primaryTerm, out Term[] terms)
+        public void Deconstruct(out bool isError, out string details, out Term primaryTerm, out Term[] terms)
         {
+            isError = this.IsError;
             details = this.Details;
             primaryTerm = this.PrimaryTerm;
             terms = this.Terms;

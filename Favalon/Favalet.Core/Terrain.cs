@@ -58,7 +58,7 @@ namespace Favalet
 
         internal Term RecordError(string details, Term primaryTerm, params Term[] terms)
         {
-            errorInformations.Add(InferErrorInformation.Create(details, primaryTerm, terms));
+            errorInformations.Add(InferErrorInformation.Create(true, details, primaryTerm, terms));
             return primaryTerm;
         }
 

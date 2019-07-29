@@ -59,7 +59,7 @@ namespace Favalon.Parsing
 
             void RecordError(string details)
             {
-                errorInformations.Add(ParseErrorInformation.Create(details, GetCurrentTextRange()));
+                errorInformations.Add(ParseErrorInformation.Create(true, details, GetCurrentTextRange()));
                 beginIndex = -1;
                 state = States.Detect;
             }

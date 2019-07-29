@@ -19,9 +19,13 @@ namespace Favalet
 {
     public abstract class ErrorInformation
     {
-        protected ErrorInformation(string details) =>
+        protected ErrorInformation(bool isError, string details)
+        {
+            this.IsError = isError;
             this.Details = details;
+        }
 
+        public readonly bool IsError;
         public readonly string Details;
 
         public abstract TextRange TextRange { get; }
@@ -30,7 +34,10 @@ namespace Favalet
             $"{this.TextRange}: {this.Details}";
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void Deconstruct(out string details) =>
+        public void Deconstruct(out bool isError, out string details)
+        {
+            isError = this.IsError;
             details = this.Details;
+        }
     }
 }

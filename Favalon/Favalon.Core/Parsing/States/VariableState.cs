@@ -29,7 +29,7 @@ namespace Favalon.Parsing.States
 
         public override State Run(InteractiveInformation inch, StateContext context)
         {
-            if (char.IsLetterOrDigit(inch.Character) || char.IsSymbol(inch.Character))
+            if (char.IsLetterOrDigit(inch.Character) || IsUsableOperator(inch.Character))
             {
                 context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return this;

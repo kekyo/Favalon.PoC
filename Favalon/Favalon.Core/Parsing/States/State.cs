@@ -23,10 +23,18 @@ namespace Favalon.Parsing.States
 {
     internal abstract class State
     {
+        private static readonly char[] usableOperators = new[]
+        {
+            '!'/* , '"' */, '#', '$', '%', '&' /* , ''', '(', ')' */, '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'
+        };
+
         protected State() { }
 
         public static bool IsTokenSeparator(char ch) =>
             char.IsWhiteSpace(ch) || (ch == '\r') || (ch == '\n');
+
+        public static bool IsUsableOperator(char ch) =>
+            Array.BinarySearch(usableOperators, ch) >= 0;
 
         protected virtual Term MakeTerm(string token, TextRange textRange) =>
             throw new InvalidOperationException();

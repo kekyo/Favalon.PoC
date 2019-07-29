@@ -19,6 +19,7 @@ using Favalon.Internals;
 using Favalon.Parsing;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon
 {
@@ -40,6 +41,16 @@ namespace Favalon
             yield return $"{bc},{wc},{lc}";
         }
 
+        private static void InitializeTerrain(Terrain terrain)
+        {
+            foreach (var type in typeof(object).Assembly.GetTypes().
+                Where(type => type.IsPublic && !type.IsNestedPublic && !type.IsGenericType))
+            {
+                var tystr = Term.Bound(type.FullName, Term.Kind, TextRange.Unknown);
+                terrain.Bind(tystr, tystr);
+            }
+        }
+
         public static int Main(string[] args)
         {
             var console = InteractiveConsoleHost.Create();
@@ -47,8 +58,9 @@ namespace Favalon
 
             using (var interpreter = ObservableInterpreter.Create(parser))
             {
-                var tystr = Term.Bound("System.String", Term.Kind, TextRange.Unknown);
-                interpreter.Terrain.Bind(tystr, tystr);
+                InitializeTerrain(interpreter.Terrain);
+
+                var tystr = Term.Free("System.String", Term.Kind, TextRange.Unknown);
 
                 // wc = stdin:IE<s> -> stdin:IE<s>
                 interpreter.Terrain.Bind(

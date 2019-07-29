@@ -53,7 +53,7 @@ namespace Favalon.Parsing
 
             if (!char.IsControl(value.Character) && (value.Modifier == InteractiveModifiers.None))
             {
-                this.InteractiveHost.Write(value.Character);
+                this.InteractiveHost.Write(FeedbackLevels.Feedback, value.Character);
             }
 
             if (!(currentState is DetectState) && (newState is DetectState) &&

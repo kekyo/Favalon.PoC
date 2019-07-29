@@ -91,7 +91,7 @@ namespace Favalon.Parsing.States
 
         public void RecordError(string details, Position? newPosition)
         {
-            this.errors.Add(ParseErrorInformation.Create(details, this.GetCurrentTextRange()));
+            this.errors.Add(ParseErrorInformation.Create(true, details, this.GetCurrentTextRange()));
             this.StartPosition = newPosition;
         }
 

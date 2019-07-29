@@ -31,18 +31,40 @@ namespace Favalon.Internals
         {
             var key = System.Console.ReadKey(true);
 
+            var keyChar = key.KeyChar;
             var modifier = InteractiveModifiers.None;
 
-            if (key.Modifiers.HasFlag(System.ConsoleModifiers.Control))
+            switch (key.Key)
             {
-                modifier |= InteractiveModifiers.Control;
-            }
-            if (key.Modifiers.HasFlag(System.ConsoleModifiers.Alt))
-            {
-                modifier |= InteractiveModifiers.Alt;
+                case System.ConsoleKey.UpArrow:
+                    keyChar = '\x0010';
+                    modifier |= InteractiveModifiers.Control;
+                    break;
+                case System.ConsoleKey.DownArrow:
+                    keyChar = '\x000e';
+                    modifier |= InteractiveModifiers.Control;
+                    break;
+                case System.ConsoleKey.LeftArrow:
+                    keyChar = '\x0006';
+                    modifier |= InteractiveModifiers.Control;
+                    break;
+                case System.ConsoleKey.RightArrow:
+                    keyChar = '\x0002';
+                    modifier |= InteractiveModifiers.Control;
+                    break;
+                default:
+                    if (key.Modifiers.HasFlag(System.ConsoleModifiers.Control))
+                    {
+                        modifier |= InteractiveModifiers.Control;
+                    }
+                    if (key.Modifiers.HasFlag(System.ConsoleModifiers.Alt))
+                    {
+                        modifier |= InteractiveModifiers.Alt;
+                    }
+                    break;
             }
 
-            base.OnNext(InteractiveInformation.Create(key.KeyChar, modifier));
+            base.OnNext(InteractiveInformation.Create(keyChar, modifier));
         }
 
         public void Abort() =>

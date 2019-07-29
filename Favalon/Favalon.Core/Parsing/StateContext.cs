@@ -36,17 +36,23 @@ namespace Favalon.Parsing
         private readonly StringBuilder token = new StringBuilder();
         private readonly List<ParseErrorInformation> errors = new List<ParseErrorInformation>();
 
-        public void AppendTokenChar(char ch, Position newPosition)
+        public void BeginToken() =>
+            this.StartPosition = this.CurrentPosition;
+
+        public void AppendTokenChar(char ch)
         {
             this.token.Append(ch);
-            this.CurrentPosition = newPosition;
+            this.CurrentPosition += 1;
         }
 
-        public void SkipTokenChar(Position newPosition) =>
-            this.CurrentPosition = newPosition;
+        public void ForwardToken() =>
+            this.CurrentPosition += 1;
 
-        public void RecordStartPosition() =>
-            this.StartPosition = this.CurrentPosition;
+        public void BackwardToken() =>
+            this.CurrentPosition += -1;
+
+        public void UpdatePosition(Position newPosition) =>
+            this.CurrentPosition = newPosition;
 
         public TextRange GetCurrentTextRange() =>
             this.TextRange.Subtract(

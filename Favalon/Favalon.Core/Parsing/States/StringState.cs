@@ -32,17 +32,17 @@ namespace Favalon.Parsing.States
             if (inch.Character == '"')
             {
                 this.RunFinishing(context);
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.ForwardToken();
                 return DetectState.Instance;
             }
             else if (inch.Character == '\\')
             {
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.ForwardToken();
                 return StringEscapedState.Instance;
             }
             else
             {
-                context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
+                context.AppendTokenChar(inch.Character);
                 return this;
             }
         }

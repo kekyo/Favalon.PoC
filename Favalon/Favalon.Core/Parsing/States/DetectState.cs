@@ -26,30 +26,30 @@ namespace Favalon.Parsing.States
         {
             if (inch.Character == '"')
             {
-                context.RecordStartPosition();
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.BeginToken();
+                context.ForwardToken();
                 return StringState.Instance;
             }
             else if (char.IsDigit(inch.Character))
             {
-                context.RecordStartPosition();
-                context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
+                context.BeginToken();
+                context.AppendTokenChar(inch.Character);
                 return NumericState.Instance;
             }
             else if (char.IsLetter(inch.Character) || Utilities.IsDeclarableOperator(inch.Character))
             {
-                context.RecordStartPosition();
-                context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
+                context.BeginToken();
+                context.AppendTokenChar(inch.Character);
                 return VariableState.Instance;
             }
             else if (Utilities.IsEnter(inch.Character))
             {
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.ForwardToken();
                 return AfterEnterState.NextState(inch.Character);
             }
             else if (char.IsWhiteSpace(inch.Character))
             {
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.ForwardToken();
                 return this;
             }
             else
@@ -60,7 +60,7 @@ namespace Favalon.Parsing.States
         }
 
         public override void Finalize(StateContext context) =>
-            context.SkipTokenChar(context.CurrentPosition + 1);
+            context.ForwardToken();
 
         public override ParseResult? PeekResult(StateContext context) =>
             null;

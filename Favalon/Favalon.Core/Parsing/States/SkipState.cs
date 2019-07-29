@@ -26,24 +26,24 @@ namespace Favalon.Parsing.States
         {
             if (Utilities.IsEnter(inch.Character))
             {
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.ForwardToken();
                 return AfterEnterState.NextState(inch.Character);
             }
             else if (char.IsWhiteSpace(inch.Character))
             {
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.ForwardToken();
                 return DetectState.Instance;
             }
             else
             {
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.ForwardToken();
                 return this;
             }
         }
 
         public override void Finalize(StateContext context)
         {
-            context.SkipTokenChar(context.CurrentPosition + 1);
+            context.ForwardToken();
         }
 
         public static readonly State Instance = new SkipState();

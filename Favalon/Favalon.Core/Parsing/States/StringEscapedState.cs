@@ -29,7 +29,7 @@ namespace Favalon.Parsing.States
 
         public override State Run(InteractiveInformation inch, StateContext context)
         {
-            context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
+            context.AppendTokenChar(inch.Character);
             return StringState.Instance;
         }
 

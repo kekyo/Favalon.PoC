@@ -31,19 +31,19 @@ namespace Favalon.Parsing.States
         {
             if (char.IsLetterOrDigit(inch.Character) || Utilities.IsDeclarableOperator(inch.Character))
             {
-                context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
+                context.AppendTokenChar(inch.Character);
                 return this;
             }
             else if (Utilities.IsEnter(inch.Character))
             {
                 this.RunFinishing(context);
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.ForwardToken();
                 return AfterEnterState.NextState(inch.Character);
             }
             else if (char.IsWhiteSpace(inch.Character))
             {
                 this.RunFinishing(context);
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.ForwardToken();
                 return DetectState.Instance;
             }
             else

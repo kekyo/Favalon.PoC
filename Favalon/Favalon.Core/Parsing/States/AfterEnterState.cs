@@ -30,7 +30,7 @@ namespace Favalon.Parsing.States
         {
             if (inch.Character == nextEnterChar)
             {
-                context.SkipTokenChar(context.CurrentPosition + 1);
+                context.ForwardToken();
                 return DetectState.Instance;
             }
             else
@@ -40,7 +40,7 @@ namespace Favalon.Parsing.States
         }
 
         public override void Finalize(StateContext context) =>
-            context.SkipTokenChar(context.CurrentPosition + 1);
+            context.ForwardToken();
 
         public override ParseResult? PeekResult(StateContext context) =>
             null;

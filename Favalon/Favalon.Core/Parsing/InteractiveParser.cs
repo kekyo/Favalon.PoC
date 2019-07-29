@@ -64,9 +64,9 @@ namespace Favalon.Parsing
             }
 
             // Backspace
-            if (value.Character == '\u0008')
+            if (value.Character == '\b')
             {
-                stateContext.SkipTokenChar(stateContext.CurrentPosition + -1);
+                stateContext.BackwardToken();
                 this.Host.Write(value.Character);
                 return;
             }

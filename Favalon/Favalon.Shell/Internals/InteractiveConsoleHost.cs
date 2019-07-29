@@ -50,7 +50,7 @@ namespace Favalon.Internals
 
         public void Run()
         {
-            this.Write(FeedbackLevels.Feedback, "Favalon> ");
+            this.Write("Favalon> ");
 
             try
             {
@@ -65,17 +65,35 @@ namespace Favalon.Internals
             }
         }
 
-        public override void Write(FeedbackLevels level, char ch) =>
+        public override void Write(char ch) =>
             System.Console.Write(ch);
 
-        public override void Write(FeedbackLevels level, string text) =>
+        public override void Write(string text) =>
             System.Console.Write(text);
 
-        public override void WriteLine(FeedbackLevels level, string text) =>
-            System.Console.WriteLine(text);
-
-        public override void WriteLine(FeedbackLevels level) =>
+        public override void WriteLine() =>
             System.Console.WriteLine();
+
+        public override void WriteLine(FeedbackLevels level, string text)
+        {
+            var fc = System.Console.ForegroundColor;
+            switch (level)
+            {
+                case FeedbackLevels.Warning:
+                    System.Console.ForegroundColor = System.ConsoleColor.Yellow;
+                    System.Console.WriteLine(text);
+                    System.Console.ForegroundColor = fc;
+                    break;
+                case FeedbackLevels.Error:
+                    System.Console.ForegroundColor = System.ConsoleColor.Red;
+                    System.Console.WriteLine(text);
+                    System.Console.ForegroundColor = fc;
+                    break;
+                default:
+                    System.Console.WriteLine(text);
+                    break;
+            }
+        }
 
         public static InteractiveConsoleHost Create() =>
             new InteractiveConsoleHost();

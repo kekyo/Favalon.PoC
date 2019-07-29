@@ -44,7 +44,7 @@ namespace Favalon.Parsing.States
                 context.SkipTokenChar(context.CurrentPosition + 1);
                 return this;
             }
-            else if (IsTokenSeparator(inch.Character))
+            else if (Utilities.IsTokenSeparator(inch.Character))
             {
                 this.RunFinishing(context);
                 context.SkipTokenChar(context.CurrentPosition + 1);

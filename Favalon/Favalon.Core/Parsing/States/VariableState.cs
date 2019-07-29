@@ -29,12 +29,12 @@ namespace Favalon.Parsing.States
 
         public override State Run(InteractiveInformation inch, StateContext context)
         {
-            if (char.IsLetterOrDigit(inch.Character) || IsUsableOperator(inch.Character))
+            if (char.IsLetterOrDigit(inch.Character) || Utilities.IsDeclarableOperator(inch.Character))
             {
                 context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return this;
             }
-            else if (IsTokenSeparator(inch.Character))
+            else if (Utilities.IsTokenSeparator(inch.Character))
             {
                 this.RunFinishing(context);
                 context.SkipTokenChar(context.CurrentPosition + 1);

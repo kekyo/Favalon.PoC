@@ -86,15 +86,15 @@ namespace Favalon.Internals
 
             if (!abort)
             {
-                parser.InteractiveHost.Write(FeedbackLevels.Feedback, "Favalon> ");
+                parser.InteractiveHost.Write("Favalon> ");
             }
         }
 
         void IObserver<ParseResult>.OnCompleted() =>
-            parser.InteractiveHost.Write(FeedbackLevels.Information, "Exited from Favalon.");
+            parser.InteractiveHost.WriteLine(FeedbackLevels.Information, "Exited Favalon.");
 
         void IObserver<ParseResult>.OnError(Exception ex) =>
-            parser.InteractiveHost.Write(FeedbackLevels.Error, ex.ToString());
+            parser.InteractiveHost.WriteLine(FeedbackLevels.Error, ex.ToString());
 
         public static ObservableInterpreter Create(ObservableParser<InteractiveConsoleHost> parser) =>
             new ObservableInterpreter(parser);

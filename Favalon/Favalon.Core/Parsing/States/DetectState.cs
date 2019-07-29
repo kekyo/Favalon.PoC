@@ -36,13 +36,13 @@ namespace Favalon.Parsing.States
                 context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return NumericState.Instance;
             }
-            else if (char.IsLetter(inch.Character) || IsUsableOperator(inch.Character))
+            else if (char.IsLetter(inch.Character) || Utilities.IsDeclarableOperator(inch.Character))
             {
                 context.RecordStartPosition();
                 context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return VariableState.Instance;
             }
-            else if (IsTokenSeparator(inch.Character))
+            else if (Utilities.IsTokenSeparator(inch.Character))
             {
                 context.SkipTokenChar(context.CurrentPosition + 1);
                 return this;

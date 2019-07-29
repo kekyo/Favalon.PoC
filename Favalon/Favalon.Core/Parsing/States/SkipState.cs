@@ -24,7 +24,7 @@ namespace Favalon.Parsing.States
 
         public override State Run(InteractiveInformation inch, StateContext context)
         {
-            if (char.IsWhiteSpace(inch.Character) || (inch.Character == '\r') || (inch.Character == '\n'))
+            if (char.IsWhiteSpace(inch.Character) || Utilities.IsEnter(inch.Character))
             {
                 context.SkipTokenChar(context.CurrentPosition + 1);
                 return DetectState.Instance;

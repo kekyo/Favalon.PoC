@@ -51,13 +51,12 @@ namespace Favalon.Parsing
 
             var newState = currentState.Run(value, stateContext);
 
-            if (!char.IsControl(value.Character) && (value.Modifier == InteractiveModifiers.None))
+            if (Utilities.CanFeedback(value.Character) && (value.Modifier == InteractiveModifiers.None))
             {
-                this.InteractiveHost.Write(FeedbackLevels.Feedback, value.Character);
+                this.InteractiveHost.Write(value.Character);
             }
 
-            if (!(currentState is DetectState) && (newState is DetectState) &&
-                State.IsTokenSeparator(value.Character))
+            if ((newState is DetectState) && Utilities.IsEnter(value.Character))
             {
                 if (stateContext.ExtractResult() is ParseResult result)
                 {

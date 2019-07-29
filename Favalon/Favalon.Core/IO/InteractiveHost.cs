@@ -20,7 +20,6 @@ namespace Favalon.IO
 {
     public enum FeedbackLevels
     {
-        Feedback,
         Information,
         Warning,
         Error
@@ -34,23 +33,23 @@ namespace Favalon.IO
 
         public TextRange TextRange { get; }
 
-        public abstract void Write(FeedbackLevels level, char ch);
+        public abstract void Write(char ch);
 
-        public virtual void Write(FeedbackLevels level, string text)
+        public virtual void Write(string text)
         {
             foreach (var ch in text)
             {
-                this.Write(level, ch);
+                this.Write(ch);
             }
         }
 
+        public virtual void WriteLine() =>
+            this.Write(Environment.NewLine);
+
         public virtual void WriteLine(FeedbackLevels level, string text)
         {
-            this.Write(level, text);
-            this.Write(level, Environment.NewLine);
+            this.Write(text);
+            this.Write(Environment.NewLine);
         }
-
-        public virtual void WriteLine(FeedbackLevels level) =>
-            this.Write(level, Environment.NewLine);
     }
 }

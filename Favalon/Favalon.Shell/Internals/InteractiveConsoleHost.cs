@@ -15,19 +15,19 @@
 
 using Favalet;
 using Favalon.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Favalon.Internals
 {
     public sealed class InteractiveConsoleHost : InteractiveHost
     {
+        private volatile bool abort;
+
         private InteractiveConsoleHost() :
             base(TextRange.Create("console", Range.MaxLength))
         {
         }
 
-        private void LoadKey()
+        private void PushReadKey()
         {
             var key = System.Console.ReadKey(true);
 
@@ -45,13 +45,18 @@ namespace Favalon.Internals
             base.OnNext(new InteractiveInformation(key.KeyChar, modifier));
         }
 
-        public void Run(ref bool abort)
+        public void Abort() =>
+            abort = true;
+
+        public void Run()
         {
+            this.Write("Favalon> ");
+
             try
             {
                 while (!abort)
                 {
-                    this.LoadKey();
+                    this.PushReadKey();
                 }
             }
             finally

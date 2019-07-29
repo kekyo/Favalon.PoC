@@ -19,23 +19,25 @@ using System;
 
 namespace Favalon.Parsing
 {
-    public sealed class ObservableParser :
+    public sealed class ObservableParser<T> :
         ObservableBase<ParseResult>, IObserver<InteractiveInformation>
+        where T : InteractiveHost
     {
         private readonly StateContext stateContext;
-        private readonly InteractiveHost interactiveHost;
         private readonly IDisposable interactiveHostDisposable;
         private State currentState = DetectState.Instance;
 
-        public ObservableParser(InteractiveHost interactiveHost)
+        public ObservableParser(T interactiveHost)
         {
-            this.interactiveHost = interactiveHost;
-            stateContext = new StateContext(this.interactiveHost.TextRange);
-            interactiveHostDisposable = this.interactiveHost.Subscribe(this);
+            this.InteractiveHost = interactiveHost;
+            stateContext = new StateContext(this.InteractiveHost.TextRange);
+            interactiveHostDisposable = this.InteractiveHost.Subscribe(this);
         }
 
         public void Dispose() =>
             interactiveHostDisposable.Dispose();
+
+        public T InteractiveHost { get; private set; }
 
         void IObserver<InteractiveInformation>.OnNext(InteractiveInformation value)
         {
@@ -51,11 +53,10 @@ namespace Favalon.Parsing
 
             if (!char.IsControl(value.Character) && (value.Modifier == InteractiveModifiers.None))
             {
-                interactiveHost.Write(value.Character);
+                this.InteractiveHost.Write(value.Character);
             }
 
-            if (!(currentState is DetectState) &&
-                (newState is DetectState) &&
+            if (!(currentState is DetectState) && (newState is DetectState) &&
                 State.IsTokenSeparator(value.Character))
             {
                 if (stateContext.ExtractResult() is ParseResult result)
@@ -82,7 +83,7 @@ namespace Favalon.Parsing
         void IObserver<InteractiveInformation>.OnError(Exception ex) =>
             base.OnError(ex);
 
-        public static ObservableParser Create(InteractiveHost interactiveHost) =>
-            new ObservableParser(interactiveHost);
+        public static ObservableParser<T> Create(T interactiveHost) =>
+            new ObservableParser<T>(interactiveHost);
     }
 }

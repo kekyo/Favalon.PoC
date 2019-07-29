@@ -20,7 +20,7 @@ namespace Favalon.IO
         public readonly char Character;
         public readonly InteractiveModifiers Modifier;
 
-        public InteractiveInformation(char character, InteractiveModifiers modifier)
+        private InteractiveInformation(char character, InteractiveModifiers modifier)
         {
             this.Character = character;
             this.Modifier = modifier;
@@ -34,6 +34,9 @@ namespace Favalon.IO
 
         public override bool Equals(object obj) =>
             obj is InteractiveInformation ii ? this.Equals(ii) : false;
+
+        public static InteractiveInformation Create(char character, InteractiveModifiers modifier) =>
+            new InteractiveInformation(character, modifier);
 
         public static bool operator ==(InteractiveInformation lhs, InteractiveInformation rhs) =>
             lhs.Equals(rhs);

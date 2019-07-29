@@ -18,7 +18,7 @@ using Favalet.Terms;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Favalon.Parsing.States
+namespace Favalon.Parsing
 {
     internal sealed class StateContext
     {

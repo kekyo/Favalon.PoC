@@ -21,7 +21,7 @@ namespace Favalet
     public struct Position : IEquatable<Position>, IComparable<Position>, IComparable
     {
         public static readonly Position Unknown = new Position(-1, -1);
-        public static readonly Position MinValue = new Position(0, 0);
+        public static readonly Position Zero = new Position(0, 0);
         public static readonly Position MaxValue = new Position(int.MaxValue, int.MaxValue);
 
         public readonly int Line;

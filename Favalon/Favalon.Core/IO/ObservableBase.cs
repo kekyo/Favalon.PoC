@@ -15,6 +15,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
 namespace Favalon.IO
 {
@@ -37,6 +39,7 @@ namespace Favalon.IO
 
         private readonly Dictionary<IObserver<T>, ObservableDisposable> observers =
             new Dictionary<IObserver<T>, ObservableDisposable>(EqualityComparer<object>.Default);
+        private IObserver<T>[]? observersCache;
 
         protected ObservableBase()
         {
@@ -44,17 +47,43 @@ namespace Favalon.IO
 
         public IDisposable Subscribe(IObserver<T> observer)
         {
-            if (!observers.TryGetValue(observer, out var ico))
+            lock (this.observers)
             {
-                ico = new ObservableDisposable(this, observer);
-                observers.Add(observer, ico);
+                if (!observers.TryGetValue(observer, out var ico))
+                {
+                    ico = new ObservableDisposable(this, observer);
+                    observers.Add(observer, ico);
+
+                    observersCache = null;
+                }
+
+                return ico;
             }
-            return ico;
+        }
+
+#line hidden
+        private IObserver<T>[] GetObservers()
+        {
+            var observers = observersCache;
+            if (observers == null)
+            {
+                lock (this.observers)
+                {
+                    observers = observersCache;
+                    if (observers == null)
+                    {
+                        observers = this.observers.Keys.ToArray();
+                        observersCache = observers;
+                    }
+                }
+            }
+
+            return observers;
         }
 
         protected void OnNext(T value)
         {
-            foreach (var observer in observers.Keys)
+            foreach (var observer in this.GetObservers())
             {
                 observer.OnNext(value);
             }
@@ -62,7 +91,7 @@ namespace Favalon.IO
 
         protected void OnError(Exception ex)
         {
-            foreach (var observer in observers.Keys)
+            foreach (var observer in this.GetObservers())
             {
                 observer.OnError(ex);
             }
@@ -70,10 +99,11 @@ namespace Favalon.IO
 
         protected void OnCompleted()
         {
-            foreach (var observer in observers.Keys)
+            foreach (var observer in this.GetObservers())
             {
                 observer.OnCompleted();
             }
         }
+#line default
     }
 }

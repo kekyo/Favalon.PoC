@@ -20,9 +20,9 @@ namespace Favalet
     public struct Range
     {
         public static readonly Range Unknown = Create(Position.Unknown, Position.Unknown);
-        public static readonly Range MinValue = Create(Position.MinValue, Position.MinValue);
+        public static readonly Range Zero = Create(Position.Zero, Position.Zero);
         public static readonly Range MaxValue = Create(Position.MaxValue, Position.MaxValue);
-        public static readonly Range MaxLength = Create(Position.MinValue, Position.MaxValue);
+        public static readonly Range MaxLength = Create(Position.Zero, Position.MaxValue);
 
         public readonly Position First;
         public readonly Position Last;

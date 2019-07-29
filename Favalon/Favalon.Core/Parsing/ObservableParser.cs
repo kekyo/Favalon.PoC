@@ -19,6 +19,15 @@ using System;
 
 namespace Favalon.Parsing
 {
+    public abstract class ObservableParser
+    {
+        internal ObservableParser() { }
+
+        public static ObservableParser<T> Create<T>(T interactiveHost)
+            where T : InteractiveHost =>
+            new ObservableParser<T>(interactiveHost);
+    }
+
     public sealed class ObservableParser<T> :
         ObservableBase<ParseResult>, IObserver<InteractiveInformation>
         where T : InteractiveHost
@@ -27,7 +36,7 @@ namespace Favalon.Parsing
         private readonly IDisposable interactiveHostDisposable;
         private State currentState = DetectState.Instance;
 
-        public ObservableParser(T interactiveHost)
+        internal ObservableParser(T interactiveHost)
         {
             this.InteractiveHost = interactiveHost;
             stateContext = new StateContext(this.InteractiveHost.TextRange);
@@ -90,8 +99,5 @@ namespace Favalon.Parsing
 
         void IObserver<InteractiveInformation>.OnError(Exception ex) =>
             base.OnError(ex);
-
-        public static ObservableParser<T> Create(T interactiveHost) =>
-            new ObservableParser<T>(interactiveHost);
     }
 }

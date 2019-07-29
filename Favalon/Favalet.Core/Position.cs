@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using System;
+using System.ComponentModel;
 
 namespace Favalet
 {
@@ -60,6 +61,7 @@ namespace Favalet
         public override string ToString() =>
             $"{this.Line},{this.Column}";
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void Deconstruct(out int line, out int column)
         {
             line = this.Line;

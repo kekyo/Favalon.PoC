@@ -25,8 +25,6 @@ namespace Favalet.Terms
     [DebuggerDisplay("{TermName}: {AnnotatedReadableString}")]
     public abstract partial class Term
     {
-        private static readonly Term[] emptyTerms = new Term[0];
-
         protected Term(Term higherOrder, TextRange textRange)
         {
             this.HigherOrder = higherOrder;

@@ -28,7 +28,7 @@ namespace Favalet.Terms.Basis
 
         protected override Term VisitInferringOnBoundTermNotFound(IInferringContext context, Term higherOrderHint)
         {
-            context.RecordError($"Cannot find variable: Name={this.Name}", this);
+            context.RecordError($"Cannot find variable: Name=\"{this.Name}\"", this);
             return base.VisitInferringOnBoundTermNotFound(context, higherOrderHint);
         }
 

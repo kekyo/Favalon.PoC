@@ -74,17 +74,17 @@ namespace Favalon.Internals
         public override void WriteLine() =>
             System.Console.WriteLine();
 
-        public override void WriteLine(FeedbackLevels level, string text)
+        public override void WriteLog(LogLevels level, string text)
         {
             var fc = System.Console.ForegroundColor;
             switch (level)
             {
-                case FeedbackLevels.Warning:
+                case LogLevels.Warning:
                     System.Console.ForegroundColor = System.ConsoleColor.Yellow;
                     System.Console.WriteLine(text);
                     System.Console.ForegroundColor = fc;
                     break;
-                case FeedbackLevels.Error:
+                case LogLevels.Error:
                     System.Console.ForegroundColor = System.ConsoleColor.Red;
                     System.Console.WriteLine(text);
                     System.Console.ForegroundColor = fc;

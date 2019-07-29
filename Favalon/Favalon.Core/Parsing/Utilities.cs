@@ -36,7 +36,7 @@ namespace Favalon.Parsing
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool CanFeedback(char ch) =>
-            !char.IsControl(ch) || IsEnter(ch);
+            !char.IsControl(ch);
 #line default
     }
 }

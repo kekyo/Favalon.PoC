@@ -62,8 +62,11 @@ namespace Favalon.Parsing
                 (_, AfterEnterState _) => true,
                 _ => false
             };
+
             if (isEntered)
             {
+                this.InteractiveHost.WriteLine();
+
                 if (stateContext.ExtractResult() is ParseResult result)
                 {
                     base.OnNext(result);

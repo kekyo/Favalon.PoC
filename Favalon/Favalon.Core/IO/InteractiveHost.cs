@@ -18,7 +18,7 @@ using System;
 
 namespace Favalon.IO
 {
-    public enum FeedbackLevels
+    public enum LogLevels
     {
         Information,
         Warning,
@@ -46,7 +46,7 @@ namespace Favalon.IO
         public virtual void WriteLine() =>
             this.Write(Environment.NewLine);
 
-        public virtual void WriteLine(FeedbackLevels level, string text)
+        public virtual void WriteLog(LogLevels level, string text)
         {
             this.Write(text);
             this.Write(Environment.NewLine);

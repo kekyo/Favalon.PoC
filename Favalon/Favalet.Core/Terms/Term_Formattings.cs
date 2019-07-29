@@ -94,9 +94,9 @@ namespace Favalet.Terms
             {
                 (_, _, null) => false,
                 (_, _, Rank3Term _) => false,                                                         // "...:#" => "..."
-                (_, TypeTerm _, KindTerm _) => false,                                           // "?:*" => "?"
-                (_, LambdaTerm(TypeTerm _, TypeTerm _), KindTerm _) => false,       // "(? -> ?):*" => "(? -> ?)"
-                (_, UnspecifiedTerm _, UnspecifiedTerm _) => false,                             // "_:_" => "_" 
+                (_, TypeTerm _, KindTerm _) => false,                                                 // "?:*" => "?"
+                (_, LambdaTerm(TypeTerm _, TypeTerm _), KindTerm _) => false,                         // "(? -> ?):*" => "(? -> ?)"
+                (_, UnspecifiedTerm _, UnspecifiedTerm _) => false,                                   // "_:_" => "_" 
                 (_, Term _, LambdaTerm(UnspecifiedTerm _, Term e)) => IsRequiredAnnotation(context, e),         // "...":(_ -> _) => "..." 
                 (_, Term _, LambdaTerm(Term p, UnspecifiedTerm _)) => IsRequiredAnnotation(context, p),         // "...":(_ -> _) => "..." 
                 (_, LambdaTerm(Term p, Term e), Term _) => IsRequiredAnnotation(context, p) || IsRequiredAnnotation(context, e),    // "(_ -> _):..." => "(_ -> _)"

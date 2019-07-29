@@ -42,15 +42,15 @@ namespace Favalon.Internals
 
         private Term? WriteInfer(Term term)
         {
-            parser.InteractiveHost.WriteLine(FeedbackLevels.Information, $"parsed: {term.AnnotatedReadableString}");
+            parser.InteractiveHost.WriteLog(LogLevels.Information, $"parsed: {term.AnnotatedReadableString}");
             var (inferred, errors) = Terrain.Infer(term, Term.Unspecified);
             foreach (var error in errors)
             {
-                parser.InteractiveHost.WriteLine(FeedbackLevels.Error, $"{error}");
+                parser.InteractiveHost.WriteLog(LogLevels.Error, $"{error}");
             }
             if (inferred != null)
             {
-                parser.InteractiveHost.WriteLine(FeedbackLevels.Information, $"inferred: {inferred.AnnotatedReadableString}");
+                parser.InteractiveHost.WriteLog(LogLevels.Information, $"inferred: {inferred.AnnotatedReadableString}");
             }
             return inferred;
         }
@@ -79,7 +79,7 @@ namespace Favalon.Internals
                 case ParseResult(_, ParseErrorInformation[] errors2, _):
                     foreach (var error in errors2)
                     {
-                        parser.InteractiveHost.WriteLine(FeedbackLevels.Error, $"{error}");
+                        parser.InteractiveHost.WriteLog(LogLevels.Error, $"{error}");
                     }
                     break;
             }
@@ -91,10 +91,10 @@ namespace Favalon.Internals
         }
 
         void IObserver<ParseResult>.OnCompleted() =>
-            parser.InteractiveHost.WriteLine(FeedbackLevels.Information, "Exited Favalon.");
+            parser.InteractiveHost.WriteLog(LogLevels.Information, "Exited Favalon.");
 
         void IObserver<ParseResult>.OnError(Exception ex) =>
-            parser.InteractiveHost.WriteLine(FeedbackLevels.Error, ex.ToString());
+            parser.InteractiveHost.WriteLog(LogLevels.Error, ex.ToString());
 
         public static ObservableInterpreter Create(ObservableParser<InteractiveConsoleHost> parser) =>
             new ObservableInterpreter(parser);

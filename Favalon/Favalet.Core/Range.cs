@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.ComponentModel;
+
 namespace Favalet
 {
     public struct Range
@@ -54,12 +56,14 @@ namespace Favalet
                 this.First.ToString() :
                 $"{this.First},{this.Last}";
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void Deconstruct(out Position first, out Position last)
         {
             first = this.First;
             last = this.Last;
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void Deconstruct(out int lineFirst, out int columnFirst, out int lineLast, out int columnLast)
         {
             lineFirst = this.First.Line;

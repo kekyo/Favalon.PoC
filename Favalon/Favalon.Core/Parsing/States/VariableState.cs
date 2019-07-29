@@ -34,7 +34,13 @@ namespace Favalon.Parsing.States
                 context.AppendTokenChar(inch.Character, context.CurrentPosition + 1);
                 return this;
             }
-            else if (Utilities.IsTokenSeparator(inch.Character))
+            else if (Utilities.IsEnter(inch.Character))
+            {
+                this.RunFinishing(context);
+                context.SkipTokenChar(context.CurrentPosition + 1);
+                return AfterEnterState.NextState(inch.Character);
+            }
+            else if (char.IsWhiteSpace(inch.Character))
             {
                 this.RunFinishing(context);
                 context.SkipTokenChar(context.CurrentPosition + 1);

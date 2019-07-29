@@ -14,38 +14,47 @@
 // limitations under the License.
 
 using Favalon.IO;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace Favalon.Parsing.States
 {
-    internal sealed class SkipState : State
+    internal sealed class AfterEnterState : State
     {
-        private SkipState()
-        { }
+        private readonly char nextEnterChar;
+
+        private AfterEnterState(char nextEnterChar) =>
+            this.nextEnterChar = nextEnterChar;
 
         public override State Run(InteractiveInformation inch, StateContext context)
         {
-            if (Utilities.IsEnter(inch.Character))
-            {
-                context.SkipTokenChar(context.CurrentPosition + 1);
-                return AfterEnterState.NextState(inch.Character);
-            }
-            else if (char.IsWhiteSpace(inch.Character))
+            if (inch.Character == nextEnterChar)
             {
                 context.SkipTokenChar(context.CurrentPosition + 1);
                 return DetectState.Instance;
             }
             else
             {
-                context.SkipTokenChar(context.CurrentPosition + 1);
-                return this;
+                return DetectState.Instance.Run(inch, context);
             }
         }
 
-        public override void Finalize(StateContext context)
-        {
+        public override void Finalize(StateContext context) =>
             context.SkipTokenChar(context.CurrentPosition + 1);
-        }
 
-        public static readonly State Instance = new SkipState();
+        public override ParseResult? PeekResult(StateContext context) =>
+            null;
+
+        public static readonly State CarriageReturn = new AfterEnterState('\r');
+        public static readonly State LineFeed = new AfterEnterState('\n');
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static State NextState(char ch) =>
+            ch switch
+            {
+                '\r' => LineFeed,
+                '\n' => CarriageReturn,
+                _ => throw new InvalidOperationException()
+            };
     }
 }

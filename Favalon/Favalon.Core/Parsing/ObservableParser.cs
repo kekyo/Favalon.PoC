@@ -56,7 +56,13 @@ namespace Favalon.Parsing
                 this.InteractiveHost.Write(value.Character);
             }
 
-            if ((newState is DetectState) && Utilities.IsEnter(value.Character))
+            var isEntered = (currentState, newState) switch
+            {
+                (AfterEnterState _, DetectState _) => false,
+                (_, AfterEnterState _) => true,
+                _ => false
+            };
+            if (isEntered)
             {
                 if (stateContext.ExtractResult() is ParseResult result)
                 {

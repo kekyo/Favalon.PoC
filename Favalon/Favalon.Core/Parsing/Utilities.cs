@@ -14,6 +14,7 @@
 // limitations under the License.
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Favalon.Parsing
 {
@@ -24,16 +25,18 @@ namespace Favalon.Parsing
             '!'/* , '"' */, '#', '$', '%', '&' /* , ''', '(', ')' */, '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'
         };
 
+#line hidden
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEnter(char ch) =>
             (ch == '\r') || (ch == '\n');
 
-        public static bool IsTokenSeparator(char ch) =>
-            char.IsWhiteSpace(ch) || IsEnter(ch);
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsDeclarableOperator(char ch) =>
             Array.BinarySearch(declarableOperators, ch) >= 0;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool CanFeedback(char ch) =>
             !char.IsControl(ch) || IsEnter(ch);
+#line default
     }
 }

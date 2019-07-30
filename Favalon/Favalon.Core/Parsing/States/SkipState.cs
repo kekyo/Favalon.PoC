@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalon.IO;
-
 namespace Favalon.Parsing.States
 {
     internal sealed class SkipState : State
@@ -22,29 +20,27 @@ namespace Favalon.Parsing.States
         private SkipState()
         { }
 
-        public override State Run(InteractiveInformation inch, StateContext context)
+        public override State Run(char inch, StateContext context)
         {
-            if (Utilities.IsEnter(inch.Character))
+            if (Utilities.IsEnter(inch))
             {
-                context.ForwardToken();
-                return AfterEnterState.NextState(inch.Character);
+                context.SkipTokenChar();
+                return AfterEnterState.NextState(inch);
             }
-            else if (char.IsWhiteSpace(inch.Character))
+            else if (char.IsWhiteSpace(inch))
             {
-                context.ForwardToken();
+                context.SkipTokenChar();
                 return DetectState.Instance;
             }
             else
             {
-                context.ForwardToken();
+                context.SkipTokenChar();
                 return this;
             }
         }
 
-        public override void Finalize(StateContext context)
-        {
-            context.ForwardToken();
-        }
+        public override void Finalize(StateContext context) =>
+            context.SkipTokenChar();
 
         public static readonly State Instance = new SkipState();
     }

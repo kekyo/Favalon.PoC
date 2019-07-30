@@ -15,7 +15,6 @@
 
 using Favalet;
 using Favalet.Terms;
-using Favalon.IO;
 
 namespace Favalon.Parsing.States
 {
@@ -27,28 +26,28 @@ namespace Favalon.Parsing.States
         protected override Term MakeTerm(string token, TextRange textRange) =>
             Term.Literal(token, textRange);
 
-        public override State Run(InteractiveInformation inch, StateContext context)
+        public override State Run(char inch, StateContext context)
         {
-            if (inch.Character == '"')
+            if (inch == '"')
             {
                 this.RunFinishing(context);
-                context.ForwardToken();
+                context.SkipTokenChar();
                 return DetectState.Instance;
             }
-            else if (inch.Character == '\\')
+            else if (inch == '\\')
             {
-                context.ForwardToken();
+                context.SkipTokenChar();
                 return StringEscapedState.Instance;
             }
             else
             {
-                context.AppendTokenChar(inch.Character);
+                context.AppendTokenChar(inch);
                 return this;
             }
         }
 
         public override void Finalize(StateContext context) =>
-            context.RecordError("Invalid string token, reached end of line.", context.CurrentPosition + 1);
+            context.RecordError("Invalid string token, reached end of line.");
 
         public static readonly State Instance = new StringState();
     }

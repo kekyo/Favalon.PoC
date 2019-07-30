@@ -22,13 +22,16 @@ namespace Favalon.Parsing
 {
     internal sealed class StateContext
     {
-        public StateContext(TextRange textRange) =>
+        public StateContext(TextRange textRange)
+        {
             this.TextRange = textRange;
+            currentPosition = textRange.Range.First;
+        }
 
         public readonly TextRange TextRange;
+        private Position currentPosition;
+        private Position? startPosition;
 
-        public Position CurrentPosition { get; private set; }
-        public Position? StartPosition { get; private set; }
         public Term? CurrentTerm { get; private set; }
         public IReadOnlyList<ParseErrorInformation> CurrentErrors =>
             errors;
@@ -37,34 +40,27 @@ namespace Favalon.Parsing
         private readonly List<ParseErrorInformation> errors = new List<ParseErrorInformation>();
 
         public void BeginToken() =>
-            this.StartPosition = this.CurrentPosition;
+            startPosition = currentPosition;
 
         public void AppendTokenChar(char ch)
         {
-            this.token.Append(ch);
-            this.CurrentPosition += 1;
+            token.Append(ch);
+            currentPosition += 1;
         }
 
-        public void ForwardToken() =>
-            this.CurrentPosition += 1;
+        public void SkipTokenChar() =>
+            currentPosition += 1;
 
-        public void BackwardToken() =>
-            this.CurrentPosition += -1;
-
-        public void UpdatePosition(Position newPosition) =>
-            this.CurrentPosition = newPosition;
-
-        public TextRange GetCurrentTextRange() =>
-            this.TextRange.Subtract(
-                this.StartPosition is Position startPosition ? startPosition : this.CurrentPosition, this.CurrentPosition);
+        private TextRange CurrentTextRange =>
+            this.TextRange.Subtract(Range.Create(startPosition is Position sp ? sp : currentPosition, currentPosition));
 
         public (string, TextRange) ExtractToken()
         {
-            var textRange = this.GetCurrentTextRange();
+            var textRange = this.CurrentTextRange;
             var token = this.token.ToString();
 
             this.token.Clear();
-            this.StartPosition = null;
+            startPosition = null;
 
             return (token, textRange);
         }
@@ -87,18 +83,10 @@ namespace Favalon.Parsing
             }
         }
 
-        public (string, TextRange) PeekToken()
+        public void RecordError(string details)
         {
-            var textRange = this.GetCurrentTextRange();
-            var token = this.token.ToString();
-
-            return (token, textRange);
-        }
-
-        public void RecordError(string details, Position? newPosition)
-        {
-            this.errors.Add(ParseErrorInformation.Create(true, details, this.GetCurrentTextRange()));
-            this.StartPosition = newPosition;
+            this.errors.Add(ParseErrorInformation.Create(true, details, this.CurrentTextRange));
+            currentPosition += 1;
         }
 
         public void AppendTerm(Term term) =>

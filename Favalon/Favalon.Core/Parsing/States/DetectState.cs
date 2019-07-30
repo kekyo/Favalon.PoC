@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalon.IO;
-
 namespace Favalon.Parsing.States
 {
     internal sealed class DetectState : State
@@ -22,48 +20,45 @@ namespace Favalon.Parsing.States
         private DetectState()
         { }
 
-        public override State Run(InteractiveInformation inch, StateContext context)
+        public override State Run(char inch, StateContext context)
         {
-            if (inch.Character == '"')
+            if (inch == '"')
             {
                 context.BeginToken();
-                context.ForwardToken();
+                context.SkipTokenChar();
                 return StringState.Instance;
             }
-            else if (char.IsDigit(inch.Character))
+            else if (char.IsDigit(inch))
             {
                 context.BeginToken();
-                context.AppendTokenChar(inch.Character);
+                context.AppendTokenChar(inch);
                 return NumericState.Instance;
             }
-            else if (char.IsLetter(inch.Character) || Utilities.IsDeclarableOperator(inch.Character))
+            else if (char.IsLetter(inch) || Utilities.IsDeclarableOperator(inch))
             {
                 context.BeginToken();
-                context.AppendTokenChar(inch.Character);
+                context.AppendTokenChar(inch);
                 return VariableState.Instance;
             }
-            else if (Utilities.IsEnter(inch.Character))
+            else if (Utilities.IsEnter(inch))
             {
-                context.ForwardToken();
-                return AfterEnterState.NextState(inch.Character);
+                context.SkipTokenChar();
+                return AfterEnterState.NextState(inch);
             }
-            else if (char.IsWhiteSpace(inch.Character))
+            else if (char.IsWhiteSpace(inch))
             {
-                context.ForwardToken();
+                context.SkipTokenChar();
                 return this;
             }
             else
             {
-                context.RecordError("Invalid token at first.", context.CurrentPosition + 1);
+                context.RecordError("Invalid token at first.");
                 return this;
             }
         }
 
         public override void Finalize(StateContext context) =>
-            context.ForwardToken();
-
-        public override ParseResult? PeekResult(StateContext context) =>
-            null;
+            context.SkipTokenChar();
 
         public static readonly State Instance = new DetectState();
     }

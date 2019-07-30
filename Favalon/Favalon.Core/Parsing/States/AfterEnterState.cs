@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalon.IO;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -26,11 +25,11 @@ namespace Favalon.Parsing.States
         private AfterEnterState(char nextEnterChar) =>
             this.nextEnterChar = nextEnterChar;
 
-        public override State Run(InteractiveInformation inch, StateContext context)
+        public override State Run(char inch, StateContext context)
         {
-            if (inch.Character == nextEnterChar)
+            if (inch == nextEnterChar)
             {
-                context.ForwardToken();
+                context.SkipTokenChar();
                 return DetectState.Instance;
             }
             else
@@ -40,10 +39,7 @@ namespace Favalon.Parsing.States
         }
 
         public override void Finalize(StateContext context) =>
-            context.ForwardToken();
-
-        public override ParseResult? PeekResult(StateContext context) =>
-            null;
+            context.SkipTokenChar();
 
         public static readonly State CarriageReturn = new AfterEnterState('\r');
         public static readonly State LineFeed = new AfterEnterState('\n');

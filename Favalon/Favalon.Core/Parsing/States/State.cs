@@ -15,9 +15,7 @@
 
 using Favalet;
 using Favalet.Terms;
-using Favalon.IO;
 using System;
-using System.Linq;
 
 namespace Favalon.Parsing.States
 {
@@ -34,15 +32,8 @@ namespace Favalon.Parsing.States
             context.AppendTerm(this.MakeTerm(token, textRange));
         }
 
-        public abstract State Run(InteractiveInformation inch, StateContext context);
+        public abstract State Run(char inch, StateContext context);
 
         public abstract void Finalize(StateContext context);
-
-        public virtual ParseResult? PeekResult(StateContext context)
-        {
-            var (token, textRange) = context.PeekToken();
-            var term = context.CurrentTerm + this.MakeTerm(token, textRange);
-            return ParseResult.Create(term, context.CurrentErrors.ToArray(), context.GetCurrentTextRange());
-        }
     }
 }

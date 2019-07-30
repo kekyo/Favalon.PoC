@@ -72,8 +72,6 @@ namespace Favalon.Internals
 
         public void Run()
         {
-            this.Write("Favalon> ");
-
             try
             {
                 while (!abort)

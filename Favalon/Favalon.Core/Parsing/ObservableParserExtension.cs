@@ -14,27 +14,20 @@
 // limitations under the License.
 
 using Favalet;
-using Favalet.Terms;
+using Favalon.IO;
+using System;
 
-namespace Favalon.Parsing.States
+namespace Favalon.Parsing
 {
-    internal sealed class StringEscapedState : State
+    public static class ObservableParserExtension
     {
-        private StringEscapedState()
-        { }
+        public static ObservableParser Parse(this IObservable<char> source, TextRange textRange) =>
+            ObservableParser.Create(source, textRange);
 
-        protected override Term MakeTerm(string token, TextRange textRange) =>
-            Term.Literal(token, textRange);
+        public static ObservableParser Parse(this IObservable<string> source, TextRange textRange) =>
+            ObservableParser.Create(source, textRange);
 
-        public override State Run(char inch, StateContext context)
-        {
-            context.AppendTokenChar(inch);
-            return StringState.Instance;
-        }
-
-        public override void Finalize(StateContext context) =>
-            context.RecordError("Invalid string escape, reached end of line.");
-
-        public static readonly State Instance = new StringEscapedState();
+        public static ObservableParser Parse(this IObservable<InteractiveInformation> source, TextRange textRange) =>
+            ObservableParser.Create(source, textRange);
     }
 }

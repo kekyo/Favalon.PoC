@@ -51,67 +51,68 @@ namespace Favalon
             }
         }
 
+        private static InteractiveInterpreter CreateInterpreter(this IObservable<ParseResult> parser, InteractiveConsoleHost host) =>
+            InteractiveInterpreter.Create(parser, host);
+
         public static int Main(string[] args)
         {
             var console = InteractiveConsoleHost.Create();
-            var parser = InteractiveParser<InteractiveConsoleHost>.Create(console);
+            var parser = console.Parse(TextRange.Create("console", Range.MaxLength));
+            var interpreter = parser.CreateInterpreter(console);
 
-            using (var interpreter = InteractiveInterpreter.Create(parser))
-            {
-                InitializeTerrain(interpreter.Terrain);
+            InitializeTerrain(interpreter.Terrain);
 
-                var tystr = Term.Free("System.String", Term.Kind, TextRange.Unknown);
+            var tystr = Term.Free("System.String", Term.Kind, TextRange.Unknown);
 
-                // wc = stdin:IE<s> -> stdin:IE<s>
-                interpreter.Terrain.Bind(
-                    Term.Bound("wordcount", Term.Unspecified, TextRange.Unknown),
+            // wc = stdin:IE<s> -> stdin:IE<s>
+            interpreter.Terrain.Bind(
+                Term.Bound("wordcount", Term.Unspecified, TextRange.Unknown),
+                Term.Lambda(
+                    Term.Bound("stdin", tystr, TextRange.Unknown),
+                    Term.Free("stdin", tystr, TextRange.Unknown),
+                    TextRange.Unknown));
+
+            // wc : System.String -> System.String
+            // let r = wc "abc"
+
+            // let r = "abc" | wc
+            // let r = | "abc" wc
+
+            // let | a b = b a
+            // let | = fun a -> fun b -> b a
+
+            // | = a -> b -> b a
+            // | = a:IE<s> -> b:(IE<s> -> IE<s>) -> b a
+            //interpreter.Terrain.Bind(
+            //    Term.Bound("|", Term.Unspecified, TextRange.Unknown),
+            //    Term.Lambda(
+            //        Term.Bound("a", tystr, TextRange.Unknown),
+            //        Term.Lambda(
+            //            Term.Bound("b", Term.Lambda(tystr, tystr, TextRange.Unknown), TextRange.Unknown),
+            //            Term.Apply(
+            //                Term.Free("b", Term.Unspecified, TextRange.Unknown),
+            //                Term.Free("a", Term.Unspecified, TextRange.Unknown),
+            //                Term.Unspecified,
+            //                TextRange.Unknown),
+            //            TextRange.Unknown),
+            //        TextRange.Unknown));
+
+            // | = a:_ -> b:_ -> b a
+            interpreter.Terrain.Bind(
+                Term.Bound("|", Term.Unspecified, TextRange.Unknown),
+                Term.Lambda(
+                    Term.Bound("a", Term.Unspecified, TextRange.Unknown),
                     Term.Lambda(
-                        Term.Bound("stdin", tystr, TextRange.Unknown),
-                        Term.Free("stdin", tystr, TextRange.Unknown),
-                        TextRange.Unknown));
-
-                // wc : System.String -> System.String
-                // let r = wc "abc"
-
-                // let r = "abc" | wc
-                // let r = | "abc" wc
-
-                // let | a b = b a
-                // let | = fun a -> fun b -> b a
-
-                // | = a -> b -> b a
-                // | = a:IE<s> -> b:(IE<s> -> IE<s>) -> b a
-                //interpreter.Terrain.Bind(
-                //    Term.Bound("|", Term.Unspecified, TextRange.Unknown),
-                //    Term.Lambda(
-                //        Term.Bound("a", tystr, TextRange.Unknown),
-                //        Term.Lambda(
-                //            Term.Bound("b", Term.Lambda(tystr, tystr, TextRange.Unknown), TextRange.Unknown),
-                //            Term.Apply(
-                //                Term.Free("b", Term.Unspecified, TextRange.Unknown),
-                //                Term.Free("a", Term.Unspecified, TextRange.Unknown),
-                //                Term.Unspecified,
-                //                TextRange.Unknown),
-                //            TextRange.Unknown),
-                //        TextRange.Unknown));
-
-                // | = a:_ -> b:_ -> b a
-                interpreter.Terrain.Bind(
-                    Term.Bound("|", Term.Unspecified, TextRange.Unknown),
-                    Term.Lambda(
-                        Term.Bound("a", Term.Unspecified, TextRange.Unknown),
-                        Term.Lambda(
-                            Term.Bound("b", Term.Unspecified, TextRange.Unknown),
-                            Term.Apply(
-                                Term.Free("b", Term.Unspecified, TextRange.Unknown),
-                                Term.Free("a", Term.Unspecified, TextRange.Unknown),
-                                Term.Unspecified,
-                                TextRange.Unknown),
+                        Term.Bound("b", Term.Unspecified, TextRange.Unknown),
+                        Term.Apply(
+                            Term.Free("b", Term.Unspecified, TextRange.Unknown),
+                            Term.Free("a", Term.Unspecified, TextRange.Unknown),
+                            Term.Unspecified,
                             TextRange.Unknown),
-                        TextRange.Unknown));
+                        TextRange.Unknown),
+                    TextRange.Unknown));
 
-                console.Run();
-            }
+            console.Run();
 
             return 0;
         }

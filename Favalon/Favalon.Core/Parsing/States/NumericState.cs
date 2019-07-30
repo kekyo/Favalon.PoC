@@ -15,7 +15,6 @@
 
 using Favalet;
 using Favalet.Terms;
-using Favalon.IO;
 
 namespace Favalon.Parsing.States
 {
@@ -32,33 +31,33 @@ namespace Favalon.Parsing.States
             return Term.Literal(numeric, textRange);
         }
 
-        public override State Run(InteractiveInformation inch, StateContext context)
+        public override State Run(char inch, StateContext context)
         {
-            if (char.IsDigit(inch.Character) || (inch.Character == '.'))
+            if (char.IsDigit(inch) || (inch == '.'))
             {
-                context.AppendTokenChar(inch.Character);
+                context.AppendTokenChar(inch);
                 return this;
             }
-            else if (inch.Character == '_')
+            else if (inch == '_')
             {
-                context.ForwardToken();
+                context.SkipTokenChar();
                 return this;
             }
-            else if (Utilities.IsEnter(inch.Character))
+            else if (Utilities.IsEnter(inch))
             {
                 this.RunFinishing(context);
-                context.ForwardToken();
-                return AfterEnterState.NextState(inch.Character);
+                context.SkipTokenChar();
+                return AfterEnterState.NextState(inch);
             }
-            else if (char.IsWhiteSpace(inch.Character))
+            else if (char.IsWhiteSpace(inch))
             {
                 this.RunFinishing(context);
-                context.ForwardToken();
+                context.SkipTokenChar();
                 return DetectState.Instance;
             }
             else
             {
-                context.RecordError("Invalid numerical token at this location.", context.CurrentPosition + 1);
+                context.RecordError("Invalid numerical token at this location.");
                 return SkipState.Instance;
             }
         }

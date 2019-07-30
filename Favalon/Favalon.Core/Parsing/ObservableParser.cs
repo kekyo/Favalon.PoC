@@ -25,15 +25,19 @@ namespace Favalon.Parsing
         ObservableBase<ParseResult>, IObserver<char>, IObserver<string>, IObserver<InteractiveInformation>
     {
         private readonly TextRange textRange;
+        private readonly IInteractiveHost? host;
+
         private IDisposable? sourceDisposable;
+
         private readonly StringBuilder lineBuffer = new StringBuilder();
         private Position startPosition;
         private int columnPosition;
         private char lastCh;
 
-        private ObservableParser(TextRange textRange)
+        private ObservableParser(TextRange textRange, IInteractiveHost? host)
         {
             this.textRange = textRange;
+            this.host = host;
             this.startPosition = textRange.Range.First;
             this.columnPosition = textRange.Range.First.Column;
         }
@@ -63,6 +67,7 @@ namespace Favalon.Parsing
                 case ('\u0008', _):  // BS
                     if (columnPosition > startPosition.Column)
                     {
+                        host?.Write("\b \b");
                         columnPosition--;
                         lineBuffer.Remove(columnPosition - startPosition.Column, 1);
                     }
@@ -70,6 +75,7 @@ namespace Favalon.Parsing
                 case ('\u007f', _):  // DEL
                     if (columnPosition < (startPosition.Column + lineBuffer.Length))
                     {
+                        host?.Write(inch);
                         lineBuffer.Remove(columnPosition - startPosition.Column, 1);
                     }
                     break;
@@ -77,6 +83,7 @@ namespace Favalon.Parsing
                     break;
                 case ('\u000d', _):  // CR
                 case ('\u000a', _):  // LF
+                    host?.WriteLine();
                     var stateContext = this.RunStateMachine();
                     if (stateContext.ExtractResult() is ParseResult result)
                     {
@@ -88,6 +95,7 @@ namespace Favalon.Parsing
                     lineBuffer.Clear();
                     break;
                 default:
+                    host?.Write(inch);
                     lineBuffer.Insert(columnPosition, inch);
                     columnPosition++;
                     break;
@@ -146,21 +154,21 @@ namespace Favalon.Parsing
 
         public static ObservableParser Create(IObservable<char> source, TextRange textRange)
         {
-            var parser = new ObservableParser(textRange);
+            var parser = new ObservableParser(textRange, source as IInteractiveHost);
             parser.sourceDisposable = source.Subscribe(parser);
             return parser;
         }
 
         public static ObservableParser Create(IObservable<string> source, TextRange textRange)
         {
-            var parser = new ObservableParser(textRange);
+            var parser = new ObservableParser(textRange, source as IInteractiveHost);
             parser.sourceDisposable = source.Subscribe(parser);
             return parser;
         }
 
         public static ObservableParser Create(IObservable<InteractiveInformation> source, TextRange textRange)
         {
-            var parser = new ObservableParser(textRange);
+            var parser = new ObservableParser(textRange, source as IInteractiveHost);
             parser.sourceDisposable = source.Subscribe(parser);
             return parser;
         }

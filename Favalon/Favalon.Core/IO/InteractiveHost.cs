@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Favalet;
 using System;
 
 namespace Favalon.IO
@@ -25,13 +24,20 @@ namespace Favalon.IO
         Error
     }
 
-    public abstract class InteractiveHost :
-        ObservableBase<InteractiveInformation>
+    public interface IInteractiveHost
     {
-        protected InteractiveHost(TextRange textRange) =>
-            this.TextRange = textRange;
+        void Write(char ch);
+        void Write(string text);
+        void WriteLine();
 
-        public TextRange TextRange { get; }
+        void WriteLog(LogLevels level, string text);
+    }
+
+    public abstract class InteractiveHost :
+        ObservableBase<InteractiveInformation>, IInteractiveHost
+    {
+        protected InteractiveHost()
+        { }
 
         public abstract void Write(char ch);
 

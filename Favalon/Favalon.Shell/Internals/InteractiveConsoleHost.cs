@@ -22,8 +22,7 @@ namespace Favalon.Internals
     {
         private volatile bool abort;
 
-        private InteractiveConsoleHost() :
-            base(TextRange.Create("console", Range.MaxLength))
+        private InteractiveConsoleHost()
         {
         }
 

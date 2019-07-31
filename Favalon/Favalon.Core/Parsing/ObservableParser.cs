@@ -75,7 +75,7 @@ namespace Favalon.Parsing
                 case ('\u007f', _):  // DEL
                     if (columnPosition < (startPosition.Column + lineBuffer.Length))
                     {
-                        output?.Echo(inch);
+                        output?.Delete();
                         lineBuffer.Remove(columnPosition - startPosition.Column, 1);
                     }
                     break;

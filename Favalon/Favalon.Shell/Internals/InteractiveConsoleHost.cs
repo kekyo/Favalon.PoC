@@ -16,11 +16,13 @@
 using Favalet;
 using Favalon.IO;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Favalon.Internals
 {
     public sealed class InteractiveConsoleHost : InteractiveHost
     {
+        private readonly StringBuilder lineBuffer = new StringBuilder();
         private readonly List<Position> cursorPositions = new List<Position>();
         private int position;
         private volatile bool abort;
@@ -38,6 +40,9 @@ namespace Favalon.Internals
 
             switch (key.Key)
             {
+                case System.ConsoleKey.Delete:
+                    keyChar = '\x007f';
+                    break;
                 case System.ConsoleKey.UpArrow:
                     keyChar = '\x0010';
                     modifier |= InteractiveModifiers.Control;
@@ -98,19 +103,21 @@ namespace Favalon.Internals
             }
 
             System.Console.Write(ch);
+            lineBuffer.Append(ch);
             cursorPositions.Insert(position++ + 1, GetCurrentPosition());
         }
 
         public override void EndOfLine()
         {
             System.Console.WriteLine();
+            lineBuffer.Clear();
             cursorPositions.Clear();
             position = 0;
         }
 
         public override void Backspace()
         {
-            if (position > 0)
+            if (position >= 1)
             {
                 var lastPosition = cursorPositions[position];
                 position--;
@@ -118,9 +125,7 @@ namespace Favalon.Internals
 
                 var differ = lastPosition.Column - newPosition.Column;
 
-                System.Console.SetCursorPosition(newPosition.Column, newPosition.Line);
-                System.Console.WriteLine(new string(' ', differ));
-                System.Console.SetCursorPosition(newPosition.Column, newPosition.Line);
+                lineBuffer.Remove(position, 1);
 
                 for (var index = position; index < cursorPositions.Count - 1; index++)
                 {
@@ -128,7 +133,36 @@ namespace Favalon.Internals
                     cursorPositions[index] = Position.Create(fromPosition.Line, fromPosition.Column - differ);
                 }
 
-                cursorPositions.RemoveAt(cursorPositions.Count - 1);
+                System.Console.SetCursorPosition(newPosition.Column, newPosition.Line);
+                System.Console.Write(lineBuffer.ToString().Substring(position) + new string(' ', differ));
+                System.Console.SetCursorPosition(newPosition.Column, newPosition.Line);
+
+                cursorPositions.RemoveAt(position + 1);
+            }
+        }
+
+        public override void Delete()
+        {
+            if (position >= 1)
+            {
+                var currentPosition = cursorPositions[position];
+                var previousPosition = cursorPositions[position - 1];
+
+                var differ = currentPosition.Column - previousPosition.Column;
+
+                lineBuffer.Remove(position - 1, 1);
+
+                for (var index = position; index < cursorPositions.Count - 1; index++)
+                {
+                    var fromPosition = cursorPositions[index + 1];
+                    cursorPositions[index] = Position.Create(fromPosition.Line, fromPosition.Column - differ);
+                }
+
+                System.Console.SetCursorPosition(currentPosition.Column, currentPosition.Line);
+                System.Console.Write(lineBuffer.ToString().Substring(position) + new string(' ', differ));
+                System.Console.SetCursorPosition(currentPosition.Column, currentPosition.Line);
+
+                cursorPositions.RemoveAt(position + 1);
             }
         }
 

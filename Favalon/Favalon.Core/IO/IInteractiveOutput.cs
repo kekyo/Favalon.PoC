@@ -28,6 +28,7 @@ namespace Favalon.IO
         void Echo(string text);
         void EndOfLine();
         void Backspace();
+        void Delete();
 
         void Write(string text);
         void WriteLine();

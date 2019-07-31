@@ -39,6 +39,9 @@ namespace Favalon.IO
         public virtual void Backspace() =>
             this.Echo('\u0008');
 
+        public virtual void Delete() =>
+            this.Echo('\u007f');
+
         public abstract void Write(string text);
 
         public virtual void WriteLine() =>

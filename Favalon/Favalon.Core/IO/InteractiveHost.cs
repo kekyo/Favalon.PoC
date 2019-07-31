@@ -17,45 +17,43 @@ using System;
 
 namespace Favalon.IO
 {
-    public enum LogLevels
-    {
-        Information,
-        Warning,
-        Error
-    }
-
-    public interface IInteractiveHost
-    {
-        void Write(char ch);
-        void Write(string text);
-        void WriteLine();
-
-        void WriteLog(LogLevels level, string text);
-    }
-
     public abstract class InteractiveHost :
-        ObservableBase<InteractiveInformation>, IInteractiveHost
+        ObservableBase<InteractiveInformation>, IInteractiveOutput
     {
         protected InteractiveHost()
         { }
 
-        public abstract void Write(char ch);
+        public abstract void Echo(char ch);
 
-        public virtual void Write(string text)
+        public virtual void Echo(string text)
         {
             foreach (var ch in text)
             {
-                this.Write(ch);
+                this.Echo(ch);
             }
         }
+
+        public virtual void EndOfLine() =>
+            this.Echo(Environment.NewLine);
+
+        public virtual void Backspace() =>
+            this.Echo('\u0008');
+
+        public abstract void Write(string text);
 
         public virtual void WriteLine() =>
             this.Write(Environment.NewLine);
 
-        public virtual void WriteLog(LogLevels level, string text)
+        public virtual void WriteLine(string text)
         {
             this.Write(text);
             this.Write(Environment.NewLine);
+        }
+
+        public virtual void WriteLog(LogLevels level, string text)
+        {
+            this.Echo(text);
+            this.Echo(Environment.NewLine);
         }
     }
 }

@@ -31,23 +31,23 @@ namespace Favalon.Parsing.States
             return Term.Literal(numeric, textRange);
         }
 
-        public override State Run(char inch, StateContext context)
+        public override (State state, StateContext context) Run(char inch, StateContext context)
         {
             if (char.IsDigit(inch) || (inch == '.'))
             {
-                context.AppendTokenChar(inch);
-                return this;
+                return (this, context.AppendTokenCharAndForward(inch));
             }
             else if (inch == '_')
             {
-                context.SkipTokenChar();
-                return this;
+                return (this, context.Forward());
             }
             else if (Utilities.IsEnter(inch))
             {
-                this.RunFinishing(context);
-                context.SkipTokenChar();
-                return AfterEnterState.NextState(inch);
+                var token = context.ExtractToken();
+                var numeric =
+                    int.TryParse(token, out var i) ? i : long.TryParse(token, out var l) ? l :
+                    float.TryParse(token, out var f) ? f : double.Parse(token);
+                return (DetectState.Instance, context Term.Literal(numeric, context.textRange);
             }
             else if (char.IsWhiteSpace(inch))
             {
@@ -61,6 +61,9 @@ namespace Favalon.Parsing.States
                 return SkipState.Instance;
             }
         }
+
+        public override Term? FinalizeTerm(StateContext context) =>
+            context.ExtractTokenAndLastTerm().lastTerm;
 
         public override void Finalize(StateContext context) =>
             this.RunFinishing(context);

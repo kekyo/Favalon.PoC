@@ -30,7 +30,7 @@ namespace Favalon.Parsing.States
         {
             if (char.IsLetterOrDigit(inch) || Utilities.IsDeclarableOperator(inch))
             {
-                context.AppendTokenChar(inch);
+                context.AppendTokenCharAndForward(inch);
                 return this;
             }
             else if (Utilities.IsEnter(inch))

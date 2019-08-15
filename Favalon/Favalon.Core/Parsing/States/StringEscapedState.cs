@@ -28,7 +28,7 @@ namespace Favalon.Parsing.States
 
         public override State Run(char inch, StateContext context)
         {
-            context.AppendTokenChar(inch);
+            context.AppendTokenCharAndForward(inch);
             return StringState.Instance;
         }
 

@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Favalet.Terms;
+
 namespace Favalon.Parsing.States
 {
     internal sealed class DetectState : State
@@ -20,45 +22,36 @@ namespace Favalon.Parsing.States
         private DetectState()
         { }
 
-        public override State Run(char inch, StateContext context)
+        public override (State state, StateContext context) Run(char inch, StateContext context)
         {
             if (inch == '"')
             {
-                context.BeginToken();
-                context.SkipTokenChar();
-                return StringState.Instance;
+                return (StringState.Instance, context.Forward());
             }
             else if (char.IsDigit(inch))
             {
-                context.BeginToken();
-                context.AppendTokenChar(inch);
-                return NumericState.Instance;
+                return (NumericState.Instance, context.AppendTokenCharAndForward(inch));
             }
             else if (char.IsLetter(inch) || Utilities.IsDeclarableOperator(inch))
             {
-                context.BeginToken();
-                context.AppendTokenChar(inch);
-                return VariableState.Instance;
+                return (VariableState.Instance, context.AppendTokenCharAndForward(inch));
             }
             else if (Utilities.IsEnter(inch))
             {
-                context.SkipTokenChar();
-                return AfterEnterState.NextState(inch);
+                return (AfterEnterState.NextState(inch), context.Forward());
             }
             else if (char.IsWhiteSpace(inch))
             {
-                context.SkipTokenChar();
-                return this;
+                return (this, context.Forward());
             }
             else
             {
-                context.RecordError("Invalid token at first.");
-                return this;
+                return (this, context.RecordError("Invalid token at first."));
             }
         }
 
-        public override void Finalize(StateContext context) =>
-            context.SkipTokenChar();
+        public override Term? FinalizeTerm(StateContext context) =>
+            context.CombineTerm(null);
 
         public static readonly State Instance = new DetectState();
     }

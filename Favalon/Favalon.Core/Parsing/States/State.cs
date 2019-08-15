@@ -23,17 +23,8 @@ namespace Favalon.Parsing.States
     {
         protected State() { }
 
-        protected virtual Term MakeTerm(string token, TextRange textRange) =>
-            throw new InvalidOperationException();
+        public abstract (State state, StateContext context) Run(char inch, StateContext context);
 
-        protected void RunFinishing(StateContext context)
-        {
-            var (token, textRange) = context.ExtractToken();
-            context.AppendTerm(this.MakeTerm(token, textRange));
-        }
-
-        public abstract State Run(char inch, StateContext context);
-
-        public abstract void Finalize(StateContext context);
+        public abstract Term? FinalizeTerm(StateContext context);
     }
 }

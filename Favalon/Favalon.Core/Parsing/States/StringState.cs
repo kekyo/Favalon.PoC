@@ -41,7 +41,7 @@ namespace Favalon.Parsing.States
             }
             else
             {
-                context.AppendTokenChar(inch);
+                context.AppendTokenCharAndForward(inch);
                 return this;
             }
         }

@@ -8,6 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Parsing\ObservableParser.cs" />
+    <Compile Remove="Parsing\ObservableParserExtension.cs" />
+    <Compile Remove="Parsing\StateContext.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Parsing\ObservableParser.cs" />
+    <None Include="Parsing\ObservableParserExtension.cs" />
+    <None Include="Parsing\StateContext.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Favalet.Core\Favalet.Core.csproj" />
   </ItemGroup>
 

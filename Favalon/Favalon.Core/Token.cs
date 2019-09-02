@@ -5,7 +5,6 @@ namespace Favalon
     public enum TokenTypes
     {
         Numeric,
-        Operator,
         String,
         Variable
     }

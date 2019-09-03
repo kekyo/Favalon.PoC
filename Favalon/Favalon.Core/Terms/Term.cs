@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Favalon.Terms
 {
-    public abstract class Term : IEquatable<Term>
+    public abstract class Term : IEquatable<Term?>
     {
         protected Term()
-        {
-        }
+        { }
 
-        public abstract bool Equals(Term? other);
+        public abstract bool Equals(Term? rhs);
 
-        public override bool Equals(object? obj) =>
-            this.Equals(obj as Term);
+        public override bool Equals(object? rhs) =>
+            this.Equals(rhs as Term);
     }
 }

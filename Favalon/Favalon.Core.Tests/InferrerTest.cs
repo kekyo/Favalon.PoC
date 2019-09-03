@@ -66,5 +66,23 @@ namespace Favalon
                 },
                 terms);
         }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        [Test]
+        public void InferVariable()
+        {
+            var tokens = Parse("abc");
+
+            var inferrer = new Inferrer();
+            var terms = inferrer.Infer(tokens);
+
+            Assert.AreEqual(
+                new[]
+                {
+                    new VariableTerm("abc")
+                },
+                terms);
+        }
     }
 }

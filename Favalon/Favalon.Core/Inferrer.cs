@@ -15,8 +15,12 @@ namespace Favalon
             {
                 yield return token.TokenType switch
                 {
-                TokenTypes.Variable => (Term)new BooleanTerm(bool.Parse(token.Value)),
-                TokenTypes.Numeric => (Term)new NumericTerm(token.Value),
+                TokenTypes.Variable =>
+                    bool.TryParse(token.Value, out var boolValue) ?
+                        (Term)new BooleanTerm(boolValue) :
+                        (Term)new VariableTerm(token.Value),
+                TokenTypes.Numeric =>
+                    (Term)new NumericTerm(token.Value),
                 _ => throw new Exception()
                 };
             }

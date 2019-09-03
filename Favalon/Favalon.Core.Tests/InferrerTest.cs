@@ -97,6 +97,37 @@ namespace Favalon
         ////////////////////////////////////////////////////////////////////////
 
         [Test]
+        public void InferString()
+        {
+            var tokens = Parse("\"abc\"");
+
+            var inferrer = new Inferrer();
+            var terms = inferrer.Infer(tokens);
+
+            Assert.AreEqual(
+                new[]
+                {
+                    new StringTerm("abc")
+                },
+                terms);
+        }
+
+        [TestCase("\"abc\" \"def\"", new[] { "abc", "def" })]
+        public void InferStringValues(string args, string[] expected)
+        {
+            var tokens = Parse(args);
+
+            var inferrer = new Inferrer();
+            var terms = inferrer.Infer(tokens);
+
+            Assert.AreEqual(
+                expected.Select(v => new StringTerm(v)),
+                terms);
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        [Test]
         public void InferVariable()
         {
             var tokens = Parse("abc");

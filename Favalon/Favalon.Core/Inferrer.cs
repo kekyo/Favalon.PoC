@@ -21,7 +21,9 @@ namespace Favalon
                         (Term)new VariableTerm(token.Value),
                 TokenTypes.Numeric =>
                     (Term)new NumericTerm(token.Value),
-                _ => throw new Exception()
+                TokenTypes.String =>
+                    (Term)new StringTerm(token.Value),
+                    _ => throw new Exception()
                 };
             }
         }

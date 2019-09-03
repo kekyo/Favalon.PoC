@@ -48,5 +48,23 @@ namespace Favalon
                 },
                 terms);
         }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        [Test]
+        public void InferNumeric()
+        {
+            var tokens = Parse("123");
+
+            var inferrer = new Inferrer();
+            var terms = inferrer.Infer(tokens);
+
+            Assert.AreEqual(
+                new[]
+                {
+                    new NumericTerm("123")
+                },
+                terms);
+        }
     }
 }

@@ -1,16 +1,21 @@
 ﻿using Favalon.Terms;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Favalon
 {
     [TestFixture]
     public sealed class InferrerTest
     {
+        private Inferrer CreateInferrer()
+        {
+            var inferrer = new Inferrer();
+            inferrer.AddVariable("true", new BooleanTerm(true));
+            inferrer.AddVariable("false", new BooleanTerm(false));
+
+            return inferrer;
+        }
+
         private Token[] Parse(string text)
         {
             var parser = new Parser();
@@ -22,7 +27,7 @@ namespace Favalon
         {
             var tokens = Parse("true");
 
-            var inferrer = new Inferrer();
+            var inferrer = CreateInferrer();
             var terms = inferrer.Infer(tokens);
 
             Assert.AreEqual(
@@ -38,7 +43,7 @@ namespace Favalon
         {
             var tokens = Parse("false");
 
-            var inferrer = new Inferrer();
+            var inferrer = CreateInferrer();
             var terms = inferrer.Infer(tokens);
 
             Assert.AreEqual(
@@ -55,7 +60,7 @@ namespace Favalon
         {
             var tokens = Parse(args);
 
-            var inferrer = new Inferrer();
+            var inferrer = CreateInferrer();
             var terms = inferrer.Infer(tokens);
 
             Assert.AreEqual(
@@ -70,7 +75,7 @@ namespace Favalon
         {
             var tokens = Parse("123");
 
-            var inferrer = new Inferrer();
+            var inferrer = CreateInferrer();
             var terms = inferrer.Infer(tokens);
 
             Assert.AreEqual(
@@ -86,7 +91,7 @@ namespace Favalon
         {
             var tokens = Parse(args);
 
-            var inferrer = new Inferrer();
+            var inferrer = CreateInferrer();
             var terms = inferrer.Infer(tokens);
 
             Assert.AreEqual(
@@ -101,7 +106,7 @@ namespace Favalon
         {
             var tokens = Parse("\"abc\"");
 
-            var inferrer = new Inferrer();
+            var inferrer = CreateInferrer();
             var terms = inferrer.Infer(tokens);
 
             Assert.AreEqual(
@@ -117,7 +122,7 @@ namespace Favalon
         {
             var tokens = Parse(args);
 
-            var inferrer = new Inferrer();
+            var inferrer = CreateInferrer();
             var terms = inferrer.Infer(tokens);
 
             Assert.AreEqual(
@@ -132,7 +137,7 @@ namespace Favalon
         {
             var tokens = Parse("abc");
 
-            var inferrer = new Inferrer();
+            var inferrer = CreateInferrer();
             var terms = inferrer.Infer(tokens);
 
             Assert.AreEqual(
@@ -150,7 +155,7 @@ namespace Favalon
         {
             var tokens = Parse(inch.ToString());
 
-            var inferrer = new Inferrer();
+            var inferrer = CreateInferrer();
             var terms = inferrer.Infer(tokens);
 
             Assert.AreEqual(
@@ -167,7 +172,7 @@ namespace Favalon
         {
             var tokens = Parse(args);
 
-            var inferrer = new Inferrer();
+            var inferrer = CreateInferrer();
             var terms = inferrer.Infer(tokens);
 
             Assert.AreEqual(

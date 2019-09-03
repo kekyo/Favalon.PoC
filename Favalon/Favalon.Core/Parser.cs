@@ -1,40 +1,37 @@
-﻿using System.Collections.Generic;
-
-using Favalon.Internals;
+﻿using Favalon.Internals;
+using Favalon.Terms;
+using Favalon.Tokens;
+using System.Collections.Generic;
 
 namespace Favalon
 {
     public sealed class Parser
     {
-        public static string OperatorChars => ParserCore.operatorChars;
+        private readonly ParserCore parserCore = new ParserCore();
 
-        private readonly ParserCore parser = new ParserCore();
+        public void AddVariable(string variable, Term term) =>
+            parserCore.AddVariable(variable, term);
 
-        public Token? Tokenize(char inch) =>
-            parser.Examine(inch);
-
-        public IEnumerable<Token> Tokenize(string input, bool withFlush = true)
+        public IEnumerable<Term> Parse(IEnumerable<Token> tokens, bool withFlush = true)
         {
-            var index = 0;
-            while (index < input.Length)
+            foreach (var token in tokens)
             {
-                var inch = input[index++];
-                if (parser.Examine(inch) is Token token)
+                foreach (var term in parserCore.Examine(token))
                 {
-                    yield return token;
+                    yield return term;
                 }
             }
 
             if (withFlush)
             {
-                if (parser.Flush() is Token token)
+                foreach (var term in parserCore.Flush())
                 {
-                    yield return token;
+                    yield return term;
                 }
             }
         }
 
-        public Token? Flush() =>
-            parser.Flush();
+        public IEnumerable<Term> Flush() =>
+            parserCore.Flush();
     }
 }

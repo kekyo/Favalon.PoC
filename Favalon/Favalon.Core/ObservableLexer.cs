@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using Favalon.Internals;
+using Favalon.Tokens;
 
 namespace Favalon
 {
-    public sealed class ObservableParser :
+    public sealed class ObservableLexer :
         IObserver<char>, IObservable<Token>
     {
         private static readonly IObserver<Token>[] emptyObservers = new IObserver<Token>[0];
 
-        private readonly ParserCore parser = new ParserCore();
+        private readonly LexerCore lexerCore = new LexerCore();
 
         private List<IObserver<Token>>? observers;
         private IObserver<Token>[]? fixedObservers;
@@ -40,7 +41,7 @@ namespace Favalon
 
         void IObserver<char>.OnNext(char inch)
         {
-            if (parser.Examine(inch) is Token token)
+            if (lexerCore.Examine(inch) is Token token)
             {
                 foreach (var observer in this.GetObservers())
                 {
@@ -59,7 +60,7 @@ namespace Favalon
 
         void IObserver<char>.OnCompleted()
         {
-            if (parser.Flush() is Token token)
+            if (lexerCore.Flush() is Token token)
             {
                 foreach (var observer in this.GetObservers())
                 {
@@ -93,21 +94,21 @@ namespace Favalon
 
         private sealed class Disposer : IDisposable
         {
-            private readonly ObservableParser parser;
+            private readonly ObservableLexer lexer;
             private readonly IObserver<Token> observer;
 
-            public Disposer(ObservableParser parser, IObserver<Token> observer)
+            public Disposer(ObservableLexer lexer, IObserver<Token> observer)
             {
-                this.parser = parser;
+                this.lexer = lexer;
                 this.observer = observer;
             }
 
             public void Dispose()
             {
-                lock (parser)
+                lock (lexer)
                 {
-                    parser.observers!.Remove(observer);
-                    parser.fixedObservers = null;
+                    lexer.observers!.Remove(observer);
+                    lexer.fixedObservers = null;
                 }
             }
         }

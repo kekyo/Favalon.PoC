@@ -10,7 +10,7 @@ namespace Favalon
         static void Main(string[] args)
         {
             var tr = Console.In;
-            var parser = new Parser();
+            var lexer = new Lexer();
 
             while (true)
             {
@@ -20,7 +20,7 @@ namespace Favalon
                     break;
                 }
 
-                foreach (var token in parser.Tokenize(line, false))
+                foreach (var token in lexer.Lex(line, false))
                 {
                     Console.WriteLine(token);
                 }

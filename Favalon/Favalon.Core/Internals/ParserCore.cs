@@ -1,159 +1,78 @@
-﻿using System;
-using System.Diagnostics;
-using System.Text;
+﻿using Favalon.Terms;
+using Favalon.Tokens;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon.Internals
 {
     internal sealed class ParserCore
     {
-        private enum States
+        private readonly Dictionary<string, Term> variables =
+            new Dictionary<string, Term>();
+        private readonly Stack<VariableToken> applyingTokens =
+            new Stack<VariableToken>();
+
+        public void AddVariable(string variable, Term term) =>
+            variables.Add(variable, term);
+
+        private IEnumerable<Term> ExhaustTokens(Token finalToken)
         {
-            Idle,
-            Numeric,
-            Operator,
-            String,
-            Variable,
-        }
-
-        private const char flushingChar = '\xffff';
-        public static readonly string operatorChars = new string(new[]
-{
-            '!'/* , '"' */, '#', '$', '%', '&' /* , ''', '(', ')' */,
-            '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?',
-            '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'
-        });
-
-        private States state = States.Idle;
-        private readonly StringBuilder buffer = new StringBuilder();
-
-        private static bool IsOperator(char inch) =>
-            operatorChars.IndexOf(inch) >= 0;
-        private static bool IsFlushing(char inch) =>
-            inch == flushingChar;
-
-        public Token? Examine(char inch)
-        {
-            Token? result = null;
-
-            while (true)
+            var term = finalToken switch
             {
-                if (state == States.Idle)
+                NumericToken _ => (Term)new NumericTerm(finalToken.Value),
+                StringToken _ => (Term)new StringTerm(finalToken.Value),
+                _ => variables.TryGetValue(finalToken.Value, out var variable) ?
+                    variable :
+                    new VariableTerm(finalToken.Value)
+            };
+
+            Stack<Term>? terms = null;
+
+            while (applyingTokens.Count >= 1)
+            {
+                var variableToken = applyingTokens.Pop();
+
+                if (variables.TryGetValue(variableToken.Value, out var variable))
                 {
-                    if (IsFlushing(inch))
+                    if (terms == null)
                     {
-                        return result;
+                        terms = new Stack<Term>();
                     }
-                    else if (inch == '"')
-                    {
-                        state = States.String;
-                        return result;
-                    }
-                    else if (char.IsNumber(inch))
-                    {
-                        state = States.Numeric;
-                    }
-                    else if (IsOperator(inch))
-                    {
-                        state = States.Operator;
-                    }
-                    else if (!char.IsWhiteSpace(inch))
-                    {
-                        state = States.Variable;
-                    }
-                    else
-                    {
-                        return result;
-                    }
-                }
-
-                if (state == States.Numeric)
-                {
-                    if (char.IsNumber(inch))
-                    {
-                        buffer.Append(inch);
-                        return result;
-                    }
-                    else
-                    {
-                        var token = new Token(TokenTypes.Numeric, buffer.ToString());
-                        buffer.Clear();
-
-                        Debug.Assert(!result.HasValue);
-                        result = token;
-
-                        state = States.Idle;
-                        continue;
-                    }
-                }
-                else if (state == States.Operator)
-                {
-                    if (IsOperator(inch))
-                    {
-                        buffer.Append(inch);
-                        return result;
-                    }
-                    else
-                    {
-                        var token = new Token(TokenTypes.Variable, buffer.ToString());
-                        buffer.Clear();
-
-                        Debug.Assert(!result.HasValue);
-                        result = token;
-
-                        state = States.Idle;
-                        continue;
-                    }
-                }
-                else if (state == States.String)
-                {
-                    if (IsFlushing(inch))
-                    {
-                        throw new Exception();
-                    }
-                    else if (inch != '"')
-                    {
-                        buffer.Append(inch);
-                        Debug.Assert(!result.HasValue);
-                        return null;
-                    }
-                    else
-                    {
-                        var token = new Token(TokenTypes.String, buffer.ToString());
-                        buffer.Clear();
-
-                        Debug.Assert(!result.HasValue);
-                        result = token;
-
-                        state = States.Idle;
-
-                        return result;
-                    }
+                    terms.Push(term);
+                    term = variable;
+                    continue;
                 }
                 else
                 {
-                    Debug.Assert(state == States.Variable);
-
-                    if (!char.IsWhiteSpace(inch) && !IsOperator(inch) && (inch != '"') && !IsFlushing(inch))
-                    {
-                        buffer.Append(inch);
-                        return result;
-                    }
-                    else
-                    {
-                        var token = new Token(TokenTypes.Variable, buffer.ToString());
-                        buffer.Clear();
-
-                        Debug.Assert(!result.HasValue);
-                        result = token;
-
-                        state = States.Idle;
-                        continue;
-                    }
+                    term = new ApplyTerm(variableToken.Value, term);
                 }
+            }
+
+            yield return term;
+
+            while (terms?.Count >= 1)
+            {
+                yield return terms.Pop();
             }
         }
 
-        public Token? Flush() =>
-            this.Examine(flushingChar);
+        public IEnumerable<Term> Examine(Token token)
+        {
+            switch (token)
+            {
+                case VariableToken variableToken:
+                    applyingTokens.Push(variableToken);
+                    return Enumerable.Empty<Term>();
+                default:
+                    return this.ExhaustTokens(token);
+            }
+        }
+
+        public IEnumerable<Term> Flush() =>
+            applyingTokens.Count switch
+            {
+                0 => Enumerable.Empty<Term>(),
+                _ => this.ExhaustTokens(applyingTokens.Pop())
+            };
     }
 }

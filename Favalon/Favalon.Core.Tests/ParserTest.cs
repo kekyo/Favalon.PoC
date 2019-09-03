@@ -1,437 +1,209 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
+﻿using Favalon.Terms;
+using Favalon.Tokens;
+using NUnit.Framework;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Favalon
 {
     [TestFixture]
     public sealed class ParserTest
     {
-        [Test]
-        public void EmptyString()
+        private Parser CreateParser()
         {
             var parser = new Parser();
+            parser.AddVariable("true", new BooleanTerm(true));
+            parser.AddVariable("false", new BooleanTerm(false));
 
-            var tokens = parser.Tokenize(string.Empty).ToArray();
+            return parser;
+        }
 
-            Assert.AreEqual(0, tokens.Length);
+        private Token[] Parse(string text)
+        {
+            var parser = new Lexer();
+            return parser.Lex(text).ToArray();
         }
 
         [Test]
-        public void WhiteSpaceString()
+        public void InferTrue()
         {
-            var parser = new Parser();
+            var tokens = Parse("true");
 
-            var tokens = parser.Tokenize(" ").ToArray();
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
 
-            Assert.AreEqual(0, tokens.Length);
+            Assert.AreEqual(
+                new[]
+                {
+                    new BooleanTerm(true)
+                },
+                terms);
         }
 
         [Test]
-        public void WhiteSpacesString()
+        public void InferFalse()
         {
-            var parser = new Parser();
+            var tokens = Parse("false");
 
-            var tokens = parser.Tokenize("  ").ToArray();
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
 
-            Assert.AreEqual(0, tokens.Length);
+            Assert.AreEqual(
+                new[]
+                {
+                    new BooleanTerm(false)
+                },
+                terms);
         }
 
-        [Test]
-        public void TabbedString()
+        [TestCase("false true", new[] { false, true })]
+        [TestCase("true false", new[] { true, false })]
+        public void InferBooleanValues(string args, bool[] expected)
         {
-            var parser = new Parser();
+            var tokens = Parse(args);
 
-            var tokens = parser.Tokenize("\t").ToArray();
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
 
-            Assert.AreEqual(0, tokens.Length);
-        }
-
-        [Test]
-        public void TabbedAndWhiteSpacesString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("\t  \t ").ToArray();
-
-            Assert.AreEqual(0, tokens.Length);
+            Assert.AreEqual(
+                expected.Select(v => new BooleanTerm(v)),
+                terms);
         }
 
         ////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void NumericString()
+        public void InferNumeric()
         {
-            var parser = new Parser();
+            var tokens = Parse("123");
 
-            var tokens = parser.Tokenize("123").ToArray();
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
                 {
-                    new Token(TokenTypes.Numeric, "123"),
-                }, tokens);
+                    new NumericTerm("123")
+                },
+                terms);
         }
 
-        public static readonly char[] NumericChars = "0123456789".ToArray();
-
-        [TestCaseSource("NumericChars")]
-        public void NumericsString(char inch)
+        [TestCase("123 456", new[] { "123", "456" })]
+        public void InferNumericValues(string args, string[] expected)
         {
-            var parser = new Parser();
+            var tokens = Parse(args);
 
-            var tokens = parser.Tokenize(inch.ToString()).ToArray();
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
 
             Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Numeric, inch.ToString()),
-                }, tokens);
-        }
-
-        [Test]
-        public void NumericWithOperatorsString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("123+456-789").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Numeric, "123"),
-                    new Token(TokenTypes.Variable, "+"),
-                    new Token(TokenTypes.Numeric, "456"),
-                    new Token(TokenTypes.Variable, "-"),
-                    new Token(TokenTypes.Numeric, "789"),
-                }, tokens);
-        }
-
-        [Test]
-        public void NumericBeforeWhiteSpaceString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize(" 123").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Numeric, "123"),
-                }, tokens);
-        }
-
-        [Test]
-        public void NumericAfterWhiteSpaceString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("123 ").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Numeric, "123"),
-                }, tokens);
-        }
-
-        [Test]
-        public void NumericBeforeAfterWhiteSpaceString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize(" 123 ").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Numeric, "123"),
-                }, tokens);
+                expected.Select(v => new NumericTerm(v)),
+                terms);
         }
 
         ////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void OperatorString()
+        public void InferString()
         {
-            var parser = new Parser();
+            var tokens = Parse("\"abc\"");
 
-            var tokens = parser.Tokenize("+").ToArray();
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
                 {
-                    new Token(TokenTypes.Variable, "+"),
-                }, tokens);
+                    new StringTerm("abc")
+                },
+                terms);
         }
+
+        [TestCase("\"abc\" \"def\"", new[] { "abc", "def" })]
+        public void InferStringValues(string args, string[] expected)
+        {
+            var tokens = Parse(args);
+
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
+
+            Assert.AreEqual(
+                expected.Select(v => new StringTerm(v)),
+                terms);
+        }
+
+        ////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void OperatorsString()
+        public void InferVariable()
         {
-            var parser = new Parser();
+            var tokens = Parse("abc");
 
-            var tokens = parser.Tokenize(Parser.OperatorChars).ToArray();
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
                 {
-                    new Token(TokenTypes.Variable, Parser.OperatorChars),
-                }, tokens);
+                    new VariableTerm("abc")
+                },
+                terms);
         }
 
-        public static readonly char[] OperatorChars = Parser.OperatorChars.ToArray();
+        public static char[] OperatorChars = Lexer.OperatorChars.ToArray();
 
         [TestCaseSource("OperatorChars")]
-        public void OperatorCharsString(char inch)
+        public void InferOperatorChars(char inch)
         {
-            var parser = new Parser();
+            var tokens = Parse(inch.ToString());
 
-            var tokens = parser.Tokenize(inch.ToString()).ToArray();
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
                 {
-                    new Token(TokenTypes.Variable, inch.ToString()),
-                }, tokens);
+                    new VariableTerm(inch.ToString())
+                },
+                terms);
         }
 
-        [Test]
-        public void OperatorBeforeWhiteSpaceString()
+        [TestCase("abc def ghi", new[] { "abc", "def" }, "ghi")]
+        [TestCase("abc+d1e2f3-ghi*jkl", new[] { "abc", "+", "d1e2f3", "-", "ghi" }, "jkl")]
+        public void InferVariables(string args, string[] expected, string expectedLast)
         {
-            var parser = new Parser();
+            var tokens = Parse(args);
 
-            var tokens = parser.Tokenize(" +").ToArray();
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
+
+            var expectedTerm =
+                expected.
+                Reverse().
+                Aggregate(
+                    (Term)new VariableTerm(expectedLast),
+                    (term, v) => new ApplyTerm(v, term));
 
             Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Variable, "+"),
-                }, tokens);
-        }
-
-        [Test]
-        public void OperatorAfterWhiteSpaceString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("+ ").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Variable, "+"),
-                }, tokens);
-        }
-
-        [Test]
-        public void OperatorBeforeAndAfterWhiteSpaceString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize(" + ").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Variable, "+"),
-                }, tokens);
+                new[] { expectedTerm },
+                terms);
         }
 
         ////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void StringString()
+        public void InferApply()
         {
-            var parser = new Parser();
+            var tokens = Parse("a b");
 
-            var tokens = parser.Tokenize("\"123\"").ToArray();
+            var parser = CreateParser();
+            var terms = parser.Parse(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
                 {
-                    new Token(TokenTypes.String, "123"),
-                }, tokens);
-        }
-
-        [Test]
-        public void StringWithWhiteSpaceString1()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("\" 123\"").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.String, " 123"),
-                }, tokens);
-        }
-
-        [Test]
-        public void StringWithWhiteSpaceString2()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("\"1 23\"").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.String, "1 23"),
-                }, tokens);
-        }
-
-        [Test]
-        public void StringWithWhiteSpaceString3()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("\"123 \"").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.String, "123 "),
-                }, tokens);
-        }
-
-        [Test]
-        public void StringWithOperatorsString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("\"abc\"+\"def\"-\"ghi\"").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.String, "abc"),
-                    new Token(TokenTypes.Variable, "+"),
-                    new Token(TokenTypes.String, "def"),
-                    new Token(TokenTypes.Variable, "-"),
-                    new Token(TokenTypes.String, "ghi"),
-                }, tokens);
-        }
-
-        [Test]
-        public void StringBeforeWhiteSpaceString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize(" \"123\"").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.String, "123"),
-                }, tokens);
-        }
-
-        [Test]
-        public void StringAfterWhiteSpaceString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("\"123\" ").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.String, "123"),
-                }, tokens);
-        }
-
-        [Test]
-        public void StringBeforeAfterWhiteSpaceString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize(" \"123\" ").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.String, "123"),
-                }, tokens);
-        }
-
-        ////////////////////////////////////////////////////////////////////////
-
-        [Test]
-        public void VariableString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("abc").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Variable, "abc"),
-                }, tokens);
-        }
-
-        [Test]
-        public void VariableWithNumericString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("a1b2c3").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Variable, "a1b2c3"),
-                }, tokens);
-        }
-
-        [Test]
-        public void VariableWithOperatorsString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("abc+def-ghi").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Variable, "abc"),
-                    new Token(TokenTypes.Variable, "+"),
-                    new Token(TokenTypes.Variable, "def"),
-                    new Token(TokenTypes.Variable, "-"),
-                    new Token(TokenTypes.Variable, "ghi"),
-                }, tokens);
-        }
-
-        [Test]
-        public void VariableBeforeWhiteSpaceString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize(" abc").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Variable, "abc"),
-                }, tokens);
-        }
-
-        [Test]
-        public void VariableAfterWhiteSpaceString()
-        {
-            var parser = new Parser();
-
-            var tokens = parser.Tokenize("abc ").ToArray();
-
-            Assert.AreEqual(
-                new[]
-                {
-                    new Token(TokenTypes.Variable, "abc"),
-                }, tokens);
+                    new ApplyTerm("a", new VariableTerm("b"))
+                },
+                terms);
         }
     }
 }

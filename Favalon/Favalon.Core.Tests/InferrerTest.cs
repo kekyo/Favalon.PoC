@@ -84,5 +84,23 @@ namespace Favalon
                 },
                 terms);
         }
+
+        public static char[] OperatorChars = Parser.OperatorChars.ToArray();
+
+        [TestCaseSource("OperatorChars")]
+        public void InferOperatorChars(char inch)
+        {
+            var tokens = Parse(inch.ToString());
+
+            var inferrer = new Inferrer();
+            var terms = inferrer.Infer(tokens);
+
+            Assert.AreEqual(
+                new[]
+                {
+                    new VariableTerm(inch.ToString())
+                },
+                terms);
+        }
     }
 }

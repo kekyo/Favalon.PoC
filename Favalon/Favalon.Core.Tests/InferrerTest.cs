@@ -49,6 +49,20 @@ namespace Favalon
                 terms);
         }
 
+        [TestCase("false true", new[] { false, true })]
+        [TestCase("true false", new[] { true, false })]
+        public void InferBooleanValues(string args, bool[] expected)
+        {
+            var tokens = Parse(args);
+
+            var inferrer = new Inferrer();
+            var terms = inferrer.Infer(tokens);
+
+            Assert.AreEqual(
+                expected.Select(v => new BooleanTerm(v)),
+                terms);
+        }
+
         ////////////////////////////////////////////////////////////////////////
 
         [Test]
@@ -64,6 +78,19 @@ namespace Favalon
                 {
                     new NumericTerm("123")
                 },
+                terms);
+        }
+
+        [TestCase("123 456", new[] { "123", "456" })]
+        public void InferNumericValues(string args, string[] expected)
+        {
+            var tokens = Parse(args);
+
+            var inferrer = new Inferrer();
+            var terms = inferrer.Infer(tokens);
+
+            Assert.AreEqual(
+                expected.Select(v => new NumericTerm(v)),
                 terms);
         }
 
@@ -100,6 +127,20 @@ namespace Favalon
                 {
                     new VariableTerm(inch.ToString())
                 },
+                terms);
+        }
+
+        [TestCase("abc def", new[] { "abc", "def" })]
+        [TestCase("abc+d1e2f3-ghi", new[] { "abc", "+", "d1e2f3", "-", "ghi" })]
+        public void InferVariables(string args, string[] expected)
+        {
+            var tokens = Parse(args);
+
+            var inferrer = new Inferrer();
+            var terms = inferrer.Infer(tokens);
+
+            Assert.AreEqual(
+                expected.Select(v => new VariableTerm(v)),
                 terms);
         }
     }

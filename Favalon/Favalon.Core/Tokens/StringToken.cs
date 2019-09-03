@@ -2,7 +2,7 @@
 
 namespace Favalon.Tokens
 {
-    public sealed class StringToken : Token
+    public sealed class StringToken : Token<StringToken>
     {
         public StringToken(string value) :
             base(value)

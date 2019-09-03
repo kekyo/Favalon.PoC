@@ -7,6 +7,9 @@
         public VariableTerm(string symbolName) =>
             this.SymbolName = symbolName;
 
+        public override int GetHashCode() =>
+            this.SymbolName.GetHashCode();
+
         public bool Equals(VariableTerm? rhs) =>
             rhs is VariableTerm term ? this.SymbolName.Equals(term.SymbolName) : false;
 

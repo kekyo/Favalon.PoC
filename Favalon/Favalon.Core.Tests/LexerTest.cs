@@ -100,9 +100,9 @@ namespace Favalon
                 new Token[]
                 {
                     new NumericToken("123"),
-                    new VariableToken("+"),
+                    new OperatorToken("+"),
                     new NumericToken("456"),
-                    new VariableToken("-"),
+                    new OperatorToken("-"),
                     new NumericToken("789"),
                 }, tokens);
         }
@@ -306,9 +306,27 @@ namespace Favalon
                 new Token[]
                 {
                     new StringToken("abc"),
-                    new VariableToken("+"),
+                    new OperatorToken("+"),
                     new StringToken("def"),
-                    new VariableToken("-"),
+                    new OperatorToken("-"),
+                    new StringToken("ghi"),
+                }, tokens);
+        }
+
+        [Test]
+        public void StringWithVariablesString()
+        {
+            var lexer = new Lexer();
+
+            var tokens = lexer.Lex("\"abc\"aaa\"def\"bbb\"ghi\"").ToArray();
+
+            Assert.AreEqual(
+                new Token[]
+                {
+                    new StringToken("abc"),
+                    new VariableToken("aaa"),
+                    new StringToken("def"),
+                    new VariableToken("bbb"),
                     new StringToken("ghi"),
                 }, tokens);
         }
@@ -396,9 +414,9 @@ namespace Favalon
                 new Token[]
                 {
                     new VariableToken("abc"),
-                    new VariableToken("+"),
+                    new OperatorToken("+"),
                     new VariableToken("def"),
-                    new VariableToken("-"),
+                    new OperatorToken("-"),
                     new VariableToken("ghi"),
                 }, tokens);
         }

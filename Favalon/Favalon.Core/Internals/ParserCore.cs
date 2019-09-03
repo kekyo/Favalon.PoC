@@ -9,8 +9,8 @@ namespace Favalon.Internals
     {
         private readonly Dictionary<string, Term> variables =
             new Dictionary<string, Term>();
-        private readonly Stack<VariableToken> applyingTokens =
-            new Stack<VariableToken>();
+        private readonly Stack<IVariableToken> applyingTokens =
+            new Stack<IVariableToken>();
 
         public void AddVariable(string variable, Term term) =>
             variables.Add(variable, term);
@@ -60,7 +60,7 @@ namespace Favalon.Internals
         {
             switch (token)
             {
-                case VariableToken variableToken:
+                case IVariableToken variableToken:
                     applyingTokens.Push(variableToken);
                     return Enumerable.Empty<Term>();
                 default:
@@ -72,7 +72,7 @@ namespace Favalon.Internals
             applyingTokens.Count switch
             {
                 0 => Enumerable.Empty<Term>(),
-                _ => this.ExhaustTokens(applyingTokens.Pop())
+                _ => this.ExhaustTokens((Token)applyingTokens.Pop())
             };
     }
 }

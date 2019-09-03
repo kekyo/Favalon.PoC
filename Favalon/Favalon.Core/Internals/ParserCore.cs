@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace Favalon.Parsing
+namespace Favalon.Internals
 {
     internal sealed class ParserCore
     {
@@ -31,7 +31,7 @@ namespace Favalon.Parsing
         private static bool IsFlushing(char inch) =>
             inch == flushingChar;
 
-        public Token? Run(char inch)
+        public Token? Examine(char inch)
         {
             Token? result = null;
 
@@ -154,6 +154,6 @@ namespace Favalon.Parsing
         }
 
         public Token? Flush() =>
-            this.Run(flushingChar);
+            this.Examine(flushingChar);
     }
 }

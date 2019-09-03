@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using Favalon.Parsing;
+using Favalon.Internals;
 
 namespace Favalon
 {
@@ -11,7 +11,7 @@ namespace Favalon
         private readonly ParserCore parser = new ParserCore();
 
         public Token? Tokenize(char inch) =>
-            parser.Run(inch);
+            parser.Examine(inch);
 
         public IEnumerable<Token> Tokenize(string input, bool withFlush = true)
         {
@@ -19,7 +19,7 @@ namespace Favalon
             while (index < input.Length)
             {
                 var inch = input[index++];
-                if (parser.Run(inch) is Token token)
+                if (parser.Examine(inch) is Token token)
                 {
                     yield return token;
                 }

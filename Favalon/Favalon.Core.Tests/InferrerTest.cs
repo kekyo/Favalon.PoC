@@ -28,7 +28,7 @@ namespace Favalon
             var tokens = Parse("true");
 
             var inferrer = CreateInferrer();
-            var terms = inferrer.Infer(tokens);
+            var terms = inferrer.Infer(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
@@ -44,7 +44,7 @@ namespace Favalon
             var tokens = Parse("false");
 
             var inferrer = CreateInferrer();
-            var terms = inferrer.Infer(tokens);
+            var terms = inferrer.Infer(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
@@ -61,7 +61,7 @@ namespace Favalon
             var tokens = Parse(args);
 
             var inferrer = CreateInferrer();
-            var terms = inferrer.Infer(tokens);
+            var terms = inferrer.Infer(tokens).ToArray();
 
             Assert.AreEqual(
                 expected.Select(v => new BooleanTerm(v)),
@@ -76,7 +76,7 @@ namespace Favalon
             var tokens = Parse("123");
 
             var inferrer = CreateInferrer();
-            var terms = inferrer.Infer(tokens);
+            var terms = inferrer.Infer(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
@@ -92,7 +92,7 @@ namespace Favalon
             var tokens = Parse(args);
 
             var inferrer = CreateInferrer();
-            var terms = inferrer.Infer(tokens);
+            var terms = inferrer.Infer(tokens).ToArray();
 
             Assert.AreEqual(
                 expected.Select(v => new NumericTerm(v)),
@@ -107,7 +107,7 @@ namespace Favalon
             var tokens = Parse("\"abc\"");
 
             var inferrer = CreateInferrer();
-            var terms = inferrer.Infer(tokens);
+            var terms = inferrer.Infer(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
@@ -123,7 +123,7 @@ namespace Favalon
             var tokens = Parse(args);
 
             var inferrer = CreateInferrer();
-            var terms = inferrer.Infer(tokens);
+            var terms = inferrer.Infer(tokens).ToArray();
 
             Assert.AreEqual(
                 expected.Select(v => new StringTerm(v)),
@@ -138,7 +138,7 @@ namespace Favalon
             var tokens = Parse("abc");
 
             var inferrer = CreateInferrer();
-            var terms = inferrer.Infer(tokens);
+            var terms = inferrer.Infer(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
@@ -156,7 +156,7 @@ namespace Favalon
             var tokens = Parse(inch.ToString());
 
             var inferrer = CreateInferrer();
-            var terms = inferrer.Infer(tokens);
+            var terms = inferrer.Infer(tokens).ToArray();
 
             Assert.AreEqual(
                 new[]
@@ -166,17 +166,42 @@ namespace Favalon
                 terms);
         }
 
-        [TestCase("abc def", new[] { "abc", "def" })]
-        [TestCase("abc+d1e2f3-ghi", new[] { "abc", "+", "d1e2f3", "-", "ghi" })]
-        public void InferVariables(string args, string[] expected)
+        [TestCase("abc def ghi", new[] { "abc", "def" }, "ghi")]
+        [TestCase("abc+d1e2f3-ghi*jkl", new[] { "abc", "+", "d1e2f3", "-", "ghi" }, "jkl")]
+        public void InferVariables(string args, string[] expected, string expectedLast)
         {
             var tokens = Parse(args);
 
             var inferrer = CreateInferrer();
-            var terms = inferrer.Infer(tokens);
+            var terms = inferrer.Infer(tokens).ToArray();
+
+            var expectedTerm =
+                expected.
+                Reverse().
+                Aggregate(
+                    (Term)new VariableTerm(expectedLast),
+                    (term, v) => new ApplyTerm(v, term));
 
             Assert.AreEqual(
-                expected.Select(v => new VariableTerm(v)),
+                new[] { expectedTerm },
+                terms);
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        [Test]
+        public void InferApply()
+        {
+            var tokens = Parse("a b");
+
+            var inferrer = CreateInferrer();
+            var terms = inferrer.Infer(tokens).ToArray();
+
+            Assert.AreEqual(
+                new[]
+                {
+                    new ApplyTerm("a", new VariableTerm("b"))
+                },
                 terms);
         }
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Favalon.Parsing;
+using Favalon.Internals;
 
 namespace Favalon
 {
@@ -41,7 +40,7 @@ namespace Favalon
 
         void IObserver<char>.OnNext(char inch)
         {
-            if (parser.Run(inch) is Token token)
+            if (parser.Examine(inch) is Token token)
             {
                 foreach (var observer in this.GetObservers())
                 {

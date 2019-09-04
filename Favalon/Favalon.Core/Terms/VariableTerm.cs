@@ -17,7 +17,7 @@
             this.Equals(other as VariableTerm);
 
         public override string ToString() =>
-            this.SymbolName;
+            $"{this.GetType().Name}: {this.SymbolName}";
     }
 
     public class VariableTerm<TTerm> : VariableTerm

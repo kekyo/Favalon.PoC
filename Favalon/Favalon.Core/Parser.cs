@@ -9,9 +9,6 @@ namespace Favalon
     {
         private readonly ParserCore parserCore = new ParserCore();
 
-        public void AddVariable(string variable, Term term) =>
-            parserCore.AddVariable(variable, term);
-
         public IEnumerable<Term> Parse(IEnumerable<Token> tokens, bool withFlush = true)
         {
             foreach (var token in tokens)

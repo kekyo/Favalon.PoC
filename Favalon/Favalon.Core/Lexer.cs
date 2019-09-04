@@ -11,10 +11,10 @@ namespace Favalon
 
         private readonly LexerCore lexerCore = new LexerCore();
 
-        public Token? Lex(char inch) =>
+        public Token? Tokenize(char inch) =>
             lexerCore.Examine(inch);
 
-        public IEnumerable<Token> Lex(string input, bool withFlush = true)
+        public IEnumerable<Token> Tokenize(string input, bool withFlush = true)
         {
             foreach (var inch in input)
             {

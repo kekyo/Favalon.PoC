@@ -12,7 +12,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(string.Empty).ToArray();
+            var tokens = lexer.Tokenize(string.Empty).ToArray();
 
             Assert.AreEqual(0, tokens.Length);
         }
@@ -22,7 +22,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(" ").ToArray();
+            var tokens = lexer.Tokenize(" ").ToArray();
 
             Assert.AreEqual(0, tokens.Length);
         }
@@ -32,7 +32,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("  ").ToArray();
+            var tokens = lexer.Tokenize("  ").ToArray();
 
             Assert.AreEqual(0, tokens.Length);
         }
@@ -42,7 +42,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("\t").ToArray();
+            var tokens = lexer.Tokenize("\t").ToArray();
 
             Assert.AreEqual(0, tokens.Length);
         }
@@ -52,7 +52,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("\t  \t ").ToArray();
+            var tokens = lexer.Tokenize("\t  \t ").ToArray();
 
             Assert.AreEqual(0, tokens.Length);
         }
@@ -64,7 +64,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("123").ToArray();
+            var tokens = lexer.Tokenize("123").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -80,7 +80,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(inch.ToString()).ToArray();
+            var tokens = lexer.Tokenize(inch.ToString()).ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -94,7 +94,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("123+456-789").ToArray();
+            var tokens = lexer.Tokenize("123+456-789").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -112,7 +112,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(" 123").ToArray();
+            var tokens = lexer.Tokenize(" 123").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -126,7 +126,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("123 ").ToArray();
+            var tokens = lexer.Tokenize("123 ").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -140,7 +140,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(" 123 ").ToArray();
+            var tokens = lexer.Tokenize(" 123 ").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -156,7 +156,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("+").ToArray();
+            var tokens = lexer.Tokenize("+").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -170,7 +170,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(Lexer.OperatorChars).ToArray();
+            var tokens = lexer.Tokenize(Lexer.OperatorChars).ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -186,7 +186,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(inch.ToString()).ToArray();
+            var tokens = lexer.Tokenize(inch.ToString()).ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -200,7 +200,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(" +").ToArray();
+            var tokens = lexer.Tokenize(" +").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -214,7 +214,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("+ ").ToArray();
+            var tokens = lexer.Tokenize("+ ").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -228,7 +228,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(" + ").ToArray();
+            var tokens = lexer.Tokenize(" + ").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -244,7 +244,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("\"123\"").ToArray();
+            var tokens = lexer.Tokenize("\"123\"").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -258,7 +258,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("\" 123\"").ToArray();
+            var tokens = lexer.Tokenize("\" 123\"").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -272,7 +272,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("\"1 23\"").ToArray();
+            var tokens = lexer.Tokenize("\"1 23\"").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -286,7 +286,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("\"123 \"").ToArray();
+            var tokens = lexer.Tokenize("\"123 \"").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -300,7 +300,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("\"abc\"+\"def\"-\"ghi\"").ToArray();
+            var tokens = lexer.Tokenize("\"abc\"+\"def\"-\"ghi\"").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -318,7 +318,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("\"abc\"aaa\"def\"bbb\"ghi\"").ToArray();
+            var tokens = lexer.Tokenize("\"abc\"aaa\"def\"bbb\"ghi\"").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -336,7 +336,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(" \"123\"").ToArray();
+            var tokens = lexer.Tokenize(" \"123\"").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -350,7 +350,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("\"123\" ").ToArray();
+            var tokens = lexer.Tokenize("\"123\" ").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -364,7 +364,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(" \"123\" ").ToArray();
+            var tokens = lexer.Tokenize(" \"123\" ").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -380,7 +380,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("abc").ToArray();
+            var tokens = lexer.Tokenize("abc").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -394,7 +394,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("a1b2c3").ToArray();
+            var tokens = lexer.Tokenize("a1b2c3").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -408,7 +408,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("abc+def-ghi").ToArray();
+            var tokens = lexer.Tokenize("abc+def-ghi").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -426,7 +426,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex(" abc").ToArray();
+            var tokens = lexer.Tokenize(" abc").ToArray();
 
             Assert.AreEqual(
                 new Token[]
@@ -440,7 +440,7 @@ namespace Favalon
         {
             var lexer = new Lexer();
 
-            var tokens = lexer.Lex("abc ").ToArray();
+            var tokens = lexer.Tokenize("abc ").ToArray();
 
             Assert.AreEqual(
                 new Token[]

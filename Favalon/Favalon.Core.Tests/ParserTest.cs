@@ -8,25 +8,18 @@ namespace Favalon
     [TestFixture]
     public sealed class ParserTest
     {
-        private Parser CreateParser()
-        {
-            var parser = new Parser();
-            parser.AddVariable("true", new BooleanTerm(true));
-            parser.AddVariable("false", new BooleanTerm(false));
+        private Parser CreateParser() => new Parser();
 
-            return parser;
-        }
-
-        private Token[] Parse(string text)
+        private Token[] Tokenize(string text)
         {
-            var parser = new Lexer();
-            return parser.Lex(text).ToArray();
+            var lexer = new Lexer();
+            return lexer.Tokenize(text).ToArray();
         }
 
         [Test]
-        public void InferTrue()
+        public void ParseTrue()
         {
-            var tokens = Parse("true");
+            var tokens = Tokenize("true");
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();
@@ -40,9 +33,9 @@ namespace Favalon
         }
 
         [Test]
-        public void InferFalse()
+        public void ParseFalse()
         {
-            var tokens = Parse("false");
+            var tokens = Tokenize("false");
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();
@@ -57,9 +50,9 @@ namespace Favalon
 
         [TestCase("false true", new[] { false, true })]
         [TestCase("true false", new[] { true, false })]
-        public void InferBooleanValues(string args, bool[] expected)
+        public void ParseBooleanValues(string args, bool[] expected)
         {
-            var tokens = Parse(args);
+            var tokens = Tokenize(args);
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();
@@ -72,9 +65,9 @@ namespace Favalon
         ////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void InferNumeric()
+        public void ParseNumeric()
         {
-            var tokens = Parse("123");
+            var tokens = Tokenize("123");
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();
@@ -88,9 +81,9 @@ namespace Favalon
         }
 
         [TestCase("123 456", new[] { "123", "456" })]
-        public void InferNumericValues(string args, string[] expected)
+        public void ParseNumericValues(string args, string[] expected)
         {
-            var tokens = Parse(args);
+            var tokens = Tokenize(args);
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();
@@ -103,9 +96,9 @@ namespace Favalon
         ////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void InferString()
+        public void ParseString()
         {
-            var tokens = Parse("\"abc\"");
+            var tokens = Tokenize("\"abc\"");
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();
@@ -119,9 +112,9 @@ namespace Favalon
         }
 
         [TestCase("\"abc\" \"def\"", new[] { "abc", "def" })]
-        public void InferStringValues(string args, string[] expected)
+        public void ParseStringValues(string args, string[] expected)
         {
-            var tokens = Parse(args);
+            var tokens = Tokenize(args);
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();
@@ -134,9 +127,9 @@ namespace Favalon
         ////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void InferVariable()
+        public void ParseVariable()
         {
-            var tokens = Parse("abc");
+            var tokens = Tokenize("abc");
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();
@@ -152,9 +145,9 @@ namespace Favalon
         public static char[] OperatorChars = Lexer.OperatorChars.ToArray();
 
         [TestCaseSource("OperatorChars")]
-        public void InferOperatorChars(char inch)
+        public void ParseOperatorChars(char inch)
         {
-            var tokens = Parse(inch.ToString());
+            var tokens = Tokenize(inch.ToString());
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();
@@ -169,9 +162,9 @@ namespace Favalon
 
         [TestCase("abc def ghi", new[] { "abc", "def" }, "ghi")]
         [TestCase("abc+d1e2f3-ghi*jkl", new[] { "abc", "+", "d1e2f3", "-", "ghi" }, "jkl")]
-        public void InferVariables(string args, string[] expected, string expectedLast)
+        public void ParseVariables(string args, string[] expected, string expectedLast)
         {
-            var tokens = Parse(args);
+            var tokens = Tokenize(args);
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();
@@ -191,9 +184,9 @@ namespace Favalon
         ////////////////////////////////////////////////////////////////////////
 
         [Test]
-        public void InferApply()
+        public void ParseApply()
         {
-            var tokens = Parse("a b");
+            var tokens = Tokenize("a b");
 
             var parser = CreateParser();
             var terms = parser.Parse(tokens).ToArray();

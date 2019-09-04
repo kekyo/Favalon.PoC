@@ -9,6 +9,6 @@
             this.Rhs = rhs;
 
         public override string ToString() =>
-            $"{this.SymbolName} {this.Rhs}";
+            $"{this.GetType().Name}: {this.SymbolName} {this.Rhs}";
     }
 }

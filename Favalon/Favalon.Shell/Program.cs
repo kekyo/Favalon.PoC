@@ -20,7 +20,7 @@ namespace Favalon
                     break;
                 }
 
-                foreach (var token in lexer.Lex(line, false))
+                foreach (var token in lexer.Tokenize(line, false))
                 {
                     Console.WriteLine(token);
                 }

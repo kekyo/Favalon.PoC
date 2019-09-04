@@ -1,4 +1,6 @@
-﻿namespace Favalon.Terms
+﻿using Favalon.Expressions;
+
+namespace Favalon.Terms
 {
     public class VariableTerm : Term
     {
@@ -15,6 +17,9 @@
 
         public override bool Equals(Term? other) =>
             this.Equals(other as VariableTerm);
+
+        protected override Expression Visit(InferContext context) =>
+            new VariableExpression(this.SymbolName);
 
         public override string ToString() =>
             $"{this.GetType().Name}: {this.SymbolName}";

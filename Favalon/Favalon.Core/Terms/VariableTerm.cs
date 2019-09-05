@@ -21,20 +21,15 @@ namespace Favalon.Terms
         public override bool Equals(Term? other) =>
             this.Equals(other as VariableTerm);
 
-        protected override Expression VisitInfer(IInferContext context)
-        {
-            if (context.Lookup(this.SymbolName).FirstOrDefault() is Expression lookup)
-            {
-                return lookup;
-            }
-
-            var sns = this.SymbolName.Split(':');
-            return sns.
+        protected override Expression VisitInfer(IInferContext context) =>
+            this.SymbolName.Split(':').
                 Reverse().
                 Aggregate(
                     UnspecifiedExpression.Instance,
-                    (higherOrder, symbolName) => new VariableExpression(symbolName, higherOrder));
-        }
+                    (higherOrder, symbolName) =>
+                        context.Lookup(symbolName).FirstOrDefault() is Expression lookup ?
+                        lookup :
+                        new VariableExpression(symbolName, higherOrder));
 
         public override string ToString() =>
             $"{this.GetType().Name}: {this.SymbolName}";

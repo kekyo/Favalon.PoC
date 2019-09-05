@@ -16,6 +16,8 @@ namespace Favalon
             return parser.Parse(lexer.Tokenize(text)).Single();
         }
 
+        ////////////////////////////////////////////////////////////////////////
+
         [Test]
         public void InferTrue()
         {
@@ -27,6 +29,9 @@ namespace Favalon
             Assert.AreEqual(
                 new BooleanExpression(true),
                 expression);
+            Assert.AreEqual(
+                TypeExpression<bool>.Instance,
+                expression.HigherOrder);
         }
 
         [Test]
@@ -74,6 +79,8 @@ namespace Favalon
                 expression);
         }
 
+        ////////////////////////////////////////////////////////////////////////
+
         [Test]
         public void InferVariableWithAnnotation()
         {
@@ -88,6 +95,42 @@ namespace Favalon
                     new VariableExpression(
                         "System.Boolean",
                         UnspecifiedExpression.Instance)),
+                expression);
+        }
+
+        [Test]
+        public void InferVariableWithAnnotations()
+        {
+            var term = Parse("abc:System.Boolean:Kind");
+
+            var checker = new Checker();
+            var expression = checker.Infer(term);
+
+            Assert.AreEqual(
+                new VariableExpression(
+                    "abc",
+                    new VariableExpression(
+                        "System.Boolean",
+                        new VariableExpression(
+                            "Kind",
+                            UnspecifiedExpression.Instance))),
+                expression);
+        }
+
+        [Test]
+        public void InferVariableWithBoundAnnotation()
+        {
+            var term = Parse("abc:System.Boolean");
+
+            var checker = new Checker();
+            checker.Add("System.Boolean", TypeExpression<bool>.Instance);
+
+            var expression = checker.Infer(term);
+
+            Assert.AreEqual(
+                new VariableExpression(
+                    "abc",
+                    TypeExpression<bool>.Instance),
                 expression);
         }
     }

@@ -2,30 +2,46 @@
 
 namespace Favalon.Expressions
 {
-    public sealed class VariableExpression : Expression
+    public abstract class VariableExpression<TExpression> :
+        Expression
+        where TExpression : VariableExpression<TExpression>
     {
-        private Expression higherOrder;
+        protected VariableExpression()
+        { }
 
-        public readonly string SymbolName;
-
-        public VariableExpression(string symbolName, Expression higherOrder)
-        {
-            this.SymbolName = symbolName;
-            this.higherOrder = higherOrder;
-        }
-
-        public override Expression HigherOrder =>
-            higherOrder;
-
-        protected override Expression VisitResolve(IInferContext context) =>
-            this;
+        public abstract string SymbolName { get; }
 
         public override bool Equals(Expression? rhs) =>
-            rhs is VariableExpression variable ?
-                (this.SymbolName.Equals(variable.SymbolName) && this.HigherOrder.Equals(variable.HigherOrder)) :
+            rhs is TExpression variable ?
+                this.HigherOrder.Equals(variable.HigherOrder) :
                 false;
 
         public override string ToString() =>
             $"{this.SymbolName}:{this.HigherOrder}";
+    }
+
+    public sealed class VariableExpression :
+        VariableExpression<VariableExpression>
+    {
+        public VariableExpression(string symbolName, Expression higherOrder)
+        {
+            this.SymbolName = symbolName;
+            this.HigherOrder = higherOrder;
+        }
+
+        public override string SymbolName { get; }
+
+        public override Expression HigherOrder { get; }
+
+        protected override Expression VisitResolve(IInferContext context) =>
+            new VariableExpression(
+                this.SymbolName,
+                this.HigherOrder.VisitResolveCore(context));
+
+        public override bool Equals(Expression? rhs) =>
+            base.Equals(rhs) &&
+            rhs is VariableExpression variable ?
+                this.SymbolName.Equals(variable.SymbolName) :
+                false;
     }
 }

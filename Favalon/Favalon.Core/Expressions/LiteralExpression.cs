@@ -13,9 +13,6 @@
 
     public class LiteralExpression<TValue> : LiteralExpression
     {
-        private static readonly Expression higherOrder =
-            new VariableExpression(typeof(TValue).FullName, UnspecifiedExpression.Instance);
-
         public readonly TValue Value;
 
         public LiteralExpression(TValue value)
@@ -23,7 +20,7 @@
             this.Value = value;
 
         public override Expression HigherOrder =>
-            higherOrder;
+            TypeExpression<TValue>.Instance;
 
         public override object RawValue =>
             this.Value!;

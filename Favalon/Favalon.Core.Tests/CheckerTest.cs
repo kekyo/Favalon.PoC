@@ -22,14 +22,73 @@ namespace Favalon
             var term = Parse("true");
 
             var checker = new Checker();
-            var expressions = checker.Infer(term);
+            var expression = checker.Infer(term);
 
             Assert.AreEqual(
-                new[]
-                {
-                    new BooleanExpression(true)
-                },
-                expressions);
+                new BooleanExpression(true),
+                expression);
+        }
+
+        [Test]
+        public void InferFalse()
+        {
+            var term = Parse("false");
+
+            var checker = new Checker();
+            var expression = checker.Infer(term);
+
+            Assert.AreEqual(
+                new BooleanExpression(false),
+                expression);
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        [Test]
+        public void InferString()
+        {
+            var term = Parse("\"abc\"");
+
+            var checker = new Checker();
+            var expression = checker.Infer(term);
+
+            Assert.AreEqual(
+                new StringExpression("abc"),
+                expression);
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        [Test]
+        public void InferVariableForString()
+        {
+            var term = Parse("abc");
+
+            var checker = new Checker();
+            checker.Add("abc", new StringExpression("abc"));
+
+            var expression = checker.Infer(term);
+
+            Assert.AreEqual(
+                new StringExpression("abc"),
+                expression);
+        }
+
+        [Test]
+        public void InferVariableWithAnnotation()
+        {
+            var term = Parse("abc:System.Boolean");
+
+            var checker = new Checker();
+            var expression = checker.Infer(term);
+
+            Assert.AreEqual(
+                new VariableExpression(
+                    "abc",
+                    new VariableExpression(
+                        "System.Boolean",
+                        UnspecifiedExpression.Instance)),
+                expression);
         }
     }
 }

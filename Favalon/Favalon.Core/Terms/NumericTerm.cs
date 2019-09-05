@@ -8,11 +8,11 @@ namespace Favalon.Terms
             base(value)
         { }
 
-        protected override Expression Visit(InferContext context) =>
+        protected override Expression VisitInfer(IInferContext context) =>
             int.TryParse(this.Value, out var intValue) ?
                 (Expression)new LiteralExpression<int>(intValue) :
                 long.TryParse(this.Value, out var longValue) ?
                     (Expression)new LiteralExpression<long>(longValue) :
-            (Expression)new UninterruptedExpression(this);
+            (Expression)new UnknownTermExpression(this);
     }
 }

@@ -8,7 +8,7 @@ namespace Favalon.Terms
             base(value)
         { }
 
-        protected override Expression Visit(InferContext context) =>
+        protected override Expression VisitInfer(IInferContext context) =>
             new BooleanExpression(this.Value);
     }
 }

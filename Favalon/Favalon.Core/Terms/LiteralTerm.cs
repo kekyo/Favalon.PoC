@@ -15,7 +15,7 @@ namespace Favalon.Terms
             this.Value?.GetHashCode() ?? 0;
 
         public bool Equals(TTerm? rhs) =>
-            rhs is TTerm term ? this.Value?.Equals(term.Value) ?? false : false;
+            rhs is TTerm term ? (this.Value?.Equals(term.Value) ?? false) : false;
 
         public override bool Equals(Term? rhs) =>
             this.Equals(rhs as TTerm);

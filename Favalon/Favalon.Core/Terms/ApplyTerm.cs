@@ -1,4 +1,5 @@
 ﻿using Favalon.Expressions;
+using System.Linq;
 
 namespace Favalon.Terms
 {
@@ -10,9 +11,9 @@ namespace Favalon.Terms
             base(symbolName) =>
             this.Rhs = rhs;
 
-        protected override Expression Visit(InferContext context) =>
+        protected override Expression VisitInfer(IInferContext context) =>
             new ApplyExpression(
-                context.Lookup(this.SymbolName),
+                context.Lookup(this.SymbolName).First(),  // TODO:
                 this.Visit(context, this.Rhs));
 
         public override string ToString() =>

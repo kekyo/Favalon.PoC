@@ -7,6 +7,8 @@ namespace Favalon
     [TestFixture]
     public sealed class LexerTest
     {
+        ////////////////////////////////////////////////////////////////////////
+
         [Test]
         public void EmptyString()
         {

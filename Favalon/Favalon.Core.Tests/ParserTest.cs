@@ -16,6 +16,8 @@ namespace Favalon
             return lexer.Tokenize(text).ToArray();
         }
 
+        ////////////////////////////////////////////////////////////////////////
+
         [Test]
         public void ParseTrue()
         {

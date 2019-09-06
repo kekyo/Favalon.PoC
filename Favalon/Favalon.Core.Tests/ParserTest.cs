@@ -162,9 +162,9 @@ namespace Favalon
                 terms);
         }
 
-        [TestCase("abc def ghi", new[] { "abc", "def" }, "ghi")]
-        [TestCase("abc+d1e2f3-ghi*jkl", new[] { "abc", "+", "d1e2f3", "-", "ghi" }, "jkl")]
-        public void ParseVariables(string args, string[] expected, string expectedLast)
+        [TestCase("abc def ghi", "abc", new[] { "def", "ghi" })]
+        [TestCase("abc+d1e2f3-ghi*jkl", "abc", new[] { "+", "d1e2f3", "-", "ghi", "*", "jkl" })]
+        public void ParseVariables(string args, string expectedFirst, string[] expected)
         {
             var tokens = Tokenize(args);
 
@@ -173,10 +173,9 @@ namespace Favalon
 
             var expectedTerm =
                 expected.
-                Reverse().
                 Aggregate(
-                    (Term)new VariableTerm(expectedLast),
-                    (term, v) => new ApplyTerm(v, term));
+                    (Term)new VariableTerm(expectedFirst),
+                    (term, v) => new ApplyTerm(term, new VariableTerm(v)));
 
             Assert.AreEqual(
                 new[] { expectedTerm },
@@ -196,7 +195,7 @@ namespace Favalon
             Assert.AreEqual(
                 new[]
                 {
-                    new ApplyTerm("a", new VariableTerm("b"))
+                    new ApplyTerm(new VariableTerm("a"), new VariableTerm("b"))
                 },
                 terms);
         }

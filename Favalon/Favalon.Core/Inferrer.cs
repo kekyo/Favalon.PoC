@@ -4,7 +4,7 @@ using Favalon.Terms;
 
 namespace Favalon
 {
-    public sealed class Checker
+    public sealed class Inferrer
     {
         private readonly InferContext inferContext =
             new InferContext();

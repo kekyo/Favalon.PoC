@@ -7,7 +7,7 @@ using System.Linq;
 namespace Favalon
 {
     [TestFixture]
-    public sealed class CheckerTest
+    public sealed class InferrerTest
     {
         private Term Parse(string text)
         {
@@ -23,8 +23,8 @@ namespace Favalon
         {
             var term = Parse("true");
 
-            var checker = new Checker();
-            var expression = checker.Infer(term);
+            var interrer = new Inferrer();
+            var expression = interrer.Infer(term);
 
             Assert.AreEqual(
                 new BooleanExpression(true),
@@ -39,8 +39,8 @@ namespace Favalon
         {
             var term = Parse("false");
 
-            var checker = new Checker();
-            var expression = checker.Infer(term);
+            var interrer = new Inferrer();
+            var expression = interrer.Infer(term);
 
             Assert.AreEqual(
                 new BooleanExpression(false),
@@ -54,8 +54,8 @@ namespace Favalon
         {
             var term = Parse("\"abc\"");
 
-            var checker = new Checker();
-            var expression = checker.Infer(term);
+            var interrer = new Inferrer();
+            var expression = interrer.Infer(term);
 
             Assert.AreEqual(
                 new StringExpression("abc"),
@@ -69,10 +69,10 @@ namespace Favalon
         {
             var term = Parse("abc");
 
-            var checker = new Checker();
-            checker.Add("abc", new StringExpression("abc"));
+            var interrer = new Inferrer();
+            interrer.Add("abc", new StringExpression("abc"));
 
-            var expression = checker.Infer(term);
+            var expression = interrer.Infer(term);
 
             Assert.AreEqual(
                 new StringExpression("abc"),
@@ -86,8 +86,8 @@ namespace Favalon
         {
             var term = Parse("abc:System.Boolean");
 
-            var checker = new Checker();
-            var expression = checker.Infer(term);
+            var interrer = new Inferrer();
+            var expression = interrer.Infer(term);
 
             Assert.AreEqual(
                 new VariableExpression(
@@ -103,8 +103,8 @@ namespace Favalon
         {
             var term = Parse("abc:System.Boolean:Kind");
 
-            var checker = new Checker();
-            var expression = checker.Infer(term);
+            var interrer = new Inferrer();
+            var expression = interrer.Infer(term);
 
             Assert.AreEqual(
                 new VariableExpression(
@@ -122,10 +122,10 @@ namespace Favalon
         {
             var term = Parse("abc:System.Boolean");
 
-            var checker = new Checker();
-            checker.Add("System.Boolean", TypeExpression<bool>.Instance);
+            var interrer = new Inferrer();
+            interrer.Add("System.Boolean", TypeExpression<bool>.Instance);
 
-            var expression = checker.Infer(term);
+            var expression = interrer.Infer(term);
 
             Assert.AreEqual(
                 new VariableExpression(
@@ -141,10 +141,10 @@ namespace Favalon
         {
             var term = Parse("-> abc def");
 
-            var checker = new Checker();
-            var expression = checker.Infer(term);
+            var interrer = new Inferrer();
+            var expression = interrer.Infer(term);
 
-            // App(App(-> abc) def)
+            // App(App(Var(->) Var(abc)) Var(def))
             // Lambda(abc def)
 
             Assert.AreEqual(

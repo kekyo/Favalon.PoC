@@ -1,64 +1,79 @@
 ﻿using Favalon.Terms;
 using Favalon.Tokens;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 
 namespace Favalon.Internals
 {
     internal sealed class ParserCore
     {
-        private readonly Stack<IVariableToken> applyingTokens =
-            new Stack<IVariableToken>();
+        // -> a b c "aaa"
+        // Var(->) Var(a) Var(b) Var(c) Str(aaa)
+        // App(App(App(App(Var(->) Var(a)) Var(b)) Var(c)) Str(aaa))
 
-        private IEnumerable<Term> ExhaustTokens(Term finalTerm)
-        {
-            var term = finalTerm;
-            Stack<Term>? terms = null;
+        // "aaa" -> a b c
+        // Str(aaa) Var(a) Var(b) Var(c)
+        // Str(aaa) App(App(App(Var(->) Var(a)) Var(b)) Var(c))
 
-            while (applyingTokens.Count >= 1)
-            {
-                var variableToken = applyingTokens.Pop();
-                term = new ApplyTerm(variableToken.Value, term);
-            }
+        private Term? lastTerm;
 
-            yield return term;
-
-            while (terms?.Count >= 1)
-            {
-                yield return terms.Pop();
-            }
-        }
-
-        private IEnumerable<Term> ExhaustTokens(Token finalToken) =>
-            this.ExhaustTokens(finalToken switch
-                {
-                    NumericToken _ =>
-                        (Term)new NumericTerm(finalToken.Value),
-                    StringToken _ =>
-                        (Term)new StringTerm(finalToken.Value),
-                    _ =>
-                        (Term)new VariableTerm(finalToken.Value)
-                });
-
-        public IEnumerable<Term> Examine(Token token)
+        public Term? Examine(Token token)
         {
             switch (token)
             {
-                case VariableToken variableToken when bool.TryParse(variableToken.Value, out var boolValue):
-                    return this.ExhaustTokens(new BooleanTerm(boolValue));
-                case IVariableToken variableToken:
-                    applyingTokens.Push(variableToken);
-                    return Enumerable.Empty<Term>();
+                case NumericToken _:
+                    if (this.lastTerm is Term lastTerm1)
+                    {
+                        this.lastTerm = new ApplyTerm(lastTerm1, new NumericTerm(token.Value));
+                        return null;
+                    }
+                    else
+                    {
+                        return new NumericTerm(token.Value);
+                    }
+                case StringToken _:
+                    if (this.lastTerm is Term lastTerm2)
+                    {
+                        this.lastTerm = new ApplyTerm(lastTerm2, new StringTerm(token.Value));
+                        return null;
+                    }
+                    else
+                    {
+                        return new StringTerm(token.Value);
+                    }
+                case IVariableToken variable:
+                    if (variable.Value == "true")
+                    {
+                        return new BooleanTerm(true);
+                    }
+                    else if (variable.Value == "false")
+                    {
+                        return new BooleanTerm(false);
+                    }
+                    if (this.lastTerm is Term lastTerm3)
+                    {
+                        this.lastTerm = new ApplyTerm(lastTerm3, new VariableTerm(variable.Value));
+                    }
+                    else
+                    {
+                        this.lastTerm = new VariableTerm(variable.Value);
+                    }
+                    return null;
                 default:
-                    return this.ExhaustTokens(token);
+                    throw new Exception();
             }
         }
 
-        public IEnumerable<Term> Flush() =>
-            applyingTokens.Count switch
+        public Term? Flush()
+        {
+            if (this.lastTerm is Term lastTerm)
             {
-                0 => Enumerable.Empty<Term>(),
-                _ => this.ExhaustTokens((Token)applyingTokens.Pop())
-            };
+                this.lastTerm = null;
+                return lastTerm;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

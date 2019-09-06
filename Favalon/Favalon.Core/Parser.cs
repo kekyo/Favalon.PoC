@@ -13,7 +13,7 @@ namespace Favalon
         {
             foreach (var token in tokens)
             {
-                foreach (var term in parserCore.Examine(token))
+                if (parserCore.Examine(token) is Term term)
                 {
                     yield return term;
                 }
@@ -21,14 +21,14 @@ namespace Favalon
 
             if (withFlush)
             {
-                foreach (var term in parserCore.Flush())
+                if (parserCore.Flush() is Term term)
                 {
                     yield return term;
                 }
             }
         }
 
-        public IEnumerable<Term> Flush() =>
+        public Term? Flush() =>
             parserCore.Flush();
     }
 }

@@ -133,5 +133,29 @@ namespace Favalon
                     TypeExpression<bool>.Instance),
                 expression);
         }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        [Test]
+        public void InferLambda()
+        {
+            var term = Parse("-> abc def");
+
+            var checker = new Checker();
+            var expression = checker.Infer(term);
+
+            // App(App(-> abc) def)
+            // Lambda(abc def)
+
+            Assert.AreEqual(
+                new LambdaExpression(
+                    new BoundExpression(
+                        "abc",
+                        UnspecifiedExpression.Instance),
+                    new VariableExpression(
+                        "def",
+                        UnspecifiedExpression.Instance)),
+                expression);
+        }
     }
 }

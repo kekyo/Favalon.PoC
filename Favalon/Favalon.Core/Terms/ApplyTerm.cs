@@ -15,9 +15,18 @@ namespace Favalon.Terms
         }
 
         protected override Expression VisitInfer(IInferContext context) =>
-            new ApplyExpression(
-                this.Function.VisitInferCore(context),
-                this.Argument.VisitInferCore(context));
+            this.Function switch
+            {
+                // App(App(Var(->) Var(abc)) def)
+                ApplyTerm(VariableTerm("->"), VariableTerm function) =>
+                    (Expression)new LambdaExpression(
+                        function.VisitInferForBound(context),
+                        this.Argument.VisitInferCore(context)),
+                _ =>
+                    (Expression)new ApplyExpression(
+                        this.Function.VisitInferCore(context),
+                        this.Argument.VisitInferCore(context))
+            };
 
         public override bool Equals(Term? rhs) =>
             rhs is ApplyTerm apply ?
@@ -26,5 +35,11 @@ namespace Favalon.Terms
 
         public override string ToString() =>
             $"{this.GetType().Name}: {this.Function} {this.Argument}";
+
+        public void Deconstruct(out Term function, out Term argument)
+        {
+            function = this.Function;
+            argument = this.Argument;
+        }
     }
 }

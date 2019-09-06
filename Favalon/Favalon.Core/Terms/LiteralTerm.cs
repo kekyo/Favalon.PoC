@@ -22,5 +22,8 @@ namespace Favalon.Terms
 
         public override string ToString() =>
             $"{this.GetType().Name}: {this.Value}";
+
+        public void Deconstruct(out TValue value) =>
+            value = this.Value;
     }
 }

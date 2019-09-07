@@ -157,5 +157,57 @@ namespace Favalon
                         UnspecifiedExpression.Instance)),
                 expression);
         }
+
+        [Test]
+        public void InferLambda2()
+        {
+            var term = Parse("-> abc def ghi");
+
+            var interrer = new Inferrer();
+            var expression = interrer.Infer(term);
+
+            // App(App(App(Var(->) Var(abc)) Var(def)) Var(ghi))
+            // App(Lambda(abc def) ghi)
+
+            Assert.AreEqual(
+                new ApplyExpression(
+                    new LambdaExpression(
+                        new BoundExpression(
+                            "abc",
+                            UnspecifiedExpression.Instance),
+                        new VariableExpression(
+                            "def",
+                            UnspecifiedExpression.Instance)),
+                    new VariableExpression(
+                        "ghi",
+                        UnspecifiedExpression.Instance)),
+                expression);
+        }
+
+        [Test]
+        public void InferLambdaNested()
+        {
+            var term = Parse("-> -> abc def ghi");
+
+            var interrer = new Inferrer();
+            var expression = interrer.Infer(term);
+
+            // App(App(App(App(Var(->) Var(->)) Var(abc)) Var(def)) Var(ghi))
+            // Lambda(abc Lambda(def ghi))
+
+            Assert.AreEqual(
+                new LambdaExpression(
+                    new BoundExpression(
+                        "abc",
+                        UnspecifiedExpression.Instance),
+                    new LambdaExpression(
+                        new BoundExpression(
+                            "def",
+                            UnspecifiedExpression.Instance),
+                        new VariableExpression(
+                            "ghi",
+                            UnspecifiedExpression.Instance))),
+                expression);
+        }
     }
 }

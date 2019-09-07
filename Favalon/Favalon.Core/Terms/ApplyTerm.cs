@@ -1,5 +1,4 @@
 ﻿using Favalon.Expressions;
-using System.Linq;
 
 namespace Favalon.Terms
 {
@@ -15,15 +14,14 @@ namespace Favalon.Terms
         }
 
         protected override Expression VisitInfer(IInferContext context) =>
-            this.Function switch
+            (this.Function, this.Argument) switch
             {
-                // App(App(Var(->) Var(abc)) def)
-                ApplyTerm(VariableTerm("->"), VariableTerm function) =>
+                (ApplyTerm(VariableTerm("->"), VariableTerm function), Term argument) =>
                     (Expression)new LambdaExpression(
                         function.VisitInferForBound(context),
-                        this.Argument.VisitInferCore(context)),
+                        argument.VisitInferCore(context)),
                 _ =>
-                    (Expression)new ApplyExpression(
+                    new ApplyExpression(
                         this.Function.VisitInferCore(context),
                         this.Argument.VisitInferCore(context))
             };

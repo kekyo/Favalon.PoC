@@ -25,7 +25,17 @@ namespace Favalon
 
             var expected = Number(123);
             Assert.AreEqual(expected, actual);
-            Assert.AreEqual(ClrType<int>(), actual.HigherOrder);
+            Assert.AreEqual(Variable("System.Int32"), actual.HigherOrder);
+        }
+
+        [Test]
+        public void ParseArrow()
+        {
+            var actual = Parser.Parse("->");
+
+            var expected = Function(123);
+            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(Variable("System.Int32"), actual.HigherOrder);
         }
 
         [Test]
@@ -33,7 +43,11 @@ namespace Favalon
         {
             var actual = Parser.Parse("abc 123");
 
-            Assert.AreEqual(Apply(Variable("abc"), Number(123)), actual);
+            var actualForApply = (Apply)actual;
+            Assert.AreEqual(Variable("abc"), actualForApply.Function);
+            Assert.AreEqual(Number(123), actualForApply.Argument);
+
+            Assert.AreEqual(Function(Variable("System.Int32"), Variable("'0")), actual.HigherOrder);
         }
     }
 }

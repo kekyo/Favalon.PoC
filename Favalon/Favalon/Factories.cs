@@ -11,7 +11,7 @@
         public static Apply Apply(Term function, Term argument) =>
             new Apply(function, argument);
 
-        public static ClrType ClrType<T>() =>
-            new ClrType(typeof(T));
+        public static Function Function(Term parameter, Term body) =>
+            new Function(parameter, body);
     }
 }

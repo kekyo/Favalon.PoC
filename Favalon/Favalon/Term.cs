@@ -1,15 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Favalon
 {
-    public abstract class Term
+    public abstract class Term : IEquatable<Term?>
     {
         protected Term()
         { }
 
-        public Term? HigherOrder { get; internal set; }
+        public abstract Term HigherOrder { get; }
+
+        public abstract bool Equals(Term? other);
+
+        public override bool Equals(object obj) =>
+            this.Equals(obj as Term);
     }
 }

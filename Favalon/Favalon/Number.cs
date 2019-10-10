@@ -9,19 +9,23 @@ namespace Favalon
     {
         public readonly int Value;
 
-        internal Number(int number)
-        {
+        internal Number(int number) =>
             this.Value = number;
-            this.HigherOrder = Factories.ClrType<int>();
-        }
+
+        public override Term HigherOrder { get; } =
+            Factories.Variable("System.Int32");
 
         public override int GetHashCode() =>
             this.Value.GetHashCode();
 
         public bool Equals(Number? other) =>
-            other?.Value.Equals(this.Value) ?? false;
+            (other?.Value.Equals(this.Value) ?? false) &&
+            (other?.HigherOrder.Equals(this.HigherOrder) ?? false);
 
-        public override bool Equals(object obj) =>
-            this.Equals(obj as Number);
+        public override bool Equals(Term? other) =>
+            this.Equals(other as Number);
+
+        public override string ToString() =>
+            this.Value.ToString();
     }
 }

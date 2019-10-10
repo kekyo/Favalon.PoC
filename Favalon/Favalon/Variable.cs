@@ -12,13 +12,25 @@ namespace Favalon
         internal Variable(string name) =>
             this.Name = name;
 
+        private Term higherOrder =
+            Unspecified.Instance;
+
+        public override Term HigherOrder =>
+            this.higherOrder;
+
         public override int GetHashCode() =>
             this.Name.GetHashCode();
 
         public bool Equals(Variable? other) =>
-            other?.Name.Equals(this.Name) ?? false;
+            (other?.Name.Equals(this.Name) ?? false) &&
+            (other?.HigherOrder.Equals(this.HigherOrder) ?? false);
 
-        public override bool Equals(object obj) =>
-            this.Equals(obj as Variable);
+        public override bool Equals(Term? other) =>
+            this.Equals(other as Variable);
+
+        public override string ToString() =>
+            this.HigherOrder is Unspecified ?
+            this.Name :
+            $"{this.Name}:{this.HigherOrder}";
     }
 }

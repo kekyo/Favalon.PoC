@@ -35,7 +35,7 @@ namespace Favalon
         }
 
         [Test]
-        public void ParseNumber()
+        public void ParseInteger()
         {
             var actual = Parser.Parse("123").ToArray();
 
@@ -44,20 +44,47 @@ namespace Favalon
         }
 
         [Test]
-        public void ParseArrow()
+        public void ParseDouble()
         {
-            var actual = Parser.Parse("->").ToArray();
+            var actual = Parser.Parse("123.456").ToArray();
 
-            var expected = Variable("->");
+            var expected = Number("123.456");
             Assert.AreEqual(expected, actual.Single());
         }
 
         [Test]
-        public void ParseApplyVariableAndNumber()
+        public void ParseString()
         {
-            var actual = Parser.Parse(new StringReader("abc 123"), 5).ToArray();
+            var actual = Parser.Parse("\"abc\"").ToArray();
 
-            Assert.AreEqual(new Term[] { Variable("abc"), Number("123") }, actual);
+            var expected = String("abc");
+            Assert.AreEqual(expected, actual.Single());
+        }
+
+        [Test]
+        public void ParseBeforeWhitespace()
+        {
+            var actual = Parser.Parse(" 123").ToArray();
+
+            var expected = Number("123");
+            Assert.AreEqual(expected, actual.Single());
+        }
+
+        [Test]
+        public void ParseAfterWhitespace()
+        {
+            var actual = Parser.Parse("123 ").ToArray();
+
+            var expected = Number("123");
+            Assert.AreEqual(expected, actual.Single());
+        }
+
+        [Test]
+        public void ParseMultipleWords()
+        {
+            var actual = Parser.Parse("abc 123 def").ToArray();
+
+            Assert.AreEqual(new Term[] { Variable("abc"), Number("123"), Variable("def") }, actual);
         }
     }
 }

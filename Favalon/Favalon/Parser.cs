@@ -9,7 +9,7 @@ namespace Favalon
     public static class Parser
     {
         public static IEnumerable<Term> Parse(string line) =>
-            Parse(new StringReader(line));
+            Parse(new StringReader(line), (line.Length < 4096) ? line.Length : 4096);
 
         private static Term Recognize(string word)
         {
@@ -19,6 +19,7 @@ namespace Favalon
             }
             else if (word.StartsWith("\"") && word.EndsWith("\""))
             {
+                // TODO: unescape
                 return new String(word.Substring(1, word.Length - 2));
             }
             else

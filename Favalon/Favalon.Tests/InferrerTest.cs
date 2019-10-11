@@ -11,6 +11,16 @@ namespace Favalon
     public sealed class InferrerTest
     {
         [Test]
+        public void InferNotBoundVariable()
+        {
+            var environment = Environment.Create();
+
+            var actual = environment.Infer(Variable("abc"));
+
+            Assert.AreEqual(Variable("abc"), actual);
+        }
+
+        [Test]
         public void InferBoundVariable()
         {
             var environment = Environment.Create();
@@ -44,11 +54,8 @@ namespace Favalon
         }
 
         [Test]
-        public void InferArrow()
+        public void InferDefaultBoundArrow()
         {
-            // -> :: '0 -> '1 -> ('0 -> '1)
-            // -> a b : a -> b
-
             var environment = Environment.Create();
 
             var actual = environment.Infer(Variable("->"));

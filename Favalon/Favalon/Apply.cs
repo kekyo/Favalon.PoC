@@ -16,8 +16,10 @@ namespace Favalon
             this.Argument = argument;
         }
 
-        public override Term HigherOrder { get; } =
-            Unspecified.Instance;
+        public override Term HigherOrder =>
+            this.Function.HigherOrder is Function fho ?
+                fho.Body :
+                Unspecified.Instance;
 
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
@@ -32,5 +34,17 @@ namespace Favalon
 
         public override string ToString() =>
             $"{this.Function} {this.Argument}";
+
+        public override Term VisitInfer(Environment environment)
+        {
+            var function = this.Function.VisitInfer(environment);
+            var argument = this.Argument.VisitInfer(environment);
+
+            return
+                (object.ReferenceEquals(function, this.Function) &&
+                 object.ReferenceEquals(argument, this.Argument)) ?
+                    this :
+                    new Apply(function, argument);
+        }
     }
 }

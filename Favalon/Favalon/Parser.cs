@@ -15,7 +15,7 @@ namespace Favalon
             {
                 if (int.TryParse(expr, out var number))
                 {
-                    return Factories.Number(number);
+                    return Factories.Number(expr);
                 }
                 else
                 {

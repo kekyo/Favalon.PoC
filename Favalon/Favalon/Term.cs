@@ -4,7 +4,7 @@ namespace Favalon
 {
     public abstract class Term : IEquatable<Term?>
     {
-        protected Term()
+        private protected Term()
         { }
 
         public abstract Term HigherOrder { get; }
@@ -13,5 +13,7 @@ namespace Favalon
 
         public override bool Equals(object obj) =>
             this.Equals(obj as Term);
+
+        public abstract Term VisitInfer(Environment environment);
     }
 }

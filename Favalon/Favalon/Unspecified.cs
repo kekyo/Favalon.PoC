@@ -25,6 +25,9 @@ namespace Favalon
         public override string ToString() =>
             string.Empty;
 
+        public override Term VisitInfer(Environment environment) =>
+            this;
+
         internal static readonly Unspecified Instance =
             new Unspecified();
     }

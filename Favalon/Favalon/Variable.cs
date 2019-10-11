@@ -9,14 +9,17 @@ namespace Favalon
     {
         public readonly string Name;
 
-        internal Variable(string name) =>
+        internal Variable(string name) :
+            this(name, Unspecified.Instance)
+        { }
+
+        internal Variable(string name, Term higherOrder)
+        {
             this.Name = name;
+            this.HigherOrder = higherOrder;
+        }
 
-        private Term higherOrder =
-            Unspecified.Instance;
-
-        public override Term HigherOrder =>
-            this.higherOrder;
+        public override Term HigherOrder { get; }
 
         public override int GetHashCode() =>
             this.Name.GetHashCode();
@@ -32,5 +35,8 @@ namespace Favalon
             this.HigherOrder is Unspecified ?
             this.Name :
             $"{this.Name}:{this.HigherOrder}";
+
+        public override Term VisitInfer(Environment environment) =>
+            this;
     }
 }

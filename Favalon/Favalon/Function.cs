@@ -32,5 +32,17 @@ namespace Favalon
 
         public override string ToString() =>
             $"{this.Parameter} -> {this.Body}";
+
+        public override Term VisitInfer(Environment environment)
+        {
+            var parameter = this.Parameter.VisitInfer(environment);
+            var body = this.Body.VisitInfer(environment);
+
+            return
+                (object.ReferenceEquals(parameter, this.Parameter) &&
+                 object.ReferenceEquals(body, this.Body)) ?
+                    this :
+                    new Function(parameter, body);
+        }
     }
 }

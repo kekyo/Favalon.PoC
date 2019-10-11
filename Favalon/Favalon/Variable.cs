@@ -37,6 +37,6 @@ namespace Favalon
             $"{this.Name}:{this.HigherOrder}";
 
         public override Term VisitInfer(Environment environment) =>
-            this;
+            environment.Lookup(this.Name) is Term body ? body : this;  // error?
     }
 }

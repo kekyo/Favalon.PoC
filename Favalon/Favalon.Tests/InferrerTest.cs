@@ -11,13 +11,14 @@ namespace Favalon
     public sealed class InferrerTest
     {
         [Test]
-        public void InferUnspecifiedVariable()
+        public void InferBoundVariable()
         {
             var environment = Environment.Create();
+            var environment2 = environment.Bind("abc", Number(123));
 
-            var actual = environment.Infer(Variable("abc"));
+            var actual = environment2.Infer(Variable("abc"));
 
-            Assert.AreEqual(Variable("abc"), actual);
+            Assert.AreEqual(Number(123), actual);
         }
 
         [Test]

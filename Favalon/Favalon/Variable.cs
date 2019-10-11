@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Favalon
 {
-    public sealed class Variable : Term, IEquatable<Variable?>
+    public sealed class Variable : Symbol
     {
         public readonly string Name;
 
@@ -13,13 +13,12 @@ namespace Favalon
             this(name, Unspecified.Instance)
         { }
 
-        internal Variable(string name, Term higherOrder)
-        {
+        internal Variable(string name, Term higherOrder) :
+            base(higherOrder) =>
             this.Name = name;
-            this.HigherOrder = higherOrder;
-        }
 
-        public override Term HigherOrder { get; }
+        public override string PrintableName =>
+            this.Name;
 
         public override int GetHashCode() =>
             this.Name.GetHashCode();
@@ -28,13 +27,8 @@ namespace Favalon
             (other?.Name.Equals(this.Name) ?? false) &&
             (other?.HigherOrder.Equals(this.HigherOrder) ?? false);
 
-        public override bool Equals(Term? other) =>
+        public override bool Equals(Symbol? other) =>
             this.Equals(other as Variable);
-
-        public override string ToString() =>
-            this.HigherOrder is Unspecified ?
-            this.Name :
-            $"{this.Name}:{this.HigherOrder}";
 
         public override Term VisitInfer(Environment environment) =>
             environment.Lookup(this.Name) is Term body ? body : this;  // error?

@@ -53,15 +53,7 @@ namespace Favalon
 
             var actual = environment.Infer(Variable("->"));
 
-            var expectedHigherOrder =
-                Function(
-                    Variable("'0"),
-                    Function(
-                        Variable("'1"),
-                        Function(
-                            Variable("'0"),
-                            Variable("'1"))));
-            var expected = Variable("->", expectedHigherOrder);
+            var expected = environment.BoundTerms["->"];
             Assert.AreEqual(expected, actual);
         }
     }

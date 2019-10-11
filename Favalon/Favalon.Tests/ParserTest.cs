@@ -13,78 +13,33 @@ namespace Favalon
     public sealed class ParserTest
     {
         [Test]
-        public void BufferingIterator()
+        public void SingleVariable()
         {
-            var line = "abc 123 \"aaa\" 456.789 def";
-            var expected = new Term[] { Variable("abc"), Number("123"), String("aaa"), Number("456.789"), Variable("def") };
+            var environment = Environment.Create();
 
-            for (var bufferSize = 1; bufferSize <= (line.Length + 1); bufferSize++)
-            {
-                var actual = Parser.Parse(new StringReader(line), bufferSize).ToArray();
+            var actual = environment.Parse(new Term[] { Variable("abc") });
 
-                Assert.AreEqual(expected, actual);
-            }
+            Assert.AreEqual(Variable("abc"), actual);
         }
 
         [Test]
-        public void ParseVariable()
+        public void Apply1()
         {
-            var actual = Parser.Parse("abc").ToArray();
+            var environment = Environment.Create();
 
-            Assert.AreEqual(Variable("abc"), actual.Single());
+            var actual = environment.Parse(new Term[] { Variable("abc"), Number(123) });
+
+            Assert.AreEqual(Apply(Variable("abc"), Number(123)), actual);
         }
 
         [Test]
-        public void ParseInteger()
+        public void Apply2()
         {
-            var actual = Parser.Parse("123").ToArray();
+            var environment = Environment.Create();
 
-            var expected = Number("123");
-            Assert.AreEqual(expected, actual.Single());
-        }
+            var actual = environment.Parse(new Term[] { Variable("abc"), Number(123), String("aaa") });
 
-        [Test]
-        public void ParseDouble()
-        {
-            var actual = Parser.Parse("123.456").ToArray();
-
-            var expected = Number("123.456");
-            Assert.AreEqual(expected, actual.Single());
-        }
-
-        [Test]
-        public void ParseString()
-        {
-            var actual = Parser.Parse("\"abc\"").ToArray();
-
-            var expected = String("abc");
-            Assert.AreEqual(expected, actual.Single());
-        }
-
-        [Test]
-        public void ParseBeforeWhitespace()
-        {
-            var actual = Parser.Parse(" 123").ToArray();
-
-            var expected = Number("123");
-            Assert.AreEqual(expected, actual.Single());
-        }
-
-        [Test]
-        public void ParseAfterWhitespace()
-        {
-            var actual = Parser.Parse("123 ").ToArray();
-
-            var expected = Number("123");
-            Assert.AreEqual(expected, actual.Single());
-        }
-
-        [Test]
-        public void ParseMultipleWords()
-        {
-            var actual = Parser.Parse("abc 123 def").ToArray();
-
-            Assert.AreEqual(new Term[] { Variable("abc"), Number("123"), Variable("def") }, actual);
+            Assert.AreEqual(Apply(Apply(Variable("abc"), Number(123)), String("aaa")), actual);
         }
     }
 }

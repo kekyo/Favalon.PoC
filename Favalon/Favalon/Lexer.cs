@@ -6,10 +6,10 @@ using System.Text;
 
 namespace Favalon
 {
-    public static class Parser
+    public static class Lexer
     {
-        public static IEnumerable<Term> Parse(string line) =>
-            Parse(new StringReader(line), (line.Length < 4096) ? line.Length : 4096);
+        public static IEnumerable<Term> Lex(string line) =>
+            Lex(new StringReader(line), (line.Length < 4096) ? line.Length : 4096);
 
         private static Term Recognize(string word)
         {
@@ -28,7 +28,7 @@ namespace Favalon
             }
         }
 
-        public static IEnumerable<Term> Parse(TextReader tr, int bufferSize = 4096)
+        public static IEnumerable<Term> Lex(TextReader tr, int bufferSize = 4096)
         {
             var buffer = new char[bufferSize];
             var inWord = false;

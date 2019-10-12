@@ -41,35 +41,6 @@ namespace Favalon
         internal Placeholder CreatePlaceholder(Term higherOrder) =>
             new Placeholder(overallScope.AssignIndex(), higherOrder);
 
-        public Term? Parse(IEnumerable<Term> terms)
-        {
-            var enumerator = terms.GetEnumerator();
-            try
-            {
-                if (enumerator.MoveNext())
-                {
-                    var term = enumerator.Current;
-                    while (enumerator.MoveNext())
-                    {
-                        term = new Apply(term, enumerator.Current);
-                    }
-
-                    return term;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            finally
-            {
-                if (enumerator is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
-            }
-        }
-
         public Term Infer(Term term)
         {
             var inferred = term.VisitInfer(this);
@@ -86,8 +57,7 @@ namespace Favalon
             var t1 = environment.CreatePlaceholder(Unspecified.Instance);
             boundTerms.Add(
                 "->",
-                new Variable("->",
-                    new Function(t0, new Function(t1, new Function(t0, t1)))));
+                Factories.Function(t0, t1));
 
             return environment;
         }

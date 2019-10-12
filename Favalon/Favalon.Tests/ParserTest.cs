@@ -13,11 +13,9 @@ namespace Favalon
     public sealed class ParserTest
     {
         [Test]
-        public void SingleVariable()
+        public void Single()
         {
-            var environment = Environment.Create();
-
-            var actual = environment.Parse(new Term[] { Variable("abc") });
+            var actual = Parser.Parse(new Term[] { Variable("abc") });
 
             Assert.AreEqual(Variable("abc"), actual);
         }
@@ -25,9 +23,7 @@ namespace Favalon
         [Test]
         public void Apply1()
         {
-            var environment = Environment.Create();
-
-            var actual = environment.Parse(new Term[] { Variable("abc"), Number(123) });
+            var actual = Parser.Parse(new Term[] { Variable("abc"), Number(123) });
 
             Assert.AreEqual(Apply(Variable("abc"), Number(123)), actual);
         }
@@ -35,11 +31,17 @@ namespace Favalon
         [Test]
         public void Apply2()
         {
-            var environment = Environment.Create();
-
-            var actual = environment.Parse(new Term[] { Variable("abc"), Number(123), String("aaa") });
+            var actual = Parser.Parse(new Term[] { Variable("abc"), Number(123), String("aaa") });
 
             Assert.AreEqual(Apply(Apply(Variable("abc"), Number(123)), String("aaa")), actual);
+        }
+
+        [Test]
+        public void Apply2Arrow()
+        {
+            var actual = Parser.Parse(new Term[] { Variable("abc"), Variable("->"), Number(123) });
+
+            Assert.AreEqual(Apply(Apply(Variable("abc"), Variable("->")), Number(123)), actual);
         }
     }
 }

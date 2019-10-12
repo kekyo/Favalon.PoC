@@ -21,7 +21,13 @@
         public static Apply Apply(Term function, Term argument) =>
             new Apply(function, argument);
 
-        public static Function Function(Term parameter, Term body) =>
-            new Function(parameter, body);
+        public static Term Function(Term parameter, Term body) =>
+            (!parameter.Equals(Unspecified.Instance) && !body.Equals(Unspecified.Instance)) ?
+                (Term)Apply(Apply(parameter, Arrow.Instance), body) :
+                Unspecified.Instance;
+
+        public static bool IsFunction(this Apply apply) =>
+            apply.Function is Apply applyInner &&
+            applyInner.Argument is Arrow;
     }
 }

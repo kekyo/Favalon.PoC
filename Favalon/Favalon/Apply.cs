@@ -14,12 +14,11 @@ namespace Favalon
         {
             this.Function = function;
             this.Argument = argument;
+            this.HigherOrder = Factories.Function(
+                this.Function.HigherOrder, this.Argument.HigherOrder);
         }
 
-        public override Term HigherOrder =>
-            this.Function.HigherOrder is Function fho ?
-                fho.Body :
-                Unspecified.Instance;
+        public override Term HigherOrder { get; }
 
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
@@ -33,7 +32,9 @@ namespace Favalon
             this.Equals(other as Apply);
 
         public override string ToString() =>
-            $"{this.Function} {this.Argument}";
+            this.Argument is Apply apply ?
+                $"{this.Function} ({apply})" :
+                $"{this.Function} {this.Argument}";
 
         public override Term VisitInfer(Environment environment)
         {

@@ -28,5 +28,10 @@ namespace Favalon
 
         public override Term VisitInfer(Environment environment) =>
             this;
+
+        public override object Reduce() =>
+            this.Type.IsGenericType ?
+                (object)new Func<Term, object>(arg => this.Type.MakeGenericType(((TypeInfo)arg.Reduce()).AsType())) :
+                this.Type;
     }
 }

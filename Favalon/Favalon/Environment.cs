@@ -70,6 +70,14 @@ namespace Favalon
                     !type.IsGenericType).
                 ToArray();
 
+            foreach (var type in types.
+                Where(type => type.GetConstructor(Type.EmptyTypes) != null))
+            {
+                var typeSymbol = new TypeSymbol(type);
+
+                boundTerms = boundTerms.Add(typeSymbol.PrintableName, ImmutableList<Term>.Empty.Add(typeSymbol));
+            }
+
             foreach (var (method, _) in types.
                 SelectMany(type => type.DeclaredMethods.
                     Where(method => method.IsPublic && method.IsStatic && !method.IsGenericMethod).

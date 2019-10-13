@@ -30,5 +30,8 @@ namespace Favalon
 
         internal static readonly Unspecified Instance =
             new Unspecified();
+
+        public override object Reduce() =>
+            throw new InvalidOperationException();
     }
 }

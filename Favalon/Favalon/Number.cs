@@ -42,6 +42,9 @@ namespace Favalon
                 throw new FormatException();
             }
         }
+
+        public override object Reduce() =>
+            throw new InvalidOperationException();
     }
 
     public sealed class Number<T> : Value
@@ -71,5 +74,8 @@ namespace Favalon
 
         public override Term VisitInfer(Environment environment) =>
             this;
+
+        public override object Reduce() =>
+            this.Value;
     }
 }

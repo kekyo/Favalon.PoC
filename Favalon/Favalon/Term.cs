@@ -15,5 +15,7 @@ namespace Favalon
             this.Equals(obj as Term);
 
         public abstract Term VisitInfer(Environment environment);
+
+        public abstract object Reduce();
     }
 }

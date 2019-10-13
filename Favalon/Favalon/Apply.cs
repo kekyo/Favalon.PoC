@@ -47,5 +47,8 @@ namespace Favalon
                     this :
                     new Apply(function, argument);
         }
+
+        public override object Reduce() =>
+            ((Func<object, object>)this.Function.Reduce())(this.Argument.Reduce());
     }
 }

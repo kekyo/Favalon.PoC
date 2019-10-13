@@ -32,5 +32,8 @@ namespace Favalon
 
         public override Term VisitInfer(Environment environment) =>
             environment.Lookup(this.Name).FirstOrDefault() ?? this;  // choose overloads
+
+        public override object Reduce() =>
+            throw new InvalidOperationException();
     }
 }

@@ -32,5 +32,8 @@ namespace Favalon
 
         public override Term VisitInfer(Environment environment) =>
             this;
+
+        public override object Reduce() =>
+            this.Value;
     }
 }

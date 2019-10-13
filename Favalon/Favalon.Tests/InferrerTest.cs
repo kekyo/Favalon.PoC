@@ -53,16 +53,16 @@ namespace Favalon
             Assert.AreEqual(expected, actual);
         }
 
-        [Test]
-        public void InferDefaultBoundArrow()
-        {
-            var environment = Environment.Create();
+        //[Test]
+        //public void InferDefaultBoundArrow()
+        //{
+        //    var environment = Environment.Create();
 
-            var actual = environment.Infer(Variable("->"));
+        //    var actual = environment.Infer(Variable("->"));
 
-            var expected = environment.BoundTerms["->"];
-            Assert.AreEqual(expected, actual);
-        }
+        //    var expected = environment.BoundTerms["->"];
+        //    Assert.AreEqual(expected, actual);
+        //}
 
         [Test]
         public void InferDotNetFunction()
@@ -84,9 +84,9 @@ namespace Favalon
             var environment = Environment.Create();
 
             var actual = environment.Infer(
-                Apply(Variable("wc"), String("sample.txt")));
+                Apply(Variable("wc"), String("abcde fghij")));
 
-            var expected = Apply(ExecutableSymbol(@"C:\Program Files\Git\usr\bin\wc.exe"), String("sample.txt"));
+            var expected = Apply(ExecutableSymbol(@"C:\Program Files\Git\usr\bin\wc.exe"), String("abcde fghij"));
             Assert.AreEqual(expected, actual);
         }
     }

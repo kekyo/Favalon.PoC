@@ -26,6 +26,9 @@ namespace Favalon
         public override Term VisitInfer(Environment environment) =>
             this;
 
+        public override object Reduce() =>
+            new Func<object, object>(arg => ((Func<object, object>)arg)(arg)); // TODO: '0 -> '1 -> '0 -> '1
+
         internal static readonly Arrow Instance =
             new Arrow();
     }

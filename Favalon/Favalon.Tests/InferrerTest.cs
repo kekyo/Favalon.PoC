@@ -16,7 +16,7 @@ namespace Favalon
             var environment = Environment.Create();
 
             var actual = environment.Infer(Variable("abc"));
-
+            
             Assert.AreEqual(Variable("abc"), actual);
         }
 
@@ -61,6 +61,32 @@ namespace Favalon
             var actual = environment.Infer(Variable("->"));
 
             var expected = environment.BoundTerms["->"];
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void InferDotNetFunction()
+        {
+            var environment = Environment.Create();
+
+            var actual = environment.Infer(
+                Apply(Variable("System.Int32.Parse"), String("123")));
+
+            var parse = typeof(int).GetMethod("Parse", new[] { typeof(string) })!;
+
+            var expected = Apply(MethodSymbol(parse), String("123"));
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void InferExecutableFunction()
+        {
+            var environment = Environment.Create();
+
+            var actual = environment.Infer(
+                Apply(Variable("wc"), String("sample.txt")));
+
+            var expected = Apply(ExecutableSymbol(@"C:\Program Files\Git\usr\bin\wc.exe"), String("sample.txt"));
             Assert.AreEqual(expected, actual);
         }
     }

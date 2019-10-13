@@ -1,4 +1,6 @@
-﻿namespace Favalon
+﻿using System.Reflection;
+
+namespace Favalon
 {
     public static class Factories
     {
@@ -20,6 +22,15 @@
 
         public static Apply Apply(Term function, Term argument) =>
             new Apply(function, argument);
+
+        public static TypeSymbol TypeSymbol(TypeInfo type) =>
+            new TypeSymbol(type);
+
+        public static MethodSymbol MethodSymbol(MethodInfo method) =>
+            new MethodSymbol(method);
+
+        public static ExecutableSymbol ExecutableSymbol(string path) =>
+            new ExecutableSymbol(path);
 
         public static Term Function(Term parameter, Term body) =>
             (!parameter.Equals(Unspecified.Instance) && !body.Equals(Unspecified.Instance)) ?

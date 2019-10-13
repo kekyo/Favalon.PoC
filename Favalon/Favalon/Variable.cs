@@ -31,6 +31,6 @@ namespace Favalon
             this.Equals(other as Variable);
 
         public override Term VisitInfer(Environment environment) =>
-            environment.Lookup(this.Name) is Term body ? body : this;  // error?
+            environment.Lookup(this.Name).FirstOrDefault() ?? this;  // choose overloads
     }
 }

@@ -35,13 +35,5 @@ namespace Favalon
 
             Assert.AreEqual(Apply(Apply(Variable("abc"), Number(123)), String("aaa")), actual);
         }
-
-        [Test]
-        public void Apply2Arrow()
-        {
-            var actual = Parser.Parse(new Term[] { Variable("abc"), Variable("->"), Number(123) });
-
-            Assert.AreEqual(Apply(Apply(Variable("abc"), Variable("->")), Number(123)), actual);
-        }
     }
 }

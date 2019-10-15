@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Favalon.Expression
+namespace Favalon.Terms
 {
     public abstract class Term : IEquatable<Term?>
     {

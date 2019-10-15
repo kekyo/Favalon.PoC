@@ -1,4 +1,4 @@
-﻿using Favalon.Expression;
+﻿using Favalon.Terms;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Favalon
 {
-    using static Favalon.Expression.Factories;
+    using static Favalon.Terms.Factories;
 
     [TestFixture]
     public sealed class ParserTest

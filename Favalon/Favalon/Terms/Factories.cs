@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Favalon.Expression
+namespace Favalon.Terms
 {
     public static class Factories
     {

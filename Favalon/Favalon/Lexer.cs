@@ -1,4 +1,4 @@
-﻿using Favalon.Expression;
+﻿using Favalon.Terms;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +21,7 @@ namespace Favalon
             else if (word.StartsWith("\"") && word.EndsWith("\""))
             {
                 // TODO: unescape
-                return new Favalon.Expression.String(word.Substring(1, word.Length - 2));
+                return new Favalon.Terms.String(word.Substring(1, word.Length - 2));
             }
             else
             {

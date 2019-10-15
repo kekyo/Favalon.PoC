@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Favalon
 {
-    using static Favalon.Expression.Factories;
+    using static Favalon.Terms.Factories;
 
     [TestFixture]
     public sealed class ReduceTest

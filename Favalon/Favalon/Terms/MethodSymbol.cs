@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Favalon.Expression
+namespace Favalon.Terms
 {
     public sealed class MethodSymbol : Symbol
     {

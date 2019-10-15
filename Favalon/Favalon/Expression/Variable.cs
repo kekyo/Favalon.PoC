@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Favalon
+namespace Favalon.Expression
 {
     public sealed class Variable : Symbol
     {

@@ -5,10 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using static Favalon.Factories;
-
 namespace Favalon
 {
+    using static Favalon.Expression.Factories;
+
     [TestFixture]
     public sealed class ReduceTest
     {

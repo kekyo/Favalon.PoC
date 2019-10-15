@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using static Favalon.Factories;
-
 namespace Favalon
 {
+    using static Favalon.Expression.Factories;
+
     [TestFixture]
     public sealed class InferrerTest
     {

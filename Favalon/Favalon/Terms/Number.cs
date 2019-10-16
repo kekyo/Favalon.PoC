@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,24 +28,21 @@ namespace Favalon.Terms
         public override string ToString() =>
             this.Value.ToString();
 
-        public override Term VisitInfer(Environment environment)
+        public override Expression VisitInfer(Environment environment)
         {
             if (int.TryParse(this.Value, out var intValue))
             {
-                return Factories.Number(intValue);
+                return Expressions.Factories.Value(intValue);
             }
             else if (double.TryParse(this.Value, out var doubleValue))
             {
-                return Factories.Number(doubleValue);
+                return Expressions.Factories.Value(doubleValue);
             }
             else
             {
                 throw new FormatException();
             }
         }
-
-        public override object Reduce() =>
-            throw new InvalidOperationException();
     }
 
     public sealed class Number<T> : Value
@@ -72,10 +70,7 @@ namespace Favalon.Terms
         public override string ToString() =>
             this.Value.ToString();
 
-        public override Term VisitInfer(Environment environment) =>
-            this;
-
-        public override object Reduce() =>
-            this.Value;
+        public override Expression VisitInfer(Environment environment) =>
+            Expressions.Factories.Value(this.Value);
     }
 }

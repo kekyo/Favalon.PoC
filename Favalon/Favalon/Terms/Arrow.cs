@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,11 +24,8 @@ namespace Favalon.Terms
         public override bool Equals(Symbol? other) =>
             this.Equals(other as Arrow);
 
-        public override Term VisitInfer(Environment environment) =>
-            this;
-
-        public override object Reduce() =>
-            new Func<object, object>(arg => ((Func<object, object>)arg)(arg)); // TODO: '0 -> '1 -> '0 -> '1
+        public override Expression VisitInfer(Environment environment) =>
+            throw new InvalidOperationException();
 
         internal static readonly Arrow Instance =
             new Arrow();

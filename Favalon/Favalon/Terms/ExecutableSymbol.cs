@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -28,45 +29,7 @@ namespace Favalon.Terms
         public override bool Equals(Symbol? other) =>
             this.Equals(other as ExecutableSymbol);
 
-        public override Term VisitInfer(Environment environment) =>
-            this;
-
-        private object Reducer(object arg)
-        {
-            var buffer = new StringBuilder();
-
-            using (var process = new Process())
-            {
-                process.StartInfo = new ProcessStartInfo(this.Path)
-                {
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                };
-
-                process.OutputDataReceived += (s, e) =>
-                    buffer.AppendLine(e.Data);
-
-                process.Start();
-
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                using (var tw = process.StandardInput)
-                {
-                    tw.Write(arg);
-                    tw.Flush();
-                }
-
-                process.WaitForExit();
-            }
-
-            return buffer.ToString();
-        }
-
-        public override object Reduce() =>
-            new Func<object, object>(Reducer);
+        public override Expression VisitInfer(Environment environment) =>
+            throw new InvalidOperationException();
     }
 }

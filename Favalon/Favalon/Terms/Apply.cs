@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Favalon.Terms
         public readonly Term Function;
         public readonly Term Argument;
 
-        public Apply(Term function, Term argument)
+        internal Apply(Term function, Term argument)
         {
             Function = function;
             Argument = argument;
@@ -36,19 +37,22 @@ namespace Favalon.Terms
                 $"{Function} ({apply})" :
                 $"{Function} {Argument}";
 
-        public override Term VisitInfer(Environment environment)
+        public override Expression VisitInfer(Environment environment)
         {
-            var function = Function.VisitInfer(environment);
-            var argument = Argument.VisitInfer(environment);
+            var argumentExpression = this.Argument.VisitInfer(environment);
 
-            return
-                ReferenceEquals(function, Function) &&
-                 ReferenceEquals(argument, Argument) ?
-                    this :
-                    new Apply(function, argument);
+            var function = this.Function switch
+            {
+                Variable variable when environment.Lookup(variable.Name) is Term term => term,
+                Term term => term
+            };
+
+            return function switch
+            {
+                MethodSymbol methodSymbol => new CallMethod(methodSymbol.Method, argumentExpression),
+                ExecutableSymbol executableSymbol => new RunExecutable(executableSymbol.Path, argumentExpression),
+                _ => throw new ArgumentException()
+            };
         }
-
-        public override object Reduce() =>
-            ((Func<object, object>)Function.Reduce())(Argument.Reduce());
     }
 }

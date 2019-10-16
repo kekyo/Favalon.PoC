@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions;
+using System;
 
 namespace Favalon.Terms
 {
@@ -14,8 +15,6 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as Term);
 
-        public abstract Term VisitInfer(Environment environment);
-
-        public abstract object Reduce();
+        public abstract Expression VisitInfer(Environment environment);
     }
 }

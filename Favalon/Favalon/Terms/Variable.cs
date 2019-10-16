@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,10 +31,7 @@ namespace Favalon.Terms
         public override bool Equals(Symbol? other) =>
             this.Equals(other as Variable);
 
-        public override Term VisitInfer(Environment environment) =>
-            environment.Lookup(this.Name).FirstOrDefault() ?? this;  // choose overloads
-
-        public override object Reduce() =>
+        public override Expression VisitInfer(Environment environment) =>
             throw new InvalidOperationException();
     }
 }

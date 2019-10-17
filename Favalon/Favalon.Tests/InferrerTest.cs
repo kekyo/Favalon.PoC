@@ -17,7 +17,7 @@ namespace Favalon
 
             var actual = environment.Infer(Variable("abc"));
             
-            Assert.AreEqual(Variable("abc"), actual);
+            Assert.AreEqual(Expressions.Factories.Unknown(Variable("abc")), actual);
         }
 
         [Test]
@@ -28,7 +28,7 @@ namespace Favalon
 
             var actual = environment2.Infer(Variable("abc"));
 
-            Assert.AreEqual(Number(123), actual);
+            Assert.AreEqual(Expressions.Factories.Value(123), actual);
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace Favalon
 
             var actual = environment.Infer(Number("123"));
 
-            var expected = Number(123);
+            var expected = Expressions.Factories.Value(123);
             Assert.AreEqual(expected, actual);
         }
 
@@ -49,7 +49,7 @@ namespace Favalon
 
             var actual = environment.Infer(Number("123.456"));
 
-            var expected = Number(123.456);
+            var expected = Expressions.Factories.Value(123.456);
             Assert.AreEqual(expected, actual);
         }
 
@@ -74,7 +74,9 @@ namespace Favalon
 
             var parse = typeof(int).GetMethod("Parse", new[] { typeof(string) })!;
 
-            var expected = Apply(MethodSymbol(parse), String("123"));
+            var expected = Expressions.Factories.CallMethod(
+                parse,
+                Expressions.Factories.Value("123"));
             Assert.AreEqual(expected, actual);
         }
 
@@ -86,7 +88,9 @@ namespace Favalon
             var actual = environment.Infer(
                 Apply(Variable("wc"), String("abcde fghij")));
 
-            var expected = Apply(ExecutableSymbol(@"C:\Program Files\Git\usr\bin\wc.exe"), String("abcde fghij"));
+            var expected = Expressions.Factories.RunExecutable(
+                @"C:\Program Files\Git\usr\bin\wc.exe",
+                Expressions.Factories.Value("abcde fghij"));
             Assert.AreEqual(expected, actual);
         }
     }

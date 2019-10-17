@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -26,12 +27,7 @@ namespace Favalon.Terms
         public override bool Equals(Symbol? other) =>
             this.Equals(other as TypeSymbol);
 
-        public override Term VisitInfer(Environment environment) =>
-            this;
-
-        public override object Reduce() =>
-            this.Type.IsGenericType ?
-                (object)new Func<Term, object>(arg => this.Type.MakeGenericType(((TypeInfo)arg.Reduce()).AsType())) :
-                this.Type;
+        public override Expression VisitInfer(Environment environment) =>
+            throw new InvalidOperationException();
     }
 }

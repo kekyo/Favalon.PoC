@@ -14,6 +14,9 @@ namespace Favalon.Expressions
         public override Expression HigherOrder =>
             null!;
 
+        public override object? RawValue =>
+            null;
+
         public override bool Equals(Value? other) =>
             other is Null;
 

@@ -1,21 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+﻿using System.Reflection;
 
 namespace Favalon.Expressions
 {
     public sealed class CallMethod : Expression
     {
-        public readonly MethodInfo Method;
+        public readonly MethodBase Method;
         public readonly Expression Argument;
 
-        internal CallMethod(MethodInfo method, Expression argument)
+        internal CallMethod(MethodBase method, Expression argument)
         {
             this.Method = method;
             this.Argument = argument;
-            this.HigherOrder = Factories.FromType((this.Method.ReturnType.GetTypeInfo()));
+
+            var returnType = method is ConstructorInfo ci ?
+                ci.DeclaringType :
+                ((MethodInfo)method).ReturnType;
+            this.HigherOrder = Factories.FromType(returnType);
         }
 
         public override Expression HigherOrder { get; }
@@ -31,9 +31,11 @@ namespace Favalon.Expressions
             this.Equals(other as CallMethod);
 
         public override string ToString() =>
-            $"{this.Method.DeclaringType.FullName}.{this.Method.Name} {this.Argument}";
+            this.Method is ConstructorInfo ?
+                $"{this.Method.DeclaringType.FullName} {this.Argument}" :
+                $"{this.Method.DeclaringType.FullName}.{this.Method.Name} {this.Argument}";
 
         public override Expression Run() =>
-            Factories.Value(this.Method.Invoke(null, new[] { ((Instance)this.Argument.Run()).Value }));
+            Factories.Value(this.Method.Invoke(null, new[] { ((Value)this.Argument.Run()).RawValue }));
     }
 }

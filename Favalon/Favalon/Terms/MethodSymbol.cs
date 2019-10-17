@@ -1,22 +1,21 @@
 ﻿using Favalon.Expressions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Favalon.Terms
 {
     public sealed class MethodSymbol : Symbol
     {
-        public readonly MethodInfo Method;
+        public readonly MethodBase Method;
 
-        internal MethodSymbol(MethodInfo method) :
+        internal MethodSymbol(MethodBase method) :
             base(Unspecified.Instance) => // TODO: Kind
             this.Method = method;
 
         public override string PrintableName =>
-            $"{this.Method.DeclaringType.FullName}.{this.Method.Name}";
+            this.Method is ConstructorInfo ?
+                $"{this.Method.DeclaringType.FullName}" :
+                $"{this.Method.DeclaringType.FullName}.{this.Method.Name}";
 
         public override int GetHashCode() =>
             this.Method.GetHashCode();

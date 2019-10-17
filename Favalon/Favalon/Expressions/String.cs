@@ -19,6 +19,9 @@ namespace Favalon.Expressions
         public override Expression HigherOrder =>
             higherOrder;
 
+        public override object? RawValue =>
+            this.Value;
+
         public override int GetHashCode() =>
             this.Value.GetHashCode();
 

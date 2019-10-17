@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Favalon
 {
-    using static Favalon.Terms.Factories;
+    using static Favalon.Expressions.Factories;
 
     [TestFixture]
     public sealed class ReduceTest
@@ -16,26 +16,26 @@ namespace Favalon
         public void DotNetMethod()
         {
             var parse = typeof(int).GetMethod("Parse", new[] { typeof(string) })!;
-            var term = Apply(MethodSymbol(parse), String("123"));
+            var expression = CallMethod(parse, Value("123"));
 
-            var actual = term.Reduce();
+            var actual = expression.Run();
 
-            Assert.AreEqual(123, actual);
+            Assert.AreEqual(Value(123), actual);
         }
 
-        [Test]
-        public void ExecutableMethod()
-        {
-            var term = Apply(ExecutableSymbol(@"C:\Program Files\Git\usr\bin\wc.exe"), String("abcde fghij"));
+        //[Test]
+        //public void ExecutableMethod()
+        //{
+        //    var term = Apply(ExecutableSymbol(@"C:\Program Files\Git\usr\bin\wc.exe"), String("abcde fghij"));
 
-            object actual = term.Reduce();
+        //    object actual = term.Reduce();
 
-            var splitted = ((string)actual).Split(
-                new[] { ' ', '\r', '\n' },
-                StringSplitOptions.RemoveEmptyEntries);
+        //    var splitted = ((string)actual).Split(
+        //        new[] { ' ', '\r', '\n' },
+        //        StringSplitOptions.RemoveEmptyEntries);
 
-            // Print newline, word, and byte counts 
-            Assert.AreEqual(new[] { "0", "2", "11" }, splitted);
-        }
+        //    // Print newline, word, and byte counts 
+        //    Assert.AreEqual(new[] { "0", "2", "11" }, splitted);
+        //}
     }
 }

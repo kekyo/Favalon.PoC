@@ -11,6 +11,8 @@ namespace Favalon.Expressions
         {
         }
 
+        public abstract object? RawValue { get; }
+
         public abstract bool Equals(Value? other);
 
         public override bool Equals(Expression? other) =>

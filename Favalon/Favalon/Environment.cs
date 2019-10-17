@@ -1,11 +1,11 @@
-﻿using Favalon.Terms;
+﻿using Favalon.Expressions;
+using Favalon.Terms;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Favalon
 {
@@ -46,7 +46,7 @@ namespace Favalon
         internal Placeholder CreatePlaceholder(Term higherOrder) =>
             new Placeholder(overallScope.AssignIndex(), higherOrder);
 
-        public Term Infer(Term term)
+        public Expression Infer(Term term)
         {
             var inferred = term.VisitInfer(this);
             return inferred;
@@ -71,12 +71,28 @@ namespace Favalon
                     !type.IsGenericType).
                 ToArray();
 
-            foreach (var type in types.
-                Where(type => type.GetConstructor(Type.EmptyTypes) != null))
+            foreach (var type in types)
             {
                 var typeSymbol = new TypeSymbol(type);
 
                 boundTerms = boundTerms.Add(typeSymbol.PrintableName, ImmutableList<Term>.Empty.Add(typeSymbol));
+            }
+
+            foreach (var (constructor, _) in types.
+                SelectMany(type => type.DeclaredConstructors.
+                    Where(constructor => constructor.IsPublic && !constructor.IsStatic).
+                    Select(constructor => (constructor, parameters: constructor.GetParameters())).
+                    OrderBy(entry => entry.parameters.Length).
+                    ThenBy(entry => entry.parameters.
+                        Sum(parameter => (parameter.ParameterType.GetTypeInfo().IsPrimitive || parameter.ParameterType == typeof(string)) ?
+                            0 :
+                            parameter.Position * 2))))
+            {
+                var methodSymbol = new MethodSymbol(constructor);
+
+                boundTerms = boundTerms.TryGetValue(methodSymbol.PrintableName, out var terms) ?
+                    boundTerms.SetItem(methodSymbol.PrintableName, terms.Add(methodSymbol)) :
+                    boundTerms.Add(methodSymbol.PrintableName, ImmutableList<Term>.Empty.Add(methodSymbol));
             }
 
             foreach (var (method, _) in types.

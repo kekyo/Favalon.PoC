@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Favalon.Expressions;
+using System;
 
 namespace Favalon.Terms
 {
@@ -25,13 +23,10 @@ namespace Favalon.Terms
         public override string ToString() =>
             string.Empty;
 
-        public override Term VisitInfer(Environment environment) =>
-            this;
+        public override Expression VisitInfer(Environment environment) =>
+            throw new InvalidOperationException();
 
         internal static readonly Unspecified Instance =
             new Unspecified();
-
-        public override object Reduce() =>
-            throw new InvalidOperationException();
     }
 }

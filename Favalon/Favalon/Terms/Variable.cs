@@ -31,7 +31,11 @@ namespace Favalon.Terms
         public override bool Equals(Symbol? other) =>
             this.Equals(other as Variable);
 
-        public override Expression VisitInfer(Environment environment) =>
-            throw new InvalidOperationException();
+        public override Expression VisitInfer(Environment environment)
+        {
+            var terms = environment.Lookup(this.Name);
+            return terms.FirstOrDefault()?.VisitInfer(environment) ??  // TODO: choice overloads.
+                Expressions.Factories.Unknown(this);
+        }
     }
 }

@@ -39,20 +39,29 @@ namespace Favalon.Terms
 
         public override Expression VisitInfer(Environment environment)
         {
-            var argumentExpression = this.Argument.VisitInfer(environment);
+            Expression visit(Term function) =>
+                function switch
+                {
+                    MethodSymbol methodSymbol =>
+                        new CallMethod(methodSymbol.Method, this.Argument.VisitInfer(environment)),
+                    ExecutableSymbol executableSymbol =>
+                        new RunExecutable(executableSymbol.Path, this.Argument.VisitInfer(environment)),
+                    TypeSymbol typeSymbol =>
+                        new CallMethod(typeSymbol.Type.GetConstructor(
+                            new[] { ((TypeSymbol)this.Argument.HigherOrder).Type.AsType() }),
+                            this.Argument.VisitInfer(environment)),
+                    _ => throw new ArgumentException()
+                };
 
-            var function = this.Function switch
+            var function = this.Function;
+            switch (function)
             {
-                Variable variable when environment.Lookup(variable.Name) is Term term => term,
-                Term term => term
-            };
-
-            return function switch
-            {
-                MethodSymbol methodSymbol => new CallMethod(methodSymbol.Method, argumentExpression),
-                ExecutableSymbol executableSymbol => new RunExecutable(executableSymbol.Path, argumentExpression),
-                _ => throw new ArgumentException()
-            };
+                case Variable variable:
+                    var terms = environment.Lookup(variable.Name);
+                    return visit(terms[0]);  // TODO: choice overloads.
+                default:
+                    return visit(function);
+            }
         }
     }
 }

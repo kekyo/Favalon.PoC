@@ -6,24 +6,32 @@ namespace Favalon.Expressions
 {
     public static class Factories
     {
-        private static readonly Dictionary<Type, Instance<TypeInfo>> types =
-            new Dictionary<Type, Instance<TypeInfo>>();
+        private static readonly Instance typeInfo =
+            new Instance(typeof(TypeInfo).GetTypeInfo(), null!);
+        private static readonly Dictionary<Type, Instance> types =
+            new Dictionary<Type, Instance>();
 
-        internal static Instance<TypeInfo> FromType(Type type)
+        static Factories() =>
+            typeInfo.higherOrder = typeInfo;
+
+        internal static Instance FromType(Type type)
         {
             if (!types.TryGetValue(type, out var value))
             {
-                value = new Instance<TypeInfo>(type.GetTypeInfo());
+                value = new Instance(type.GetTypeInfo(), typeInfo);
                 types.Add(type, value);
             }
             return value;
         }
 
-        internal static Instance<TypeInfo> FromType(TypeInfo type) =>
-            FromType(type.GetTypeInfo());
+        internal static Instance FromType(TypeInfo type) =>
+            FromType(type.AsType());
 
-        internal static Instance<TypeInfo> FromType<T>() =>
-            FromType(typeof(T).GetTypeInfo());
+        internal static Instance FromType<T>() =>
+            FromType(typeof(T));
+
+        public static Unknown Unknown(Terms.Term term) =>
+            new Unknown(term);
 
         public static Value Value(object value) =>
             value switch
@@ -37,16 +45,19 @@ namespace Favalon.Expressions
                 _ => new Instance(value, FromType(value.GetType()))
             };
 
-        public static Instance<string> Value(string stringValue) =>
-            new Instance<string>(stringValue);
+        public static String Value(string stringValue) =>
+            new String(stringValue);
 
-        public static Instance<int> Value(int intValue) =>
-            new Instance<int>(intValue);
+        public static Number<int> Value(int intValue) =>
+            new Number<int>(intValue);
 
-        public static Instance<double> Value(double doubleValue) =>
-            new Instance<double>(doubleValue);
+        public static Number<double> Value(double doubleValue) =>
+            new Number<double>(doubleValue);
 
-        public static Instance<T> Value<T>(T value) =>
-            new Instance<T>(value);
+        public static CallMethod CallMethod(MethodInfo method, Expression argument) =>
+            new CallMethod(method, argument);
+
+        public static RunExecutable RunExecutable(string path, Expression argument) =>
+            new RunExecutable(path, argument);
     }
 }

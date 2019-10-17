@@ -13,10 +13,16 @@ namespace Favalon.Expressions
         internal Instance(object value, Expression higherOrder)
         {
             this.Value = value;
-            this.HigherOrder = higherOrder;
+            this.higherOrder = higherOrder;
         }
 
-        public override Expression HigherOrder { get; }
+        internal Expression higherOrder;
+
+        public override Expression HigherOrder =>
+            higherOrder;
+
+        public override object? RawValue =>
+            this.Value;
 
         public override int GetHashCode() =>
             this.Value?.GetHashCode() ?? 0;
@@ -29,23 +35,6 @@ namespace Favalon.Expressions
 
         public override string ToString() =>
             this.Value?.ToString() ?? "(null)";
-
-        public override Expression Run() =>
-            this;
-    }
-
-    public sealed class Instance<T> : Instance
-    {
-        private static readonly Expression higherOrder =
-            Factories.FromType<T>();
-
-        internal Instance(T value) :
-            base(value!, higherOrder)
-        {
-        }
-
-        public new T Value =>
-            (T)base.Value;
 
         public override Expression Run() =>
             this;

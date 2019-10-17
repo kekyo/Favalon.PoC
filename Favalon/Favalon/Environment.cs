@@ -46,11 +46,8 @@ namespace Favalon
         internal Placeholder CreatePlaceholder(Term higherOrder) =>
             new Placeholder(overallScope.AssignIndex(), higherOrder);
 
-        public Expression Infer(Term term)
-        {
-            var inferred = term.VisitInfer(this);
-            return inferred;
-        }
+        public Expression Infer(Term term) =>
+            term.Visit(this);
 
         public static Environment Create()
         {

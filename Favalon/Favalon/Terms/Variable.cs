@@ -31,10 +31,10 @@ namespace Favalon.Terms
         public override bool Equals(Symbol? other) =>
             this.Equals(other as Variable);
 
-        public override Expression VisitInfer(Environment environment)
+        protected internal override Expression Visit(Environment environment)
         {
             var terms = environment.Lookup(this.Name);
-            return terms.FirstOrDefault()?.VisitInfer(environment) ??  // TODO: choice overloads.
+            return terms.FirstOrDefault()?.Visit(environment) ??  // TODO: choice overloads.
                 Expressions.Factories.Unknown(this);
         }
     }

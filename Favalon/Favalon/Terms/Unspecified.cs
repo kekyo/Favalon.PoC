@@ -23,7 +23,7 @@ namespace Favalon.Terms
         public override string ToString() =>
             string.Empty;
 
-        public override Expression VisitInfer(Environment environment) =>
+        protected internal override Expression Visit(Environment environment) =>
             throw new InvalidOperationException();
 
         internal static readonly Unspecified Instance =

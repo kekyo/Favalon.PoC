@@ -4,6 +4,8 @@ namespace Favalon.Terms
 {
     public static class Factories
     {
+        private static readonly Variable arrow = new Variable("->");
+
         public static Variable Variable(string name) =>
             new Variable(name);
 
@@ -34,11 +36,7 @@ namespace Favalon.Terms
 
         public static Term Function(Term parameter, Term body) =>
             (!parameter.Equals(Unspecified.Instance) && !body.Equals(Unspecified.Instance)) ?
-                (Term)Apply(Apply(parameter, Arrow.Instance), body) :
+                (Term)Apply(Apply(parameter, arrow), body) :
                 Unspecified.Instance;
-
-        public static bool IsFunction(this Apply apply) =>
-            apply.Function is Apply applyInner &&
-            applyInner.Argument is Arrow;
     }
 }

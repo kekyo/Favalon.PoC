@@ -1,11 +1,5 @@
 ﻿using Favalon.Expressions;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace Favalon.Terms
 {
@@ -29,7 +23,7 @@ namespace Favalon.Terms
         public override bool Equals(Symbol? other) =>
             this.Equals(other as ExecutableSymbol);
 
-        public override Expression VisitInfer(Environment environment) =>
+        protected internal override Expression Visit(Environment environment) =>
             throw new InvalidOperationException();
     }
 }

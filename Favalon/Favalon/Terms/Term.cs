@@ -3,7 +3,9 @@ using System;
 
 namespace Favalon.Terms
 {
+#pragma warning disable CS0659
     public abstract class Term : IEquatable<Term?>
+#pragma warning restore CS0659
     {
         private protected Term()
         { }
@@ -15,6 +17,6 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as Term);
 
-        public abstract Expression VisitInfer(Environment environment);
+        protected internal abstract Expression Visit(Environment environment);
     }
 }

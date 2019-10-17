@@ -27,7 +27,7 @@ namespace Favalon.Terms
         public override bool Equals(Symbol? other) =>
             this.Equals(other as TypeSymbol);
 
-        public override Expression VisitInfer(Environment environment) =>
+        protected internal override Expression Visit(Environment environment) =>
             throw new InvalidOperationException();
     }
 }

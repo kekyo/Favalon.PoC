@@ -2,7 +2,9 @@
 
 namespace Favalon.Expressions
 {
+#pragma warning disable CS0659
     public abstract class Expression : IEquatable<Expression?>
+#pragma warning restore CS0659
     {
         private protected Expression()
         { }

@@ -37,19 +37,19 @@ namespace Favalon.Terms
                 $"{Function} ({apply})" :
                 $"{Function} {Argument}";
 
-        public override Expression VisitInfer(Environment environment)
+        protected internal override Expression Visit(Environment environment)
         {
             Expression visit(Term function) =>
                 function switch
                 {
                     MethodSymbol methodSymbol =>
-                        new CallMethod(methodSymbol.Method, this.Argument.VisitInfer(environment)),
+                        new CallMethod(methodSymbol.Method, environment.Infer(this.Argument)),
                     ExecutableSymbol executableSymbol =>
-                        new RunExecutable(executableSymbol.Path, this.Argument.VisitInfer(environment)),
+                        new RunExecutable(executableSymbol.Path, environment.Infer(this.Argument)),
                     TypeSymbol typeSymbol =>
                         new CallMethod(typeSymbol.Type.GetConstructor(
                             new[] { ((TypeSymbol)this.Argument.HigherOrder).Type.AsType() }),
-                            this.Argument.VisitInfer(environment)),
+                            environment.Infer(this.Argument)),
                     _ => throw new ArgumentException()
                 };
 

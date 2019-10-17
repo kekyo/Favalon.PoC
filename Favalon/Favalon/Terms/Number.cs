@@ -28,7 +28,7 @@ namespace Favalon.Terms
         public override string ToString() =>
             this.Value.ToString();
 
-        public override Expression VisitInfer(Environment environment)
+        protected internal override Expression Visit(Environment environment)
         {
             if (int.TryParse(this.Value, out var intValue))
             {
@@ -70,7 +70,7 @@ namespace Favalon.Terms
         public override string ToString() =>
             this.Value.ToString();
 
-        public override Expression VisitInfer(Environment environment) =>
+        protected internal override Expression Visit(Environment environment) =>
             Expressions.Factories.Value(this.Value);
     }
 }

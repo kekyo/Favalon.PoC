@@ -31,7 +31,7 @@ namespace Favalon.Terms
         public override string ToString() =>
             $"\"{this.Value}\"";
 
-        public override Expression VisitInfer(Environment environment) =>
+        protected internal override Expression Visit(Environment environment) =>
             Expressions.Factories.Value(this.Value);
     }
 }

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Favalon.Expressions;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,19 +24,20 @@ namespace Favalon
             Assert.AreEqual(Value(123), actual);
         }
 
-        //[Test]
-        //public void ExecutableMethod()
-        //{
-        //    var term = Apply(ExecutableSymbol(@"C:\Program Files\Git\usr\bin\wc.exe"), String("abcde fghij"));
+        [Test]
+        public void ExecutableMethod()
+        {
+            var expression = RunExecutable(@"C:\Program Files\Git\usr\bin\wc.exe", Value("abcde fghij"));
 
-        //    object actual = term.Reduce();
+            var actual = expression.Run();
 
-        //    var splitted = ((string)actual).Split(
-        //        new[] { ' ', '\r', '\n' },
-        //        StringSplitOptions.RemoveEmptyEntries);
+            var splitted = ((string)(((Value)actual)!.RawValue!)).
+                Split(
+                    new[] { ' ', '\r', '\n' },
+                    StringSplitOptions.RemoveEmptyEntries);
 
-        //    // Print newline, word, and byte counts 
-        //    Assert.AreEqual(new[] { "0", "2", "11" }, splitted);
-        //}
+            // Print newline, word, and byte counts 
+            Assert.AreEqual(new[] { "0", "2", "11" }, splitted);
+        }
     }
 }

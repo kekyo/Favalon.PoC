@@ -61,7 +61,7 @@ namespace Favalon.Expressions
 
                 using (var tw = process.StandardInput)
                 {
-                    var input = ((Instance)this.Argument.Run()).Value;
+                    var input = ((Value)this.Argument.Run()).RawValue;
 
                     tw.Write(input);
                     tw.Flush();

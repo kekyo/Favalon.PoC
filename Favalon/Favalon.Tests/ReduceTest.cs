@@ -1,10 +1,6 @@
 ﻿using Favalon.Expressions;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Favalon
 {
@@ -25,9 +21,30 @@ namespace Favalon
         }
 
         [Test]
-        public void ExecutableMethod()
+        public void ExecuteDirect()
         {
             var expression = RunExecutable(@"C:\Program Files\Git\usr\bin\wc.exe", Value("abcde fghij"));
+
+            var actual = expression.Run();
+
+            var splitted = ((string)(((Value)actual)!.RawValue!)).
+                Split(
+                    new[] { ' ', '\r', '\n' },
+                    StringSplitOptions.RemoveEmptyEntries);
+
+            // Print newline, word, and byte counts 
+            Assert.AreEqual(new[] { "0", "2", "11" }, splitted);
+        }
+
+        [Test]
+        public void ExecuteBound()
+        {
+            var environment = Environment.Create();
+
+            var expression = environment.Infer(
+                Terms.Factories.Apply(
+                    Terms.Factories.Variable("wc"),
+                    Terms.Factories.String("abcde fghij")));
 
             var actual = expression.Run();
 

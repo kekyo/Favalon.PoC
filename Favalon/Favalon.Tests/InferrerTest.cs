@@ -53,17 +53,6 @@ namespace Favalon
             Assert.AreEqual(expected, actual);
         }
 
-        //[Test]
-        //public void InferDefaultBoundArrow()
-        //{
-        //    var environment = Environment.Create();
-
-        //    var actual = environment.Infer(Variable("->"));
-
-        //    var expected = environment.BoundTerms["->"];
-        //    Assert.AreEqual(expected, actual);
-        //}
-
         [Test]
         public void InferDotNetFunction()
         {
@@ -93,5 +82,37 @@ namespace Favalon
                 Expressions.Factories.Value("abcde fghij"));
             Assert.AreEqual(expected, actual);
         }
+
+        [Test]
+        public void InferDefaultBoundArrow()
+        {
+            var environment = Environment.Create();
+
+            // -> x x
+            var actual = environment.Infer(
+                Apply(Apply(Variable("->"), Variable("x")), Variable("x")));
+
+            var expected = Expressions.Factories.Lambda("x", Variable("x"));
+            Assert.AreEqual(expected, actual);
+        }
+
+        //[Test]
+        //public void InferDefaultBoundPipeline()
+        //{
+        //    var environment = Environment.Create();
+
+        //    // let (|) = fun x -> fun y -> y x
+        //    environment.Bind("|", );
+
+        //    var actual = environment.Infer(
+        //        Apply(Apply(Variable("|"), String("123")), Variable("System.Int32.Parse")));
+
+        //    var parse = typeof(int).GetMethod("Parse", new[] { typeof(string) })!;
+
+        //    var expected = Expressions.Factories.CallMethod(
+        //        parse,
+        //        Expressions.Factories.Value("123"));
+        //    Assert.AreEqual(expected, actual);
+        //}
     }
 }

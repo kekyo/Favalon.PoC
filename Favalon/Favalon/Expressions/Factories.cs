@@ -1,33 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
 
 namespace Favalon.Expressions
 {
     public static class Factories
     {
-        private static readonly Instance typeInfo =
-            new Instance(typeof(TypeInfo).GetTypeInfo(), null!);
-        private static readonly Dictionary<Type, Instance> types =
-            new Dictionary<Type, Instance>();
+        private static readonly Dictionary<System.Type, Type> types =
+            new Dictionary<System.Type, Type>
+            {
+                { typeof(TypeInfo), Type.TypeType }
+            };
 
-        static Factories() =>
-            typeInfo.higherOrder = typeInfo;
-
-        internal static Instance FromType(Type type)
+        internal static Type FromType(System.Type type)
         {
             if (!types.TryGetValue(type, out var value))
             {
-                value = new Instance(type.GetTypeInfo(), typeInfo);
+                value = new Type(type.GetTypeInfo());
                 types.Add(type, value);
             }
             return value;
         }
 
-        internal static Instance FromType(TypeInfo type) =>
+        internal static Type FromType(TypeInfo type) =>
             FromType(type.AsType());
 
-        internal static Instance FromType<T>() =>
+        internal static Type FromType<T>() =>
             FromType(typeof(T));
 
         public static Unknown Unknown(Terms.Term term) =>
@@ -41,7 +38,7 @@ namespace Favalon.Expressions
                 int intValue => new Number<int>(intValue),
                 double doubleValue => new Number<double>(doubleValue),
                 TypeInfo type => FromType(type),
-                Type type => FromType(type),
+                System.Type type => FromType(type),
                 _ => new Instance(value, FromType(value.GetType()))
             };
 

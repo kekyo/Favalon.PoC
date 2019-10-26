@@ -1,22 +1,21 @@
-﻿using Favalon.Expressions;
-using System;
-
-namespace Favalon.Terms
+﻿namespace Favalon.Terms
 {
-#pragma warning disable CS0659
-    public abstract class Term : IEquatable<Term?>
-#pragma warning restore CS0659
+    public abstract partial class Term
     {
-        private protected Term()
-        { }
+        public abstract bool Reducible { get; }
 
-        public abstract Term HigherOrder { get; }
+        public abstract Term VisitReplace(string name, Term replacement);
 
-        public abstract bool Equals(Term? other);
+        public abstract Term VisitReduce();
 
-        public override bool Equals(object obj) =>
-            this.Equals(obj as Term);
-
-        protected internal abstract Expression Visit(Environment environment);
+        public Term Reduce()
+        {
+            var current = this;
+            while (current.Reducible)
+            {
+                current = current.VisitReduce();
+            }
+            return current;
+        }
     }
 }

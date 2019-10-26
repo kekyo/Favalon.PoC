@@ -1,6 +1,9 @@
-﻿namespace Favalon.Terms
+﻿using System;
+
+namespace Favalon.Terms
 {
-    public sealed class ApplyTerm : Term
+    public sealed class ApplyTerm :
+        Term, IEquatable<ApplyTerm?>
     {
         public new readonly Term Function;
         public readonly Term Argument;
@@ -15,10 +18,10 @@
             this.Function.Reducible || this.Argument.Reducible ||
             this.Function is FunctionTerm;
 
-        public override Term VisitReplace(string name, Term replacement) =>
+        public override Term VisitReplace(string identity, Term replacement) =>
             new ApplyTerm(
-                this.Function.VisitReplace(name, replacement),
-                this.Argument.VisitReplace(name, replacement));
+                this.Function.VisitReplace(identity, replacement),
+                this.Argument.VisitReplace(identity, replacement));
 
         public override Term VisitReduce() =>
             this.Function.Reducible ?
@@ -28,6 +31,17 @@
                     this.Function is FunctionTerm function ?
                         function.Call(this.Argument) :
                         this;
+
+        public override int GetHashCode() =>
+            this.Function.GetHashCode() ^
+            this.Argument.GetHashCode();
+
+        public bool Equals(ApplyTerm? other) =>
+            (other?.Function.Equals(this.Function) ?? false) &&
+            (other?.Argument.Equals(this.Argument) ?? false);
+
+        public override bool Equals(object obj) =>
+            this.Equals(obj as ApplyTerm);
 
         public override string ToString()
         {

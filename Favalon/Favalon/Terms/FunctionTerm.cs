@@ -16,20 +16,31 @@ namespace Favalon.Terms
         public override bool Reducible =>
             false;
 
-        public override Term VisitReplace(string name, Term replacement) =>
-            (this.Parameter is IdentityTerm variable && variable.Name == name) ?
+        public override Term VisitReplace(string identity, Term replacement) =>
+            (this.Parameter is IdentityTerm variable && variable.Identity == identity) ?
                 this :  // NOT applicable
                 new FunctionTerm(
-                    this.Parameter.VisitReplace(name, replacement),
-                    this.Body.VisitReplace(name, replacement));
+                    this.Parameter.VisitReplace(identity, replacement),
+                    this.Body.VisitReplace(identity, replacement));
 
         public override Term VisitReduce() =>
             this;
 
         public Term Call(Term argument) =>
             this.Body.VisitReplace(
-                ((IdentityTerm)this.Parameter).Name,
+                ((IdentityTerm)this.Parameter).Identity,
                 argument);
+
+        public override int GetHashCode() =>
+            this.Parameter.GetHashCode() ^
+            this.Body.GetHashCode();
+
+        public bool Equals(FunctionTerm? other) =>
+            (other?.Parameter.Equals(this.Parameter) ?? false) &&
+            (other?.Body.Equals(this.Body) ?? false);
+
+        public override bool Equals(object obj) =>
+            this.Equals(obj as FunctionTerm);
 
         public override string ToString()
         {

@@ -4,7 +4,7 @@
     {
         public abstract bool Reducible { get; }
 
-        public abstract Term VisitReplace(string name, Term replacement);
+        public abstract Term VisitReplace(string identity, Term replacement);
 
         public abstract Term VisitReduce();
 

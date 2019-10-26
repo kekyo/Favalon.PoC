@@ -34,7 +34,7 @@
             var function = this.Function is FunctionTerm ?
                 $"({this.Function})" :
                 this.Function.ToString();
-            return this.Argument is VariableTerm ?
+            return this.Argument is IdentityTerm ?
                 $"{function} {this.Argument}" :
                 $"{function} ({this.Argument})";
         }

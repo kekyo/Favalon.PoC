@@ -8,10 +8,10 @@ namespace Favalon.Terms
 {
     partial class Term
     {
-        public static VariableTerm Variable(string name) =>
-            new VariableTerm(name);
+        public static IdentityTerm Identity(string name) =>
+            new IdentityTerm(name);
 
-        public static FunctionTerm Function(VariableTerm parameter, Term body) =>
+        public static FunctionTerm Function(IdentityTerm parameter, Term body) =>
             new FunctionTerm(parameter, body);
 
         public static ApplyTerm Apply(Term function, Term argument) =>

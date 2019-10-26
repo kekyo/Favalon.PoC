@@ -9,8 +9,8 @@ namespace Favalon.Terms
         public void Function()
         {
             var actual = Term.Function(
-                Term.Variable("x"),
-                Term.Variable("y"));
+                Term.Identity("x"),
+                Term.Identity("y"));
 
             Assert.AreEqual("x -> y", actual.ToString());
         }
@@ -19,9 +19,9 @@ namespace Favalon.Terms
         public void ReplaceAtBody()
         {
             var f = Term.Function(
-                Term.Variable("x"),
-                Term.Variable("y"));
-            var actual = f.VisitReplace("y", Term.Variable("z"));
+                Term.Identity("x"),
+                Term.Identity("y"));
+            var actual = f.VisitReplace("y", Term.Identity("z"));
 
             Assert.AreEqual("x -> z", actual.ToString());
         }
@@ -30,9 +30,9 @@ namespace Favalon.Terms
         public void ReplaceNotApplicableAtParameterIsVariable()
         {
             var f = Term.Function(
-                Term.Variable("x"),
-                Term.Variable("y"));
-            var actual = f.VisitReplace("x", Term.Variable("z"));
+                Term.Identity("x"),
+                Term.Identity("y"));
+            var actual = f.VisitReplace("x", Term.Identity("z"));
 
             Assert.AreEqual("x -> y", actual.ToString());
         }
@@ -41,8 +41,8 @@ namespace Favalon.Terms
         public void Reduce()
         {
             var f = Term.Function(
-                Term.Variable("x"),
-                Term.Variable("y"));
+                Term.Identity("x"),
+                Term.Identity("y"));
             var actual = f.Reduce();
 
             Assert.AreEqual("x -> y", actual.ToString());
@@ -52,15 +52,15 @@ namespace Favalon.Terms
         public void Call()
         {
             var f = Term.Function(
-                Term.Variable("x"),
+                Term.Identity("x"),
                 Term.Function(
-                    Term.Variable("y"),
+                    Term.Identity("y"),
                     Term.Apply(
-                        Term.Variable("x"),
-                        Term.Variable("y"))));
+                        Term.Identity("x"),
+                        Term.Identity("y"))));
             var arg = Term.Function(
-                Term.Variable("z"),
-                Term.Variable("z"));
+                Term.Identity("z"),
+                Term.Identity("z"));
             var actual = f.Call(arg);
 
             Assert.AreEqual("y -> (z -> z) y", actual.ToString());

@@ -17,7 +17,7 @@ namespace Favalon.Terms
             false;
 
         public override Term VisitReplace(string name, Term replacement) =>
-            (this.Parameter is VariableTerm variable && variable.Name == name) ?
+            (this.Parameter is IdentityTerm variable && variable.Name == name) ?
                 this :  // NOT applicable
                 new FunctionTerm(
                     this.Parameter.VisitReplace(name, replacement),
@@ -28,7 +28,7 @@ namespace Favalon.Terms
 
         public Term Call(Term argument) =>
             this.Body.VisitReplace(
-                ((VariableTerm)this.Parameter).Name,
+                ((IdentityTerm)this.Parameter).Name,
                 argument);
 
         public override string ToString()

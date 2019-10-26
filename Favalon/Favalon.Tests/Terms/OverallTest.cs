@@ -8,38 +8,38 @@ namespace Favalon.Terms
         // Church numeral calculas
         private static readonly Term one =
             Term.Function(
-                Term.Variable("p"),
+                Term.Identity("p"),
                 Term.Function(
-                    Term.Variable("x"),
+                    Term.Identity("x"),
                     Term.Apply(
-                        Term.Variable("p"),
-                        Term.Variable("x"))));
+                        Term.Identity("p"),
+                        Term.Identity("x"))));
 
         private static readonly Term increment =
             Term.Function(
-                Term.Variable("n"),
+                Term.Identity("n"),
                 Term.Function(
-                    Term.Variable("p"),
+                    Term.Identity("p"),
                     Term.Function(
-                        Term.Variable("x"),
+                        Term.Identity("x"),
                         Term.Apply(
-                            Term.Variable("p"),
+                            Term.Identity("p"),
                             Term.Apply(
                                 Term.Apply(
-                                    Term.Variable("n"),
-                                    Term.Variable("p")),
-                                Term.Variable("x"))))));
+                                    Term.Identity("n"),
+                                    Term.Identity("p")),
+                                Term.Identity("x"))))));
 
         private static readonly Term add =
             Term.Function(
-                Term.Variable("m"),
+                Term.Identity("m"),
                 Term.Function(
-                    Term.Variable("n"),
+                    Term.Identity("n"),
                     Term.Apply(
                         Term.Apply(
-                            Term.Variable("n"),
+                            Term.Identity("n"),
                             increment),
-                        Term.Variable("m"))));
+                        Term.Identity("m"))));
 
         [Test]
         public void OneTerm()
@@ -73,8 +73,8 @@ namespace Favalon.Terms
 
             Assert.AreEqual("p -> x -> p ((p -> x -> p x) p x)", reduced.ToString());
 
-            var inc = Term.Variable("inc");
-            var zero = Term.Variable("zero");
+            var inc = Term.Identity("inc");
+            var zero = Term.Identity("zero");
 
             var final =
                 Term.Apply(

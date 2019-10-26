@@ -9,8 +9,8 @@ namespace Favalon.Terms
         public void Apply()
         {
             var actual = Term.Apply(
-                Term.Variable("x"),
-                Term.Variable("y"));
+                Term.Identity("x"),
+                Term.Identity("y"));
 
             Assert.AreEqual("x y", actual.ToString());
         }
@@ -19,9 +19,9 @@ namespace Favalon.Terms
         public void ReplaceAtFunction()
         {
             var a = Term.Apply(
-                Term.Variable("x"),
-                Term.Variable("y"));
-            var actual = a.VisitReplace("x", Term.Variable("z"));
+                Term.Identity("x"),
+                Term.Identity("y"));
+            var actual = a.VisitReplace("x", Term.Identity("z"));
 
             Assert.AreEqual("z y", actual.ToString());
         }
@@ -30,9 +30,9 @@ namespace Favalon.Terms
         public void ReplaceAtArgument()
         {
             var a = Term.Apply(
-                Term.Variable("x"),
-                Term.Variable("y"));
-            var actual = a.VisitReplace("y", Term.Variable("z"));
+                Term.Identity("x"),
+                Term.Identity("y"));
+            var actual = a.VisitReplace("y", Term.Identity("z"));
 
             Assert.AreEqual("x z", actual.ToString());
         }
@@ -41,9 +41,9 @@ namespace Favalon.Terms
         public void ReplaceNotApplicable()
         {
             var a = Term.Apply(
-                Term.Variable("x"),
-                Term.Variable("y"));
-            var actual = a.VisitReplace("z", Term.Variable("q"));
+                Term.Identity("x"),
+                Term.Identity("y"));
+            var actual = a.VisitReplace("z", Term.Identity("q"));
 
             Assert.AreEqual("x y", actual.ToString());
         }
@@ -52,8 +52,8 @@ namespace Favalon.Terms
         public void ReduceNotReduceable()
         {
             var a = Term.Apply(
-                Term.Variable("x"),
-                Term.Variable("y"));
+                Term.Identity("x"),
+                Term.Identity("y"));
             var actual = a.Reduce();
 
             Assert.AreEqual("x y", actual.ToString());
@@ -65,9 +65,9 @@ namespace Favalon.Terms
             // (x -> x) y
             var a = Term.Apply(
                 Term.Function(
-                    Term.Variable("x"),
-                    Term.Variable("x")),
-                Term.Variable("y"));
+                    Term.Identity("x"),
+                    Term.Identity("x")),
+                Term.Identity("y"));
             var actual = a.Reduce();
 
             Assert.AreEqual("y", actual.ToString());

@@ -2,11 +2,11 @@
 
 namespace Favalon.Terms
 {
-    public sealed class VariableTerm : Term
+    public sealed class IdentityTerm : Term
     {
         public readonly string Name;
 
-        internal VariableTerm(string name) =>
+        internal IdentityTerm(string name) =>
             this.Name = name;
 
         public override bool Reducible =>

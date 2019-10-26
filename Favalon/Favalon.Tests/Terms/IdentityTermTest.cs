@@ -3,12 +3,12 @@
 namespace Favalon.Terms
 {
     [TestFixture]
-    public sealed class VariableTermTest
+    public sealed class IdentityTermTest
     {
         [Test]
-        public void Variable()
+        public void Identity()
         {
-            var actual = Term.Variable("x");
+            var actual = Term.Identity("x");
 
             Assert.AreEqual("x", actual.ToString());
         }
@@ -16,8 +16,8 @@ namespace Favalon.Terms
         [Test]
         public void Replace()
         {
-            var v = Term.Variable("x");
-            var actual = v.VisitReplace("x", Term.Variable("y"));
+            var id = Term.Identity("x");
+            var actual = id.VisitReplace("x", Term.Identity("y"));
 
             Assert.AreEqual("y", actual.ToString());
         }
@@ -25,8 +25,8 @@ namespace Favalon.Terms
         [Test]
         public void ReplaceNotApplicable()
         {
-            var v = Term.Variable("x");
-            var actual = v.VisitReplace("z", Term.Variable("y"));
+            var id = Term.Identity("x");
+            var actual = id.VisitReplace("z", Term.Identity("y"));
 
             Assert.AreEqual("x", actual.ToString());
         }
@@ -34,8 +34,8 @@ namespace Favalon.Terms
         [Test]
         public void Reduce()
         {
-            var v = Term.Variable("x");
-            var actual = v.Reduce();
+            var id = Term.Identity("x");
+            var actual = id.Reduce();
 
             Assert.AreEqual("x", actual.ToString());
         }

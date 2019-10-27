@@ -1,4 +1,5 @@
 ﻿using Favalon.Tokens;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -7,6 +8,31 @@ namespace Favalon
 {
     public sealed class Lexer
     {
+        private struct RunResult
+        {
+            public readonly Token? Token0;
+            public readonly Token? Token1;
+            
+            private RunResult(Token? token0, Token? token1)
+            {
+                this.Token0 = token0;
+                this.Token1 = token1;
+            }
+
+            public static readonly RunResult Empty =
+                new RunResult(null, null);
+            public static RunResult Create(Token? token0) =>
+                new RunResult(token0, null);
+            public static RunResult Create(Token? token0, Token? token1) =>
+                new RunResult(token0, token1);
+
+            public void Deconstruct(out Token? token0, out Token? token1)
+            {
+                token0 = this.Token0;
+                token1 = this.Token1;
+            }
+        }
+
         private enum States
         {
             Waiting,
@@ -19,29 +45,62 @@ namespace Favalon
         private Lexer()
         { }
 
-        private Token? Run(char ch)
+        private RunResult RunWaiting(char ch)
         {
-            switch (state)
+            switch (ch)
             {
-                case States.Waiting when (!char.IsWhiteSpace(ch) && !char.IsControl(ch)):
-                    tokenBuffer.Append(ch);
-                    state = States.Identity;
-                    return null;
-                case States.Identity:
+                case '(':
+                    return RunResult.Create(
+                        BeginBracketToken.Instance);
+                case ')':
+                    return RunResult.Create(
+                        EndBracketToken.Instance);
+                default:
+                    if (!char.IsWhiteSpace(ch) && !char.IsControl(ch))
+                    {
+                        tokenBuffer.Append(ch);
+                        state = States.Identity;
+                    }
+                    return RunResult.Empty;
+            }
+        }
+
+        private RunResult RunIdentity(char ch)
+        {
+            switch (ch)
+            {
+                case '(':
+                    return RunResult.Create(
+                        this.Finish(), BeginBracketToken.Instance);
+                case ')':
+                    return RunResult.Create(
+                        this.Finish(), EndBracketToken.Instance);
+                default:
                     if (char.IsWhiteSpace(ch))
                     {
                         var token = tokenBuffer.ToString();
                         tokenBuffer.Clear();
                         state = States.Waiting;
-                        return new IdentityToken(token);
+                        return RunResult.Create(new IdentityToken(token));
                     }
                     else
                     {
                         tokenBuffer.Append(ch);
-                        return null;
+                        return RunResult.Empty;
                     }
+            }
+        }
+
+        private RunResult Run(char ch)
+        {
+            switch (state)
+            {
+                case States.Waiting:
+                    return this.RunWaiting(ch);
+                case States.Identity:
+                    return this.RunIdentity(ch);
                 default:
-                    return null;
+                    throw new InvalidOperationException();
             }
         }
 
@@ -59,6 +118,54 @@ namespace Favalon
             }
         }
 
+        public static IEnumerable<Token> EnumerableTokens(string text)
+        {
+            var lexer = new Lexer();
+
+            for (var index = 0; index < text.Length; index++)
+            {
+                switch (lexer.Run(text[index]))
+                {
+                    case RunResult(Token token0, Token token1):
+                        yield return token0;
+                        yield return token1;
+                        break;
+                    case RunResult(Token token, null):
+                        yield return token;
+                        break;
+                }
+            }
+
+            if (lexer.Finish() is Token finalToken)
+            {
+                yield return finalToken;
+            }
+        }
+
+        public static IEnumerable<Token> EnumerableTokens(IEnumerable<char> chars)
+        {
+            var lexer = new Lexer();
+
+            foreach (var ch in chars)
+            {
+                switch (lexer.Run(ch))
+                {
+                    case RunResult(Token token0, Token token1):
+                        yield return token0;
+                        yield return token1;
+                        break;
+                    case RunResult(Token token, null):
+                        yield return token;
+                        break;
+                }
+            }
+
+            if (lexer.Finish() is Token finalToken)
+            {
+                yield return finalToken;
+            }
+        }
+
         public static IEnumerable<Token> EnumerableTokens(TextReader tr)
         {
             var lexer = new Lexer();
@@ -71,9 +178,15 @@ namespace Favalon
                     break;
                 }
 
-                if (lexer.Run((char)inch) is Token token)
+                switch (lexer.Run((char)inch))
                 {
-                    yield return token;
+                    case RunResult(Token token0, Token token1):
+                        yield return token0;
+                        yield return token1;
+                        break;
+                    case RunResult(Token token, null):
+                        yield return token;
+                        break;
                 }
             }
 

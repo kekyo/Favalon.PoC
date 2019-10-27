@@ -9,40 +9,44 @@ namespace Favalon
     {
         public static IEnumerable<Term> EnumerableTerms(IEnumerable<Token> tokens)
         {
-            var enumerator = tokens.GetEnumerator();
-            try
+            Term? root = null;
+            var stack = new Stack<Term?>();
+            foreach (var token in tokens)
             {
-                if (enumerator.MoveNext())
+                switch (token)
                 {
-                    if (enumerator.Current is IdentityToken identityToken)
-                    {
-                        Term term = new IdentityTerm(identityToken.Identity);
-                        while (enumerator.MoveNext())
+                    case IdentityToken identityToken:
+                        var identityTerm = new IdentityTerm(identityToken.Identity);
+                        if (root != null)
                         {
-                            if (enumerator.Current is IdentityToken token)
-                            {
-                                term = new ApplyTerm(term, new IdentityTerm(token.Identity));
-                            }
-                            else
-                            {
-                                // TODO: error invalid token sequence?
-                            }
+                            root = new ApplyTerm(root, identityTerm);
                         }
-
-                        yield return term;
-                    }
-                    else
-                    {
-                        // TODO: error invalid token sequence?
-                    }
+                        else
+                        {
+                            root = identityTerm;
+                        }
+                        break;
+                    case BeginBracketToken _:
+                        stack.Push(root);
+                        root = null;
+                        break;
+                    case EndBracketToken _:
+                        var lastTerm = stack.Pop();
+                        if ((root != null) && (lastTerm != null))
+                        {
+                            root = new ApplyTerm(lastTerm, root);
+                        }
+                        else if (lastTerm != null)
+                        {
+                            root = lastTerm;
+                        }
+                        break;
                 }
             }
-            finally
+
+            if (root != null)
             {
-                if (enumerator is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
+                yield return root;
             }
         }
     }

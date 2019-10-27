@@ -4,5 +4,11 @@
     {
         public static IdentityToken Identity(string identity) =>
             new IdentityToken(identity);
+
+        public static BeginBracketToken Begin() =>
+            BeginBracketToken.Instance;
+
+        public static EndBracketToken End() =>
+            EndBracketToken.Instance;
     }
 }

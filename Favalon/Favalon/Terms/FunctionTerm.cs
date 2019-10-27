@@ -13,9 +13,6 @@ namespace Favalon.Terms
             this.Body = body;
         }
 
-        public override bool Reducible =>
-            false;
-
         public override Term VisitReplace(string identity, Term replacement) =>
             (this.Parameter is IdentityTerm variable && variable.Identity == identity) ?
                 this :  // NOT applicable
@@ -47,6 +44,12 @@ namespace Favalon.Terms
             var parameter = (this.Parameter is FunctionTerm) ?
                 $"({this.Parameter})" : this.Parameter.ToString();
             return $"{parameter} -> {this.Body}";
+        }
+
+        public void Deconstruct(out Term parameter, out Term body)
+        {
+            parameter = this.Parameter;
+            body = this.Body;
         }
     }
 }

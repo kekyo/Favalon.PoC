@@ -21,5 +21,8 @@ namespace Favalon.Tokens
 
         public override string ToString() =>
             this.Identity;
+
+        public void Deconstruct(out string identity) =>
+            identity = this.Identity;
     }
 }

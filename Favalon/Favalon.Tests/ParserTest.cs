@@ -156,21 +156,5 @@ namespace Favalon
                 new[] { Term.Apply(Term.Identity("abc"), Term.Apply(Term.Identity("def"), Term.Apply(Term.Identity("ghi"), Term.Identity("jkl")))) },
                 actual);
         }
-
-        [Test]
-        public void EnumerableArrowToken()
-        {
-            var actual = Parser.EnumerableTerms(
-                new[]
-                {
-                    Token.Identity("abc"),
-                    Token.Identity("->"),
-                    Token.Identity("ghi"),
-                });
-
-            Assert.AreEqual(
-                new[] { Term.Apply(Term.Apply(Term.Identity("abc"), Term.Identity("->")), Term.Identity("ghi")) },
-                actual);
-        }
     }
 }

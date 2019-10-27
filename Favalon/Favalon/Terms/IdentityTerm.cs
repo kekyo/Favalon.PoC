@@ -10,9 +10,6 @@ namespace Favalon.Terms
         internal IdentityTerm(string identity) =>
             this.Identity = identity;
 
-        public override bool Reducible =>
-            false;
-
         public override Term VisitReplace(string identity, Term replacement) =>
             (identity == this.Identity) ?
                 replacement :
@@ -32,5 +29,8 @@ namespace Favalon.Terms
 
         public override string ToString() =>
             this.Identity;
+
+        public void Deconstruct(out string identity) =>
+            identity = this.Identity;
     }
 }

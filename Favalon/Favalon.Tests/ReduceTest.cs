@@ -1,9 +1,10 @@
-﻿using NUnit.Framework;
+﻿using Favalon.Terms;
+using NUnit.Framework;
 
-namespace Favalon.Terms
+namespace Favalon
 {
     [TestFixture]
-    public sealed class OverallTest
+    public sealed class ReduceTest
     {
         // Church numeral calculas
         private static readonly Term one =

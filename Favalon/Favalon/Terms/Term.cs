@@ -2,8 +2,6 @@
 {
     public abstract partial class Term
     {
-        public abstract bool Reducible { get; }
-
         public abstract Term VisitReplace(string identity, Term replacement);
 
         public abstract Term VisitReduce();
@@ -11,11 +9,15 @@
         public Term Reduce()
         {
             var current = this;
-            while (current.Reducible)
+            while (true)
             {
-                current = current.VisitReduce();
+                var reduced = current.VisitReduce();
+                if (object.ReferenceEquals(reduced, current))
+                {
+                    return current;
+                }
+                current = reduced;
             }
-            return current;
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Favalon.Terms
         public void Reduce()
         {
             var id = Term.Identity("x");
-            var actual = id.Reduce();
+            var actual = id.ReduceAll();
 
             Assert.AreEqual("x", actual.ToString());
         }

@@ -43,7 +43,7 @@ namespace Favalon.Terms
             var f = Term.Function(
                 Term.Identity("x"),
                 Term.Identity("y"));
-            var actual = f.Reduce();
+            var actual = f.ReduceAll();
 
             Assert.AreEqual("x -> y", actual.ToString());
         }

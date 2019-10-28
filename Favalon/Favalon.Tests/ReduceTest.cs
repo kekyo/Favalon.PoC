@@ -70,7 +70,7 @@ namespace Favalon
                         add,
                         one),
                     one);
-            var reduced = add2Times.Reduce();
+            var reduced = add2Times.ReduceAll();
 
             Assert.AreEqual("p -> x -> p ((p -> x -> p x) p x)", reduced.ToString());
 
@@ -83,7 +83,7 @@ namespace Favalon
                         reduced,
                         inc),
                     zero);
-            var actual = final.Reduce();
+            var actual = final.ReduceAll();
 
             Assert.AreEqual("inc (inc zero)", actual.ToString());
         }

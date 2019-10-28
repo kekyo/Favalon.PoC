@@ -6,7 +6,7 @@
 
         public abstract Term VisitReduce();
 
-        public Term Reduce()
+        public Term ReduceAll()
         {
             var current = this;
             while (true)

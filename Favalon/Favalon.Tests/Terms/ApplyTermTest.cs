@@ -54,7 +54,7 @@ namespace Favalon.Terms
             var a = Term.Apply(
                 Term.Identity("x"),
                 Term.Identity("y"));
-            var actual = a.Reduce();
+            var actual = a.ReduceAll();
 
             Assert.AreEqual("x y", actual.ToString());
         }
@@ -68,7 +68,7 @@ namespace Favalon.Terms
                     Term.Identity("x"),
                     Term.Identity("x")),
                 Term.Identity("y"));
-            var actual = a.Reduce();
+            var actual = a.ReduceAll();
 
             Assert.AreEqual("y", actual.ToString());
         }
@@ -82,7 +82,7 @@ namespace Favalon.Terms
                     Term.Identity("->"),
                     Term.Identity("a")),
                 Term.Identity("b"));
-            var actual = a.Reduce();
+            var actual = a.ReduceAll();
 
             Assert.AreEqual("a -> b", actual.ToString());
         }
@@ -98,7 +98,7 @@ namespace Favalon.Terms
                         Term.Identity("a")),
                     Term.Identity("b")),
                 Term.Identity("c"));
-            var actual = a.Reduce();
+            var actual = a.ReduceAll();
 
             Assert.AreEqual("a -> b c", actual.ToString());
         }
@@ -116,7 +116,7 @@ namespace Favalon.Terms
                         Term.Identity("b")),
                     Term.Identity("c")),
                 Term.Identity("d"));
-            var actual = a.Reduce();
+            var actual = a.ReduceAll();
 
             Assert.AreEqual("a -> b c d", actual.ToString());
         }
@@ -132,7 +132,7 @@ namespace Favalon.Terms
                         Term.Identity("->")),
                     Term.Identity("b")),
                 Term.Identity("c"));
-            var actual = a.Reduce();
+            var actual = a.ReduceAll();
 
             Assert.AreEqual("a (b -> c)", actual.ToString());
         }
@@ -150,7 +150,7 @@ namespace Favalon.Terms
                         Term.Identity("b")),
                     Term.Identity("c")),
                 Term.Identity("d"));
-            var actual = a.Reduce();
+            var actual = a.ReduceAll();
 
             Assert.AreEqual("a (b -> c d)", actual.ToString());
         }

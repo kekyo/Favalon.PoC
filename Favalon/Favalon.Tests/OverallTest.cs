@@ -14,7 +14,7 @@ namespace Favalon
             var tokens = Lexer.EnumerableTokens(text);
             var term = Parser.EnumerableTerms(tokens).
                 Single();
-            var actual = term.Reduce();
+            var actual = term.ReduceAll();
 
             Assert.AreEqual(
                 Term.Function(
@@ -30,7 +30,8 @@ namespace Favalon
             var tokens = Lexer.EnumerableTokens(text);
             var term = Parser.EnumerableTerms(tokens).
                 Single();
-            var actual = term.Reduce();
+            var actual1 = term.VisitReduce();
+            var actual2 = actual1.VisitReduce();
 
             Assert.AreEqual(
                 Term.Apply(
@@ -40,7 +41,13 @@ namespace Favalon
                     Term.Function(
                         Term.Identity("y"),
                         Term.Identity("y"))),
-                actual);
+                actual1);
+
+            Assert.AreEqual(
+                Term.Function(
+                    Term.Identity("y"),
+                    Term.Identity("y")),
+                actual2);
         }
     }
 }

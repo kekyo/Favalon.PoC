@@ -60,9 +60,9 @@ namespace Favalon.Terms
         }
 
         [Test]
-        public void ReduceContainsFunction()
+        public void ReduceFunctionByApplied()
         {
-            // (x -> x) y
+            // (-> x x) y
             var a = Term.Apply(
                 Term.Function(
                     Term.Identity("x"),
@@ -71,6 +71,88 @@ namespace Favalon.Terms
             var actual = a.Reduce();
 
             Assert.AreEqual("y", actual.ToString());
+        }
+
+        [Test]
+        public void ReduceArrow()
+        {
+            // -> a b
+            var a = Term.Apply(
+                Term.Apply(
+                    Term.Identity("->"),
+                    Term.Identity("a")),
+                Term.Identity("b"));
+            var actual = a.Reduce();
+
+            Assert.AreEqual("a -> b", actual.ToString());
+        }
+
+        [Test]
+        public void ReduceArrowAndApply()
+        {
+            // -> a b c
+            var a = Term.Apply(
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("->"),
+                        Term.Identity("a")),
+                    Term.Identity("b")),
+                Term.Identity("c"));
+            var actual = a.Reduce();
+
+            Assert.AreEqual("a -> b c", actual.ToString());
+        }
+
+        [Test]
+        public void ReduceArrowAndApply2()
+        {
+            // -> a b c d
+            var a = Term.Apply(
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("->"),
+                            Term.Identity("a")),
+                        Term.Identity("b")),
+                    Term.Identity("c")),
+                Term.Identity("d"));
+            var actual = a.Reduce();
+
+            Assert.AreEqual("a -> b c d", actual.ToString());
+        }
+
+        [Test]
+        public void ReduceApplyAndArrow()
+        {
+            // a -> b c
+            var a = Term.Apply(
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("a"),
+                        Term.Identity("->")),
+                    Term.Identity("b")),
+                Term.Identity("c"));
+            var actual = a.Reduce();
+
+            Assert.AreEqual("a (b -> c)", actual.ToString());
+        }
+
+        [Test]
+        public void ReduceApplyAndArrowAndApply()
+        {
+            // a -> b c d
+            var a = Term.Apply(
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("a"),
+                            Term.Identity("->")),
+                        Term.Identity("b")),
+                    Term.Identity("c")),
+                Term.Identity("d"));
+            var actual = a.Reduce();
+
+            Assert.AreEqual("a (b -> c d)", actual.ToString());
         }
     }
 }

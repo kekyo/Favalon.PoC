@@ -53,7 +53,8 @@ namespace Favalon.Terms
                     {
                         return new TranslateFunctionCandidates(
                             candidates.Parameter,
-                            new ApplyTerm(candidates.Argument, a1));   // a0, a1
+                            new ApplyTerm(candidates.Argument, a1),   // a0, a1
+                            candidates.ApplyingFunction);
                     }
                     else
                     {
@@ -66,35 +67,36 @@ namespace Favalon.Terms
 
         public override Term VisitReduce()
         {
+            Term function;
+            Term argument;
+
             switch (TranslateFunction(this, new IdentityTerm("->")))
             {
                 case TranslateFunctionCandidates(Term p, Term a, Term af):
-                    return new ApplyTerm(
-                        af,
-                        new FunctionTerm(
-                            p.VisitReduce(),
-                            a.VisitReduce()));
+                    function = af.VisitReduce();
+                    argument = new FunctionTerm(p.VisitReduce(), a.VisitReduce());
+                    break;
                 case TranslateFunctionCandidates(Term p, Term a, null):
-                    return new FunctionTerm(
-                        p.VisitReduce(),
-                        a.VisitReduce());
+                    return new FunctionTerm(p.VisitReduce(), a.VisitReduce());
                 default:
-                    var function = this.Function.VisitReduce();
-                    var argument = this.Argument.VisitReduce();
-                    if (function is FunctionTerm f)
-                    {
-                        return f.Call(argument);
-                    }
-                    else if (
-                        !object.ReferenceEquals(function, this.Function) ||
-                        !object.ReferenceEquals(argument, this.Argument))
-                    {
-                        return new ApplyTerm(function, argument);
-                    }
-                    else
-                    {
-                        return this;
-                    }
+                    function = this.Function.VisitReduce();
+                    argument = this.Argument.VisitReduce();
+                    break;
+            }
+
+            if (function is FunctionTerm f)
+            {
+                return f.Call(argument);
+            }
+            else if (
+                !object.ReferenceEquals(function, this.Function) ||
+                !object.ReferenceEquals(argument, this.Argument))
+            {
+                return new ApplyTerm(function, argument);
+            }
+            else
+            {
+                return this;
             }
         }
 

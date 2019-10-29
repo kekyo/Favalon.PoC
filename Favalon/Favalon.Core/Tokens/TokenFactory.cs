@@ -10,5 +10,8 @@
 
         public static EndBracketToken End() =>
             EndBracketToken.Instance;
+
+        public static NumericToken Numeric(int value) =>
+            new NumericToken(value.ToString());
     }
 }

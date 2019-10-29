@@ -22,13 +22,13 @@ namespace Favalon.LexRunners
                 case '(':
                     return RunResult.Create(WaitingRunner.Instance, InternalFinish(context), BeginBracketToken.Instance);
                 case ')':
-                    return RunResult.Create(WaitingRunner.Instance, InternalFinish(context),  EndBracketToken.Instance);
+                    return RunResult.Create(WaitingRunner.Instance, InternalFinish(context), EndBracketToken.Instance);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {
                         var token = context.TokenBuffer.ToString();
                         context.TokenBuffer.Clear();
-                        return RunResult.Create(WaitingRunner.Instance, new IdentityToken(token));
+                        return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, new IdentityToken(token), SeparatorToken.Instance);
                     }
                     else if (Utilities.IsOperator(ch))
                     {

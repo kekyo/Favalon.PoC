@@ -28,7 +28,7 @@ namespace Favalon.LexRunners
                     {
                         var token = context.TokenBuffer.ToString();
                         context.TokenBuffer.Clear();
-                        return RunResult.Create(WaitingRunner.Instance, new NumericToken(token));
+                        return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, new NumericToken(token), SeparatorToken.Instance);
                     }
                     else if (Utilities.IsOperator(ch))
                     {

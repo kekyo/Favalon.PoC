@@ -3,9 +3,9 @@ using System;
 
 namespace Favalon.LexRunners
 {
-    internal sealed class WaitingRunner : Runner
+    internal sealed class WaitingIgnoreSpaceRunner : Runner
     {
-        private WaitingRunner()
+        private WaitingIgnoreSpaceRunner()
         { }
 
         public override RunResult Run(RunContext context, char ch)
@@ -13,13 +13,13 @@ namespace Favalon.LexRunners
             switch (ch)
             {
                 case '(':
-                    return RunResult.Create(this, BeginBracketToken.Instance);
+                    return RunResult.Create(WaitingRunner.Instance, BeginBracketToken.Instance);
                 case ')':
-                    return RunResult.Create(this, EndBracketToken.Instance);
+                    return RunResult.Create(WaitingRunner.Instance, EndBracketToken.Instance);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {
-                        return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, SeparatorToken.Instance);
+                        return RunResult.Empty(this);
                     }
                     else if (char.IsDigit(ch))
                     {
@@ -43,6 +43,6 @@ namespace Favalon.LexRunners
             }
         }
 
-        public static readonly Runner Instance = new WaitingRunner();
+        public static readonly Runner Instance = new WaitingIgnoreSpaceRunner();
     }
 }

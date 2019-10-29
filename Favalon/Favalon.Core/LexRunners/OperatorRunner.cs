@@ -28,7 +28,7 @@ namespace Favalon.LexRunners
                     {
                         var token = context.TokenBuffer.ToString();
                         context.TokenBuffer.Clear();
-                        return RunResult.Create(WaitingRunner.Instance, new IdentityToken(token));
+                        return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, new IdentityToken(token), SeparatorToken.Instance);
                     }
                     else if (char.IsDigit(ch))
                     {

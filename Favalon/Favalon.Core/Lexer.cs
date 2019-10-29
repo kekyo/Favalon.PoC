@@ -10,7 +10,7 @@ namespace Favalon
         public static IEnumerable<Token> EnumerableTokens(string text)
         {
             var context = RunContext.Create();
-            var runner = WaitingRunner.Instance;
+            var runner = WaitingIgnoreSpaceRunner.Instance;
 
             for (var index = 0; index < text.Length; index++)
             {
@@ -40,7 +40,7 @@ namespace Favalon
         public static IEnumerable<Token> EnumerableTokens(IEnumerable<char> chars)
         {
             var context = RunContext.Create();
-            var runner = WaitingRunner.Instance;
+            var runner = WaitingIgnoreSpaceRunner.Instance;
 
             foreach (var ch in chars)
             {
@@ -70,7 +70,7 @@ namespace Favalon
         public static IEnumerable<Token> EnumerableTokens(TextReader tr)
         {
             var context = RunContext.Create();
-            var runner = WaitingRunner.Instance;
+            var runner = WaitingIgnoreSpaceRunner.Instance;
 
             while (true)
             {

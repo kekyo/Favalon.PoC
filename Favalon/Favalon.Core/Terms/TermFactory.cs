@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 
 namespace Favalon.Terms
 {
@@ -16,5 +12,11 @@ namespace Favalon.Terms
 
         public static ApplyTerm Apply(Term function, Term argument) =>
             new ApplyTerm(function, argument);
+ 
+        public static MethodTerm Method(MethodInfo method) =>
+            new MethodTerm(method);
+
+        public static ConstantTerm Constant(object constant) =>
+            new ConstantTerm(constant);
     }
 }

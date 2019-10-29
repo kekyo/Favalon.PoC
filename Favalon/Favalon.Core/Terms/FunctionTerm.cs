@@ -1,6 +1,9 @@
-﻿namespace Favalon.Terms
+﻿using System;
+
+namespace Favalon.Terms
 {
-    public sealed class FunctionTerm : CallableTerm
+    public sealed class FunctionTerm :
+        CallableTerm, IEquatable<FunctionTerm>
     {
         public readonly Term Body;
 

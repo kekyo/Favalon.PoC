@@ -1,17 +1,12 @@
-﻿using System;
-
-namespace Favalon.Terms
+﻿namespace Favalon.Terms
 {
-    public sealed class FunctionTerm : Term
+    public sealed class FunctionTerm : CallableTerm
     {
-        public readonly Term Parameter;
         public readonly Term Body;
 
-        internal FunctionTerm(Term parameter, Term body)
-        {
-            this.Parameter = parameter;
+        internal FunctionTerm(Term parameter, Term body) :
+            base(parameter) =>
             this.Body = body;
-        }
 
         public override Term VisitReplace(string identity, Term replacement) =>
             (this.Parameter is IdentityTerm variable && variable.Identity == identity) ?
@@ -23,7 +18,7 @@ namespace Favalon.Terms
         public override Term VisitReduce() =>
             this;
 
-        public Term Call(Term argument) =>
+        public override Term Call(Term argument) =>
             this.Body.VisitReplace(
                 ((IdentityTerm)this.Parameter).Identity,
                 argument);

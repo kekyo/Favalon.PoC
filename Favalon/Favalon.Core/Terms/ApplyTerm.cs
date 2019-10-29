@@ -84,9 +84,9 @@ namespace Favalon.Terms
                     break;
             }
 
-            if (function is FunctionTerm f)
+            if (function is CallableTerm callable)
             {
-                return f.Call(argument);
+                return callable.Call(argument);
             }
             else if (
                 !object.ReferenceEquals(function, this.Function) ||

@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Favalon", "Favalon\Favalon.csproj", "{8B60710F-F8CF-4A71-B9C4-491DD09FB40A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Favalon.Core", "Favalon.Core\Favalon.Core.csproj", "{8B60710F-F8CF-4A71-B9C4-491DD09FB40A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Favalon.Tests", "Favalon.Tests\Favalon.Tests.csproj", "{FFA8D1C6-143B-43E7-971D-56D63ECEAAB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Favalon.Core.Tests", "Favalon.Core.Tests\Favalon.Core.Tests.csproj", "{FFA8D1C6-143B-43E7-971D-56D63ECEAAB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

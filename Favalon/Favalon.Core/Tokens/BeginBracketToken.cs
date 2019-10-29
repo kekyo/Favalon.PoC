@@ -8,6 +8,9 @@ namespace Favalon.Tokens
         private BeginBracketToken()
         { }
 
+        public override int GetHashCode() =>
+            0;
+
         public bool Equals(BeginBracketToken? other) =>
             other != null;
 

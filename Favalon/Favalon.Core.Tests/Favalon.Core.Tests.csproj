@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Favalon\Favalon.csproj" />
+        <ProjectReference Include="..\Favalon.Core\Favalon.Core.csproj" />
     </ItemGroup>
 
 </Project>

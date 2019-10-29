@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -6,6 +7,16 @@ namespace Favalon
 {
     internal static class Utilities
     {
+        private static readonly HashSet<char> operatorChars = new HashSet<char>
+        {
+            '!'/* , '"' */, '#', '$', '%', '&' /* , ''' */, '(', ')',
+            '*', '+', ',', '-'/* , '.'*/, '/'/*, ':' */, ';', '<', '=', '>', '?',
+            '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'
+        };
+
+        public static bool IsOperator(char ch) =>
+            operatorChars.Contains(ch);
+
         public static string GetFullName(this MemberInfo member)
         {
             var parentNames = (member.DeclaringType as Type)?.GetFullName() ??

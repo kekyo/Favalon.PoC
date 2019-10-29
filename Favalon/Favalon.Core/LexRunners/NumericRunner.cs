@@ -3,16 +3,16 @@ using System;
 
 namespace Favalon.LexRunners
 {
-    internal sealed class IdentityRunner : Runner
+    internal sealed class NumericRunner : Runner
     {
-        private IdentityRunner()
+        private NumericRunner()
         { }
 
-        private static IdentityToken InternalFinish(RunContext context)
+        private static NumericToken InternalFinish(RunContext context)
         {
             var token = context.TokenBuffer.ToString();
             context.TokenBuffer.Clear();
-            return new IdentityToken(token);
+            return new NumericToken(token);
         }
 
         public override RunResult Run(RunContext context, char ch)
@@ -22,13 +22,13 @@ namespace Favalon.LexRunners
                 case '(':
                     return RunResult.Create(WaitingRunner.Instance, InternalFinish(context), BeginBracketToken.Instance);
                 case ')':
-                    return RunResult.Create(WaitingRunner.Instance, InternalFinish(context),  EndBracketToken.Instance);
+                    return RunResult.Create(WaitingRunner.Instance, InternalFinish(context), EndBracketToken.Instance);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {
                         var token = context.TokenBuffer.ToString();
                         context.TokenBuffer.Clear();
-                        return RunResult.Create(WaitingRunner.Instance, new IdentityToken(token));
+                        return RunResult.Create(WaitingRunner.Instance, new NumericToken(token));
                     }
                     else if (Utilities.IsOperator(ch))
                     {
@@ -36,7 +36,7 @@ namespace Favalon.LexRunners
                         context.TokenBuffer.Append(ch);
                         return RunResult.Create(OperatorRunner.Instance, token0);
                     }
-                    else if (!char.IsControl(ch))
+                    else if (char.IsDigit(ch))
                     {
                         context.TokenBuffer.Append(ch);
                         return RunResult.Empty(this);
@@ -51,6 +51,6 @@ namespace Favalon.LexRunners
         public override RunResult Finish(RunContext context) =>
             RunResult.Create(WaitingRunner.Instance, InternalFinish(context));
 
-        public static readonly Runner Instance = new IdentityRunner();
+        public static readonly Runner Instance = new NumericRunner();
     }
 }

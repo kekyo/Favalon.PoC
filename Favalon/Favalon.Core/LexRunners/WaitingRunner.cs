@@ -1,4 +1,5 @@
 ﻿using Favalon.Tokens;
+using System;
 
 namespace Favalon.LexRunners
 {
@@ -16,14 +17,28 @@ namespace Favalon.LexRunners
                 case ')':
                     return RunResult.Create(this, EndBracketToken.Instance);
                 default:
-                    if (!char.IsWhiteSpace(ch) && !char.IsControl(ch))
+                    if (char.IsWhiteSpace(ch))
+                    {
+                        return RunResult.Empty(this);
+                    }
+                    else if (char.IsDigit(ch))
+                    {
+                        context.TokenBuffer.Append(ch);
+                        return RunResult.Empty(NumericRunner.Instance);
+                    }
+                    else if (Utilities.IsOperator(ch))
+                    {
+                        context.TokenBuffer.Append(ch);
+                        return RunResult.Empty(OperatorRunner.Instance);
+                    }
+                    else if (!char.IsControl(ch))
                     {
                         context.TokenBuffer.Append(ch);
                         return RunResult.Empty(IdentityRunner.Instance);
                     }
                     else
                     {
-                        return RunResult.Empty(this);
+                        throw new InvalidOperationException();
                     }
             }
         }

@@ -2,11 +2,18 @@
 using Favalon.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Favalon
 {
     public static class Parser
     {
+        private static ConstantTerm GetNumericConstant(string value)
+        {
+            var intValue = int.Parse(value, CultureInfo.InvariantCulture);
+            return new ConstantTerm(intValue);
+        }
+
         public static IEnumerable<Term> EnumerableTerms(IEnumerable<Token> tokens)
         {
             Term? root = null;
@@ -16,14 +23,25 @@ namespace Favalon
                 switch (token)
                 {
                     case IdentityToken identityToken:
-                        var identityTerm = new IdentityTerm(identityToken.Identity);
-                        if (root != null)
+                        switch (root)
                         {
-                            root = new ApplyTerm(root, identityTerm);
+                            case Term _:
+                                root = new ApplyTerm(root, new IdentityTerm(identityToken.Identity));
+                                break;
+                            default:
+                                root = new IdentityTerm(identityToken.Identity);
+                                break;
                         }
-                        else
+                        break;
+                    case NumericToken numericToken:
+                        switch (root)
                         {
-                            root = identityTerm;
+                            case Term _:
+                                root = new ApplyTerm(root, GetNumericConstant(numericToken.Value));
+                                break;
+                            default:
+                                root = GetNumericConstant(numericToken.Value);
+                                break;
                         }
                         break;
                     case BeginBracketToken _:

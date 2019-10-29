@@ -1,6 +1,4 @@
-﻿using Favalon.Tokens;
-
-namespace Favalon.LexRunners
+﻿namespace Favalon.LexRunners
 {
     internal abstract class Runner
     {

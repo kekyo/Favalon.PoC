@@ -3,9 +3,9 @@ using System;
 
 namespace Favalon.LexRunners
 {
-    internal sealed class IdentityRunner : Runner
+    internal sealed class OperatorRunner : Runner
     {
-        private IdentityRunner()
+        private OperatorRunner()
         { }
 
         private static IdentityToken InternalFinish(RunContext context)
@@ -22,7 +22,7 @@ namespace Favalon.LexRunners
                 case '(':
                     return RunResult.Create(WaitingRunner.Instance, InternalFinish(context), BeginBracketToken.Instance);
                 case ')':
-                    return RunResult.Create(WaitingRunner.Instance, InternalFinish(context),  EndBracketToken.Instance);
+                    return RunResult.Create(WaitingRunner.Instance, InternalFinish(context), EndBracketToken.Instance);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {
@@ -30,11 +30,28 @@ namespace Favalon.LexRunners
                         context.TokenBuffer.Clear();
                         return RunResult.Create(WaitingRunner.Instance, new IdentityToken(token));
                     }
-                    else if (Utilities.IsOperator(ch))
+                    else if (char.IsDigit(ch))
+                    {
+                        // Sign (+/-)
+                        if (context.TokenBuffer.Length == 1)
+                        {
+                            var ch0 = context.TokenBuffer[0];
+                            if ((ch0 == '+') || (ch0 == '-'))
+                            {
+                                context.TokenBuffer.Append(ch);
+                                return RunResult.Empty(NumericRunner.Instance);
+                            }
+                        }
+
+                        var token0 = InternalFinish(context);
+                        context.TokenBuffer.Append(ch);
+                        return RunResult.Create(NumericRunner.Instance, token0);
+                    }
+                    else if (!Utilities.IsOperator(ch))
                     {
                         var token0 = InternalFinish(context);
                         context.TokenBuffer.Append(ch);
-                        return RunResult.Create(OperatorRunner.Instance, token0);
+                        return RunResult.Create(IdentityRunner.Instance, token0);
                     }
                     else if (!char.IsControl(ch))
                     {
@@ -51,6 +68,6 @@ namespace Favalon.LexRunners
         public override RunResult Finish(RunContext context) =>
             RunResult.Create(WaitingRunner.Instance, InternalFinish(context));
 
-        public static readonly Runner Instance = new IdentityRunner();
+        public static readonly Runner Instance = new OperatorRunner();
     }
 }

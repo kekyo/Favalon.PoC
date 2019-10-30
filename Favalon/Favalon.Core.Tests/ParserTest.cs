@@ -179,7 +179,7 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
-                    Token.Numeric("+123"),
+                    Token.Identity("+"), Token.Numeric("123"),
                 });
 
             Assert.AreEqual(
@@ -193,41 +193,11 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
-                    Token.Numeric("-123"),
+                    Token.Identity("-"), Token.Numeric("123"),
                 });
 
             Assert.AreEqual(
                 new[] { Term.Constant(-123) },
-                actual);
-        }
-
-        [Test]
-        public void EnumerableNumericTokenWithPlusSignAfterIdentity()
-        {
-            var actual = Parser.EnumerableTerms(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    Token.Numeric("+123"),
-                });
-
-            Assert.AreEqual(
-                new Term[] { Term.Apply(Term.Identity("abc"), Term.Constant(123)) },
-                actual);
-        }
-
-        [Test]
-        public void EnumerableNumericTokenWithMinusSignAfterIdentity()
-        {
-            var actual = Parser.EnumerableTerms(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    Token.Numeric("-123"),
-                });
-
-            Assert.AreEqual(
-                new Term[] { Term.Apply(Term.Identity("abc"), Term.Constant(-123)) },
                 actual);
         }
 
@@ -237,12 +207,11 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
-                    Token.Identity("+"),
-                    Token.Numeric("123"),
+                    Token.Identity("+"), Token.WhiteSpace(), Token.Numeric("123"),
                 });
 
             Assert.AreEqual(
-                new[] { Term.Apply(Term.Identity("+"), Term.Constant(123)) },
+                new[] { Term.Constant(123) },
                 actual);
         }
 
@@ -252,12 +221,77 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
+                    Token.Identity("-"), Token.WhiteSpace(), Token.Numeric("123"),
+                });
+
+            Assert.AreEqual(
+                new[] { Term.Constant(-123) },
+                actual);
+        }
+
+        [Test]
+        public void EnumerableNumericTokenClosePlusSignAfterIdentity()
+        {
+            var actual = Parser.EnumerableTerms(
+                new Token[]
+                {
+                    Token.Identity("abc"),
+                    Token.WhiteSpace(),
+                    Token.Identity("+"),
+                    Token.Numeric("123"),
+                });
+
+            Assert.AreEqual(
+                new Term[] { Term.Apply(Term.Identity("abc"), Term.Constant(123)) },
+                actual);
+        }
+
+        [Test]
+        public void EnumerableNumericTokenCloseMinusSignAfterIdentity()
+        {
+            var actual = Parser.EnumerableTerms(
+                new Token[]
+                {
+                    Token.Identity("abc"),
+                    Token.WhiteSpace(),
                     Token.Identity("-"),
                     Token.Numeric("123"),
                 });
 
             Assert.AreEqual(
-                new[] { Term.Apply(Term.Identity("-"), Term.Constant(123)) },
+                new Term[] { Term.Apply(Term.Identity("abc"), Term.Constant(-123)) },
+                actual);
+        }
+
+        [Test]
+        public void EnumerableNumericTokenWithPlusOperatorAfterIdentity()
+        {
+            var actual = Parser.EnumerableTerms(
+                new Token[]
+                {
+                    Token.Identity("abc"),
+                    Token.Identity("+"),
+                    Token.Numeric("123"),
+                });
+
+            Assert.AreEqual(
+                new Term[] { Term.Apply(Term.Apply(Term.Identity("abc"), Term.Identity("+")), Term.Constant(123)) },
+                actual);
+        }
+
+        [Test]
+        public void EnumerableNumericTokenWithMinusOperatorAfterIdentity()
+        {
+            var actual = Parser.EnumerableTerms(
+                new Token[]
+                {
+                    Token.Identity("abc"),
+                    Token.Identity("-"),
+                    Token.Numeric("123"),
+                });
+
+            Assert.AreEqual(
+                new Term[] { Term.Apply(Term.Apply(Term.Identity("abc"), Term.Identity("-")), Term.Constant(123)) },
                 actual);
         }
     }

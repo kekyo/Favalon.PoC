@@ -32,17 +32,6 @@ namespace Favalon.LexRunners
                     }
                     else if (char.IsDigit(ch))
                     {
-                        // Sign (+/-)
-                        if (context.TokenBuffer.Length == 1)
-                        {
-                            var ch0 = context.TokenBuffer[0];
-                            if ((ch0 == '+') || (ch0 == '-'))
-                            {
-                                context.TokenBuffer.Append(ch);
-                                return RunResult.Empty(NumericRunner.Instance);
-                            }
-                        }
-
                         var token0 = InternalFinish(context);
                         context.TokenBuffer.Append(ch);
                         return RunResult.Create(NumericRunner.Instance, token0);

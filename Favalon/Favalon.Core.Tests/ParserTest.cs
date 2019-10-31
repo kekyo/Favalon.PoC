@@ -282,6 +282,10 @@ namespace Favalon
         [Test]
         public void EnumerableNumericTokenWithMinusOperatorAfterIdentity()
         {
+            // abc-123     // minus sign
+            // abc -123    // minus sign
+            // abc- 123    // binop
+            // abc - 123   // binop
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {

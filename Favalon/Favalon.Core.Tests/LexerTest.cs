@@ -238,7 +238,7 @@ namespace Favalon
             var actual = run(text);
 
             Assert.AreEqual(
-                new Token[] { Token.Numeric("+123"), Token.WhiteSpace(), Token.Numeric("+456"), Token.WhiteSpace(), Token.Numeric("+789") },
+                new Token[] { Token.Identity("+"), Token.Numeric("123"), Token.WhiteSpace(), Token.Identity("+"), Token.Numeric("456"), Token.WhiteSpace(), Token.Identity("+"), Token.Numeric("789") },
                 actual);
         }
 
@@ -249,7 +249,7 @@ namespace Favalon
             var actual = run(text);
 
             Assert.AreEqual(
-                new Token[] { Token.Numeric("-123"), Token.WhiteSpace(), Token.Numeric("-456"), Token.WhiteSpace(), Token.Numeric("-789") },
+                new Token[] { Token.Identity("-"), Token.Numeric("123"), Token.WhiteSpace(), Token.Identity("-"), Token.Numeric("456"), Token.WhiteSpace(), Token.Identity("-"), Token.Numeric("789") },
                 actual);
         }
 
@@ -304,7 +304,7 @@ namespace Favalon
             var actual = run(text);
 
             Assert.AreEqual(
-                new Token[] { Token.Numeric("123"), Token.Numeric("+456") },
+                new Token[] { Token.Numeric("123"), Token.Identity("+"), Token.Numeric("456") },
                 actual);
         }
 
@@ -315,7 +315,7 @@ namespace Favalon
             var actual = run(text);
 
             Assert.AreEqual(
-                new Token[] { Token.Numeric("123"), Token.Numeric("-456") },
+                new Token[] { Token.Numeric("123"), Token.Identity("-"), Token.Numeric("456") },
                 actual);
         }
 
@@ -326,9 +326,15 @@ namespace Favalon
             var actual = run(text);
 
             Assert.AreEqual(
-                new Token[] { Token.Numeric("-123"), Token.Identity("*"),
+                new Token[] {
+                    Token.Identity("-"),
+                    Token.Numeric("123"),
+                    Token.Identity("*"),
                     Token.Begin(),
-                    Token.Numeric("+456"), Token.Numeric("+789"),
+                    Token.Identity("+"),
+                    Token.Numeric("456"),
+                    Token.Identity("+"),
+                    Token.Numeric("789"),
                     Token.End()
                 },
                 actual);
@@ -341,9 +347,15 @@ namespace Favalon
             var actual = run(text);
 
             Assert.AreEqual(
-                new Token[] { Token.Numeric("+123"), Token.Identity("*"),
+                new Token[] {
+                    Token.Identity("+"),
+                    Token.Numeric("123"),
+                    Token.Identity("*"),
                     Token.Begin(),
-                    Token.Numeric("-456"), Token.Numeric("-789"),
+                    Token.Identity("-"),
+                    Token.Numeric("456"),
+                    Token.Identity("-"),
+                    Token.Numeric("789"),
                     Token.End()
                 },
                 actual);

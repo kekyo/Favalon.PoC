@@ -8,63 +8,120 @@ namespace Favalon
 {
     public static class Parser
     {
-        private static ConstantTerm GetNumericConstant(string value)
+        private static ConstantTerm GetNumericConstant(string value, Token? preSign)
         {
-            var intValue = int.Parse(value, CultureInfo.InvariantCulture);
+            var sign = preSign switch
+            {
+                IdentityToken("-") => -1,
+                _ => 1,
+            };
+            var intValue = int.Parse(value, CultureInfo.InvariantCulture) * sign;
             return new ConstantTerm(intValue);
         }
 
         public static IEnumerable<Term> EnumerableTerms(IEnumerable<Token> tokens)
         {
-            Term? root = null;
+            Token? lastToken = null;
+            IdentityToken? lastSignToken = null;
+            Term? rootTerm = null;
             var stack = new Stack<Term?>();
             foreach (var token in tokens)
             {
                 switch (token)
                 {
+                    case IdentityToken("+"):
+                    case IdentityToken("-"):
+                        switch (lastToken)
+                        {
+                            case WhiteSpaceToken _:
+                            case null:
+                                lastSignToken = (IdentityToken)token;
+                                break;
+                            default:
+                                switch (rootTerm)
+                                {
+                                    case Term _:
+                                        rootTerm = new ApplyTerm(rootTerm, new IdentityTerm(((IdentityToken)token).Identity));
+                                        break;
+                                    default:
+                                        rootTerm = new IdentityTerm(((IdentityToken)token).Identity);
+                                        break;
+                                }
+                                break;
+                        }
+                        break;
+
                     case IdentityToken identityToken:
-                        switch (root)
+                        switch (rootTerm)
                         {
                             case Term _:
-                                root = new ApplyTerm(root, new IdentityTerm(identityToken.Identity));
+                                rootTerm = new ApplyTerm(rootTerm, new IdentityTerm(identityToken.Identity));
                                 break;
                             default:
-                                root = new IdentityTerm(identityToken.Identity);
+                                rootTerm = new IdentityTerm(identityToken.Identity);
                                 break;
                         }
+                        lastSignToken = null;
                         break;
+
                     case NumericToken numericToken:
-                        switch (root)
+                        switch (rootTerm)
                         {
                             case Term _:
-                                root = new ApplyTerm(root, GetNumericConstant(numericToken.Value));
+                                rootTerm = new ApplyTerm(rootTerm, GetNumericConstant(numericToken.Value, lastSignToken));
                                 break;
                             default:
-                                root = GetNumericConstant(numericToken.Value);
+                                rootTerm = GetNumericConstant(numericToken.Value, lastSignToken);
                                 break;
                         }
+                        lastSignToken = null;
                         break;
+
                     case BeginBracketToken _:
-                        stack.Push(root);
-                        root = null;
+                        stack.Push(rootTerm);
+                        rootTerm = null;
+                        lastSignToken = null;
                         break;
+
                     case EndBracketToken _:
                         var lastTerm = stack.Pop();
-                        if ((root != null) && (lastTerm != null))
+                        if ((rootTerm != null) && (lastTerm != null))
                         {
-                            root = new ApplyTerm(lastTerm, root);
+                            rootTerm = new ApplyTerm(lastTerm, rootTerm);
                         }
                         else if (lastTerm != null)
                         {
-                            root = lastTerm;
+                            rootTerm = lastTerm;
+                        }
+                        lastSignToken = null;
+                        break;
+
+                    case WhiteSpaceToken _:
+                        switch (lastSignToken)
+                        {
+                            case IdentityToken("+"):
+                            case IdentityToken("-"):
+                                switch (rootTerm)
+                                {
+                                    case Term _:
+                                        rootTerm = new ApplyTerm(rootTerm, new IdentityTerm(lastSignToken.Identity));
+                                        break;
+                                    default:
+                                        rootTerm = new IdentityTerm(lastSignToken.Identity);
+                                        break;
+                                }
+                                lastSignToken = null;
+                                break;
                         }
                         break;
                 }
+
+                lastToken = token;
             }
 
-            if (root != null)
+            if (rootTerm != null)
             {
-                yield return root;
+                yield return rootTerm;
             }
         }
     }

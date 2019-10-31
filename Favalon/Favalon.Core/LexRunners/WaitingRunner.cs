@@ -19,7 +19,7 @@ namespace Favalon.LexRunners
                 default:
                     if (char.IsWhiteSpace(ch))
                     {
-                        return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, SeparatorToken.Instance);
+                        return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, WhiteSpaceToken.Instance);
                     }
                     else if (char.IsDigit(ch))
                     {

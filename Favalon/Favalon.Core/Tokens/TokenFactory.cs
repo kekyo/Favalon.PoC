@@ -11,8 +11,8 @@
         public static EndBracketToken End() =>
             EndBracketToken.Instance;
 
-        public static SeparatorToken WhiteSpace() =>
-            SeparatorToken.Instance;
+        public static WhiteSpaceToken WhiteSpace() =>
+            WhiteSpaceToken.Instance;
 
         public static NumericToken Numeric(string value) =>
             new NumericToken(value);

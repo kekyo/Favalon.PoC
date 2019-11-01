@@ -1,10 +1,20 @@
-﻿using Favalon.Terms;
+﻿using Favalon.Internal;
+using Favalon.Terms;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Favalon
 {
     public class Context
     {
+        private static readonly Dictionary<string, MethodTerm[]> methodTerms =
+            typeof(object).GetTypeInfo().Assembly.
+            EnumerableAllPublicStaticMethods().
+            Where(method => method.GetParameters().Length == 1).
+            GroupBy(method => method.GetFullName()).
+            ToDictionary(g => g.Key, g => g.Select(method => new MethodTerm(method)).ToArray());
+
         private protected Context()
         { }
 

@@ -1,4 +1,5 @@
-﻿using Favalon.Tokens;
+﻿using Favalon.Internal;
+using Favalon.Tokens;
 using System;
 
 namespace Favalon.LexRunners

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Favalon
+namespace Favalon.Internal
 {
     internal static class Utilities
     {
@@ -16,6 +16,11 @@ namespace Favalon
 
         public static bool IsOperator(char ch) =>
             operatorChars.Contains(ch);
+
+        public static IEnumerable<MethodInfo> EnumerableAllPublicStaticMethods(this Assembly assembly) =>
+            assembly.DefinedTypes.
+            Where(type => (type.IsPublic || type.IsNestedPublic) && !type.IsGenericType).
+            SelectMany(type => type.DeclaredMethods.Where(method => method.IsPublic && method.IsStatic && !method.IsGenericMethod));
 
         public static string GetFullName(this MemberInfo member)
         {
@@ -47,6 +52,6 @@ namespace Favalon
         }
 
         public static string GetFullName(this Type type) =>
-            GetFullName(type.GetTypeInfo());
+            ((MemberInfo)type.GetTypeInfo()).GetFullName();
     }
 }

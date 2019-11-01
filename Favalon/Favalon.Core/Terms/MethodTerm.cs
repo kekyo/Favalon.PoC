@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Internal;
+using System;
 using System.Linq;
 using System.Reflection;
 

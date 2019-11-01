@@ -1,5 +1,6 @@
 ﻿using Favalon.Terms;
 using NUnit.Framework;
+using System.Linq;
 
 namespace Favalon
 {
@@ -72,9 +73,10 @@ namespace Favalon
                     one);
 
             var environment = Environment.Create();
-            var reduced = environment.Reduce(add2Times);
+            var reduced = environment.EnumerableReduceSteps(add2Times).
+                ToArray();
 
-            Assert.AreEqual("p -> x -> p ((p -> x -> p x) p x)", reduced.ToString());
+            Assert.AreEqual("p -> x -> p ((p -> x -> p x) p x)", reduced.Last().ToString());
 
             var inc = Term.Identity("inc");
             var zero = Term.Identity("zero");
@@ -82,7 +84,7 @@ namespace Favalon
             var final =
                 Term.Apply(
                     Term.Apply(
-                        reduced,
+                        reduced.Last(),
                         inc),
                     zero);
 

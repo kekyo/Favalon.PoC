@@ -10,12 +10,12 @@ namespace Favalon.Terms
         internal IdentityTerm(string identity) =>
             this.Identity = identity;
 
-        public override Term VisitReplace(string identity, Term replacement) =>
+        protected internal override Term VisitReplace(string identity, Term replacement) =>
             (identity == this.Identity) ?
                 replacement :
                 this;
 
-        public override Term VisitReduce(Context context) =>
+        protected internal override Term VisitReduce(Context context) =>
             this;
 
         public override int GetHashCode() =>

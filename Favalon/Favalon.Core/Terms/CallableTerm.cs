@@ -7,10 +7,10 @@
         internal CallableTerm(Term parameter) =>
             this.Parameter = parameter;
 
-        public sealed override Term VisitReduce(Context context) =>
+        protected internal sealed override Term VisitReduce(Context context) =>
             this;
 
-        public abstract Term Call(Context context, Term argument);
+        protected internal abstract Term VisitCall(Context context, Term argument);
 
         public void Deconstruct(out Term parameter) =>
             parameter = this.Parameter;

@@ -17,7 +17,9 @@ namespace Favalon.Terms
         public void Replace()
         {
             var id = Term.Identity("x");
-            var actual = id.VisitReplace("x", Term.Identity("y"));
+
+            var environment = Environment.Create();
+            var actual = environment.Replace(id, "x", Term.Identity("y"));
 
             Assert.AreEqual("y", actual.ToString());
         }
@@ -26,7 +28,9 @@ namespace Favalon.Terms
         public void ReplaceNotApplicable()
         {
             var id = Term.Identity("x");
-            var actual = id.VisitReplace("z", Term.Identity("y"));
+
+            var environment = Environment.Create();
+            var actual = environment.Replace(id, "z", Term.Identity("y"));
 
             Assert.AreEqual("x", actual.ToString());
         }

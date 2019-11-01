@@ -13,10 +13,10 @@ namespace Favalon.Terms
             base(new IdentityTerm(method.GetParameters().Single().Name)) =>
             this.Method = method;
 
-        public override Term VisitReplace(string identity, Term replacement) =>
+        protected internal override Term VisitReplace(string identity, Term replacement) =>
             this;
 
-        public override Term Call(Context context, Term argument) =>
+        protected internal override Term VisitCall(Context context, Term argument) =>
             new ConstantTerm(
                 this.Method.Invoke(
                     null,

@@ -21,7 +21,9 @@ namespace Favalon.Terms
             var f = Term.Function(
                 Term.Identity("x"),
                 Term.Identity("y"));
-            var actual = f.VisitReplace("y", Term.Identity("z"));
+
+            var environment = Environment.Create();
+            var actual = environment.Replace(f, "y", Term.Identity("z"));
 
             Assert.AreEqual("x -> z", actual.ToString());
         }
@@ -32,7 +34,9 @@ namespace Favalon.Terms
             var f = Term.Function(
                 Term.Identity("x"),
                 Term.Identity("y"));
-            var actual = f.VisitReplace("x", Term.Identity("z"));
+
+            var environment = Environment.Create();
+            var actual = environment.Replace(f, "x", Term.Identity("z"));
 
             Assert.AreEqual("x -> y", actual.ToString());
         }
@@ -65,7 +69,7 @@ namespace Favalon.Terms
                 Term.Identity("z"));
 
             var environment = Environment.Create();
-            var actual = f.Call(environment, arg);
+            var actual = environment.Call(f, arg);
 
             Assert.AreEqual("y -> (z -> z) y", actual.ToString());
         }

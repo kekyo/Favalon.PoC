@@ -14,7 +14,7 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        public override Term VisitReplace(string identity, Term replacement) =>
+        protected internal override Term VisitReplace(string identity, Term replacement) =>
             new ApplyTerm(
                 this.Function.VisitReplace(identity, replacement),
                 this.Argument.VisitReplace(identity, replacement));
@@ -65,7 +65,7 @@ namespace Favalon.Terms
             }
         }
 
-        public override Term VisitReduce(Context context)
+        protected internal override Term VisitReduce(Context context)
         {
             Term function;
             Term argument;
@@ -86,7 +86,7 @@ namespace Favalon.Terms
 
             if (function is CallableTerm callable)
             {
-                return callable.Call(context, argument);
+                return callable.VisitCall(context, argument);
             }
             else if (
                 !object.ReferenceEquals(function, this.Function) ||

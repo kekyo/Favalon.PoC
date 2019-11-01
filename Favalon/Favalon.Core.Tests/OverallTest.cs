@@ -34,8 +34,8 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual1 = term.VisitReduce(environment);
-            var actual2 = actual1.VisitReduce(environment);
+            var actual1 = environment.Reduce(term, false);
+            var actual2 = environment.Reduce(actual1, false);
 
             Assert.AreEqual(
                 Term.Apply(

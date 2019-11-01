@@ -11,14 +11,14 @@ namespace Favalon.Terms
             base(parameter) =>
             this.Body = body;
 
-        public override Term VisitReplace(string identity, Term replacement) =>
+        protected internal override Term VisitReplace(string identity, Term replacement) =>
             (this.Parameter is IdentityTerm variable && variable.Identity == identity) ?
                 this :  // NOT applicable
                 new FunctionTerm(
                     this.Parameter.VisitReplace(identity, replacement),
                     this.Body.VisitReplace(identity, replacement));
 
-        public override Term Call(Context context, Term argument) =>
+        protected internal override Term VisitCall(Context context, Term argument) =>
             this.Body.VisitReplace(
                 ((IdentityTerm)this.Parameter).Identity,
                 argument);

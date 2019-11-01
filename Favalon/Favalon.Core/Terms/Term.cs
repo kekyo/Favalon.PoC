@@ -2,8 +2,8 @@
 {
     public abstract partial class Term
     {
-        public abstract Term VisitReplace(string identity, Term replacement);
+        protected internal abstract Term VisitReplace(string identity, Term replacement);
 
-        public abstract Term VisitReduce(Context context);
+        protected internal abstract Term VisitReduce(Context context);
     }
 }

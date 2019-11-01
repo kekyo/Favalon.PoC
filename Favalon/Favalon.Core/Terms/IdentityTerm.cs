@@ -15,7 +15,7 @@ namespace Favalon.Terms
                 replacement :
                 this;
 
-        public override Term VisitReduce() =>
+        public override Term VisitReduce(Context context) =>
             this;
 
         public override int GetHashCode() =>

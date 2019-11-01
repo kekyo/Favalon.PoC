@@ -65,7 +65,7 @@ namespace Favalon.Terms
             }
         }
 
-        public override Term VisitReduce()
+        public override Term VisitReduce(Context context)
         {
             Term function;
             Term argument;
@@ -73,20 +73,20 @@ namespace Favalon.Terms
             switch (TranslateFunction(this, new IdentityTerm("->")))
             {
                 case TranslateFunctionCandidates(Term p, Term a, Term af):
-                    function = af.VisitReduce();
-                    argument = new FunctionTerm(p.VisitReduce(), a.VisitReduce());
+                    function = af.VisitReduce(context);
+                    argument = new FunctionTerm(p.VisitReduce(context), a.VisitReduce(context));
                     break;
                 case TranslateFunctionCandidates(Term p, Term a, null):
-                    return new FunctionTerm(p.VisitReduce(), a.VisitReduce());
+                    return new FunctionTerm(p.VisitReduce(context), a.VisitReduce(context));
                 default:
-                    function = this.Function.VisitReduce();
-                    argument = this.Argument.VisitReduce();
+                    function = this.Function.VisitReduce(context);
+                    argument = this.Argument.VisitReduce(context);
                     break;
             }
 
             if (function is CallableTerm callable)
             {
-                return callable.Call(argument);
+                return callable.Call(context, argument);
             }
             else if (
                 !object.ReferenceEquals(function, this.Function) ||

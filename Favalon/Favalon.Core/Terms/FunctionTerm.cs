@@ -18,10 +18,7 @@ namespace Favalon.Terms
                     this.Parameter.VisitReplace(identity, replacement),
                     this.Body.VisitReplace(identity, replacement));
 
-        public override Term VisitReduce() =>
-            this;
-
-        public override Term Call(Term argument) =>
+        public override Term Call(Context context, Term argument) =>
             this.Body.VisitReplace(
                 ((IdentityTerm)this.Parameter).Identity,
                 argument);

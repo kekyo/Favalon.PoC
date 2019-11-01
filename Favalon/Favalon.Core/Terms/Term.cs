@@ -4,20 +4,6 @@
     {
         public abstract Term VisitReplace(string identity, Term replacement);
 
-        public abstract Term VisitReduce();
-
-        public Term ReduceAll()
-        {
-            var current = this;
-            while (true)
-            {
-                var reduced = current.VisitReduce();
-                if (object.ReferenceEquals(reduced, current))
-                {
-                    return current;
-                }
-                current = reduced;
-            }
-        }
+        public abstract Term VisitReduce(Context context);
     }
 }

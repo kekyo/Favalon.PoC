@@ -16,11 +16,11 @@ namespace Favalon.Terms
         public override Term VisitReplace(string identity, Term replacement) =>
             this;
 
-        public override Term VisitReduce() =>
-            this;
-
-        public override Term Call(Term argument) =>
-            new ConstantTerm(this.Method.Invoke(null, new object[] { ((ConstantTerm)argument.ReduceAll()).Constant }));
+        public override Term Call(Context context, Term argument) =>
+            new ConstantTerm(
+                this.Method.Invoke(
+                    null,
+                    new object[] { ((ConstantTerm)context.Reduce(argument)).Constant }));
 
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^

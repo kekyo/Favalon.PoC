@@ -8,15 +8,52 @@ namespace Favalon
 {
     public class Context
     {
-        private static readonly Dictionary<string, MethodTerm[]> methodTerms =
+        private static readonly Dictionary<string, List<Term>> boundTerms =
             typeof(object).GetTypeInfo().Assembly.
             EnumerableAllPublicStaticMethods().
             Where(method => method.GetParameters().Length == 1).
             GroupBy(method => method.GetFullName()).
-            ToDictionary(g => g.Key, g => g.Select(method => new MethodTerm(method)).ToArray());
+            ToDictionary(g => g.Key, g => g.Select(method => (Term)new MethodTerm(method)).ToList());
+
+        private static void AddBoundTerm(
+            Dictionary<string, List<Term>> boundTerms, string identity, Term term)
+        {
+            if (!boundTerms.TryGetValue(identity, out var terms))
+            {
+                terms = new List<Term>();
+                boundTerms.Add(identity, terms);
+            }
+            terms.Add(term);
+        }
+
+        static Context()
+        {
+            // operator arrow (lambda constructor)
+            // -> a b
+            // --------------
+            // f  a b
+            // ((f:'1->'2 a:'1):'2 b:'3):'4
+            // ((f:'1->'2 a:'1):'3->'4 b:'3):'4
+            // ((f:'1->'3->'4 a:'1):'3->'4 b:'3):'4
+            AddBoundTerm(
+                boundTerms,
+                "->",
+                // f:'1->'3->'4
+                new InterpretTerm(
+                    "->", "a",  // a:'1
+                    (ic, a) =>
+                        // '3->'4
+                        new InterpretTerm(
+                            $"Closure(-> {a})", "b",  // b:'3
+                            (oc, b) =>
+                                new FunctionTerm(a.VisitReduce(ic), b.VisitReduce(oc)))));
+        }
 
         private protected Context()
         { }
+
+        public Term[]? LookupIdentity(IdentityTerm identity) =>
+            boundTerms.TryGetValue(identity.Identity, out var terms) ? terms.ToArray() : null;
 
         public Term Replace(Term term, string identity, Term replacement) =>
             term.VisitReplace(identity, replacement);

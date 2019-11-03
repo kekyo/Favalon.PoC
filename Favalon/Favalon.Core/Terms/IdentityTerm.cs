@@ -16,7 +16,9 @@ namespace Favalon.Terms
                 this;
 
         protected internal override Term VisitReduce(Context context) =>
-            this;
+            context.LookupIdentity(this) is Term[] terms ?
+                terms[0] :
+                this;
 
         public override int GetHashCode() =>
             this.Identity.GetHashCode();

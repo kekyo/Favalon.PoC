@@ -2,10 +2,10 @@
 {
     public abstract class CallableTerm : Term
     {
-        public readonly Term Parameter;
+        internal CallableTerm()
+        { }
 
-        internal CallableTerm(Term parameter) =>
-            this.Parameter = parameter;
+        public abstract Term Parameter { get; }
 
         protected internal sealed override Term VisitReduce(Context context) =>
             this;

@@ -40,16 +40,21 @@ namespace Favalon.Terms
             }
         }
 
-        private static TranslateFunctionCandidates? TranslateFunction(Term term, IdentityTerm functionIdentity)
+        private static readonly IdentityTerm functionIdentity = new IdentityTerm("->");
+
+        private static TranslateFunctionCandidates? TranslateFunction(
+            Context context, Term term)
         {
             switch (term)
             {
-                case ApplyTerm(ApplyTerm(ApplyTerm(Term f, IdentityTerm identity), Term p), Term a0) when identity.Equals(functionIdentity):
+                case ApplyTerm(ApplyTerm(ApplyTerm(Term f, IdentityTerm identity), Term p), Term a0)
+                    when context.LookupIdentity(identity) is Term[] terms:
                     return new TranslateFunctionCandidates(p, a0, f);
-                case ApplyTerm(ApplyTerm(IdentityTerm identity, Term p), Term a0) when identity.Equals(functionIdentity):
+                case ApplyTerm(ApplyTerm(IdentityTerm identity, Term p), Term a0)
+                    when context.LookupIdentity(identity) is Term[] terms:
                     return new TranslateFunctionCandidates(p, a0);
                 case ApplyTerm(Term child, Term a1):
-                    if (TranslateFunction(child, functionIdentity) is TranslateFunctionCandidates candidates)
+                    if (TranslateFunction(context, child) is TranslateFunctionCandidates candidates)
                     {
                         return new TranslateFunctionCandidates(
                             candidates.Parameter,
@@ -65,12 +70,12 @@ namespace Favalon.Terms
             }
         }
 
-        protected internal override Term VisitReduce(Context context)
+        internal Term VisitReduce0(Context context)
         {
             Term function;
             Term argument;
 
-            switch (TranslateFunction(this, new IdentityTerm("->")))
+            switch (TranslateFunction(context, this))
             {
                 case TranslateFunctionCandidates(Term p, Term a, Term af):
                     function = af.VisitReduce(context);
@@ -83,6 +88,27 @@ namespace Favalon.Terms
                     argument = this.Argument.VisitReduce(context);
                     break;
             }
+
+            if (function is CallableTerm callable)
+            {
+                return callable.VisitCall(context, argument);
+            }
+            else if (
+                !object.ReferenceEquals(function, this.Function) ||
+                !object.ReferenceEquals(argument, this.Argument))
+            {
+                return new ApplyTerm(function, argument);
+            }
+            else
+            {
+                return this;
+            }
+        }
+
+        protected internal override Term VisitReduce(Context context)
+        {
+            var function = this.Function.VisitReduce(context);
+            var argument = this.Argument.VisitReduce(context);
 
             if (function is CallableTerm callable)
             {

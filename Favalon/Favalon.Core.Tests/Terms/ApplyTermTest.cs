@@ -102,14 +102,14 @@ namespace Favalon.Terms
         [Test]
         public void ReduceArrowAndApply()
         {
-            // -> a b c
+            // -> a (b c)
             var a = Term.Apply(
                 Term.Apply(
-                    Term.Apply(
-                        Term.Identity("->"),
-                        Term.Identity("a")),
-                    Term.Identity("b")),
-                Term.Identity("c"));
+                    Term.Identity("->"),
+                    Term.Identity("a")),
+                Term.Apply(
+                    Term.Identity("b"),
+                    Term.Identity("c")));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(a);
@@ -120,16 +120,16 @@ namespace Favalon.Terms
         [Test]
         public void ReduceArrowAndApply2()
         {
-            // -> a b c d
+            // -> a (b c d)
             var a = Term.Apply(
                 Term.Apply(
+                    Term.Identity("->"),
+                    Term.Identity("a")),
+                Term.Apply(
                     Term.Apply(
-                        Term.Apply(
-                            Term.Identity("->"),
-                            Term.Identity("a")),
-                        Term.Identity("b")),
-                    Term.Identity("c")),
-                Term.Identity("d"));
+                        Term.Identity("b"),
+                        Term.Identity("c")),
+                    Term.Identity("d")));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(a);
@@ -140,14 +140,14 @@ namespace Favalon.Terms
         [Test]
         public void ReduceApplyAndArrow()
         {
-            // a -> b c
+            // a (-> b c)
             var a = Term.Apply(
+                Term.Identity("a"),
                 Term.Apply(
                     Term.Apply(
-                        Term.Identity("a"),
-                        Term.Identity("->")),
-                    Term.Identity("b")),
-                Term.Identity("c"));
+                        Term.Identity("->"),
+                        Term.Identity("b")),
+                    Term.Identity("c")));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(a);
@@ -158,16 +158,16 @@ namespace Favalon.Terms
         [Test]
         public void ReduceApplyAndArrowAndApply()
         {
-            // a -> b c d
+            // a (-> b (c d))
             var a = Term.Apply(
+                Term.Identity("a"),
                 Term.Apply(
                     Term.Apply(
-                        Term.Apply(
-                            Term.Identity("a"),
-                            Term.Identity("->")),
+                        Term.Identity("->"),
                         Term.Identity("b")),
-                    Term.Identity("c")),
-                Term.Identity("d"));
+                    Term.Apply(
+                        Term.Identity("c"),
+                        Term.Identity("d"))));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(a);

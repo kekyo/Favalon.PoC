@@ -10,9 +10,11 @@ namespace Favalon.Terms
     {
         public new readonly MethodInfo Method;
 
-        internal MethodTerm(MethodInfo method) :
-            base(new IdentityTerm(method.GetParameters().Single().Name)) =>
+        internal MethodTerm(MethodInfo method) =>
             this.Method = method;
+
+        public override Term Parameter =>
+            new IdentityTerm(this.Method.GetParameters().Single().Name);
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             this;

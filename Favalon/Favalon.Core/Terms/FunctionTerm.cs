@@ -7,9 +7,13 @@ namespace Favalon.Terms
     {
         public readonly Term Body;
 
-        internal FunctionTerm(Term parameter, Term body) :
-            base(parameter) =>
+        internal FunctionTerm(Term parameter, Term body)
+        {
+            this.Parameter = parameter;
             this.Body = body;
+        }
+
+        public override Term Parameter { get; }
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             (this.Parameter is IdentityTerm variable && variable.Identity == identity) ?

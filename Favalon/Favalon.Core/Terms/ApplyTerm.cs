@@ -14,17 +14,6 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        protected internal override Term VisitTransposeFunction(Context context)
-        {
-
-
-
-            var function = context.TransposeFunction(this.Function);
-            var argument = context.TransposeFunction(this.Argument);
-
-            return this;
-        }
-
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             new ApplyTerm(
                 this.Function.VisitReplace(identity, replacement),

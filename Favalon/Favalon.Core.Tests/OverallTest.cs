@@ -10,7 +10,7 @@ namespace Favalon
         [Test]
         public void EnumerableIdentityToken1()
         {
-            var text = "-> a b";
+            var text = "a -> b";
             var tokens = Lexer.EnumerableTokens(text);
             var term = Parser.EnumerableTerms(tokens).
                 Single();
@@ -28,7 +28,7 @@ namespace Favalon
         [Test]
         public void EnumerableIdentityToken2()
         {
-            var text = "-> a b c";
+            var text = "a -> b c";
             var tokens = Lexer.EnumerableTokens(text);
             var term = Parser.EnumerableTerms(tokens).
                 Single();

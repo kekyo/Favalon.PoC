@@ -20,6 +20,10 @@ namespace Favalon
 
         public static IEnumerable<Term> EnumerableTerms(IEnumerable<Token> tokens)
         {
+            // Special parser features:
+            // 1. Will have capablility for translating numerics before unary signed operator (+/-).
+            // 2. Will make (applicable) function from all operator tokens by transposing.
+
             Token? lastToken = null;
             OperatorToken? lastSignToken = null;
             Term? rootTerm = null;
@@ -41,9 +45,10 @@ namespace Favalon
                                 switch (rootTerm)
                                 {
                                     case Term _:
+                                        // auto transposed, it's single binary operator +/-
                                         rootTerm = new ApplyTerm(
-                                            rootTerm,
-                                            new IdentityTerm(signToken.Symbol));
+                                            new IdentityTerm(signToken.Symbol),
+                                            rootTerm);
                                         break;
                                     default:
                                         rootTerm = new IdentityTerm(signToken.Symbol);
@@ -57,9 +62,10 @@ namespace Favalon
                         switch (rootTerm)
                         {
                             case Term _:
+                                // auto transposed because it's a operator
                                 rootTerm = new ApplyTerm(
-                                    rootTerm,
-                                    new IdentityTerm(operatorToken.Symbol));
+                                    new IdentityTerm(operatorToken.Symbol),
+                                    rootTerm);
                                 break;
                             default:
                                 rootTerm = new IdentityTerm(operatorToken.Symbol);
@@ -123,9 +129,10 @@ namespace Favalon
                                 switch (rootTerm)
                                 {
                                     case Term _:
+                                        // auto transposed, it's single binary operator +/-
                                         rootTerm = new ApplyTerm(
-                                            rootTerm,
-                                            new IdentityTerm(lastSignToken.Symbol));
+                                            new IdentityTerm(lastSignToken.Symbol),
+                                            rootTerm);
                                         break;
                                     default:
                                         rootTerm = new IdentityTerm(lastSignToken.Symbol);

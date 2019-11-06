@@ -21,13 +21,14 @@ namespace Favalon
             var actual = environment.Transpose(term);
 
             // abc def ghi
-            Assert.AreEqual(
+            var expected =
                 Term.Apply(
                     Term.Apply(
                         Term.Identity("abc"),
                         Term.Identity("def")),
-                    Term.Identity("ghi")),
-                actual);
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
         }
 
         [Test]
@@ -45,13 +46,105 @@ namespace Favalon
             var actual = environment.Transpose(term);
 
             // -> abc def
-            Assert.AreEqual(
+            var expected =
                 Term.Apply(
                     Term.Apply(
                         Term.Operator("->"),
                         Term.Identity("abc")),
-                    Term.Identity("def")),
-                actual);
+                    Term.Identity("def"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TransposeOperatorWithTrailingApplyTerm()
+        {
+            // abc -> def ghi
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Operator("->")),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            var environment = Environment.Create();
+            var actual = environment.Transpose(term);
+
+            // -> abc def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Operator("->"),
+                            Term.Identity("abc")),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TransposeOperatorWithTrailingApplyOperator()
+        {
+            // abc -> def ->
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Operator("->")),
+                        Term.Identity("def")),
+                    Term.Operator("->"));
+
+            var environment = Environment.Create();
+            var actual = environment.Transpose(term);
+
+            // -> (-> abc def)
+            var expected =
+                Term.Apply(
+                    Term.Operator("->"),
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Operator("->"),
+                            Term.Identity("abc")),
+                        Term.Identity("def")));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TransposeOperatorWithTrailingApplyOperatorSequence()
+        {
+            // abc -> def -> ghi
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("abc"),
+                                Term.Operator("->")),
+                            Term.Identity("def")),
+                        Term.Operator("->")),
+                    Term.Identity("ghi"));
+
+            var environment = Environment.Create();
+            var actual = environment.Transpose(term);
+
+            // -> (-> abc def) ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Operator("->"),
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Operator("->"),
+                                Term.Identity("abc")),
+                            Term.Identity("def"))),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
         }
     }
 }

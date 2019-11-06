@@ -199,70 +199,6 @@ namespace Favalon
 
         //////////////////////////////////////////////
 
-        [TestCase("+")]
-        [TestCase("-")]
-        [TestCase("&")]
-        [TestCase("|")]
-        [TestCase("->")]
-        public void EnumerableCombinedOperatorToken(string symbol)
-        {
-            // abc + def
-            var actual = Parser.EnumerableTerms(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    Token.Operator(symbol),
-                    Token.Identity("def"),
-                });
-
-            // + abc def
-            Assert.AreEqual(
-                new[] {
-                    Term.Apply(
-                        Term.Apply(
-                            Term.Identity(symbol),  // auto transposed
-                            Term.Identity("abc")),
-                        Term.Identity("def")) },
-                actual);
-        }
-
-        [TestCase("+")]
-        [TestCase("-")]
-        [TestCase("&")]
-        [TestCase("|")]
-        [TestCase("->")]
-        public void EnumerableCombinedOperatorTokens(string symbol)
-        {
-            // abc + def + ghi
-            var actual = Parser.EnumerableTerms(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    Token.Operator(symbol),
-                    Token.Identity("def"),
-                    Token.Operator(symbol),
-                    Token.Identity("ghi"),
-                });
-
-            // + + abc def ghi
-            var expected = new[] {
-                Term.Apply(
-                    Term.Apply(
-                        Term.Identity(symbol),  // auto transposed
-                        Term.Apply(
-                            Term.Apply(
-                                Term.Identity(symbol),  // auto transposed
-                                Term.Identity("abc")),
-                            Term.Identity("def"))),
-                    Term.Identity("ghi")) };
-
-            Assert.AreEqual(
-                expected,
-                actual);
-        }
-
-        //////////////////////////////////////////////
-
         [Test]
         public void EnumerableNumericToken()
         {
@@ -352,13 +288,13 @@ namespace Favalon
                     Token.Numeric("123"),
                 });
 
-            // - abc 123
+            // abc - 123
             Assert.AreEqual(
                 new Term[] {
                     Term.Apply(
                         Term.Apply(
-                            Term.Identity(plus ? "+" : "-"),
-                            Term.Identity("abc")),
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
                         Term.Constant(123)) },
                 actual);
         }
@@ -377,13 +313,13 @@ namespace Favalon
                     Token.Numeric("123"),
                 });
 
-            // - abc 123
+            // abc - 123
             Assert.AreEqual(
                 new Term[] {
                     Term.Apply(
                         Term.Apply(
-                            Term.Identity(plus ? "+" : "-"),
-                            Term.Identity("abc")),
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
                         Term.Constant(123)) },
                 actual);
         }
@@ -403,13 +339,13 @@ namespace Favalon
                     Token.Numeric("123"),
                 });
 
-            // - abc 123
+            // abc - 123
             Assert.AreEqual(
                 new Term[] {
                     Term.Apply(
                         Term.Apply(
-                            Term.Identity(plus ? "+" : "-"),
-                            Term.Identity("abc")),
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
                         Term.Constant(123)) },
                 actual);
         }

@@ -21,8 +21,7 @@ namespace Favalon
         public static IEnumerable<Term> EnumerableTerms(IEnumerable<Token> tokens)
         {
             // Special parser features:
-            // 1. Will have capablility for translating numerics before unary signed operator (+/-).
-            // 2. Will make (applicable) function from all operator tokens by transposing.
+            // * Will have capablility for translating numerics before unary signed operator (+/-).
 
             Token? lastToken = null;
             OperatorToken? lastSignToken = null;
@@ -45,10 +44,9 @@ namespace Favalon
                                 switch (rootTerm)
                                 {
                                     case Term _:
-                                        // auto transposed, it's single binary operator +/-
                                         rootTerm = new ApplyTerm(
-                                            new IdentityTerm(signToken.Symbol),
-                                            rootTerm);
+                                            rootTerm,
+                                            new IdentityTerm(signToken.Symbol));
                                         break;
                                     default:
                                         rootTerm = new IdentityTerm(signToken.Symbol);
@@ -81,10 +79,9 @@ namespace Favalon
                         switch (rootTerm)
                         {
                             case Term _:
-                                // auto transposed because it's a operator
                                 rootTerm = new ApplyTerm(
-                                    new IdentityTerm(operatorToken.Symbol),
-                                    rootTerm);
+                                    rootTerm,
+                                    new IdentityTerm(operatorToken.Symbol));
                                 break;
                             default:
                                 rootTerm = new IdentityTerm(operatorToken.Symbol);
@@ -97,7 +94,9 @@ namespace Favalon
                         switch (rootTerm)
                         {
                             case Term _:
-                                rootTerm = new ApplyTerm(rootTerm, new IdentityTerm(identityToken.Identity));
+                                rootTerm = new ApplyTerm(
+                                    rootTerm,
+                                    new IdentityTerm(identityToken.Identity));
                                 break;
                             default:
                                 rootTerm = new IdentityTerm(identityToken.Identity);
@@ -129,10 +128,9 @@ namespace Favalon
                                 switch (rootTerm)
                                 {
                                     case Term _:
-                                        // auto transposed, it's single binary operator +/-
                                         rootTerm = new ApplyTerm(
-                                            new IdentityTerm(lastSignToken.Symbol),
-                                            rootTerm);
+                                            rootTerm,
+                                            new IdentityTerm(lastSignToken.Symbol));
                                         break;
                                     default:
                                         rootTerm = new IdentityTerm(lastSignToken.Symbol);

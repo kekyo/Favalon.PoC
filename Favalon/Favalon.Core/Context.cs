@@ -55,6 +55,9 @@ namespace Favalon
         public Term[]? LookupIdentity(IdentityTerm identity) =>
             boundTerms.TryGetValue(identity.Identity, out var terms) ? terms.ToArray() : null;
 
+        public Term Transpose(Term term) =>
+            term.VisitTranspose(this);
+
         public Term Replace(Term term, string identity, Term replacement) =>
             term.VisitReplace(identity, replacement);
 

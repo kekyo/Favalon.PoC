@@ -46,19 +46,19 @@ namespace Favalon
         [Test]
         public void OneTerm()
         {
-            Assert.AreEqual("p -> x -> p x", one.ToString());
+            Assert.AreEqual("p -> x -> p x", one.Readable);
         }
 
         [Test]
         public void IncrementTerm()
         {
-            Assert.AreEqual("n -> p -> x -> p (n p x)", increment.ToString());
+            Assert.AreEqual("n -> p -> x -> p (n p x)", increment.Readable);
         }
 
         [Test]
         public void AddTerm()
         {
-            Assert.AreEqual("m -> n -> n (n -> p -> x -> p (n p x)) m", add.ToString());
+            Assert.AreEqual("m -> n -> n (n -> p -> x -> p (n p x)) m", add.Readable);
         }
 
         [Test]
@@ -76,7 +76,7 @@ namespace Favalon
             var reduced = environment.EnumerableReduceSteps(add2Times).
                 ToArray();
 
-            Assert.AreEqual("p -> x -> p ((p -> x -> p x) p x)", reduced.Last().ToString());
+            Assert.AreEqual("p -> x -> p ((p -> x -> p x) p x)", reduced.Last().Readable);
 
             var inc = Term.Identity("inc");
             var zero = Term.Identity("zero");
@@ -90,7 +90,7 @@ namespace Favalon
 
             var actual = environment.Reduce(final);
 
-            Assert.AreEqual("inc (inc zero)", actual.ToString());
+            Assert.AreEqual("inc (inc zero)", actual.Readable);
         }
     }
 }

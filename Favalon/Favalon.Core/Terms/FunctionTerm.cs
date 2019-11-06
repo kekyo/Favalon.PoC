@@ -38,11 +38,12 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as FunctionTerm);
 
-        public override string ToString()
+        protected override string VisitTermString(bool includeTermName)
         {
             var parameter = (this.Parameter is FunctionTerm) ?
-                $"({this.Parameter})" : this.Parameter.ToString();
-            return $"{parameter} -> {this.Body}";
+                $"({this.Parameter.ToString(includeTermName)})" :
+                this.Parameter.ToString(includeTermName);
+            return $"{parameter} -> {this.Body.ToString(includeTermName)}";
         }
 
         public void Deconstruct(out Term parameter, out Term body)

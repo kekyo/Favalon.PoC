@@ -29,7 +29,7 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as IdentityTerm);
 
-        public override string ToString() =>
+        protected override string VisitTermString(bool includeTermName) =>
             this.Identity;
 
         public void Deconstruct(out string identity) =>

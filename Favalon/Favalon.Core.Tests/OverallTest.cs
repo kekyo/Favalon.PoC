@@ -10,6 +10,88 @@ namespace Favalon
         [Test]
         public void EnumerableIdentityToken1()
         {
+            var text = "-> a b";
+            var tokens = Lexer.EnumerableTokens(text);
+            var term = Parser.EnumerableTerms(tokens).
+                Single();
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(
+                Term.Function(
+                    Term.Identity("a"),
+                    Term.Identity("b")),
+                actual);
+        }
+
+        [Test]
+        public void EnumerableIdentityToken2()
+        {
+            var text = "-> a b c";
+            var tokens = Lexer.EnumerableTokens(text);
+            var term = Parser.EnumerableTerms(tokens).
+                Single();
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(
+                Term.Identity("b"),
+                actual);
+        }
+
+        [Test]
+        public void EnumerableIdentityToken3()
+        {
+            var text = "-> a (b c)";
+            var tokens = Lexer.EnumerableTokens(text);
+            var term = Parser.EnumerableTerms(tokens).
+                Single();
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(
+                Term.Function(
+                    Term.Identity("a"),
+                    Term.Apply(
+                        Term.Identity("b"),
+                        Term.Identity("c"))),
+                actual);
+        }
+
+        //[Test]
+        public void EnumerableIdentityToken4()
+        {
+            var text = "-> x (x x) ->";
+            var tokens = Lexer.EnumerableTokens(text);
+            var term = Parser.EnumerableTerms(tokens).
+                Single();
+
+            var environment = Environment.Create();
+
+            var r = environment.EnumerableReduceSteps(term).
+                ToArray();
+
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(
+                Term.Apply(
+                    Term.Function(
+                        Term.Identity("a"),
+                        Term.Apply(
+                            Term.Identity("b"),
+                            Term.Identity("c"))),
+                    environment.LookupIdentity(Term.Identity("->"))![0]),
+                actual);
+        }
+
+        //////////////////////////////////////////////////
+
+        [Test]
+        public void EnumerableIdentityToken11()
+        {
             var text = "(-> x x) -> y y";
             var tokens = Lexer.EnumerableTokens(text);
             var term = Parser.EnumerableTerms(tokens).
@@ -25,8 +107,8 @@ namespace Favalon
                 actual);
         }
 
-        [Test]
-        public void EnumerableIdentityToken2()
+        //[Test]
+        public void EnumerableIdentityToken12()
         {
             var text = "(-> x (x x)) -> y y";
             var tokens = Lexer.EnumerableTokens(text);

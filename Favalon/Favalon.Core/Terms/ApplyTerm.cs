@@ -137,14 +137,14 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as ApplyTerm);
 
-        public override string ToString()
+        protected override string VisitTermString(bool includeTermName)
         {
             var function = this.Function is FunctionTerm ?
-                $"({this.Function})" :
-                this.Function.ToString();
+                $"({this.Function.ToString(includeTermName)})" :
+                this.Function.ToString(includeTermName);
             return this.Argument is IdentityTerm ?
-                $"{function} {this.Argument}" :
-                $"{function} ({this.Argument})";
+                $"{function} {this.Argument.ToString(includeTermName)}" :
+                $"{function} ({this.Argument.ToString(includeTermName)})";
         }
 
         public void Deconstruct(out Term function, out Term argument)

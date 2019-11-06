@@ -95,11 +95,11 @@ namespace Favalon
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Identity("abc"),
                     Token.WhiteSpace(),
                     Token.Identity("def"),
-                    Token.End(), 
+                    Token.Close(), 
                     Token.WhiteSpace(),
                     Token.Identity("ghi") },
                 actual);
@@ -115,11 +115,11 @@ namespace Favalon
                 new Token[] {
                     Token.Identity("abc"),
                     Token.WhiteSpace(),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Identity("def"),
                     Token.WhiteSpace(),
                     Token.Identity("ghi"),
-                    Token.End() },
+                    Token.Close() },
                 actual);
         }
 
@@ -133,11 +133,11 @@ namespace Favalon
                 new Token[] {
                     Token.Identity("abc"),
                     Token.WhiteSpace(),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.WhiteSpace(),
                     Token.Identity("def"),
                     Token.WhiteSpace(),
-                    Token.End(),
+                    Token.Close(),
                     Token.WhiteSpace(),
                     Token.Identity("ghi") },
                 actual);
@@ -152,9 +152,9 @@ namespace Favalon
             Assert.AreEqual(
                 new Token[] {
                     Token.Identity("abc"),
-                    Token.Begin(), 
+                    Token.Open(), 
                     Token.Identity("def"),
-                    Token.End(),
+                    Token.Close(),
                     Token.Identity("ghi") },
                 actual);
         }
@@ -269,11 +269,11 @@ namespace Favalon
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Numeric("123"),
                     Token.WhiteSpace(),
                     Token.Numeric("456"),
-                    Token.End(),
+                    Token.Close(),
                     Token.WhiteSpace(),
                     Token.Numeric("789") },
                 actual);
@@ -289,11 +289,11 @@ namespace Favalon
                 new Token[] {
                     Token.Numeric("123"),
                     Token.WhiteSpace(),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Numeric("456"),
                     Token.WhiteSpace(),
                     Token.Numeric("789"),
-                    Token.End() },
+                    Token.Close() },
                 actual);
         }
 
@@ -307,11 +307,11 @@ namespace Favalon
                 new Token[] {
                     Token.Numeric("123"),
                     Token.WhiteSpace(),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.WhiteSpace(),
                     Token.Numeric("456"),
                     Token.WhiteSpace(),
-                    Token.End(),
+                    Token.Close(),
                     Token.WhiteSpace(),
                     Token.Numeric("789") },
                 actual);
@@ -326,9 +326,9 @@ namespace Favalon
             Assert.AreEqual(
                 new Token[] {
                     Token.Numeric("123"),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Numeric("456"),
-                    Token.End(),
+                    Token.Close(),
                     Token.Numeric("789") },
                 actual);
         }
@@ -486,12 +486,12 @@ namespace Favalon
                     Token.Operator("-"),
                     Token.Numeric("123"),
                     Token.Operator("*"),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Operator("+"),
                     Token.Numeric("456"),
                     Token.Operator("+"),
                     Token.Numeric("789"),
-                    Token.End()
+                    Token.Close()
                 },
                 actual);
         }
@@ -507,12 +507,12 @@ namespace Favalon
                     Token.Operator("+"),
                     Token.Numeric("123"),
                     Token.Operator("*"),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Operator("-"),
                     Token.Numeric("456"),
                     Token.Operator("-"),
                     Token.Numeric("789"),
-                    Token.End()
+                    Token.Close()
                 },
                 actual);
         }

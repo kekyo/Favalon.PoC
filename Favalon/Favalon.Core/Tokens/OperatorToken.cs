@@ -24,5 +24,10 @@ namespace Favalon.Tokens
 
         public void Deconstruct(out string identity) =>
             identity = this.Symbol;
+
+        internal static new readonly OperatorToken Open =
+            new OperatorToken("(");
+        internal static new readonly OperatorToken Close =
+            new OperatorToken(")");
     }
 }

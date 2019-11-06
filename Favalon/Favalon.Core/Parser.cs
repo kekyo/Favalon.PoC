@@ -58,6 +58,25 @@ namespace Favalon
                         }
                         break;
 
+                    case OperatorToken("(") _:
+                        stack.Push(rootTerm);
+                        rootTerm = null;
+                        lastSignToken = null;
+                        break;
+
+                    case OperatorToken(")") _:
+                        var lastTerm = stack.Pop();
+                        if ((rootTerm != null) && (lastTerm != null))
+                        {
+                            rootTerm = new ApplyTerm(lastTerm, rootTerm);
+                        }
+                        else if (lastTerm != null)
+                        {
+                            rootTerm = lastTerm;
+                        }
+                        lastSignToken = null;
+                        break;
+
                     case OperatorToken operatorToken:
                         switch (rootTerm)
                         {
@@ -98,25 +117,6 @@ namespace Favalon
                             default:
                                 rootTerm = GetNumericConstant(numericToken.Value, lastSignToken);
                                 break;
-                        }
-                        lastSignToken = null;
-                        break;
-
-                    case BeginBracketToken _:
-                        stack.Push(rootTerm);
-                        rootTerm = null;
-                        lastSignToken = null;
-                        break;
-
-                    case EndBracketToken _:
-                        var lastTerm = stack.Pop();
-                        if ((rootTerm != null) && (lastTerm != null))
-                        {
-                            rootTerm = new ApplyTerm(lastTerm, rootTerm);
-                        }
-                        else if (lastTerm != null)
-                        {
-                            rootTerm = lastTerm;
                         }
                         lastSignToken = null;
                         break;

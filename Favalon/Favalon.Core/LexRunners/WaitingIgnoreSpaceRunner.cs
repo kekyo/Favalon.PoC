@@ -14,9 +14,13 @@ namespace Favalon.LexRunners
             switch (ch)
             {
                 case '(':
-                    return RunResult.Create(WaitingRunner.Instance, BeginBracketToken.Instance);
+                    return RunResult.Create(
+                        WaitingRunner.Instance,
+                        OperatorToken.Open);
                 case ')':
-                    return RunResult.Create(WaitingRunner.Instance, EndBracketToken.Instance);
+                    return RunResult.Create(
+                        WaitingRunner.Instance,
+                        OperatorToken.Close);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {

@@ -50,10 +50,10 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Identity("abc"),
                     Token.Identity("def"),
-                    Token.End(),
+                    Token.Close(),
                     Token.Identity("ghi"),
                 });
 
@@ -75,10 +75,10 @@ namespace Favalon
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Identity("def"),
                     Token.Identity("ghi"),
-                    Token.End(),
+                    Token.Close(),
                 });
 
             Assert.AreEqual(
@@ -98,11 +98,11 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Identity("abc"),
                     Token.Identity("def"),
                     Token.Identity("ghi"),
-                    Token.End(),
+                    Token.Close(),
                 });
 
             Assert.AreEqual(
@@ -123,9 +123,9 @@ namespace Favalon
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Identity("def"),
-                    Token.End(),
+                    Token.Close(),
                     Token.Identity("ghi"),
                 });
 
@@ -146,13 +146,13 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
-                    Token.Begin(),
-                    Token.Begin(),
+                    Token.Open(),
+                    Token.Open(),
                     Token.Identity("abc"),
                     Token.Identity("def"),
-                    Token.End(),
+                    Token.Close(),
                     Token.Identity("ghi"),
-                    Token.End(),
+                    Token.Close(),
                     Token.Identity("jkl"),
                 });
 
@@ -176,13 +176,13 @@ namespace Favalon
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Identity("def"),
-                    Token.Begin(),
+                    Token.Open(),
                     Token.Identity("ghi"),
                     Token.Identity("jkl"),
-                    Token.End(),
-                    Token.End(),
+                    Token.Close(),
+                    Token.Close(),
                 });
 
             Assert.AreEqual(

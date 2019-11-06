@@ -8,11 +8,11 @@
         public static OperatorToken Operator(string symbol) =>
             new OperatorToken(symbol);
 
-        public static BeginBracketToken Begin() =>
-            BeginBracketToken.Instance;
+        public static OperatorToken Open() =>
+            OperatorToken.Open;
 
-        public static EndBracketToken End() =>
-            EndBracketToken.Instance;
+        public static OperatorToken Close() =>
+            OperatorToken.Close;
 
         public static WhiteSpaceToken WhiteSpace() =>
             WhiteSpaceToken.Instance;

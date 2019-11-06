@@ -14,13 +14,19 @@ namespace Favalon.LexRunners
             switch (ch)
             {
                 case '(':
-                    return RunResult.Create(this, BeginBracketToken.Instance);
+                    return RunResult.Create(
+                        this,
+                        OperatorToken.Open);
                 case ')':
-                    return RunResult.Create(this, EndBracketToken.Instance);
+                    return RunResult.Create(
+                        this,
+                        OperatorToken.Close);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {
-                        return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, WhiteSpaceToken.Instance);
+                        return RunResult.Create(
+                            WaitingIgnoreSpaceRunner.Instance,
+                            WhiteSpaceToken.Instance);
                     }
                     else if (char.IsDigit(ch))
                     {

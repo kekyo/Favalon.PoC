@@ -21,15 +21,24 @@ namespace Favalon.LexRunners
             switch (ch)
             {
                 case '(':
-                    return RunResult.Create(WaitingRunner.Instance, InternalFinish(context), BeginBracketToken.Instance);
+                    return RunResult.Create(
+                        WaitingRunner.Instance,
+                        InternalFinish(context),
+                        OperatorToken.Open);
                 case ')':
-                    return RunResult.Create(WaitingRunner.Instance, InternalFinish(context), EndBracketToken.Instance);
+                    return RunResult.Create(
+                        WaitingRunner.Instance,
+                        InternalFinish(context),
+                        OperatorToken.Close);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {
                         var token = context.TokenBuffer.ToString();
                         context.TokenBuffer.Clear();
-                        return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, new NumericToken(token), WhiteSpaceToken.Instance);
+                        return RunResult.Create(
+                            WaitingIgnoreSpaceRunner.Instance,
+                            new NumericToken(token),
+                            WhiteSpaceToken.Instance);
                     }
                     else if (Utilities.IsOperator(ch))
                     {

@@ -181,12 +181,13 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
-                    Token.Identity(plus ? "+" : "-"),
+                    Token.Operator(plus ? "+" : "-"),
                     Token.Numeric("123"),
                 });
 
             Assert.AreEqual(
-                new[] { Term.Constant(plus ? 123 : -123) },
+                new[] {
+                    Term.Constant(plus ? 123 : -123) },
                 actual);
         }
 
@@ -198,13 +199,16 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
-                    Token.Identity(plus ? "+" : "-"),
+                    Token.Operator(plus ? "+" : "-"),
                     Token.WhiteSpace(),
                     Token.Numeric("123"),
                 });
 
             Assert.AreEqual(
-                new[] { Term.Apply(Term.Identity(plus ? "+" : "-"), Term.Constant(123)) },
+                new[] {
+                    Term.Apply(
+                        Term.Identity(plus ? "+" : "-"),
+                        Term.Constant(123)) },
                 actual);
         }
 
@@ -218,12 +222,15 @@ namespace Favalon
                 {
                     Token.Identity("abc"),
                     Token.WhiteSpace(),
-                    Token.Identity(plus ? "+" : "-"),
+                    Token.Operator(plus ? "+" : "-"),
                     Token.Numeric("123"),
                 });
 
             Assert.AreEqual(
-                new Term[] { Term.Apply(Term.Identity("abc"), Term.Constant(plus ? 123 : -123)) },
+                new Term[] {
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Constant(plus ? 123 : -123)) },
                 actual);
         }
 
@@ -236,12 +243,17 @@ namespace Favalon
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.Identity(plus ? "+" : "-"),
+                    Token.Operator(plus ? "+" : "-"),
                     Token.Numeric("123"),
                 });
 
             Assert.AreEqual(
-                new Term[] { Term.Apply(Term.Apply(Term.Identity("abc"), Term.Identity(plus ? "+" : "-")), Term.Constant(123)) },
+                new Term[] {
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
+                        Term.Constant(123)) },
                 actual);
         }
 
@@ -254,13 +266,18 @@ namespace Favalon
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.Identity(plus ? "+" : "-"),
+                    Token.Operator(plus ? "+" : "-"),
                     Token.WhiteSpace(),
                     Token.Numeric("123"),
                 });
 
             Assert.AreEqual(
-                new Term[] { Term.Apply(Term.Apply(Term.Identity("abc"), Term.Identity(plus ? "+" : "-")), Term.Constant(123)) },
+                new Term[] {
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
+                        Term.Constant(123)) },
                 actual);
         }
 
@@ -274,13 +291,18 @@ namespace Favalon
                 {
                     Token.Identity("abc"),
                     Token.WhiteSpace(),
-                    Token.Identity(plus ? "+" : "-"),
+                    Token.Operator(plus ? "+" : "-"),
                     Token.WhiteSpace(),
                     Token.Numeric("123"),
                 });
 
             Assert.AreEqual(
-                new Term[] { Term.Apply(Term.Apply(Term.Identity("abc"), Term.Identity(plus ? "+" : "-")), Term.Constant(123)) },
+                new Term[] {
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
+                        Term.Constant(123)) },
                 actual);
         }
     }

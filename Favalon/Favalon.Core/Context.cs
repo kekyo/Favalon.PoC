@@ -58,6 +58,9 @@ namespace Favalon
         public Term Replace(Term term, string identity, Term replacement) =>
             term.VisitReplace(identity, replacement);
 
+        public Term TransposeFunction(Term term) =>
+            term.VisitTransposeFunction(this);
+
         public IEnumerable<Term> EnumerableReduceSteps(Term term)
         {
             var current = term;

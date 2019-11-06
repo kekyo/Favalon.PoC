@@ -5,6 +5,9 @@
         public static IdentityToken Identity(string identity) =>
             new IdentityToken(identity);
 
+        public static OperatorToken Operator(string symbol) =>
+            new OperatorToken(symbol);
+
         public static BeginBracketToken Begin() =>
             BeginBracketToken.Instance;
 

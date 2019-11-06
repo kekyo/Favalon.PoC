@@ -9,11 +9,11 @@ namespace Favalon.LexRunners
         private OperatorRunner()
         { }
 
-        private static IdentityToken InternalFinish(RunContext context)
+        private static OperatorToken InternalFinish(RunContext context)
         {
             var token = context.TokenBuffer.ToString();
             context.TokenBuffer.Clear();
-            return new IdentityToken(token);
+            return new OperatorToken(token);
         }
 
         public override RunResult Run(RunContext context, char ch)
@@ -21,15 +21,22 @@ namespace Favalon.LexRunners
             switch (ch)
             {
                 case '(':
-                    return RunResult.Create(WaitingRunner.Instance, InternalFinish(context), BeginBracketToken.Instance);
+                    return RunResult.Create(
+                        WaitingRunner.Instance,
+                        InternalFinish(context),
+                        BeginBracketToken.Instance);
                 case ')':
-                    return RunResult.Create(WaitingRunner.Instance, InternalFinish(context), EndBracketToken.Instance);
+                    return RunResult.Create(
+                        WaitingRunner.Instance,
+                        InternalFinish(context),
+                        EndBracketToken.Instance);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {
-                        var token = context.TokenBuffer.ToString();
-                        context.TokenBuffer.Clear();
-                        return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, new IdentityToken(token), WhiteSpaceToken.Instance);
+                        return RunResult.Create(
+                            WaitingIgnoreSpaceRunner.Instance,
+                            InternalFinish(context),
+                            WhiteSpaceToken.Instance);
                     }
                     else if (char.IsDigit(ch))
                     {

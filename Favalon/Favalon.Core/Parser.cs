@@ -1,6 +1,5 @@
 ﻿using Favalon.Terms;
 using Favalon.Tokens;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -12,7 +11,7 @@ namespace Favalon
         {
             var sign = preSign switch
             {
-                IdentityToken("-") => -1,
+                OperatorToken("-") => -1,
                 _ => 1,
             };
             var intValue = int.Parse(value, CultureInfo.InvariantCulture) * sign;
@@ -22,33 +21,51 @@ namespace Favalon
         public static IEnumerable<Term> EnumerableTerms(IEnumerable<Token> tokens)
         {
             Token? lastToken = null;
-            IdentityToken? lastSignToken = null;
+            OperatorToken? lastSignToken = null;
             Term? rootTerm = null;
             var stack = new Stack<Term?>();
             foreach (var token in tokens)
             {
                 switch (token)
                 {
-                    case IdentityToken("+"):
-                    case IdentityToken("-"):
+                    case OperatorToken("+"):
+                    case OperatorToken("-"):
+                        var signToken = (OperatorToken)token;
                         switch (lastToken)
                         {
                             case WhiteSpaceToken _:
                             case null:
-                                lastSignToken = (IdentityToken)token;
+                                lastSignToken = signToken;
                                 break;
                             default:
                                 switch (rootTerm)
                                 {
                                     case Term _:
-                                        rootTerm = new ApplyTerm(rootTerm, new IdentityTerm(((IdentityToken)token).Identity));
+                                        rootTerm = new ApplyTerm(
+                                            rootTerm,
+                                            new IdentityTerm(signToken.Symbol));
                                         break;
                                     default:
-                                        rootTerm = new IdentityTerm(((IdentityToken)token).Identity);
+                                        rootTerm = new IdentityTerm(signToken.Symbol);
                                         break;
                                 }
                                 break;
                         }
+                        break;
+
+                    case OperatorToken operatorToken:
+                        switch (rootTerm)
+                        {
+                            case Term _:
+                                rootTerm = new ApplyTerm(
+                                    rootTerm,
+                                    new IdentityTerm(operatorToken.Symbol));
+                                break;
+                            default:
+                                rootTerm = new IdentityTerm(operatorToken.Symbol);
+                                break;
+                        }
+                        lastSignToken = null;
                         break;
 
                     case IdentityToken identityToken:
@@ -68,7 +85,9 @@ namespace Favalon
                         switch (rootTerm)
                         {
                             case Term _:
-                                rootTerm = new ApplyTerm(rootTerm, GetNumericConstant(numericToken.Value, lastSignToken));
+                                rootTerm = new ApplyTerm(
+                                    rootTerm,
+                                    GetNumericConstant(numericToken.Value, lastSignToken));
                                 break;
                             default:
                                 rootTerm = GetNumericConstant(numericToken.Value, lastSignToken);
@@ -99,15 +118,17 @@ namespace Favalon
                     case WhiteSpaceToken _:
                         switch (lastSignToken)
                         {
-                            case IdentityToken("+"):
-                            case IdentityToken("-"):
+                            case OperatorToken("+"):
+                            case OperatorToken("-"):
                                 switch (rootTerm)
                                 {
                                     case Term _:
-                                        rootTerm = new ApplyTerm(rootTerm, new IdentityTerm(lastSignToken.Identity));
+                                        rootTerm = new ApplyTerm(
+                                            rootTerm,
+                                            new IdentityTerm(lastSignToken.Symbol));
                                         break;
                                     default:
-                                        rootTerm = new IdentityTerm(lastSignToken.Identity);
+                                        rootTerm = new IdentityTerm(lastSignToken.Symbol);
                                         break;
                                 }
                                 lastSignToken = null;

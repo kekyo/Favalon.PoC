@@ -13,7 +13,7 @@ namespace Favalon.Terms
         internal MethodTerm(MethodInfo method) =>
             this.Method = method;
 
-        public override Term Parameter =>
+        public override IdentityTerm Parameter =>
             new IdentityTerm(this.Method.GetParameters().Single().Name);
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>

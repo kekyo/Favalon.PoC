@@ -17,7 +17,7 @@ namespace Favalon.Terms
             this.interpreter = interpreter;
         }
 
-        public override Term Parameter { get; }
+        public override IdentityTerm Parameter { get; }
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             this;
@@ -39,6 +39,6 @@ namespace Favalon.Terms
             $"{this.Identity.ToString(includeTermName)} {this.Parameter.ToString(includeTermName)}";
 
         public void Deconstruct(out string identity) =>
-            identity = this.Identity.Identity;
+            identity = this.Identity.Name;
     }
 }

@@ -46,14 +46,14 @@ namespace Favalon
                         new InterpretTerm(
                             $"Closure(-> {a})", "b",  // b:'3
                             (oc, b) =>
-                                new FunctionTerm(a.VisitReduce(ic), b.VisitReduce(oc)))));
+                                new FunctionTerm((IdentityTerm)a.VisitReduce(ic), b.VisitReduce(oc)))));
         }
 
         private protected Context()
         { }
 
-        public Term[]? LookupIdentity(IdentityTerm identity) =>
-            boundTerms.TryGetValue(identity.Identity, out var terms) ? terms.ToArray() : null;
+        public Term[]? LookupIdentity(VariableTerm variable) =>
+            boundTerms.TryGetValue(variable.Name, out var terms) ? terms.ToArray() : null;
 
         public Term Transpose(Term term) =>
             term.VisitTranspose(this);

@@ -7,24 +7,24 @@ namespace Favalon.Terms
     {
         public readonly Term Body;
 
-        internal FunctionTerm(Term parameter, Term body)
+        internal FunctionTerm(IdentityTerm parameter, Term body)
         {
             this.Parameter = parameter;
             this.Body = body;
         }
 
-        public override Term Parameter { get; }
+        public override IdentityTerm Parameter { get; }
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
-            (this.Parameter is IdentityTerm variable && variable.Identity == identity) ?
+            (this.Parameter is IdentityTerm parameter && parameter.Name == identity) ?
                 this :  // NOT applicable
                 new FunctionTerm(
-                    this.Parameter.VisitReplace(identity, replacement),
+                    (IdentityTerm)this.Parameter.VisitReplace(identity, replacement),
                     this.Body.VisitReplace(identity, replacement));
 
         protected internal override Term VisitCall(Context context, Term argument) =>
             this.Body.VisitReplace(
-                ((IdentityTerm)this.Parameter).Identity,
+                this.Parameter.Name,
                 argument);
 
         public override int GetHashCode() =>
@@ -38,13 +38,8 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as FunctionTerm);
 
-        protected override string VisitTermString(bool includeTermName)
-        {
-            var parameter = (this.Parameter is FunctionTerm) ?
-                $"({this.Parameter.ToString(includeTermName)})" :
-                this.Parameter.ToString(includeTermName);
-            return $"{parameter} -> {this.Body.ToString(includeTermName)}";
-        }
+        protected override string VisitTermString(bool includeTermName) =>
+            $"{this.Parameter.ToString(includeTermName)} -> {this.Body.ToString(includeTermName)}";
 
         public void Deconstruct(out Term parameter, out Term body)
         {

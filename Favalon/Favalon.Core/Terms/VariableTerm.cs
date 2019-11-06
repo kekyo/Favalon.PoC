@@ -24,7 +24,7 @@ namespace Favalon.Terms
         public override sealed bool Equals(object obj) =>
             this.Equals(obj as VariableTerm);
 
-        protected override sealed string VisitTermString(bool includeTermName) =>
+        protected override string VisitTermString(bool includeTermName) =>
             this.Name;
 
         public void Deconstruct(out string name) =>

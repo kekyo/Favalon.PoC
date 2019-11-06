@@ -6,24 +6,50 @@ using System.Reflection;
 
 namespace Favalon
 {
+    public enum BoundAssociatives
+    {
+        Left,
+        Right
+    }
+
+    public struct BoundTerm
+    {
+        public readonly BoundAssociatives Associative;
+        public readonly Term Term;
+
+        internal BoundTerm(BoundAssociatives associative, Term term)
+        {
+            this.Associative = associative;
+            this.Term = term;
+        }
+
+        public void Deconstruct(out BoundAssociatives associative, out Term term)
+        {
+            associative = this.Associative;
+            term = this.Term;
+        }
+    }
+
     public class Context
     {
-        private static readonly Dictionary<string, List<Term>> boundTerms =
+        private static readonly Dictionary<string, List<BoundTerm>> boundTerms =
             typeof(object).GetTypeInfo().Assembly.
             EnumerableAllPublicStaticMethods().
             Where(method => method.GetParameters().Length == 1).
             GroupBy(method => method.GetFullName()).
-            ToDictionary(g => g.Key, g => g.Select(method => (Term)new MethodTerm(method)).ToList());
+            ToDictionary(
+                g => g.Key,
+                g => g.Select(method => new BoundTerm(BoundAssociatives.Left, new MethodTerm(method))).ToList());
 
         private static void AddBoundTerm(
-            Dictionary<string, List<Term>> boundTerms, string identity, Term term)
+            Dictionary<string, List<BoundTerm>> boundTerms, string name, BoundAssociatives associative, Term term)
         {
-            if (!boundTerms.TryGetValue(identity, out var terms))
+            if (!boundTerms.TryGetValue(name, out var terms))
             {
-                terms = new List<Term>();
-                boundTerms.Add(identity, terms);
+                terms = new List<BoundTerm>();
+                boundTerms.Add(name, terms);
             }
-            terms.Add(term);
+            terms.Add(new BoundTerm(associative, term));
         }
 
         static Context()
@@ -37,7 +63,7 @@ namespace Favalon
             // ((f:'1->'3->'4 a:'1):'3->'4 b:'3):'4
             AddBoundTerm(
                 boundTerms,
-                "->",
+                "->", BoundAssociatives.Right,
                 // f:'1->'3->'4
                 new InterpretTerm(
                     "->", "a",  // a:'1
@@ -52,7 +78,7 @@ namespace Favalon
         private protected Context()
         { }
 
-        public Term[]? LookupBoundTerms(VariableTerm variable) =>
+        public BoundTerm[]? LookupBoundTerms(VariableTerm variable) =>
             boundTerms.TryGetValue(variable.Name, out var terms) ? terms.ToArray() : null;
 
         public Term Transpose(Term term) =>

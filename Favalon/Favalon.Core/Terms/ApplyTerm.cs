@@ -14,22 +14,76 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        protected internal override Term VisitTranspose(Context context)
+        private struct TransposeCandidates
         {
-            if (this.Argument is OperatorTerm oper)
+            public readonly Term Parameter;
+            public readonly Term Argument;
+            public readonly Term? ApplyingFunction;
+
+            public TransposeCandidates(Term parameter, Term argument, Term? applyingFunction = default)
             {
-                if (context.LookupBoundTerms(oper) is Term[])
-                {
-                    return new ApplyTerm(
-                        this.Argument.VisitTranspose(context),
-                        this.Function.VisitTranspose(context));
-                }
+                this.Parameter = parameter;
+                this.Argument = argument;
+                this.ApplyingFunction = applyingFunction;
             }
 
-            var function = this.Function.VisitTranspose(context);
-            var argument = this.Argument.VisitTranspose(context);
+            public void Deconstruct(out Term parameter, out Term argument, out Term? applyingFunction)
+            {
+                parameter = this.Parameter;
+                argument = this.Argument;
+                applyingFunction = this.ApplyingFunction;
+            }
+        }
 
-            if (!object.ReferenceEquals(function, this.Function) ||
+        private static TransposeCandidates? TransposeOperator(
+            Context context, Term term)
+        {
+            switch (term)
+            {
+                case ApplyTerm(ApplyTerm(Term _, Term p), Term a0):
+                    return new TransposeCandidates(p, a0);
+                case ApplyTerm(Term child, Term a1):
+                    if (TransposeOperator(context, child) is TransposeCandidates candidates)
+                    {
+                        return new TransposeCandidates(
+                            candidates.Parameter,
+                            new ApplyTerm(candidates.Argument, a1),   // a0, a1
+                            candidates.ApplyingFunction);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                default:
+                    return null;
+            }
+        }
+
+        protected internal override Term VisitTranspose(Context context)
+        {
+            Term function;
+            Term argument;
+
+            switch (TransposeOperator(context, this))
+            {
+                case TransposeCandidates(Term p, Term a, Term af):
+                    function = context.Transpose(af);
+                    argument = new FunctionTerm(context.Transpose(p), context.Transpose(a));
+                    break;
+                case TransposeCandidates(Term p, Term a, null):
+                    return new FunctionTerm(context.Transpose(p), context.Transpose(a));
+                default:
+                    function = context.Transpose(this.Function);
+                    argument = context.Transpose(this.Argument);
+                    break;
+            }
+
+            if (function is CallableTerm callable)
+            {
+                return callable.VisitCall(context, argument);
+            }
+            else if (
+                !object.ReferenceEquals(function, this.Function) ||
                 !object.ReferenceEquals(argument, this.Argument))
             {
                 return new ApplyTerm(function, argument);

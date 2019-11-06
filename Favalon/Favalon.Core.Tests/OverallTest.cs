@@ -83,7 +83,7 @@ namespace Favalon
                         Term.Apply(
                             Term.Identity("b"),
                             Term.Identity("c"))),
-                    environment.LookupIdentity(Term.Identity("->"))![0]),
+                    environment.LookupBoundTerms(Term.Identity("->"))![0]),
                 actual);
         }
 

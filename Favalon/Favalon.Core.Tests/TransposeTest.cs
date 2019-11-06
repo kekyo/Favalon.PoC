@@ -33,22 +33,22 @@ namespace Favalon
         [Test]
         public void TransposeOperatorWithSimpleTerm()
         {
-            // abc + def
+            // abc -> def
             var term =
                 Term.Apply(
                     Term.Apply(
                         Term.Identity("abc"),
-                        Term.Operator("+")),
+                        Term.Operator("->")),
                     Term.Identity("def"));
 
             var environment = Environment.Create();
             var actual = environment.Transpose(term);
 
-            // + abc def
+            // -> abc def
             Assert.AreEqual(
                 Term.Apply(
                     Term.Apply(
-                        Term.Operator("+"),
+                        Term.Operator("->"),
                         Term.Identity("abc")),
                     Term.Identity("def")),
                 actual);

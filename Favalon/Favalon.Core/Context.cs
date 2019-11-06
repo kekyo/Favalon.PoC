@@ -52,7 +52,7 @@ namespace Favalon
         private protected Context()
         { }
 
-        public Term[]? LookupIdentity(VariableTerm variable) =>
+        public Term[]? LookupBoundTerms(VariableTerm variable) =>
             boundTerms.TryGetValue(variable.Name, out var terms) ? terms.ToArray() : null;
 
         public Term Transpose(Term term) =>

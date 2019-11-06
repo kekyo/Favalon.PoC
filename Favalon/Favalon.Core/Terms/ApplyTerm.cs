@@ -14,6 +14,32 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
+        protected internal override Term VisitTranspose(Context context)
+        {
+            if (this.Argument is OperatorTerm oper)
+            {
+                if (context.LookupBoundTerms(oper) is Term[])
+                {
+                    return new ApplyTerm(
+                        this.Argument.VisitTranspose(context),
+                        this.Function.VisitTranspose(context));
+                }
+            }
+
+            var function = this.Function.VisitTranspose(context);
+            var argument = this.Argument.VisitTranspose(context);
+
+            if (!object.ReferenceEquals(function, this.Function) ||
+                !object.ReferenceEquals(argument, this.Argument))
+            {
+                return new ApplyTerm(function, argument);
+            }
+            else
+            {
+                return this;
+            }
+        }
+
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             new ApplyTerm(
                 this.Function.VisitReplace(identity, replacement),

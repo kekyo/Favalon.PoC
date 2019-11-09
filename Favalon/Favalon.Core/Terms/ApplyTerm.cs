@@ -35,15 +35,14 @@ namespace Favalon.Terms
             }
         }
 
-        private static TransposeCandidates? TransposeOperator(
-            Context context, Term term)
+        private static TransposeCandidates? Transpose(Context context, Term term)
         {
             switch (term)
             {
                 case ApplyTerm(ApplyTerm(Term _, Term p), Term a0):
                     return new TransposeCandidates(p, a0);
                 case ApplyTerm(Term child, Term a1):
-                    if (TransposeOperator(context, child) is TransposeCandidates candidates)
+                    if (Transpose(context, child) is TransposeCandidates candidates)
                     {
                         return new TransposeCandidates(
                             candidates.Parameter,
@@ -64,7 +63,7 @@ namespace Favalon.Terms
             Term function;
             Term argument;
 
-            switch (TransposeOperator(context, this))
+            switch (Transpose(context, this))
             {
                 case TransposeCandidates(Term p, Term a, Term af):
                     function = context.Transpose(af);

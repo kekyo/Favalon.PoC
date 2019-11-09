@@ -11,8 +11,8 @@ namespace Favalon.Terms
             this.Name = name;
 
         protected internal override sealed Term VisitReduce(Context context) =>
-            context.LookupBoundTerms(this) is Term[] terms ?
-                terms[0] :
+            context.LookupBoundTerms(this) is BoundTerm[] terms ?
+                terms[0].Term :
                 this;
 
         public override sealed int GetHashCode() =>

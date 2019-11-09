@@ -20,13 +20,34 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Transpose(term);
 
-            // abc def ghi
+            // (abc def) ghi
             var expected =
                 Term.Apply(
                     Term.Apply(
                         Term.Identity("abc"),
                         Term.Identity("def")),
                     Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TransposeOperatorWithPartialTerm()
+        {
+            // abc ->
+            var term =
+                Term.Apply(
+                    Term.Identity("abc"),
+                    Term.Operator("->"));
+
+            var environment = Environment.Create();
+            var actual = environment.Transpose(term);
+
+            // -> abc
+            var expected =
+                Term.Apply(
+                    Term.Operator("->"),
+                    Term.Identity("abc"));
 
             Assert.AreEqual(expected, actual);
         }
@@ -45,7 +66,7 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Transpose(term);
 
-            // -> abc def
+            // (-> abc) def
             var expected =
                 Term.Apply(
                     Term.Apply(
@@ -72,7 +93,7 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Transpose(term);
 
-            // -> abc (def ghi)
+            // (-> abc) (def ghi)
             var expected =
                 Term.Apply(
                     Term.Apply(
@@ -101,15 +122,15 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Transpose(term);
 
-            // -> abc (-> def)
+            // -> (abc (-> def))
             var expected =
                 Term.Apply(
+                    Term.Operator("->"),
                     Term.Apply(
-                        Term.Operator("->"),
-                        Term.Identity("abc")),
-                    Term.Apply(
-                        Term.Operator("->"),
-                        Term.Identity("def")));
+                        Term.Identity("abc"),
+                        Term.Apply(
+                            Term.Operator("->"),
+                            Term.Identity("def"))));
 
             Assert.AreEqual(expected, actual);
         }

@@ -122,15 +122,15 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Transpose(term);
 
-            // -> (abc (-> def))
+            // (-> abc) (-> def)
             var expected =
                 Term.Apply(
-                    Term.Operator("->"),
                     Term.Apply(
-                        Term.Identity("abc"),
-                        Term.Apply(
-                            Term.Operator("->"),
-                            Term.Identity("def"))));
+                        Term.Operator("->"),
+                        Term.Identity("abc")),
+                    Term.Apply(
+                        Term.Operator("->"),
+                        Term.Identity("def")));
 
             Assert.AreEqual(expected, actual);
         }
@@ -153,7 +153,7 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Transpose(term);
 
-            // -> abc (-> def ghi)
+            // (-> abc) ((-> def) ghi)
             var expected =
                 Term.Apply(
                     Term.Apply(

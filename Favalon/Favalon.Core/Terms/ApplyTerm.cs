@@ -14,15 +14,44 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        protected internal override Term VisitTranspose(Context context)
+        private struct TransposeResult
         {
-            var left = context.Transpose(this.Function);
-            var right = context.Transpose(this.Argument);
+            public readonly Term Term;
+            public readonly bool Swapped;
+            public readonly bool WillTranspose;
 
-            switch (left)
+            public TransposeResult(Term term, bool swapped, bool willTranspose)
             {
-                case ApplyTerm(Term applyLeft, Term applyRight):
-                    left = applyLeft;
+                this.Term = term;
+                this.Swapped = swapped;
+                this.WillTranspose = willTranspose;
+            }
+
+            public void Deconstruct(out Term term, out bool swapped, out bool willTranspose)
+            {
+                term = this.Term;
+                swapped = this.Swapped;
+                willTranspose = this.WillTranspose;
+            }
+        }
+
+        private static TransposeResult Transpose(Context context, Term term) =>
+            term is ApplyTerm apply ?
+                Transpose(context, apply) :
+                new TransposeResult(context.Transpose(term), false, false);
+
+        private static TransposeResult Transpose(Context context, ApplyTerm term)
+        {
+            var leftTransposed = Transpose(context, term.Function);
+            var rightTransposed = Transpose(context, term.Argument);
+
+            var left = leftTransposed.Term;
+            var right = rightTransposed.Term;
+
+            switch (leftTransposed)
+            {
+                case TransposeResult(ApplyTerm(Term applyLeft, Term applyRight), _, true):
+                    left = applyLeft;   // transposed
                     right = new ApplyTerm(applyRight, right);
                     break;
             }
@@ -31,19 +60,22 @@ namespace Favalon.Terms
             {
                 case VariableTerm variable when
                     (context.LookupBoundTerms(variable) is BoundTerm[] terms && terms[0].Associative == BoundAssociatives.Right):
-                    return new ApplyTerm(variable, left);  // tramsposed between left and right.
+                    return new TransposeResult(new ApplyTerm(variable, left), true, leftTransposed.Swapped);  // swapped left and right, will transpose if child is swapped
             }
 
-            if (!object.ReferenceEquals(left, this.Function) ||
-                !object.ReferenceEquals(right, this.Argument))
+            if (!object.ReferenceEquals(left, term.Function) ||
+                !object.ReferenceEquals(right, term.Argument))
             {
-                return new ApplyTerm(left, right);
+                return new TransposeResult(new ApplyTerm(left, right), false, leftTransposed.Swapped);  // will transpose if child is swapped
             }
             else
             {
-                return this;
+                return new TransposeResult(term, false, false);
             }
         }
+
+        protected internal override Term VisitTranspose(Context context) =>
+            Transpose(context, this).Term;
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             new ApplyTerm(

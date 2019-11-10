@@ -43,30 +43,39 @@ namespace Favalon.Terms
         private static TransposeResult Transpose(Context context, ApplyTerm term)
         {
             var leftTransposed = Transpose(context, term.Function);
-            var rightTransposed = Transpose(context, term.Argument);
-
             var left = leftTransposed.Term;
-            var right = rightTransposed.Term;
 
+            TransposeResult rightTransposed;
             switch (leftTransposed)
             {
                 case TransposeResult(ApplyTerm(Term applyLeft, Term applyRight), _, true):
                     left = applyLeft;   // transposed
-                    right = new ApplyTerm(applyRight, right);
+                    rightTransposed = Transpose(context, new ApplyTerm(applyRight, term.Argument));
+                    break;
+                default:
+                    rightTransposed = Transpose(context, term.Argument);
                     break;
             }
 
-            switch (right)
+            switch (rightTransposed.Term)
             {
                 case VariableTerm variable when
                     (context.LookupBoundTerms(variable) is BoundTerm[] terms && terms[0].Associative == BoundAssociatives.Right):
-                    return new TransposeResult(new ApplyTerm(variable, left), true, leftTransposed.Swapped);  // swapped left and right, will transpose if child is swapped
+                    // Swapped left and right, will transpose if child is swapped
+                    return new TransposeResult(
+                        new ApplyTerm(variable, left),  // Swapped
+                        true,
+                        leftTransposed.Swapped);
             }
 
             if (!object.ReferenceEquals(left, term.Function) ||
-                !object.ReferenceEquals(right, term.Argument))
+                !object.ReferenceEquals(rightTransposed.Term, term.Argument))
             {
-                return new TransposeResult(new ApplyTerm(left, right), false, leftTransposed.Swapped);  // will transpose if child is swapped
+                // Parent node will transpose if child is swapped
+                return new TransposeResult(
+                    new ApplyTerm(left, rightTransposed.Term),
+                    false,
+                    leftTransposed.Swapped || leftTransposed.WillTranspose);   // Continue transpose if swapped or transposed current
             }
             else
             {

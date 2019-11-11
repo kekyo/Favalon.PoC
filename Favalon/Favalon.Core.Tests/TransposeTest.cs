@@ -32,7 +32,28 @@ namespace Favalon
         }
 
         [Test]
-        public void TransposeOperatorWithPartialTerm()
+        public void SwapInfixOperatorPartialTerm1()
+        {
+            // abc +
+            var term =
+                Term.Apply(
+                    Term.Identity("abc"),
+                    Term.Operator("+"));
+
+            var environment = Environment.Create();
+            var actual = environment.Transpose(term);
+
+            // + abc
+            var expected =
+                Term.Apply(
+                    Term.Operator("+"),
+                    Term.Identity("abc"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void SwapInfixOperatorPartialTerm2()
         {
             // abc ->
             var term =
@@ -53,7 +74,32 @@ namespace Favalon
         }
 
         [Test]
-        public void TransposeOperatorWithSimpleTerm()
+        public void SwapInfixOperatorTerm1()
+        {
+            // abc + def
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Operator("+")),
+                    Term.Identity("def"));
+
+            var environment = Environment.Create();
+            var actual = environment.Transpose(term);
+
+            // + abc def
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Operator("+"),
+                        Term.Identity("abc")),
+                    Term.Identity("def"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void SwapInfixOperatorTerm2()
         {
             // abc -> def
             var term =
@@ -66,7 +112,7 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Transpose(term);
 
-            // (-> abc) def
+            // -> abc def
             var expected =
                 Term.Apply(
                     Term.Apply(
@@ -78,92 +124,51 @@ namespace Favalon
         }
 
         [Test]
-        public void TransposeOperatorWithTrailingApplyTerm()
+        public void SwapInfixOperatorPartialTermWithOuterApply1()
         {
-            // abc -> def ghi
+            // abc def +
             var term =
                 Term.Apply(
                     Term.Apply(
-                        Term.Apply(
-                            Term.Identity("abc"),
-                            Term.Operator("->")),
+                        Term.Identity("abc"),
                         Term.Identity("def")),
-                    Term.Identity("ghi"));
+                    Term.Operator("+"));
 
             var environment = Environment.Create();
             var actual = environment.Transpose(term);
 
-            // (-> abc) (def ghi)
+            // abc + def
             var expected =
                 Term.Apply(
                     Term.Apply(
-                        Term.Operator("->"),
-                        Term.Identity("abc")),
-                    Term.Apply(
-                        Term.Identity("def"),
-                        Term.Identity("ghi")));
+                        Term.Identity("abc"),
+                        Term.Operator("+")),
+                    Term.Identity("def"));
 
             Assert.AreEqual(expected, actual);
         }
 
         [Test]
-        public void TransposeOperatorWithTrailingApplyOperator()
+        public void SwapInfixOperatorPartialTermWithOuterApply2()
         {
-            // abc -> def ->
+            // abc def ->
             var term =
                 Term.Apply(
                     Term.Apply(
-                        Term.Apply(
-                            Term.Identity("abc"),
-                            Term.Operator("->")),
+                        Term.Identity("abc"),
                         Term.Identity("def")),
                     Term.Operator("->"));
 
             var environment = Environment.Create();
             var actual = environment.Transpose(term);
 
-            // (-> abc) (-> def)
+            // abc -> def
             var expected =
                 Term.Apply(
                     Term.Apply(
-                        Term.Operator("->"),
-                        Term.Identity("abc")),
-                    Term.Apply(
-                        Term.Operator("->"),
-                        Term.Identity("def")));
-
-            Assert.AreEqual(expected, actual);
-        }
-
-        [Test]
-        public void TransposeOperatorWithTrailingApplyOperatorSequence()
-        {
-            // abc -> def -> ghi
-            var term =
-                Term.Apply(
-                    Term.Apply(
-                        Term.Apply(
-                            Term.Apply(
-                                Term.Identity("abc"),
-                                Term.Operator("->")),
-                            Term.Identity("def")),
+                        Term.Identity("abc"),
                         Term.Operator("->")),
-                    Term.Identity("ghi"));
-
-            var environment = Environment.Create();
-            var actual = environment.Transpose(term);
-
-            // (-> abc) ((-> def) ghi)
-            var expected =
-                Term.Apply(
-                    Term.Apply(
-                        Term.Operator("->"),
-                        Term.Identity("abc")),
-                    Term.Apply(
-                        Term.Apply(
-                            Term.Operator("->"),
-                            Term.Identity("def")),
-                        Term.Identity("ghi")));
+                    Term.Identity("def"));
 
             Assert.AreEqual(expected, actual);
         }

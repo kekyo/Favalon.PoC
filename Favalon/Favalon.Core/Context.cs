@@ -1,31 +1,29 @@
 ﻿using Favalon.Internal;
 using Favalon.Terms;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
 namespace Favalon
 {
-    public enum BoundAssociatives
-    {
-        Left,
-        Right
-    }
-
     public struct BoundTerm
     {
-        public readonly BoundAssociatives Associative;
+        public readonly bool Infix;
+        public readonly bool RightToLeft;
         public readonly Term Term;
 
-        internal BoundTerm(BoundAssociatives associative, Term term)
+        internal BoundTerm(bool infix, bool rightToLeft, Term term)
         {
-            this.Associative = associative;
+            this.Infix = infix;
+            this.RightToLeft = rightToLeft;
             this.Term = term;
         }
 
-        public void Deconstruct(out BoundAssociatives associative, out Term term)
+        public void Deconstruct(out bool infix, out bool rightToLeft, out Term term)
         {
-            associative = this.Associative;
+            infix = this.Infix;
+            rightToLeft = this.RightToLeft;
             term = this.Term;
         }
     }
@@ -39,17 +37,18 @@ namespace Favalon
             GroupBy(method => method.GetFullName()).
             ToDictionary(
                 g => g.Key,
-                g => g.Select(method => new BoundTerm(BoundAssociatives.Left, new MethodTerm(method))).ToList());
+                g => g.Select(method => new BoundTerm(false, false, new MethodTerm(method))).ToList());
 
         private static void AddBoundTerm(
-            Dictionary<string, List<BoundTerm>> boundTerms, string name, BoundAssociatives associative, Term term)
+            Dictionary<string, List<BoundTerm>> boundTerms,
+            string name, bool infix, bool rightToLeft, Term term)
         {
             if (!boundTerms.TryGetValue(name, out var terms))
             {
                 terms = new List<BoundTerm>();
                 boundTerms.Add(name, terms);
             }
-            terms.Add(new BoundTerm(associative, term));
+            terms.Add(new BoundTerm(infix, rightToLeft, term));
         }
 
         static Context()
@@ -63,7 +62,7 @@ namespace Favalon
             // ((f:'1->'3->'4 a:'1):'3->'4 b:'3):'4
             AddBoundTerm(
                 boundTerms,
-                "->", BoundAssociatives.Right,
+                "->", true, true,
                 // f:'1->'3->'4
                 new InterpretTerm(
                     "->", "a",  // a:'1
@@ -73,6 +72,12 @@ namespace Favalon
                             $"Closure(-> {a})", "b",  // b:'3
                             (oc, b) =>
                                 new FunctionTerm((IdentityTerm)a.VisitReduce(ic), b.VisitReduce(oc)))));
+
+            // TODO:
+            AddBoundTerm(
+                boundTerms,
+                "+", true, false,
+                new OperatorTerm("+"));
         }
 
         private protected Context()

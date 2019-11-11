@@ -14,77 +14,34 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        private struct TransposeResult
+        protected internal override Term VisitTranspose(Context context)
         {
-            public readonly Term Term;
-            public readonly bool Swapped;
-            public readonly bool WillTranspose;
+            var left = this.Function;
+            var right = this.Argument;
 
-            public TransposeResult(Term term, bool swapped, bool willTranspose)
-            {
-                this.Term = term;
-                this.Swapped = swapped;
-                this.WillTranspose = willTranspose;
-            }
-
-            public void Deconstruct(out Term term, out bool swapped, out bool willTranspose)
-            {
-                term = this.Term;
-                swapped = this.Swapped;
-                willTranspose = this.WillTranspose;
-            }
-        }
-
-        private static TransposeResult Transpose(Context context, Term term) =>
-            term is ApplyTerm apply ?
-                Transpose(context, apply) :
-                new TransposeResult(context.Transpose(term), false, false);
-
-        private static TransposeResult Transpose(Context context, ApplyTerm term)
-        {
-            var leftTransposed = Transpose(context, term.Function);
-            var left = leftTransposed.Term;
-
-            TransposeResult rightTransposed;
-            switch (leftTransposed)
-            {
-                case TransposeResult(ApplyTerm(Term applyLeft, Term applyRight), _, true):
-                    left = applyLeft;   // transposed
-                    rightTransposed = Transpose(context, new ApplyTerm(applyRight, term.Argument));
-                    break;
-                default:
-                    rightTransposed = Transpose(context, term.Argument);
-                    break;
-            }
-
-            switch (rightTransposed.Term)
+            switch (right)
             {
                 case VariableTerm variable when
-                    (context.LookupBoundTerms(variable) is BoundTerm[] terms && terms[0].Associative == BoundAssociatives.Right):
-                    // Swapped left and right, will transpose if child is swapped
-                    return new TransposeResult(
-                        new ApplyTerm(variable, left),  // Swapped
-                        true,
-                        leftTransposed.Swapped);
+                    context.LookupBoundTerms(variable) is BoundTerm[] terms && terms[0].Infix:
+                    if (left is ApplyTerm(Term applyLeft, Term applyRight))
+                    {
+                        left = new ApplyTerm(applyLeft, variable); // swap
+                        right = applyRight;
+                    }
+                    else
+                    {
+                        left = variable; // swap
+                        right = this.Function;
+                    }
+                    break;
+                default:
+                    left = context.Transpose(this.Function);
+                    right = this.Argument;
+                    break;
             }
 
-            if (!object.ReferenceEquals(left, term.Function) ||
-                !object.ReferenceEquals(rightTransposed.Term, term.Argument))
-            {
-                // Parent node will transpose if child is swapped
-                return new TransposeResult(
-                    new ApplyTerm(left, rightTransposed.Term),
-                    false,
-                    leftTransposed.Swapped || leftTransposed.WillTranspose);   // Continue transpose if swapped or transposed current
-            }
-            else
-            {
-                return new TransposeResult(term, false, false);
-            }
+            return new ApplyTerm(left, right);
         }
-
-        protected internal override Term VisitTranspose(Context context) =>
-            Transpose(context, this).Term;
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             new ApplyTerm(

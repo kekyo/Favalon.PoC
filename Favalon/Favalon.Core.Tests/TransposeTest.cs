@@ -31,6 +31,8 @@ namespace Favalon
             Assert.AreEqual(expected, actual);
         }
 
+        ////////////////////////////////////////////
+
         [Test]
         public void SwapInfixOperatorPartialTerm1()
         {
@@ -72,6 +74,8 @@ namespace Favalon
 
             Assert.AreEqual(expected, actual);
         }
+
+        ////////////////////////////////////////////
 
         [Test]
         public void SwapInfixOperatorTerm1()
@@ -123,8 +127,10 @@ namespace Favalon
             Assert.AreEqual(expected, actual);
         }
 
+        ////////////////////////////////////////////
+
         [Test]
-        public void SwapInfixOperatorPartialTermWithOuterApply1()
+        public void SwapInfixOperatorPartialTermWithTrailingApply1()
         {
             // abc def +
             var term =
@@ -149,7 +155,7 @@ namespace Favalon
         }
 
         [Test]
-        public void SwapInfixOperatorPartialTermWithOuterApply2()
+        public void SwapInfixOperatorPartialTermWithTrailingApply2()
         {
             // abc def ->
             var term =
@@ -169,6 +175,66 @@ namespace Favalon
                         Term.Identity("abc"),
                         Term.Operator("->")),
                     Term.Identity("def"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        ////////////////////////////////////////////
+
+        [Test]
+        public void SwapInfixOperatorTermWithApply()
+        {
+            // abc + def ghi
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Operator("+")),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            var environment = Environment.Create();
+            var actual = environment.Transpose(term);
+
+            // + abc def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Operator("+"),
+                            Term.Identity("abc")),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void SwapAndTransposeInfixRightAssociativeOperatorTermWithApply()
+        {
+            // abc -> def ghi
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Operator("->")),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            var environment = Environment.Create();
+            var actual = environment.Transpose(term);
+
+            // -> abc (def ghi)
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Operator("->"),
+                        Term.Identity("abc")),
+                    Term.Apply(
+                        Term.Identity("def"),
+                        Term.Identity("ghi")));
 
             Assert.AreEqual(expected, actual);
         }

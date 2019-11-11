@@ -1,9 +1,7 @@
 ﻿using Favalon.Internal;
 using Favalon.Terms;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Favalon
 {
@@ -31,7 +29,7 @@ namespace Favalon
     public class Context
     {
         private static readonly Dictionary<string, List<BoundTerm>> boundTerms =
-            typeof(object).GetTypeInfo().Assembly.
+            typeof(object).GetAssembly().
             EnumerableAllPublicStaticMethods().
             Where(method => method.GetParameters().Length == 1).
             GroupBy(method => method.GetFullName()).

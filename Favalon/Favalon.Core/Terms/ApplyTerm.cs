@@ -19,6 +19,15 @@ namespace Favalon.Terms
             var left = this.Function;
             var right = this.Argument;
 
+            switch (left)
+            {
+                case ApplyTerm(VariableTerm applyLeft, VariableTerm applyRight) when
+                    context.LookupBoundTerms(applyRight) is BoundTerm[] terms && terms[0].RightToLeft:
+                    left = new ApplyTerm(applyLeft, right);  // transpose
+                    right = applyLeft;
+                    break;
+            }
+
             switch (right)
             {
                 case VariableTerm variable when
@@ -40,7 +49,15 @@ namespace Favalon.Terms
                     break;
             }
 
-            return new ApplyTerm(left, right);
+            if (!object.ReferenceEquals(left, this.Function) ||
+                !object.ReferenceEquals(right, this.Argument))
+            {
+                return new ApplyTerm(left, right);
+            }
+            else
+            {
+                return this;
+            }
         }
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>

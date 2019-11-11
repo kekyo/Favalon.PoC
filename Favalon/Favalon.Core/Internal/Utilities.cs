@@ -21,9 +21,9 @@ namespace Favalon.Internal
             operatorChars.Contains(ch);
 
         public static IEnumerable<MethodInfo> EnumerableAllPublicStaticMethods(this Assembly assembly) =>
-            assembly.DefinedTypes.
+            assembly.GetTypes().
             Where(type => (type.IsPublic || type.IsNestedPublic) && !type.IsGenericType).
-            SelectMany(type => type.DeclaredMethods.Where(method => method.IsPublic && method.IsStatic && !method.IsGenericMethod));
+            SelectMany(type => type.GetMethods().Where(method => method.IsPublic && method.IsStatic && !method.IsGenericMethod));
 
         public static string GetFullName(this MemberInfo member)
         {
@@ -56,5 +56,19 @@ namespace Favalon.Internal
 
         public static string GetFullName(this Type type) =>
             ((MemberInfo)type.GetTypeInfo()).GetFullName();
+
+#if NET35 || NET40
+        public static Assembly GetAssembly(this Type type) =>
+            type.Assembly;
+#else
+        public static Assembly GetAssembly(this Type type) =>
+            type.GetTypeInfo().Assembly;
+
+        public static TypeInfo[] GetTypes(this Assembly assembly) =>
+            assembly.DefinedTypes.ToArray();
+
+        public static MethodInfo[] GetMethods(this TypeInfo type) =>
+            type.DeclaredMethods.ToArray();
+#endif
     }
 }

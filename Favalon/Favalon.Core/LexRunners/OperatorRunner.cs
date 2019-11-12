@@ -44,7 +44,7 @@ namespace Favalon.LexRunners
                         context.TokenBuffer.Append(ch);
                         return RunResult.Create(NumericRunner.Instance, token0);
                     }
-                    else if (!Utilities.IsOperator(ch))
+                    else if (!IsOperator(ch))
                     {
                         var token0 = InternalFinish(context);
                         context.TokenBuffer.Append(ch);

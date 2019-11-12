@@ -8,19 +8,6 @@ namespace Favalon.Internal
 {
     internal static class Utilities
     {
-        private static readonly HashSet<char> operatorChars = new HashSet<char>
-        {
-            '!'/* , '"' */, '#', '$', '%', '&' /* , ''' */, /* '(', ')', */
-            '*', '+', ',', '-'/* , '.'*/, '/'/*, ':' */, ';', '<', '=', '>', '?',
-            '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'
-        };
-
-        public static IEnumerable<char> OperatorChars =>
-            operatorChars;
-
-        public static bool IsOperator(char ch) =>
-            operatorChars.Contains(ch);
-
         public static IEnumerable<MethodInfo> EnumerableAllPublicStaticMethods(this Assembly assembly) =>
             assembly.GetTypes().
             Where(type => (type.IsPublic || type.IsNestedPublic) && !type.IsGenericType).

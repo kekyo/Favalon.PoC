@@ -37,7 +37,7 @@ namespace Favalon.LexRunners
                         context.TokenBuffer.Clear();
                         return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, new IdentityToken(token), WhiteSpaceToken.Instance);
                     }
-                    else if (Utilities.IsOperator(ch))
+                    else if (IsOperator(ch))
                     {
                         var token0 = InternalFinish(context);
                         context.TokenBuffer.Append(ch);

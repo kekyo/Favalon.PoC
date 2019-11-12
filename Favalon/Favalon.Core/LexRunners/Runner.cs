@@ -1,7 +1,19 @@
-﻿namespace Favalon.LexRunners
+﻿using System.Collections.Generic;
+
+namespace Favalon.LexRunners
 {
     internal abstract class Runner
     {
+        internal static readonly HashSet<char> operatorChars = new HashSet<char>
+        {
+            '!'/* , '"' */, '#', '$', '%', '&' /* , ''' */, /* '(', ')', */
+            '*', '+', ',', '-'/* , '.'*/, '/'/*, ':' */, ';', '<', '=', '>', '?',
+            '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'
+        };
+
+        public static bool IsOperator(char ch) =>
+            operatorChars.Contains(ch);
+
         protected Runner()
         { }
 

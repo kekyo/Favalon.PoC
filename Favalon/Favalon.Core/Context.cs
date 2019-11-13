@@ -76,6 +76,10 @@ namespace Favalon
                 boundTerms,
                 "+", true, false,
                 new OperatorTerm("+"));
+            AddBoundTerm(
+                boundTerms,
+                "-", true, false,
+                new OperatorTerm("-"));
         }
 
         private protected Context()

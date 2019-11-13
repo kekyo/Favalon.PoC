@@ -16,8 +16,8 @@ namespace Favalon.Terms
 
         protected internal override Term VisitTranspose(Context context)
         {
-            var left = this.Function;
-            var right = this.Argument;
+            var left = context.Transpose(this.Function);
+            var right = context.Transpose(this.Argument);
 
             switch (right)
             {
@@ -27,19 +27,15 @@ namespace Favalon.Terms
                     // abc def + ==> abc + def
                     if (left is ApplyTerm(Term applyLeft, Term applyRight))
                     {
-                        left = new ApplyTerm(applyLeft, variable); // swap
-                        right = applyRight;
+                        right = applyRight; // swap
+                        left = new ApplyTerm(applyLeft, variable);
                     }
                     // abc + ==> + abc
                     else
                     {
-                        left = variable; // swap
-                        right = this.Function;
+                        right = left; // swap
+                        left = variable;
                     }
-                    break;
-                default:
-                    left = context.Transpose(this.Function);
-                    right = this.Argument;
                     break;
             }
 
@@ -49,8 +45,8 @@ namespace Favalon.Terms
                 // abc -> def ghi ==> -> abc (def ghi)
                 case ApplyTerm(ApplyTerm(VariableTerm applyLeft, Term _) apply, Term applyRight) when
                     context.LookupBoundTerms(applyLeft) is BoundTerm[] terms && terms[0].RightToLeft:
-                    left = apply;
                     right = new ApplyTerm(applyRight, right);
+                    left = apply;
                     break;
             }
 

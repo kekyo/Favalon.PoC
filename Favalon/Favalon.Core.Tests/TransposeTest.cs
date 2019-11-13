@@ -6,6 +6,18 @@ namespace Favalon
     [TestFixture]
     public sealed class TransposeTest
     {
+        private static Environment CreateEnvironment()
+        {
+            var environment = Environment.Create();
+            environment.AddBoundTerm(
+                "+", true, false,
+                new OperatorTerm("+"));
+            environment.AddBoundTerm(
+                "-", true, false,
+                new OperatorTerm("-"));
+            return environment;
+        }
+
         [Test]
         public void TransposeNonTransposableTerm()
         {
@@ -17,7 +29,7 @@ namespace Favalon
                         Term.Identity("def")),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // (abc def) ghi
@@ -42,7 +54,7 @@ namespace Favalon
                     Term.Identity("abc"),
                     Term.Operator("+"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // + abc
@@ -63,7 +75,7 @@ namespace Favalon
                     Term.Identity("abc"),
                     Term.Operator("->"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // -> abc
@@ -88,7 +100,7 @@ namespace Favalon
                         Term.Operator("+")),
                     Term.Identity("def"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // + abc def
@@ -113,7 +125,7 @@ namespace Favalon
                         Term.Operator("->")),
                     Term.Identity("def"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // -> abc def
@@ -140,7 +152,7 @@ namespace Favalon
                         Term.Identity("def")),
                     Term.Operator("+"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // abc + def
@@ -165,7 +177,7 @@ namespace Favalon
                         Term.Identity("def")),
                     Term.Operator("->"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // abc -> def
@@ -194,7 +206,7 @@ namespace Favalon
                         Term.Identity("def")),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // + abc def ghi
@@ -223,7 +235,7 @@ namespace Favalon
                         Term.Identity("def")),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // -> abc (def ghi)
@@ -254,7 +266,7 @@ namespace Favalon
                         Term.Identity("def"),
                         Term.Operator("+")));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // + abc (+ def)
@@ -283,7 +295,7 @@ namespace Favalon
                         Term.Identity("def"),
                         Term.Operator("->")));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
          // -> abc (-> def)
@@ -314,7 +326,7 @@ namespace Favalon
                             Term.Identity("def"))),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // abc (+ def) ghi
@@ -343,7 +355,7 @@ namespace Favalon
                             Term.Identity("def"))),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // abc (-> def) ghi
@@ -374,7 +386,7 @@ namespace Favalon
                             Term.Operator("+"))),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // abc (+ def) ghi
@@ -403,7 +415,7 @@ namespace Favalon
                             Term.Operator("->"))),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // abc (-> def) ghi
@@ -436,7 +448,7 @@ namespace Favalon
                         Term.Operator("-")),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // abc - (+ def) ghi
@@ -469,7 +481,7 @@ namespace Favalon
                         Term.Operator("->")),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // abc -> (-> def) ghi
@@ -504,7 +516,7 @@ namespace Favalon
                         Term.Operator("+")),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // + abc + def ghi
@@ -537,7 +549,7 @@ namespace Favalon
                         Term.Operator("->")),
                     Term.Identity("ghi"));
 
-            var environment = Environment.Create();
+            var environment = CreateEnvironment();
             var actual = environment.Transpose(term);
 
             // -> abc (-> def ghi)

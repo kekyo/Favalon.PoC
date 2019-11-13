@@ -16,7 +16,7 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+            var actual = environment.Reduce(environment.Transpose(term));
 
             Assert.AreEqual(
                 Term.Function(
@@ -34,7 +34,7 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+            var actual = environment.Reduce(environment.Transpose(term));
 
             Assert.AreEqual(
                 Term.Identity("b"),
@@ -50,7 +50,7 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+            var actual = environment.Reduce(environment.Transpose(term));
 
             Assert.AreEqual(
                 Term.Function(
@@ -61,7 +61,7 @@ namespace Favalon
                 actual);
         }
 
-        //[Test]
+        [Test]
         public void EnumerableIdentityToken4()
         {
             var text = "-> x (x x) ->";
@@ -70,11 +70,7 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-
-            var r = environment.EnumerableReduceSteps(term).
-                ToArray();
-
-            var actual = environment.Reduce(term);
+            var actual = environment.Reduce(environment.Transpose(term));
 
             Assert.AreEqual(
                 Term.Apply(
@@ -98,7 +94,7 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+            var actual = environment.Reduce(environment.Transpose(term));
 
             Assert.AreEqual(
                 Term.Function(
@@ -107,7 +103,7 @@ namespace Favalon
                 actual);
         }
 
-        //[Test]
+        [Test]
         public void EnumerableIdentityToken12()
         {
             var text = "(-> x (x x)) -> y y";
@@ -116,7 +112,7 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual1 = environment.Reduce(term, false);
+            var actual1 = environment.Reduce(environment.Transpose(term), false);
             var actual2 = environment.Reduce(actual1, false);
 
             Assert.AreEqual(

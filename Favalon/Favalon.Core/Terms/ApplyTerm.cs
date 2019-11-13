@@ -23,7 +23,7 @@ namespace Favalon.Terms
             {
                 // Swap by infix variables
                 case VariableTerm variable when
-                    context.LookupBoundTerms(variable) is BoundTerm[] terms && terms[0].Infix:
+                    context.LookupBoundTerms(variable) is BoundTermInformation[] terms && terms[0].Infix:
                     // abc def + ==> abc + def
                     if (left is ApplyTerm(Term applyLeft, Term applyRight))
                     {
@@ -44,7 +44,7 @@ namespace Favalon.Terms
                 // Transpose by right associative variables
                 // abc -> def ghi ==> -> abc (def ghi)
                 case ApplyTerm(ApplyTerm(VariableTerm applyLeft, Term _) apply, Term applyRight) when
-                    context.LookupBoundTerms(applyLeft) is BoundTerm[] terms && terms[0].RightToLeft:
+                    context.LookupBoundTerms(applyLeft) is BoundTermInformation[] terms && terms[0].RightToLeft:
                     right = new ApplyTerm(applyRight, right);
                     left = apply;
                     break;

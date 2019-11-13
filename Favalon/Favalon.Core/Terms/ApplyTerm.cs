@@ -19,17 +19,9 @@ namespace Favalon.Terms
             var left = this.Function;
             var right = this.Argument;
 
-            switch (left)
-            {
-                case ApplyTerm(VariableTerm applyLeft, VariableTerm applyRight) when
-                    context.LookupBoundTerms(applyRight) is BoundTerm[] terms && terms[0].RightToLeft:
-                    left = new ApplyTerm(applyLeft, right);  // transpose
-                    right = applyLeft;
-                    break;
-            }
-
             switch (right)
             {
+                // Swap by infix variables
                 case VariableTerm variable when
                     context.LookupBoundTerms(variable) is BoundTerm[] terms && terms[0].Infix:
                     if (left is ApplyTerm(Term applyLeft, Term applyRight))
@@ -46,6 +38,16 @@ namespace Favalon.Terms
                 default:
                     left = context.Transpose(this.Function);
                     right = this.Argument;
+                    break;
+            }
+
+            switch (left)
+            {
+                // Transpose by right associative variables
+                case ApplyTerm(ApplyTerm(VariableTerm applyLeft, Term _) apply, Term applyRight) when
+                    context.LookupBoundTerms(applyLeft) is BoundTerm[] terms && terms[0].RightToLeft:
+                    left = apply;
+                    right = new ApplyTerm(applyRight, right);
                     break;
             }
 

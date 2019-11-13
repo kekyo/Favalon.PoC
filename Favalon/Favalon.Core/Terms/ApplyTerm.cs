@@ -24,11 +24,13 @@ namespace Favalon.Terms
                 // Swap by infix variables
                 case VariableTerm variable when
                     context.LookupBoundTerms(variable) is BoundTerm[] terms && terms[0].Infix:
+                    // abc def + ==> abc + def
                     if (left is ApplyTerm(Term applyLeft, Term applyRight))
                     {
                         left = new ApplyTerm(applyLeft, variable); // swap
                         right = applyRight;
                     }
+                    // abc + ==> + abc
                     else
                     {
                         left = variable; // swap
@@ -44,6 +46,7 @@ namespace Favalon.Terms
             switch (left)
             {
                 // Transpose by right associative variables
+                // abc -> def ghi ==> -> abc (def ghi)
                 case ApplyTerm(ApplyTerm(VariableTerm applyLeft, Term _) apply, Term applyRight) when
                     context.LookupBoundTerms(applyLeft) is BoundTerm[] terms && terms[0].RightToLeft:
                     left = apply;
@@ -104,7 +107,7 @@ namespace Favalon.Terms
             var function = this.Function is FunctionTerm ?
                 $"({this.Function.ToString(includeTermName)})" :
                 this.Function.ToString(includeTermName);
-            return this.Argument is IdentityTerm ?
+            return this.Argument is VariableTerm ?
                 $"{function} {this.Argument.ToString(includeTermName)}" :
                 $"{function} ({this.Argument.ToString(includeTermName)})";
         }

@@ -48,5 +48,13 @@ namespace Favalon.Internal
 
         public static string GetFullName(this Type type) =>
             type.AsMemberInfo().GetFullName();
+
+#if NETSTANDARD1_0
+        public static string GetIdentity(this Delegate dlg) =>
+            $"&{dlg.GetHashCode()}";
+#else
+        public static string GetIdentity(this Delegate dlg) =>
+            $"&{dlg.Method.GetFullName()}";
+#endif
     }
 }

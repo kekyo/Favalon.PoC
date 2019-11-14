@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net45</TargetFramework>
+        <RootNamespace>Favalon</RootNamespace>
+
+        <LangVersion>8.0</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.1" />
+        <PackageReference Include="NUnit" Version="3.12.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
+        <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Favalon.Core\Favalon.Core.csproj" />
+    </ItemGroup>
+
+</Project>

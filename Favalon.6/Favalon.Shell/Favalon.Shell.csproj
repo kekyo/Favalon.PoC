@@ -1,12 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFrameworks>net35;net40;net45;netstandard1.0</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net45</TargetFramework>
     <RootNamespace>Favalon</RootNamespace>
 
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Favalon.Core\Favalon.Core.csproj" />
+  </ItemGroup>
 
 </Project>

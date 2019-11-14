@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Internal;
+using System;
 
 namespace Favalon.Terms
 {
@@ -17,7 +18,7 @@ namespace Favalon.Terms
             this.interpreter = interpreter;
         }
 
-        public override Term Parameter { get; }
+        public override IdentityTerm Parameter { get; }
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             this;
@@ -36,9 +37,9 @@ namespace Favalon.Terms
             this.Equals(obj as InterpretTerm);
 
         protected override string VisitTermString(bool includeTermName) =>
-            $"{this.Identity.ToString(includeTermName)} {this.Parameter.ToString(includeTermName)}";
+            $"{this.Identity.ToString(includeTermName)} {this.Parameter.ToString(includeTermName)} {this.interpreter.GetIdentity()}";
 
         public void Deconstruct(out string identity) =>
-            identity = this.Identity.Identity;
+            identity = this.Identity.Name;
     }
 }

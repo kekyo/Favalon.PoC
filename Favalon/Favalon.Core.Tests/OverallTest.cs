@@ -16,7 +16,8 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+            var transposed = environment.Transpose(term);
+            var actual = environment.Reduce(transposed);
 
             Assert.AreEqual(
                 Term.Function(
@@ -34,10 +35,15 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+            var transposed = environment.Transpose(term);
+            var actual = environment.Reduce(transposed);
 
             Assert.AreEqual(
-                Term.Identity("b"),
+                Term.Function(
+                    Term.Identity("a"),
+                    Term.Apply(
+                        Term.Identity("b"),
+                        Term.Identity("c"))),
                 actual);
         }
 
@@ -50,7 +56,8 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+            var transposed = environment.Transpose(term);
+            var actual = environment.Reduce(transposed);
 
             Assert.AreEqual(
                 Term.Function(
@@ -61,7 +68,7 @@ namespace Favalon
                 actual);
         }
 
-        //[Test]
+        [Test]
         public void EnumerableIdentityToken4()
         {
             var text = "-> x (x x) ->";
@@ -70,11 +77,8 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-
-            var r = environment.EnumerableReduceSteps(term).
-                ToArray();
-
-            var actual = environment.Reduce(term);
+            var transposed = environment.Transpose(term);
+            var actual = environment.Reduce(transposed);
 
             Assert.AreEqual(
                 Term.Apply(
@@ -83,7 +87,7 @@ namespace Favalon
                         Term.Apply(
                             Term.Identity("b"),
                             Term.Identity("c"))),
-                    environment.LookupIdentity(Term.Identity("->"))![0]),
+                    environment.LookupBoundTerms(Term.Operator("->"))![0].Term),
                 actual);
         }
 
@@ -98,7 +102,8 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+            var transposed = environment.Transpose(term);
+            var actual = environment.Reduce(transposed);
 
             Assert.AreEqual(
                 Term.Function(
@@ -107,7 +112,7 @@ namespace Favalon
                 actual);
         }
 
-        //[Test]
+        [Test]
         public void EnumerableIdentityToken12()
         {
             var text = "(-> x (x x)) -> y y";
@@ -116,7 +121,8 @@ namespace Favalon
                 Single();
 
             var environment = Environment.Create();
-            var actual1 = environment.Reduce(term, false);
+            var transposed = environment.Transpose(term);
+            var actual1 = environment.Reduce(transposed, false);
             var actual2 = environment.Reduce(actual1, false);
 
             Assert.AreEqual(

@@ -1,59 +1,35 @@
-﻿using Favalon.Internal;
-using Favalon.Terms;
+﻿using Favalon.Terms;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace Favalon
 {
     public class Context
     {
-        private static readonly Dictionary<string, List<Term>> boundTerms =
-            typeof(object).GetTypeInfo().Assembly.
-            EnumerableAllPublicStaticMethods().
-            Where(method => method.GetParameters().Length == 1).
-            GroupBy(method => method.GetFullName()).
-            ToDictionary(g => g.Key, g => g.Select(method => (Term)new MethodTerm(method)).ToList());
+        private readonly Dictionary<string, List<BoundTermInformation>> boundTerms;
 
-        private static void AddBoundTerm(
-            Dictionary<string, List<Term>> boundTerms, string identity, Term term)
+        private protected Context(Dictionary<string, List<BoundTermInformation>> initialBoundTerm) =>
+            boundTerms = new Dictionary<string, List<BoundTermInformation>>(initialBoundTerm);
+
+        private protected static void AddBoundTerm(
+            Dictionary<string, List<BoundTermInformation>> boundTerms,
+            string name, bool infix, bool rightToLeft, Term term)
         {
-            if (!boundTerms.TryGetValue(identity, out var terms))
+            if (!boundTerms.TryGetValue(name, out var terms))
             {
-                terms = new List<Term>();
-                boundTerms.Add(identity, terms);
+                terms = new List<BoundTermInformation>();
+                boundTerms.Add(name, terms);
             }
-            terms.Add(term);
+            terms.Add(new BoundTermInformation(infix, rightToLeft, term));
         }
 
-        static Context()
-        {
-            // operator arrow (lambda constructor)
-            // -> a b
-            // --------------
-            // f  a b
-            // ((f:'1->'2 a:'1):'2 b:'3):'4
-            // ((f:'1->'2 a:'1):'3->'4 b:'3):'4
-            // ((f:'1->'3->'4 a:'1):'3->'4 b:'3):'4
-            AddBoundTerm(
-                boundTerms,
-                "->",
-                // f:'1->'3->'4
-                new InterpretTerm(
-                    "->", "a",  // a:'1
-                    (ic, a) =>
-                        // '3->'4
-                        new InterpretTerm(
-                            $"Closure(-> {a})", "b",  // b:'3
-                            (oc, b) =>
-                                new FunctionTerm(a.VisitReduce(ic), b.VisitReduce(oc)))));
-        }
+        public void AddBoundTerm(string name, bool infix, bool rightToLeft, Term term) =>
+            AddBoundTerm(boundTerms, name, infix, rightToLeft, term);
 
-        private protected Context()
-        { }
+        public BoundTermInformation[]? LookupBoundTerms(VariableTerm variable) =>
+            boundTerms.TryGetValue(variable.Name, out var terms) ? terms.ToArray() : null;
 
-        public Term[]? LookupIdentity(IdentityTerm identity) =>
-            boundTerms.TryGetValue(identity.Identity, out var terms) ? terms.ToArray() : null;
+        public Term Transpose(Term term) =>
+            term.VisitTranspose(this);
 
         public Term Replace(Term term, string identity, Term replacement) =>
             term.VisitReplace(identity, replacement);

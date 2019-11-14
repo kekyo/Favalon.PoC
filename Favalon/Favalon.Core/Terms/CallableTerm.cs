@@ -5,14 +5,14 @@
         internal CallableTerm()
         { }
 
-        public abstract Term Parameter { get; }
+        public abstract IdentityTerm Parameter { get; }
 
         protected internal sealed override Term VisitReduce(Context context) =>
             this;
 
         protected internal abstract Term VisitCall(Context context, Term argument);
 
-        public void Deconstruct(out Term parameter) =>
+        public void Deconstruct(out IdentityTerm parameter) =>
             parameter = this.Parameter;
     }
 }

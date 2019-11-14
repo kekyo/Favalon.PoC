@@ -31,7 +31,7 @@ namespace Favalon.LexRunners
                         context.TokenBuffer.Append(ch);
                         return RunResult.Empty(NumericRunner.Instance);
                     }
-                    else if (Utilities.IsOperator(ch))
+                    else if (IsOperator(ch))
                     {
                         context.TokenBuffer.Append(ch);
                         return RunResult.Empty(OperatorRunner.Instance);

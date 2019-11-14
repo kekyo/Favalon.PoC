@@ -40,7 +40,7 @@ namespace Favalon.LexRunners
                             new NumericToken(token),
                             WhiteSpaceToken.Instance);
                     }
-                    else if (Utilities.IsOperator(ch))
+                    else if (IsOperator(ch))
                     {
                         var token0 = InternalFinish(context);
                         context.TokenBuffer.Append(ch);

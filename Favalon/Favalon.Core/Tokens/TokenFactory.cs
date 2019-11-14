@@ -1,7 +1,13 @@
-﻿namespace Favalon.Tokens
+﻿using Favalon.LexRunners;
+using System.Collections.Generic;
+
+namespace Favalon.Tokens
 {
     partial class Token
     {
+        public static IEnumerable<char> OperatorChars =>
+            Runner.operatorChars;
+
         public static IdentityToken Identity(string identity) =>
             new IdentityToken(identity);
 

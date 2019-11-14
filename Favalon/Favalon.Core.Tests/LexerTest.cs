@@ -1,5 +1,4 @@
-﻿using Favalon.Internal;
-using Favalon.Tokens;
+﻿using Favalon.Tokens;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -574,18 +573,18 @@ namespace Favalon
         [TestCaseSource("LexerRunners")]
         public void Operator1Detection(Func<string, IEnumerable<Token>> run)
         {
-            foreach (var ch in Utilities.OperatorChars)
+            foreach (var ch in Token.OperatorChars)
             {
                 var text = $"123 {ch} abc";
                 var actual = run(text);
 
                 Assert.AreEqual(
                     new Token[] {
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.Operator(ch.ToString()),
-                    Token.WhiteSpace(),
-                    Token.Identity("abc") },
+                        Token.Numeric("123"),
+                        Token.WhiteSpace(),
+                        Token.Operator(ch.ToString()),
+                        Token.WhiteSpace(),
+                        Token.Identity("abc") },
                     actual);
             }
         }
@@ -594,8 +593,8 @@ namespace Favalon
         public void Operator2Detection(Func<string, IEnumerable<Token>> run)
         {
             Parallel.ForEach(
-                Utilities.OperatorChars.
-                    SelectMany(ch1 => Utilities.OperatorChars.
+                Token.OperatorChars.
+                    SelectMany(ch1 => Token.OperatorChars.
                         Select(ch2 => (ch1, ch2))),
                 entry =>
                 {
@@ -604,11 +603,11 @@ namespace Favalon
 
                     Assert.AreEqual(
                         new Token[] {
-                        Token.Numeric("123"),
-                        Token.WhiteSpace(),
-                        Token.Operator($"{entry.ch1}{entry.ch2}"),
-                        Token.WhiteSpace(),
-                        Token.Identity("abc") },
+                            Token.Numeric("123"),
+                            Token.WhiteSpace(),
+                            Token.Operator($"{entry.ch1}{entry.ch2}"),
+                            Token.WhiteSpace(),
+                            Token.Identity("abc") },
                         actual);
                 });
         }
@@ -617,9 +616,9 @@ namespace Favalon
         public void Operator3Detection(Func<string, IEnumerable<Token>> run)
         {
             Parallel.ForEach(
-                Utilities.OperatorChars.
-                    SelectMany(ch1 => Utilities.OperatorChars.
-                        SelectMany(ch2 => Utilities.OperatorChars.
+                Token.OperatorChars.
+                    SelectMany(ch1 => Token.OperatorChars.
+                        SelectMany(ch2 => Token.OperatorChars.
                             Select(ch3 => (ch1, ch2, ch3)))),
                 entry =>
                 {
@@ -628,11 +627,11 @@ namespace Favalon
 
                     Assert.AreEqual(
                         new Token[] {
-                        Token.Numeric("123"),
-                        Token.WhiteSpace(),
-                        Token.Operator($"{entry.ch1}{entry.ch2}{entry.ch3}"),
-                        Token.WhiteSpace(),
-                        Token.Identity("abc") },
+                            Token.Numeric("123"),
+                            Token.WhiteSpace(),
+                            Token.Operator($"{entry.ch1}{entry.ch2}{entry.ch3}"),
+                            Token.WhiteSpace(),
+                            Token.Identity("abc") },
                         actual);
                 });
         }

@@ -4,8 +4,11 @@ namespace Favalon.Terms
 {
     partial class Term
     {
-        public static IdentityTerm Identity(string name) =>
-            new IdentityTerm(name);
+        public static IdentityTerm Identity(string identity) =>
+            new IdentityTerm(identity);
+
+        public static OperatorTerm Operator(string symbol) =>
+            new OperatorTerm(symbol);
 
         public static FunctionTerm Function(IdentityTerm parameter, Term body) =>
             new FunctionTerm(parameter, body);

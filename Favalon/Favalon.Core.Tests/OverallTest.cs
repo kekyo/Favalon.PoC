@@ -8,7 +8,7 @@ namespace Favalon
     public sealed class OverallTest
     {
         [Test]
-        public void EnumerableIdentityToken1()
+        public void SimpleArrowOperator()
         {
             var text = "a -> b";
             var tokens = Lexer.EnumerableTokens(text);
@@ -27,7 +27,7 @@ namespace Favalon
         }
 
         [Test]
-        public void EnumerableIdentityToken2()
+        public void SimpleArrowOperatorWithApplyBody1()
         {
             var text = "a -> b c";
             var tokens = Lexer.EnumerableTokens(text);
@@ -48,9 +48,9 @@ namespace Favalon
         }
 
         [Test]
-        public void EnumerableIdentityToken3()
+        public void SimpleArrowOperatorWithApplyBody2()
         {
-            var text = "-> a (b c)";
+            var text = "a -> (b c)";
             var tokens = Lexer.EnumerableTokens(text);
             var term = Parser.EnumerableTerms(tokens).
                 Single();
@@ -69,9 +69,9 @@ namespace Favalon
         }
 
         [Test]
-        public void EnumerableIdentityToken4()
+        public void SimpleArrowOperatorDouble()
         {
-            var text = "-> x (x x) ->";
+            var text = "a -> b -> c";
             var tokens = Lexer.EnumerableTokens(text);
             var term = Parser.EnumerableTerms(tokens).
                 Single();
@@ -81,13 +81,34 @@ namespace Favalon
             var actual = environment.Reduce(transposed);
 
             Assert.AreEqual(
-                Term.Apply(
+                Term.Function(
+                    Term.Identity("a"),
                     Term.Function(
-                        Term.Identity("a"),
+                        Term.Identity("b"),
+                        Term.Identity("c"))),
+                actual);
+        }
+
+        [Test]
+        public void SimpleArrowOperatorDoubleWithApply()
+        {
+            var text = "a -> b -> c d";
+            var tokens = Lexer.EnumerableTokens(text);
+            var term = Parser.EnumerableTerms(tokens).
+                Single();
+
+            var environment = Environment.Create();
+            var transposed = environment.Transpose(term);
+            var actual = environment.Reduce(transposed);
+
+            Assert.AreEqual(
+                Term.Function(
+                    Term.Identity("a"),
+                    Term.Function(
+                        Term.Identity("b"),
                         Term.Apply(
-                            Term.Identity("b"),
-                            Term.Identity("c"))),
-                    environment.LookupBoundTerms(Term.Operator("->"))![0].Term),
+                            Term.Identity("c"),
+                            Term.Identity("d")))),
                 actual);
         }
 

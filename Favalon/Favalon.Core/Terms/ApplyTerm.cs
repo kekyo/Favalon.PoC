@@ -14,9 +14,24 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        private static Term InternalTranspose(Context context, Term leftTerm)
+        private struct TransposeResult
         {
-            if (leftTerm is ApplyTerm(Term function, Term argument))
+            public readonly Term Result;
+            public readonly Term? TransposeTarget;
+
+            public TransposeResult(Term result, Term? transposeTarget)
+            {
+                this.Result = result;
+                this.TransposeTarget = transposeTarget;
+            }
+        }
+
+        private static Term InternalTranspose(Context context, Term term) =>
+            InternalTranspose_(context, term).Result;
+
+        private static TransposeResult InternalTranspose_(Context context, Term term)
+        {
+            if (term is ApplyTerm(Term function, Term argument))
             {
                 var left = InternalTranspose(context, function);
                 var right = context.Transpose(argument);
@@ -55,16 +70,16 @@ namespace Favalon.Terms
                 if (!object.ReferenceEquals(left, function) ||
                     !object.ReferenceEquals(right, argument))
                 {
-                    return new ApplyTerm(left, right);
+                    return new TransposeResult(new ApplyTerm(left, right), null);
                 }
                 else
                 {
-                    return leftTerm;
+                    return new TransposeResult(term, null);
                 }
             }
             else
             {
-                return context.Transpose(leftTerm);
+                return new TransposeResult(context.Transpose(term), null);
             }
         }
 

@@ -33,19 +33,19 @@ namespace Favalon.Terms
         {
             if (term is ApplyTerm(Term function, Term argument))
             {
-                var left = InternalTranspose(context, function);
+                var left = InternalTranspose_(context, function).Result;
                 var right = context.Transpose(argument);
 
-                switch (right)
+                // Swap by infix variables
+                if (right is VariableTerm variable)
                 {
-                    // Swap by infix variables
-                    case VariableTerm variable when
-                        context.LookupBoundTerms(variable) is BoundTermInformation[] terms && terms[0].Infix:
+                    if (context.LookupBoundTerms(variable) is BoundTermInformation[] terms && terms[0].Infix)
+                    {
                         // abc def + ==> abc + def
-                        if (left is ApplyTerm(Term applyLeft, Term applyRight))
+                        if (left is ApplyTerm(Term applyLeft1, Term applyRight1))
                         {
-                            right = applyRight; // swap
-                            left = new ApplyTerm(applyLeft, variable);
+                            right = applyRight1; // swap
+                            left = new ApplyTerm(applyLeft1, variable);
                         }
                         // abc + ==> + abc
                         else
@@ -53,20 +53,21 @@ namespace Favalon.Terms
                             right = left; // swap
                             left = variable;
                         }
-                        break;
+                    }
                 }
 
-                switch (left)
+                // Transpose by right associative variables
+                // abc -> def ghi ==> -> abc (def ghi)
+                if (left is ApplyTerm(ApplyTerm(VariableTerm applyLeft2, Term _) apply, Term applyRight2))
                 {
-                    // Transpose by right associative variables
-                    // abc -> def ghi ==> -> abc (def ghi)
-                    case ApplyTerm(ApplyTerm(VariableTerm applyLeft, Term _) apply, Term applyRight) when
-                        context.LookupBoundTerms(applyLeft) is BoundTermInformation[] terms && terms[0].RightToLeft:
-                        right = new ApplyTerm(applyRight, right);
+                    if (context.LookupBoundTerms(applyLeft2) is BoundTermInformation[] terms && terms[0].RightToLeft)
+                    {
+                        right = new ApplyTerm(applyRight2, right);
                         left = apply;
-                        break;
+                    }
                 }
 
+                // If changed left and/or right terms
                 if (!object.ReferenceEquals(left, function) ||
                     !object.ReferenceEquals(right, argument))
                 {

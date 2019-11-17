@@ -14,111 +14,139 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        private struct TransposeResult
+        private struct TransposeResult0
         {
             public readonly Term Result;
-            public readonly Term? TransposeTarget;
+            public readonly bool WillTranspose;
 
-            public TransposeResult(Term result, Term? transposeTarget)
+            public TransposeResult0(Term result, bool willTranspose)
             {
                 this.Result = result;
-                this.TransposeTarget = transposeTarget;
+                this.WillTranspose = willTranspose;
+            }
+
+            public void Deconstruct(out Term result, out bool willTranspose)
+            {
+                result = this.Result;
+                willTranspose = this.WillTranspose;
             }
         }
 
-        private static Term InternalTranspose(Context context, Term term) =>
-            InternalTranspose_(context, term).Result;
+        private struct TransposeResult1
+        {
+            public readonly Term Result;
+            public readonly Term? Right;
+            public readonly bool WillTranspose;
 
-        private static TransposeResult InternalTranspose_(Context context, Term term)
+            public TransposeResult1(Term result, Term? right, bool willTranspose)
+            {
+                this.Result = result;
+                this.Right = right;
+                this.WillTranspose = willTranspose;
+            }
+
+            public void Deconstruct(out Term result, out Term? right, out bool willTranspose)
+            {
+                result = this.Result;
+                right = this.Right;
+                willTranspose = this.WillTranspose;
+            }
+        }
+
+        private static TransposeResult1 InternalTranspose1(Context context, Term term)
         {
             if (term is ApplyTerm(Term function, Term argument))
             {
-                var leftResult = InternalTranspose_(context, function);
+                var leftResult = InternalTranspose1(context, function);
                 var left = leftResult.Result;
-                Term? transposeTarget = null;
-
-                //var left = InternalTranspose_(context, function).Result;
+                var willTranspose = leftResult.WillTranspose;
 
                 var right = context.Transpose(argument);
 
+                var rightToLeft = false;
+
+                if (leftResult.Right is Term rightTerm)
+                {
+                    var rightResult = InternalTranspose0(context, new ApplyTerm(rightTerm, right));
+
+                    right = rightResult.Result;
+
+                    // TODO: validate this expression
+                    willTranspose = willTranspose || rightResult.WillTranspose;
+                }
+
                 // Swap by infix variables
-                switch (right)
+                if (right is VariableTerm rightVariable &&
+                    context.LookupBoundTerms(rightVariable) is BoundTermInformation[] rightTerms)
                 {
-                    case VariableTerm variable:
-                        if (context.LookupBoundTerms(variable) is BoundTermInformation[] terms1)
+                    if (rightTerms[0].Infix)
+                    {
+                        // Rule 2: abc def + ==> abc + def
+                        if (left is ApplyTerm(Term applyLeft1, Term applyRight1))
                         {
-                            if (terms1[0].Infix)
-                            {
-                                // abc def + ==> abc + def
-                                if (left is ApplyTerm(Term applyLeft1, Term applyRight1))
-                                {
-                                    right = applyRight1; // swap
-                                    left = new ApplyTerm(applyLeft1, variable);
-                                }
-                                // abc + ==> + abc
-                                else
-                                {
-                                    right = left; // swap
-                                    left = variable;
-                                }
-                            }
+                            right = applyRight1;
+                            left = new ApplyTerm(applyLeft1, rightVariable);
                         }
-                        break;
+                        // Rule 1: abc + ==> + abc
+                        else
+                        {
+                            right = left; // swap
+                            left = rightVariable;
+                        }
+                    }
+
+                    if (rightTerms[0].RightToLeft)
+                    {
+                        rightToLeft = true;
+                    }
+                }
+                else if (left is VariableTerm leftVariable &&
+                    context.LookupBoundTerms(leftVariable) is BoundTermInformation[] leftTerms)
+                {
+                    if (leftTerms[0].RightToLeft)
+                    {
+                        rightToLeft = true;
+                    }
                 }
 
-                switch (left)
+                if (willTranspose)
                 {
-                    case ApplyTerm(VariableTerm applyLeft2, Term _):
-                        if (context.LookupBoundTerms(applyLeft2) is BoundTermInformation[] terms2)
-                        {
-                            if (terms2[0].RightToLeft)
-                            {
-                                transposeTarget = right;
-                            }
-                        }
-                        break;
-                    case ApplyTerm(Term applyLeft, Term applyRight):
-                        // Transpose by right associative variables
-                        // abc -> def ghi ==> -> abc (def ghi)
-                        if (leftResult.TransposeTarget is Term lastTransposeTarget)
-                        {
-                            right = new ApplyTerm(lastTransposeTarget, applyRight);
-                            left = applyLeft;
-                            transposeTarget = right;
-                        }
-                        break;
+                    return new TransposeResult1(left, right, rightToLeft);
                 }
-
-                // Transpose by right associative variables
-                // abc -> def ghi ==> -> abc (def ghi)
-                //if (left is ApplyTerm(ApplyTerm(VariableTerm applyLeft2, Term _) apply, Term applyRight2))
-                //{
-                //    if (context.LookupBoundTerms(applyLeft2) is BoundTermInformation[] terms && terms[0].RightToLeft)
-                //    {
-                //        right = new ApplyTerm(applyRight2, right);
-                //        left = apply;
-                //    }
-                //}
 
                 // If changed left and/or right terms
                 if (!object.ReferenceEquals(left, function) ||
                     !object.ReferenceEquals(right, argument))
                 {
-                    return new TransposeResult(new ApplyTerm(left, right), transposeTarget);
+                    return new TransposeResult1(new ApplyTerm(left, right), null, rightToLeft);
                 }
                 else
                 {
-                    return new TransposeResult(term, transposeTarget);
+                    return new TransposeResult1(term, null, rightToLeft);
                 }
             }
             else
             {
-                return new TransposeResult(context.Transpose(term), null);
+                return new TransposeResult1(context.Transpose(term), null, false);
+            }
+        }
+
+        private static TransposeResult0 InternalTranspose0(Context context, Term term)
+        {
+            var result = InternalTranspose1(context, term);
+
+            if (result is TransposeResult1(Term left, Term right, bool willTranspose))
+            {
+                return new TransposeResult0(new ApplyTerm(left, right), willTranspose);
+            }
+            else
+            {
+                return new TransposeResult0(result.Result, result.WillTranspose);
             }
         }
 
         protected internal override Term VisitTranspose(Context context) =>
-            InternalTranspose(context, this);
+            InternalTranspose0(context, this).Result;
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             new ApplyTerm(

@@ -14,52 +14,139 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        protected internal override Term VisitTranspose(Context context)
+        private struct TransposeResult0
         {
-            var left = context.Transpose(this.Function);
-            var right = context.Transpose(this.Argument);
+            public readonly Term Result;
+            public readonly bool WillTranspose;
 
-            switch (right)
+            public TransposeResult0(Term result, bool willTranspose)
             {
+                this.Result = result;
+                this.WillTranspose = willTranspose;
+            }
+
+            public void Deconstruct(out Term result, out bool willTranspose)
+            {
+                result = this.Result;
+                willTranspose = this.WillTranspose;
+            }
+        }
+
+        private struct TransposeResult1
+        {
+            public readonly Term Result;
+            public readonly Term? Right;
+            public readonly bool WillTranspose;
+
+            public TransposeResult1(Term result, Term? right, bool willTranspose)
+            {
+                this.Result = result;
+                this.Right = right;
+                this.WillTranspose = willTranspose;
+            }
+
+            public void Deconstruct(out Term result, out Term? right, out bool willTranspose)
+            {
+                result = this.Result;
+                right = this.Right;
+                willTranspose = this.WillTranspose;
+            }
+        }
+
+        private static TransposeResult1 InternalTranspose1(Context context, Term term)
+        {
+            if (term is ApplyTerm(Term function, Term argument))
+            {
+                var leftResult = InternalTranspose1(context, function);
+                var left = leftResult.Result;
+                var willTranspose = leftResult.WillTranspose;
+
+                var right = context.Transpose(argument);
+
+                var rightToLeft = false;
+
+                if (leftResult.Right is Term rightTerm)
+                {
+                    var rightResult = InternalTranspose0(context, new ApplyTerm(rightTerm, right));
+
+                    right = rightResult.Result;
+
+                    // TODO: validate this expression
+                    willTranspose = willTranspose || rightResult.WillTranspose;
+                }
+
                 // Swap by infix variables
-                case VariableTerm variable when
-                    context.LookupBoundTerms(variable) is BoundTermInformation[] terms && terms[0].Infix:
-                    // abc def + ==> abc + def
-                    if (left is ApplyTerm(Term applyLeft, Term applyRight))
+                if (right is VariableTerm rightVariable &&
+                    context.LookupBoundTerms(rightVariable) is BoundTermInformation[] rightTerms)
+                {
+                    if (rightTerms[0].Infix)
                     {
-                        right = applyRight; // swap
-                        left = new ApplyTerm(applyLeft, variable);
+                        // Rule 2: abc def + ==> abc + def
+                        if (left is ApplyTerm(Term applyLeft1, Term applyRight1))
+                        {
+                            right = applyRight1;
+                            left = new ApplyTerm(applyLeft1, rightVariable);
+                        }
+                        // Rule 1: abc + ==> + abc
+                        else
+                        {
+                            right = left; // swap
+                            left = rightVariable;
+                        }
                     }
-                    // abc + ==> + abc
-                    else
+
+                    if (rightTerms[0].RightToLeft)
                     {
-                        right = left; // swap
-                        left = variable;
+                        rightToLeft = true;
                     }
-                    break;
-            }
+                }
+                else if (left is VariableTerm leftVariable &&
+                    context.LookupBoundTerms(leftVariable) is BoundTermInformation[] leftTerms)
+                {
+                    if (leftTerms[0].RightToLeft)
+                    {
+                        rightToLeft = true;
+                    }
+                }
 
-            switch (left)
-            {
-                // Transpose by right associative variables
-                // abc -> def ghi ==> -> abc (def ghi)
-                case ApplyTerm(ApplyTerm(VariableTerm applyLeft, Term _) apply, Term applyRight) when
-                    context.LookupBoundTerms(applyLeft) is BoundTermInformation[] terms && terms[0].RightToLeft:
-                    right = new ApplyTerm(applyRight, right);
-                    left = apply;
-                    break;
-            }
+                if (willTranspose)
+                {
+                    return new TransposeResult1(left, right, rightToLeft || willTranspose);
+                }
 
-            if (!object.ReferenceEquals(left, this.Function) ||
-                !object.ReferenceEquals(right, this.Argument))
-            {
-                return new ApplyTerm(left, right);
+                // If changed left and/or right terms
+                if (!object.ReferenceEquals(left, function) ||
+                    !object.ReferenceEquals(right, argument))
+                {
+                    return new TransposeResult1(new ApplyTerm(left, right), null, rightToLeft);
+                }
+                else
+                {
+                    return new TransposeResult1(term, null, rightToLeft);
+                }
             }
             else
             {
-                return this;
+                return new TransposeResult1(context.Transpose(term), null, false);
             }
         }
+
+        private static TransposeResult0 InternalTranspose0(Context context, Term term)
+        {
+            var result = InternalTranspose1(context, term);
+
+            if (result is TransposeResult1(Term left, Term right, bool willTranspose))
+            {
+                return new TransposeResult0(new ApplyTerm(left, right), willTranspose);
+            }
+            else
+            {
+                return new TransposeResult0(result.Result, result.WillTranspose);
+            }
+        }
+
+        protected internal override Term VisitTranspose(Context context) =>
+            InternalTranspose0(context, this).Result;
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             new ApplyTerm(

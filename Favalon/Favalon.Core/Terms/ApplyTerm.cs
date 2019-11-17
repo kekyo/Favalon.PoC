@@ -33,49 +33,82 @@ namespace Favalon.Terms
         {
             if (term is ApplyTerm(Term function, Term argument))
             {
-                var left = InternalTranspose_(context, function).Result;
+                var leftResult = InternalTranspose_(context, function);
+                var left = leftResult.Result;
+                Term? transposeTarget = null;
+
+                //var left = InternalTranspose_(context, function).Result;
+
                 var right = context.Transpose(argument);
 
                 // Swap by infix variables
-                if (right is VariableTerm variable)
+                switch (right)
                 {
-                    if (context.LookupBoundTerms(variable) is BoundTermInformation[] terms && terms[0].Infix)
-                    {
-                        // abc def + ==> abc + def
-                        if (left is ApplyTerm(Term applyLeft1, Term applyRight1))
+                    case VariableTerm variable:
+                        if (context.LookupBoundTerms(variable) is BoundTermInformation[] terms1)
                         {
-                            right = applyRight1; // swap
-                            left = new ApplyTerm(applyLeft1, variable);
+                            if (terms1[0].Infix)
+                            {
+                                // abc def + ==> abc + def
+                                if (left is ApplyTerm(Term applyLeft1, Term applyRight1))
+                                {
+                                    right = applyRight1; // swap
+                                    left = new ApplyTerm(applyLeft1, variable);
+                                }
+                                // abc + ==> + abc
+                                else
+                                {
+                                    right = left; // swap
+                                    left = variable;
+                                }
+                            }
                         }
-                        // abc + ==> + abc
-                        else
+                        break;
+                }
+
+                switch (left)
+                {
+                    case ApplyTerm(VariableTerm applyLeft2, Term _):
+                        if (context.LookupBoundTerms(applyLeft2) is BoundTermInformation[] terms2)
                         {
-                            right = left; // swap
-                            left = variable;
+                            if (terms2[0].RightToLeft)
+                            {
+                                transposeTarget = right;
+                            }
                         }
-                    }
+                        break;
+                    case ApplyTerm(Term applyLeft, Term applyRight):
+                        // Transpose by right associative variables
+                        // abc -> def ghi ==> -> abc (def ghi)
+                        if (leftResult.TransposeTarget is Term lastTransposeTarget)
+                        {
+                            right = new ApplyTerm(lastTransposeTarget, applyRight);
+                            left = applyLeft;
+                            transposeTarget = right;
+                        }
+                        break;
                 }
 
                 // Transpose by right associative variables
                 // abc -> def ghi ==> -> abc (def ghi)
-                if (left is ApplyTerm(ApplyTerm(VariableTerm applyLeft2, Term _) apply, Term applyRight2))
-                {
-                    if (context.LookupBoundTerms(applyLeft2) is BoundTermInformation[] terms && terms[0].RightToLeft)
-                    {
-                        right = new ApplyTerm(applyRight2, right);
-                        left = apply;
-                    }
-                }
+                //if (left is ApplyTerm(ApplyTerm(VariableTerm applyLeft2, Term _) apply, Term applyRight2))
+                //{
+                //    if (context.LookupBoundTerms(applyLeft2) is BoundTermInformation[] terms && terms[0].RightToLeft)
+                //    {
+                //        right = new ApplyTerm(applyRight2, right);
+                //        left = apply;
+                //    }
+                //}
 
                 // If changed left and/or right terms
                 if (!object.ReferenceEquals(left, function) ||
                     !object.ReferenceEquals(right, argument))
                 {
-                    return new TransposeResult(new ApplyTerm(left, right), null);
+                    return new TransposeResult(new ApplyTerm(left, right), transposeTarget);
                 }
                 else
                 {
-                    return new TransposeResult(term, null);
+                    return new TransposeResult(term, transposeTarget);
                 }
             }
             else

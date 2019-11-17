@@ -7,6 +7,9 @@ namespace Favalon
     {
         private readonly Dictionary<string, List<BoundTermInformation>> boundTerms;
 
+        private protected Context() =>
+            boundTerms = new Dictionary<string, List<BoundTermInformation>>();
+
         private protected Context(Dictionary<string, List<BoundTermInformation>> initialBoundTerm) =>
             boundTerms = new Dictionary<string, List<BoundTermInformation>>(initialBoundTerm);
 

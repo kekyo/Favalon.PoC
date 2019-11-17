@@ -39,10 +39,13 @@ namespace Favalon
                                 new FunctionTerm((IdentityTerm)a.VisitReduce(ic), b.VisitReduce(oc)))));
         }
 
-        private Environment() : base(defaultBoundTerms)
+        private Environment()
         { }
 
-        public static Environment Create() =>
-            new Environment();
+        private Environment(Dictionary<string, List<BoundTermInformation>> boundTerms) : base(boundTerms)
+        { }
+
+        public static Environment Create(bool pure = false) =>
+            pure ? new Environment() : new Environment(defaultBoundTerms);
     }
 }

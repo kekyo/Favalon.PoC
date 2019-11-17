@@ -111,7 +111,7 @@ namespace Favalon.Terms
 
                 if (willTranspose)
                 {
-                    return new TransposeResult1(left, right, rightToLeft);
+                    return new TransposeResult1(left, right, rightToLeft || willTranspose);
                 }
 
                 // If changed left and/or right terms

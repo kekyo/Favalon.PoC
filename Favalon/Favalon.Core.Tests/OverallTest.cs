@@ -136,7 +136,7 @@ namespace Favalon
         [Test]
         public void EnumerableIdentityToken12()
         {
-            var text = "(-> x (x x)) -> y y";
+            var text = "(x -> x x) (y -> y)";
             var tokens = Lexer.EnumerableTokens(text);
             var term = Parser.EnumerableTerms(tokens).
                 Single();

@@ -16,11 +16,11 @@ namespace Favalon.LexRunners
                 case '(':
                     return RunResult.Create(
                         this,
-                        OperatorToken.Open);
+                        Token.open);
                 case ')':
                     return RunResult.Create(
                         this,
-                        OperatorToken.Close);
+                        Token.close);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {

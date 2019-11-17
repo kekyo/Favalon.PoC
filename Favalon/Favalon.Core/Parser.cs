@@ -11,7 +11,7 @@ namespace Favalon
         {
             var sign = preSign switch
             {
-                OperatorToken("-") => -1,
+                NumericalSignToken('-') => -1,
                 _ => 1,
             };
             var intValue = int.Parse(value, CultureInfo.InvariantCulture) * sign;
@@ -24,16 +24,16 @@ namespace Favalon
             // * Will have capablility for translating numerics before unary signed operator (+/-).
 
             Token? lastToken = null;
-            OperatorToken? lastSignToken = null;
+            NumericalSignToken? lastSignToken = null;
             Term? rootTerm = null;
             var stack = new Stack<Term?>();
             foreach (var token in tokens)
             {
                 switch (token)
                 {
-                    case OperatorToken("+"):
-                    case OperatorToken("-"):
-                        var signToken = (OperatorToken)token;
+                    case NumericalSignToken('+'):
+                    case NumericalSignToken('-'):
+                        var signToken = (NumericalSignToken)token;
                         switch (lastToken)
                         {
                             case WhiteSpaceToken _:
@@ -46,23 +46,23 @@ namespace Favalon
                                     case Term _:
                                         rootTerm = new ApplyTerm(
                                             rootTerm,
-                                            new IdentityTerm(signToken.Symbol));
+                                            new IdentityTerm(signToken.Symbol.ToString()));
                                         break;
                                     default:
-                                        rootTerm = new IdentityTerm(signToken.Symbol);
+                                        rootTerm = new IdentityTerm(signToken.Symbol.ToString());
                                         break;
                                 }
                                 break;
                         }
                         break;
 
-                    case OperatorToken("(") _:
+                    case IdentityToken("(") _:
                         stack.Push(rootTerm);
                         rootTerm = null;
                         lastSignToken = null;
                         break;
 
-                    case OperatorToken(")") _:
+                    case IdentityToken(")") _:
                         var lastTerm = stack.Pop();
                         if ((rootTerm != null) && (lastTerm != null))
                         {
@@ -71,21 +71,6 @@ namespace Favalon
                         else if (lastTerm != null)
                         {
                             rootTerm = lastTerm;
-                        }
-                        lastSignToken = null;
-                        break;
-
-                    case OperatorToken operatorToken:
-                        switch (rootTerm)
-                        {
-                            case Term _:
-                                rootTerm = new ApplyTerm(
-                                    rootTerm,
-                                    new IdentityTerm(operatorToken.Symbol));
-                                break;
-                            default:
-                                rootTerm = new IdentityTerm(operatorToken.Symbol);
-                                break;
                         }
                         lastSignToken = null;
                         break;
@@ -123,17 +108,17 @@ namespace Favalon
                     case WhiteSpaceToken _:
                         switch (lastSignToken)
                         {
-                            case OperatorToken("+"):
-                            case OperatorToken("-"):
+                            case NumericalSignToken('+'):
+                            case NumericalSignToken('-'):
                                 switch (rootTerm)
                                 {
                                     case Term _:
                                         rootTerm = new ApplyTerm(
                                             rootTerm,
-                                            new IdentityTerm(lastSignToken.Symbol));
+                                            new IdentityTerm(lastSignToken.Symbol.ToString()));
                                         break;
                                     default:
-                                        rootTerm = new IdentityTerm(lastSignToken.Symbol);
+                                        rootTerm = new IdentityTerm(lastSignToken.Symbol.ToString());
                                         break;
                                 }
                                 lastSignToken = null;

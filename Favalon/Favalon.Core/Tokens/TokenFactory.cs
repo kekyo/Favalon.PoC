@@ -5,20 +5,25 @@ namespace Favalon.Tokens
 {
     partial class Token
     {
+        internal static readonly IdentityToken open =
+            new IdentityToken("(");
+        internal static readonly IdentityToken close =
+            new IdentityToken(")");
+
         public static IEnumerable<char> OperatorChars =>
             Runner.operatorChars;
 
         public static IdentityToken Identity(string identity) =>
             new IdentityToken(identity);
 
-        public static OperatorToken Operator(string symbol) =>
-            new OperatorToken(symbol);
+        public static NumericalSignToken NumericalSign(char symbol) =>
+            new NumericalSignToken(symbol);
 
-        public static OperatorToken Open() =>
-            OperatorToken.Open;
+        public static IdentityToken Open() =>
+            open;
 
-        public static OperatorToken Close() =>
-            OperatorToken.Close;
+        public static IdentityToken Close() =>
+            close;
 
         public static WhiteSpaceToken WhiteSpace() =>
             WhiteSpaceToken.Instance;

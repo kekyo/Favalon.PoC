@@ -1,5 +1,4 @@
-﻿using Favalon.Internal;
-using Favalon.Tokens;
+﻿using Favalon.Tokens;
 using System;
 
 namespace Favalon.LexRunners
@@ -16,11 +15,11 @@ namespace Favalon.LexRunners
                 case '(':
                     return RunResult.Create(
                         WaitingRunner.Instance,
-                        OperatorToken.Open);
+                        Token.open);
                 case ')':
                     return RunResult.Create(
                         WaitingRunner.Instance,
-                        OperatorToken.Close);
+                        Token.close);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {

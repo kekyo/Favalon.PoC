@@ -340,13 +340,13 @@ namespace Favalon
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.NumericalSign('+'),
+                    Token.PlusSign(),
                     Token.Numeric("123"),
                     Token.WhiteSpace(),
-                    Token.NumericalSign('+'), 
+                    Token.PlusSign(), 
                     Token.Numeric("456"),
                     Token.WhiteSpace(),
-                    Token.NumericalSign('+'),
+                    Token.PlusSign(),
                     Token.Numeric("789") },
                 actual);
         }
@@ -359,13 +359,13 @@ namespace Favalon
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.NumericalSign('-'),
+                    Token.MinusSign(),
                     Token.Numeric("123"),
                     Token.WhiteSpace(),
-                    Token.NumericalSign('-'),
+                    Token.MinusSign(),
                     Token.Numeric("456"),
                     Token.WhiteSpace(),
-                    Token.NumericalSign('-'),
+                    Token.MinusSign(),
                     Token.Numeric("789") },
                 actual);
         }
@@ -455,7 +455,7 @@ namespace Favalon
             Assert.AreEqual(
                 new Token[] {
                     Token.Numeric("123"),
-                    Token.NumericalSign('+'),
+                    Token.PlusSign(),
                     Token.Numeric("456") },
                 actual);
         }
@@ -469,7 +469,7 @@ namespace Favalon
             Assert.AreEqual(
                 new Token[] {
                     Token.Numeric("123"),
-                    Token.NumericalSign('-'),
+                    Token.MinusSign(),
                     Token.Numeric("456") },
                 actual);
         }
@@ -482,13 +482,13 @@ namespace Favalon
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.NumericalSign('-'),
+                    Token.MinusSign(),
                     Token.Numeric("123"),
                     Token.Identity("*"),
                     Token.Open('('),
-                    Token.NumericalSign('+'),
+                    Token.PlusSign(),
                     Token.Numeric("456"),
-                    Token.NumericalSign('+'),
+                    Token.PlusSign(),
                     Token.Numeric("789"),
                     Token.Close(')')
                 },
@@ -503,13 +503,13 @@ namespace Favalon
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.NumericalSign('+'),
+                    Token.PlusSign(),
                     Token.Numeric("123"),
                     Token.Identity("*"),
                     Token.Open('('),
-                    Token.NumericalSign('-'),
+                    Token.MinusSign(),
                     Token.Numeric("456"),
-                    Token.NumericalSign('-'),
+                    Token.MinusSign(),
                     Token.Numeric("789"),
                     Token.Close(')')
                 },
@@ -551,7 +551,7 @@ namespace Favalon
             Assert.AreEqual(
                 new Token[] {
                     Token.Identity("abc"),
-                    Token.NumericalSign('+'),
+                    Token.PlusSign(),
                     Token.Numeric("123") },
                 actual);
         }

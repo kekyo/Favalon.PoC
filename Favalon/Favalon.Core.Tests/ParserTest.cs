@@ -226,7 +226,7 @@ namespace Favalon
             var actual = Parse(
                 new Token[]
                 {
-                    Token.NumericalSign(plus ? '+' : '-'),
+                    plus ? Token.PlusSign() : Token.MinusSign(),
                     Token.Numeric("123"),
                 });
 
@@ -267,7 +267,7 @@ namespace Favalon
                 {
                     Token.Identity("abc"),
                     Token.WhiteSpace(),
-                    Token.NumericalSign(plus ? '+' : '-'),
+                    plus ? Token.PlusSign() : Token.MinusSign(),
                     Token.Numeric("123"),
                 });
 
@@ -288,7 +288,7 @@ namespace Favalon
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.NumericalSign(plus ? '+' : '-'),
+                    plus ? Token.PlusSign() : Token.MinusSign(),
                     Token.Numeric("123"),
                 });
 

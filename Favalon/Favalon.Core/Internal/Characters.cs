@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Favalon.Tokens;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
@@ -55,8 +56,13 @@ namespace Favalon.Internal
             closeParenthesis.Add('}', new ParenthesisInformation('{', '}'));
         }
 
-        public static bool IsNumericSign(char ch) =>
-            (ch == '-') || (ch == '+');
+        public static Signs? IsNumericSign(char ch) =>
+            ch switch
+            {
+                '+' => (Signs?)Signs.Plus,
+                '-' => Signs.Minus,
+                _ => null
+            };
 
         public static ParenthesisInformation? IsOpenParenthesis(char ch) =>
             openParenthesis.TryGetValue(ch, out var p) ? (ParenthesisInformation?)p : null;

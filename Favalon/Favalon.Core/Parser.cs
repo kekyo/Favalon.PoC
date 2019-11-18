@@ -9,17 +9,6 @@ namespace Favalon
 {
     internal static class Parser
     {
-        private static ConstantTerm GetNumericConstant(string value, Token? preSign)
-        {
-            var sign = preSign switch
-            {
-                NumericalSignToken('-') => -1,
-                _ => 1,
-            };
-            var intValue = int.Parse(value, CultureInfo.InvariantCulture) * sign;
-            return new ConstantTerm(intValue);
-        }
-
         private struct OneOfTermInformation
         {
             public readonly Term? Term;
@@ -36,66 +25,130 @@ namespace Favalon
             Environment environment,
             IEnumerable<Token> tokens)
         {
-            Term? lastTerm = null;
+            ConstantTerm GetNumericConstant(string value, Signs preSign) =>
+                new ConstantTerm(int.Parse(value, CultureInfo.InvariantCulture) * (int)preSign);
+
+            Term TermOrApply(Term? left, Term? right) =>
+                left is Term ?
+                    right is Term ?
+                        new ApplyTerm(left, right) :
+                        left :
+                    right!;
+
+            Term? currentTerm = null;
+            Token? lastToken = null;
             var stack = new Stack<OneOfTermInformation>();
+            NumericalSignToken? preSign = null;
+            var separatedSign = false;
 
             foreach (var token in tokens)
             {
-                switch (token)
+                if (token is NumericalSignToken numericalSign)
                 {
-                    case IdentityToken identity:
-                        Term newTerm = new IdentityTerm(identity.Identity);
-                        if (lastTerm != null)
-                        {
-                            lastTerm = new ApplyTerm(lastTerm, newTerm);
-                        }
-                        else
-                        {
-                            lastTerm = newTerm;
-                        }
-                        break;
-
-                    case OpenParenthesisToken parenthesis:
-                        stack.Push(new OneOfTermInformation(
-                            lastTerm,
-                            Characters.IsOpenParenthesis(parenthesis.Symbol)!.Value.Close));
-                        lastTerm = null;
-                        break;
-
-                    case CloseParenthesisToken parenthesis:
-                        if (stack.Count >= 1)
-                        {
-                            var oneOfTermInformation = stack.Pop();
-                            if (oneOfTermInformation.Close == parenthesis.Symbol)
+                    preSign = numericalSign;
+                    separatedSign = (lastToken is WhiteSpaceToken) || (lastToken == null);
+                }
+                else
+                {
+                    switch (token)
+                    {
+                        case WhiteSpaceToken _:
+                            if (preSign is NumericalSignToken sign1)
                             {
-                                if (oneOfTermInformation.Term != null)
+                                currentTerm = TermOrApply(
+                                    currentTerm,
+                                    new IdentityTerm(sign1.ToString()));
+                            }
+                            break;
+
+                        case NumericToken numeric:
+                            if (preSign is NumericalSignToken sign2)
+                            {
+                                // abc -123
+                                if (separatedSign)
                                 {
-                                    if (lastTerm != null)
+                                    var numericTerm = GetNumericConstant(
+                                        numeric.Value,
+                                        sign2.Sign);
+                                    currentTerm = TermOrApply(
+                                        currentTerm,
+                                        numericTerm);
+                                }
+                                // abc-123
+                                else
+                                {
+                                    // Examined binary op
+                                    currentTerm = TermOrApply(
+                                        currentTerm,
+                                        new IdentityTerm(sign2.ToString()));
+                                    var numericTerm = GetNumericConstant(
+                                        numeric.Value,
+                                        Signs.Plus);
+                                    currentTerm = TermOrApply(
+                                        currentTerm,
+                                        numericTerm);
+                                }
+                            }
+                            // abc 123
+                            else
+                            {
+                                var numericTerm = GetNumericConstant(
+                                    numeric.Value,
+                                    Signs.Plus);
+                                currentTerm = TermOrApply(
+                                    currentTerm,
+                                    numericTerm);
+                            }
+                            break;
+
+                        case IdentityToken identity:
+                            currentTerm = TermOrApply(
+                                currentTerm,
+                                new IdentityTerm(identity.Identity));
+                            break;
+
+                        case OpenParenthesisToken parenthesis:
+                            stack.Push(new OneOfTermInformation(
+                                currentTerm,
+                                Characters.IsOpenParenthesis(parenthesis.Symbol)!.Value.Close));
+                            currentTerm = null;
+                            break;
+
+                        case CloseParenthesisToken parenthesis:
+                            if (stack.Count >= 1)
+                            {
+                                var oneOfTermInformation = stack.Pop();
+                                if (oneOfTermInformation.Close == parenthesis.Symbol)
+                                {
+                                    if (oneOfTermInformation.Term != null)
                                     {
-                                        lastTerm = new ApplyTerm(oneOfTermInformation.Term, lastTerm);
+                                        currentTerm = TermOrApply(
+                                            oneOfTermInformation.Term,
+                                            currentTerm);
                                     }
-                                    else
-                                    {
-                                        lastTerm = oneOfTermInformation.Term;
-                                    }
+                                }
+                                else
+                                {
+                                    // Invalid parenthesis pair.
+                                    throw new InvalidOperationException();
                                 }
                             }
                             else
                             {
-                                // Invalid parenthesis pair.
+                                // Lack for open parenthesis.
                                 throw new InvalidOperationException();
                             }
-                        }
-                        else
-                        {
-                            // Lack for open parenthesis.
-                            throw new InvalidOperationException();
-                        }
-                        break;
+                            break;
 
-                    default:
-                        throw new InvalidOperationException();
+                        default:
+                            throw new InvalidOperationException();
+                    }
+
+                    preSign = null;
+                    separatedSign = false;
                 }
+
+                lastToken = token;
             }
 
             if (stack.Count >= 1)
@@ -104,9 +157,9 @@ namespace Favalon
                 throw new InvalidOperationException();
             }
 
-            if (lastTerm != null)
+            if (currentTerm != null)
             {
-                yield return lastTerm;
+                yield return currentTerm;
             }
         }
     }

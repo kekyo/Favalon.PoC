@@ -1,5 +1,4 @@
 ﻿using Favalon.Internal;
-using Favalon.LexRunners;
 using System;
 using System.Collections.Generic;
 
@@ -13,10 +12,10 @@ namespace Favalon.Tokens
         public static IdentityToken Identity(string identity) =>
             new IdentityToken(identity);
 
-        public static NumericalSignToken NumericalSign(char symbol) =>
-            Characters.IsNumericSign(symbol) ?
-                new NumericalSignToken(symbol) :
-                throw new InvalidOperationException();
+        public static NumericalSignToken PlusSign() =>
+            NumericalSignToken.Plus;
+        public static NumericalSignToken MinusSign() =>
+            NumericalSignToken.Minus;
 
         public static OpenParenthesisToken Open(char symbol) =>
             Characters.IsOpenParenthesis(symbol) is ParenthesisInformation ?

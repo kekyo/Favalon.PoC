@@ -1,4 +1,5 @@
-﻿using Favalon.Terms;
+﻿using Favalon.Internal;
+using Favalon.Terms;
 using Favalon.Tokens;
 using System;
 using System.Collections.Generic;
@@ -19,42 +20,93 @@ namespace Favalon
             return new ConstantTerm(intValue);
         }
 
-        private static Term? Parse(Environment environment, IEnumerable<Token> tokens)
+        private struct OneOfTermInformation
+        {
+            public readonly Term? Term;
+            public readonly char Close;
+
+            public OneOfTermInformation(Term? term, char close)
+            {
+                this.Term = term;
+                this.Close = close;
+            }
+        }
+
+        public static IEnumerable<Term> EnumerableTerms(
+            Environment environment,
+            IEnumerable<Token> tokens)
         {
             Term? lastTerm = null;
-            var stack = new Stack<Term?>();
+            var stack = new Stack<OneOfTermInformation>();
 
             foreach (var token in tokens)
             {
-                Term term;
-
                 switch (token)
                 {
                     case IdentityToken identity:
-                        term = new IdentityTerm(identity.Identity);
+                        Term newTerm = new IdentityTerm(identity.Identity);
                         if (lastTerm != null)
                         {
-                            term = new ApplyTerm(lastTerm, term);
+                            lastTerm = new ApplyTerm(lastTerm, newTerm);
+                        }
+                        else
+                        {
+                            lastTerm = newTerm;
                         }
                         break;
-                    case OpenParenthesisToken parenthesis:
 
+                    case OpenParenthesisToken parenthesis:
+                        stack.Push(new OneOfTermInformation(
+                            lastTerm,
+                            Characters.IsOpenParenthesis(parenthesis.Symbol)!.Value.Close));
+                        lastTerm = null;
                         break;
+
+                    case CloseParenthesisToken parenthesis:
+                        if (stack.Count >= 1)
+                        {
+                            var oneOfTermInformation = stack.Pop();
+                            if (oneOfTermInformation.Close == parenthesis.Symbol)
+                            {
+                                if (oneOfTermInformation.Term != null)
+                                {
+                                    if (lastTerm != null)
+                                    {
+                                        lastTerm = new ApplyTerm(oneOfTermInformation.Term, lastTerm);
+                                    }
+                                    else
+                                    {
+                                        lastTerm = oneOfTermInformation.Term;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // Invalid parenthesis pair.
+                                throw new InvalidOperationException();
+                            }
+                        }
+                        else
+                        {
+                            // Lack for open parenthesis.
+                            throw new InvalidOperationException();
+                        }
+                        break;
+
                     default:
                         throw new InvalidOperationException();
                 }
-
-                lastTerm = term;
             }
 
-            return lastTerm;
-        }
-
-        public static IEnumerable<Term> EnumerableTerms(Environment environment, IEnumerable<Token> tokens)
-        {
-            if (Parse(environment, tokens) is Term term)
+            if (stack.Count >= 1)
             {
-                yield return term;
+                // Lack for close parenthesis.
+                throw new InvalidOperationException();
+            }
+
+            if (lastTerm != null)
+            {
+                yield return lastTerm;
             }
         }
     }

@@ -4,7 +4,7 @@ using System;
 
 namespace Favalon.LexRunners
 {
-    internal sealed class NumericRunner : Runner
+    internal sealed class NumericRunner : LexRunner
     {
         private NumericRunner()
         { }
@@ -18,49 +18,49 @@ namespace Favalon.LexRunners
 
         public override RunResult Run(RunContext context, char ch)
         {
-            switch (ch)
+            if (char.IsWhiteSpace(ch))
             {
-                case '(':
-                    return RunResult.Create(
-                        WaitingRunner.Instance,
-                        InternalFinish(context),
-                        Token.open);
-                case ')':
-                    return RunResult.Create(
-                        WaitingRunner.Instance,
-                        InternalFinish(context),
-                        Token.close);
-                default:
-                    if (char.IsWhiteSpace(ch))
-                    {
-                        var token = context.TokenBuffer.ToString();
-                        context.TokenBuffer.Clear();
-                        return RunResult.Create(
-                            WaitingIgnoreSpaceRunner.Instance,
-                            new NumericToken(token),
-                            WhiteSpaceToken.Instance);
-                    }
-                    else if (IsOperator(ch))
-                    {
-                        var token0 = InternalFinish(context);
-                        context.TokenBuffer.Append(ch);
-                        return RunResult.Create(OperatorRunner.Instance, token0);
-                    }
-                    else if (char.IsDigit(ch))
-                    {
-                        context.TokenBuffer.Append(ch);
-                        return RunResult.Empty(this);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException();
-                    }
+                var token = context.TokenBuffer.ToString();
+                context.TokenBuffer.Clear();
+                return RunResult.Create(
+                    WaitingIgnoreSpaceRunner.Instance,
+                    new NumericToken(token),
+                    WhiteSpaceToken.Instance);
+            }
+            else if (IsOpenParenthesis(ch) is Parenthesis)
+            {
+                return RunResult.Create(
+                    WaitingRunner.Instance,
+                    InternalFinish(context),
+                    Token.Open(ch));
+            }
+            else if (IsCloseParenthesis(ch) is Parenthesis)
+            {
+                return RunResult.Create(
+                    WaitingRunner.Instance,
+                    InternalFinish(context),
+                    Token.Close(ch));
+            }
+            else if (IsOperator(ch))
+            {
+                var token0 = InternalFinish(context);
+                context.TokenBuffer.Append(ch);
+                return RunResult.Create(OperatorRunner.Instance, token0);
+            }
+            else if (char.IsDigit(ch))
+            {
+                context.TokenBuffer.Append(ch);
+                return RunResult.Empty(this);
+            }
+            else
+            {
+                throw new InvalidOperationException();
             }
         }
 
         public override RunResult Finish(RunContext context) =>
             RunResult.Create(WaitingRunner.Instance, InternalFinish(context));
 
-        public static readonly Runner Instance = new NumericRunner();
+        public static readonly LexRunner Instance = new NumericRunner();
     }
 }

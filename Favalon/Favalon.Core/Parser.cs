@@ -1,11 +1,12 @@
 ﻿using Favalon.Terms;
 using Favalon.Tokens;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 
 namespace Favalon
 {
-    public static class Parser
+    internal static class Parser
     {
         private static ConstantTerm GetNumericConstant(string value, Token? preSign)
         {
@@ -18,143 +19,38 @@ namespace Favalon
             return new ConstantTerm(intValue);
         }
 
-        public static IEnumerable<Term> EnumerableTerms(IEnumerable<Token> tokens)
+        private static Term? Parse(Environment environment, IEnumerable<Token> tokens)
         {
-            // Special parser features:
-            // * Will have capablility for translating numerics before unary signed operator (+/-).
+            Term? lastTerm = null;
 
-            Token? lastToken = null;
-            NumericalSignToken? lastSignToken = null;
-            Term? rootTerm = null;
-            var stack = new Stack<Term?>();
             foreach (var token in tokens)
             {
+                Term term;
+
                 switch (token)
                 {
-                    case NumericalSignToken('+'):
-                    case NumericalSignToken('-'):
-                        var signToken = (NumericalSignToken)token;
-                        switch (lastToken)
-                        {
-                            case WhiteSpaceToken _:
-                            case null:
-                                lastSignToken = signToken;
-                                break;
-                            default:
-                                switch (rootTerm)
-                                {
-                                    case Term _:
-                                        rootTerm = new ApplyTerm(
-                                            rootTerm,
-                                            new IdentityTerm(signToken.Symbol.ToString()));
-                                        break;
-                                    default:
-                                        rootTerm = new IdentityTerm(signToken.Symbol.ToString());
-                                        break;
-                                }
-                                break;
-                        }
-                        break;
-
-                    case IdentityToken("(") _:
-                        stack.Push(rootTerm);
-                        rootTerm = null;
-                        lastSignToken = null;
-                        break;
-
-                    case IdentityToken(")") _:
-                        var lastTerm = stack.Pop();
+                    case IdentityToken identity:
+                        term = new IdentityTerm(identity.Identity);
                         if (lastTerm != null)
                         {
-                            if (rootTerm != null)
-                            {
-                                rootTerm = new ApplyTerm(lastTerm, rootTerm);
-                            }
-                            else
-                            {
-                                rootTerm = lastTerm;
-                            }
-                        }
-                        stack.Push(rootTerm);
-                        rootTerm = null;
-                        lastSignToken = null;
-                        break;
-
-                    case IdentityToken identityToken:
-                        switch (rootTerm)
-                        {
-                            case Term _:
-                                rootTerm = new ApplyTerm(
-                                    rootTerm,
-                                    new IdentityTerm(identityToken.Identity));
-                                break;
-                            default:
-                                rootTerm = new IdentityTerm(identityToken.Identity);
-                                break;
-                        }
-                        lastSignToken = null;
-                        break;
-
-                    case NumericToken numericToken:
-                        switch (rootTerm)
-                        {
-                            case Term _:
-                                rootTerm = new ApplyTerm(
-                                    rootTerm,
-                                    GetNumericConstant(numericToken.Value, lastSignToken));
-                                break;
-                            default:
-                                rootTerm = GetNumericConstant(numericToken.Value, lastSignToken);
-                                break;
-                        }
-                        lastSignToken = null;
-                        break;
-
-                    case WhiteSpaceToken _:
-                        switch (lastSignToken)
-                        {
-                            case NumericalSignToken('+'):
-                            case NumericalSignToken('-'):
-                                switch (rootTerm)
-                                {
-                                    case Term _:
-                                        rootTerm = new ApplyTerm(
-                                            rootTerm,
-                                            new IdentityTerm(lastSignToken.Symbol.ToString()));
-                                        break;
-                                    default:
-                                        rootTerm = new IdentityTerm(lastSignToken.Symbol.ToString());
-                                        break;
-                                }
-                                lastSignToken = null;
-                                break;
+                            term = new ApplyTerm(lastTerm, term);
                         }
                         break;
+                    default:
+                        throw new InvalidOperationException();
                 }
 
-                lastToken = token;
+                lastTerm = term;
             }
 
-            // Final consuming for left terms.
-            while (stack.Count >= 1)
-            {
-                var leftTerm = stack.Pop();
-                if (leftTerm != null)
-                {
-                    if (rootTerm != null)
-                    {
-                        rootTerm = new ApplyTerm(leftTerm, rootTerm);
-                    }
-                    else
-                    {
-                        rootTerm = leftTerm;
-                    }
-                }
-            }
+            return lastTerm;
+        }
 
-            if (rootTerm != null)
+        public static IEnumerable<Term> EnumerableTerms(Environment environment, IEnumerable<Token> tokens)
+        {
+            if (Parse(environment, tokens) is Term term)
             {
-                yield return rootTerm;
+                yield return term;
             }
         }
     }

@@ -1,16 +1,20 @@
 ﻿using Favalon.Tokens;
 using Favalon.Terms;
 using NUnit.Framework;
+using System.Linq;
 
 namespace Favalon
 {
     [TestFixture]
     public sealed class ParserTest
     {
+        private static Term[] Parse(Token[] tokens) =>
+            Environment.Create().Parse(tokens).ToArray();
+
         [Test]
         public void EnumerableIdentityToken()
         {
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new[]
                 {
                     Token.Identity("abc"),
@@ -25,7 +29,7 @@ namespace Favalon
         [Test]
         public void EnumerableIdentityTokens()
         {
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new[]
                 {
                     Token.Identity("abc"),
@@ -47,13 +51,13 @@ namespace Favalon
         public void EnumerableIdentityWithBeforeBracketTokens()
         {
             // (abc def) ghi
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
-                    Token.Open(),
+                    Token.Open('('),
                     Token.Identity("abc"),
                     Token.Identity("def"),
-                    Token.Close(),
+                    Token.Close(')'),
                     Token.Identity("ghi"),
                 });
 
@@ -71,14 +75,14 @@ namespace Favalon
         public void EnumerableIdentityWithAfterBracketTokens()
         {
             // abc (def ghi)
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.Open(),
+                    Token.Open('('),
                     Token.Identity("def"),
                     Token.Identity("ghi"),
-                    Token.Close(),
+                    Token.Close(')'),
                 });
 
             Assert.AreEqual(
@@ -95,14 +99,14 @@ namespace Favalon
         public void EnumerableIdentityWithAllBracketTokens()
         {
             // (abc def ghi)
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
-                    Token.Open(),
+                    Token.Open('('),
                     Token.Identity("abc"),
                     Token.Identity("def"),
                     Token.Identity("ghi"),
-                    Token.Close(),
+                    Token.Close(')'),
                 });
 
             Assert.AreEqual(
@@ -119,13 +123,13 @@ namespace Favalon
         public void EnumerableIdentityWithBracketToken()
         {
             // abc (def) ghi
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.Open(),
+                    Token.Open('('),
                     Token.Identity("def"),
-                    Token.Close(),
+                    Token.Close(')'),
                     Token.Identity("ghi"),
                 });
 
@@ -143,16 +147,16 @@ namespace Favalon
         public void EnumerableIdentityWithNestedBeforeBracketsTokens()
         {
             // ((abc def) ghi) jkl
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
-                    Token.Open(),
-                    Token.Open(),
+                    Token.Open('('),
+                    Token.Open('('),
                     Token.Identity("abc"),
                     Token.Identity("def"),
-                    Token.Close(),
+                    Token.Close(')'),
                     Token.Identity("ghi"),
-                    Token.Close(),
+                    Token.Close(')'),
                     Token.Identity("jkl"),
                 });
 
@@ -172,17 +176,17 @@ namespace Favalon
         public void EnumerableIdentityWithNestedAfterBracketsTokens()
         {
             // abc (def (ghi jkl))
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.Open(),
+                    Token.Open('('),
                     Token.Identity("def"),
-                    Token.Open(),
+                    Token.Open('('),
                     Token.Identity("ghi"),
                     Token.Identity("jkl"),
-                    Token.Close(),
-                    Token.Close(),
+                    Token.Close(')'),
+                    Token.Close(')'),
                 });
 
             Assert.AreEqual(
@@ -202,7 +206,7 @@ namespace Favalon
         [Test]
         public void EnumerableNumericToken()
         {
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new[]
                 {
                     Token.Numeric("123"),
@@ -219,7 +223,7 @@ namespace Favalon
         public void EnumerableNumericTokenWithSign(bool plus)
         {
             // -123    // minus sign
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
                     Token.NumericalSign(plus ? '+' : '-'),
@@ -237,7 +241,7 @@ namespace Favalon
         public void EnumerableNumericTokenWithOperator(bool plus)
         {
             // - 123    // unary op
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
                     Token.Identity(plus ? "+" : "-"),
@@ -258,7 +262,7 @@ namespace Favalon
         public void EnumerableNumericTokenCloseSignAfterIdentity(bool plus)
         {
             // abc -123    // minus sign
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
                     Token.Identity("abc"),
@@ -280,7 +284,7 @@ namespace Favalon
         public void EnumerableNumericTokenWithOperatorAfterIdentity1(bool plus)
         {
             // abc-123     // binary op
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
                     Token.Identity("abc"),
@@ -304,7 +308,7 @@ namespace Favalon
         public void EnumerableNumericTokenWithOperatorAfterIdentity2(bool plus)
         {
             // abc- 123    // binary op
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
                     Token.Identity("abc"),
@@ -329,7 +333,7 @@ namespace Favalon
         public void EnumerableNumericTokenWithOperatorAfterIdentity3(bool plus)
         {
             // abc - 123   // binary op
-            var actual = Parser.EnumerableTerms(
+            var actual = Parse(
                 new Token[]
                 {
                     Token.Identity("abc"),

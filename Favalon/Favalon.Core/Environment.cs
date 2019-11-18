@@ -1,5 +1,6 @@
 ﻿using Favalon.Internal;
 using Favalon.Terms;
+using Favalon.Tokens;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -44,6 +45,9 @@ namespace Favalon
 
         private Environment(Dictionary<string, List<BoundTermInformation>> boundTerms) : base(boundTerms)
         { }
+
+        public IEnumerable<Term> Parse(IEnumerable<Token> tokens) =>
+            Parser.EnumerableTerms(this, tokens);
 
         public static Environment Create(bool pure = false) =>
             pure ? new Environment() : new Environment(defaultBoundTerms);

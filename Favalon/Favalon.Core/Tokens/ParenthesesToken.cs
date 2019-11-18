@@ -1,9 +1,9 @@
 ﻿namespace Favalon.Tokens
 {
-    public sealed class NumericalSignToken :
+    public sealed class ParenthesesToken :
         SymbolToken
     {
-        internal NumericalSignToken(char symbol) :
+        internal ParenthesesToken(char symbol) :
             base(symbol)
         { }
     }

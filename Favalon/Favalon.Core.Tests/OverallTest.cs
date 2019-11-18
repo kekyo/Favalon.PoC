@@ -12,10 +12,10 @@ namespace Favalon
         {
             var text = "a -> b";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
+            var term = environment.Parse(tokens).
+                Single();
             var transposed = environment.Transpose(term);
             var actual = environment.Reduce(transposed);
 
@@ -31,10 +31,10 @@ namespace Favalon
         {
             var text = "a -> b c";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
+            var term = environment.Parse(tokens).
+                Single();
             var transposed = environment.Transpose(term);
             var actual = environment.Reduce(transposed);
 
@@ -52,10 +52,10 @@ namespace Favalon
         {
             var text = "a -> (b c)";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
+            var term = environment.Parse(tokens).
+                Single();
             var transposed = environment.Transpose(term);
             var actual = environment.Reduce(transposed);
 
@@ -73,10 +73,10 @@ namespace Favalon
         {
             var text = "a -> b -> c";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
+            var term = environment.Parse(tokens).
+                Single();
             var transposed = environment.Transpose(term);
             var actual = environment.Reduce(transposed);
 
@@ -94,10 +94,10 @@ namespace Favalon
         {
             var text = "a -> b -> c d";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
+            var term = environment.Parse(tokens).
+                Single();
             var transposed = environment.Transpose(term);
             var actual = environment.Reduce(transposed);
 
@@ -119,10 +119,10 @@ namespace Favalon
         {
             var text = "(x -> x) y -> y";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
+            var term = environment.Parse(tokens).
+                Single();
             var transposed = environment.Transpose(term);
             var actual = environment.Reduce(transposed);
 
@@ -138,10 +138,10 @@ namespace Favalon
         {
             var text = "(x -> x x) (y -> y)";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
+            var term = environment.Parse(tokens).
+                Single();
             var transposed = environment.Transpose(term);
             var actual1 = environment.Reduce(transposed, false);
             var actual2 = environment.Reduce(actual1, false);

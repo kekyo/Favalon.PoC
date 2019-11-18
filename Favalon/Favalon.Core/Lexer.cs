@@ -16,16 +16,16 @@ namespace Favalon
             {
                 switch (runner.Run(context, text[index]))
                 {
-                    case RunResult(Runner next, Token token0, Token token1):
+                    case RunResult(LexRunner next, Token token0, Token token1):
                         yield return token0;
                         yield return token1;
                         runner = next;
                         break;
-                    case RunResult(Runner next, Token token, _):
+                    case RunResult(LexRunner next, Token token, _):
                         yield return token;
                         runner = next;
                         break;
-                    case RunResult(Runner next, _, _):
+                    case RunResult(LexRunner next, _, _):
                         runner = next;
                         break;
                 }
@@ -46,16 +46,16 @@ namespace Favalon
             {
                 switch (runner.Run(context, ch))
                 {
-                    case RunResult(Runner next, Token token0, Token token1):
+                    case RunResult(LexRunner next, Token token0, Token token1):
                         yield return token0;
                         yield return token1;
                         runner = next;
                         break;
-                    case RunResult(Runner next, Token token, _):
+                    case RunResult(LexRunner next, Token token, _):
                         yield return token;
                         runner = next;
                         break;
-                    case RunResult(Runner next, _, _):
+                    case RunResult(LexRunner next, _, _):
                         runner = next;
                         break;
                 }
@@ -82,16 +82,16 @@ namespace Favalon
 
                 switch (runner.Run(context, (char)inch))
                 {
-                    case RunResult(Runner next, Token token0, Token token1):
+                    case RunResult(LexRunner next, Token token0, Token token1):
                         yield return token0;
                         yield return token1;
                         runner = next;
                         break;
-                    case RunResult(Runner next, Token token, _):
+                    case RunResult(LexRunner next, Token token, _):
                         yield return token;
                         runner = next;
                         break;
-                    case RunResult(Runner next, _, _):
+                    case RunResult(LexRunner next, _, _):
                         runner = next;
                         break;
                 }

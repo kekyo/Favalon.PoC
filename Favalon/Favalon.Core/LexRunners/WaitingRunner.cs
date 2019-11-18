@@ -1,4 +1,5 @@
-﻿using Favalon.Tokens;
+﻿using Favalon.Internal;
+using Favalon.Tokens;
 using System;
 
 namespace Favalon.LexRunners
@@ -21,19 +22,19 @@ namespace Favalon.LexRunners
                 context.TokenBuffer.Append(ch);
                 return RunResult.Empty(NumericRunner.Instance);
             }
-            else if (IsOpenParenthesis(ch) is Parenthesis)
+            else if (Characters.IsOpenParenthesis(ch) is ParenthesisInformation)
             {
                 return RunResult.Create(
                     this,
                     Token.Open(ch));
             }
-            else if (IsCloseParenthesis(ch) is Parenthesis)
+            else if (Characters.IsCloseParenthesis(ch) is ParenthesisInformation)
             {
                 return RunResult.Create(
                     this,
                     Token.Close(ch));
             }
-            else if (IsOperator(ch))
+            else if (Characters.IsOperator(ch))
             {
                 context.TokenBuffer.Append(ch);
                 return RunResult.Empty(OperatorRunner.Instance);

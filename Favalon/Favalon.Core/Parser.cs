@@ -22,6 +22,7 @@ namespace Favalon
         private static Term? Parse(Environment environment, IEnumerable<Token> tokens)
         {
             Term? lastTerm = null;
+            var stack = new Stack<Term?>();
 
             foreach (var token in tokens)
             {
@@ -35,6 +36,9 @@ namespace Favalon
                         {
                             term = new ApplyTerm(lastTerm, term);
                         }
+                        break;
+                    case OpenParenthesisToken parenthesis:
+
                         break;
                     default:
                         throw new InvalidOperationException();

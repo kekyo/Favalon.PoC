@@ -13,7 +13,7 @@ namespace Favalon.LexRunners
         {
             var token = context.TokenBuffer.ToString();
             context.TokenBuffer.Clear();
-            if (!forceIdentity && (token.Length == 1) && IsNumericSign(token[0]))
+            if (!forceIdentity && (token.Length == 1) && Characters.IsNumericSign(token[0]))
             {
                 return new NumericalSignToken(token[0]);
             }
@@ -37,21 +37,21 @@ namespace Favalon.LexRunners
                 context.TokenBuffer.Append(ch);
                 return RunResult.Create(NumericRunner.Instance, token0);
             }
-            else if (IsOpenParenthesis(ch) is Parenthesis)
+            else if (Characters.IsOpenParenthesis(ch) is ParenthesisInformation)
             {
                 return RunResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context, true),
                     Token.Open(ch));
             }
-            else if (IsCloseParenthesis(ch) is Parenthesis)
+            else if (Characters.IsCloseParenthesis(ch) is ParenthesisInformation)
             {
                 return RunResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context, true),
                     Token.Close(ch));
             }
-            else if (IsOperator(ch))
+            else if (Characters.IsOperator(ch))
             {
                 context.TokenBuffer.Append(ch);
                 return RunResult.Empty(this);

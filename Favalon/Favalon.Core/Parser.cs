@@ -64,14 +64,19 @@ namespace Favalon
 
                     case IdentityToken(")") _:
                         var lastTerm = stack.Pop();
-                        if ((rootTerm != null) && (lastTerm != null))
+                        if (lastTerm != null)
                         {
-                            rootTerm = new ApplyTerm(lastTerm, rootTerm);
+                            if (rootTerm != null)
+                            {
+                                rootTerm = new ApplyTerm(lastTerm, rootTerm);
+                            }
+                            else
+                            {
+                                rootTerm = lastTerm;
+                            }
                         }
-                        else if (lastTerm != null)
-                        {
-                            rootTerm = lastTerm;
-                        }
+                        stack.Push(rootTerm);
+                        rootTerm = null;
                         lastSignToken = null;
                         break;
 
@@ -128,6 +133,23 @@ namespace Favalon
                 }
 
                 lastToken = token;
+            }
+
+            // Final consuming for left terms.
+            while (stack.Count >= 1)
+            {
+                var leftTerm = stack.Pop();
+                if (leftTerm != null)
+                {
+                    if (rootTerm != null)
+                    {
+                        rootTerm = new ApplyTerm(leftTerm, rootTerm);
+                    }
+                    else
+                    {
+                        rootTerm = leftTerm;
+                    }
+                }
             }
 
             if (rootTerm != null)

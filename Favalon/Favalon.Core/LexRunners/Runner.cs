@@ -11,6 +11,9 @@ namespace Favalon.LexRunners
             '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'
         };
 
+        public static bool IsNumericSign(char ch) =>
+            (ch == '-') || (ch == '+');
+
         public static bool IsOperator(char ch) =>
             operatorChars.Contains(ch);
 

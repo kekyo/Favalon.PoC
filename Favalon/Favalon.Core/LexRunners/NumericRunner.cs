@@ -24,12 +24,12 @@ namespace Favalon.LexRunners
                     return RunResult.Create(
                         WaitingRunner.Instance,
                         InternalFinish(context),
-                        OperatorToken.Open);
+                        Token.open);
                 case ')':
                     return RunResult.Create(
                         WaitingRunner.Instance,
                         InternalFinish(context),
-                        OperatorToken.Close);
+                        Token.close);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {

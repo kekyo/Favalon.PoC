@@ -9,11 +9,18 @@ namespace Favalon.LexRunners
         private OperatorRunner()
         { }
 
-        private static OperatorToken InternalFinish(RunContext context)
+        private static Token InternalFinish(RunContext context, bool forceIdentity)
         {
             var token = context.TokenBuffer.ToString();
             context.TokenBuffer.Clear();
-            return new OperatorToken(token);
+            if (!forceIdentity && (token.Length == 1) && IsNumericSign(token[0]))
+            {
+                return new NumericalSignToken(token[0]);
+            }
+            else
+            {
+                return new IdentityToken(token);
+            }
         }
 
         public override RunResult Run(RunContext context, char ch)
@@ -23,37 +30,36 @@ namespace Favalon.LexRunners
                 case '(':
                     return RunResult.Create(
                         WaitingRunner.Instance,
-                        InternalFinish(context),
-                        OperatorToken.Open);
+                        InternalFinish(context, true),
+                        Token.open);
                 case ')':
                     return RunResult.Create(
                         WaitingRunner.Instance,
-                        InternalFinish(context),
-                        OperatorToken.Close);
+                        InternalFinish(context, true),
+                        Token.close);
                 default:
                     if (char.IsWhiteSpace(ch))
                     {
-                        return RunResult.Create(
-                            WaitingIgnoreSpaceRunner.Instance,
-                            InternalFinish(context),
-                            WhiteSpaceToken.Instance);
+                        var token0 = InternalFinish(context, true);
+                        context.TokenBuffer.Clear();
+                        return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, token0, WhiteSpaceToken.Instance);
                     }
                     else if (char.IsDigit(ch))
                     {
-                        var token0 = InternalFinish(context);
+                        var token0 = InternalFinish(context, false);
                         context.TokenBuffer.Append(ch);
                         return RunResult.Create(NumericRunner.Instance, token0);
                     }
-                    else if (!IsOperator(ch))
-                    {
-                        var token0 = InternalFinish(context);
-                        context.TokenBuffer.Append(ch);
-                        return RunResult.Create(IdentityRunner.Instance, token0);
-                    }
-                    else if (!char.IsControl(ch))
+                    else if (IsOperator(ch))
                     {
                         context.TokenBuffer.Append(ch);
                         return RunResult.Empty(this);
+                    }
+                    else if(!char.IsControl(ch))
+                    {
+                        var token0 = InternalFinish(context, true);
+                        context.TokenBuffer.Append(ch);
+                        return RunResult.Create(IdentityRunner.Instance, token0);
                     }
                     else
                     {
@@ -63,7 +69,7 @@ namespace Favalon.LexRunners
         }
 
         public override RunResult Finish(RunContext context) =>
-            RunResult.Create(WaitingRunner.Instance, InternalFinish(context));
+            RunResult.Create(WaitingRunner.Instance, InternalFinish(context, true));
 
         public static readonly Runner Instance = new OperatorRunner();
     }

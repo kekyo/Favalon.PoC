@@ -222,7 +222,7 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
-                    Token.Operator(plus ? "+" : "-"),
+                    Token.NumericalSign(plus ? '+' : '-'),
                     Token.Numeric("123"),
                 });
 
@@ -240,7 +240,7 @@ namespace Favalon
             var actual = Parser.EnumerableTerms(
                 new Token[]
                 {
-                    Token.Operator(plus ? "+" : "-"),
+                    Token.Identity(plus ? "+" : "-"),
                     Token.WhiteSpace(),
                     Token.Numeric("123"),
                 });
@@ -263,7 +263,7 @@ namespace Favalon
                 {
                     Token.Identity("abc"),
                     Token.WhiteSpace(),
-                    Token.Operator(plus ? "+" : "-"),
+                    Token.NumericalSign(plus ? '+' : '-'),
                     Token.Numeric("123"),
                 });
 
@@ -284,7 +284,7 @@ namespace Favalon
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.Operator(plus ? "+" : "-"),
+                    Token.NumericalSign(plus ? '+' : '-'),
                     Token.Numeric("123"),
                 });
 
@@ -308,7 +308,7 @@ namespace Favalon
                 new Token[]
                 {
                     Token.Identity("abc"),
-                    Token.Operator(plus ? "+" : "-"),
+                    Token.Identity(plus ? "+" : "-"),
                     Token.WhiteSpace(),
                     Token.Numeric("123"),
                 });
@@ -334,7 +334,7 @@ namespace Favalon
                 {
                     Token.Identity("abc"),
                     Token.WhiteSpace(),
-                    Token.Operator(plus ? "+" : "-"),
+                    Token.Identity(plus ? "+" : "-"),
                     Token.WhiteSpace(),
                     Token.Numeric("123"),
                 });

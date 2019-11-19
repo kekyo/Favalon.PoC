@@ -39,14 +39,14 @@ namespace Favalon.LexRunners
                 context.TokenBuffer.Append(ch);
                 return LexRunnerResult.Create(NumericRunner.Instance, token0);
             }
-            else if (Characters.IsOpenParenthesis(ch) is ParenthesisInformation)
+            else if (Characters.IsOpenParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context, true),
                     Token.Open(ch));
             }
-            else if (Characters.IsCloseParenthesis(ch) is ParenthesisInformation)
+            else if (Characters.IsCloseParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,

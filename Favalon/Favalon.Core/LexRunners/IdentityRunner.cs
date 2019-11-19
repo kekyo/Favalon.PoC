@@ -24,14 +24,14 @@ namespace Favalon.LexRunners
                 context.TokenBuffer.Clear();
                 return LexRunnerResult.Create(WaitingIgnoreSpaceRunner.Instance, new IdentityToken(token), WhiteSpaceToken.Instance);
             }
-            else if (Characters.IsOpenParenthesis(ch) is ParenthesisInformation)
+            else if (Characters.IsOpenParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context),
                     Token.Open(ch));
             }
-            else if (Characters.IsCloseParenthesis(ch) is ParenthesisInformation)
+            else if (Characters.IsCloseParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,

@@ -2,19 +2,36 @@
 
 namespace Favalon.Tokens
 {
+    public struct ParenthesisPair
+    {
+        public readonly char Open;
+        public readonly char Close;
+
+        internal ParenthesisPair(char open, char close)
+        {
+            this.Open = open;
+            this.Close = close;
+        }
+
+        public override string ToString() =>
+            $"'{this.Open}','{this.Close}'";
+    }
+
     public abstract class ParenthesisToken :
         Token, IEquatable<ParenthesisToken?>
     {
-        public readonly char Symbol;
+        public readonly ParenthesisPair Pair;
 
-        internal ParenthesisToken(char symbol) =>
-            this.Symbol = symbol;
+        internal ParenthesisToken(ParenthesisPair parenthesis) =>
+            this.Pair = parenthesis;
+
+        public abstract char Symbol { get; }
 
         public override int GetHashCode() =>
-            this.Symbol.GetHashCode();
+            this.Pair.GetHashCode();
 
         public bool Equals(ParenthesisToken? other) =>
-            other?.Symbol.Equals(this.Symbol) ?? false;
+            other?.Pair.Equals(this.Pair) ?? false;
 
         public override bool Equals(object obj) =>
             this.Equals(obj as ParenthesisToken);
@@ -22,7 +39,7 @@ namespace Favalon.Tokens
         public override string ToString() =>
             this.Symbol.ToString();
 
-        public void Deconstruct(out char symbol) =>
-            symbol = this.Symbol;
+        public void Deconstruct(out ParenthesisPair parenthesis) =>
+            parenthesis = this.Pair;
     }
 }

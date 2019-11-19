@@ -1,5 +1,4 @@
-﻿using Favalon.Internal;
-using Favalon.Terms;
+﻿using Favalon.Terms;
 using Favalon.Tokens;
 using System;
 using System.Diagnostics;
@@ -18,9 +17,18 @@ namespace Favalon.ParseRunners
             switch (token)
             {
                 case IdentityToken identity:
-                    context.CurrentTerm = new IdentityTerm(identity.Identity);
+                    context.CurrentTerm = CombineTerm(
+                        context.CurrentTerm,
+                        new IdentityTerm(identity.Identity));
                     return ParseRunnerResult.Empty(
                         ApplyingRunner.Instance);
+
+                case OpenParenthesisToken parenthesis:
+                    context.ParenthesisScopes.Push(
+                        new ParenthesisScope(context.CurrentTerm, parenthesis.Pair));
+                    context.CurrentTerm = null;
+                    return ParseRunnerResult.Empty(
+                        this);
 
                 default:
                     throw new InvalidOperationException();

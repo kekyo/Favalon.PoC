@@ -18,13 +18,13 @@ namespace Favalon.Tokens
             NumericalSignToken.Minus;
 
         public static OpenParenthesisToken Open(char symbol) =>
-            Characters.IsOpenParenthesis(symbol) is ParenthesisInformation ?
-                new OpenParenthesisToken(symbol) :
+            Characters.IsOpenParenthesis(symbol) is ParenthesisPair parenthesis ?
+                new OpenParenthesisToken(parenthesis) :
                 throw new InvalidOperationException();
 
         public static CloseParenthesisToken Close(char symbol) =>
-            Characters.IsCloseParenthesis(symbol) is ParenthesisInformation ?
-                new CloseParenthesisToken(symbol) :
+            Characters.IsCloseParenthesis(symbol) is ParenthesisPair parenthesis ?
+                new CloseParenthesisToken(parenthesis) :
                 throw new InvalidOperationException();
 
         public static WhiteSpaceToken WhiteSpace() =>

@@ -3,8 +3,11 @@
     public sealed class CloseParenthesisToken :
         ParenthesisToken
     {
-        internal CloseParenthesisToken(char symbol) :
-            base(symbol)
+        internal CloseParenthesisToken(ParenthesisPair parenthesis) :
+            base(parenthesis)
         { }
+
+        public override char Symbol =>
+            this.Pair.Close;
     }
 }

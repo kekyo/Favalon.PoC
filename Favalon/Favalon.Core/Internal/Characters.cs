@@ -44,11 +44,11 @@ namespace Favalon.Internal
             closeParenthesis.Add('}', new ParenthesisPair('{', '}'));
         }
 
-        public static Signs? IsNumericSign(char ch) =>
+        public static Signes? IsNumericSign(char ch) =>
             ch switch
             {
-                '+' => (Signs?)Signs.Plus,
-                '-' => Signs.Minus,
+                '+' => (Signes?)Signes.Plus,
+                '-' => Signes.Minus,
                 _ => null
             };
 

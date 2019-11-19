@@ -18,14 +18,12 @@ namespace Favalon.Tokens
     }
 
     public abstract class ParenthesisToken :
-        Token, IEquatable<ParenthesisToken?>
+        SymbolToken, IEquatable<ParenthesisToken?>
     {
         public readonly ParenthesisPair Pair;
 
         internal ParenthesisToken(ParenthesisPair parenthesis) =>
             this.Pair = parenthesis;
-
-        public abstract char Symbol { get; }
 
         public override int GetHashCode() =>
             this.Pair.GetHashCode();
@@ -35,9 +33,6 @@ namespace Favalon.Tokens
 
         public override bool Equals(object obj) =>
             this.Equals(obj as ParenthesisToken);
-
-        public override string ToString() =>
-            this.Symbol.ToString();
 
         public void Deconstruct(out ParenthesisPair parenthesis) =>
             parenthesis = this.Pair;

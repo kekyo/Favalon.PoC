@@ -13,6 +13,7 @@ namespace Favalon.ParseRunners
         public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
         {
             Debug.Assert(context.CurrentTerm != null);
+            Debug.Assert(context.PreSignToken == null);
 
             switch (token)
             {
@@ -44,6 +45,35 @@ namespace Favalon.ParseRunners
                     context.CurrentTerm = CombineTerm(
                         parenthesisScope.SavedTerm,
                         context.CurrentTerm);
+                    return ParseRunnerResult.Empty(
+                        this);
+
+                case NumericToken numeric:
+                    context.CurrentTerm = CombineTerm(
+                        context.CurrentTerm,
+                        GetNumericConstant(numeric.Value, Signes.Plus));
+                    return ParseRunnerResult.Empty(
+                        this);
+
+                case NumericalSignToken numericSign:
+                    // "abc-" / "123-" ==> binary op
+                    if (context.LastToken is ValueToken)
+                    {
+                        context.CurrentTerm = CombineTerm(
+                            context.CurrentTerm,
+                            new IdentityTerm(numericSign.Symbol.ToString()));
+                        return ParseRunnerResult.Empty(
+                            this);
+                    }
+                    // "-" / "abc -" / "123 -" ==> binary op or signed
+                    else
+                    {
+                        context.PreSignToken = numericSign;
+                        return ParseRunnerResult.Empty(
+                            NumericalSignedRunner.Instance);
+                    }
+
+                case WhiteSpaceToken _:
                     return ParseRunnerResult.Empty(
                         this);
 

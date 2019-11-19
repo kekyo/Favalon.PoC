@@ -26,6 +26,8 @@ namespace Favalon
                         runner = next;
                         break;
                 }
+
+                runnerContext.LastToken = token;
             }
 
             if (runner.Finish(runnerContext) is ParseRunnerResult(_, Term finalTerm))

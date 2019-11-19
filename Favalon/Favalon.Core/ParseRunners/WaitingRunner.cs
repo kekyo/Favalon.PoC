@@ -13,6 +13,7 @@ namespace Favalon.ParseRunners
         public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
         {
             Debug.Assert(context.CurrentTerm == null);
+            Debug.Assert(context.PreSignToken == null);
 
             switch (token)
             {
@@ -29,6 +30,18 @@ namespace Favalon.ParseRunners
                     context.CurrentTerm = null;
                     return ParseRunnerResult.Empty(
                         this);
+
+                case NumericToken numeric:
+                    context.CurrentTerm = CombineTerm(
+                        context.CurrentTerm,
+                        GetNumericConstant(numeric.Value, Signes.Plus));
+                    return ParseRunnerResult.Empty(
+                        ApplyingRunner.Instance);
+
+                case NumericalSignToken numericSign:
+                    context.PreSignToken = numericSign;
+                    return ParseRunnerResult.Empty(
+                        NumericalSignedRunner.Instance);
 
                 default:
                     throw new InvalidOperationException();

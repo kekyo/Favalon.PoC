@@ -14,9 +14,9 @@ namespace Favalon.LexRunners
             var token = context.TokenBuffer.ToString();
             context.TokenBuffer.Clear();
             if (!forceIdentity && (token.Length == 1) &&
-                Characters.IsNumericSign(token[0]) is Signs sign)
+                Characters.IsNumericSign(token[0]) is Signes sign)
             {
-                return (sign == Signs.Plus) ?
+                return (sign == Signes.Plus) ?
                     NumericalSignToken.Plus : NumericalSignToken.Minus;
             }
             else

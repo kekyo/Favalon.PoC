@@ -1,6 +1,7 @@
 ﻿using Favalon.Terms;
 using Favalon.Tokens;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Favalon.ParseRunners
 {
@@ -33,5 +34,8 @@ namespace Favalon.ParseRunners
                 return right!;
             }
         }
+
+        protected static ConstantTerm GetNumericConstant(string value, Signes preSign) =>
+            new ConstantTerm(int.Parse(value, CultureInfo.InvariantCulture) * (int)preSign);
     }
 }

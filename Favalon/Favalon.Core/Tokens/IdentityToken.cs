@@ -3,7 +3,7 @@
 namespace Favalon.Tokens
 {
     public sealed class IdentityToken :
-        Token, IEquatable<IdentityToken?>
+        ValueToken, IEquatable<IdentityToken?>
     {
         public new readonly string Identity;
 

@@ -308,5 +308,127 @@ namespace Favalon
                         Term.Constant(123)) },
                 actual);
         }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenWithSign(bool plus)
+        {
+            // -abc    // unary op
+            var actual = Parse(
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Identity("abc"));
+
+            Assert.AreEqual(
+                new[] {
+                    Term.Apply(
+                        Term.Identity(plus ? "+" : "-"),
+                        Term.Identity("abc")) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenWithOperator(bool plus)
+        {
+            // - abc    // unary op
+            var actual = Parse(
+                Token.Identity(plus ? "+" : "-"),
+                Token.WhiteSpace(),
+                Token.Identity("abc"));
+
+            Assert.AreEqual(
+                new[] {
+                    Term.Apply(
+                        Term.Identity(plus ? "+" : "-"),
+                        Term.Identity("abc")) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenCloseSignAfterIdentity(bool plus)
+        {
+            // abc -def    // binary op
+            var actual = Parse(
+                Token.Identity("abc"),
+                Token.WhiteSpace(),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Identity("def"));
+
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
+                        Term.Identity("def")) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenWithOperatorAfterIdentity1(bool plus)
+        {
+            // abc-def     // binary op
+            var actual = Parse(
+                Token.Identity("abc"),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Identity("def"));
+
+            // abc - 123
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
+                        Term.Identity("def")) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenWithOperatorAfterIdentity2(bool plus)
+        {
+            // abc- def    // binary op
+            var actual = Parse(
+                Token.Identity("abc"),
+                Token.Identity(plus ? "+" : "-"),
+                Token.WhiteSpace(),
+                Token.Identity("def"));
+
+            // abc - def
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
+                        Term.Identity("def")) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenWithOperatorAfterIdentity3(bool plus)
+        {
+            // abc - def   // binary op
+            var actual = Parse(
+                Token.Identity("abc"),
+                Token.WhiteSpace(),
+                Token.Identity(plus ? "+" : "-"),
+                Token.WhiteSpace(),
+                Token.Identity("def"));
+
+            // abc - 123
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
+                        Term.Identity("def")) },
+                actual);
+        }
     }
 }

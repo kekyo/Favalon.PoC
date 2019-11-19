@@ -18,7 +18,7 @@ namespace Favalon.ParseRunners
             switch (token)
             {
                 case IdentityToken identity:
-                    context.CurrentTerm = CombineTerm(
+                    context.CurrentTerm = CombineTerms(
                         context.CurrentTerm,
                         new IdentityTerm(identity.Identity));
                     return ParseRunnerResult.Empty(
@@ -32,7 +32,7 @@ namespace Favalon.ParseRunners
                         this);
 
                 case NumericToken numeric:
-                    context.CurrentTerm = CombineTerm(
+                    context.CurrentTerm = CombineTerms(
                         context.CurrentTerm,
                         GetNumericConstant(numeric.Value, Signes.Plus));
                     return ParseRunnerResult.Empty(

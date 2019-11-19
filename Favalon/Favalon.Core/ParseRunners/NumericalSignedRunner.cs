@@ -17,7 +17,7 @@ namespace Favalon.ParseRunners
             switch (token)
             {
                 case NumericToken numeric:
-                    context.CurrentTerm = CombineTerm(
+                    context.CurrentTerm = CombineTerms(
                         context.CurrentTerm,
                         GetNumericConstant(numeric.Value, context.PreSignToken!.Sign));
                     context.PreSignToken = null;
@@ -25,12 +25,19 @@ namespace Favalon.ParseRunners
                         ApplyingRunner.Instance);
 
                 case WhiteSpaceToken _:
-                    context.CurrentTerm = CombineTerm(
+                    context.CurrentTerm = CombineTerms(
                         context.CurrentTerm,
                         new IdentityTerm(context.PreSignToken!.Symbol.ToString()));
                     context.PreSignToken = null;
                     return ParseRunnerResult.Empty(
                         ApplyingRunner.Instance);
+
+                case IdentityToken identity:
+                    context.CurrentTerm = CombineTerms(
+                        context.CurrentTerm,
+                        new IdentityTerm(context.PreSignToken!.Symbol.ToString()),
+                        new IdentityTerm(identity.Identity));
+                    return ParseRunnerResult.Empty(this);
 
                 default:
                     throw new InvalidOperationException();

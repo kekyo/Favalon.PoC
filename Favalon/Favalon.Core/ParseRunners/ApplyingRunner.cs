@@ -18,7 +18,7 @@ namespace Favalon.ParseRunners
             switch (token)
             {
                 case IdentityToken identity:
-                    context.CurrentTerm = CombineTerm(
+                    context.CurrentTerm = CombineTerms(
                         context.CurrentTerm,
                         new IdentityTerm(identity.Identity));
                     return ParseRunnerResult.Empty(this);
@@ -42,14 +42,14 @@ namespace Favalon.ParseRunners
                         throw new InvalidOperationException(
                             $"Unmatched parenthesis: {parenthesis.Pair}");
                     }
-                    context.CurrentTerm = CombineTerm(
+                    context.CurrentTerm = CombineTerms(
                         parenthesisScope.SavedTerm,
                         context.CurrentTerm);
                     return ParseRunnerResult.Empty(
                         this);
 
                 case NumericToken numeric:
-                    context.CurrentTerm = CombineTerm(
+                    context.CurrentTerm = CombineTerms(
                         context.CurrentTerm,
                         GetNumericConstant(numeric.Value, Signes.Plus));
                     return ParseRunnerResult.Empty(
@@ -59,7 +59,7 @@ namespace Favalon.ParseRunners
                     // "abc-" / "123-" ==> binary op
                     if (context.LastToken is ValueToken)
                     {
-                        context.CurrentTerm = CombineTerm(
+                        context.CurrentTerm = CombineTerms(
                             context.CurrentTerm,
                             new IdentityTerm(numericSign.Symbol.ToString()));
                         return ParseRunnerResult.Empty(

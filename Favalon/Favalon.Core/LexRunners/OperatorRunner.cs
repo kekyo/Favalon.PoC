@@ -9,7 +9,7 @@ namespace Favalon.LexRunners
         private OperatorRunner()
         { }
 
-        private static Token InternalFinish(RunContext context, bool forceIdentity)
+        private static Token InternalFinish(LexRunnerContext context, bool forceIdentity)
         {
             var token = context.TokenBuffer.ToString();
             context.TokenBuffer.Clear();
@@ -25,30 +25,30 @@ namespace Favalon.LexRunners
             }
         }
 
-        public override RunResult Run(RunContext context, char ch)
+        public override LexRunnerResult Run(LexRunnerContext context, char ch)
         {
             if (char.IsWhiteSpace(ch))
             {
                 var token0 = InternalFinish(context, true);
                 context.TokenBuffer.Clear();
-                return RunResult.Create(WaitingIgnoreSpaceRunner.Instance, token0, WhiteSpaceToken.Instance);
+                return LexRunnerResult.Create(WaitingIgnoreSpaceRunner.Instance, token0, WhiteSpaceToken.Instance);
             }
             else if (char.IsDigit(ch))
             {
                 var token0 = InternalFinish(context, false);
                 context.TokenBuffer.Append(ch);
-                return RunResult.Create(NumericRunner.Instance, token0);
+                return LexRunnerResult.Create(NumericRunner.Instance, token0);
             }
             else if (Characters.IsOpenParenthesis(ch) is ParenthesisInformation)
             {
-                return RunResult.Create(
+                return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context, true),
                     Token.Open(ch));
             }
             else if (Characters.IsCloseParenthesis(ch) is ParenthesisInformation)
             {
-                return RunResult.Create(
+                return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context, true),
                     Token.Close(ch));
@@ -56,13 +56,13 @@ namespace Favalon.LexRunners
             else if (Characters.IsOperator(ch))
             {
                 context.TokenBuffer.Append(ch);
-                return RunResult.Empty(this);
+                return LexRunnerResult.Empty(this);
             }
             else if(!char.IsControl(ch))
             {
                 var token0 = InternalFinish(context, true);
                 context.TokenBuffer.Append(ch);
-                return RunResult.Create(IdentityRunner.Instance, token0);
+                return LexRunnerResult.Create(IdentityRunner.Instance, token0);
             }
             else
             {
@@ -70,8 +70,8 @@ namespace Favalon.LexRunners
             }
         }
 
-        public override RunResult Finish(RunContext context) =>
-            RunResult.Create(WaitingRunner.Instance, InternalFinish(context, true));
+        public override LexRunnerResult Finish(LexRunnerContext context) =>
+            LexRunnerResult.Create(WaitingRunner.Instance, InternalFinish(context, true));
 
         public static readonly LexRunner Instance = new OperatorRunner();
     }

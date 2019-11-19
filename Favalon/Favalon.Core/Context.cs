@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms;
+using Favalon.Tokens;
 using System.Collections.Generic;
 
 namespace Favalon
@@ -30,9 +31,6 @@ namespace Favalon
 
         public BoundTermInformation[]? LookupBoundTerms(VariableTerm variable) =>
             boundTerms.TryGetValue(variable.Name, out var terms) ? terms.ToArray() : null;
-
-        public Term Transpose(Term term) =>
-            term.VisitTranspose(this);
 
         public Term Replace(Term term, string identity, Term replacement) =>
             term.VisitReplace(identity, replacement);

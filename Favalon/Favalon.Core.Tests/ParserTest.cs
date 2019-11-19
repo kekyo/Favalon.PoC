@@ -8,17 +8,14 @@ namespace Favalon
     [TestFixture]
     public sealed class ParserTest
     {
-        private static Term[] Parse(Token[] tokens) =>
+        private static Term[] Parse(params Token[] tokens) =>
             Environment.Create().Parse(tokens).ToArray();
 
         [Test]
         public void EnumerableIdentityToken()
         {
             var actual = Parse(
-                new[]
-                {
-                    Token.Identity("abc"),
-                });
+                Token.Identity("abc"));
 
             Assert.AreEqual(
                 new[] {
@@ -30,12 +27,9 @@ namespace Favalon
         public void EnumerableIdentityTokens()
         {
             var actual = Parse(
-                new[]
-                {
-                    Token.Identity("abc"),
-                    Token.Identity("def"),
-                    Token.Identity("ghi"),
-                });
+                Token.Identity("abc"),
+                Token.Identity("def"),
+                Token.Identity("ghi"));
 
             Assert.AreEqual(
                 new[] {
@@ -52,14 +46,11 @@ namespace Favalon
         {
             // (abc def) ghi
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Open('('),
-                    Token.Identity("abc"),
-                    Token.Identity("def"),
-                    Token.Close(')'),
-                    Token.Identity("ghi"),
-                });
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Identity("ghi"));
 
             Assert.AreEqual(
                 new[] {
@@ -76,14 +67,11 @@ namespace Favalon
         {
             // abc (def ghi)
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    Token.Open('('),
-                    Token.Identity("def"),
-                    Token.Identity("ghi"),
-                    Token.Close(')'),
-                });
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("ghi"),
+                Token.Close(')'));
 
             Assert.AreEqual(
                 new[] {
@@ -100,14 +88,11 @@ namespace Favalon
         {
             // (abc def ghi)
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Open('('),
-                    Token.Identity("abc"),
-                    Token.Identity("def"),
-                    Token.Identity("ghi"),
-                    Token.Close(')'),
-                });
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Identity("def"),
+                Token.Identity("ghi"),
+                Token.Close(')'));
 
             Assert.AreEqual(
                 new[] {
@@ -124,14 +109,11 @@ namespace Favalon
         {
             // abc (def) ghi
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    Token.Open('('),
-                    Token.Identity("def"),
-                    Token.Close(')'),
-                    Token.Identity("ghi"),
-                });
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Identity("ghi"));
 
             Assert.AreEqual(
                 new[] {
@@ -148,17 +130,14 @@ namespace Favalon
         {
             // ((abc def) ghi) jkl
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Open('('),
-                    Token.Open('('),
-                    Token.Identity("abc"),
-                    Token.Identity("def"),
-                    Token.Close(')'),
-                    Token.Identity("ghi"),
-                    Token.Close(')'),
-                    Token.Identity("jkl"),
-                });
+                Token.Open('('),
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Identity("ghi"),
+                Token.Close(')'),
+                Token.Identity("jkl"));
 
             Assert.AreEqual(
                 new[] {
@@ -177,17 +156,14 @@ namespace Favalon
         {
             // abc (def (ghi jkl))
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    Token.Open('('),
-                    Token.Identity("def"),
-                    Token.Open('('),
-                    Token.Identity("ghi"),
-                    Token.Identity("jkl"),
-                    Token.Close(')'),
-                    Token.Close(')'),
-                });
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Open('('),
+                Token.Identity("ghi"),
+                Token.Identity("jkl"),
+                Token.Close(')'),
+                Token.Close(')'));
 
             Assert.AreEqual(
                 new[] {
@@ -207,10 +183,7 @@ namespace Favalon
         public void EnumerableNumericToken()
         {
             var actual = Parse(
-                new[]
-                {
-                    Token.Numeric("123"),
-                });
+                Token.Numeric("123"));
 
             Assert.AreEqual(
                 new[] {
@@ -224,11 +197,8 @@ namespace Favalon
         {
             // -123    // minus sign
             var actual = Parse(
-                new Token[]
-                {
-                    plus ? Token.PlusSign() : Token.MinusSign(),
-                    Token.Numeric("123"),
-                });
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Numeric("123"));
 
             Assert.AreEqual(
                 new[] {
@@ -242,12 +212,9 @@ namespace Favalon
         {
             // - 123    // unary op
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Identity(plus ? "+" : "-"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("123"),
-                });
+                Token.Identity(plus ? "+" : "-"),
+                Token.WhiteSpace(),
+                Token.Numeric("123"));
 
             Assert.AreEqual(
                 new[] {
@@ -263,13 +230,10 @@ namespace Favalon
         {
             // abc -123    // minus sign
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    Token.WhiteSpace(),
-                    plus ? Token.PlusSign() : Token.MinusSign(),
-                    Token.Numeric("123"),
-                });
+                Token.Identity("abc"),
+                Token.WhiteSpace(),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Numeric("123"));
 
             Assert.AreEqual(
                 new Term[] {
@@ -285,12 +249,9 @@ namespace Favalon
         {
             // abc-123     // binary op
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    plus ? Token.PlusSign() : Token.MinusSign(),
-                    Token.Numeric("123"),
-                });
+                Token.Identity("abc"),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Numeric("123"));
 
             // abc - 123
             Assert.AreEqual(
@@ -309,13 +270,10 @@ namespace Favalon
         {
             // abc- 123    // binary op
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    Token.Identity(plus ? "+" : "-"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("123"),
-                });
+                Token.Identity("abc"),
+                Token.Identity(plus ? "+" : "-"),
+                Token.WhiteSpace(),
+                Token.Numeric("123"));
 
             // abc - 123
             Assert.AreEqual(
@@ -334,14 +292,11 @@ namespace Favalon
         {
             // abc - 123   // binary op
             var actual = Parse(
-                new Token[]
-                {
-                    Token.Identity("abc"),
-                    Token.WhiteSpace(),
-                    Token.Identity(plus ? "+" : "-"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("123"),
-                });
+                Token.Identity("abc"),
+                Token.WhiteSpace(),
+                Token.Identity(plus ? "+" : "-"),
+                Token.WhiteSpace(),
+                Token.Numeric("123"));
 
             // abc - 123
             Assert.AreEqual(

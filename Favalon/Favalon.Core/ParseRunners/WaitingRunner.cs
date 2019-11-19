@@ -17,6 +17,7 @@ namespace Favalon.ParseRunners
 
             switch (token)
             {
+                // "a"
                 case IdentityToken identity:
                     context.CurrentTerm = CombineTerms(
                         context.CurrentTerm,
@@ -24,6 +25,7 @@ namespace Favalon.ParseRunners
                     return ParseRunnerResult.Empty(
                         ApplyingRunner.Instance);
 
+                // "("
                 case OpenParenthesisToken parenthesis:
                     context.ParenthesisScopes.Push(
                         new ParenthesisScope(context.CurrentTerm, parenthesis.Pair));
@@ -31,6 +33,7 @@ namespace Favalon.ParseRunners
                     return ParseRunnerResult.Empty(
                         this);
 
+                // "1"
                 case NumericToken numeric:
                     context.CurrentTerm = CombineTerms(
                         context.CurrentTerm,
@@ -38,6 +41,7 @@ namespace Favalon.ParseRunners
                     return ParseRunnerResult.Empty(
                         ApplyingRunner.Instance);
 
+                // "-"
                 case NumericalSignToken numericSign:
                     context.PreSignToken = numericSign;
                     return ParseRunnerResult.Empty(

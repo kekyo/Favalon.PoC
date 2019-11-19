@@ -226,6 +226,43 @@ namespace Favalon
 
         [TestCase(true)]
         [TestCase(false)]
+        public void EnumerableNumericTokenWithBracketedSign(bool plus)
+        {
+            // (-123)    // minus sign
+            var actual = Parse(
+                Token.Open('('),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Numeric("123"),
+                Token.Close(')'));
+
+            Assert.AreEqual(
+                new[] {
+                    Term.Constant(plus ? 123 : -123) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableNumericTokenWithBracketedOperator(bool plus)
+        {
+            // (- 123)    // unary op
+            var actual = Parse(
+                Token.Open('('),
+                Token.Identity(plus ? "+" : "-"),
+                Token.WhiteSpace(),
+                Token.Numeric("123"),
+                Token.Close(')'));
+
+            Assert.AreEqual(
+                new[] {
+                    Term.Apply(
+                        Term.Identity(plus ? "+" : "-"),
+                        Term.Constant(123)) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
         public void EnumerableNumericTokenCloseSignAfterIdentity(bool plus)
         {
             // abc -123    // minus sign
@@ -240,6 +277,90 @@ namespace Favalon
                     Term.Apply(
                         Term.Identity("abc"),
                         Term.Constant(plus ? 123 : -123)) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableNumericTokenCloseBracketedSignAfterIdentity(bool plus)
+        {
+            // abc (-123)    // minus sign
+            var actual = Parse(
+                Token.Identity("abc"),
+                Token.WhiteSpace(),
+                Token.Open('('),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Numeric("123"),
+                Token.Close(')'));
+
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Constant(plus ? 123 : -123)) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableNumericTokenCloseNonSpacedBracketedSignAfterIdentity(bool plus)
+        {
+            // abc(-123)    // minus sign
+            var actual = Parse(
+                Token.Identity("abc"),
+                Token.Open('('),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Numeric("123"),
+                Token.Close(')'));
+
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Constant(plus ? 123 : -123)) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableNumericTokenCloseSignAfterBracketedIdentity(bool plus)
+        {
+            // (abc) -123    // minus sign
+            var actual = Parse(
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Close(')'),
+                Token.WhiteSpace(),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Numeric("123"));
+
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Constant(plus ? 123 : -123)) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableNumericTokenCloseSignAfterNonSpacedBracketedIdentity(bool plus)
+        {
+            // (abc)-123    // binary op
+            var actual = Parse(
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Close(')'),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Numeric("123"));
+
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
+                        Term.Constant(123)) },
                 actual);
         }
 
@@ -346,6 +467,45 @@ namespace Favalon
 
         [TestCase(true)]
         [TestCase(false)]
+        public void EnumerableIdentityTokenWithBracketedSign(bool plus)
+        {
+            // (-abc)    // unary op
+            var actual = Parse(
+                Token.Open('('),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Identity("abc"),
+                Token.Close(')'));
+
+            Assert.AreEqual(
+                new[] {
+                    Term.Apply(
+                        Term.Identity(plus ? "+" : "-"),
+                        Term.Identity("abc")) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenWithBracketedOperator(bool plus)
+        {
+            // (- abc)    // unary op
+            var actual = Parse(
+                Token.Open('('),
+                Token.Identity(plus ? "+" : "-"),
+                Token.WhiteSpace(),
+                Token.Identity("abc"),
+                Token.Close(')'));
+
+            Assert.AreEqual(
+                new[] {
+                    Term.Apply(
+                        Term.Identity(plus ? "+" : "-"),
+                        Term.Identity("abc")) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
         public void EnumerableIdentityTokenCloseSignAfterIdentity(bool plus)
         {
             // abc -def    // binary op
@@ -367,11 +527,103 @@ namespace Favalon
 
         [TestCase(true)]
         [TestCase(false)]
-        public void EnumerableIdentityTokenWithOperatorAfterIdentity1(bool plus)
+        public void EnumerableIdentityTokenWithOperatorAfterIdentity(bool plus)
         {
             // abc-def     // binary op
             var actual = Parse(
                 Token.Identity("abc"),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Identity("def"));
+
+            // abc - 123
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
+                        Term.Identity("def")) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenCloseBracketedSignAfterIdentity(bool plus)
+        {
+            // abc (-def)    // unary op
+            var actual = Parse(
+                Token.Identity("abc"),
+                Token.WhiteSpace(),
+                Token.Open('('),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Identity("def"),
+                Token.Close(')'));
+
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Apply(
+                            Term.Identity(plus ? "+" : "-"),
+                            Term.Identity("def"))) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenWithBracketedOperatorAfterIdentity(bool plus)
+        {
+            // abc(-def)     // unary op
+            var actual = Parse(
+                Token.Identity("abc"),
+                Token.Open('('),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Identity("def"),
+                Token.Close(')'));
+
+            // abc - 123
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Apply(
+                            Term.Identity(plus ? "+" : "-"),
+                            Term.Identity("def"))) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenCloseSignAfterBracketedIdentity(bool plus)
+        {
+            // (abc) -def    // binary op
+            var actual = Parse(
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Close(')'),
+                Token.WhiteSpace(),
+                plus ? Token.PlusSign() : Token.MinusSign(),
+                Token.Identity("def"));
+
+            Assert.AreEqual(
+                new Term[] {
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity(plus ? "+" : "-")),
+                        Term.Identity("def")) },
+                actual);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EnumerableIdentityTokenWithOperatorAfterBracketedIdentity(bool plus)
+        {
+            // (abc)-def     // binary op
+            var actual = Parse(
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Close(')'),
                 plus ? Token.PlusSign() : Token.MinusSign(),
                 Token.Identity("def"));
 

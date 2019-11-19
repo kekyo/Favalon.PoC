@@ -56,21 +56,21 @@ namespace Favalon.ParseRunners
                         this);
 
                 case NumericalSignToken numericSign:
-                    // "abc-" / "123-" ==> binary op
-                    if (context.LastToken is ValueToken)
+                    // "abc -" / "123 -" ==> binary op or signed
+                    if (context.LastToken is WhiteSpaceToken)
+                    {
+                        context.PreSignToken = numericSign;
+                        return ParseRunnerResult.Empty(
+                            NumericalSignedRunner.Instance);
+                    }
+                    // "abc-" / "123-" / "(abc)-" ==> binary op
+                    else
                     {
                         context.CurrentTerm = CombineTerms(
                             context.CurrentTerm,
                             new IdentityTerm(numericSign.Symbol.ToString()));
                         return ParseRunnerResult.Empty(
                             this);
-                    }
-                    // "-" / "abc -" / "123 -" ==> binary op or signed
-                    else
-                    {
-                        context.PreSignToken = numericSign;
-                        return ParseRunnerResult.Empty(
-                            NumericalSignedRunner.Instance);
                     }
 
                 case WhiteSpaceToken _:

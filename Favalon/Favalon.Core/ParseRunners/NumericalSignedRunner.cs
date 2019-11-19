@@ -37,7 +37,9 @@ namespace Favalon.ParseRunners
                         context.CurrentTerm,
                         new IdentityTerm(context.PreSignToken!.Symbol.ToString()),
                         new IdentityTerm(identity.Identity));
-                    return ParseRunnerResult.Empty(this);
+                    context.PreSignToken = null;
+                    return ParseRunnerResult.Empty(
+                        ApplyingRunner.Instance);
 
                 default:
                     throw new InvalidOperationException();

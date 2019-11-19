@@ -18,9 +18,29 @@ namespace Favalon.ParseRunners
             switch (token)
             {
                 case IdentityToken identity:
-                    context.CurrentTerm = CombineTerms(
-                        context.CurrentTerm,
-                        new IdentityTerm(identity.Identity));
+                    if (context.Context.LookupBoundTerms(identity.Identity) is BoundTermInformation[] terms &&
+                        terms[0].Infix)
+                    {
+                        if (context.CurrentTerm is ApplyTerm(Term left, Term right))
+                        {
+                            context.CurrentTerm = CombineTerms(
+                                left,
+                                new IdentityTerm(identity.Identity),
+                                right);
+                        }
+                        else
+                        {
+                            context.CurrentTerm = CombineTerms(
+                                new IdentityTerm(identity.Identity),
+                                context.CurrentTerm);
+                        }
+                    }
+                    else
+                    {
+                        context.CurrentTerm = CombineTerms(
+                            context.CurrentTerm,
+                            new IdentityTerm(identity.Identity));
+                    }
                     return ParseRunnerResult.Empty(this);
 
                 case OpenParenthesisToken parenthesis:

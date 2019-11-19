@@ -10,13 +10,16 @@ namespace Favalon
     {
         private static Term Parse(Token[] tokens)
         {
-            var environment = Environment.Create();
+            var environment = Environment.Create(true);
             environment.AddBoundTerm(
                 "+", true, false,
-                new OperatorTerm("+"));
+                new IdentityTerm("+"));
             environment.AddBoundTerm(
                 "-", true, false,
-                new OperatorTerm("-"));
+                new IdentityTerm("-"));
+            environment.AddBoundTerm(
+                "->", true, true,
+                new IdentityTerm("->"));
             return environment.Parse(tokens).Single();
         }
 
@@ -45,47 +48,45 @@ namespace Favalon
 
         //////////////////////////////////////////////
 
-        //[Test]
-        //public void SwapInfixOperatorPartialTerm1()
-        //{
-        //    // abc +
-        //    var term =
-        //        Term.Apply(
-        //            Term.Identity("abc"),
-        //            Term.Operator("+"));
+        [Test]
+        public void SwapInfixOperatorPartialTerm1()
+        {
+            // abc +
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("+")
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // + abc
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Operator("+"),
-        //            Term.Identity("abc"));
+            // + abc
+            var expected =
+                Term.Apply(
+                    Term.Identity("+"),
+                    Term.Identity("abc"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
-        //[Test]
-        //public void SwapInfixOperatorPartialTerm2()
-        //{
-        //    // abc ->
-        //    var term =
-        //        Term.Apply(
-        //            Term.Identity("abc"),
-        //            Term.Operator("->"));
+        [Test]
+        public void SwapInfixOperatorPartialTerm2()
+        {
+            // abc ->
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("->")
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // -> abc
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Operator("->"),
-        //            Term.Identity("abc"));
+            // -> abc
+            var expected =
+                Term.Apply(
+                    Term.Identity("->"),
+                    Term.Identity("abc"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
         //////////////////////////////////////////////
 

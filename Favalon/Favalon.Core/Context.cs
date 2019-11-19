@@ -16,21 +16,21 @@ namespace Favalon
 
         private protected static void AddBoundTerm(
             Dictionary<string, List<BoundTermInformation>> boundTerms,
-            string name, bool infix, bool rightToLeft, Term term)
+            string identity, bool infix, bool rightToLeft, Term term)
         {
-            if (!boundTerms.TryGetValue(name, out var terms))
+            if (!boundTerms.TryGetValue(identity, out var terms))
             {
                 terms = new List<BoundTermInformation>();
-                boundTerms.Add(name, terms);
+                boundTerms.Add(identity, terms);
             }
             terms.Add(new BoundTermInformation(infix, rightToLeft, term));
         }
 
-        public void AddBoundTerm(string name, bool infix, bool rightToLeft, Term term) =>
-            AddBoundTerm(boundTerms, name, infix, rightToLeft, term);
+        public void AddBoundTerm(string identity, bool infix, bool rightToLeft, Term term) =>
+            AddBoundTerm(boundTerms, identity, infix, rightToLeft, term);
 
-        public BoundTermInformation[]? LookupBoundTerms(VariableTerm variable) =>
-            boundTerms.TryGetValue(variable.Name, out var terms) ? terms.ToArray() : null;
+        public BoundTermInformation[]? LookupBoundTerms(string identity) =>
+            boundTerms.TryGetValue(identity, out var terms) ? terms.ToArray() : null;
 
         public Term Replace(Term term, string identity, Term replacement) =>
             term.VisitReplace(identity, replacement);

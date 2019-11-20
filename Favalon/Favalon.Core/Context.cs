@@ -3,33 +3,33 @@ using System.Collections.Generic;
 
 namespace Favalon
 {
-    public class Context
+    public abstract class Context
     {
         private readonly Dictionary<string, List<BoundTermInformation>> boundTerms;
+
+        private protected Context() =>
+            boundTerms = new Dictionary<string, List<BoundTermInformation>>();
 
         private protected Context(Dictionary<string, List<BoundTermInformation>> initialBoundTerm) =>
             boundTerms = new Dictionary<string, List<BoundTermInformation>>(initialBoundTerm);
 
         private protected static void AddBoundTerm(
             Dictionary<string, List<BoundTermInformation>> boundTerms,
-            string name, bool infix, bool rightToLeft, Term term)
+            string identity, bool infix, bool rightToLeft, Term term)
         {
-            if (!boundTerms.TryGetValue(name, out var terms))
+            if (!boundTerms.TryGetValue(identity, out var terms))
             {
                 terms = new List<BoundTermInformation>();
-                boundTerms.Add(name, terms);
+                boundTerms.Add(identity, terms);
             }
             terms.Add(new BoundTermInformation(infix, rightToLeft, term));
         }
 
-        public void AddBoundTerm(string name, bool infix, bool rightToLeft, Term term) =>
-            AddBoundTerm(boundTerms, name, infix, rightToLeft, term);
+        public void AddBoundTerm(string identity, bool infix, bool rightToLeft, Term term) =>
+            AddBoundTerm(boundTerms, identity, infix, rightToLeft, term);
 
-        public BoundTermInformation[]? LookupBoundTerms(VariableTerm variable) =>
-            boundTerms.TryGetValue(variable.Name, out var terms) ? terms.ToArray() : null;
-
-        public Term Transpose(Term term) =>
-            term.VisitTranspose(this);
+        public BoundTermInformation[]? LookupBoundTerms(string identity) =>
+            boundTerms.TryGetValue(identity, out var terms) ? terms.ToArray() : null;
 
         public Term Replace(Term term, string identity, Term replacement) =>
             term.VisitReplace(identity, replacement);

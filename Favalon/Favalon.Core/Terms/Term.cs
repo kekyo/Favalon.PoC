@@ -1,10 +1,10 @@
-﻿namespace Favalon.Terms
+﻿using System.Diagnostics;
+
+namespace Favalon.Terms
 {
+    [DebuggerDisplay("{Readable}")]
     public abstract partial class Term
     {
-        protected internal virtual Term VisitTranspose(Context context) =>
-            this;  // TODO: abstract
-
         protected internal abstract Term VisitReplace(string identity, Term replacement);
 
         protected internal abstract Term VisitReduce(Context context);
@@ -29,6 +29,6 @@
             this.ToString(true);
 
         public override string ToString() =>
-            this.ToString(true);
+            this.ToString(false);
     }
 }

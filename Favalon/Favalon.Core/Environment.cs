@@ -1,11 +1,12 @@
 ﻿using Favalon.Internal;
 using Favalon.Terms;
+using Favalon.Tokens;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon
 {
-    public sealed class Environment : Context
+    public sealed partial class Environment : Context
     {
         private static readonly Dictionary<string, List<BoundTermInformation>> defaultBoundTerms =
             typeof(object).GetAssembly().
@@ -39,10 +40,13 @@ namespace Favalon
                                 new FunctionTerm((IdentityTerm)a.VisitReduce(ic), b.VisitReduce(oc)))));
         }
 
-        private Environment() : base(defaultBoundTerms)
+        private Environment()
         { }
 
-        public static Environment Create() =>
-            new Environment();
+        private Environment(Dictionary<string, List<BoundTermInformation>> boundTerms) : base(boundTerms)
+        { }
+
+        public static Environment Create(bool pure = false) =>
+            pure ? new Environment() : new Environment(defaultBoundTerms);
     }
 }

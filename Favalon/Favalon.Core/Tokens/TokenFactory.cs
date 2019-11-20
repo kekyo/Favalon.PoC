@@ -1,4 +1,5 @@
-﻿using Favalon.LexRunners;
+﻿using Favalon.Internal;
+using System;
 using System.Collections.Generic;
 
 namespace Favalon.Tokens
@@ -6,19 +7,25 @@ namespace Favalon.Tokens
     partial class Token
     {
         public static IEnumerable<char> OperatorChars =>
-            Runner.operatorChars;
+            Characters.operatorChars;
 
         public static IdentityToken Identity(string identity) =>
             new IdentityToken(identity);
 
-        public static OperatorToken Operator(string symbol) =>
-            new OperatorToken(symbol);
+        public static NumericalSignToken PlusSign() =>
+            NumericalSignToken.Plus;
+        public static NumericalSignToken MinusSign() =>
+            NumericalSignToken.Minus;
 
-        public static OperatorToken Open() =>
-            OperatorToken.Open;
+        public static OpenParenthesisToken Open(char symbol) =>
+            Characters.IsOpenParenthesis(symbol) is ParenthesisPair parenthesis ?
+                new OpenParenthesisToken(parenthesis) :
+                throw new InvalidOperationException();
 
-        public static OperatorToken Close() =>
-            OperatorToken.Close;
+        public static CloseParenthesisToken Close(char symbol) =>
+            Characters.IsCloseParenthesis(symbol) is ParenthesisPair parenthesis ?
+                new CloseParenthesisToken(parenthesis) :
+                throw new InvalidOperationException();
 
         public static WhiteSpaceToken WhiteSpace() =>
             WhiteSpaceToken.Instance;

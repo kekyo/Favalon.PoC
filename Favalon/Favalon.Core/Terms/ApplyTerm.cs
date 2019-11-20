@@ -14,53 +14,6 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        protected internal override Term VisitTranspose(Context context)
-        {
-            var left = context.Transpose(this.Function);
-            var right = context.Transpose(this.Argument);
-
-            switch (right)
-            {
-                // Swap by infix variables
-                case VariableTerm variable when
-                    context.LookupBoundTerms(variable) is BoundTermInformation[] terms && terms[0].Infix:
-                    // abc def + ==> abc + def
-                    if (left is ApplyTerm(Term applyLeft, Term applyRight))
-                    {
-                        right = applyRight; // swap
-                        left = new ApplyTerm(applyLeft, variable);
-                    }
-                    // abc + ==> + abc
-                    else
-                    {
-                        right = left; // swap
-                        left = variable;
-                    }
-                    break;
-            }
-
-            switch (left)
-            {
-                // Transpose by right associative variables
-                // abc -> def ghi ==> -> abc (def ghi)
-                case ApplyTerm(ApplyTerm(VariableTerm applyLeft, Term _) apply, Term applyRight) when
-                    context.LookupBoundTerms(applyLeft) is BoundTermInformation[] terms && terms[0].RightToLeft:
-                    right = new ApplyTerm(applyRight, right);
-                    left = apply;
-                    break;
-            }
-
-            if (!object.ReferenceEquals(left, this.Function) ||
-                !object.ReferenceEquals(right, this.Argument))
-            {
-                return new ApplyTerm(left, right);
-            }
-            else
-            {
-                return this;
-            }
-        }
-
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             new ApplyTerm(
                 this.Function.VisitReplace(identity, replacement),

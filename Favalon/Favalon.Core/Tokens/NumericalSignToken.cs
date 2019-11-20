@@ -1,28 +1,43 @@
-﻿using System;
-
-namespace Favalon.Tokens
+﻿namespace Favalon.Tokens
 {
-    public sealed class NumericalSignToken :
-        Token, IEquatable<NumericalSignToken?>
+    public enum Signes
     {
-        public readonly char Symbol;
+        Unknown = 0,
+        Plus = 1,
+        Minus = -1
+    }
 
-        internal NumericalSignToken(char symbol) =>
-            this.Symbol = symbol;
+    public sealed class NumericalSignToken :
+        SymbolToken
+    {
+        public readonly Signes Sign;
+
+        private NumericalSignToken(Signes sign) =>
+            this.Sign = sign;
+
+        public override char Symbol =>
+            this.Sign switch
+            {
+                Signes.Plus => '+',
+                Signes.Minus => '-',
+                _ => '?'
+            };
 
         public override int GetHashCode() =>
-            this.Symbol.GetHashCode();
+            this.Sign.GetHashCode();
 
         public bool Equals(NumericalSignToken? other) =>
-            other?.Symbol.Equals(this.Symbol) ?? false;
+            other?.Sign.Equals(this.Sign) ?? false;
 
         public override bool Equals(object obj) =>
             this.Equals(obj as NumericalSignToken);
 
-        public override string ToString() =>
-            this.Symbol.ToString();
+        public void Deconstruct(out Signes sign) =>
+            sign = this.Sign;
 
-        public void Deconstruct(out char symbol) =>
-            symbol = this.Symbol;
+        internal static readonly NumericalSignToken Plus =
+            new NumericalSignToken(Signes.Plus);
+        internal static readonly NumericalSignToken Minus =
+            new NumericalSignToken(Signes.Minus);
     }
 }

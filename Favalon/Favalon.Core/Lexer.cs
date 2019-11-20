@@ -9,29 +9,29 @@ namespace Favalon
     {
         public static IEnumerable<Token> EnumerableTokens(string text)
         {
-            var context = RunContext.Create();
+            var context = LexRunnerContext.Create();
             var runner = WaitingIgnoreSpaceRunner.Instance;
 
             for (var index = 0; index < text.Length; index++)
             {
                 switch (runner.Run(context, text[index]))
                 {
-                    case RunResult(Runner next, Token token0, Token token1):
+                    case LexRunnerResult(LexRunner next, Token token0, Token token1):
                         yield return token0;
                         yield return token1;
                         runner = next;
                         break;
-                    case RunResult(Runner next, Token token, _):
+                    case LexRunnerResult(LexRunner next, Token token, _):
                         yield return token;
                         runner = next;
                         break;
-                    case RunResult(Runner next, _, _):
+                    case LexRunnerResult(LexRunner next, _, _):
                         runner = next;
                         break;
                 }
             }
 
-            if (runner.Finish(context) is RunResult(_, Token finalToken, _))
+            if (runner.Finish(context) is LexRunnerResult(_, Token finalToken, _))
             {
                 yield return finalToken;
             }
@@ -39,29 +39,29 @@ namespace Favalon
 
         public static IEnumerable<Token> EnumerableTokens(IEnumerable<char> chars)
         {
-            var context = RunContext.Create();
+            var runnerContext = LexRunnerContext.Create();
             var runner = WaitingIgnoreSpaceRunner.Instance;
 
             foreach (var ch in chars)
             {
-                switch (runner.Run(context, ch))
+                switch (runner.Run(runnerContext, ch))
                 {
-                    case RunResult(Runner next, Token token0, Token token1):
+                    case LexRunnerResult(LexRunner next, Token token0, Token token1):
                         yield return token0;
                         yield return token1;
                         runner = next;
                         break;
-                    case RunResult(Runner next, Token token, _):
+                    case LexRunnerResult(LexRunner next, Token token, _):
                         yield return token;
                         runner = next;
                         break;
-                    case RunResult(Runner next, _, _):
+                    case LexRunnerResult(LexRunner next, _, _):
                         runner = next;
                         break;
                 }
             }
 
-            if (runner.Finish(context) is RunResult(_, Token finalToken, _))
+            if (runner.Finish(runnerContext) is LexRunnerResult(_, Token finalToken, _))
             {
                 yield return finalToken;
             }
@@ -69,7 +69,7 @@ namespace Favalon
 
         public static IEnumerable<Token> EnumerableTokens(TextReader tr)
         {
-            var context = RunContext.Create();
+            var context = LexRunnerContext.Create();
             var runner = WaitingIgnoreSpaceRunner.Instance;
 
             while (true)
@@ -82,22 +82,22 @@ namespace Favalon
 
                 switch (runner.Run(context, (char)inch))
                 {
-                    case RunResult(Runner next, Token token0, Token token1):
+                    case LexRunnerResult(LexRunner next, Token token0, Token token1):
                         yield return token0;
                         yield return token1;
                         runner = next;
                         break;
-                    case RunResult(Runner next, Token token, _):
+                    case LexRunnerResult(LexRunner next, Token token, _):
                         yield return token;
                         runner = next;
                         break;
-                    case RunResult(Runner next, _, _):
+                    case LexRunnerResult(LexRunner next, _, _):
                         runner = next;
                         break;
                 }
             }
 
-            if (runner.Finish(context) is RunResult(_, Token finalToken, _))
+            if (runner.Finish(context) is LexRunnerResult(_, Token finalToken, _))
             {
                 yield return finalToken;
             }

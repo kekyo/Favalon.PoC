@@ -1,11 +1,12 @@
 ﻿using Favalon.Internal;
 using Favalon.Terms;
+using Favalon.Tokens;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon
 {
-    public sealed class Environment : Context
+    public sealed partial class Environment : Context
     {
         private static readonly Dictionary<string, List<BoundTermInformation>> defaultBoundTerms =
             typeof(object).GetAssembly().

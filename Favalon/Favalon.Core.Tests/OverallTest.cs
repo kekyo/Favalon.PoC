@@ -12,12 +12,11 @@ namespace Favalon
         {
             var text = "a -> b";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
-            var transposed = environment.Transpose(term);
-            var actual = environment.Reduce(transposed);
+            var term = environment.Parse(tokens).
+                Single();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(
                 Term.Function(
@@ -27,16 +26,15 @@ namespace Favalon
         }
 
         [Test]
-        public void SimpleArrowOperatorWithApplyBody1()
+        public void SimpleArrowOperatorWithApplyBody()
         {
             var text = "a -> b c";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
-            var transposed = environment.Transpose(term);
-            var actual = environment.Reduce(transposed);
+            var term = environment.Parse(tokens).
+                Single();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(
                 Term.Function(
@@ -48,16 +46,15 @@ namespace Favalon
         }
 
         [Test]
-        public void SimpleArrowOperatorWithApplyBody2()
+        public void SimpleArrowOperatorWithBracketedApplyBody()
         {
             var text = "a -> (b c)";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
-            var transposed = environment.Transpose(term);
-            var actual = environment.Reduce(transposed);
+            var term = environment.Parse(tokens).
+                Single();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(
                 Term.Function(
@@ -73,12 +70,11 @@ namespace Favalon
         {
             var text = "a -> b -> c";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
-            var transposed = environment.Transpose(term);
-            var actual = environment.Reduce(transposed);
+            var term = environment.Parse(tokens).
+                Single();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(
                 Term.Function(
@@ -94,12 +90,11 @@ namespace Favalon
         {
             var text = "a -> b -> c d";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
-            var transposed = environment.Transpose(term);
-            var actual = environment.Reduce(transposed);
+            var term = environment.Parse(tokens).
+                Single();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(
                 Term.Function(
@@ -112,19 +107,18 @@ namespace Favalon
                 actual);
         }
 
-        //////////////////////////////////////////////////
+        ////////////////////////////////////////////////////
 
         [Test]
         public void EnumerableIdentityToken11()
         {
             var text = "(x -> x) y -> y";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
-            var transposed = environment.Transpose(term);
-            var actual = environment.Reduce(transposed);
+            var term = environment.Parse(tokens).
+                Single();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(
                 Term.Function(
@@ -138,12 +132,11 @@ namespace Favalon
         {
             var text = "(x -> x x) (y -> y)";
             var tokens = Lexer.EnumerableTokens(text);
-            var term = Parser.EnumerableTerms(tokens).
-                Single();
 
             var environment = Environment.Create();
-            var transposed = environment.Transpose(term);
-            var actual1 = environment.Reduce(transposed, false);
+            var term = environment.Parse(tokens).
+                Single();
+            var actual1 = environment.Reduce(term, false);
             var actual2 = environment.Reduce(actual1, false);
 
             Assert.AreEqual(

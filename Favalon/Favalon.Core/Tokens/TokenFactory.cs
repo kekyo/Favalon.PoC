@@ -1,29 +1,31 @@
-﻿using Favalon.LexRunners;
+﻿using Favalon.Internal;
+using System;
 using System.Collections.Generic;
 
 namespace Favalon.Tokens
 {
     partial class Token
     {
-        internal static readonly IdentityToken open =
-            new IdentityToken("(");
-        internal static readonly IdentityToken close =
-            new IdentityToken(")");
-
         public static IEnumerable<char> OperatorChars =>
-            Runner.operatorChars;
+            Characters.operatorChars;
 
         public static IdentityToken Identity(string identity) =>
             new IdentityToken(identity);
 
-        public static NumericalSignToken NumericalSign(char symbol) =>
-            new NumericalSignToken(symbol);
+        public static NumericalSignToken PlusSign() =>
+            NumericalSignToken.Plus;
+        public static NumericalSignToken MinusSign() =>
+            NumericalSignToken.Minus;
 
-        public static IdentityToken Open() =>
-            open;
+        public static OpenParenthesisToken Open(char symbol) =>
+            Characters.IsOpenParenthesis(symbol) is ParenthesisPair parenthesis ?
+                new OpenParenthesisToken(parenthesis) :
+                throw new InvalidOperationException();
 
-        public static IdentityToken Close() =>
-            close;
+        public static CloseParenthesisToken Close(char symbol) =>
+            Characters.IsCloseParenthesis(symbol) is ParenthesisPair parenthesis ?
+                new CloseParenthesisToken(parenthesis) :
+                throw new InvalidOperationException();
 
         public static WhiteSpaceToken WhiteSpace() =>
             WhiteSpaceToken.Instance;

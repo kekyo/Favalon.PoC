@@ -6,11 +6,19 @@ namespace Favalon.Tokens
     public sealed class NumericalSignTokenTest
     {
         [Test]
-        public void NumericalSign()
+        public void PlusSign()
         {
-            var actual = Token.NumericalSign('+');
+            var actual = Token.PlusSign();
 
             Assert.AreEqual("+", actual.ToString());
+        }
+
+        [Test]
+        public void MinusSign()
+        {
+            var actual = Token.MinusSign();
+
+            Assert.AreEqual("-", actual.ToString());
         }
     }
 }

@@ -3,7 +3,7 @@
 namespace Favalon.Tokens
 {
     public sealed class NumericToken :
-        Token, IEquatable<NumericToken?>
+        ValueToken, IEquatable<NumericToken?>
     {
         public readonly string Value;
 

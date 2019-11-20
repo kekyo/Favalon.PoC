@@ -1,4 +1,5 @@
-﻿using Favalon.ParseRunners;
+﻿using Favalon.Internal;
+using Favalon.ParseRunners;
 using Favalon.Terms;
 using Favalon.Tokens;
 using System;
@@ -39,7 +40,7 @@ namespace Favalon
                     throw new InvalidOperationException(
                         $"Unmatched parenthesis: {parenthesisPair}");
                 }
-                runnerContext.CurrentTerm = ParseRunner.CombineTerms(
+                runnerContext.CurrentTerm = Utilities.CombineTerms(
                     parenthesisScope.SavedTerm,
                     runnerContext.CurrentTerm);
             }

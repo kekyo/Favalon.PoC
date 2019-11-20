@@ -1,4 +1,5 @@
-﻿using Favalon.Terms;
+﻿using Favalon.Internal;
+using Favalon.Terms;
 using Favalon.Tokens;
 using System;
 using System.Diagnostics;
@@ -24,21 +25,21 @@ namespace Favalon.ParseRunners
                         {
                             if (context.CurrentTerm is ApplyTerm(Term left, Term right))
                             {
-                                context.CurrentTerm = CombineTerms(
+                                context.CurrentTerm = Utilities.CombineTerms(
                                     left,
                                     new IdentityTerm(identity.Identity),
                                     right);
                             }
                             else
                             {
-                                context.CurrentTerm = CombineTerms(
+                                context.CurrentTerm = Utilities.CombineTerms(
                                     new IdentityTerm(identity.Identity),
                                     context.CurrentTerm);
                             }
                         }
                         else
                         {
-                            context.CurrentTerm = CombineTerms(
+                            context.CurrentTerm = Utilities.CombineTerms(
                                 context.CurrentTerm,
                                 new IdentityTerm(identity.Identity));
                         }
@@ -54,7 +55,7 @@ namespace Favalon.ParseRunners
                     }
                     else
                     {
-                        context.CurrentTerm = CombineTerms(
+                        context.CurrentTerm = Utilities.CombineTerms(
                             context.CurrentTerm,
                             new IdentityTerm(identity.Identity));
                     }
@@ -80,16 +81,16 @@ namespace Favalon.ParseRunners
                         throw new InvalidOperationException(
                             $"Unmatched parenthesis: {parenthesis.Pair}");
                     }
-                    context.CurrentTerm = CombineTerms(
+                    context.CurrentTerm = Utilities.CombineTerms(
                         parenthesisScope.SavedTerm,
                         context.CurrentTerm);
                     return ParseRunnerResult.Empty(
                         this);
 
                 case NumericToken numeric:
-                    context.CurrentTerm = CombineTerms(
+                    context.CurrentTerm = Utilities.CombineTerms(
                         context.CurrentTerm,
-                        GetNumericConstant(numeric.Value, Signes.Plus));
+                        Utilities.GetNumericConstant(numeric.Value, Signes.Plus));
                     return ParseRunnerResult.Empty(
                         this);
 
@@ -104,7 +105,7 @@ namespace Favalon.ParseRunners
                     // "abc-" / "123-" / "(abc)-" ==> binary op
                     else
                     {
-                        context.CurrentTerm = CombineTerms(
+                        context.CurrentTerm = Utilities.CombineTerms(
                             context.CurrentTerm,
                             new IdentityTerm(numericSign.Symbol.ToString()));
                         return ParseRunnerResult.Empty(

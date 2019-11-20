@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Favalon
 {
-    public sealed class Environment : Context
+    public sealed partial class Environment : Context
     {
         private static readonly Dictionary<string, List<BoundTermInformation>> defaultBoundTerms =
             typeof(object).GetAssembly().
@@ -45,9 +45,6 @@ namespace Favalon
 
         private Environment(Dictionary<string, List<BoundTermInformation>> boundTerms) : base(boundTerms)
         { }
-
-        public IEnumerable<Term> Parse(IEnumerable<Token> tokens) =>
-            Parser.EnumerableTerms(this, tokens);
 
         public static Environment Create(bool pure = false) =>
             pure ? new Environment() : new Environment(defaultBoundTerms);

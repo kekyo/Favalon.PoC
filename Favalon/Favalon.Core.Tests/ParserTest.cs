@@ -9,7 +9,7 @@ namespace Favalon
     public sealed class ParserTest
     {
         private static Term[] Parse(params Token[] tokens) =>
-            Environment.Create().Parse(tokens).ToArray();
+            Environment.Create(true).Parse(tokens).ToArray();
 
         [Test]
         public void EnumerableIdentityToken()

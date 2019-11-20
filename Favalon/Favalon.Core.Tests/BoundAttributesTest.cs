@@ -6,7 +6,7 @@ using System.Linq;
 namespace Favalon
 {
     [TestFixture]
-    public sealed class TransposeTest
+    public sealed class BoundAttributesTest
     {
         private static Term Parse(Token[] tokens)
         {
@@ -18,8 +18,8 @@ namespace Favalon
                 "-", true, false,
                 new IdentityTerm("-"));
             environment.AddBoundTerm(
-                "->", true, true,
-                new IdentityTerm("->"));
+                "<<<", true, true,
+                new IdentityTerm("<<<"));
             return environment.Parse(tokens).Single();
         }
 
@@ -71,18 +71,18 @@ namespace Favalon
         [Test]
         public void SwapInfixOperatorPartialTerm2()
         {
-            // abc ->
+            // abc <<<
             var tokens = new[] {
                 Token.Identity("abc"),
-                Token.Identity("->")
+                Token.Identity("<<<")
             };
 
             var actual = Parse(tokens);
 
-            // -> abc
+            // <<< abc
             var expected =
                 Term.Apply(
-                    Term.Identity("->"),
+                    Term.Identity("<<<"),
                     Term.Identity("abc"));
 
             Assert.AreEqual(expected, actual);
@@ -90,160 +90,146 @@ namespace Favalon
 
         //////////////////////////////////////////////
 
-        //[Test]
-        //public void SwapInfixOperatorTerm1()
-        //{
-        //    // abc + def
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Operator("+")),
-        //            Term.Identity("def"));
+        [Test]
+        public void SwapInfixOperatorTerm1()
+        {
+            // abc + def
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("+"),
+                Token.Identity("def")
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // + abc def
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Operator("+"),
-        //                Term.Identity("abc")),
-        //            Term.Identity("def"));
+            // + abc def
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("+"),
+                        Term.Identity("abc")),
+                    Term.Identity("def"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
-        //[Test]
-        //public void SwapInfixOperatorTerm2()
-        //{
-        //    // abc -> def
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Operator("->")),
-        //            Term.Identity("def"));
+        [Test]
+        public void SwapInfixOperatorTerm2()
+        {
+            // abc <<< def
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("<<<"),
+                Token.Identity("def")
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // -> abc def
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Operator("->"),
-        //                Term.Identity("abc")),
-        //            Term.Identity("def"));
+            // <<< abc def
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("<<<"),
+                        Term.Identity("abc")),
+                    Term.Identity("def"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
         //////////////////////////////////////////////
 
-        //[Test]
-        //public void SwapInfixOperatorPartialTermWithTrailingApply1()
-        //{
-        //    // abc def +
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Identity("def")),
-        //            Term.Operator("+"));
+        [Test]
+        public void SwapInfixOperatorPartialTermWithTrailingApply1()
+        {
+            // abc def +
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("def"),
+                Token.Identity("+"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // abc + def
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Operator("+")),
-        //            Term.Identity("def"));
+            // abc + def
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Identity("+")),
+                    Term.Identity("def"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
-        //[Test]
-        //public void SwapInfixOperatorPartialTermWithTrailingApply2()
-        //{
-        //    // abc def ->
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Identity("def")),
-        //            Term.Operator("->"));
+        [Test]
+        public void SwapInfixOperatorPartialTermWithTrailingApply2()
+        {
+            // abc def <<<
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("def"),
+                Token.Identity("<<<"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // abc -> def
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Operator("->")),
-        //            Term.Identity("def"));
+            // abc <<< def
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Identity("<<<")),
+                    Term.Identity("def"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
         //////////////////////////////////////////////
 
-        //[Test]
-        //public void SwapInfixOperatorTermWithApply()
-        //{
-        //    // abc + def ghi
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Identity("abc"),
-        //                    Term.Operator("+")),
-        //                Term.Identity("def")),
-        //            Term.Identity("ghi"));
+        [Test]
+        public void SwapInfixOperatorTermWithApply()
+        {
+            // abc + def ghi
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("+"),
+                Token.Identity("def"),
+                Token.Identity("ghi"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // + abc def ghi
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Operator("+"),
-        //                    Term.Identity("abc")),
-        //                Term.Identity("def")),
-        //            Term.Identity("ghi"));
+            // + abc def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("+"),
+                            Term.Identity("abc")),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
         //[Test]
         //public void SwapAndTransposeInfixRightAssociativeOperatorTermWithApply()
         //{
-        //    // abc -> def ghi
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Identity("abc"),
-        //                    Term.Operator("->")),
-        //                Term.Identity("def")),
-        //            Term.Identity("ghi"));
+        //    // abc <<< def ghi
+        //    var tokens = new[] {
+        //        Token.Identity("abc"),
+        //        Token.Identity("<<<"),
+        //        Token.Identity("def"),
+        //        Token.Identity("ghi"),
+        //    };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+        //    var actual = Parse(tokens);
 
-        //    // -> abc (def ghi)
+        //    // <<< abc (def ghi)
         //    var expected =
         //        Term.Apply(
         //            Term.Apply(
-        //                Term.Operator("->"),
+        //                Term.Identity("<<<"),
         //                Term.Identity("abc")),
         //            Term.Apply(
         //                Term.Identity("def"),
@@ -286,27 +272,27 @@ namespace Favalon
         //[Test]
         //public void SwapAndTransposeTwoInfixRightAssociativeOperatorTermTrailingApplyTerm()
         //{
-        //    // abc -> (def ->)
+        //    // abc <<< (def <<<)
         //    var term =
         //        Term.Apply(
         //            Term.Apply(
         //                Term.Identity("abc"),
-        //                Term.Operator("->")),
+        //                Term.Operator("<<<")),
         //            Term.Apply(
         //                Term.Identity("def"),
-        //                Term.Operator("->")));
+        //                Term.Operator("<<<")));
 
         //    var environment = Parse();
         //    var actual = environment.Transpose(term);
 
-        // // -> abc (-> def)
+        // // <<< abc (<<< def)
         //    var expected =
         //        Term.Apply(
         //            Term.Apply(
-        //                Term.Operator("->"),
+        //                Term.Operator("<<<"),
         //                Term.Identity("abc")),
         //            Term.Apply(
-        //                Term.Operator("->"),
+        //                Term.Operator("<<<"),
         //                Term.Identity("def")));
 
         //    Assert.AreEqual(expected, actual);
@@ -346,26 +332,26 @@ namespace Favalon
         //[Test]
         //public void SwapInnerInfixAndTransposeOperatorTerm()
         //{
-        //    // abc (-> def) ghi
+        //    // abc (<<< def) ghi
         //    var term =
         //        Term.Apply(
         //            Term.Apply(
         //                Term.Identity("abc"),
         //                Term.Apply(
-        //                    Term.Operator("->"),
+        //                    Term.Operator("<<<"),
         //                    Term.Identity("def"))),
         //            Term.Identity("ghi"));
 
         //    var environment = Parse();
         //    var actual = environment.Transpose(term);
 
-        //    // abc (-> def) ghi
+        //    // abc (<<< def) ghi
         //    var expected =
         //        Term.Apply(
         //            Term.Apply(
         //                Term.Identity("abc"),
         //                Term.Apply(
-        //                    Term.Operator("->"),
+        //                    Term.Operator("<<<"),
         //                    Term.Identity("def"))),
         //            Term.Identity("ghi"));
 
@@ -406,26 +392,26 @@ namespace Favalon
         //[Test]
         //public void SwapInnerTrailingInfixAndTransposeOperatorTerm()
         //{
-        //    // abc (def ->) ghi
+        //    // abc (def <<<) ghi
         //    var term =
         //        Term.Apply(
         //            Term.Apply(
         //                Term.Identity("abc"),
         //                Term.Apply(
         //                    Term.Identity("def"),
-        //                    Term.Operator("->"))),
+        //                    Term.Operator("<<<"))),
         //            Term.Identity("ghi"));
 
         //    var environment = Parse();
         //    var actual = environment.Transpose(term);
 
-        //    // abc (-> def) ghi
+        //    // abc (<<< def) ghi
         //    var expected =
         //        Term.Apply(
         //            Term.Apply(
         //                Term.Identity("abc"),
         //                Term.Apply(
-        //                    Term.Operator("->"),
+        //                    Term.Operator("<<<"),
         //                    Term.Identity("def"))),
         //            Term.Identity("ghi"));
 
@@ -470,7 +456,7 @@ namespace Favalon
         //[Test]
         //public void SwapAndTransposeDoubleInfixOperatorTermsAndApply()
         //{
-        //    // abc (def ->) -> ghi
+        //    // abc (def <<<) <<< ghi
         //    var term =
         //        Term.Apply(
         //            Term.Apply(
@@ -478,22 +464,22 @@ namespace Favalon
         //                    Term.Identity("abc"),
         //                    Term.Apply(
         //                        Term.Identity("def"),
-        //                        Term.Operator("->"))),
-        //                Term.Operator("->")),
+        //                        Term.Operator("<<<"))),
+        //                Term.Operator("<<<")),
         //            Term.Identity("ghi"));
 
         //    var environment = Parse();
         //    var actual = environment.Transpose(term);
 
-        //    // abc -> (-> def) ghi
+        //    // abc <<< (<<< def) ghi
         //    var expected =
         //        Term.Apply(
         //            Term.Apply(
         //                Term.Apply(
         //                    Term.Identity("abc"),
-        //                    Term.Operator("->")),
+        //                    Term.Operator("<<<")),
         //                Term.Apply(
-        //                    Term.Operator("->"),
+        //                    Term.Operator("<<<"),
         //                    Term.Identity("def"))),
         //            Term.Identity("ghi"));
 
@@ -538,30 +524,30 @@ namespace Favalon
         //[Test]
         //public void SwapAndTransposeTwoInfixRightAssociativeOperatorTerm()
         //{
-        //    // abc -> def -> ghi
+        //    // abc <<< def <<< ghi
         //    var term =
         //        Term.Apply(
         //            Term.Apply(
         //                Term.Apply(
         //                    Term.Apply(
         //                        Term.Identity("abc"),
-        //                        Term.Operator("->")),
+        //                        Term.Operator("<<<")),
         //                    Term.Identity("def")),
-        //                Term.Operator("->")),
+        //                Term.Operator("<<<")),
         //            Term.Identity("ghi"));
 
         //    var environment = Parse();
         //    var actual = environment.Transpose(term);
 
-        //    // -> abc (-> def ghi)
+        //    // <<< abc (<<< def ghi)
         //    var expected =
         //        Term.Apply(
         //            Term.Apply(
-        //                Term.Operator("->"),
+        //                Term.Operator("<<<"),
         //                Term.Identity("abc")),
         //            Term.Apply(
         //                Term.Apply(
-        //                    Term.Operator("->"),
+        //                    Term.Operator("<<<"),
         //                    Term.Identity("def")),
         //                Term.Identity("ghi")));
 

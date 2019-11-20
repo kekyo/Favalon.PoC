@@ -1,10 +1,9 @@
 ﻿using Favalon.Terms;
-using Favalon.Tokens;
 using System.Collections.Generic;
 
 namespace Favalon
 {
-    public class Context
+    public abstract class Context
     {
         private readonly Dictionary<string, List<BoundTermInformation>> boundTerms;
 

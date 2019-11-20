@@ -18,21 +18,38 @@ namespace Favalon.ParseRunners
             switch (token)
             {
                 case IdentityToken identity:
-                    if (context.Context.LookupBoundTerms(identity.Identity) is BoundTermInformation[] terms &&
-                        terms[0].Infix)
+                    if (context.Context.LookupBoundTerms(identity.Identity) is BoundTermInformation[] terms)
                     {
-                        if (context.CurrentTerm is ApplyTerm(Term left, Term right))
+                        if (terms[0].Infix)
                         {
-                            context.CurrentTerm = CombineTerms(
-                                left,
-                                new IdentityTerm(identity.Identity),
-                                right);
+                            if (context.CurrentTerm is ApplyTerm(Term left, Term right))
+                            {
+                                context.CurrentTerm = CombineTerms(
+                                    left,
+                                    new IdentityTerm(identity.Identity),
+                                    right);
+                            }
+                            else
+                            {
+                                context.CurrentTerm = CombineTerms(
+                                    new IdentityTerm(identity.Identity),
+                                    context.CurrentTerm);
+                            }
                         }
                         else
                         {
                             context.CurrentTerm = CombineTerms(
-                                new IdentityTerm(identity.Identity),
-                                context.CurrentTerm);
+                                context.CurrentTerm,
+                                new IdentityTerm(identity.Identity));
+                        }
+   
+                        if (terms[0].RightToLeft)
+                        {
+                            context.Scopes.Push(
+                                new ScopeInformation(context.CurrentTerm));
+                            context.CurrentTerm = null;
+                            return ParseRunnerResult.Empty(
+                                WaitingRunner.Instance);
                         }
                     }
                     else
@@ -41,23 +58,24 @@ namespace Favalon.ParseRunners
                             context.CurrentTerm,
                             new IdentityTerm(identity.Identity));
                     }
+
                     return ParseRunnerResult.Empty(this);
 
                 case OpenParenthesisToken parenthesis:
-                    context.ParenthesisScopes.Push(
-                        new ParenthesisScope(context.CurrentTerm, parenthesis.Pair));
+                    context.Scopes.Push(
+                        new ScopeInformation(context.CurrentTerm, parenthesis.Pair));
                     context.CurrentTerm = null;
                     return ParseRunnerResult.Empty(
                         WaitingRunner.Instance);
 
                 case CloseParenthesisToken parenthesis:
-                    if (context.ParenthesisScopes.Count == 0)
+                    if (context.Scopes.Count == 0)
                     {
                         throw new InvalidOperationException(
                             $"Couldn't find open parenthesis: '{parenthesis.Pair.Open}'");
                     }
-                    var parenthesisScope = context.ParenthesisScopes.Pop();
-                    if (parenthesisScope.Pair.Close != parenthesis.Pair.Close)
+                    var parenthesisScope = context.Scopes.Pop();
+                    if (!(parenthesisScope.ParenthesisPair?.Close == parenthesis.Pair.Close))
                     {
                         throw new InvalidOperationException(
                             $"Unmatched parenthesis: {parenthesis.Pair}");

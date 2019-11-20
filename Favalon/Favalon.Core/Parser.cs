@@ -1,6 +1,7 @@
 ﻿using Favalon.ParseRunners;
 using Favalon.Terms;
 using Favalon.Tokens;
+using System;
 using System.Collections.Generic;
 
 namespace Favalon
@@ -29,7 +30,21 @@ namespace Favalon
                 runnerContext.LastToken = token;
             }
 
-            if (runner.Finish(runnerContext) is ParseRunnerResult(_, Term finalTerm))
+            // Exhaust saved scopes
+            while (runnerContext.Scopes.Count >= 1)
+            {
+                var parenthesisScope = runnerContext.Scopes.Pop();
+                if (parenthesisScope.ParenthesisPair is ParenthesisPair parenthesisPair)
+                {
+                    throw new InvalidOperationException(
+                        $"Unmatched parenthesis: {parenthesisPair}");
+                }
+                runnerContext.CurrentTerm = ParseRunner.CombineTerms(
+                    parenthesisScope.SavedTerm,
+                    runnerContext.CurrentTerm);
+            }
+
+            if (runnerContext.CurrentTerm is Term finalTerm)
             {
                 yield return finalTerm;
             }

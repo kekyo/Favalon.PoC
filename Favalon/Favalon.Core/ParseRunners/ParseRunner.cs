@@ -1,6 +1,5 @@
 ﻿using Favalon.Terms;
 using Favalon.Tokens;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 
@@ -13,10 +12,7 @@ namespace Favalon.ParseRunners
 
         public abstract ParseRunnerResult Run(ParseRunnerContext context, Token token);
 
-        public virtual ParseRunnerResult Finish(ParseRunnerContext context) =>
-            ParseRunnerResult.Create(WaitingRunner.Instance, context.CurrentTerm);
-
-        protected static Term CombineTerms(Term? left, Term? right)
+        protected internal static Term CombineTerms(Term? left, Term? right)
         {
             if (left != null)
             {
@@ -35,10 +31,10 @@ namespace Favalon.ParseRunners
             }
         }
 
-        protected static Term CombineTerms(params Term?[] terms) =>
+        protected internal static Term CombineTerms(params Term?[] terms) =>
             terms.Aggregate(CombineTerms)!;
 
-        protected static ConstantTerm GetNumericConstant(string value, Signes preSign) =>
+        protected internal static ConstantTerm GetNumericConstant(string value, Signes preSign) =>
             new ConstantTerm(int.Parse(value, CultureInfo.InvariantCulture) * (int)preSign);
     }
 }

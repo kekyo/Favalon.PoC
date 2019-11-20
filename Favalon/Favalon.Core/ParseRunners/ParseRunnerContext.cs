@@ -8,20 +8,20 @@ namespace Favalon.ParseRunners
     {
         public readonly Context Context;
         public Term? CurrentTerm;
-        public readonly Stack<ParenthesisScope> ParenthesisScopes;
+        public readonly Stack<ScopeInformation> Scopes;
         public NumericalSignToken? PreSignToken;
         public Token? LastToken;
 
-        private ParseRunnerContext(Context context, Stack<ParenthesisScope> parenthesisScopes)
+        private ParseRunnerContext(Context context, Stack<ScopeInformation> scopes)
         {
             this.Context = context;
             this.CurrentTerm = null;
-            this.ParenthesisScopes = parenthesisScopes;
+            this.Scopes = scopes;
             this.PreSignToken = null;
             this.LastToken = null;
         }
 
         public static ParseRunnerContext Create(Context context) =>
-            new ParseRunnerContext(context, new Stack<ParenthesisScope>());
+            new ParseRunnerContext(context, new Stack<ScopeInformation>());
     }
 }

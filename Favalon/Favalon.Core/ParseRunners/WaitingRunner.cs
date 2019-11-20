@@ -27,8 +27,8 @@ namespace Favalon.ParseRunners
 
                 // "("
                 case OpenParenthesisToken parenthesis:
-                    context.ParenthesisScopes.Push(
-                        new ParenthesisScope(context.CurrentTerm, parenthesis.Pair));
+                    context.Scopes.Push(
+                        new ScopeInformation(context.CurrentTerm, parenthesis.Pair));
                     context.CurrentTerm = null;
                     return ParseRunnerResult.Empty(
                         this);

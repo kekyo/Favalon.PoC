@@ -212,31 +212,31 @@ namespace Favalon
             Assert.AreEqual(expected, actual);
         }
 
-        //[Test]
-        //public void SwapAndTransposeInfixRightAssociativeOperatorTermWithApply()
-        //{
-        //    // abc <<< def ghi
-        //    var tokens = new[] {
-        //        Token.Identity("abc"),
-        //        Token.Identity("<<<"),
-        //        Token.Identity("def"),
-        //        Token.Identity("ghi"),
-        //    };
+        [Test]
+        public void SwapAndTransposeInfixRightAssociativeOperatorTermWithApply()
+        {
+            // abc <<< def ghi
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("<<<"),
+                Token.Identity("def"),
+                Token.Identity("ghi"),
+            };
 
-        //    var actual = Parse(tokens);
+            var actual = Parse(tokens);
 
-        //    // <<< abc (def ghi)
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("<<<"),
-        //                Term.Identity("abc")),
-        //            Term.Apply(
-        //                Term.Identity("def"),
-        //                Term.Identity("ghi")));
+            // <<< abc (def ghi)
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("<<<"),
+                        Term.Identity("abc")),
+                    Term.Apply(
+                        Term.Identity("def"),
+                        Term.Identity("ghi")));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
         //////////////////////////////////////////////
 

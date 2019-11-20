@@ -104,22 +104,38 @@ namespace Favalon.ParseRunners
                         WaitingRunner.Instance);
 
                 case CloseParenthesisToken parenthesis:
-                    if (context.Scopes.Count == 0)
+                    while (context.Scopes.Count >= 1)
                     {
-                        throw new InvalidOperationException(
-                            $"Couldn't find open parenthesis: '{parenthesis.Pair.Open}'");
+                        // Get last parenthesis scope:
+                        var parenthesisScope = context.Scopes.Pop();
+                        if (parenthesisScope.ParenthesisPair is ParenthesisPair parenthesisPair)
+                        {
+                            // Is parenthesis not matching
+                            if (parenthesisPair.Close != parenthesis.Pair.Close)
+                            {
+                                throw new InvalidOperationException(
+                                    $"Unmatched parenthesis: {parenthesis.Pair}");
+                            }
+
+                            // Combine it
+                            context.CurrentTerm = Utilities.CombineTerms(
+                                parenthesisScope.SavedTerm,
+                                context.CurrentTerm);
+                            return ParseRunnerResult.Empty(
+                                this);
+                        }
+                        // RTL scope:
+                        else
+                        {
+                            // Combine it implicitly.
+                            context.CurrentTerm = Utilities.CombineTerms(
+                                parenthesisScope.SavedTerm,
+                                context.CurrentTerm);
+                        }
                     }
-                    var parenthesisScope = context.Scopes.Pop();
-                    if (!(parenthesisScope.ParenthesisPair?.Close == parenthesis.Pair.Close))
-                    {
-                        throw new InvalidOperationException(
-                            $"Unmatched parenthesis: {parenthesis.Pair}");
-                    }
-                    context.CurrentTerm = Utilities.CombineTerms(
-                        parenthesisScope.SavedTerm,
-                        context.CurrentTerm);
-                    return ParseRunnerResult.Empty(
-                        this);
+
+                    throw new InvalidOperationException(
+                        $"Couldn't find open parenthesis: '{parenthesis.Pair.Open}'");
 
                 default:
                     throw new InvalidOperationException(token.ToString());

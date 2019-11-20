@@ -127,34 +127,33 @@ namespace Favalon
                 actual);
         }
 
-        //[Test]
-        //public void EnumerableIdentityToken12()
-        //{
-        //    var text = "(x -> x x) (y -> y)";
-        //    var tokens = Lexer.EnumerableTokens(text);
+        [Test]
+        public void EnumerableIdentityToken12()
+        {
+            var text = "(x -> x x) (y -> y)";
+            var tokens = Lexer.EnumerableTokens(text);
 
-        //    var environment = Environment.Create();
-        //    var term = environment.Parse(tokens).
-        //        Single();
-        //    var transposed = environment.Transpose(term);
-        //    var actual1 = environment.Reduce(transposed, false);
-        //    var actual2 = environment.Reduce(actual1, false);
+            var environment = Environment.Create();
+            var term = environment.Parse(tokens).
+                Single();
+            var actual1 = environment.Reduce(term, false);
+            var actual2 = environment.Reduce(actual1, false);
 
-        //    Assert.AreEqual(
-        //        Term.Apply(
-        //            Term.Function(
-        //                Term.Identity("y"),
-        //                Term.Identity("y")),
-        //            Term.Function(
-        //                Term.Identity("y"),
-        //                Term.Identity("y"))),
-        //        actual1);
+            Assert.AreEqual(
+                Term.Apply(
+                    Term.Function(
+                        Term.Identity("y"),
+                        Term.Identity("y")),
+                    Term.Function(
+                        Term.Identity("y"),
+                        Term.Identity("y"))),
+                actual1);
 
-        //    Assert.AreEqual(
-        //        Term.Function(
-        //            Term.Identity("y"),
-        //            Term.Identity("y")),
-        //        actual2);
-        //}
+            Assert.AreEqual(
+                Term.Function(
+                    Term.Identity("y"),
+                    Term.Identity("y")),
+                actual2);
+        }
     }
 }

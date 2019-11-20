@@ -46,7 +46,7 @@ namespace Favalon.LexRunners
             }
             else
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(ch.ToString());
             }
         }
 

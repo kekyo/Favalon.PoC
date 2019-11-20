@@ -15,6 +15,7 @@ namespace Favalon.ParseRunners
         {
             Debug.Assert(context.CurrentTerm == null);
             Debug.Assert(context.PreSignToken == null);
+            Debug.Assert(context.ApplyRightToLeft == false);
 
             switch (token)
             {
@@ -49,7 +50,7 @@ namespace Favalon.ParseRunners
                         NumericalSignedRunner.Instance);
 
                 default:
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException(token.ToString());
             }
         }
 

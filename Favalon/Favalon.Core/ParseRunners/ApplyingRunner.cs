@@ -16,6 +16,18 @@ namespace Favalon.ParseRunners
             Debug.Assert(context.CurrentTerm != null);
             Debug.Assert(context.PreSignToken == null);
 
+            if (context.ApplyRightToLeft)
+            {
+                if (token is ValueToken)
+                {
+                    context.Scopes.Push(
+                        new ScopeInformation(context.CurrentTerm));
+                    context.CurrentTerm = null;
+                }
+
+                context.ApplyRightToLeft = false;
+            }
+
             switch (token)
             {
                 case IdentityToken identity:
@@ -43,15 +55,8 @@ namespace Favalon.ParseRunners
                                 context.CurrentTerm,
                                 new IdentityTerm(identity.Identity));
                         }
-   
-                        if (terms[0].RightToLeft)
-                        {
-                            context.Scopes.Push(
-                                new ScopeInformation(context.CurrentTerm));
-                            context.CurrentTerm = null;
-                            return ParseRunnerResult.Empty(
-                                WaitingRunner.Instance);
-                        }
+
+                        context.ApplyRightToLeft = terms[0].RightToLeft;
                     }
                     else
                     {
@@ -59,33 +64,7 @@ namespace Favalon.ParseRunners
                             context.CurrentTerm,
                             new IdentityTerm(identity.Identity));
                     }
-
                     return ParseRunnerResult.Empty(this);
-
-                case OpenParenthesisToken parenthesis:
-                    context.Scopes.Push(
-                        new ScopeInformation(context.CurrentTerm, parenthesis.Pair));
-                    context.CurrentTerm = null;
-                    return ParseRunnerResult.Empty(
-                        WaitingRunner.Instance);
-
-                case CloseParenthesisToken parenthesis:
-                    if (context.Scopes.Count == 0)
-                    {
-                        throw new InvalidOperationException(
-                            $"Couldn't find open parenthesis: '{parenthesis.Pair.Open}'");
-                    }
-                    var parenthesisScope = context.Scopes.Pop();
-                    if (!(parenthesisScope.ParenthesisPair?.Close == parenthesis.Pair.Close))
-                    {
-                        throw new InvalidOperationException(
-                            $"Unmatched parenthesis: {parenthesis.Pair}");
-                    }
-                    context.CurrentTerm = Utilities.CombineTerms(
-                        parenthesisScope.SavedTerm,
-                        context.CurrentTerm);
-                    return ParseRunnerResult.Empty(
-                        this);
 
                 case NumericToken numeric:
                     context.CurrentTerm = Utilities.CombineTerms(
@@ -112,12 +91,37 @@ namespace Favalon.ParseRunners
                             this);
                     }
 
+                case OpenParenthesisToken parenthesis:
+                    context.Scopes.Push(
+                        new ScopeInformation(context.CurrentTerm, parenthesis.Pair));
+                    context.CurrentTerm = null;
+                    return ParseRunnerResult.Empty(
+                        WaitingRunner.Instance);
+
+                case CloseParenthesisToken parenthesis:
+                    if (context.Scopes.Count == 0)
+                    {
+                        throw new InvalidOperationException(
+                            $"Couldn't find open parenthesis: '{parenthesis.Pair.Open}'");
+                    }
+                    var parenthesisScope = context.Scopes.Pop();
+                    if (!(parenthesisScope.ParenthesisPair?.Close == parenthesis.Pair.Close))
+                    {
+                        throw new InvalidOperationException(
+                            $"Unmatched parenthesis: {parenthesis.Pair}");
+                    }
+                    context.CurrentTerm = Utilities.CombineTerms(
+                        parenthesisScope.SavedTerm,
+                        context.CurrentTerm);
+                    return ParseRunnerResult.Empty(
+                        this);
+
                 case WhiteSpaceToken _:
                     return ParseRunnerResult.Empty(
                         this);
 
                 default:
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException(token.ToString());
             }
         }
 

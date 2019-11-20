@@ -240,318 +240,300 @@ namespace Favalon
 
         //////////////////////////////////////////////
 
-        //[Test]
-        //public void SwapTwoInfixOperatorTermTrailingApplyTerm()
-        //{
-        //    // abc + (def +)
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Operator("+")),
-        //            Term.Apply(
-        //                Term.Identity("def"),
-        //                Term.Operator("+")));
+        [Test]
+        public void SwapTwoInfixOperatorTermTrailingApplyTerm()
+        {
+            // abc + (def +)
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Identity("+"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("+"),
+                Token.Close(')')
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // + abc (+ def)
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Operator("+"),
-        //                Term.Identity("abc")),
-        //            Term.Apply(
-        //                Term.Operator("+"),
-        //                Term.Identity("def")));
+            // + abc (+ def)
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("+"),
+                        Term.Identity("abc")),
+                    Term.Apply(
+                        Term.Identity("+"),
+                        Term.Identity("def")));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
-        //[Test]
-        //public void SwapAndTransposeTwoInfixRightAssociativeOperatorTermTrailingApplyTerm()
-        //{
-        //    // abc <<< (def <<<)
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Operator("<<<")),
-        //            Term.Apply(
-        //                Term.Identity("def"),
-        //                Term.Operator("<<<")));
+        [Test]
+        public void SwapAndTransposeTwoInfixRightAssociativeOperatorTermTrailingApplyTerm()
+        {
+            // abc <<< (def <<<)
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Identity("<<<"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("<<<"),
+                Token.Close(')')
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        // // <<< abc (<<< def)
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Operator("<<<"),
-        //                Term.Identity("abc")),
-        //            Term.Apply(
-        //                Term.Operator("<<<"),
-        //                Term.Identity("def")));
+            // <<< abc (<<< def)
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("<<<"),
+                        Term.Identity("abc")),
+                    Term.Apply(
+                        Term.Identity("<<<"),
+                        Term.Identity("def")));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
         //////////////////////////////////////////////
 
-        //[Test]
-        //public void SwapInnerInfixOperatorTerm()
-        //{
-        //    // abc (+ def) ghi
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Apply(
-        //                    Term.Operator("+"),
-        //                    Term.Identity("def"))),
-        //            Term.Identity("ghi"));
+        [Test]
+        public void SwapInnerInfixOperatorTerm()
+        {
+            // abc (+ def) ghi
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("+"),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Identity("ghi"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // abc (+ def) ghi
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Apply(
-        //                    Term.Operator("+"),
-        //                    Term.Identity("def"))),
-        //            Term.Identity("ghi"));
+            // abc (+ def) ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Apply(
+                            Term.Identity("+"),
+                            Term.Identity("def"))),
+                    Term.Identity("ghi"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
-        //[Test]
-        //public void SwapInnerInfixAndTransposeOperatorTerm()
-        //{
-        //    // abc (<<< def) ghi
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Apply(
-        //                    Term.Operator("<<<"),
-        //                    Term.Identity("def"))),
-        //            Term.Identity("ghi"));
+        [Test]
+        public void SwapInnerInfixAndTransposeOperatorTerm()
+        {
+            // abc (<<< def) ghi
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("<<<"),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Identity("ghi"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // abc (<<< def) ghi
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Apply(
-        //                    Term.Operator("<<<"),
-        //                    Term.Identity("def"))),
-        //            Term.Identity("ghi"));
+            // abc (<<< def) ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Apply(
+                            Term.Identity("<<<"),
+                            Term.Identity("def"))),
+                    Term.Identity("ghi"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
         //////////////////////////////////////////////
 
-        //[Test]
-        //public void SwapInnerTrailingInfixOperatorTerm()
-        //{
-        //    // abc (def +) ghi
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Apply(
-        //                    Term.Identity("def"),
-        //                    Term.Operator("+"))),
-        //            Term.Identity("ghi"));
+        [Test]
+        public void SwapInnerTrailingInfixOperatorTerm()
+        {
+            // abc (def +) ghi
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("+"),
+                Token.Close(')'),
+                Token.Identity("ghi"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // abc (+ def) ghi
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Apply(
-        //                    Term.Operator("+"),
-        //                    Term.Identity("def"))),
-        //            Term.Identity("ghi"));
+            // abc (+ def) ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Apply(
+                            Term.Identity("+"),
+                            Term.Identity("def"))),
+                    Term.Identity("ghi"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
-        //[Test]
-        //public void SwapInnerTrailingInfixAndTransposeOperatorTerm()
-        //{
-        //    // abc (def <<<) ghi
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Apply(
-        //                    Term.Identity("def"),
-        //                    Term.Operator("<<<"))),
-        //            Term.Identity("ghi"));
+        [Test]
+        public void SwapInnerTrailingInfixAndTransposeOperatorTerm()
+        {
+            // abc (def <<<) ghi
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("<<<"),
+                Token.Close(')'),
+                Token.Identity("ghi"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // abc (<<< def) ghi
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Identity("abc"),
-        //                Term.Apply(
-        //                    Term.Operator("<<<"),
-        //                    Term.Identity("def"))),
-        //            Term.Identity("ghi"));
+            // abc (<<< def) ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Apply(
+                            Term.Identity("<<<"),
+                            Term.Identity("def"))),
+                    Term.Identity("ghi"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
         //////////////////////////////////////////////
 
-        //[Test]
-        //public void SwapDoubleInfixOperatorTermsAndApply()
-        //{
-        //    // abc (def +) - ghi
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Identity("abc"),
-        //                    Term.Apply(
-        //                        Term.Identity("def"),
-        //                        Term.Operator("+"))),
-        //                Term.Operator("-")),
-        //            Term.Identity("ghi"));
+        [Test]
+        public void SwapDoubleInfixOperatorTermsAndApply()
+        {
+            // abc (def +) - ghi
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("+"),
+                Token.Close(')'),
+                Token.Identity("-"),
+                Token.Identity("ghi"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // abc - (+ def) ghi
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Identity("abc"),
-        //                    Term.Operator("-")),
-        //                Term.Apply(
-        //                    Term.Operator("+"),
-        //                    Term.Identity("def"))),
-        //            Term.Identity("ghi"));
+            // abc - (+ def) ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity("-")),
+                        Term.Apply(
+                            Term.Identity("+"),
+                            Term.Identity("def"))),
+                    Term.Identity("ghi"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
-        //[Test]
-        //public void SwapAndTransposeDoubleInfixOperatorTermsAndApply()
-        //{
-        //    // abc (def <<<) <<< ghi
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Identity("abc"),
-        //                    Term.Apply(
-        //                        Term.Identity("def"),
-        //                        Term.Operator("<<<"))),
-        //                Term.Operator("<<<")),
-        //            Term.Identity("ghi"));
+        [Test]
+        public void SwapAndTransposeDoubleInfixOperatorTermsAndApply()
+        {
+            // abc (def <<<) <<< ghi
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("<<<"),
+                Token.Close(')'),
+                Token.Identity("<<<"),
+                Token.Identity("ghi"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // abc <<< (<<< def) ghi
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Identity("abc"),
-        //                    Term.Operator("<<<")),
-        //                Term.Apply(
-        //                    Term.Operator("<<<"),
-        //                    Term.Identity("def"))),
-        //            Term.Identity("ghi"));
+            // abc <<< (<<< def) ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("abc"),
+                            Term.Identity("<<<")),
+                        Term.Apply(
+                            Term.Identity("<<<"),
+                            Term.Identity("def"))),
+                    Term.Identity("ghi"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
         //////////////////////////////////////////////
 
-        //[Test]
-        //public void SwapTwoInfixOperatorTerm()
-        //{
-        //    // abc + def + ghi
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Apply(
-        //                        Term.Identity("abc"),
-        //                        Term.Operator("+")),
-        //                    Term.Identity("def")),
-        //                Term.Operator("+")),
-        //            Term.Identity("ghi"));
+        [Test]
+        public void SwapTwoInfixOperatorTerm()
+        {
+            // abc + def + ghi
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Identity("+"),
+                Token.Identity("def"),
+                Token.Identity("+"),
+                Token.Identity("ghi"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // + abc + def ghi
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Apply(
-        //                        Term.Operator("+"),
-        //                        Term.Identity("abc")),
-        //                    Term.Operator("+")),
-        //                Term.Identity("def")),
-        //            Term.Identity("ghi"));
+            // + abc + def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("+"),
+                                Term.Identity("abc")),
+                            Term.Identity("+")),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
 
-        //[Test]
-        //public void SwapAndTransposeTwoInfixRightAssociativeOperatorTerm()
-        //{
-        //    // abc <<< def <<< ghi
-        //    var term =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Apply(
-        //                        Term.Identity("abc"),
-        //                        Term.Operator("<<<")),
-        //                    Term.Identity("def")),
-        //                Term.Operator("<<<")),
-        //            Term.Identity("ghi"));
+        [Test]
+        public void SwapAndTransposeTwoInfixRightAssociativeOperatorTerm()
+        {
+            // abc <<< def <<< ghi
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Identity("<<<"),
+                Token.Identity("def"),
+                Token.Identity("<<<"),
+                Token.Identity("ghi"),
+            };
 
-        //    var environment = Parse();
-        //    var actual = environment.Transpose(term);
+            var actual = Parse(tokens);
 
-        //    // <<< abc (<<< def ghi)
-        //    var expected =
-        //        Term.Apply(
-        //            Term.Apply(
-        //                Term.Operator("<<<"),
-        //                Term.Identity("abc")),
-        //            Term.Apply(
-        //                Term.Apply(
-        //                    Term.Operator("<<<"),
-        //                    Term.Identity("def")),
-        //                Term.Identity("ghi")));
+            // <<< abc (<<< def ghi)
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("<<<"),
+                        Term.Identity("abc")),
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("<<<"),
+                            Term.Identity("def")),
+                        Term.Identity("ghi")));
 
-        //    Assert.AreEqual(expected, actual);
-        //}
+            Assert.AreEqual(expected, actual);
+        }
     }
 }

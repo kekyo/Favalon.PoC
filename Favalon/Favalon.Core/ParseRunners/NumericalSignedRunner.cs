@@ -14,6 +14,7 @@ namespace Favalon.ParseRunners
         public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
         {
             Debug.Assert(context.PreSignToken != null);
+            Debug.Assert(context.ApplyRightToLeft == false);
 
             switch (token)
             {
@@ -43,7 +44,7 @@ namespace Favalon.ParseRunners
                         ApplyingRunner.Instance);
 
                 default:
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException(token.ToString());
             }
         }
 

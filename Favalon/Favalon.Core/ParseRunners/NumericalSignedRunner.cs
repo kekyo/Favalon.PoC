@@ -18,6 +18,7 @@ namespace Favalon.ParseRunners
 
             switch (token)
             {
+                // "-123"
                 case NumericToken numeric:
                     context.CurrentTerm = Utilities.CombineTerms(
                         context.CurrentTerm,
@@ -26,7 +27,9 @@ namespace Favalon.ParseRunners
                     return ParseRunnerResult.Empty(
                         ApplyingRunner.Instance);
 
+                // "- ..."
                 case WhiteSpaceToken _:
+                    // Will make binary op
                     context.CurrentTerm = Utilities.CombineTerms(
                         context.CurrentTerm,
                         new IdentityTerm(context.PreSignToken!.Symbol.ToString()));
@@ -34,7 +37,9 @@ namespace Favalon.ParseRunners
                     return ParseRunnerResult.Empty(
                         ApplyingRunner.Instance);
 
+                // "-abc"
                 case IdentityToken identity:
+                    // Will make binary op
                     context.CurrentTerm = Utilities.CombineTerms(
                         context.CurrentTerm,
                         new IdentityTerm(context.PreSignToken!.Symbol.ToString()),

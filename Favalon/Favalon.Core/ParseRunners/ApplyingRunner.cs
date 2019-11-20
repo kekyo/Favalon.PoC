@@ -16,6 +16,11 @@ namespace Favalon.ParseRunners
             Debug.Assert(context.CurrentTerm != null);
             Debug.Assert(context.PreSignToken == null);
 
+            if (token is WhiteSpaceToken)
+            {
+                return ParseRunnerResult.Empty(this);
+            }
+
             if (context.ApplyRightToLeft)
             {
                 if (token is ValueToken)
@@ -113,10 +118,6 @@ namespace Favalon.ParseRunners
                     context.CurrentTerm = Utilities.CombineTerms(
                         parenthesisScope.SavedTerm,
                         context.CurrentTerm);
-                    return ParseRunnerResult.Empty(
-                        this);
-
-                case WhiteSpaceToken _:
                     return ParseRunnerResult.Empty(
                         this);
 

@@ -17,6 +17,11 @@ namespace Favalon.ParseRunners
             Debug.Assert(context.PreSignToken == null);
             Debug.Assert(context.ApplyRightToLeft == false);
 
+            if (token is WhiteSpaceToken)
+            {
+                return ParseRunnerResult.Empty(this);
+            }
+
             switch (token)
             {
                 // "a"

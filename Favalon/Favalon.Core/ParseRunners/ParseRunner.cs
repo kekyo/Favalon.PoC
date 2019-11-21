@@ -1,5 +1,7 @@
-﻿using Favalon.Terms;
+﻿using Favalon.Internal;
+using Favalon.Terms;
 using Favalon.Tokens;
+using System;
 using System.Globalization;
 using System.Linq;
 

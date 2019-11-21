@@ -1,5 +1,4 @@
-﻿using Favalon.Internal;
-using Favalon.Terms;
+﻿using Favalon.Terms;
 using Favalon.Tokens;
 using System;
 using System.Diagnostics;
@@ -26,7 +25,7 @@ namespace Favalon.ParseRunners
             {
                 // "a"
                 case IdentityToken identity:
-                    context.CurrentTerm = Utilities.CombineTerms(
+                    context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
                         new IdentityTerm(identity.Identity));
                     return ParseRunnerResult.Empty(
@@ -42,9 +41,9 @@ namespace Favalon.ParseRunners
 
                 // "1"
                 case NumericToken numeric:
-                    context.CurrentTerm = Utilities.CombineTerms(
+                    context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
-                        Utilities.GetNumericConstant(numeric.Value, Signes.Plus));
+                        ParserUtilities.GetNumericConstant(numeric.Value, Signes.Plus));
                     return ParseRunnerResult.Empty(
                         ApplyingRunner.Instance);
 

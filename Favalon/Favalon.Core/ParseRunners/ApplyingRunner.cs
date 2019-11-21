@@ -1,5 +1,4 @@
-﻿using Favalon.Internal;
-using Favalon.Terms;
+﻿using Favalon.Terms;
 using Favalon.Tokens;
 using System;
 using System.Diagnostics;
@@ -42,21 +41,21 @@ namespace Favalon.ParseRunners
                         {
                             if (context.CurrentTerm is ApplyTerm(Term left, Term right))
                             {
-                                context.CurrentTerm = Utilities.CombineTerms(
+                                context.CurrentTerm = ParserUtilities.CombineTerms(
                                     left,
                                     new IdentityTerm(identity.Identity),
                                     right);
                             }
                             else
                             {
-                                context.CurrentTerm = Utilities.CombineTerms(
+                                context.CurrentTerm = ParserUtilities.CombineTerms(
                                     new IdentityTerm(identity.Identity),
                                     context.CurrentTerm);
                             }
                         }
                         else
                         {
-                            context.CurrentTerm = Utilities.CombineTerms(
+                            context.CurrentTerm = ParserUtilities.CombineTerms(
                                 context.CurrentTerm,
                                 new IdentityTerm(identity.Identity));
                         }
@@ -65,16 +64,16 @@ namespace Favalon.ParseRunners
                     }
                     else
                     {
-                        context.CurrentTerm = Utilities.CombineTerms(
+                        context.CurrentTerm = ParserUtilities.CombineTerms(
                             context.CurrentTerm,
                             new IdentityTerm(identity.Identity));
                     }
                     return ParseRunnerResult.Empty(this);
 
                 case NumericToken numeric:
-                    context.CurrentTerm = Utilities.CombineTerms(
+                    context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
-                        Utilities.GetNumericConstant(numeric.Value, Signes.Plus));
+                        ParserUtilities.GetNumericConstant(numeric.Value, Signes.Plus));
                     return ParseRunnerResult.Empty(
                         this);
 
@@ -89,7 +88,7 @@ namespace Favalon.ParseRunners
                     // "abc-" / "123-" / "(abc)-" ==> binary op
                     else
                     {
-                        context.CurrentTerm = Utilities.CombineTerms(
+                        context.CurrentTerm = ParserUtilities.CombineTerms(
                             context.CurrentTerm,
                             new IdentityTerm(numericSign.Symbol.ToString()));
                         return ParseRunnerResult.Empty(
@@ -104,38 +103,15 @@ namespace Favalon.ParseRunners
                         WaitingRunner.Instance);
 
                 case CloseParenthesisToken parenthesis:
-                    while (context.Scopes.Count >= 1)
+                    if (ParserUtilities.LeaveScope(context, parenthesis.Pair))
                     {
-                        // Get last parenthesis scope:
-                        var parenthesisScope = context.Scopes.Pop();
-                        if (parenthesisScope.ParenthesisPair is ParenthesisPair parenthesisPair)
-                        {
-                            // Is parenthesis not matching
-                            if (parenthesisPair.Close != parenthesis.Pair.Close)
-                            {
-                                throw new InvalidOperationException(
-                                    $"Unmatched parenthesis: {parenthesis.Pair}");
-                            }
-
-                            // Combine it
-                            context.CurrentTerm = Utilities.CombineTerms(
-                                parenthesisScope.SavedTerm,
-                                context.CurrentTerm);
-                            return ParseRunnerResult.Empty(
-                                this);
-                        }
-                        // RTL scope:
-                        else
-                        {
-                            // Combine it implicitly.
-                            context.CurrentTerm = Utilities.CombineTerms(
-                                parenthesisScope.SavedTerm,
-                                context.CurrentTerm);
-                        }
+                        return ParseRunnerResult.Empty(this);
                     }
-
-                    throw new InvalidOperationException(
-                        $"Couldn't find open parenthesis: '{parenthesis.Pair.Open}'");
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"Couldn't find open parenthesis: '{parenthesis.Pair.Open}'");
+                    }
 
                 default:
                     throw new InvalidOperationException(token.ToString());

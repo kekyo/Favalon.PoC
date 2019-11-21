@@ -1,5 +1,4 @@
-﻿using Favalon.Internal;
-using Favalon.Terms;
+﻿using Favalon.Terms;
 using Favalon.Tokens;
 using System;
 using System.Diagnostics;
@@ -20,9 +19,9 @@ namespace Favalon.ParseRunners
             {
                 // "-123"
                 case NumericToken numeric:
-                    context.CurrentTerm = Utilities.CombineTerms(
+                    context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
-                        Utilities.GetNumericConstant(numeric.Value, context.PreSignToken!.Sign));
+                        ParserUtilities.GetNumericConstant(numeric.Value, context.PreSignToken!.Sign));
                     context.PreSignToken = null;
                     return ParseRunnerResult.Empty(
                         ApplyingRunner.Instance);
@@ -30,7 +29,7 @@ namespace Favalon.ParseRunners
                 // "- ..."
                 case WhiteSpaceToken _:
                     // Will make binary op
-                    context.CurrentTerm = Utilities.CombineTerms(
+                    context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
                         new IdentityTerm(context.PreSignToken!.Symbol.ToString()));
                     context.PreSignToken = null;
@@ -40,7 +39,7 @@ namespace Favalon.ParseRunners
                 // "-abc"
                 case IdentityToken identity:
                     // Will make binary op
-                    context.CurrentTerm = Utilities.CombineTerms(
+                    context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
                         new IdentityTerm(context.PreSignToken!.Symbol.ToString()),
                         new IdentityTerm(identity.Identity));

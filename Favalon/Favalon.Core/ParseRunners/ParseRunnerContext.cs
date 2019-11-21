@@ -11,7 +11,7 @@ namespace Favalon.ParseRunners
         public readonly Stack<ScopeInformation> Scopes;
         public NumericalSignToken? PreSignToken;
         public Token? LastToken;
-        public bool ApplyRightToLeft;
+        public bool WillApplyRightToLeft;
 
         private ParseRunnerContext(Context context, Stack<ScopeInformation> scopes)
         {
@@ -20,7 +20,7 @@ namespace Favalon.ParseRunners
             this.Scopes = scopes;
             this.PreSignToken = null;
             this.LastToken = null;
-            this.ApplyRightToLeft = false;
+            this.WillApplyRightToLeft = false;
         }
 
         public static ParseRunnerContext Create(Context context) =>

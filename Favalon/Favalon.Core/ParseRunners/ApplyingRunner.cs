@@ -15,12 +15,14 @@ namespace Favalon.ParseRunners
             Debug.Assert(context.CurrentTerm != null);
             Debug.Assert(context.PreSignToken == null);
 
+            // Ignore WillApplyRightToLeft checking if token is whitespace.
             if (token is WhiteSpaceToken)
             {
                 return ParseRunnerResult.Empty(this);
             }
 
-            if (context.ApplyRightToLeft)
+            // Triggered the token arranging by RTL.
+            if (context.WillApplyRightToLeft)
             {
                 if (token is ValueToken)
                 {
@@ -29,7 +31,7 @@ namespace Favalon.ParseRunners
                     context.CurrentTerm = null;
                 }
 
-                context.ApplyRightToLeft = false;
+                context.WillApplyRightToLeft = false;
             }
 
             switch (token)
@@ -60,7 +62,7 @@ namespace Favalon.ParseRunners
                                 new IdentityTerm(identity.Identity));
                         }
 
-                        context.ApplyRightToLeft = terms[0].RightToLeft;
+                        context.WillApplyRightToLeft = terms[0].RightToLeft;
                     }
                     else
                     {

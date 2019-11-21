@@ -3,11 +3,15 @@ using Favalon.Tokens;
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Favalon.ParseRunners
 {
     internal static class ParserUtilities
     {
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static Term CombineTerms(Term? left, Term? right)
         {
             if (left != null)
@@ -30,7 +34,7 @@ namespace Favalon.ParseRunners
         public static Term CombineTerms(params Term?[] terms) =>
             terms.Aggregate(CombineTerms)!;
 
-        public static ConstantTerm GetNumericConstant(string value, Signes preSign) =>
+        public static ConstantTerm GetNumericConstant(string value, NumericalSignes preSign) =>
             new ConstantTerm(int.Parse(value, CultureInfo.InvariantCulture) * (int)preSign);
 
         public static bool LeaveScope(

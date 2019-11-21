@@ -75,7 +75,7 @@ namespace Favalon.ParseRunners
                 case NumericToken numeric:
                     context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
-                        ParserUtilities.GetNumericConstant(numeric.Value, Signes.Plus));
+                        ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
                     return ParseRunnerResult.Empty(
                         this);
 

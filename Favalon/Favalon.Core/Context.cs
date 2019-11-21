@@ -3,6 +3,26 @@ using System.Collections.Generic;
 
 namespace Favalon
 {
+    public enum BoundTermNotations
+    {
+        Prefix,
+        Infix
+    }
+
+    public enum BoundTermAssociatives
+    {
+        LeftToRight,
+        RightToLeft
+    }
+
+    public enum BoundTermPrecedences
+    {
+        Morphism = 1000,
+        ArithmericAddition = 2000,
+        ArithmericMultiplication = 3000,
+        Apply = 5000,
+    }
+
     public abstract class Context
     {
         private readonly Dictionary<string, List<BoundTermInformation>> boundTerms;
@@ -15,18 +35,21 @@ namespace Favalon
 
         private protected static void AddBoundTerm(
             Dictionary<string, List<BoundTermInformation>> boundTerms,
-            string identity, bool infix, bool rightToLeft, Term term)
+            string identity, bool infix, bool rightToLeft, BoundTermPrecedences precedence, Term term)
         {
             if (!boundTerms.TryGetValue(identity, out var terms))
             {
                 terms = new List<BoundTermInformation>();
                 boundTerms.Add(identity, terms);
             }
-            terms.Add(new BoundTermInformation(infix, rightToLeft, term));
+            terms.Add(new BoundTermInformation(infix, rightToLeft, precedence, term));
         }
 
-        public void AddBoundTerm(string identity, bool infix, bool rightToLeft, Term term) =>
-            AddBoundTerm(boundTerms, identity, infix, rightToLeft, term);
+        public void AddBoundTerm(string identity, bool infix, bool rightToLeft, int precedence, Term term) =>
+            AddBoundTerm(boundTerms, identity, infix, rightToLeft, (BoundTermPrecedences)precedence, term);
+
+        public void AddBoundTerm(string identity, bool infix, bool rightToLeft, BoundTermPrecedences precedence, Term term) =>
+            AddBoundTerm(boundTerms, identity, infix, rightToLeft, precedence, term);
 
         public BoundTermInformation[]? LookupBoundTerms(string identity) =>
             boundTerms.TryGetValue(identity, out var terms) ? terms.ToArray() : null;

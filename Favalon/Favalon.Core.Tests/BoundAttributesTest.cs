@@ -12,13 +12,16 @@ namespace Favalon
         {
             var environment = Environment.Create(true);
             environment.AddBoundTerm(
-                "+", true, false,
+                "+", true, false, BoundTermPrecedences.ArithmericAddition,
                 new IdentityTerm("+"));
             environment.AddBoundTerm(
-                "-", true, false,
+                "-", true, false, BoundTermPrecedences.ArithmericAddition,
                 new IdentityTerm("-"));
             environment.AddBoundTerm(
-                "<<<", true, true,
+                "*", true, false, BoundTermPrecedences.ArithmericMultiplication,
+                new IdentityTerm("*"));
+            environment.AddBoundTerm(
+                "<<<", true, true, BoundTermPrecedences.Morphism,
                 new IdentityTerm("<<<"));
             return environment.Parse(tokens).Single();
         }
@@ -530,6 +533,66 @@ namespace Favalon
                     Term.Apply(
                         Term.Apply(
                             Term.Identity("<<<"),
+                            Term.Identity("def")),
+                        Term.Identity("ghi")));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        //////////////////////////////////////////////
+
+        [Test]
+        public void ForwardOrderedTerms()
+        {
+            // abc * def + ghi
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("*"),
+                Token.Identity("def"),
+                Token.Identity("+"),
+                Token.Identity("ghi"),
+            };
+
+            var actual = Parse(tokens);
+
+            // * abc + def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("*"),
+                                Term.Identity("abc")),
+                            Term.Identity("+")),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void BackwardOrderedTerms()
+        {
+            // abc + def * ghi
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("+"),
+                Token.Identity("def"),
+                Token.Identity("*"),
+                Token.Identity("ghi"),
+            };
+
+            var actual = Parse(tokens);
+
+            // + abc (* def ghi)
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("+"),
+                        Term.Identity("abc")),
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("*"),
                             Term.Identity("def")),
                         Term.Identity("ghi")));
 

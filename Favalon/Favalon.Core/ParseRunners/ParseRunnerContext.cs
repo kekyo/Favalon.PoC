@@ -1,6 +1,7 @@
 ﻿using Favalon.Terms;
 using Favalon.Tokens;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Favalon.ParseRunners
 {
@@ -13,6 +14,9 @@ namespace Favalon.ParseRunners
         public Token? LastToken;
         public bool WillApplyRightToLeft;
 
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         private ParseRunnerContext(Context context, Stack<ScopeInformation> scopes)
         {
             this.Context = context;
@@ -23,6 +27,9 @@ namespace Favalon.ParseRunners
             this.WillApplyRightToLeft = false;
         }
 
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ParseRunnerContext Create(Context context) =>
             new ParseRunnerContext(context, new Stack<ScopeInformation>());
     }

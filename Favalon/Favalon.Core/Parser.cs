@@ -30,7 +30,7 @@ namespace Favalon
             }
 
             // Exhaust all saved scopes
-            while (ParserUtilities.LeaveScope(runnerContext, null));
+            while (ParserUtilities.LeaveScopes(runnerContext, null));
 
             // Contains final result
             if (runnerContext.CurrentTerm is Term finalTerm)

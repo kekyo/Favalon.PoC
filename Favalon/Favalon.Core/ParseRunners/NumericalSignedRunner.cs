@@ -19,6 +19,9 @@ namespace Favalon.ParseRunners
             {
                 // "-123"
                 case NumericToken numeric:
+                    // Initial precedence (Apply)
+                    context.CurrentPrecedence = BoundTermPrecedences.Apply;
+
                     context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
                         ParserUtilities.GetNumericConstant(numeric.Value, context.PreSignToken!.Sign));
@@ -28,6 +31,9 @@ namespace Favalon.ParseRunners
 
                 // "- ..."
                 case WhiteSpaceToken _:
+                    // Initial precedence (ArithmericAddition)
+                    context.CurrentPrecedence = BoundTermPrecedences.ArithmericAddition;
+
                     // Will make binary op
                     context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
@@ -38,6 +44,9 @@ namespace Favalon.ParseRunners
 
                 // "-abc"
                 case IdentityToken identity:
+                    // Initial precedence (ArithmericAddition)
+                    context.CurrentPrecedence = BoundTermPrecedences.ArithmericAddition;
+
                     // Will make binary op
                     context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,

@@ -1,5 +1,6 @@
 ﻿using Favalon.Terms;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Favalon
 {
@@ -17,6 +18,7 @@ namespace Favalon
 
     public enum BoundTermPrecedences
     {
+        Lowest = 0,
         Morphism = 1000,
         ArithmericAddition = 2000,
         ArithmericMultiplication = 3000,

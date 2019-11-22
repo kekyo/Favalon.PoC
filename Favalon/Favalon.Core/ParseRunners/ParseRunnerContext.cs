@@ -9,10 +9,11 @@ namespace Favalon.ParseRunners
     {
         public readonly Context Context;
         public Term? CurrentTerm;
-        public readonly Stack<ScopeInformation> Scopes;
+        public BoundTermPrecedences? CurrentPrecedence;
         public NumericalSignToken? PreSignToken;
         public Token? LastToken;
         public bool WillApplyRightToLeft;
+        public readonly Stack<ScopeInformation> Scopes;
 
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -21,10 +22,18 @@ namespace Favalon.ParseRunners
         {
             this.Context = context;
             this.CurrentTerm = null;
-            this.Scopes = scopes;
+            this.CurrentPrecedence = null;
             this.PreSignToken = null;
             this.LastToken = null;
             this.WillApplyRightToLeft = false;
+            this.Scopes = scopes;
+        }
+
+        public void PushScope(ParenthesisPair? parenthesisPair = null)
+        {
+            this.Scopes.Push(new ScopeInformation(this.CurrentTerm, this.CurrentPrecedence, parenthesisPair));
+            this.CurrentTerm = null;
+            this.CurrentPrecedence = null;
         }
 
 #if NET45 || NETSTANDARD1_0

@@ -37,10 +37,100 @@ namespace Favalon.ParseRunners
         public static ConstantTerm GetNumericConstant(string value, NumericalSignes preSign) =>
             new ConstantTerm(int.Parse(value, CultureInfo.InvariantCulture) * (int)preSign);
 
+        public static ParseRunnerResult RunIdentity(ParseRunnerContext context, IdentityToken identity)
+        {
+            if (context.Context.LookupBoundTerms(identity.Identity) is BoundTermInformation[] terms)
+            {
+                // Not first time
+                if (context.CurrentPrecedence is BoundTermPrecedences precedence)
+                {
+                    // Greater than current precedence
+                    if (terms[0].Precedence > precedence)
+                    {
+                        // Update precedence
+                        context.CurrentPrecedence = terms[0].Precedence;
+
+                        if (context.CurrentTerm is ApplyTerm(Term left, Term right))
+                        {
+                            // Unapply and begin new implicitly scope
+                            // "+ abc def   *" ==> "+ abc (def   *"
+                            //  left  right id      left  (right id
+                            context.CurrentTerm = left;
+                            context.PushScope();
+
+                            // Set first term from right
+                            context.CurrentTerm = right;
+                        }
+                        else
+                        {
+                            // Begin new implicitly scope
+                            // "+ *" ==> "+ (*"
+                            context.PushScope();
+                        }
+                    }
+                    // Lesser than current precedence
+                    else if (terms[0].Precedence < precedence)
+                    {
+                        // Update precedence
+                        context.CurrentPrecedence = terms[0].Precedence;
+
+                        // Leave one implicitly scope
+                        LeaveScope(context, null);
+                    }
+                }
+                // First time
+                else
+                {
+                    // Update precedence
+                    context.CurrentPrecedence = terms[0].Precedence;
+                }
+
+                if (terms[0].Infix)
+                {
+                    // "abc def +" ==> "abc + def"
+                    if (context.CurrentTerm is ApplyTerm(Term left, Term right))
+                    {
+                        context.CurrentTerm = CombineTerms(
+                            left,
+                            new IdentityTerm(identity.Identity),
+                            right);
+                    }
+                    // "abc +" ==> "+ abc"
+                    else
+                    {
+                        context.CurrentTerm = CombineTerms(
+                            new IdentityTerm(identity.Identity),
+                            context.CurrentTerm);
+                    }
+                }
+                else
+                {
+                    // Will not swap
+                    context.CurrentTerm = CombineTerms(
+                        context.CurrentTerm,
+                        new IdentityTerm(identity.Identity));
+                }
+
+                // Update precedence
+                context.CurrentPrecedence = terms[0].Precedence;
+
+                // Pre marking RTL
+                context.WillApplyRightToLeft = terms[0].RightToLeft;
+            }
+            // "abc def"
+            else
+            {
+                context.CurrentTerm = CombineTerms(
+                    context.CurrentTerm,
+                    new IdentityTerm(identity.Identity));
+            }
+            return ParseRunnerResult.Empty(ApplyingRunner.Instance);
+        }
+
         public static bool LeaveScope(
             ParseRunnerContext context, ParenthesisPair? parenthesisPair)
         {
-            while (context.Scopes.Count >= 1)
+            if (context.Scopes.Count >= 1)
             {
                 // Get last parenthesis scope:
                 var parenthesisScope = context.Scopes.Pop();
@@ -71,6 +161,19 @@ namespace Favalon.ParseRunners
             }
 
             // Matching scope didn't find
+            return false;
+        }
+
+        public static bool LeaveScopes(
+            ParseRunnerContext context, ParenthesisPair? parenthesisPair)
+        {
+            while (context.Scopes.Count >= 1)
+            {
+                if (LeaveScope(context, parenthesisPair))
+                {
+                    return true;
+                }
+            }
             return false;
         }
     }

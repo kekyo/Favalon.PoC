@@ -26,8 +26,7 @@ namespace Favalon.ParseRunners
             {
                 if (token is ValueToken)
                 {
-                    context.Scopes.Push(
-                        new ScopeInformation(context.CurrentTerm));
+                    context.PushScope();
                     context.CurrentTerm = null;
                 }
 
@@ -37,55 +36,20 @@ namespace Favalon.ParseRunners
             switch (token)
             {
                 case IdentityToken identity:
-                    if (context.Context.LookupBoundTerms(identity.Identity) is BoundTermInformation[] terms)
-                    {
-                        if (terms[0].Infix)
-                        {
-                            if (context.CurrentTerm is ApplyTerm(Term left, Term right))
-                            {
-                                context.CurrentTerm = ParserUtilities.CombineTerms(
-                                    left,
-                                    new IdentityTerm(identity.Identity),
-                                    right);
-                            }
-                            else
-                            {
-                                context.CurrentTerm = ParserUtilities.CombineTerms(
-                                    new IdentityTerm(identity.Identity),
-                                    context.CurrentTerm);
-                            }
-                        }
-                        else
-                        {
-                            context.CurrentTerm = ParserUtilities.CombineTerms(
-                                context.CurrentTerm,
-                                new IdentityTerm(identity.Identity));
-                        }
-
-                        context.WillApplyRightToLeft = terms[0].RightToLeft;
-                    }
-                    else
-                    {
-                        context.CurrentTerm = ParserUtilities.CombineTerms(
-                            context.CurrentTerm,
-                            new IdentityTerm(identity.Identity));
-                    }
-                    return ParseRunnerResult.Empty(this);
+                    return ParserUtilities.RunIdentity(context, identity);
 
                 case NumericToken numeric:
                     context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
                         ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
-                    return ParseRunnerResult.Empty(
-                        this);
+                    return ParseRunnerResult.Empty(this);
 
                 case NumericalSignToken numericSign:
                     // "abc -" / "123 -" ==> binary op or signed
                     if (context.LastToken is WhiteSpaceToken)
                     {
                         context.PreSignToken = numericSign;
-                        return ParseRunnerResult.Empty(
-                            NumericalSignedRunner.Instance);
+                        return ParseRunnerResult.Empty(NumericalSignedRunner.Instance);
                     }
                     // "abc-" / "123-" / "(abc)-" ==> binary op
                     else
@@ -93,19 +57,15 @@ namespace Favalon.ParseRunners
                         context.CurrentTerm = ParserUtilities.CombineTerms(
                             context.CurrentTerm,
                             new IdentityTerm(numericSign.Symbol.ToString()));
-                        return ParseRunnerResult.Empty(
-                            this);
+                        return ParseRunnerResult.Empty(this);
                     }
 
                 case OpenParenthesisToken parenthesis:
-                    context.Scopes.Push(
-                        new ScopeInformation(context.CurrentTerm, parenthesis.Pair));
-                    context.CurrentTerm = null;
-                    return ParseRunnerResult.Empty(
-                        WaitingRunner.Instance);
+                    context.PushScope(parenthesis.Pair);
+                    return ParseRunnerResult.Empty(WaitingRunner.Instance);
 
                 case CloseParenthesisToken parenthesis:
-                    if (ParserUtilities.LeaveScope(context, parenthesis.Pair))
+                    if (ParserUtilities.LeaveScopes(context, parenthesis.Pair))
                     {
                         return ParseRunnerResult.Empty(this);
                     }

@@ -23,35 +23,41 @@ namespace Favalon.ParseRunners
 
             switch (token)
             {
-                // "a"
+                // "abc"
                 case IdentityToken identity:
-                    context.CurrentTerm = ParserUtilities.CombineTerms(
-                        context.CurrentTerm,
-                        new IdentityTerm(identity.Identity));
-                    return ParseRunnerResult.Empty(
-                        ApplyingRunner.Instance);
+                    return ParserUtilities.RunIdentity(context, identity);
 
-                // "("
-                case OpenParenthesisToken parenthesis:
-                    context.Scopes.Push(
-                        new ScopeInformation(context.CurrentTerm, parenthesis.Pair));
-                    context.CurrentTerm = null;
-                    return ParseRunnerResult.Empty(
-                        this);
-
-                // "1"
+                // "123"
                 case NumericToken numeric:
+                    // Initial precedence (Apply)
+                    context.CurrentPrecedence = BoundTermPrecedences.Apply;
+
                     context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
                         ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
-                    return ParseRunnerResult.Empty(
-                        ApplyingRunner.Instance);
+                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
 
                 // "-"
                 case NumericalSignToken numericSign:
                     context.PreSignToken = numericSign;
-                    return ParseRunnerResult.Empty(
-                        NumericalSignedRunner.Instance);
+                    return ParseRunnerResult.Empty(NumericalSignedRunner.Instance);
+
+                // "("
+                case OpenParenthesisToken parenthesis:
+                    context.PushScope(parenthesis.Pair);
+                    return ParseRunnerResult.Empty(this);
+
+                // ")"
+                case CloseParenthesisToken parenthesis:
+                    if (ParserUtilities.LeaveScopes(context, parenthesis.Pair))
+                    {
+                        return ParseRunnerResult.Empty(this);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"Couldn't find open parenthesis: '{parenthesis.Pair.Open}'");
+                    }
 
                 default:
                     throw new InvalidOperationException(token.ToString());

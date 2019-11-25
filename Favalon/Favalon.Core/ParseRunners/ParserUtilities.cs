@@ -48,14 +48,13 @@ namespace Favalon.ParseRunners
         {
             if (context.Context.LookupBoundTerms(identity.Identity) is BoundTermInformation[] terms)
             {
-                var deconstructApply = true;
-
                 // Not first time
                 if (context.CurrentPrecedence is BoundTermPrecedences precedence)
                 {
                     // Greater than current precedence
                     if (terms[0].Precedence > precedence)
                     {
+                        // (Dodge SavedTerm)
                         if (context.CurrentTerm is ApplyTerm(Term left, Term right))
                         {
                             // Swap (unapply) and begin new implicitly scope
@@ -77,21 +76,9 @@ namespace Favalon.ParseRunners
                     // Lesser than current precedence
                     else if (terms[0].Precedence < precedence)
                     {
-                        // TODO: managed by 
-
                         // Leave one implicit scope 
                         // And disable deconstruct last ApplyTerm if didn't scope out
-                        if (LeaveOneImplicitScope(context) == LeaveScopeResults.None)
-                        {
-                            // Will apply normally
-                            // "* abc +" ==> "* abc +"
-                            deconstructApply = false;
-                        }
-                        else
-                        {
-                            // Have to apply with transposing when leaved from implicit scope
-                            // "+ abc (* def ghi) +" ==> "+ abc + (* def ghi)
-                        }
+                        LeaveOneImplicitScope(context);
                     }
                 }
 
@@ -101,8 +88,8 @@ namespace Favalon.ParseRunners
                 if (terms[0].Infix)
                 {
                     // "abc def +" ==> "abc + def"
-                    if (deconstructApply &&
-                        context.CurrentTerm is ApplyTerm(Term left, Term right))
+                    // (Dodge SavedTerm)
+                    if (context.CurrentTerm is ApplyTerm(Term left, Term right))
                     {
                         context.CurrentTerm = CombineTerms(
                             left,
@@ -168,6 +155,13 @@ namespace Favalon.ParseRunners
             }
             else
             {
+                // Make term hiding:
+                // because invalid deconstruction ApplyTerm for next token iteration.
+                if (context.CurrentTerm is ApplyTerm t)
+                {
+                    context.CurrentTerm = new HideTerm(t);
+                }
+
                 // Matching scope didn't find
                 return LeaveScopeResults.None;
             }
@@ -219,6 +213,32 @@ namespace Favalon.ParseRunners
             {
                 throw new InvalidOperationException(
                     $"Unmatched parenthesis: {parenthesisPair.Close}");
+            }
+        }
+
+        public static Term FinalizeHideTerm(Term term)
+        {
+            switch (term)
+            {
+                // Unveil HideTerm recursivity
+                case HideTerm(Term hideTerm):
+                    return FinalizeHideTerm(hideTerm);
+
+                case ApplyTerm(Term function, Term argument):
+                    var f = FinalizeHideTerm(function);
+                    var a = FinalizeHideTerm(argument);
+                    if (!object.ReferenceEquals(f, function) ||
+                        !object.ReferenceEquals(a, argument))
+                    {
+                        return new ApplyTerm(f, a);
+                    }
+                    else
+                    {
+                        return term;
+                    }
+
+                default:
+                    return term;
             }
         }
     }

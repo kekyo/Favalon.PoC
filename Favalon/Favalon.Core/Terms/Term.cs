@@ -9,7 +9,7 @@ namespace Favalon.Terms
 
         protected internal abstract Term VisitReduce(Context context);
 
-        protected abstract string VisitTermString(bool includeTermName);
+        protected internal abstract string VisitTermString(bool includeTermName);
 
         private string GetTermName()
         {

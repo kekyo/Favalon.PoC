@@ -37,21 +37,35 @@ namespace Favalon
 
         private protected static void AddBoundTerm(
             Dictionary<string, List<BoundTermInformation>> boundTerms,
-            string identity, bool infix, bool rightToLeft, BoundTermPrecedences precedence, Term term)
+            string identity,
+            BoundTermNotations notation,
+            bool rightToLeft,
+            BoundTermPrecedences precedence,
+            Term term)
         {
             if (!boundTerms.TryGetValue(identity, out var terms))
             {
                 terms = new List<BoundTermInformation>();
                 boundTerms.Add(identity, terms);
             }
-            terms.Add(new BoundTermInformation(infix, rightToLeft, precedence, term));
+            terms.Add(new BoundTermInformation(notation, rightToLeft, precedence, term));
         }
 
-        public void AddBoundTerm(string identity, bool infix, bool rightToLeft, int precedence, Term term) =>
-            AddBoundTerm(boundTerms, identity, infix, rightToLeft, (BoundTermPrecedences)precedence, term);
+        public void AddBoundTerm(
+            string identity,
+            BoundTermNotations notation,
+            bool rightToLeft,
+            int precedence,
+            Term term) =>
+            AddBoundTerm(boundTerms, identity, notation, rightToLeft, (BoundTermPrecedences)precedence, term);
 
-        public void AddBoundTerm(string identity, bool infix, bool rightToLeft, BoundTermPrecedences precedence, Term term) =>
-            AddBoundTerm(boundTerms, identity, infix, rightToLeft, precedence, term);
+        public void AddBoundTerm(
+            string identity,
+            BoundTermNotations notation,
+            bool rightToLeft,
+            BoundTermPrecedences precedence,
+            Term term) =>
+            AddBoundTerm(boundTerms, identity, notation, rightToLeft, precedence, term);
 
         public BoundTermInformation[]? LookupBoundTerms(string identity) =>
             boundTerms.TryGetValue(identity, out var terms) ? terms.ToArray() : null;

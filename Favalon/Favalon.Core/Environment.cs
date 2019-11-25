@@ -14,7 +14,8 @@ namespace Favalon
             GroupBy(method => method.GetFullName()).
             ToDictionary(
                 g => g.Key,
-                g => g.Select(method => new BoundTermInformation(false, false, 0, new MethodTerm(method))).ToList());
+                g => g.Select(method => new BoundTermInformation(
+                    BoundTermNotations.Prefix, false, 0, new MethodTerm(method))).ToList());
 
         static Environment()
         {
@@ -27,7 +28,7 @@ namespace Favalon
             // ((f:'1->'3->'4 a:'1):'3->'4 b:'3):'4
             AddBoundTerm(
                 defaultBoundTerms,
-                "->", true, true, BoundTermPrecedences.Morphism,
+                "->", BoundTermNotations.Infix, true, BoundTermPrecedences.Morphism,
                 // f:'1->'3->'4
                 new InterpretTerm(
                     "->", "a",  // a:'1

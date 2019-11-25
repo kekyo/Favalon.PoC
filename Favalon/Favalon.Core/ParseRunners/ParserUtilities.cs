@@ -88,7 +88,7 @@ namespace Favalon.ParseRunners
                 // Update precedence
                 context.CurrentPrecedence = terms[0].Precedence;
 
-                if (terms[0].Infix)
+                if (terms[0].Notation == BoundTermNotations.Infix)
                 {
                     // "abc def +" ==> "abc + def"
                     // (Dodge SavedTerm)

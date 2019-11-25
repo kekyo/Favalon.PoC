@@ -12,16 +12,16 @@ namespace Favalon
         {
             var environment = Environment.Create(true);
             environment.AddBoundTerm(
-                "+", true, false, BoundTermPrecedences.ArithmericAddition,
+                "+", BoundTermNotations.Infix, false, BoundTermPrecedences.ArithmericAddition,
                 new IdentityTerm("+"));
             environment.AddBoundTerm(
-                "-", true, false, BoundTermPrecedences.ArithmericAddition,
+                "-", BoundTermNotations.Infix, false, BoundTermPrecedences.ArithmericAddition,
                 new IdentityTerm("-"));
             environment.AddBoundTerm(
-                "*", true, false, BoundTermPrecedences.ArithmericMultiplication,
+                "*", BoundTermNotations.Infix, false, BoundTermPrecedences.ArithmericMultiplication,
                 new IdentityTerm("*"));
             environment.AddBoundTerm(
-                "<<<", true, true, BoundTermPrecedences.Morphism,
+                "<<<", BoundTermNotations.Infix, true, BoundTermPrecedences.Morphism,
                 new IdentityTerm("<<<"));
             return environment.Parse(tokens).Single();
         }

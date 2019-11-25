@@ -4,7 +4,7 @@ namespace Favalon.Terms
 {
     public struct BoundTermInformation
     {
-        public readonly bool Infix;
+        public readonly BoundTermNotations Notation;
         public readonly bool RightToLeft;
         public readonly BoundTermPrecedences Precedence;
         public readonly Term Term;
@@ -12,9 +12,13 @@ namespace Favalon.Terms
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        internal BoundTermInformation(bool infix, bool rightToLeft, BoundTermPrecedences precedence, Term term)
+        internal BoundTermInformation(
+            BoundTermNotations notation,
+            bool rightToLeft,
+            BoundTermPrecedences precedence,
+            Term term)
         {
-            this.Infix = infix;
+            this.Notation = notation;
             this.RightToLeft = rightToLeft;
             this.Precedence = precedence;
             this.Term = term;
@@ -23,9 +27,13 @@ namespace Favalon.Terms
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public void Deconstruct(out bool infix, out bool rightToLeft, out BoundTermPrecedences precedence, out Term term)
+        public void Deconstruct(
+            out BoundTermNotations notation,
+            out bool rightToLeft,
+            out BoundTermPrecedences precedence,
+            out Term term)
         {
-            infix = this.Infix;
+            notation = this.Notation;
             rightToLeft = this.RightToLeft;
             precedence = this.Precedence;
             term = this.Term;

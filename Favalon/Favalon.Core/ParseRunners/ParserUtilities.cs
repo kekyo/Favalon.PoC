@@ -7,6 +7,13 @@ using System.Runtime.CompilerServices;
 
 namespace Favalon.ParseRunners
 {
+    internal enum LeaveScopeResults
+    {
+        None,
+        Implicitly,
+        Explicitly
+    }
+
     internal static class ParserUtilities
     {
 #if NET45 || NETSTANDARD1_0
@@ -41,6 +48,8 @@ namespace Favalon.ParseRunners
         {
             if (context.Context.LookupBoundTerms(identity.Identity) is BoundTermInformation[] terms)
             {
+                var forceFirstApplying = false;
+
                 // Not first time
                 if (context.CurrentPrecedence is BoundTermPrecedences precedence)
                 {
@@ -52,7 +61,7 @@ namespace Favalon.ParseRunners
 
                         if (context.CurrentTerm is ApplyTerm(Term left, Term right))
                         {
-                            // Unapply and begin new implicitly scope
+                            // Swap (unapply) and begin new implicitly scope
                             // "+ abc def   *" ==> "+ abc (def   *"
                             //  left  right id      left  (right id
                             context.CurrentTerm = left;
@@ -75,7 +84,10 @@ namespace Favalon.ParseRunners
                         context.CurrentPrecedence = terms[0].Precedence;
 
                         // Leave one implicitly scope
-                        LeaveScope(context, null);
+                        LeaveOneImplicitScope(context);
+
+                        // Disable deconstruct last ApplyTerm
+                        forceFirstApplying = true;
                     }
                 }
                 // First time
@@ -88,7 +100,8 @@ namespace Favalon.ParseRunners
                 if (terms[0].Infix)
                 {
                     // "abc def +" ==> "abc + def"
-                    if (context.CurrentTerm is ApplyTerm(Term left, Term right))
+                    if (!forceFirstApplying &&
+                        context.CurrentTerm is ApplyTerm(Term left, Term right))
                     {
                         context.CurrentTerm = CombineTerms(
                             left,
@@ -111,9 +124,6 @@ namespace Favalon.ParseRunners
                         new IdentityTerm(identity.Identity));
                 }
 
-                // Update precedence
-                context.CurrentPrecedence = terms[0].Precedence;
-
                 // Pre marking RTL
                 context.WillApplyRightToLeft = terms[0].RightToLeft;
             }
@@ -127,8 +137,40 @@ namespace Favalon.ParseRunners
             return ParseRunnerResult.Empty(ApplyingRunner.Instance);
         }
 
-        public static bool LeaveScope(
-            ParseRunnerContext context, ParenthesisPair? parenthesisPair)
+        public static LeaveScopeResults LeaveOneImplicitScope(ParseRunnerContext context)
+        {
+            if (context.Scopes.Count >= 1)
+            {
+                // Get last parenthesis scope:
+                var parenthesisScope = context.Scopes.Pop();
+
+                // Did this scope have parenthesis?
+                if (parenthesisScope.ParenthesisPair is ParenthesisPair scopeParenthesisPair)
+                {
+                    throw new InvalidOperationException(
+                        $"Unmatched parenthesis: {scopeParenthesisPair}");
+                }
+                // Implicit (RTL) scope:
+                else
+                {
+                    // Combine it implicitly.
+                    context.CurrentTerm = CombineTerms(
+                        parenthesisScope.SavedTerm,
+                        context.CurrentTerm);
+
+                    // Leave Implicit scope.
+                    return LeaveScopeResults.Implicitly;
+                }
+            }
+            else
+            {
+                // Matching scope didn't find
+                return LeaveScopeResults.None;
+            }
+        }
+
+        public static LeaveScopeResults LeaveOneScope(
+            ParseRunnerContext context, ParenthesisPair parenthesisPair)
         {
             if (context.Scopes.Count >= 1)
             {
@@ -137,44 +179,37 @@ namespace Favalon.ParseRunners
                 if (parenthesisScope.ParenthesisPair is ParenthesisPair scopeParenthesisPair)
                 {
                     // Is parenthesis not matching
-                    if (!parenthesisPair.HasValue ||
-                        scopeParenthesisPair.Close != parenthesisPair.Value.Close)
+                    if (scopeParenthesisPair.Close != parenthesisPair.Close)
                     {
                         throw new InvalidOperationException(
                             $"Unmatched parenthesis: {parenthesisPair}");
                     }
 
-                    // Combine it
+                    // Parenthesis scope:
                     context.CurrentTerm = CombineTerms(
                         parenthesisScope.SavedTerm,
                         context.CurrentTerm);
-                    return true;
+
+                    // Matched scope
+                    return LeaveScopeResults.Explicitly;
                 }
-                // RTL scope:
+                // Implicit (RTL) scope:
                 else
                 {
                     // Combine it implicitly.
                     context.CurrentTerm = CombineTerms(
                         parenthesisScope.SavedTerm,
                         context.CurrentTerm);
+
+                    // Leave Implicit scope.
+                    return LeaveScopeResults.Implicitly;
                 }
             }
-
-            // Matching scope didn't find
-            return false;
-        }
-
-        public static bool LeaveScopes(
-            ParseRunnerContext context, ParenthesisPair? parenthesisPair)
-        {
-            while (context.Scopes.Count >= 1)
+            else
             {
-                if (LeaveScope(context, parenthesisPair))
-                {
-                    return true;
-                }
+                throw new InvalidOperationException(
+                    $"Unmatched parenthesis: {parenthesisPair}");
             }
-            return false;
         }
     }
 }

@@ -49,15 +49,16 @@ namespace Favalon.ParseRunners
 
                 // ")"
                 case CloseParenthesisToken parenthesis:
-                    if (ParserUtilities.LeaveScopes(context, parenthesis.Pair))
+                    while (true)
                     {
-                        return ParseRunnerResult.Empty(this);
+                        var result = ParserUtilities.LeaveOneScope(context, parenthesis.Pair);
+                        Debug.Assert(result != LeaveScopeResults.None);
+                        if (result == LeaveScopeResults.Explicitly)
+                        {
+                            break;
+                        }
                     }
-                    else
-                    {
-                        throw new InvalidOperationException(
-                            $"Couldn't find open parenthesis: '{parenthesis.Pair.Open}'");
-                    }
+                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
 
                 default:
                     throw new InvalidOperationException(token.ToString());

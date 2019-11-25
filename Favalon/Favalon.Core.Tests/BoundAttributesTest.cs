@@ -555,16 +555,16 @@ namespace Favalon
 
             var actual = Parse(tokens);
 
-            // * abc + def ghi
+            // + (* abc def) ghi
             var expected =
                 Term.Apply(
                     Term.Apply(
+                        Term.Identity("+"),
                         Term.Apply(
                             Term.Apply(
                                 Term.Identity("*"),
                                 Term.Identity("abc")),
-                            Term.Identity("+")),
-                        Term.Identity("def")),
+                            Term.Identity("def"))),
                     Term.Identity("ghi"));
 
             Assert.AreEqual(expected, actual);
@@ -595,6 +595,41 @@ namespace Favalon
                             Term.Identity("*"),
                             Term.Identity("def")),
                         Term.Identity("ghi")));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void CombineForwardAndBackwardOrderedTerms()
+        {
+            // abc * def + ghi * jkl
+            var tokens = new[] {
+                Token.Identity("abc"),
+                Token.Identity("*"),
+                Token.Identity("def"),
+                Token.Identity("+"),
+                Token.Identity("ghi"),
+                Token.Identity("*"),
+                Token.Identity("jkl"),
+            };
+
+            var actual = Parse(tokens);
+
+            // + (* abc def) (* ghi jkl)
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("+"),
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("*"),
+                                Term.Identity("abc")),
+                            Term.Identity("def"))),
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("*"),
+                            Term.Identity("ghi")),
+                        Term.Identity("jkl")));
 
             Assert.AreEqual(expected, actual);
         }

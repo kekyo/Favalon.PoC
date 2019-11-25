@@ -22,7 +22,7 @@ namespace Favalon.ParseRunners
             }
 
             // Triggered the token arranging by RTL.
-            if (context.WillApplyRightToLeft)
+            if (context.ApplyNextAssociative == BoundTermAssociatives.RightToLeft)
             {
                 if (token is ValueToken)
                 {
@@ -30,7 +30,7 @@ namespace Favalon.ParseRunners
                     context.CurrentTerm = null;
                 }
 
-                context.WillApplyRightToLeft = false;
+                context.ApplyNextAssociative = BoundTermAssociatives.LeftToRight;
             }
 
             switch (token)

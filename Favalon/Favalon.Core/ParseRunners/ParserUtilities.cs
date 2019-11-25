@@ -116,7 +116,7 @@ namespace Favalon.ParseRunners
                 }
 
                 // Pre marking RTL
-                context.WillApplyRightToLeft = terms[0].RightToLeft;
+                context.ApplyNextAssociative = terms[0].Associative;
             }
             // "abc def"
             else

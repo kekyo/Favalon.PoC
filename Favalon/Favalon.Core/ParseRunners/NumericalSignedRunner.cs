@@ -13,7 +13,7 @@ namespace Favalon.ParseRunners
         public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
         {
             Debug.Assert(context.PreSignToken != null);
-            Debug.Assert(context.WillApplyRightToLeft == false);
+            Debug.Assert(context.ApplyNextAssociative == BoundTermAssociatives.LeftToRight);
 
             switch (token)
             {

@@ -5,7 +5,7 @@ namespace Favalon.Terms
     public struct BoundTermInformation
     {
         public readonly BoundTermNotations Notation;
-        public readonly bool RightToLeft;
+        public readonly BoundTermAssociatives Associative;
         public readonly BoundTermPrecedences Precedence;
         public readonly Term Term;
 
@@ -14,12 +14,12 @@ namespace Favalon.Terms
 #endif
         internal BoundTermInformation(
             BoundTermNotations notation,
-            bool rightToLeft,
+            BoundTermAssociatives associative,
             BoundTermPrecedences precedence,
             Term term)
         {
             this.Notation = notation;
-            this.RightToLeft = rightToLeft;
+            this.Associative = associative;
             this.Precedence = precedence;
             this.Term = term;
         }
@@ -29,12 +29,12 @@ namespace Favalon.Terms
 #endif
         public void Deconstruct(
             out BoundTermNotations notation,
-            out bool rightToLeft,
+            out BoundTermAssociatives associative,
             out BoundTermPrecedences precedence,
             out Term term)
         {
             notation = this.Notation;
-            rightToLeft = this.RightToLeft;
+            associative = this.Associative;
             precedence = this.Precedence;
             term = this.Term;
         }

@@ -15,7 +15,7 @@ namespace Favalon
             ToDictionary(
                 g => g.Key,
                 g => g.Select(method => new BoundTermInformation(
-                    BoundTermNotations.Prefix, false, 0, new MethodTerm(method))).ToList());
+                    BoundTermNotations.Prefix, BoundTermAssociatives.LeftToRight, 0, new MethodTerm(method))).ToList());
 
         static Environment()
         {
@@ -28,7 +28,10 @@ namespace Favalon
             // ((f:'1->'3->'4 a:'1):'3->'4 b:'3):'4
             AddBoundTerm(
                 defaultBoundTerms,
-                "->", BoundTermNotations.Infix, true, BoundTermPrecedences.Morphism,
+                "->",
+                BoundTermNotations.Infix,
+                BoundTermAssociatives.RightToLeft,
+                BoundTermPrecedences.Morphism,
                 // f:'1->'3->'4
                 new InterpretTerm(
                     "->", "a",  // a:'1

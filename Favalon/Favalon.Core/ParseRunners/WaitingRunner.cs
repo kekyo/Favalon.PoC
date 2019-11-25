@@ -14,7 +14,7 @@ namespace Favalon.ParseRunners
         {
             Debug.Assert(context.CurrentTerm == null);
             Debug.Assert(context.PreSignToken == null);
-            Debug.Assert(context.WillApplyRightToLeft == false);
+            Debug.Assert(context.ApplyNextAssociative == BoundTermAssociatives.LeftToRight);
 
             if (token is WhiteSpaceToken)
             {

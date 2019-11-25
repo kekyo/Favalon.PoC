@@ -39,7 +39,7 @@ namespace Favalon
             Dictionary<string, List<BoundTermInformation>> boundTerms,
             string identity,
             BoundTermNotations notation,
-            bool rightToLeft,
+            BoundTermAssociatives associative,
             BoundTermPrecedences precedence,
             Term term)
         {
@@ -48,24 +48,24 @@ namespace Favalon
                 terms = new List<BoundTermInformation>();
                 boundTerms.Add(identity, terms);
             }
-            terms.Add(new BoundTermInformation(notation, rightToLeft, precedence, term));
+            terms.Add(new BoundTermInformation(notation, associative, precedence, term));
         }
 
         public void AddBoundTerm(
             string identity,
             BoundTermNotations notation,
-            bool rightToLeft,
+            BoundTermAssociatives associative,
             int precedence,
             Term term) =>
-            AddBoundTerm(boundTerms, identity, notation, rightToLeft, (BoundTermPrecedences)precedence, term);
+            AddBoundTerm(boundTerms, identity, notation, associative, (BoundTermPrecedences)precedence, term);
 
         public void AddBoundTerm(
             string identity,
             BoundTermNotations notation,
-            bool rightToLeft,
+            BoundTermAssociatives associative,
             BoundTermPrecedences precedence,
             Term term) =>
-            AddBoundTerm(boundTerms, identity, notation, rightToLeft, precedence, term);
+            AddBoundTerm(boundTerms, identity, notation, associative, precedence, term);
 
         public BoundTermInformation[]? LookupBoundTerms(string identity) =>
             boundTerms.TryGetValue(identity, out var terms) ? terms.ToArray() : null;

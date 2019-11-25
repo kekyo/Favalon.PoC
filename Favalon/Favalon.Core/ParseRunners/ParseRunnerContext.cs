@@ -14,7 +14,7 @@ namespace Favalon.ParseRunners
         public BoundTermPrecedences? CurrentPrecedence;
         public NumericalSignToken? PreSignToken;
         public Token? LastToken;
-        public bool WillApplyRightToLeft;
+        public BoundTermAssociatives ApplyNextAssociative;
         public readonly Stack<ScopeInformation> Scopes;
 
 #if NET45 || NETSTANDARD1_0
@@ -27,7 +27,7 @@ namespace Favalon.ParseRunners
             this.CurrentPrecedence = null;
             this.PreSignToken = null;
             this.LastToken = null;
-            this.WillApplyRightToLeft = false;
+            this.ApplyNextAssociative = BoundTermAssociatives.LeftToRight;
             this.Scopes = scopes;
         }
 
@@ -42,10 +42,10 @@ namespace Favalon.ParseRunners
         {
             var currentTerm = this.CurrentTerm?.Readable ?? "[null]";
             var currentPrecedence = this.CurrentPrecedence?.ToString() ?? "[null]";
-            var willApplyRightToLeft = this.WillApplyRightToLeft ? ", RTL" : string.Empty;
+            var willApplyAssociative = this.ApplyNextAssociative.ToString();
             var scopes = string.Join(",", this.Scopes.Select(scope => $"[{scope}]").ToArray());
 
-            return $"'{currentTerm}', P={currentPrecedence}{willApplyRightToLeft}, [{scopes}]";
+            return $"'{currentTerm}', P={currentPrecedence}, {willApplyAssociative}, [{scopes}]";
         }
 
 

@@ -8,18 +8,21 @@ namespace Favalon
 {
     partial class Environment
     {
+#if DEBUG
+        public int BreakIndex = -1;
+#endif
+
         public IEnumerable<Term> Parse(IEnumerable<Token> tokens)
         {
             var runnerContext = ParseRunnerContext.Create(this);
             var runner = WaitingRunner.Instance;
 #if DEBUG
             var index = 0;
-            var breakIndex = -1;
 #endif
             foreach (var token in tokens)
             {
 #if DEBUG
-                if (index == breakIndex) Debugger.Break();
+                if (index == BreakIndex) Debugger.Break();
                 index++;
 #endif
                 switch (runner.Run(runnerContext, token))

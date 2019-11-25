@@ -41,6 +41,9 @@ namespace Favalon.ParseRunners
         public static Term CombineTerms(params Term?[] terms) =>
             terms.Aggregate(CombineTerms)!;
 
+        public static Term? HideTerm(Term? term) =>
+            term is ApplyTerm apply ? new HidedApplyTerm(apply) : term;
+
         public static ConstantTerm GetNumericConstant(string value, NumericalSignes preSign) =>
             new ConstantTerm(int.Parse(value, CultureInfo.InvariantCulture) * (int)preSign);
 
@@ -141,10 +144,14 @@ namespace Favalon.ParseRunners
                 // Implicit (RTL) scope:
                 else
                 {
+                    // Make term hiding:
+                    // because invalid deconstruction ApplyTerm for next token iteration.
+                    var hideTerm = HideTerm(context.CurrentTerm);
+
                     // Combine it implicitly.
                     context.CurrentTerm = CombineTerms(
                         parenthesisScope.SavedTerm,
-                        context.CurrentTerm);
+                        hideTerm);
 
                     // Reset precedence, because finished a scope.
                     context.CurrentPrecedence = null;
@@ -157,10 +164,7 @@ namespace Favalon.ParseRunners
             {
                 // Make term hiding:
                 // because invalid deconstruction ApplyTerm for next token iteration.
-                if (context.CurrentTerm is ApplyTerm t)
-                {
-                    context.CurrentTerm = new HideTerm(t);
-                }
+                context.CurrentTerm = HideTerm(context.CurrentTerm);
 
                 // Matching scope didn't find
                 return LeaveScopeResults.None;
@@ -183,10 +187,14 @@ namespace Favalon.ParseRunners
                             $"Unmatched parenthesis: {parenthesisPair.Close}, Opened={scopeParenthesisPair.Open}");
                     }
 
+                    // Make term hiding:
+                    // because invalid deconstruction ApplyTerm for next token iteration.
+                    var hideTerm = HideTerm(context.CurrentTerm);
+
                     // Parenthesis scope:
                     context.CurrentTerm = CombineTerms(
                         parenthesisScope.SavedTerm,
-                        context.CurrentTerm);
+                        hideTerm);
 
                     // Reset precedence, because finished a scope.
                     context.CurrentPrecedence = null;
@@ -197,10 +205,14 @@ namespace Favalon.ParseRunners
                 // Implicit (RTL) scope:
                 else
                 {
+                    // Make term hiding:
+                    // because invalid deconstruction ApplyTerm for next token iteration.
+                    var hideTerm = HideTerm(context.CurrentTerm);
+
                     // Combine it implicitly.
                     context.CurrentTerm = CombineTerms(
                         parenthesisScope.SavedTerm,
-                        context.CurrentTerm);
+                        hideTerm);
 
                     // Reset precedence, because finished a scope.
                     context.CurrentPrecedence = null;
@@ -218,10 +230,10 @@ namespace Favalon.ParseRunners
 
         public static Term FinalizeHideTerm(Term term)
         {
+            // Unveil HideTerm recursivity
             switch (term)
             {
-                // Unveil HideTerm recursivity
-                case HideTerm(Term hideTerm):
+                case HidedApplyTerm(ApplyTerm hideTerm):
                     return FinalizeHideTerm(hideTerm);
 
                 case ApplyTerm(Term function, Term argument):

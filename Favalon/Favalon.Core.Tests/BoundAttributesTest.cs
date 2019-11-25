@@ -668,5 +668,38 @@ namespace Favalon
 
             Assert.AreEqual(expected, actual);
         }
+
+        //////////////////////////////////////////////
+
+        [Test]
+        public void BackwardOrderedWithBracketedTerms()
+        {
+            // abc * (def + ghi)
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Identity("*"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("+"),
+                Token.Identity("ghi"),
+                Token.Close(')')
+            };
+
+            var actual = Parse(tokens);
+
+            // * abc (+ def ghi)
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("*"),
+                        Term.Identity("abc")),
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("+"),
+                            Term.Identity("def")),
+                        Term.Identity("ghi")));
+
+            Assert.AreEqual(expected, actual);
+        }
     }
 }

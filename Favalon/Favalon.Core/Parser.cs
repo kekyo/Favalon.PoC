@@ -1,22 +1,30 @@
-﻿using Favalon.Internal;
-using Favalon.ParseRunners;
+﻿using Favalon.ParseRunners;
 using Favalon.Terms;
 using Favalon.Tokens;
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Favalon
 {
     partial class Environment
     {
-        public IEnumerable<Term> Parse(
-            IEnumerable<Token> tokens)
+#if DEBUG
+        public int BreakIndex = -1;
+#endif
+
+        public IEnumerable<Term> Parse(IEnumerable<Token> tokens)
         {
             var runnerContext = ParseRunnerContext.Create(this);
             var runner = WaitingRunner.Instance;
-
+#if DEBUG
+            var index = 0;
+#endif
             foreach (var token in tokens)
             {
+#if DEBUG
+                if (index == BreakIndex) Debugger.Break();
+                index++;
+#endif
                 switch (runner.Run(runnerContext, token))
                 {
                     case ParseRunnerResult(ParseRunner next, Term term):
@@ -28,26 +36,19 @@ namespace Favalon
                         break;
                 }
 
+                Debug.WriteLine($"{index - 1}: '{token}': {runnerContext}");
+
                 runnerContext.LastToken = token;
             }
 
-            // Exhaust saved scopes
-            while (runnerContext.Scopes.Count >= 1)
-            {
-                var parenthesisScope = runnerContext.Scopes.Pop();
-                if (parenthesisScope.ParenthesisPair is ParenthesisPair parenthesisPair)
-                {
-                    throw new InvalidOperationException(
-                        $"Unmatched parenthesis: {parenthesisPair}");
-                }
-                runnerContext.CurrentTerm = Utilities.CombineTerms(
-                    parenthesisScope.SavedTerm,
-                    runnerContext.CurrentTerm);
-            }
+            // Exhaust all saved scopes
+            while (ParserUtilities.LeaveOneImplicitScope(runnerContext) != LeaveScopeResults.None);
 
+            // Contains final result
             if (runnerContext.CurrentTerm is Term finalTerm)
             {
-                yield return finalTerm;
+                // Iterate with unveiling hided terms.
+                yield return finalTerm.VisitUnveil();
             }
         }
     }

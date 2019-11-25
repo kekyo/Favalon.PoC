@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Favalon.Internal
 {
@@ -22,9 +23,6 @@ namespace Favalon.Internal
             // TODO: generate statically
             var parenthesis =
                 Enumerable.Range(0x20, ushort.MaxValue - 1).
-#if NET40 || NET45
-                AsParallel().
-#endif
                 Where(value =>
                     (CharUnicodeInfo.GetUnicodeCategory((char)value) == UnicodeCategory.OpenPunctuation) &&
                     (CharUnicodeInfo.GetUnicodeCategory((char)(value + 1)) == UnicodeCategory.ClosePunctuation)).
@@ -44,20 +42,32 @@ namespace Favalon.Internal
             closeParenthesis.Add('}', new ParenthesisPair('{', '}'));
         }
 
-        public static Signes? IsNumericSign(char ch) =>
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static NumericalSignes? IsNumericSign(char ch) =>
             ch switch
             {
-                '+' => (Signes?)Signes.Plus,
-                '-' => Signes.Minus,
+                '+' => (NumericalSignes?)NumericalSignes.Plus,
+                '-' => NumericalSignes.Minus,
                 _ => null
             };
 
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ParenthesisPair? IsOpenParenthesis(char ch) =>
             openParenthesis.TryGetValue(ch, out var p) ? (ParenthesisPair?)p : null;
 
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ParenthesisPair? IsCloseParenthesis(char ch) =>
             closeParenthesis.TryGetValue(ch, out var p) ? (ParenthesisPair?)p : null;
 
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static bool IsOperator(char ch) =>
             operatorChars.Contains(ch);
     }

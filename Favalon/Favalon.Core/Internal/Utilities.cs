@@ -1,11 +1,7 @@
-﻿using Favalon.Terms;
-using Favalon.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Favalon.Internal
 {
@@ -59,30 +55,5 @@ namespace Favalon.Internal
         public static string GetIdentity(this Delegate dlg) =>
             $"&{dlg.Method.GetFullName()}";
 #endif
-
-        public static Term CombineTerms(Term? left, Term? right)
-        {
-            if (left != null)
-            {
-                if (right != null)
-                {
-                    return new ApplyTerm(left, right);
-                }
-                else
-                {
-                    return left;
-                }
-            }
-            else
-            {
-                return right!;
-            }
-        }
-
-        public static Term CombineTerms(params Term?[] terms) =>
-            terms.Aggregate(CombineTerms)!;
-
-        public static ConstantTerm GetNumericConstant(string value, Signes preSign) =>
-            new ConstantTerm(int.Parse(value, CultureInfo.InvariantCulture) * (int)preSign);
     }
 }

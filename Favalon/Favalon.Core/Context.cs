@@ -1,8 +1,30 @@
 ﻿using Favalon.Terms;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Favalon
 {
+    public enum BoundTermNotations
+    {
+        Prefix,
+        Infix
+    }
+
+    public enum BoundTermAssociatives
+    {
+        LeftToRight,
+        RightToLeft
+    }
+
+    public enum BoundTermPrecedences
+    {
+        Lowest = 0,
+        Morphism = 1000,
+        ArithmericAddition = 2000,
+        ArithmericMultiplication = 3000,
+        Apply = 5000,
+    }
+
     public abstract class Context
     {
         private readonly Dictionary<string, List<BoundTermInformation>> boundTerms;
@@ -15,18 +37,35 @@ namespace Favalon
 
         private protected static void AddBoundTerm(
             Dictionary<string, List<BoundTermInformation>> boundTerms,
-            string identity, bool infix, bool rightToLeft, Term term)
+            string identity,
+            BoundTermNotations notation,
+            BoundTermAssociatives associative,
+            BoundTermPrecedences precedence,
+            Term term)
         {
             if (!boundTerms.TryGetValue(identity, out var terms))
             {
                 terms = new List<BoundTermInformation>();
                 boundTerms.Add(identity, terms);
             }
-            terms.Add(new BoundTermInformation(infix, rightToLeft, term));
+            terms.Add(new BoundTermInformation(notation, associative, precedence, term));
         }
 
-        public void AddBoundTerm(string identity, bool infix, bool rightToLeft, Term term) =>
-            AddBoundTerm(boundTerms, identity, infix, rightToLeft, term);
+        public void AddBoundTerm(
+            string identity,
+            BoundTermNotations notation,
+            BoundTermAssociatives associative,
+            int precedence,
+            Term term) =>
+            AddBoundTerm(boundTerms, identity, notation, associative, (BoundTermPrecedences)precedence, term);
+
+        public void AddBoundTerm(
+            string identity,
+            BoundTermNotations notation,
+            BoundTermAssociatives associative,
+            BoundTermPrecedences precedence,
+            Term term) =>
+            AddBoundTerm(boundTerms, identity, notation, associative, precedence, term);
 
         public BoundTermInformation[]? LookupBoundTerms(string identity) =>
             boundTerms.TryGetValue(identity, out var terms) ? terms.ToArray() : null;

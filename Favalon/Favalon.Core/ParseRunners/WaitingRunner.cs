@@ -1,5 +1,4 @@
-﻿using Favalon.Internal;
-using Favalon.Terms;
+﻿using Favalon.Terms;
 using Favalon.Tokens;
 using System;
 using System.Diagnostics;
@@ -15,7 +14,7 @@ namespace Favalon.ParseRunners
         {
             Debug.Assert(context.CurrentTerm == null);
             Debug.Assert(context.PreSignToken == null);
-            Debug.Assert(context.ApplyRightToLeft == false);
+            Debug.Assert(context.ApplyNextAssociative == BoundTermAssociatives.LeftToRight);
 
             if (token is WhiteSpaceToken)
             {
@@ -24,35 +23,42 @@ namespace Favalon.ParseRunners
 
             switch (token)
             {
-                // "a"
+                // "abc"
                 case IdentityToken identity:
-                    context.CurrentTerm = Utilities.CombineTerms(
-                        context.CurrentTerm,
-                        new IdentityTerm(identity.Identity));
-                    return ParseRunnerResult.Empty(
-                        ApplyingRunner.Instance);
+                    return ParserUtilities.RunIdentity(context, identity);
 
-                // "("
-                case OpenParenthesisToken parenthesis:
-                    context.Scopes.Push(
-                        new ScopeInformation(context.CurrentTerm, parenthesis.Pair));
-                    context.CurrentTerm = null;
-                    return ParseRunnerResult.Empty(
-                        this);
-
-                // "1"
+                // "123"
                 case NumericToken numeric:
-                    context.CurrentTerm = Utilities.CombineTerms(
+                    // Initial precedence (Apply)
+                    context.CurrentPrecedence = BoundTermPrecedences.Apply;
+
+                    context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
-                        Utilities.GetNumericConstant(numeric.Value, Signes.Plus));
-                    return ParseRunnerResult.Empty(
-                        ApplyingRunner.Instance);
+                        ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
+                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
 
                 // "-"
                 case NumericalSignToken numericSign:
                     context.PreSignToken = numericSign;
-                    return ParseRunnerResult.Empty(
-                        NumericalSignedRunner.Instance);
+                    return ParseRunnerResult.Empty(NumericalSignedRunner.Instance);
+
+                // "("
+                case OpenParenthesisToken parenthesis:
+                    context.PushScope(parenthesis.Pair);
+                    return ParseRunnerResult.Empty(this);
+
+                // ")"
+                case CloseParenthesisToken parenthesis:
+                    while (true)
+                    {
+                        var result = ParserUtilities.LeaveOneScope(context, parenthesis.Pair);
+                        Debug.Assert(result != LeaveScopeResults.None);
+                        if (result == LeaveScopeResults.Explicitly)
+                        {
+                            break;
+                        }
+                    }
+                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
 
                 default:
                     throw new InvalidOperationException(token.ToString());

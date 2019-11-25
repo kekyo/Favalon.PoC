@@ -25,7 +25,7 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as ConstantTerm);
 
-        protected override string VisitTermString(bool includeTermName) =>
+        protected internal override string VisitTermString(bool includeTermName) =>
             this.Constant is string stringValue ?
                 "\"" + stringValue + "\"" :
             this.Constant?.ToString() ?? "null";

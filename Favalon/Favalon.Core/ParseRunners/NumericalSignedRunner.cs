@@ -1,5 +1,4 @@
-﻿using Favalon.Internal;
-using Favalon.Terms;
+﻿using Favalon.Terms;
 using Favalon.Tokens;
 using System;
 using System.Diagnostics;
@@ -14,23 +13,29 @@ namespace Favalon.ParseRunners
         public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
         {
             Debug.Assert(context.PreSignToken != null);
-            Debug.Assert(context.ApplyRightToLeft == false);
+            Debug.Assert(context.ApplyNextAssociative == BoundTermAssociatives.LeftToRight);
 
             switch (token)
             {
                 // "-123"
                 case NumericToken numeric:
-                    context.CurrentTerm = Utilities.CombineTerms(
+                    // Initial precedence (Apply)
+                    context.CurrentPrecedence = BoundTermPrecedences.Apply;
+
+                    context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
-                        Utilities.GetNumericConstant(numeric.Value, context.PreSignToken!.Sign));
+                        ParserUtilities.GetNumericConstant(numeric.Value, context.PreSignToken!.Sign));
                     context.PreSignToken = null;
                     return ParseRunnerResult.Empty(
                         ApplyingRunner.Instance);
 
                 // "- ..."
                 case WhiteSpaceToken _:
+                    // Initial precedence (ArithmericAddition)
+                    context.CurrentPrecedence = BoundTermPrecedences.ArithmericAddition;
+
                     // Will make binary op
-                    context.CurrentTerm = Utilities.CombineTerms(
+                    context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
                         new IdentityTerm(context.PreSignToken!.Symbol.ToString()));
                     context.PreSignToken = null;
@@ -39,8 +44,11 @@ namespace Favalon.ParseRunners
 
                 // "-abc"
                 case IdentityToken identity:
+                    // Initial precedence (ArithmericAddition)
+                    context.CurrentPrecedence = BoundTermPrecedences.ArithmericAddition;
+
                     // Will make binary op
-                    context.CurrentTerm = Utilities.CombineTerms(
+                    context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
                         new IdentityTerm(context.PreSignToken!.Symbol.ToString()),
                         new IdentityTerm(identity.Identity));

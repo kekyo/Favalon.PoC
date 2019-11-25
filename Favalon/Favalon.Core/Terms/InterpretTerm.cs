@@ -36,7 +36,7 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as InterpretTerm);
 
-        protected override string VisitTermString(bool includeTermName) =>
+        protected internal override string VisitTermString(bool includeTermName) =>
             $"{this.Identity.ToString(includeTermName)} {this.Parameter.ToString(includeTermName)} {this.interpreter.GetIdentity()}";
 
         public void Deconstruct(out string identity) =>

@@ -14,6 +14,23 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
+        // Recursive unveil terms.
+        internal override Term VisitUnveil()
+        {
+            var function = this.Function.VisitUnveil();
+            var argument = this.Argument.VisitUnveil();
+
+            if (!object.ReferenceEquals(function, this.Function) ||
+                !object.ReferenceEquals(argument, this.Argument))
+            {
+                return new ApplyTerm(function, argument);
+            }
+            else
+            {
+                return this;
+            }
+        }
+
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             new ApplyTerm(
                 this.Function.VisitReplace(identity, replacement),
@@ -51,7 +68,7 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as ApplyTerm);
 
-        protected override string VisitTermString(bool includeTermName)
+        protected internal override string VisitTermString(bool includeTermName)
         {
             var function = this.Function is FunctionTerm ?
                 $"({this.Function.ToString(includeTermName)})" :

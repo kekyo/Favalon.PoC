@@ -48,7 +48,7 @@ namespace Favalon.ParseRunners
         {
             if (context.Context.LookupBoundTerms(identity.Identity) is BoundTermInformation[] terms)
             {
-                var forceFirstApplying = false;
+                var deconstructApply = true;
 
                 // Not first time
                 if (context.CurrentPrecedence is BoundTermPrecedences precedence)
@@ -56,9 +56,6 @@ namespace Favalon.ParseRunners
                     // Greater than current precedence
                     if (terms[0].Precedence > precedence)
                     {
-                        // Update precedence
-                        context.CurrentPrecedence = terms[0].Precedence;
-
                         if (context.CurrentTerm is ApplyTerm(Term left, Term right))
                         {
                             // Swap (unapply) and begin new implicitly scope
@@ -80,27 +77,31 @@ namespace Favalon.ParseRunners
                     // Lesser than current precedence
                     else if (terms[0].Precedence < precedence)
                     {
-                        // Update precedence
-                        context.CurrentPrecedence = terms[0].Precedence;
+                        // TODO: managed by 
 
-                        // Leave one implicitly scope
-                        LeaveOneImplicitScope(context);
-
-                        // Disable deconstruct last ApplyTerm
-                        forceFirstApplying = true;
+                        // Leave one implicit scope 
+                        // And disable deconstruct last ApplyTerm if didn't scope out
+                        if (LeaveOneImplicitScope(context) == LeaveScopeResults.None)
+                        {
+                            // Will apply normally
+                            // "* abc +" ==> "* abc +"
+                            deconstructApply = false;
+                        }
+                        else
+                        {
+                            // Have to apply with transposing when leaved from implicit scope
+                            // "+ abc (* def ghi) +" ==> "+ abc + (* def ghi)
+                        }
                     }
                 }
-                // First time
-                else
-                {
-                    // Update precedence
-                    context.CurrentPrecedence = terms[0].Precedence;
-                }
+
+                // Update precedence
+                context.CurrentPrecedence = terms[0].Precedence;
 
                 if (terms[0].Infix)
                 {
                     // "abc def +" ==> "abc + def"
-                    if (!forceFirstApplying &&
+                    if (deconstructApply &&
                         context.CurrentTerm is ApplyTerm(Term left, Term right))
                     {
                         context.CurrentTerm = CombineTerms(

@@ -149,7 +149,7 @@ namespace Favalon.ParseRunners
                 if (parenthesisScope.ParenthesisPair is ParenthesisPair scopeParenthesisPair)
                 {
                     throw new InvalidOperationException(
-                        $"Unmatched parenthesis: {scopeParenthesisPair}");
+                        $"Unmatched parenthesis: Opened={scopeParenthesisPair.Open}");
                 }
                 // Implicit (RTL) scope:
                 else
@@ -158,6 +158,9 @@ namespace Favalon.ParseRunners
                     context.CurrentTerm = CombineTerms(
                         parenthesisScope.SavedTerm,
                         context.CurrentTerm);
+
+                    // Reset precedence, because finished a scope.
+                    context.CurrentPrecedence = null;
 
                     // Leave Implicit scope.
                     return LeaveScopeResults.Implicitly;
@@ -183,13 +186,16 @@ namespace Favalon.ParseRunners
                     if (scopeParenthesisPair.Close != parenthesisPair.Close)
                     {
                         throw new InvalidOperationException(
-                            $"Unmatched parenthesis: {parenthesisPair}");
+                            $"Unmatched parenthesis: {parenthesisPair.Close}, Opened={scopeParenthesisPair.Open}");
                     }
 
                     // Parenthesis scope:
                     context.CurrentTerm = CombineTerms(
                         parenthesisScope.SavedTerm,
                         context.CurrentTerm);
+
+                    // Reset precedence, because finished a scope.
+                    context.CurrentPrecedence = null;
 
                     // Matched scope
                     return LeaveScopeResults.Explicitly;
@@ -202,6 +208,9 @@ namespace Favalon.ParseRunners
                         parenthesisScope.SavedTerm,
                         context.CurrentTerm);
 
+                    // Reset precedence, because finished a scope.
+                    context.CurrentPrecedence = null;
+
                     // Leave Implicit scope.
                     return LeaveScopeResults.Implicitly;
                 }
@@ -209,7 +218,7 @@ namespace Favalon.ParseRunners
             else
             {
                 throw new InvalidOperationException(
-                    $"Unmatched parenthesis: {parenthesisPair}");
+                    $"Unmatched parenthesis: {parenthesisPair.Close}");
             }
         }
     }

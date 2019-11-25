@@ -701,5 +701,110 @@ namespace Favalon
 
             Assert.AreEqual(expected, actual);
         }
+
+        [Test]
+        public void ForwardOrderedWithBracketedTerms()
+        {
+            // abc + (def * ghi)
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Identity("+"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("*"),
+                Token.Identity("ghi"),
+                Token.Close(')')
+            };
+
+            var actual = Parse(tokens);
+
+            // + abc (* def ghi)
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("+"),
+                        Term.Identity("abc")),
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Identity("*"),
+                            Term.Identity("def")),
+                        Term.Identity("ghi")));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void CombineBackwardAndForwardOrderedWithBracketedTerms()
+        {
+            // abc + (def * ghi) + jkl
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Identity("+"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("*"),
+                Token.Identity("ghi"),
+                Token.Close(')'),
+                Token.Identity("+"),
+                Token.Identity("jkl"),
+            };
+
+            var actual = Parse(tokens);
+
+            // + abc + (* def ghi) jkl
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("+"),
+                                Term.Identity("abc")),
+                            Term.Identity("+")),
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("*"),
+                                Term.Identity("def")),
+                            Term.Identity("ghi"))),
+                    Term.Identity("jkl"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void CombineForwardAndBackwardOrderedWithBracketedTerms()
+        {
+            // abc * (def + ghi) * jkl
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Identity("*"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("+"),
+                Token.Identity("ghi"),
+                Token.Close(')'),
+                Token.Identity("*"),
+                Token.Identity("jkl"),
+            };
+
+            var actual = Parse(tokens);
+
+            // * abc * (+ def ghi) jkl
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("*"),
+                                Term.Identity("abc")),
+                            Term.Identity("*")),
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("+"),
+                                Term.Identity("def")),
+                            Term.Identity("ghi"))),
+                    Term.Identity("jkl"));
+
+            Assert.AreEqual(expected, actual);
+        }
     }
 }

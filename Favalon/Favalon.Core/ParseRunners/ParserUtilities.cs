@@ -227,31 +227,5 @@ namespace Favalon.ParseRunners
                     $"Unmatched parenthesis: {parenthesisPair.Close}");
             }
         }
-
-        public static Term FinalizeHideTerm(Term term)
-        {
-            // Unveil HideTerm recursivity
-            switch (term)
-            {
-                case HidedApplyTerm(ApplyTerm hideTerm):
-                    return FinalizeHideTerm(hideTerm);
-
-                case ApplyTerm(Term function, Term argument):
-                    var f = FinalizeHideTerm(function);
-                    var a = FinalizeHideTerm(argument);
-                    if (!object.ReferenceEquals(f, function) ||
-                        !object.ReferenceEquals(a, argument))
-                    {
-                        return new ApplyTerm(f, a);
-                    }
-                    else
-                    {
-                        return term;
-                    }
-
-                default:
-                    return term;
-            }
-        }
     }
 }

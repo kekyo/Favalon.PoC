@@ -47,7 +47,8 @@ namespace Favalon
             // Contains final result
             if (runnerContext.CurrentTerm is Term finalTerm)
             {
-                yield return ParserUtilities.FinalizeHideTerm(finalTerm);
+                // Iterate with unveiling hided terms.
+                yield return finalTerm.VisitUnveil();
             }
         }
     }

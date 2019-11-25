@@ -26,8 +26,27 @@ namespace Favalon
             return environment.Parse(tokens).Single();
         }
 
+        //////////////////////////////////////////////
+
         [Test]
-        public void TransposeNonTransposableTerm()
+        public void SingleTerm()
+        {
+            // abc
+            var tokens = new[] {
+                Token.Identity("abc"),
+            };
+
+            var actual = Parse(tokens);
+
+            // abc
+            var expected =
+                Term.Identity("abc");
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void MultipleTerm()
         {
             // abc def ghi
             var tokens = new[] {
@@ -38,13 +57,246 @@ namespace Favalon
 
             var actual = Parse(tokens);
 
-            // (abc def) ghi
+            // abc def ghi
             var expected =
                 Term.Apply(
                     Term.Apply(
                         Term.Identity("abc"),
                         Term.Identity("def")),
                     Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void SingleTermWithBracket()
+        {
+            // (abc)
+            var tokens = new Token[] {
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Close(')'),
+            };
+
+            var actual = Parse(tokens);
+
+            // abc
+            var expected =
+                Term.Identity("abc");
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void AllTermsInsideBracket()
+        {
+            // (abc def ghi)
+            var tokens = new Token[] {
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Identity("def"),
+                Token.Identity("ghi"),
+                Token.Close(')'),
+            };
+
+            var actual = Parse(tokens);
+
+            // abc def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void DoubleBrackets1()
+        {
+            // ((abc def ghi))
+            var tokens = new Token[] {
+                Token.Open('('),
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Identity("def"),
+                Token.Identity("ghi"),
+                Token.Close(')'),
+                Token.Close(')'),
+            };
+
+            var actual = Parse(tokens);
+
+            // abc def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void DoubleBrackets2()
+        {
+            // abc ((def)) ghi
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Close(')'),
+                Token.Identity("ghi"),
+            };
+
+            var actual = Parse(tokens);
+
+            // abc def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TermsInsideMultipleBrackets1()
+        {
+            // ((abc def) ghi)
+            var tokens = new Token[] {
+                Token.Open('('),
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Identity("ghi"),
+                Token.Close(')'),
+            };
+
+            var actual = Parse(tokens);
+
+            // abc def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TermsInsideMultipleBrackets2()
+        {
+            // (abc (def ghi))
+            var tokens = new Token[] {
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Identity("ghi"),
+                Token.Close(')'),
+                Token.Close(')'),
+            };
+
+            var actual = Parse(tokens);
+
+            // abc (def ghi)
+            var expected =
+                Term.Apply(
+                    Term.Identity("abc"),
+                    Term.Apply(
+                        Term.Identity("def"),
+                        Term.Identity("ghi")));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TermsInsideMultipleBrackets3()
+        {
+            // (abc (def) ghi)
+            var tokens = new Token[] {
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Identity("ghi"),
+                Token.Close(')'),
+            };
+
+            var actual = Parse(tokens);
+
+            // abc def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TermsInsideMultipleBrackets4()
+        {
+            // ((abc) def) ghi
+            var tokens = new Token[] {
+                Token.Open('('),
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Close(')'),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Identity("ghi"),
+            };
+
+            var actual = Parse(tokens);
+
+            // abc def ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("abc"),
+                        Term.Identity("def")),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TermsInsideMultipleBrackets5()
+        {
+            // abc (def (ghi))
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Open('('),
+                Token.Identity("def"),
+                Token.Open('('),
+                Token.Identity("ghi"),
+                Token.Close(')'),
+                Token.Close(')'),
+            };
+
+            var actual = Parse(tokens);
+
+            // abc (def ghi)
+            var expected =
+                Term.Apply(
+                    Term.Identity("abc"),
+                    Term.Apply(
+                        Term.Identity("def"),
+                        Term.Identity("ghi")));
 
             Assert.AreEqual(expected, actual);
         }
@@ -865,6 +1117,60 @@ namespace Favalon
                                 Term.Identity("def")),
                             Term.Identity("ghi"))),
                     Term.Identity("jkl"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        //////////////////////////////////////////////
+
+        [Test]
+        public void ComplexTerms()
+        {
+            // abc + def * ghi <<< jkl * (mno + pqr) stu
+            var tokens = new Token[] {
+                Token.Identity("abc"),
+                Token.Identity("+"),
+                Token.Identity("def"),
+                Token.Identity("*"),
+                Token.Identity("ghi"),
+                Token.Identity("<<<"),
+                Token.Identity("jkl"),
+                Token.Identity("*"),
+                Token.Open('('),
+                Token.Identity("mno"),
+                Token.Identity("+"),
+                Token.Identity("pqr"),
+                Token.Close(')'),
+                Token.Identity("stu"),
+            };
+
+            var actual = Parse(tokens);
+
+            // + abc <<< (* def ghi) (* jkl (+ mno pqr) stu)
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("+"),
+                                Term.Identity("abc")),
+                            Term.Identity("<<<")),
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("*"),
+                                Term.Identity("def")),
+                            Term.Identity("ghi"))),
+                    Term.Apply(
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("*"),
+                                Term.Identity("jkl")),
+                            Term.Apply(
+                                Term.Apply(
+                                    Term.Identity("+"),
+                                    Term.Identity("mno")),
+                                Term.Identity("pqr"))),
+                        Term.Identity("stu")));
 
             Assert.AreEqual(expected, actual);
         }

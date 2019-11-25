@@ -23,9 +23,6 @@ namespace Favalon.Internal
             // TODO: generate statically
             var parenthesis =
                 Enumerable.Range(0x20, ushort.MaxValue - 1).
-#if NET40 || NET45
-                AsParallel().
-#endif
                 Where(value =>
                     (CharUnicodeInfo.GetUnicodeCategory((char)value) == UnicodeCategory.OpenPunctuation) &&
                     (CharUnicodeInfo.GetUnicodeCategory((char)(value + 1)) == UnicodeCategory.ClosePunctuation)).

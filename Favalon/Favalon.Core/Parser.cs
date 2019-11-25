@@ -7,8 +7,7 @@ namespace Favalon
 {
     partial class Environment
     {
-        public IEnumerable<Term> Parse(
-            IEnumerable<Token> tokens)
+        public IEnumerable<Term> Parse(IEnumerable<Token> tokens)
         {
             var runnerContext = ParseRunnerContext.Create(this);
             var runner = WaitingRunner.Instance;
@@ -35,7 +34,7 @@ namespace Favalon
             // Contains final result
             if (runnerContext.CurrentTerm is Term finalTerm)
             {
-                yield return finalTerm;
+                yield return ParserUtilities.FinalizeHideTerm(finalTerm);
             }
         }
     }

@@ -51,7 +51,7 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as ApplyTerm);
 
-        protected override string VisitTermString(bool includeTermName)
+        protected internal override string VisitTermString(bool includeTermName)
         {
             var function = this.Function is FunctionTerm ?
                 $"({this.Function.ToString(includeTermName)})" :

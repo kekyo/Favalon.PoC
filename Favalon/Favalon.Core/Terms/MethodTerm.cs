@@ -36,7 +36,7 @@ namespace Favalon.Terms
         public override bool Equals(object obj) =>
             this.Equals(obj as MethodTerm);
 
-        protected override string VisitTermString(bool includeTermName) =>
+        protected internal override string VisitTermString(bool includeTermName) =>
             $"{this.Method.GetFullName()}({this.Parameter.ToString(includeTermName)})";
 
         public void Deconstruct(out Term parameter, out MethodInfo method)

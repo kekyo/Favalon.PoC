@@ -22,5 +22,12 @@ namespace Favalon.ParseRunners
             this.Precedence = precedence;
             this.ParenthesisPair = parenthesisPair;
         }
+
+        public override string ToString()
+        {
+            var savedTerm = this.SavedTerm?.ToString() ?? "[null]";
+            var precedence = this.Precedence?.ToString() ?? "[null]";
+            return $"{savedTerm},P={precedence},PP={this.ParenthesisPair}";
+        }
     }
 }

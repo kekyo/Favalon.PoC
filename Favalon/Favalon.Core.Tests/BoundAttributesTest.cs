@@ -672,7 +672,69 @@ namespace Favalon
         //////////////////////////////////////////////
 
         [Test]
-        public void BackwardOrderedWithBracketedTerms()
+        public void BackwardOrderedWithBeforeBracketedTerms()
+        {
+            // (abc * def) + ghi
+            var tokens = new Token[] {
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Identity("*"),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Identity("+"),
+                Token.Identity("ghi"),
+            };
+
+            var actual = Parse(tokens);
+
+            // + (* abc def) ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("+"),
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("*"),
+                                Term.Identity("abc")),
+                            Term.Identity("def"))),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void ForwardOrderedWithBeforeBracketedTerms()
+        {
+            // (abc + def) * ghi
+            var tokens = new Token[] {
+                Token.Open('('),
+                Token.Identity("abc"),
+                Token.Identity("+"),
+                Token.Identity("def"),
+                Token.Close(')'),
+                Token.Identity("*"),
+                Token.Identity("ghi"),
+            };
+
+            var actual = Parse(tokens);
+
+            // * (+ abc def) ghi
+            var expected =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Identity("*"),
+                        Term.Apply(
+                            Term.Apply(
+                                Term.Identity("+"),
+                                Term.Identity("abc")),
+                            Term.Identity("def"))),
+                    Term.Identity("ghi"));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void BackwardOrderedWithAfterBracketedTerms()
         {
             // abc * (def + ghi)
             var tokens = new Token[] {
@@ -703,7 +765,7 @@ namespace Favalon
         }
 
         [Test]
-        public void ForwardOrderedWithBracketedTerms()
+        public void ForwardOrderedWithAfterBracketedTerms()
         {
             // abc + (def * ghi)
             var tokens = new Token[] {

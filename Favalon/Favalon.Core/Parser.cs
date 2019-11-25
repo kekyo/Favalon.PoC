@@ -2,6 +2,7 @@
 using Favalon.Terms;
 using Favalon.Tokens;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Favalon
 {
@@ -11,9 +12,16 @@ namespace Favalon
         {
             var runnerContext = ParseRunnerContext.Create(this);
             var runner = WaitingRunner.Instance;
-
+#if DEBUG
+            var index = 0;
+            var breakIndex = -1;
+#endif
             foreach (var token in tokens)
             {
+#if DEBUG
+                if (index == breakIndex) Debugger.Break();
+                index++;
+#endif
                 switch (runner.Run(runnerContext, token))
                 {
                     case ParseRunnerResult(ParseRunner next, Term term):
@@ -24,6 +32,8 @@ namespace Favalon
                         runner = next;
                         break;
                 }
+
+                Debug.WriteLine($"{index - 1}: '{token}': {runnerContext}");
 
                 runnerContext.LastToken = token;
             }

@@ -2,6 +2,7 @@
 using Favalon.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Favalon.ParseRunners
@@ -36,6 +37,17 @@ namespace Favalon.ParseRunners
             this.CurrentTerm = null;
             this.CurrentPrecedence = null;
         }
+
+        public override string ToString()
+        {
+            var currentTerm = this.CurrentTerm?.Readable ?? "[null]";
+            var currentPrecedence = this.CurrentPrecedence?.ToString() ?? "[null]";
+            var willApplyRightToLeft = this.WillApplyRightToLeft ? ", RTL" : string.Empty;
+            var scopes = string.Join(",", this.Scopes.Select(scope => $"[{scope}]").ToArray());
+
+            return $"'{currentTerm}', P={currentPrecedence}{willApplyRightToLeft}, [{scopes}]";
+        }
+
 
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

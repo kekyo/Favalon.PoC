@@ -29,12 +29,12 @@ namespace Favalon
 
     public abstract class Context
     {
-        private readonly ManagedDictionary<string, List<BoundTermInformation>> boundTerms;
+        private protected readonly ManagedDictionary<string, List<BoundTermInformation>> boundTerms;
 
         private protected Context(ManagedDictionary<string, List<BoundTermInformation>> initialBoundTerm) =>
             boundTerms = initialBoundTerm;
 
-        private protected static void AddBoundTerm(
+        private protected static void InternalAddBoundTerm(
             ManagedDictionary<string, List<BoundTermInformation>> boundTerms,
             string identity,
             BoundTermNotations notation,
@@ -56,7 +56,7 @@ namespace Favalon
             BoundTermAssociatives associative,
             int precedence,
             Term term) =>
-            AddBoundTerm(boundTerms, identity, notation, associative, (BoundTermPrecedences)precedence, term);
+            InternalAddBoundTerm(boundTerms, identity, notation, associative, (BoundTermPrecedences)precedence, term);
 
         public void AddBoundTerm(
             string identity,
@@ -64,7 +64,7 @@ namespace Favalon
             BoundTermAssociatives associative,
             BoundTermPrecedences precedence,
             Term term) =>
-            AddBoundTerm(boundTerms, identity, notation, associative, precedence, term);
+            InternalAddBoundTerm(boundTerms, identity, notation, associative, precedence, term);
 
         public BoundTermInformation[]? LookupBoundTerms(string identity) =>
             boundTerms.TryGetValue(identity, out var terms) ? terms.ToArray() : null;

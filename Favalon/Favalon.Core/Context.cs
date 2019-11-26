@@ -1,4 +1,5 @@
-﻿using Favalon.Terms;
+﻿using Favalon.Internal;
+using Favalon.Terms;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -19,24 +20,22 @@ namespace Favalon
     public enum BoundTermPrecedences
     {
         Lowest = 0,
-        Morphism = 1000,
-        ArithmericAddition = 2000,
-        ArithmericMultiplication = 3000,
-        Apply = 5000,
+        Method = 100,
+        Function = 1000,
+        Morphism = 3000,
+        ArithmericAddition = 5000,
+        ArithmericMultiplication = 6000,
     }
 
     public abstract class Context
     {
-        private readonly Dictionary<string, List<BoundTermInformation>> boundTerms;
+        private readonly ManagedDictionary<string, List<BoundTermInformation>> boundTerms;
 
-        private protected Context() =>
-            boundTerms = new Dictionary<string, List<BoundTermInformation>>();
-
-        private protected Context(Dictionary<string, List<BoundTermInformation>> initialBoundTerm) =>
-            boundTerms = new Dictionary<string, List<BoundTermInformation>>(initialBoundTerm);
+        private protected Context(ManagedDictionary<string, List<BoundTermInformation>> initialBoundTerm) =>
+            boundTerms = initialBoundTerm;
 
         private protected static void AddBoundTerm(
-            Dictionary<string, List<BoundTermInformation>> boundTerms,
+            ManagedDictionary<string, List<BoundTermInformation>> boundTerms,
             string identity,
             BoundTermNotations notation,
             BoundTermAssociatives associative,
@@ -46,7 +45,7 @@ namespace Favalon
             if (!boundTerms.TryGetValue(identity, out var terms))
             {
                 terms = new List<BoundTermInformation>();
-                boundTerms.Add(identity, terms);
+                boundTerms.Set(identity, terms);
             }
             terms.Add(new BoundTermInformation(notation, associative, precedence, term));
         }

@@ -7,18 +7,32 @@ namespace Favalon
 {
     public sealed partial class Environment : Context
     {
-        private static readonly Dictionary<string, List<BoundTermInformation>> defaultBoundTerms =
-            typeof(object).GetAssembly().
-            EnumerableAllPublicStaticMethods().
-            Where(method => method.GetParameters().Length == 1).
-            GroupBy(method => method.GetFullName()).
-            ToDictionary(
-                g => g.Key,
-                g => g.Select(method => new BoundTermInformation(
-                    BoundTermNotations.Prefix, BoundTermAssociatives.LeftToRight, 0, new MethodTerm(method))).ToList());
+        private static readonly ManagedDictionary<string, List<BoundTermInformation>> defaultBoundTerms =
+            new ManagedDictionary<string, List<BoundTermInformation>>();
 
         static Environment()
         {
+            foreach (var entry in
+                typeof(object).GetAssembly().
+                EnumerableAllPublicStaticMethods().
+                Where(method => method.GetParameters().Length == 1).
+                GroupBy(method => method.GetFullName()).
+                SelectMany(g => g.Select(method => new { g.Key, method })))
+            {
+                // TODO:
+                //   1. construct nested term from multiple parameter methods.
+                //   2. construct specialized term from instance method (arg0 is this parameter)
+                //   3. construct specialized term from empty parameter methods (uses unit?)
+                //   4. construct specialized term from constructors.
+                //   5. construct specialized term from operator methods.
+
+                AddBoundTerm(
+                    defaultBoundTerms,
+                    entry.Key,
+                    BoundTermNotations.Prefix, BoundTermAssociatives.LeftToRight, BoundTermPrecedences.Method,
+                    new MethodTerm(entry.method));
+            }
+
             // operator arrow (lambda constructor)
             // -> a b
             // --------------
@@ -43,13 +57,10 @@ namespace Favalon
                                 new FunctionTerm((IdentityTerm)a.VisitReduce(ic), b.VisitReduce(oc)))));
         }
 
-        private Environment()
-        { }
-
-        private Environment(Dictionary<string, List<BoundTermInformation>> boundTerms) : base(boundTerms)
+        private Environment(ManagedDictionary<string, List<BoundTermInformation>> boundTerms) : base(boundTerms)
         { }
 
         public static Environment Create(bool pure = false) =>
-            pure ? new Environment() : new Environment(defaultBoundTerms);
+            new Environment(pure ? new ManagedDictionary<string, List<BoundTermInformation>>() : defaultBoundTerms.Fork());
     }
 }

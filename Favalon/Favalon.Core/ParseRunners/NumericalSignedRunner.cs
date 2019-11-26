@@ -19,9 +19,6 @@ namespace Favalon.ParseRunners
             {
                 // "-123"
                 case NumericToken numeric:
-                    // Initial precedence (Apply)
-                    context.CurrentPrecedence = BoundTermPrecedences.Apply;
-
                     context.CurrentTerm = ParserUtilities.CombineTerms(
                         context.CurrentTerm,
                         ParserUtilities.GetNumericConstant(numeric.Value, context.PreSignToken!.Sign));

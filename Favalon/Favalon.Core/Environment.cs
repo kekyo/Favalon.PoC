@@ -82,6 +82,6 @@ namespace Favalon
         { }
 
         public static Environment Create(bool pure = false) =>
-            new Environment(pure ? new ManagedDictionary<string, List<BoundTermInformation>>() : defaultBoundTerms.Fork());
+            new Environment(pure ? new ManagedDictionary<string, List<BoundTermInformation>>() : defaultBoundTerms.Clone());
     }
 }

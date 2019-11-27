@@ -45,7 +45,7 @@ namespace Favalon
             if (!boundTerms.TryGetValue(identity, out var terms))
             {
                 terms = new List<BoundTermInformation>();
-                boundTerms.Set(identity, terms);
+                boundTerms[identity] = terms;
             }
             terms.Add(new BoundTermInformation(notation, associative, precedence, term));
         }

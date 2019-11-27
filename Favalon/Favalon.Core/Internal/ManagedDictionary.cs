@@ -1,55 +1,119 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon.Internal
 {
     internal sealed class ManagedDictionary<TKey, TValue>
     {
-        private Dictionary<TKey, TValue> dictionary;
-        private bool cloned;
+        private readonly ManagedDictionary<TKey, TValue>? parent;
+        private Dictionary<TKey, TValue>? dictionary;
 
         public ManagedDictionary()
+        { }
+
+        private ManagedDictionary(ManagedDictionary<TKey, TValue>? parent) =>
+            this.parent = parent;
+
+        public TValue this[TKey key]
         {
-            this.dictionary = new Dictionary<TKey, TValue>();
-            this.cloned = true;
+            get
+            {
+                ManagedDictionary<TKey, TValue>? current = this;
+                do
+                {
+                    if (current.dictionary is Dictionary<TKey, TValue> d &&
+                        d.TryGetValue(key, out var v))
+                    {
+                        return v;
+                    }
+                    current = current.parent;
+                }
+                while (current != null);
+                throw new KeyNotFoundException();
+            }
+            set
+            {
+                if (dictionary == null)
+                {
+                    dictionary = new Dictionary<TKey, TValue>();
+                }
+                dictionary[key] = value;
+            }
         }
 
-        private ManagedDictionary(Dictionary<TKey, TValue> dictionary) =>
-            this.dictionary = dictionary;
-
-        public ManagedDictionary<TKey, TValue> Fork() =>
-            // TODO: performance issue for cloning, will change linked list impls.
-            new ManagedDictionary<TKey, TValue>(dictionary);
-
-        public TValue this[TKey key] =>
-            dictionary[key];
+        private IEnumerable<KeyValuePair<TKey, TValue>> Normalized
+        {
+            get
+            {
+                ManagedDictionary<TKey, TValue>? current = this;
+                var keys = new HashSet<TKey>();
+                do
+                {
+                    if (current.dictionary is Dictionary<TKey, TValue> d)
+                    {
+                        foreach (var entry in d)
+                        {
+                            if (keys.Add(entry.Key))
+                            {
+                                yield return entry;
+                            }
+                        }
+                    }
+                    current = current.parent;
+                }
+                while (current != null);
+            }
+        }
 
         public IEnumerable<TKey> Keys =>
-            dictionary.Keys;
+            this.Normalized.Select(entry => entry.Key);
 
         public IEnumerable<TValue> Values =>
-            dictionary.Values;
+            this.Normalized.Select(entry => entry.Value);
 
         public int Count =>
-            dictionary.Count;
+            this.Normalized.Count();
 
-        public bool ContainsKey(TKey key) =>
-            dictionary.ContainsKey(key);
+        public bool ContainsKey(TKey key)
+        {
+            {
+                ManagedDictionary<TKey, TValue>? current = this;
+                do
+                {
+                    if (current.dictionary is Dictionary<TKey, TValue> d &&
+                        d.ContainsKey(key))
+                    {
+                        return true;
+                    }
+                    current = current.parent;
+                }
+                while (current != null);
+                return false;
+            }
+        }
 
-        public bool TryGetValue(TKey key, out TValue value) =>
-            dictionary.TryGetValue(key, out value);
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            ManagedDictionary<TKey, TValue>? current = this;
+            do
+            {
+                if (current.dictionary is Dictionary<TKey, TValue> d &&
+                    d.TryGetValue(key, out value))
+                {
+                    return true;
+                }
+                current = current.parent;
+            }
+            while (current != null);
+            value = default!;
+            return false;
+        }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() =>
-            dictionary.GetEnumerator();
+            this.Normalized.GetEnumerator();
 
-        public void Set(TKey key, TValue value)
-        {
-            if (!cloned)
-            {
-                dictionary = new Dictionary<TKey, TValue>(dictionary);
-                cloned = true;
-            }
-
-            dictionary[key] = value;
-        }
+        public ManagedDictionary<TKey, TValue> Clone() =>
+            new ManagedDictionary<TKey, TValue>(this);
     }
 }

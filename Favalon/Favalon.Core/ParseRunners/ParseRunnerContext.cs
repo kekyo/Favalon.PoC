@@ -9,7 +9,6 @@ namespace Favalon.ParseRunners
 {
     internal sealed class ParseRunnerContext
     {
-        public readonly Context Context;
         public Term? CurrentTerm;
         public BoundTermPrecedences? CurrentPrecedence;
         public NumericalSignToken? PreSignToken;
@@ -22,7 +21,7 @@ namespace Favalon.ParseRunners
 #endif
         private ParseRunnerContext(Context context, Stack<ScopeInformation> scopes)
         {
-            this.Context = context;
+            this.CurrentContext = context;
             this.CurrentTerm = null;
             this.CurrentPrecedence = null;
             this.PreSignToken = null;
@@ -31,23 +30,41 @@ namespace Favalon.ParseRunners
             this.Scopes = scopes;
         }
 
+        public Context CurrentContext { get; private set; }
+
         public void PushScope(ParenthesisPair? parenthesisPair = null)
         {
-            this.Scopes.Push(new ScopeInformation(this.CurrentTerm, this.CurrentPrecedence, parenthesisPair));
+            this.Scopes.Push(new ScopeInformation(this.CurrentContext, this.CurrentTerm, this.CurrentPrecedence, parenthesisPair));
+            this.CurrentContext = this.CurrentContext.Clone();
             this.CurrentTerm = null;
             this.CurrentPrecedence = null;
         }
 
+        public bool TryPopScope(out ScopeInformation scope)
+        {
+            if (this.Scopes.Count >= 1)
+            {
+                scope = this.Scopes.Pop();
+                this.CurrentContext = scope.SavedContext;
+                return true;
+            }
+            else
+            {
+                scope = default;
+                return false;
+            }
+        }
+
         public override string ToString()
         {
+            var currentContext = this.CurrentContext.ToString();
             var currentTerm = this.CurrentTerm?.Readable ?? "[null]";
             var currentPrecedence = this.CurrentPrecedence?.ToString() ?? "[null]";
             var willApplyAssociative = this.ApplyNextAssociative.ToString();
             var scopes = string.Join(",", this.Scopes.Select(scope => $"[{scope}]").ToArray());
 
-            return $"'{currentTerm}', P={currentPrecedence}, {willApplyAssociative}, [{scopes}]";
+            return $"{currentContext},'{currentTerm}', P={currentPrecedence}, {willApplyAssociative}, [{scopes}]";
         }
-
 
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

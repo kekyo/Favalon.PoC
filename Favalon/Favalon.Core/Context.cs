@@ -27,12 +27,15 @@ namespace Favalon
         ArithmericMultiplication = 6000,
     }
 
-    public abstract class Context
+    public class Context
     {
         private protected readonly ManagedDictionary<string, List<BoundTermInformation>> boundTerms;
 
         private protected Context(ManagedDictionary<string, List<BoundTermInformation>> initialBoundTerm) =>
             boundTerms = initialBoundTerm;
+
+        internal Context Clone() =>
+            new Context(boundTerms.Clone());
 
         private protected static void InternalAddBoundTerm(
             ManagedDictionary<string, List<BoundTermInformation>> boundTerms,

@@ -6,6 +6,7 @@ namespace Favalon.ParseRunners
 {
     internal struct ScopeInformation
     {
+        public readonly Context SavedContext;
         public readonly Term? SavedTerm;
         public readonly BoundTermPrecedences? Precedence;
         public readonly ParenthesisPair? ParenthesisPair;
@@ -14,20 +15,23 @@ namespace Favalon.ParseRunners
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public ScopeInformation(
-            Term? reservedTerm,
+            Context savedContext,
+            Term? savedTerm,
             BoundTermPrecedences? precedence,
             ParenthesisPair? parenthesisPair)
         {
-            this.SavedTerm = reservedTerm;
+            this.SavedContext = savedContext;
+            this.SavedTerm = savedTerm;
             this.Precedence = precedence;
             this.ParenthesisPair = parenthesisPair;
         }
 
         public override string ToString()
         {
-            var savedTerm = this.SavedTerm?.ToString() ?? "[null]";
+            var savedContext = this.SavedContext?.ToString();
+            var savedTerm = this.SavedTerm?.Readable ?? "[null]";
             var precedence = this.Precedence?.ToString() ?? "[null]";
-            return $"{savedTerm},P={precedence},PP={this.ParenthesisPair}";
+            return $"{savedContext},'{savedTerm}',P={precedence},PP={this.ParenthesisPair}";
         }
     }
 }

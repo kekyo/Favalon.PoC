@@ -30,8 +30,7 @@ namespace Favalon.ParseRunners
 
                 // "123"
                 case NumericToken numeric:
-                    context.CurrentTerm = ParserUtilities.CombineTerms(
-                        context.CurrentTerm,
+                    context.CombineAfter(
                         ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
                     return ParseRunnerResult.Empty(ApplyingRunner.Instance);
 

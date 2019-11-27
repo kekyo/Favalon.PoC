@@ -2,7 +2,6 @@
 using Favalon.Tokens;
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Favalon.ParseRunners
@@ -38,9 +37,6 @@ namespace Favalon.ParseRunners
             }
         }
 
-        public static Term CombineTerms(params Term?[] terms) =>
-            terms.Aggregate(CombineTerms)!;
-
         public static Term? HideTerm(Term? term) =>
             term is ApplyTerm apply ? new HidedApplyTerm(apply) : term;
 
@@ -60,18 +56,18 @@ namespace Favalon.ParseRunners
                         // (Dodge SavedTerm)
                         if (runnerContext.CurrentTerm is ApplyTerm(Term left, Term right))
                         {
-                            // Swap (unapply) and begin new implicitly scope
+                            // Swap (unapply) and begin new implicit scope
                             // "+ abc def   *" ==> "+ abc (def   *"
                             //  left  right id      left  (right id
-                            runnerContext.CurrentTerm = left;
+                            runnerContext.SetTerm(left);
                             runnerContext.PushScope();
 
                             // Set first term from right
-                            runnerContext.CurrentTerm = right;
+                            runnerContext.SetTerm(right);
                         }
                         else
                         {
-                            // Begin new implicitly scope
+                            // Begin new implicit scope
                             // "+ *" ==> "+ (*"
                             runnerContext.PushScope();
                         }
@@ -86,33 +82,29 @@ namespace Favalon.ParseRunners
                 }
 
                 // Update precedence
-                runnerContext.CurrentPrecedence = terms[0].Precedence;
+                runnerContext.SetPrecedence(terms[0].Precedence);
 
+                // Is this identity infix?
                 if (terms[0].Notation == BoundTermNotations.Infix)
                 {
                     // "abc def +" ==> "abc + def"
                     // (Dodge SavedTerm)
                     if (runnerContext.CurrentTerm is ApplyTerm(Term left, Term right))
                     {
-                        runnerContext.CurrentTerm = CombineTerms(
-                            left,
-                            new IdentityTerm(identity.Identity),
-                            right);
+                        runnerContext.SetTerm(left);
+                        runnerContext.CombineAfter(new IdentityTerm(identity.Identity));
+                        runnerContext.CombineAfter(right);
                     }
                     // "abc +" ==> "+ abc"
                     else
                     {
-                        runnerContext.CurrentTerm = CombineTerms(
-                            new IdentityTerm(identity.Identity),
-                            runnerContext.CurrentTerm);
+                        runnerContext.CombineBefore(new IdentityTerm(identity.Identity));
                     }
                 }
                 else
                 {
                     // Will not swap
-                    runnerContext.CurrentTerm = CombineTerms(
-                        runnerContext.CurrentTerm,
-                        new IdentityTerm(identity.Identity));
+                    runnerContext.CombineAfter(new IdentityTerm(identity.Identity));
                 }
 
                 // Pre marking RTL
@@ -121,9 +113,7 @@ namespace Favalon.ParseRunners
             // "abc def"
             else
             {
-                runnerContext.CurrentTerm = CombineTerms(
-                    runnerContext.CurrentTerm,
-                    new IdentityTerm(identity.Identity));
+                runnerContext.CombineAfter(new IdentityTerm(identity.Identity));
             }
             return ParseRunnerResult.Empty(ApplyingRunner.Instance);
         }
@@ -131,10 +121,10 @@ namespace Favalon.ParseRunners
         public static LeaveScopeResults LeaveOneImplicitScope(ParseRunnerContext runnerContext)
         {
             // Get last parenthesis scope:
-            if (runnerContext.TryPopScope(out var scope))
+            if (runnerContext.TryPopScope(out var spp))
             {
                 // Did this scope have parenthesis?
-                if (scope.ParenthesisPair is ParenthesisPair scopeParenthesisPair)
+                if (spp is ParenthesisPair scopeParenthesisPair)
                 {
                     throw new InvalidOperationException(
                         $"Unmatched parenthesis: Opened={scopeParenthesisPair.Open}");
@@ -142,18 +132,6 @@ namespace Favalon.ParseRunners
                 // Implicit (RTL) scope:
                 else
                 {
-                    // Make term hiding:
-                    // because invalid deconstruction ApplyTerm for next token iteration.
-                    var hideTerm = HideTerm(runnerContext.CurrentTerm);
-
-                    // Combine it implicitly.
-                    runnerContext.CurrentTerm = CombineTerms(
-                        scope.SavedTerm,
-                        hideTerm);
-
-                    // Reset precedence, because finished a scope.
-                    runnerContext.CurrentPrecedence = null;
-
                     // Leave Implicit scope.
                     return LeaveScopeResults.Implicitly;
                 }
@@ -162,7 +140,7 @@ namespace Favalon.ParseRunners
             {
                 // Make term hiding:
                 // because invalid deconstruction ApplyTerm for next token iteration.
-                runnerContext.CurrentTerm = HideTerm(runnerContext.CurrentTerm);
+                runnerContext.MakeHidedApplyTerm();
 
                 // Matching scope didn't find
                 return LeaveScopeResults.None;
@@ -172,29 +150,18 @@ namespace Favalon.ParseRunners
         public static LeaveScopeResults LeaveOneScope(
             ParseRunnerContext runnerContext, ParenthesisPair parenthesisPair)
         {
-            // Get last parenthesis scope:
-            if (runnerContext.TryPopScope(out var scope))
+            // Get last scope:
+            if (runnerContext.TryPopScope(out var spp))
             {
-                if (scope.ParenthesisPair is ParenthesisPair scopeParenthesisPair)
+                // Did this scope have parenthesis?
+                if (spp is ParenthesisPair scopeParenthesisPair)
                 {
-                    // Is parenthesis not matching
+                    // Is parenthesis not matching?
                     if (scopeParenthesisPair.Close != parenthesisPair.Close)
                     {
                         throw new InvalidOperationException(
                             $"Unmatched parenthesis: {parenthesisPair.Close}, Opened={scopeParenthesisPair.Open}");
                     }
-
-                    // Make term hiding:
-                    // because invalid deconstruction ApplyTerm for next token iteration.
-                    var hideTerm = HideTerm(runnerContext.CurrentTerm);
-
-                    // Parenthesis scope:
-                    runnerContext.CurrentTerm = CombineTerms(
-                        scope.SavedTerm,
-                        hideTerm);
-
-                    // Reset precedence, because finished a scope.
-                    runnerContext.CurrentPrecedence = null;
 
                     // Matched scope
                     return LeaveScopeResults.Explicitly;
@@ -202,18 +169,6 @@ namespace Favalon.ParseRunners
                 // Implicit (RTL) scope:
                 else
                 {
-                    // Make term hiding:
-                    // because invalid deconstruction ApplyTerm for next token iteration.
-                    var hideTerm = HideTerm(runnerContext.CurrentTerm);
-
-                    // Combine it implicitly.
-                    runnerContext.CurrentTerm = CombineTerms(
-                        scope.SavedTerm,
-                        hideTerm);
-
-                    // Reset precedence, because finished a scope.
-                    runnerContext.CurrentPrecedence = null;
-
                     // Leave Implicit scope.
                     return LeaveScopeResults.Implicitly;
                 }

@@ -48,7 +48,8 @@ namespace Favalon
             //   2. construct specialized term from instance method (arg0 is this parameter)
             //   3. construct specialized term from empty parameter methods (uses unit?)
             //   4. construct specialized term from constructors.
-            //   5. construct specialized term from operator methods.
+            //   5. construct specialized term for cast operator.
+            //   6. construct specialized term from operator methods.
 
             var identity = method.GetFullName();
             InternalAddBoundTerm(boundTerms,

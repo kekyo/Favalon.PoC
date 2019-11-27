@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Favalon.Internal
 {
-    internal static class Compat
+    partial class ReflectionUtilities
     {
 #if NET35 || NET40 || NET45
 #if NET45

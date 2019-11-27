@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Favalon.Internal
 {
-    internal static class Utilities
+    internal static partial class ReflectionUtilities
     {
         public static IEnumerable<MethodInfo> EnumerableAllPublicStaticMethods(this Assembly assembly) =>
             assembly.GetTypes().
@@ -29,13 +29,13 @@ namespace Favalon.Internal
 #else
                 case TypeInfo type when type.IsGenericType:
 #endif
-                    var gta = Compat.Join(
+                    var gta = Join(
                         ",",
                         type.GetGenericArguments().Select(GetFullName));
                     return $"{parentNames}.{name}<{gta}>";
 
                 case MethodInfo method when method.IsGenericMethod:
-                    var gma = Compat.Join(
+                    var gma = Join(
                         ",",
                         method.GetGenericArguments().Select(GetFullName));
                     return $"{parentNames}.{name}<{gma}>";

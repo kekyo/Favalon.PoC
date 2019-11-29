@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 
 namespace Favalon.Terms
 {
@@ -11,7 +10,7 @@ namespace Favalon.Terms
 
         public abstract new object Constant { get; }
 
-        public override Term HigherOrder =>
+        public override Term? HigherOrder =>
             new TypeTerm(this.Constant.GetType());
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>

@@ -5,8 +5,8 @@ namespace Favalon.Terms
     [DebuggerDisplay("{Readable}")]
     public abstract partial class Term
     {
-        public virtual Term HigherOrder { get; } =
-            null!; // TODO:
+        public virtual Term? HigherOrder { get; } =
+            null; // TODO:
 
         internal virtual Term VisitUnveil() =>
             this;

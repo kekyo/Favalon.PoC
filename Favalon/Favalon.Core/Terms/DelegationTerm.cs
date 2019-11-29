@@ -16,7 +16,7 @@ namespace Favalon.Terms
             Func<Context, TParameterTerm, Term> runner)
         {
             this.Identity = new IdentityTerm(identity);
-            this.Parameter = new BoundIdentityTerm(parameter/* TODO: , new ClrTypeTerm(typeof(TParameterType)) */);
+            this.Parameter = new BoundIdentityTerm(parameter, new TypeTerm(typeof(TParameterTerm)));
             this.runner = runner;
         }
 

@@ -61,10 +61,10 @@ namespace Favalon.Terms
             var identity = type.GetFullName(false);
 
             // The type
-            //Context.AddBoundTerm(boundTerms,
-            //    identity,
-            //    BoundTermNotations.Prefix, BoundTermAssociatives.LeftToRight, null,
-            //    new TypeTerm(type));
+            Context.AddBoundTerm(boundTerms,
+                identity,
+                BoundTermNotations.Prefix, BoundTermAssociatives.LeftToRight, null,
+                new TypeTerm(type));
 
             // Type constructor
             if (type.IsGenericTypeDefinition() && type.GetGenericArguments() is Type[] types && types.Length == 1)

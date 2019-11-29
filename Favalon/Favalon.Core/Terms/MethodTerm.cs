@@ -13,11 +13,13 @@ namespace Favalon.Terms
         internal MethodTerm(MethodBase method) =>
             this.Method = method;
 
-        public override Term HigherOrder =>
+        public override Term? HigherOrder =>
             new TypeTerm(this.Method is MethodInfo mi ? mi.ReturnType : this.Method.DeclaringType);
 
         public override BoundIdentityTerm Parameter =>
-            new BoundIdentityTerm(this.Method.GetParameters().Single().Name  /* TODO: , this.Method.GetParameters().Single().ParameterType */);
+            new BoundIdentityTerm(
+                this.Method.GetParameters().Single().Name,
+                new TypeTerm(this.Method.GetParameters().Single().ParameterType));
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             this;
@@ -41,7 +43,7 @@ namespace Favalon.Terms
 
         protected internal override string VisitTermString(bool includeTermName) =>
             this.Method is MethodInfo ?
-                $"{this.Method.GetFullName()}({this.Parameter.ToString(includeTermName)})" :
+                $"{this.Method.GetFullName()}({this.Parameter.ToString(includeTermName)}) -> {this.HigherOrder!.ToString(includeTermName)}" :
                 $"{this.Method.DeclaringType.GetFullName()}({this.Parameter.ToString(includeTermName)})";
 
         public void Deconstruct(out MethodBase method) =>

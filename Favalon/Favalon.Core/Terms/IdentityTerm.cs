@@ -26,6 +26,6 @@ namespace Favalon.Terms
                 new[] { this };
 
         public BoundIdentityTerm ToBoundIdentity() =>
-            new BoundIdentityTerm(this.Name);
+            new BoundIdentityTerm(this.Name, this.HigherOrder);
     }
 }

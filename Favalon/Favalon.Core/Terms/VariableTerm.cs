@@ -20,7 +20,9 @@ namespace Favalon.Terms
             this.Equals(obj as VariableTerm);
 
         protected internal override string VisitTermString(bool includeTermName) =>
-            this.Name;
+            this.HigherOrder is Term higherOrder ?
+                $"{this.Name}:{higherOrder.ToString(includeTermName)}" :
+                this.Name;
 
         public void Deconstruct(out string name) =>
             name = this.Name;

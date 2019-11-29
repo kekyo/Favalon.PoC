@@ -13,5 +13,13 @@ namespace Favalon.Terms
             (identity == this.Name) ?
                 replacement :
                 this;
+
+        protected internal override sealed Term VisitReduce(Context context) =>
+            context.LookupBoundTerms(this.Name) is BoundTermInformation[] terms ?
+                terms[0].Term :
+                this;
+
+        public BoundIdentityTerm ToBoundIdentity() =>
+            new BoundIdentityTerm(this.Name);
     }
 }

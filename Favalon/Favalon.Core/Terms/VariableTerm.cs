@@ -10,11 +10,6 @@ namespace Favalon.Terms
         protected VariableTerm(string name) =>
             this.Name = name;
 
-        protected internal override sealed Term VisitReduce(Context context) =>
-            context.LookupBoundTerms(this.Name) is BoundTermInformation[] terms ?
-                terms[0].Term :
-                this;
-
         public override sealed int GetHashCode() =>
             this.Name.GetHashCode();
 

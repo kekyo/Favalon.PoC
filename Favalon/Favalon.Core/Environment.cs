@@ -29,14 +29,14 @@ namespace Favalon
                 BoundTermAssociatives.RightToLeft,
                 BoundTermPrecedences.Morphism,
                 // f:'1->'3->'4
-                new InterpretTerm(
+                new DelegationTerm<IdentityTerm>(
                     "->", "a",  // a:'1
                     (ic, a) =>
                         // '3->'4
-                        new InterpretTerm(
+                        new DelegationTerm<Term>(
                             $"Closure(-> {a})", "b",  // b:'3
                             (oc, b) =>
-                                new FunctionTerm((IdentityTerm)a.VisitReduce(ic), b.VisitReduce(oc)))));
+                                new FunctionTerm(((IdentityTerm)a.VisitReduce(ic)).ToBoundIdentity(), b.VisitReduce(oc)))));
         }
 
         private static void InternalAddBoundTermFromMethod(

@@ -13,8 +13,11 @@ namespace Favalon.Terms
         internal MethodTerm(MethodInfo method) =>
             this.Method = method;
 
-        public override IdentityTerm Parameter =>
-            new IdentityTerm(this.Method.GetParameters().Single().Name);
+        public override Term HigherOrder =>
+            new ClrTypeTerm(this.Method.ReturnType);
+
+        public override BoundIdentityTerm Parameter =>
+            new BoundIdentityTerm(this.Method.GetParameters().Single().Name  /* TODO: , this.Method.GetParameters().Single().ParameterType */);
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             this;
@@ -39,10 +42,7 @@ namespace Favalon.Terms
         protected internal override string VisitTermString(bool includeTermName) =>
             $"{this.Method.GetFullName()}({this.Parameter.ToString(includeTermName)})";
 
-        public void Deconstruct(out Term parameter, out MethodInfo method)
-        {
-            parameter = this.Parameter;
+        public void Deconstruct(out MethodInfo method) =>
             method = this.Method;
-        }
     }
 }

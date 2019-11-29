@@ -8,7 +8,10 @@ namespace Favalon.Terms
         public static IdentityTerm Identity(string identity) =>
             new IdentityTerm(identity);
 
-        public static FunctionTerm Function(IdentityTerm parameter, Term body) =>
+        public static BoundIdentityTerm BoundIdentity(string identity) =>
+            new BoundIdentityTerm(identity);
+
+        public static FunctionTerm Function(BoundIdentityTerm parameter, Term body) =>
             new FunctionTerm(parameter, body);
 
         public static ApplyTerm Apply(Term function, Term argument) =>

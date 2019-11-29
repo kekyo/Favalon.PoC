@@ -9,7 +9,7 @@ namespace Favalon.Terms
         public void Function()
         {
             var actual = Term.Function(
-                Term.Identity("x"),
+                Term.BoundIdentity("x"),
                 Term.Identity("y"));
 
             Assert.AreEqual("x -> y", actual.Readable);
@@ -19,7 +19,7 @@ namespace Favalon.Terms
         public void ReplaceAtBody()
         {
             var f = Term.Function(
-                Term.Identity("x"),
+                Term.BoundIdentity("x"),
                 Term.Identity("y"));
 
             var environment = Environment.Create();
@@ -32,7 +32,7 @@ namespace Favalon.Terms
         public void ReplaceNotApplicableAtParameterIsVariable()
         {
             var f = Term.Function(
-                Term.Identity("x"),
+                Term.BoundIdentity("x"),
                 Term.Identity("y"));
 
             var environment = Environment.Create();
@@ -45,7 +45,7 @@ namespace Favalon.Terms
         public void Reduce()
         {
             var f = Term.Function(
-                Term.Identity("x"),
+                Term.BoundIdentity("x"),
                 Term.Identity("y"));
 
             var environment = Environment.Create();
@@ -58,14 +58,14 @@ namespace Favalon.Terms
         public void Call()
         {
             var f = Term.Function(
-                Term.Identity("x"),
+                Term.BoundIdentity("x"),
                 Term.Function(
-                    Term.Identity("y"),
+                    Term.BoundIdentity("y"),
                     Term.Apply(
                         Term.Identity("x"),
                         Term.Identity("y"))));
             var arg = Term.Function(
-                Term.Identity("z"),
+                Term.BoundIdentity("z"),
                 Term.Identity("z"));
 
             var environment = Environment.Create();

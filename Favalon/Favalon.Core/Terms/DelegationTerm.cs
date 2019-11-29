@@ -3,38 +3,40 @@ using System;
 
 namespace Favalon.Terms
 {
-    public sealed class InterpretTerm :
-        CallableTerm, IEquatable<InterpretTerm>
+    public sealed class DelegationTerm<TParameterTerm> :
+        CallableTerm, IEquatable<DelegationTerm<TParameterTerm>>
+        where TParameterTerm : Term
     {
         public new readonly IdentityTerm Identity;
 
-        private readonly Func<Context, Term, Term> interpreter;
+        private readonly Func<Context, TParameterTerm, Term> interpreter;
 
-        internal InterpretTerm(string identity, string parameter,
-            Func<Context, Term, Term> interpreter)
+        internal DelegationTerm(string identity, string parameter,
+            Func<Context, TParameterTerm, Term> interpreter)
         {
             this.Identity = new IdentityTerm(identity);
-            this.Parameter = new IdentityTerm(parameter);
+            this.Parameter = new BoundIdentityTerm(parameter/* TODO: , new ClrTypeTerm(typeof(TParameterType)) */);
             this.interpreter = interpreter;
         }
 
-        public override IdentityTerm Parameter { get; }
+        public override BoundIdentityTerm Parameter { get; }
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             this;
 
         protected internal override Term VisitCall(Context context, Term argument) =>
-            interpreter(context, argument);
+            // Will cause failure when argument isn't TParameterTerm
+            interpreter(context, (TParameterTerm)argument);
 
         public override int GetHashCode() =>
             this.Identity.GetHashCode() ^
             this.Parameter.GetHashCode();
 
-        public bool Equals(InterpretTerm? other) =>
+        public bool Equals(DelegationTerm<TParameterTerm>? other) =>
             other?.Identity.Equals(this.Identity) ?? false;
 
         public override bool Equals(object obj) =>
-            this.Equals(obj as InterpretTerm);
+            this.Equals(obj as DelegationTerm<TParameterTerm>);
 
         protected internal override string VisitTermString(bool includeTermName) =>
             $"{this.Identity.ToString(includeTermName)} {this.Parameter.ToString(includeTermName)} {this.interpreter.GetIdentity()}";

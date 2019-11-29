@@ -73,7 +73,7 @@ namespace Favalon.Terms
             // (-> x x) y
             var a = Term.Apply(
                 Term.Function(
-                    Term.Identity("x"),
+                    Term.BoundIdentity("x"),
                     Term.Identity("x")),
                 Term.Identity("y"));
 

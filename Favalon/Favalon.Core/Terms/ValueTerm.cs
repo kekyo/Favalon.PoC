@@ -20,9 +20,6 @@ namespace Favalon.Terms
         protected internal override Term VisitReduce(Context context) =>
             this;
 
-        protected internal override Term VisitInfer(Context context) =>
-            this;
-
         public override int GetHashCode() =>
             this.Constant?.GetHashCode() ?? 0;
 

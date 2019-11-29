@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Favalon.Terms
 {
@@ -14,15 +15,15 @@ namespace Favalon.Terms
                 replacement :
                 this;
 
-        protected internal override sealed Term VisitReduce(Context context) =>
+        protected internal override Term VisitReduce(Context context) =>
             context.LookupBoundTerms(this.Name) is BoundTermInformation[] terms ?
                 terms[0].Term :
                 this;
 
-        protected internal override sealed Term VisitInfer(Context context) =>
+        protected internal override Term[] VisitInfer(Context context) =>
             context.LookupBoundTerms(this.Name) is BoundTermInformation[] terms ?
-                terms[0].Term :
-                this;
+                terms.Select(term => term.Term).ToArray() :
+                new[] { this };
 
         public BoundIdentityTerm ToBoundIdentity() =>
             new BoundIdentityTerm(this.Name);

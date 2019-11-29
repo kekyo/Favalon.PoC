@@ -15,8 +15,8 @@ namespace Favalon.Terms
 
         protected internal abstract Term VisitReduce(Context context);
 
-        protected internal virtual Term VisitInfer(Context context) =>
-            this; // TODO:
+        protected internal virtual Term[] VisitInfer(Context context) =>
+            new[] { this }; // TODO:
 
         protected internal abstract string VisitTermString(bool includeTermName);
 

@@ -150,7 +150,7 @@ namespace Favalon
         public Term Call(CallableTerm term, Term argument) =>
             term.VisitCall(this, argument);
 
-        public Term Infer(Term term) =>
+        public Term[] Infer(Term term) =>
             term.VisitInfer(this);
     }
 }

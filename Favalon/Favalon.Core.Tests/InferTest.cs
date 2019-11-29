@@ -1,6 +1,7 @@
 ﻿using Favalon.Terms;
 using NUnit.Framework;
 using System;
+using System.Linq;
 
 namespace Favalon
 {
@@ -14,7 +15,7 @@ namespace Favalon
             var term = Term.Constant(123);
 
             var environment = Environment.Create();
-            var actual = environment.Infer(term);
+            var actual = environment.Infer(term).Single();
 
             Assert.AreEqual("System.Int32", actual.HigherOrder.Readable);
         }
@@ -26,7 +27,7 @@ namespace Favalon
             var term = Term.Identity("System.Int32.Parse");
 
             var environment = Environment.Create();
-            var actual = environment.Infer(term);
+            var actual = environment.Infer(term).Single();
 
             Assert.AreEqual("System.Int32", actual.HigherOrder.Readable);
         }
@@ -39,7 +40,7 @@ namespace Favalon
             var term = Term.Identity("System.Int32");
 
             var environment = Environment.Create();
-            var actual = environment.Infer(term);
+            var actual = environment.Infer(term).Single();
 
             var expected = Term.Constant(typeof(int));
 
@@ -61,7 +62,7 @@ namespace Favalon
             var environment = Environment.Create();
             environment.AddBoundTermFromType(typeof(TypeWithConstructor));
 
-            var actual = environment.Infer(term);
+            var actual = environment.Infer(term).Single();
 
             var expected = Term.ValueConstructor(typeof(TypeWithConstructor));
 
@@ -81,7 +82,7 @@ namespace Favalon
             var environment = Environment.Create();
             environment.AddBoundTermFromType(typeof(GenericTypeDefinition<>));
 
-            var actual = environment.Infer(term);
+            var actual = environment.Infer(term).Single();
 
             var expected = Term.TypeConstructor(typeof(GenericTypeDefinition<>));
 

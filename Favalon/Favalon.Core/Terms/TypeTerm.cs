@@ -6,7 +6,7 @@ namespace Favalon.Terms
     public sealed class TypeTerm :
         ValueTerm
     {
-        public new readonly Type Type;
+        public readonly Type Type;
 
         internal TypeTerm(Type type) =>
             this.Type = type;

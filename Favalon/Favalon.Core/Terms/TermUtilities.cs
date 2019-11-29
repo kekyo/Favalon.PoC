@@ -80,7 +80,7 @@ namespace Favalon.Terms
             foreach (var constructor in type.GetConstructors().
                 Where(constructor => constructor.IsPublic && !constructor.IsStatic && !constructor.IsGenericMethod && constructor.GetParameters().Length == 1))
             {
-                AddBoundTermFromMethod(boundTerms, constructor.DeclaringType.GetFullName(false), constructor);
+                AddBoundTermFromMethod(boundTerms, identity, constructor);
             }
 
             // Static methods

@@ -1,5 +1,6 @@
 ﻿using Favalon.Terms;
 using NUnit.Framework;
+using System;
 
 namespace Favalon
 {
@@ -40,6 +41,26 @@ namespace Favalon
             var actual = environment.Infer(term);
 
             var expected = Term.Constant(typeof(int));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        public sealed class GenericTypeNotConstructor<T>
+        {
+        }
+
+        [Test]
+        public void InferGenericType()
+        {
+            // System.Lazy<T>
+            var term = Term.Identity("Favalon.InferTest.GenericTypeNotConstructor");
+
+            var environment = Environment.Create();
+            environment.AddBoundTermFromType(typeof(GenericTypeNotConstructor<>));
+
+            var actual = environment.Infer(term);
+
+            var expected = Term.Constant(typeof(GenericTypeNotConstructor<>));
 
             Assert.AreEqual(expected, actual);
         }

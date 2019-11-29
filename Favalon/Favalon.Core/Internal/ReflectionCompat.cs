@@ -81,6 +81,10 @@ namespace Favalon.Internal
             member is TypeInfo typeInfo ? typeInfo.AsType() : null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Type? AsType(this Type type) =>
+            type;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPublic(this Type type) =>
             type.GetTypeInfo().IsPublic;
 
@@ -91,6 +95,10 @@ namespace Favalon.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsGenericType(this Type type) =>
             type.GetTypeInfo().IsGenericType;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ConstructorInfo[] GetConstructors(this Type type) =>
+            type.GetTypeInfo().DeclaredConstructors.ToArray();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static MethodInfo[] GetMethods(this Type type) =>

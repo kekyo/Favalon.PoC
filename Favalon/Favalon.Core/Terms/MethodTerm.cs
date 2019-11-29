@@ -8,13 +8,13 @@ namespace Favalon.Terms
     public sealed class MethodTerm :
         CallableTerm, IEquatable<MethodTerm>
     {
-        public new readonly MethodInfo Method;
+        public new readonly MethodBase Method;
 
-        internal MethodTerm(MethodInfo method) =>
+        internal MethodTerm(MethodBase method) =>
             this.Method = method;
 
         public override Term HigherOrder =>
-            new TypeTerm(this.Method.ReturnType);
+            new TypeTerm(this.Method is MethodInfo mi ? mi.ReturnType : this.Method.DeclaringType);
 
         public override BoundIdentityTerm Parameter =>
             new BoundIdentityTerm(this.Method.GetParameters().Single().Name  /* TODO: , this.Method.GetParameters().Single().ParameterType */);
@@ -40,9 +40,11 @@ namespace Favalon.Terms
             this.Equals(obj as MethodTerm);
 
         protected internal override string VisitTermString(bool includeTermName) =>
-            $"{this.Method.GetFullName()}({this.Parameter.ToString(includeTermName)})";
+            this.Method is MethodInfo ?
+                $"{this.Method.GetFullName()}({this.Parameter.ToString(includeTermName)})" :
+                $"{this.Method.DeclaringType.GetFullName()}({this.Parameter.ToString(includeTermName)})";
 
-        public void Deconstruct(out MethodInfo method) =>
+        public void Deconstruct(out MethodBase method) =>
             method = this.Method;
     }
 }

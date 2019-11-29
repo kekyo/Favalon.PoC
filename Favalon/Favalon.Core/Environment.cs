@@ -1,5 +1,6 @@
 ﻿using Favalon.Internal;
 using Favalon.Terms;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -39,7 +40,10 @@ namespace Favalon
         }
 
         public void AddBoundTermFromMethod(MethodInfo method) =>
-            ReflectionUtilities.InternalAddBoundTermFromMethod(boundTerms, method);
+            ReflectionUtilities.InternalAddBoundTermFromMethod(boundTerms, method.GetFullName(), method);
+
+        public void AddBoundTermFromType(Type type) =>
+            ReflectionUtilities.InternalAddBoundTermFromType(boundTerms, type);
 
         public void AddBoundTermsFromAssembly(Assembly assembly) =>
             ReflectionUtilities.InternalAddBoundTermsFromAssembly(boundTerms, assembly);

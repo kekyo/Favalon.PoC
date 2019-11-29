@@ -7,11 +7,6 @@ namespace Favalon.Internal
 {
     internal static partial class ReflectionUtilities
     {
-        public static IEnumerable<MethodInfo> EnumerableAllPublicStaticMethods(this Assembly assembly) =>
-            assembly.GetTypes().
-            Where(type => (type.IsPublic() || type.IsNestedPublic()) && !type.IsGenericType()).
-            SelectMany(type => type.GetMethods().Where(method => method.IsPublic && method.IsStatic && !method.IsGenericMethod));
-
         public static string GetFullName(this MemberInfo member)
         {
             var parentNames = (member.DeclaringType as Type)?.GetFullName() ??

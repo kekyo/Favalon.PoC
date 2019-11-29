@@ -1,7 +1,6 @@
 ﻿using Favalon.Internal;
 using Favalon.Terms;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Favalon
@@ -13,7 +12,7 @@ namespace Favalon
 
         static Environment()
         {
-            InternalAddBoundTermsFromAssembly(defaultBoundTerms, typeof(object).GetAssembly());
+            ReflectionUtilities.InternalAddBoundTermsFromAssembly(defaultBoundTerms, typeof(object).GetAssembly());
 
             // operator arrow (lambda constructor)
             // -> a b
@@ -39,45 +38,11 @@ namespace Favalon
                                 new FunctionTerm(((IdentityTerm)a.VisitReduce(ic)).ToBoundIdentity(), b.VisitReduce(oc)))));
         }
 
-        private static void InternalAddBoundTermFromMethod(
-            ManagedDictionary<string, List<BoundTermInformation>> boundTerms,
-            MethodInfo method)
-        {
-            // TODO:
-            //   1. construct nested term from multiple parameter methods.
-            //   2. construct specialized term from instance method (arg0 is this parameter)
-            //   3. construct specialized term from empty parameter methods (uses unit?)
-            //   4. construct specialized term from constructors.
-            //   5. construct specialized term for cast operator.
-            //   6. construct specialized term from operator methods.
-
-            var identity = method.GetFullName();
-            InternalAddBoundTerm(boundTerms,
-                identity,
-                BoundTermNotations.Prefix, BoundTermAssociatives.LeftToRight, BoundTermPrecedences.Method,
-                new MethodTerm(method));
-        }
-
-        private static void InternalAddBoundTermsFromAssembly(
-            ManagedDictionary<string, List<BoundTermInformation>> boundTerms,
-            Assembly assembly)
-        {
-            foreach (var method in
-                assembly.
-                EnumerableAllPublicStaticMethods().
-                Where(method => method.GetParameters().Length == 1).
-                GroupBy(method => method.GetFullName()).
-                SelectMany(g => g))
-            {
-                InternalAddBoundTermFromMethod(boundTerms, method);
-            }
-        }
-
         public void AddBoundTermFromMethod(MethodInfo method) =>
-            InternalAddBoundTermFromMethod(boundTerms, method);
+            ReflectionUtilities.InternalAddBoundTermFromMethod(boundTerms, method);
 
         public void AddBoundTermsFromAssembly(Assembly assembly) =>
-            InternalAddBoundTermsFromAssembly(boundTerms, assembly);
+            ReflectionUtilities.InternalAddBoundTermsFromAssembly(boundTerms, assembly);
 
         private Environment(ManagedDictionary<string, List<BoundTermInformation>> boundTerms) : base(boundTerms)
         { }

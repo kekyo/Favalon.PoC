@@ -14,7 +14,7 @@ namespace Favalon.Terms
             this.Method = method;
 
         public override Term HigherOrder =>
-            new ClrTypeTerm(this.Method.ReturnType);
+            new TypeTerm(this.Method.ReturnType);
 
         public override BoundIdentityTerm Parameter =>
             new BoundIdentityTerm(this.Method.GetParameters().Single().Name  /* TODO: , this.Method.GetParameters().Single().ParameterType */);

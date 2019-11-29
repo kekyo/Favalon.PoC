@@ -3,18 +3,18 @@ using System;
 
 namespace Favalon.Terms
 {
-    public sealed class ClrTypeTerm :
+    public sealed class TypeTerm :
         ValueTerm
     {
-        public readonly Type ClrType;
+        public new readonly Type Type;
 
-        internal ClrTypeTerm(Type type) =>
-            this.ClrType = type;
+        internal TypeTerm(Type type) =>
+            this.Type = type;
 
         public override object Constant =>
-            this.ClrType;
+            this.Type;
 
         protected internal override string VisitTermString(bool includeTermName) =>
-            this.ClrType.GetFullName();
+            this.Type.GetFullName();
     }
 }

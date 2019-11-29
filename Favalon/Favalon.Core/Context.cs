@@ -31,7 +31,7 @@ namespace Favalon
     {
         public readonly BoundTermNotations Notation;
         public readonly BoundTermAssociatives Associative;
-        public readonly BoundTermPrecedences Precedence;
+        public readonly BoundTermPrecedences? Precedence;
         public readonly Term Term;
 
 #if NET45 || NETSTANDARD1_0
@@ -40,7 +40,7 @@ namespace Favalon
         internal BoundTermInformation(
             BoundTermNotations notation,
             BoundTermAssociatives associative,
-            BoundTermPrecedences precedence,
+            BoundTermPrecedences? precedence,
             Term term)
         {
             this.Notation = notation;
@@ -55,7 +55,7 @@ namespace Favalon
         public void Deconstruct(
             out BoundTermNotations notation,
             out BoundTermAssociatives associative,
-            out BoundTermPrecedences precedence,
+            out BoundTermPrecedences? precedence,
             out Term term)
         {
             notation = this.Notation;
@@ -75,12 +75,12 @@ namespace Favalon
         internal Context Clone() =>
             new Context(boundTerms.Clone());
 
-        private protected static void InternalAddBoundTerm(
+        internal static void InternalAddBoundTerm(
             ManagedDictionary<string, List<BoundTermInformation>> boundTerms,
             string identity,
             BoundTermNotations notation,
             BoundTermAssociatives associative,
-            BoundTermPrecedences precedence,
+            BoundTermPrecedences? precedence,
             Term term)
         {
             if (!boundTerms.TryGetValue(identity, out var terms))
@@ -103,7 +103,7 @@ namespace Favalon
             string identity,
             BoundTermNotations notation,
             BoundTermAssociatives associative,
-            BoundTermPrecedences precedence,
+            BoundTermPrecedences? precedence,
             Term term) =>
             InternalAddBoundTerm(boundTerms, identity, notation, associative, precedence, term);
 
@@ -149,5 +149,8 @@ namespace Favalon
 
         public Term Call(CallableTerm term, Term argument) =>
             term.VisitCall(this, argument);
+
+        public Term Infer(Term term) =>
+            term.VisitInfer(this);
     }
 }

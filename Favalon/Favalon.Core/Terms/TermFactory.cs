@@ -16,14 +16,18 @@ namespace Favalon.Terms
 
         public static ApplyTerm Apply(Term function, Term argument) =>
             new ApplyTerm(function, argument);
- 
+
+        public static TypeTerm Type(Type type) =>
+            new TypeTerm(type);
+
         public static MethodTerm Method(MethodInfo method) =>
             new MethodTerm(method);
 
-        public static ValueTerm Constant(object constant) =>
+        public static Term Constant(object constant) =>
             constant switch
             {
-                Type type => new ClrTypeTerm(type),
+                Type type => new TypeTerm(type),
+                MethodInfo method => new MethodTerm(method),
                 _ => new ConstantTerm(constant)
             };
     }

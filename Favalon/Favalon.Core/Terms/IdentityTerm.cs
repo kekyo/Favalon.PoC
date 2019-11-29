@@ -19,6 +19,11 @@ namespace Favalon.Terms
                 terms[0].Term :
                 this;
 
+        protected internal override sealed Term VisitInfer(Context context) =>
+            context.LookupBoundTerms(this.Name) is BoundTermInformation[] terms ?
+                terms[0].Term :
+                this;
+
         public BoundIdentityTerm ToBoundIdentity() =>
             new BoundIdentityTerm(this.Name);
     }

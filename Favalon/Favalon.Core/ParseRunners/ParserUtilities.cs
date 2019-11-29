@@ -47,42 +47,54 @@ namespace Favalon.ParseRunners
         {
             if (runnerContext.CurrentContext.LookupBoundTerms(identity.Identity) is BoundTermInformation[] terms)
             {
-                // Not first time
-                if (runnerContext.CurrentPrecedence is BoundTermPrecedences precedence)
+                // This term is given precedence
+                if (terms[0].Precedence is BoundTermPrecedences termPrecedence)
                 {
-                    // Greater than current precedence
-                    if (terms[0].Precedence > precedence)
+                    // Not first time
+                    if (runnerContext.CurrentPrecedence is BoundTermPrecedences precedence)
                     {
-                        // (Dodge SavedTerm)
-                        if (runnerContext.CurrentTerm is ApplyTerm(Term left, Term right))
+                        // Greater than current precedence
+                        if (termPrecedence > precedence)
                         {
-                            // Swap (unapply) and begin new implicit scope
-                            // "+ abc def   *" ==> "+ abc (def   *"
-                            //  left  right id      left  (right id
-                            runnerContext.SetTerm(left);
-                            runnerContext.PushScope();
+                            // (Transpose SavedTerm)
+                            if (runnerContext.CurrentTerm is ApplyTerm(Term left, Term right))
+                            {
+                                // Swap (unapply) and begin new implicit scope
+                                // "+ abc def   *" ==> "+ abc (def   *"
+                                //  left  right id      left  (right id
+                                runnerContext.SetTerm(left);
+                                runnerContext.PushScope();
 
-                            // Set first term from right
-                            runnerContext.SetTerm(right);
+                                // Set first term from right
+                                runnerContext.SetTerm(right);
+                            }
+                            else
+                            {
+                                // Begin new implicit scope
+                                // "+ *" ==> "+ (*"
+                                runnerContext.PushScope();
+                            }
+
+                            // Update precedence
+                            runnerContext.SetPrecedence(termPrecedence);
                         }
-                        else
+                        // Lesser than current precedence
+                        else if (termPrecedence < precedence)
                         {
-                            // Begin new implicit scope
-                            // "+ *" ==> "+ (*"
-                            runnerContext.PushScope();
+                            // Leave one implicit scope 
+                            // And disable deconstruct last ApplyTerm if didn't scope out
+                            LeaveOneImplicitScope(runnerContext);
+
+                            // Update precedence
+                            runnerContext.SetPrecedence(termPrecedence);
                         }
                     }
-                    // Lesser than current precedence
-                    else if (terms[0].Precedence < precedence)
+                    else
                     {
-                        // Leave one implicit scope 
-                        // And disable deconstruct last ApplyTerm if didn't scope out
-                        LeaveOneImplicitScope(runnerContext);
+                        // Update precedence
+                        runnerContext.SetPrecedence(termPrecedence);
                     }
                 }
-
-                // Update precedence
-                runnerContext.SetPrecedence(terms[0].Precedence);
 
                 // Is this identity infix?
                 if (terms[0].Notation == BoundTermNotations.Infix)

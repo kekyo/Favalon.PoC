@@ -12,7 +12,7 @@ namespace Favalon.Terms
         public abstract new object Constant { get; }
 
         public override Term HigherOrder =>
-            new ClrTypeTerm(this.Constant.GetType());
+            new TypeTerm(this.Constant.GetType());
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
             this;

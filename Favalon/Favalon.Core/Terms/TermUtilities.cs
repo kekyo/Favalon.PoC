@@ -26,7 +26,7 @@ namespace Favalon.Terms
                         $"Closure(-> {a})", "b",  // b:'3
                         (oc, b) =>
                             new FunctionTerm(((IdentityTerm)a.VisitReduce(ic)).ToBoundIdentity(), b.VisitReduce(oc))));
-
+        
         public static Term CreateTypeConstructorTerm(Type gtd) =>
             new DelegationTerm<Term>(
                 gtd.GetFullName(false),
@@ -61,10 +61,10 @@ namespace Favalon.Terms
             var identity = type.GetFullName(false);
 
             // The type
-            Context.AddBoundTerm(boundTerms,
-                identity,
-                BoundTermNotations.Prefix, BoundTermAssociatives.LeftToRight, null,
-                new TypeTerm(type));
+            //Context.AddBoundTerm(boundTerms,
+            //    identity,
+            //    BoundTermNotations.Prefix, BoundTermAssociatives.LeftToRight, null,
+            //    new TypeTerm(type));
 
             // Type constructor
             if (type.IsGenericTypeDefinition() && type.GetGenericArguments() is Type[] types && types.Length == 1)

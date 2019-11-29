@@ -75,7 +75,7 @@ namespace Favalon
         internal Context Clone() =>
             new Context(boundTerms.Clone());
 
-        internal static void InternalAddBoundTerm(
+        internal static void AddBoundTerm(
             ManagedDictionary<string, List<BoundTermInformation>> boundTerms,
             string identity,
             BoundTermNotations notation,
@@ -97,7 +97,7 @@ namespace Favalon
             BoundTermAssociatives associative,
             int precedence,
             Term term) =>
-            InternalAddBoundTerm(boundTerms, identity, notation, associative, (BoundTermPrecedences)precedence, term);
+            AddBoundTerm(boundTerms, identity, notation, associative, (BoundTermPrecedences)precedence, term);
 
         public void AddBoundTerm(
             string identity,
@@ -105,7 +105,7 @@ namespace Favalon
             BoundTermAssociatives associative,
             BoundTermPrecedences? precedence,
             Term term) =>
-            InternalAddBoundTerm(boundTerms, identity, notation, associative, precedence, term);
+            AddBoundTerm(boundTerms, identity, notation, associative, precedence, term);
 
         public BoundTermInformation[]? LookupBoundTerms(string identity) =>
             boundTerms.TryGetValue(identity, out var terms) ? terms.ToArray() : null;

@@ -13,40 +13,25 @@ namespace Favalon
 
         static Environment()
         {
-            ReflectionUtilities.InternalAddBoundTermsFromAssembly(defaultBoundTerms, typeof(object).GetAssembly());
+            TermUtilities.AddBoundTermsFromAssembly(defaultBoundTerms, typeof(object).GetAssembly());
 
-            // operator arrow (lambda constructor)
-            // -> a b
-            // --------------
-            // f  a b
-            // ((f:'1->'2 a:'1):'2 b:'3):'4
-            // ((f:'1->'2 a:'1):'3->'4 b:'3):'4
-            // ((f:'1->'3->'4 a:'1):'3->'4 b:'3):'4
-            InternalAddBoundTerm(
+            AddBoundTerm(
                 defaultBoundTerms,
                 "->",
                 BoundTermNotations.Infix,
                 BoundTermAssociatives.RightToLeft,
                 BoundTermPrecedences.Morphism,
-                // f:'1->'3->'4
-                new DelegationTerm<IdentityTerm>(
-                    "->", "a",  // a:'1
-                    (ic, a) =>
-                        // '3->'4
-                        new DelegationTerm<Term>(
-                            $"Closure(-> {a})", "b",  // b:'3
-                            (oc, b) =>
-                                new FunctionTerm(((IdentityTerm)a.VisitReduce(ic)).ToBoundIdentity(), b.VisitReduce(oc)))));
+                TermUtilities.LambdaArrowOperator);
         }
 
         public void AddBoundTermFromMethod(MethodInfo method) =>
-            ReflectionUtilities.InternalAddBoundTermFromMethod(boundTerms, method.GetFullName(), method);
+            TermUtilities.AddBoundTermFromMethod(boundTerms, method.GetFullName(), method);
 
         public void AddBoundTermFromType(Type type) =>
-            ReflectionUtilities.InternalAddBoundTermFromType(boundTerms, type);
+            TermUtilities.AddBoundTermFromType(boundTerms, type);
 
         public void AddBoundTermsFromAssembly(Assembly assembly) =>
-            ReflectionUtilities.InternalAddBoundTermsFromAssembly(boundTerms, assembly);
+            TermUtilities.AddBoundTermsFromAssembly(boundTerms, assembly);
 
         private Environment(ManagedDictionary<string, List<BoundTermInformation>> boundTerms) : base(boundTerms)
         { }

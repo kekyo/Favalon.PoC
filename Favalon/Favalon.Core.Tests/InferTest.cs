@@ -52,7 +52,7 @@ namespace Favalon
         [Test]
         public void InferGenericType()
         {
-            // System.Lazy<T>
+            // GenericTypeNotConstructor<T>
             var term = Term.Identity("Favalon.InferTest.GenericTypeNotConstructor");
 
             var environment = Environment.Create();
@@ -60,7 +60,23 @@ namespace Favalon
 
             var actual = environment.Infer(term);
 
-            var expected = Term.Constant(typeof(GenericTypeNotConstructor<>));
+            var expected = Term.Type(typeof(GenericTypeNotConstructor<>));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void InferTypeConstructor()
+        {
+            // GenericTypeNotConstructor<T>
+            var term = Term.Identity("Favalon.InferTest.GenericTypeNotConstructor");
+
+            var environment = Environment.Create();
+            environment.AddBoundTermFromType(typeof(GenericTypeNotConstructor<>));
+
+            var actual = environment.Infer(term);
+
+            var expected = Term.TypeConstructor(typeof(GenericTypeNotConstructor<>));
 
             Assert.AreEqual(expected, actual);
         }

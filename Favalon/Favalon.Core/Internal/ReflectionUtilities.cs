@@ -4,11 +4,8 @@ using System.Reflection;
 
 namespace Favalon.Internal
 {
-    internal static partial class ReflectionUtilities
+    internal static class ReflectionUtilities
     {
-        private static string Append(this string lhs, string rhs) =>
-            lhs + rhs;
-
         public static string GetFullName(this MemberInfo member, bool containsGenericSignature = true)
         {
             var type = member.AsType();
@@ -17,8 +14,8 @@ namespace Favalon.Internal
                 return type!.Name;
             }
 
-            var parentNames = type?.DeclaringType?.GetFullName().Append(".") ??
-                member.AsType()?.Namespace.Append(".") ??
+            var parentNames = member.DeclaringType?.GetFullName().Append(".") ??
+                type?.Namespace.Append(".") ??
                 string.Empty;
             var name = member.Name.IndexOf('`') switch
             {

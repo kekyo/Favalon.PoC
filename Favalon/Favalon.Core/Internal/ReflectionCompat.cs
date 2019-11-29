@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace Favalon.Internal
+namespace System.Reflection
 {
-    partial class ReflectionUtilities
+    public static class ReflectionCompat
     {
 #if NET35 || NET40 || NET45
 #if NET45
@@ -53,14 +52,19 @@ namespace Favalon.Internal
 #if NET45
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static void Deconstruct(this MemberInfo member, out Type? type) =>
-            type = member as Type;
+        public static bool IsGenericTypeDefinition(this Type type) =>
+            type.IsGenericTypeDefinition;
 
 #if NET45
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+        public static void Deconstruct(this MemberInfo member, out Type? type) =>
+            type = member as Type;
+
+#if !NET45
         public static MethodInfo GetMethodInfo(this Delegate dlg) =>
             dlg.Method;
+#endif
 
 #else   ///////////////////////////////////////////////////////////////
 
@@ -103,6 +107,10 @@ namespace Favalon.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static MethodInfo[] GetMethods(this Type type) =>
             type.GetTypeInfo().DeclaredMethods.ToArray();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsGenericTypeDefinition(this Type type) =>
+            type.GetTypeInfo().IsGenericTypeDefinition;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Type[] GetGenericArguments(this Type type) =>

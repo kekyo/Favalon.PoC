@@ -85,5 +85,11 @@ namespace Favalon.Internal
         public static string Join(string separator, IEnumerable<string> values) =>
             string.Join(separator, values);
 #endif
+
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static string Append(this string lhs, string rhs) =>
+            lhs + rhs;
     }
 }

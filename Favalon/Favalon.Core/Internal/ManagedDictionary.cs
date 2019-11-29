@@ -8,7 +8,11 @@ namespace Favalon.Internal
     internal sealed class ManagedDictionary<TKey, TValue>
     {
         private readonly ManagedDictionary<TKey, TValue>? parent;
+#if DEBUG
+        private SortedDictionary<TKey, TValue>? dictionary;
+#else
         private Dictionary<TKey, TValue>? dictionary;
+#endif
 
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -32,8 +36,13 @@ namespace Favalon.Internal
                 ManagedDictionary<TKey, TValue>? current = this;
                 do
                 {
+#if DEBUG
+                    if (current.dictionary is SortedDictionary<TKey, TValue> d &&
+                        d.TryGetValue(key, out var v))
+#else
                     if (current.dictionary is Dictionary<TKey, TValue> d &&
                         d.TryGetValue(key, out var v))
+#endif
                     {
                         return v;
                     }
@@ -49,7 +58,11 @@ namespace Favalon.Internal
             {
                 if (dictionary == null)
                 {
+#if DEBUG
+                    dictionary = new SortedDictionary<TKey, TValue>();
+#else
                     dictionary = new Dictionary<TKey, TValue>();
+#endif
                 }
                 dictionary[key] = value;
             }
@@ -97,8 +110,13 @@ namespace Favalon.Internal
                 ManagedDictionary<TKey, TValue>? current = this;
                 do
                 {
+#if DEBUG
+                    if (current.dictionary is SortedDictionary<TKey, TValue> d &&
+                        d.ContainsKey(key))
+#else
                     if (current.dictionary is Dictionary<TKey, TValue> d &&
                         d.ContainsKey(key))
+#endif
                     {
                         return true;
                     }
@@ -117,8 +135,13 @@ namespace Favalon.Internal
             ManagedDictionary<TKey, TValue>? current = this;
             do
             {
+#if DEBUG
+                if (current.dictionary is SortedDictionary<TKey, TValue> d &&
+                    d.TryGetValue(key, out value))
+#else
                 if (current.dictionary is Dictionary<TKey, TValue> d &&
                     d.TryGetValue(key, out value))
+#endif
                 {
                     return true;
                 }

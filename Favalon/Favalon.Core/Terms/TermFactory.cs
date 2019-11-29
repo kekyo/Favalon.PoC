@@ -19,6 +19,11 @@ namespace Favalon.Terms
 
         public static TypeTerm Type(Type type) =>
             new TypeTerm(type);
+        public static TypeTerm Type<T>() =>
+            new TypeTerm(typeof(T));
+
+        public static Term TypeConstructor(Type gtd) =>
+            TermUtilities.CreateTypeConstructorTerm(gtd);
 
         public static MethodTerm Method(MethodInfo method) =>
             new MethodTerm(method);
@@ -27,7 +32,7 @@ namespace Favalon.Terms
             constant switch
             {
                 Type type => new TypeTerm(type),
-                MethodInfo method => new MethodTerm(method),
+                MethodBase method => new MethodTerm(method),
                 _ => new ConstantTerm(constant)
             };
     }

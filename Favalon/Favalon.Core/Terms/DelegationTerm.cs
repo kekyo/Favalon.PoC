@@ -1,5 +1,6 @@
 ﻿using Favalon.Internal;
 using System;
+using System.Reflection;
 
 namespace Favalon.Terms
 {
@@ -9,14 +10,14 @@ namespace Favalon.Terms
     {
         public new readonly IdentityTerm Identity;
 
-        private readonly Func<Context, TParameterTerm, Term> interpreter;
+        private readonly Func<Context, TParameterTerm, Term> runner;
 
         internal DelegationTerm(string identity, string parameter,
-            Func<Context, TParameterTerm, Term> interpreter)
+            Func<Context, TParameterTerm, Term> runner)
         {
             this.Identity = new IdentityTerm(identity);
             this.Parameter = new BoundIdentityTerm(parameter/* TODO: , new ClrTypeTerm(typeof(TParameterType)) */);
-            this.interpreter = interpreter;
+            this.runner = runner;
         }
 
         public override BoundIdentityTerm Parameter { get; }
@@ -26,20 +27,19 @@ namespace Favalon.Terms
 
         protected internal override Term VisitCall(Context context, Term argument) =>
             // Will cause failure when argument isn't TParameterTerm
-            interpreter(context, (TParameterTerm)argument);
+            runner(context, (TParameterTerm)argument);
 
         public override int GetHashCode() =>
-            this.Identity.GetHashCode() ^
-            this.Parameter.GetHashCode();
+            this.runner.GetMethodInfo().GetHashCode();
 
         public bool Equals(DelegationTerm<TParameterTerm>? other) =>
-            other?.Identity.Equals(this.Identity) ?? false;
+            (other?.runner.GetMethodInfo().Equals(this.runner.GetMethodInfo()) ?? false);
 
         public override bool Equals(object obj) =>
             this.Equals(obj as DelegationTerm<TParameterTerm>);
 
         protected internal override string VisitTermString(bool includeTermName) =>
-            $"{this.Identity.ToString(includeTermName)} {this.Parameter.ToString(includeTermName)} {this.interpreter.GetIdentity()}";
+            $"{this.Identity.ToString(includeTermName)} {this.Parameter.ToString(includeTermName)} {this.runner.GetIdentity()}";
 
         public void Deconstruct(out string identity) =>
             identity = this.Identity.Name;

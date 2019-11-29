@@ -25,42 +25,84 @@ namespace Favalon.Internal
 #endif
         public static Type? AsType(this MemberInfo member) =>
             member as Type;
-#else
-#if NETSTANDARD1_0
+
+#if NET45
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+        public static bool IsPublic(this Type type) =>
+            type.IsPublic;
+
+#if NET45
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static bool IsNestedPublic(this Type type) =>
+            type.IsNestedPublic;
+
+#if NET45
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static bool IsGenericType(this Type type) =>
+            type.IsGenericType;
+
+#if NET45
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static MethodInfo[] GetMethods(this Type type) =>
+            type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+
+#if NET45
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static void Deconstruct(this MemberInfo member, out Type? type) =>
+            type = member as Type;
+
+#if NET45
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static MethodInfo GetMethodInfo(this Delegate dlg) =>
+            dlg.Method;
+
+#else   ///////////////////////////////////////////////////////////////
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Assembly GetAssembly(this Type type) =>
-            type.GetTypeInfo().Assembly;
+            type.GetAssembly();
 
-#if NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static TypeInfo[] GetTypes(this Assembly assembly) =>
-            assembly.DefinedTypes.ToArray();
+        public static Type[] GetTypes(this Assembly assembly) =>
+            assembly.DefinedTypes.Select(typeInfo => typeInfo.AsType()).ToArray();
 
-#if NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static MethodInfo[] GetMethods(this TypeInfo type) =>
-            type.DeclaredMethods.ToArray();
-
-#if NETSTANDARD1_0
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         public static MemberInfo AsMemberInfo(this Type type) =>
             type.GetTypeInfo();
 
-#if NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static TypeInfo? AsType(this MemberInfo member) =>
-            member as TypeInfo;
-#endif
+        public static Type? AsType(this MemberInfo member) =>
+            member is TypeInfo typeInfo ? typeInfo.AsType() : null;
 
-#if NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Type[] GetGenericArguments(this TypeInfo type) =>
+        public static bool IsPublic(this Type type) =>
+            type.GetTypeInfo().IsPublic;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNestedPublic(this Type type) =>
+            type.GetTypeInfo().IsNestedPublic;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsGenericType(this Type type) =>
+            type.GetTypeInfo().IsGenericType;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static MethodInfo[] GetMethods(this Type type) =>
+            type.GetTypeInfo().DeclaredMethods.ToArray();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Type[] GetGenericArguments(this Type type) =>
             type.GenericTypeArguments;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Deconstruct(this MemberInfo member, out Type? type) =>
+            type = member.AsType();
 #endif
     }
 }

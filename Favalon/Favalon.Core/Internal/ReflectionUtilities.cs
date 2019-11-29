@@ -9,7 +9,7 @@ namespace Favalon.Internal
     {
         public static IEnumerable<MethodInfo> EnumerableAllPublicStaticMethods(this Assembly assembly) =>
             assembly.GetTypes().
-            Where(type => (type.IsPublic || type.IsNestedPublic) && !type.IsGenericType).
+            Where(type => (type.IsPublic() || type.IsNestedPublic()) && !type.IsGenericType()).
             SelectMany(type => type.GetMethods().Where(method => method.IsPublic && method.IsStatic && !method.IsGenericMethod));
 
         public static string GetFullName(this MemberInfo member)
@@ -24,11 +24,7 @@ namespace Favalon.Internal
 
             switch (member)
             {
-#if NET35 || NET40 || NET45
-                case Type type when type.IsGenericType:
-#else
-                case TypeInfo type when type.IsGenericType:
-#endif
+                case MemberInfo(Type type) when type.IsGenericType():
                     var gta = StringUtilities.Join(
                         ",",
                         type.GetGenericArguments().Select(GetFullName));
@@ -48,12 +44,7 @@ namespace Favalon.Internal
         public static string GetFullName(this Type type) =>
             type.AsMemberInfo().GetFullName();
 
-#if NETSTANDARD1_0
         public static string GetIdentity(this Delegate dlg) =>
-            $"&{dlg.GetHashCode()}";
-#else
-        public static string GetIdentity(this Delegate dlg) =>
-            $"&{dlg.Method.GetFullName()}";
-#endif
+            $"&{dlg.GetMethodInfo().GetFullName()}";
     }
 }

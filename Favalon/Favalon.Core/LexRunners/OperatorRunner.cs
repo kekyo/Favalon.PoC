@@ -14,7 +14,7 @@ namespace Favalon.LexRunners
             var token = context.TokenBuffer.ToString();
             context.TokenBuffer.Clear();
             if (!forceIdentity && (token.Length == 1) &&
-                Characters.IsNumericSign(token[0]) is NumericalSignes sign)
+                StringUtilities.IsNumericSign(token[0]) is NumericalSignes sign)
             {
                 return (sign == NumericalSignes.Plus) ?
                     NumericalSignToken.Plus : NumericalSignToken.Minus;
@@ -39,21 +39,21 @@ namespace Favalon.LexRunners
                 context.TokenBuffer.Append(ch);
                 return LexRunnerResult.Create(NumericRunner.Instance, token0);
             }
-            else if (Characters.IsOpenParenthesis(ch) is ParenthesisPair)
+            else if (StringUtilities.IsOpenParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context, true),
                     Token.Open(ch));
             }
-            else if (Characters.IsCloseParenthesis(ch) is ParenthesisPair)
+            else if (StringUtilities.IsCloseParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context, true),
                     Token.Close(ch));
             }
-            else if (Characters.IsOperator(ch))
+            else if (StringUtilities.IsOperator(ch))
             {
                 context.TokenBuffer.Append(ch);
                 return LexRunnerResult.Empty(this);

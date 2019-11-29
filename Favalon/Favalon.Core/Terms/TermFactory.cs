@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 
 namespace Favalon.Terms
 {
@@ -16,7 +17,16 @@ namespace Favalon.Terms
         public static MethodTerm Method(MethodInfo method) =>
             new MethodTerm(method);
 
-        public static ConstantTerm Constant(object constant) =>
-            new ConstantTerm(constant);
+        public static ValueTerm Constant(object constant) =>
+            constant switch
+            {
+#if NET35 || NET40 || NET45
+                Type type => new ClrTypeTerm(type),
+#else
+                Type type => new ClrTypeTerm(type.GetTypeInfo()),
+                TypeInfo type => new ClrTypeTerm(type),
+#endif
+                _ => new ConstantTerm(constant)
+            };
     }
 }

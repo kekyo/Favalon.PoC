@@ -29,13 +29,13 @@ namespace Favalon.Internal
 #else
                 case TypeInfo type when type.IsGenericType:
 #endif
-                    var gta = Join(
+                    var gta = StringUtilities.Join(
                         ",",
                         type.GetGenericArguments().Select(GetFullName));
                     return $"{parentNames}.{name}<{gta}>";
 
                 case MethodInfo method when method.IsGenericMethod:
-                    var gma = Join(
+                    var gma = StringUtilities.Join(
                         ",",
                         method.GetGenericArguments().Select(GetFullName));
                     return $"{parentNames}.{name}<{gma}>";

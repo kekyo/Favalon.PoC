@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Favalon.Internal
 {
@@ -63,20 +61,6 @@ namespace Favalon.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Type[] GetGenericArguments(this TypeInfo type) =>
             type.GenericTypeArguments;
-#endif
-
-#if NET35
-        public static string Join(string separator, IEnumerable<string> values) =>
-            string.Join(separator, values.ToArray());
-
-        public static void Clear(this StringBuilder sb) =>
-            sb.Length = 0;
-#else
-#if NET45 || NETSTANDARD1_0
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static string Join(string separator, IEnumerable<string> values) =>
-            string.Join(separator, values);
 #endif
     }
 }

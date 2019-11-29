@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Favalon.Internal
 {
-    internal static class Characters
+    internal static class StringUtilities
     {
         internal static readonly Dictionary<char, ParenthesisPair> openParenthesis;
         internal static readonly Dictionary<char, ParenthesisPair> closeParenthesis;
@@ -18,7 +19,7 @@ namespace Favalon.Internal
             '@', /* '[', */ '\\', /* ']', */ '^', '_', '`', /* '{', */ '|', /* '}', */ '~'
         };
 
-        static Characters()
+        static StringUtilities()
         {
             // TODO: generate statically
             var parenthesis =
@@ -70,5 +71,19 @@ namespace Favalon.Internal
 #endif
         public static bool IsOperator(char ch) =>
             operatorChars.Contains(ch);
+
+#if NET35
+        public static string Join(string separator, IEnumerable<string> values) =>
+            string.Join(separator, values.ToArray());
+
+        public static void Clear(this StringBuilder sb) =>
+            sb.Length = 0;
+#else
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static string Join(string separator, IEnumerable<string> values) =>
+            string.Join(separator, values);
+#endif
     }
 }

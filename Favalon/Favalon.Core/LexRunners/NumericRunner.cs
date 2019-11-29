@@ -27,21 +27,21 @@ namespace Favalon.LexRunners
                     new NumericToken(token),
                     WhiteSpaceToken.Instance);
             }
-            else if (Characters.IsOpenParenthesis(ch) is ParenthesisPair)
+            else if (StringUtilities.IsOpenParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context),
                     Token.Open(ch));
             }
-            else if (Characters.IsCloseParenthesis(ch) is ParenthesisPair)
+            else if (StringUtilities.IsCloseParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context),
                     Token.Close(ch));
             }
-            else if (Characters.IsOperator(ch))
+            else if (StringUtilities.IsOperator(ch))
             {
                 var token0 = InternalFinish(context);
                 context.TokenBuffer.Append(ch);

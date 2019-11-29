@@ -17,7 +17,7 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Infer(term).Single();
 
-            Assert.AreEqual("System.Int32", actual.HigherOrder.Readable);
+            Assert.AreEqual("System.Int32", actual.HigherOrder!.Readable);
         }
 
         [Test]
@@ -30,6 +30,21 @@ namespace Favalon
             var actual = environment.Infer(term).Single();
 
             Assert.AreEqual("System.Int32.Parse(s:System.String) -> System.Int32", actual.Readable);
+        }
+
+        [Test]
+        public void InferStaticMethod2()
+        {
+            // System.Math.Abs
+            var term =
+                Term.Apply(
+                    Term.Identity("System.Math.Abs"),
+                    Term.Constant(123));
+
+            var environment = Environment.Create();
+            var actual = environment.Infer(term).Single();
+
+            Assert.AreEqual("System.Math.Abs 123", actual.Readable);
         }
 
         [Test]

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Favalon.Terms
@@ -56,6 +58,38 @@ namespace Favalon.Terms
             {
                 return this;
             }
+        }
+
+        protected internal override Term[] VisitInfer(Context context)
+        {
+            IEnumerable<Term> Enumerate()
+            {
+                var functions = this.Function.VisitInfer(context);
+                var arguments = this.Argument.VisitInfer(context);
+
+                foreach (var function in functions)
+                {
+                    foreach (var argument in arguments)
+                    {
+                        if (function is CallableTerm callable)
+                        {
+                            yield return callable.VisitCall(context, argument);
+                        }
+                        else if (
+                            !object.ReferenceEquals(function, this.Function) ||
+                            !object.ReferenceEquals(argument, this.Argument))
+                        {
+                            yield return new ApplyTerm(function, argument);
+                        }
+                        else
+                        {
+                            yield return this;
+                        }
+                    }
+                }
+            }
+
+            return Enumerate().Distinct().ToArray();
         }
 
         public override int GetHashCode() =>

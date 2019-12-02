@@ -35,9 +35,6 @@ namespace LambdaCalculus
 
     public abstract class CallableTerm : Term
     {
-        public override Term Reduce() =>
-            this;
-
         public abstract Term Call(Term argument);
     }
 

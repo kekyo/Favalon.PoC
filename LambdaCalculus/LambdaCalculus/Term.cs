@@ -1,10 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LambdaCalculus
 {
+    public sealed class Context
+    {
+        private readonly Dictionary<string, Term> boundTerms = new Dictionary<string, Term>();
+
+        public void AddBoundTerm(string identity, Term term) =>
+            boundTerms[identity] = term;
+
+        public bool TryGetBoundTerm(string identity, out Term term) =>
+            boundTerms.TryGetValue(identity, out term);
+    }
+
     public abstract class Term
     {
-        public abstract Term Reduce();
+        public abstract Term Reduce(Context context);
 
         public abstract Term Replace(string parameter, Term replacement);
     }
@@ -16,7 +28,7 @@ namespace LambdaCalculus
         public BooleanTerm(bool value) =>
             this.Value = value;
 
-        public override Term Reduce() =>
+        public override Term Reduce(Context context) =>
             this;
 
         public override Term Replace(string parameter, Term replacement) =>
@@ -34,8 +46,8 @@ namespace LambdaCalculus
             this.Argument = argument;
         }
 
-        public override Term Reduce() =>
-            ((CallableTerm)this.Function.Reduce()).Call(this.Argument.Reduce());
+        public override Term Reduce(Context context) =>
+            ((CallableTerm)this.Function.Reduce(context)).Call(this.Argument.Reduce(context)).Reduce(context);
 
         public override Term Replace(string parameter, Term replacement) =>
             new ApplyTerm(this.Function.Replace(parameter, replacement), this.Argument.Replace(parameter, replacement));
@@ -53,8 +65,8 @@ namespace LambdaCalculus
         public AndTerm(Term lhs) =>
             this.Lhs = lhs;
 
-        public override Term Reduce() =>
-            new AndTerm(this.Lhs.Reduce());
+        public override Term Reduce(Context context) =>
+            new AndTerm(this.Lhs.Reduce(context));
 
         public override Term Call(Term rhs) =>
             new BooleanTerm(((BooleanTerm)this.Lhs).Value && ((BooleanTerm)rhs).Value);
@@ -74,11 +86,11 @@ namespace LambdaCalculus
             this.Body = body;
         }
 
-        public override Term Reduce() =>
+        public override Term Reduce(Context context) =>
             this;
 
         public override Term Call(Term rhs) =>
-            this.Body.Replace(this.Parameter, rhs).Reduce();
+            this.Body.Replace(this.Parameter, rhs);
 
         public override Term Replace(string parameter, Term replacement) =>
             (parameter != this.Parameter) ?
@@ -93,7 +105,7 @@ namespace LambdaCalculus
         public IdentityTerm(string identity) =>
             this.Identity = identity;
 
-        public override Term Reduce() =>
+        public override Term Reduce(Context context) =>
             this;
 
         public override Term Replace(string parameter, Term replacement) =>

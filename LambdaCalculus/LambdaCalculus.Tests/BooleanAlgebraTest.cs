@@ -10,7 +10,8 @@ namespace LambdaCalculus
         {
             var term = new BooleanTerm(true);
 
-            var actual = term.Reduce();
+            var context = new Context();
+            var actual = term.Reduce(context);
 
             Assert.AreEqual(true, ((BooleanTerm)actual).Value);
         }
@@ -20,7 +21,8 @@ namespace LambdaCalculus
         {
             var term = new BooleanTerm(false);
 
-            var actual = term.Reduce();
+            var context = new Context();
+            var actual = term.Reduce(context);
 
             Assert.AreEqual(false, ((BooleanTerm)actual).Value);
         }
@@ -36,7 +38,8 @@ namespace LambdaCalculus
                     new AndTerm(new BooleanTerm(lhs)),
                     new BooleanTerm(rhs));
 
-            var actual = term.Reduce();
+            var context = new Context();
+            var actual = term.Reduce(context);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
@@ -58,7 +61,8 @@ namespace LambdaCalculus
                             new BooleanTerm(chs))),
                     new BooleanTerm(rhs));
 
-            var actual = term.Reduce();
+            var context = new Context();
+            var actual = term.Reduce(context);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
@@ -74,7 +78,8 @@ namespace LambdaCalculus
                         new BooleanTerm(result)),
                 new BooleanTerm(false));
 
-            var actual = term.Reduce();
+            var context = new Context();
+            var actual = term.Reduce(context);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
@@ -90,7 +95,8 @@ namespace LambdaCalculus
                         new IdentityTerm("a")),
                 new BooleanTerm(result));
 
-            var actual = term.Reduce();
+            var context = new Context();
+            var actual = term.Reduce(context);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }

@@ -7,7 +7,7 @@ namespace LambdaCalculus
     {
         [TestCase(true)]
         [TestCase(false)]
-        public void BasisLambdaCallAndFixedResult(bool result)
+        public void LambdaArrowCallAndFixedResult(bool result)
         {
             var term =
                 Term.Apply(

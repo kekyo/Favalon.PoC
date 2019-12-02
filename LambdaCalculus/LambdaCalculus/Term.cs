@@ -55,10 +55,17 @@ namespace LambdaCalculus
 
         //////////////////////////////////
 
-        protected static class IdentityGenerator<T>
+        private static readonly Dictionary<Type, IdentityTerm> types =
+            new Dictionary<Type, IdentityTerm>();
+
+        protected static IdentityTerm Identity(Type type)
         {
-            public static readonly IdentityTerm Instance =
-                new IdentityTerm(typeof(T).FullName);
+            if (!types.TryGetValue(type, out var term))
+            {
+                term = new IdentityTerm(type.FullName);
+                types.Add(type, term);
+            }
+            return term;
         }
 
         public static IdentityTerm Identity(string identity) =>
@@ -118,6 +125,20 @@ namespace LambdaCalculus
             context.GetBoundTerm(this.Identity) is Term term ?
                 term :
                 this;
+    }
+
+    public sealed class ConstantTerm : Term
+    {
+        public readonly object Value;
+
+        internal ConstantTerm(object value) =>
+            this.Value = value;
+
+        public override Term HigherOrder =>
+            Identity(this.Value.GetType());
+
+        public override Term Reduce(Context context) =>
+            this;
     }
 
     public abstract class ApplicableTerm : Term
@@ -222,13 +243,16 @@ namespace LambdaCalculus
 
     public sealed class BooleanTerm : Term
     {
+        internal static readonly IdentityTerm higherOrder =
+            Identity(typeof(bool));
+
         public readonly bool Value;
 
         private BooleanTerm(bool value) =>
             this.Value = value;
 
         public override Term HigherOrder =>
-            IdentityGenerator<bool>.Instance;
+            higherOrder;
 
         public override Term Reduce(Context context) =>
             this;
@@ -247,7 +271,7 @@ namespace LambdaCalculus
             this.Lhs = lhs;
 
         public override Term HigherOrder =>
-           IdentityGenerator<bool>.Instance;
+           BooleanTerm.higherOrder;
 
         public override sealed Term Reduce(Context context) =>
             new AndTerm(this.Lhs.Reduce(context));

@@ -65,7 +65,7 @@ namespace LambdaCalculus
 
     public abstract class ApplicableTerm : Term
     {
-        public abstract Term Apply(Context context, Term rhs);
+        protected internal abstract Term? Apply(Context context, Term rhs);
     }
 
     public sealed class ApplyTerm : Term
@@ -84,9 +84,10 @@ namespace LambdaCalculus
             var function = this.Function.Reduce(context);
             var argument = this.Argument.Reduce(context);
 
-            if (function is ApplicableTerm applicable)
+            if (function is ApplicableTerm applicable &&
+                applicable.Apply(context, argument) is Term term)
             {
-                return applicable.Apply(context, argument);
+                return term;
             }
             else
             {
@@ -109,7 +110,7 @@ namespace LambdaCalculus
         public override Term Reduce(Context context) =>
             new LambdaTerm(this.Parameter, this.Body.Reduce(context));
 
-        public override Term Apply(Context context, Term rhs)
+        protected internal override Term? Apply(Context context, Term rhs)
         {
             var newScope = context.NewScope();
             newScope.AddBoundTerm(this.Parameter, rhs);
@@ -118,22 +119,17 @@ namespace LambdaCalculus
         }
     }
 
-    public abstract class FunctionTerm : ApplicableTerm
+    public abstract class Function2ArgumentsTerm : ApplicableTerm
     {
         public readonly Term Lhs;
 
-        public FunctionTerm(Term lhs) =>
+        public Function2ArgumentsTerm(Term lhs) =>
             this.Lhs = lhs;
 
         protected abstract Term Create(Term lhs);
 
         public override sealed Term Reduce(Context context) =>
             this.Create(this.Lhs.Reduce(context));
-
-        public override Term Apply(Context context, Term rhs) =>
-            this.Apply(context, this.Lhs, rhs);
-
-        protected abstract Term Apply(Context context, Term lhs, Term rhs);
     }
 
     ////////////////////////////////////////////////////////////
@@ -149,34 +145,7 @@ namespace LambdaCalculus
             this;
     }
 
-    public sealed class AndTerm2 : Term
-    {
-        public readonly Term Lhs;
-        public readonly Term Rhs;
-
-        public AndTerm2(Term lhs, Term rhs)
-        {
-            this.Lhs = lhs;
-            this.Rhs = rhs;
-        }
-
-        public override Term Reduce(Context context)
-        {
-            var lhs = this.Lhs.Reduce(context);
-            var rhs = this.Rhs.Reduce(context);
-
-            if (lhs is BooleanTerm l && rhs is BooleanTerm r)
-            {
-                return new BooleanTerm(l.Value && r.Value);
-            }
-            else
-            {
-                return new AndTerm2(lhs, rhs);
-            }
-        }
-    }
-
-    public sealed class AndTerm : FunctionTerm
+    public sealed class AndTerm : Function2ArgumentsTerm
     {
         public AndTerm(Term lhs) :
             base(lhs)
@@ -185,16 +154,9 @@ namespace LambdaCalculus
         protected override Term Create(Term lhs) =>
             new AndTerm(lhs);
 
-        protected override Term Apply(Context context, Term lhs, Term rhs)
-        {
-            if (lhs is BooleanTerm l && rhs is BooleanTerm r)
-            {
-                return new BooleanTerm(l.Value && r.Value);
-            }
-            else
-            {
-                return new ApplyTerm(new AndTerm(lhs), rhs);
-            }
-        }
+        protected internal override Term? Apply(Context context, Term rhs) =>
+            (this.Lhs is BooleanTerm l && rhs is BooleanTerm r) ?
+                new BooleanTerm(l.Value && r.Value) :
+                null;
     }
 }

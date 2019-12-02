@@ -5,8 +5,6 @@ namespace LambdaCalculus
     public abstract class Term
     {
         public abstract Term Reduce();
-
-        public abstract Term Call(Term argument);
     }
 
     public sealed class BooleanTerm : Term
@@ -18,9 +16,6 @@ namespace LambdaCalculus
 
         public override Term Reduce() =>
             this;
-
-        public override Term Call(Term argument) =>
-            throw new InvalidOperationException();
     }
 
     public sealed class ApplyTerm : Term
@@ -35,36 +30,28 @@ namespace LambdaCalculus
         }
 
         public override Term Reduce() =>
-            this.Function.Reduce().Call(this.Argument.Reduce());
-
-        public override Term Call(Term argument) =>
-            throw new InvalidOperationException();
+            ((CallableTerm)this.Function.Reduce()).Call(this.Argument.Reduce());
     }
 
-    public sealed class DelegationTerm : Term
+    public abstract class CallableTerm : Term
     {
-        private readonly Func<Term, Term> runner;
-
-        public DelegationTerm(Func<Term, Term> runner) =>
-            this.runner = runner;
-
         public override Term Reduce() =>
             this;
 
-        public override Term Call(Term argument) =>
-            runner(argument);
+        public abstract Term Call(Term argument);
     }
 
-    public sealed class AndTerm : Term
+    public sealed class AndTerm : CallableTerm
     {
-        public AndTerm()
-        { }
+        public readonly Term Lhs;
+
+        public AndTerm(Term lhs) =>
+            this.Lhs = lhs;
 
         public override Term Reduce() =>
-            this;
+            new AndTerm(this.Lhs.Reduce());
 
-        public override Term Call(Term argument) =>
-            new DelegationTerm(rhs => new BooleanTerm(
-                ((BooleanTerm)argument.Reduce()).Value && ((BooleanTerm)rhs.Reduce()).Value));
+        public override Term Call(Term rhs) =>
+            new BooleanTerm(((BooleanTerm)this.Lhs).Value && ((BooleanTerm)rhs).Value);
     }
 }

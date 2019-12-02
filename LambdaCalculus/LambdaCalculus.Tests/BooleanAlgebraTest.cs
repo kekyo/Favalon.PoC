@@ -1,14 +1,9 @@
 ﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LambdaCalculus
 {
     [TestFixture]
-    class BooleanTest
+    class BooleanAlgebraTest
     {
         [Test]
         public void BooleanTrue()
@@ -38,9 +33,29 @@ namespace LambdaCalculus
         {
             var term =
                 new ApplyTerm(
-                    new ApplyTerm(
-                        new AndTerm(),
-                        new BooleanTerm(lhs)),
+                    new AndTerm(new BooleanTerm(lhs)),
+                    new BooleanTerm(rhs));
+
+            var actual = term.Reduce();
+
+            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        }
+
+        [TestCase(true, true, true, true)]
+        [TestCase(false, false, true, true)]
+        [TestCase(false, true, false, true)]
+        [TestCase(false, true, true, false)]
+        [TestCase(false, false, false, true)]
+        [TestCase(false, true, false, false)]
+        [TestCase(false, false, false, false)]
+        public void BooleanAndAnd(bool result, bool lhs, bool chs, bool rhs)
+        {
+            var term =
+                new ApplyTerm(
+                    new AndTerm(
+                        new ApplyTerm(
+                            new AndTerm(new BooleanTerm(lhs)),
+                            new BooleanTerm(chs))),
                     new BooleanTerm(rhs));
 
             var actual = term.Reduce();

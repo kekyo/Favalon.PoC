@@ -7,6 +7,9 @@ namespace LambdaCalculus
     {
         private readonly Dictionary<string, Term> boundTerms = new Dictionary<string, Term>();
 
+        public Context NewScope() =>
+            this;   // TODO:
+
         public void AddBoundTerm(string identity, Term term) =>
             boundTerms[identity] = term;
 
@@ -17,22 +20,19 @@ namespace LambdaCalculus
     public abstract class Term
     {
         public abstract Term Reduce(Context context);
-
-        public abstract Term Replace(string parameter, Term replacement);
     }
 
-    public sealed class BooleanTerm : Term
+    public sealed class IdentityTerm : Term
     {
-        public readonly bool Value;
+        public readonly string Identity;
 
-        public BooleanTerm(bool value) =>
-            this.Value = value;
+        public IdentityTerm(string identity) =>
+            this.Identity = identity;
 
         public override Term Reduce(Context context) =>
-            this;
-
-        public override Term Replace(string parameter, Term replacement) =>
-            this;
+            context.TryGetBoundTerm(this.Identity, out var term) ?
+                term :
+                this;
     }
 
     public sealed class ApplyTerm : Term
@@ -47,32 +47,12 @@ namespace LambdaCalculus
         }
 
         public override Term Reduce(Context context) =>
-            ((CallableTerm)this.Function.Reduce(context)).Call(this.Argument.Reduce(context)).Reduce(context);
-
-        public override Term Replace(string parameter, Term replacement) =>
-            new ApplyTerm(this.Function.Replace(parameter, replacement), this.Argument.Replace(parameter, replacement));
+            ((CallableTerm)this.Function.Reduce(context)).Call(context, this.Argument.Reduce(context));
     }
 
     public abstract class CallableTerm : Term
     {
-        public abstract Term Call(Term rhs);
-    }
-
-    public sealed class AndTerm : CallableTerm
-    {
-        public readonly Term Lhs;
-
-        public AndTerm(Term lhs) =>
-            this.Lhs = lhs;
-
-        public override Term Reduce(Context context) =>
-            new AndTerm(this.Lhs.Reduce(context));
-
-        public override Term Call(Term rhs) =>
-            new BooleanTerm(((BooleanTerm)this.Lhs).Value && ((BooleanTerm)rhs).Value);
-
-        public override Term Replace(string parameter, Term replacement) =>
-            new AndTerm(this.Lhs.Replace(parameter, replacement));
+        public abstract Term Call(Context context, Term rhs);
     }
 
     public sealed class LambdaTerm : CallableTerm
@@ -89,28 +69,39 @@ namespace LambdaCalculus
         public override Term Reduce(Context context) =>
             this;
 
-        public override Term Call(Term rhs) =>
-            this.Body.Replace(this.Parameter, rhs);
+        public override Term Call(Context context, Term rhs)
+        {
+            var newScope = context.NewScope();
 
-        public override Term Replace(string parameter, Term replacement) =>
-            (parameter != this.Parameter) ?
-                this.Body.Replace(parameter, replacement) :
-                this;   // Shadowed
+            newScope.AddBoundTerm(this.Parameter, rhs);
+            return this.Body.Reduce(newScope);
+        }
     }
 
-    public sealed class IdentityTerm : Term
-    {
-        public readonly string Identity;
+    ////////////////////////////////////////////////////////////
 
-        public IdentityTerm(string identity) =>
-            this.Identity = identity;
+    public sealed class BooleanTerm : Term
+    {
+        public readonly bool Value;
+
+        public BooleanTerm(bool value) =>
+            this.Value = value;
 
         public override Term Reduce(Context context) =>
             this;
+    }
 
-        public override Term Replace(string parameter, Term replacement) =>
-            (parameter == this.Identity) ?
-                replacement :
-                this;
+    public sealed class AndTerm : CallableTerm
+    {
+        public readonly Term Lhs;
+
+        public AndTerm(Term lhs) =>
+            this.Lhs = lhs;
+
+        public override Term Reduce(Context context) =>
+            new AndTerm(this.Lhs.Reduce(context));
+
+        public override Term Call(Context context, Term rhs) =>
+            new BooleanTerm(((BooleanTerm)this.Lhs).Value && ((BooleanTerm)rhs).Value);
     }
 }

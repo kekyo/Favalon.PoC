@@ -53,23 +53,31 @@ namespace LambdaCalculus
 
         public abstract Term Reduce(Context context);
 
+        public abstract Term Infer(Context context);
+
         //////////////////////////////////
 
         private static readonly Dictionary<Type, IdentityTerm> types =
             new Dictionary<Type, IdentityTerm>();
 
-        protected static IdentityTerm Identity(Type type)
+        private static readonly IdentityTerm kind =
+            new IdentityTerm("*", UnspecifiedTerm.Instance);
+
+        public static IdentityTerm Identity(Type type)
         {
             if (!types.TryGetValue(type, out var term))
             {
-                term = new IdentityTerm(type.FullName);
+                term = new IdentityTerm(type.FullName, kind);
                 types.Add(type, term);
             }
             return term;
         }
 
         public static IdentityTerm Identity(string identity) =>
-            new IdentityTerm(identity);
+            new IdentityTerm(identity, UnspecifiedTerm.Instance);
+
+        public static IdentityTerm Kind() =>
+            kind;
 
         public static BooleanTerm True() =>
             BooleanTerm.True;
@@ -78,6 +86,9 @@ namespace LambdaCalculus
 
         public static BooleanTerm Constant(bool value) =>
             value ? BooleanTerm.True : BooleanTerm.False;
+
+        public static Term Constant(object value) =>
+            new ConstantTerm(value);
 
         public static ApplyTerm Apply(Term function, Term argument) =>
             new ApplyTerm(function, argument);
@@ -105,6 +116,9 @@ namespace LambdaCalculus
         public override Term Reduce(Context context) =>
             this;
 
+        public override Term Infer(Context context) =>
+            this;
+
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();
     }
@@ -115,15 +129,22 @@ namespace LambdaCalculus
     {
         public new readonly string Identity;
 
-        internal IdentityTerm(string identity) =>
+        internal IdentityTerm(string identity, Term higherOrder)
+        {
             this.Identity = identity;
+            this.HigherOrder = higherOrder;
+        }
 
-        public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
+        public override Term HigherOrder { get; }
 
         public override Term Reduce(Context context) =>
             context.GetBoundTerm(this.Identity) is Term term ?
-                term :
+                term.Reduce(context) :
+                this;
+
+        public override Term Infer(Context context) =>
+            context.GetBoundTerm(this.Identity) is Term term ?
+                term.Infer(context) :
                 this;
     }
 
@@ -138,6 +159,9 @@ namespace LambdaCalculus
             Identity(this.Value.GetType());
 
         public override Term Reduce(Context context) =>
+            this;
+
+        public override Term Infer(Context context) =>
             this;
     }
 
@@ -158,7 +182,7 @@ namespace LambdaCalculus
         }
 
         public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
+            this.Argument.HigherOrder;
 
         public override Term Reduce(Context context)
         {
@@ -175,6 +199,14 @@ namespace LambdaCalculus
                 return new ApplyTerm(function, argument);
             }
         }
+
+        public override Term Infer(Context context)
+        {
+            var function = this.Function.Infer(context);
+            var argument = this.Argument.Infer(context);
+
+            return new ApplyTerm(function, argument);
+        }
     }
 
     public sealed class LambdaArrowTerm : ApplicableTerm
@@ -184,13 +216,16 @@ namespace LambdaCalculus
         }
 
         public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
+            Lambda("->", Lambda("?", UnspecifiedTerm.Instance));
 
         public override Term Reduce(Context context) =>
             this;
 
         protected internal override Term? Apply(Context context, Term rhs) =>
             new LambdaArrowLeftTerm(((IdentityTerm)rhs).Identity);
+
+        public override Term Infer(Context context) =>
+            this;
 
         private sealed class LambdaArrowLeftTerm : ApplicableTerm
         {
@@ -206,7 +241,10 @@ namespace LambdaCalculus
                 this;
 
             protected internal override Term? Apply(Context context, Term rhs) =>
-                Term.Lambda(this.Parameter, rhs);
+                Lambda(this.Parameter, rhs);
+
+            public override Term Infer(Context context) =>
+                this;
         }
 
         public static LambdaArrowTerm Instance =
@@ -237,6 +275,9 @@ namespace LambdaCalculus
 
             return this.Body.Reduce(newScope);
         }
+
+        public override Term Infer(Context context) =>
+            new LambdaTerm(this.Parameter, this.Body.Infer(context));
     }
 
     ////////////////////////////////////////////////////////////
@@ -257,6 +298,9 @@ namespace LambdaCalculus
         public override Term Reduce(Context context) =>
             this;
 
+        public override Term Infer(Context context) =>
+            this;
+
         public static new readonly BooleanTerm True =
             new BooleanTerm(true);
         public static new readonly BooleanTerm False =
@@ -275,6 +319,9 @@ namespace LambdaCalculus
 
         public override sealed Term Reduce(Context context) =>
             new AndTerm(this.Lhs.Reduce(context));
+
+        public override Term Infer(Context context) =>
+            new AndTerm(this.Lhs.Infer(context));
 
         protected internal override Term? Apply(Context context, Term rhs) =>
             (this.Lhs is BooleanTerm l && rhs is BooleanTerm r) ?
@@ -300,6 +347,9 @@ namespace LambdaCalculus
                 (c.Value ? (Term)new ThenTerm(rhs) : ElseTerm.Instance) :
                 null;
 
+        public override Term Infer(Context context) =>
+            new IfTerm(this.Condition.Infer(context));
+
         private sealed class ThenTerm : ApplicableTerm
         {
             public readonly Term Then;
@@ -308,13 +358,16 @@ namespace LambdaCalculus
                 this.Then = then;
 
             public override Term HigherOrder =>
-                UnspecifiedTerm.Instance;
+                this.Then.HigherOrder;
 
             public override Term Reduce(Context context) =>
                 this;
 
             protected internal override Term? Apply(Context context, Term rhs) =>
                 this.Then;
+
+            public override Term Infer(Context context) =>
+                this;
         }
 
         private sealed class ElseTerm : ApplicableTerm
@@ -330,6 +383,9 @@ namespace LambdaCalculus
 
             protected internal override Term? Apply(Context context, Term rhs) =>
                 rhs;
+
+            public override Term Infer(Context context) =>
+                this;
 
             public static readonly ElseTerm Instance =
                 new ElseTerm();

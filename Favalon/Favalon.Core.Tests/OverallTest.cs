@@ -20,7 +20,7 @@ namespace Favalon
 
             Assert.AreEqual(
                 Term.Function(
-                    Term.Identity("a"),
+                    Term.BoundIdentity("a"),
                     Term.Identity("b")),
                 actual);
         }
@@ -38,7 +38,7 @@ namespace Favalon
 
             Assert.AreEqual(
                 Term.Function(
-                    Term.Identity("a"),
+                    Term.BoundIdentity("a"),
                     Term.Apply(
                         Term.Identity("b"),
                         Term.Identity("c"))),
@@ -58,7 +58,7 @@ namespace Favalon
 
             Assert.AreEqual(
                 Term.Function(
-                    Term.Identity("a"),
+                    Term.BoundIdentity("a"),
                     Term.Apply(
                         Term.Identity("b"),
                         Term.Identity("c"))),
@@ -78,9 +78,9 @@ namespace Favalon
 
             Assert.AreEqual(
                 Term.Function(
-                    Term.Identity("a"),
+                    Term.BoundIdentity("a"),
                     Term.Function(
-                        Term.Identity("b"),
+                        Term.BoundIdentity("b"),
                         Term.Identity("c"))),
                 actual);
         }
@@ -98,9 +98,9 @@ namespace Favalon
 
             Assert.AreEqual(
                 Term.Function(
-                    Term.Identity("a"),
+                    Term.BoundIdentity("a"),
                     Term.Function(
-                        Term.Identity("b"),
+                        Term.BoundIdentity("b"),
                         Term.Apply(
                             Term.Identity("c"),
                             Term.Identity("d")))),
@@ -122,7 +122,7 @@ namespace Favalon
 
             Assert.AreEqual(
                 Term.Function(
-                    Term.Identity("y"),
+                    Term.BoundIdentity("y"),
                     Term.Identity("y")),
                 actual);
         }
@@ -142,16 +142,16 @@ namespace Favalon
             Assert.AreEqual(
                 Term.Apply(
                     Term.Function(
-                        Term.Identity("y"),
+                        Term.BoundIdentity("y"),
                         Term.Identity("y")),
                     Term.Function(
-                        Term.Identity("y"),
+                        Term.BoundIdentity("y"),
                         Term.Identity("y"))),
                 actual1);
 
             Assert.AreEqual(
                 Term.Function(
-                    Term.Identity("y"),
+                    Term.BoundIdentity("y"),
                     Term.Identity("y")),
                 actual2);
         }

@@ -22,19 +22,19 @@ namespace Favalon.LexRunners
                 context.TokenBuffer.Append(ch);
                 return LexRunnerResult.Empty(NumericRunner.Instance);
             }
-            else if (Characters.IsOpenParenthesis(ch) is ParenthesisPair)
+            else if (StringUtilities.IsOpenParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     this,
                     Token.Open(ch));
             }
-            else if (Characters.IsCloseParenthesis(ch) is ParenthesisPair)
+            else if (StringUtilities.IsCloseParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     this,
                     Token.Close(ch));
             }
-            else if (Characters.IsOperator(ch))
+            else if (StringUtilities.IsOperator(ch))
             {
                 context.TokenBuffer.Append(ch);
                 return LexRunnerResult.Empty(OperatorRunner.Instance);

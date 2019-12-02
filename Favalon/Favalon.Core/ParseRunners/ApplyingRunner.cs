@@ -10,10 +10,10 @@ namespace Favalon.ParseRunners
         private ApplyingRunner()
         { }
 
-        public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
+        public override ParseRunnerResult Run(ParseRunnerContext runnerContext, Token token)
         {
-            Debug.Assert(context.CurrentTerm != null);
-            Debug.Assert(context.PreSignToken == null);
+            Debug.Assert(runnerContext.CurrentTerm != null);
+            Debug.Assert(runnerContext.PreSignToken == null);
 
             // Ignore WillApplyRightToLeft checking if token is whitespace.
             if (token is WhiteSpaceToken)
@@ -22,52 +22,49 @@ namespace Favalon.ParseRunners
             }
 
             // Triggered the token arranging by RTL.
-            if (context.ApplyNextAssociative == BoundTermAssociatives.RightToLeft)
+            if (runnerContext.ApplyNextAssociative == BoundTermAssociatives.RightToLeft)
             {
                 if (token is ValueToken)
                 {
-                    context.PushScope();
-                    context.CurrentTerm = null;
+                    runnerContext.PushScope();
                 }
 
-                context.ApplyNextAssociative = BoundTermAssociatives.LeftToRight;
+                runnerContext.ApplyNextAssociative = BoundTermAssociatives.LeftToRight;
             }
 
             switch (token)
             {
                 case IdentityToken identity:
-                    return ParserUtilities.RunIdentity(context, identity);
+                    return ParserUtilities.RunIdentity(runnerContext, identity);
 
                 case NumericToken numeric:
-                    context.CurrentTerm = ParserUtilities.CombineTerms(
-                        context.CurrentTerm,
+                    runnerContext.CombineAfter(
                         ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
                     return ParseRunnerResult.Empty(this);
 
                 case NumericalSignToken numericSign:
                     // "abc -" / "123 -" ==> binary op or signed
-                    if (context.LastToken is WhiteSpaceToken)
+                    if (runnerContext.LastToken is WhiteSpaceToken)
                     {
-                        context.PreSignToken = numericSign;
+                        runnerContext.PreSignToken = numericSign;
                         return ParseRunnerResult.Empty(NumericalSignedRunner.Instance);
                     }
                     // "abc-" / "123-" / "(abc)-" ==> binary op
                     else
                     {
-                        context.CurrentTerm = ParserUtilities.CombineTerms(
-                            context.CurrentTerm,
+                        runnerContext.CombineAfter(
                             new IdentityTerm(numericSign.Symbol.ToString()));
                         return ParseRunnerResult.Empty(this);
                     }
 
                 case OpenParenthesisToken parenthesis:
-                    context.PushScope(parenthesis.Pair);
+                    runnerContext.PushScope(parenthesis.Pair);
                     return ParseRunnerResult.Empty(WaitingRunner.Instance);
 
                 case CloseParenthesisToken parenthesis:
                     while (true)
                     {
-                        var result = ParserUtilities.LeaveOneScope(context, parenthesis.Pair);
+                        var result = ParserUtilities.LeaveOneScope(runnerContext, parenthesis.Pair);
                         Debug.Assert(result != LeaveScopeResults.None);
                         if (result == LeaveScopeResults.Explicitly)
                         {

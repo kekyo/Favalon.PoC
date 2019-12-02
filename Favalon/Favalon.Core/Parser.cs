@@ -38,7 +38,7 @@ namespace Favalon
 
                 Debug.WriteLine($"{index - 1}: '{token}': {runnerContext}");
 
-                runnerContext.LastToken = token;
+                runnerContext.SetLastToken(token);
             }
 
             // Exhaust all saved scopes

@@ -13,6 +13,7 @@ namespace Favalon.ParseRunners
         public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
         {
             Debug.Assert(context.CurrentTerm == null);
+            Debug.Assert(context.CurrentPrecedence == null);
             Debug.Assert(context.PreSignToken == null);
             Debug.Assert(context.ApplyNextAssociative == BoundTermAssociatives.LeftToRight);
 
@@ -29,11 +30,7 @@ namespace Favalon.ParseRunners
 
                 // "123"
                 case NumericToken numeric:
-                    // Initial precedence (Apply)
-                    context.CurrentPrecedence = BoundTermPrecedences.Apply;
-
-                    context.CurrentTerm = ParserUtilities.CombineTerms(
-                        context.CurrentTerm,
+                    context.CombineAfter(
                         ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
                     return ParseRunnerResult.Empty(ApplyingRunner.Instance);
 

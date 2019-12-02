@@ -19,11 +19,7 @@ namespace Favalon.ParseRunners
             {
                 // "-123"
                 case NumericToken numeric:
-                    // Initial precedence (Apply)
-                    context.CurrentPrecedence = BoundTermPrecedences.Apply;
-
-                    context.CurrentTerm = ParserUtilities.CombineTerms(
-                        context.CurrentTerm,
+                    context.CombineAfter(
                         ParserUtilities.GetNumericConstant(numeric.Value, context.PreSignToken!.Sign));
                     context.PreSignToken = null;
                     return ParseRunnerResult.Empty(
@@ -32,11 +28,10 @@ namespace Favalon.ParseRunners
                 // "- ..."
                 case WhiteSpaceToken _:
                     // Initial precedence (ArithmericAddition)
-                    context.CurrentPrecedence = BoundTermPrecedences.ArithmericAddition;
+                    context.SetPrecedence(BoundTermPrecedences.ArithmericAddition);
 
                     // Will make binary op
-                    context.CurrentTerm = ParserUtilities.CombineTerms(
-                        context.CurrentTerm,
+                    context.CombineAfter(
                         new IdentityTerm(context.PreSignToken!.Symbol.ToString()));
                     context.PreSignToken = null;
                     return ParseRunnerResult.Empty(
@@ -45,12 +40,12 @@ namespace Favalon.ParseRunners
                 // "-abc"
                 case IdentityToken identity:
                     // Initial precedence (ArithmericAddition)
-                    context.CurrentPrecedence = BoundTermPrecedences.ArithmericAddition;
+                    context.SetPrecedence(BoundTermPrecedences.ArithmericAddition);
 
                     // Will make binary op
-                    context.CurrentTerm = ParserUtilities.CombineTerms(
-                        context.CurrentTerm,
-                        new IdentityTerm(context.PreSignToken!.Symbol.ToString()),
+                    context.CombineAfter(
+                        new IdentityTerm(context.PreSignToken!.Symbol.ToString()));
+                    context.CombineAfter(
                         new IdentityTerm(identity.Identity));
                     context.PreSignToken = null;
                     return ParseRunnerResult.Empty(

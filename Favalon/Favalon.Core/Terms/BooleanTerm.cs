@@ -16,5 +16,8 @@
 
         public static readonly BooleanTerm True = new BooleanTerm(true);
         public static readonly BooleanTerm False = new BooleanTerm(false);
+
+        public static BooleanTerm FromConstant(bool value) =>
+            value ? True : False;
     }
 }

@@ -9,6 +9,21 @@ namespace Favalon.Terms
 {
     internal static class TermUtilities
     {
+        public static readonly Term BooleanAndOperator =
+            new DelegationTerm<Term>(
+                "lhs",
+                (ic, lhs) =>
+                    new DelegationTerm<Term>(
+                        "rhs",
+                        (oc, rhs) => BooleanTerm.FromConstant(((BooleanTerm)lhs.VisitReduce(ic)).Value && ((BooleanTerm)rhs.VisitReduce(oc)).Value)));
+        public static readonly Term BooleanOrOperator =
+            new DelegationTerm<Term>(
+                "lhs",
+                (ic, lhs) =>
+                    new DelegationTerm<Term>(
+                        "rhs",
+                        (oc, rhs) => BooleanTerm.FromConstant(((BooleanTerm)lhs.VisitReduce(ic)).Value || ((BooleanTerm)rhs.VisitReduce(oc)).Value)));
+
         // operator arrow (lambda calculus)
         // -> a b
         // --------------
@@ -19,17 +34,16 @@ namespace Favalon.Terms
         // f:'1->'3->'4
         public static readonly Term LambdaArrowOperator =
             new DelegationTerm<IdentityTerm>(
-                "->", "a",  // a:'1
-                (ic, a) =>
+                "parameter",  // a:'1
+                (ic, parameter) =>
                     // '3->'4
                     new DelegationTerm<Term>(
-                        $"Closure(-> {a})", "b",  // b:'3
-                        (oc, b) =>
-                            new FunctionTerm(((IdentityTerm)a.VisitReduce(ic)).ToBoundIdentity(), b.VisitReduce(oc))));
+                        "body",  // b:'3
+                        (oc, body) =>
+                            new FunctionTerm(((IdentityTerm)parameter.VisitReduce(ic)).ToBoundIdentity(), body.VisitReduce(oc))));
         
         public static Term CreateTypeConstructorTerm(Type gtd) =>
             new DelegationTerm<Term>(
-                gtd.GetFullName(false),
                 gtd.GetGenericArguments()[0].GetFullName(),
                 (context, a) => new TypeTerm(gtd.MakeGenericType(((TypeTerm)a.VisitReduce(context)).Type)));
 

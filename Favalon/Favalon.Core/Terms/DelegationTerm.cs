@@ -8,14 +8,11 @@ namespace Favalon.Terms
         CallableTerm, IEquatable<DelegationTerm<TParameterTerm>>
         where TParameterTerm : Term
     {
-        public new readonly IdentityTerm Identity;
-
         private readonly Func<Context, TParameterTerm, Term> runner;
 
-        internal DelegationTerm(string identity, string parameter,
+        internal DelegationTerm(string parameter,
             Func<Context, TParameterTerm, Term> runner)
         {
-            this.Identity = new IdentityTerm(identity);
             this.Parameter = new BoundIdentityTerm(parameter/* TODO: , new ClrTypeTerm(typeof(TParameterType)) */);
             this.runner = runner;
         }
@@ -39,9 +36,6 @@ namespace Favalon.Terms
             this.Equals(obj as DelegationTerm<TParameterTerm>);
 
         protected internal override string VisitTermString(bool includeTermName) =>
-            $"{this.Identity.ToString(includeTermName)} {this.Parameter.ToString(includeTermName)} {this.runner.GetIdentity()}";
-
-        public void Deconstruct(out string identity) =>
-            identity = this.Identity.Name;
+            $"{this.runner.GetIdentity()} {this.Parameter.ToString(includeTermName)}";
     }
 }

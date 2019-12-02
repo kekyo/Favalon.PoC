@@ -28,7 +28,20 @@ namespace Favalon
                 null,
                 BooleanTerm.False);
 
-            TermUtilities.AddBoundTermsFromAssembly(defaultBoundTerms, typeof(object).GetAssembly());
+            AddBoundTerm(
+                defaultBoundTerms,
+                "&&",
+                BoundTermNotations.Infix,
+                BoundTermAssociatives.LeftToRight,
+                BoundTermPrecedences.BooleanAnd,
+                TermUtilities.BooleanAndOperator);
+            AddBoundTerm(
+                defaultBoundTerms,
+                "||",
+                BoundTermNotations.Infix,
+                BoundTermAssociatives.LeftToRight,
+                BoundTermPrecedences.BooleanOr,
+                TermUtilities.BooleanOrOperator);
 
             AddBoundTerm(
                 defaultBoundTerms,
@@ -37,6 +50,8 @@ namespace Favalon
                 BoundTermAssociatives.RightToLeft,
                 BoundTermPrecedences.Morphism,
                 TermUtilities.LambdaArrowOperator);
+
+            TermUtilities.AddBoundTermsFromAssembly(defaultBoundTerms, typeof(object).GetAssembly());
         }
 
         public void AddBoundTermFromMethod(MethodInfo method) =>

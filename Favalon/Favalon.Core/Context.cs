@@ -23,8 +23,10 @@ namespace Favalon
         Method = 100,
         Function = 1000,
         Morphism = 3000,
-        ArithmericAddition = 5000,
-        ArithmericMultiplication = 6000,
+        BooleanOr = 5000,
+        BooleanAnd = 6000,
+        ArithmericAddition = 10000,
+        ArithmericMultiplication = 11000,
     }
 
     public struct BoundTermInformation

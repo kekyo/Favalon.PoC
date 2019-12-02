@@ -5,16 +5,44 @@ namespace LambdaCalculus
 {
     public sealed class Context
     {
-        private readonly Dictionary<string, Term> boundTerms = new Dictionary<string, Term>();
+        private readonly Context? parent;
+        private Dictionary<string, Term>? boundTerms;
+
+        public Context() =>
+            boundTerms = new Dictionary<string, Term>();
+        private Context(Context parent) =>
+            this.parent = parent;
 
         public Context NewScope() =>
-            this;   // TODO:
+            new Context(this);
 
-        public void AddBoundTerm(string identity, Term term) =>
+        public void AddBoundTerm(string identity, Term term)
+        {
+            if (boundTerms == null)
+            {
+                boundTerms = new Dictionary<string, Term>();
+            }
             boundTerms[identity] = term;
+        }
 
-        public bool TryGetBoundTerm(string identity, out Term term) =>
-            boundTerms.TryGetValue(identity, out term);
+        public Term? GetBoundTerm(string identity)
+        {
+            Context? current = this;
+            do
+            {
+                if (current.boundTerms != null)
+                {
+                    if (current.boundTerms.TryGetValue(identity, out var term))
+                    {
+                        return term;
+                    }
+                }
+                current = current.parent;
+            }
+            while (current != null);
+
+            return null;
+        }
     }
 
     public abstract class Term
@@ -30,7 +58,7 @@ namespace LambdaCalculus
             this.Identity = identity;
 
         public override Term Reduce(Context context) =>
-            context.TryGetBoundTerm(this.Identity, out var term) ?
+            context.GetBoundTerm(this.Identity) is Term term ?
                 term :
                 this;
     }

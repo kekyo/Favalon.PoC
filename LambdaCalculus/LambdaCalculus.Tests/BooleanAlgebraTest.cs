@@ -8,7 +8,7 @@ namespace LambdaCalculus
         [Test]
         public void BooleanTrue()
         {
-            var term = new BooleanTerm(true);
+            var term = Term.True();
 
             var context = new Context();
             var actual = term.Reduce(context);
@@ -19,7 +19,7 @@ namespace LambdaCalculus
         [Test]
         public void BooleanFalse()
         {
-            var term = new BooleanTerm(false);
+            var term = Term.False();
 
             var context = new Context();
             var actual = term.Reduce(context);
@@ -34,10 +34,10 @@ namespace LambdaCalculus
         public void BooleanAnd(bool result, bool lhs, bool rhs)
         {
             var term =
-                new ApplyTerm(
-                    new AndTerm(
-                        new BooleanTerm(lhs)),
-                    new BooleanTerm(rhs));
+                Term.Apply(
+                    Term.And(
+                        Term.Constant(lhs)),
+                    Term.Constant(rhs));
 
             var context = new Context();
             var actual = term.Reduce(context);
@@ -55,13 +55,13 @@ namespace LambdaCalculus
         public void BooleanAndAnd(bool result, bool lhs, bool chs, bool rhs)
         {
             var term =
-                new ApplyTerm(
-                    new AndTerm(
-                        new ApplyTerm(
-                            new AndTerm(
-                                new BooleanTerm(lhs)),
-                            new BooleanTerm(chs))),
-                    new BooleanTerm(rhs));
+                Term.Apply(
+                    Term.And(
+                        Term.Apply(
+                            Term.And(
+                                Term.Constant(lhs)),
+                            Term.Constant(chs))),
+                    Term.Constant(rhs));
 
             var context = new Context();
             var actual = term.Reduce(context);

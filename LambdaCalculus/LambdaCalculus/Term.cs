@@ -45,17 +45,69 @@ namespace LambdaCalculus
         }
     }
 
+    ////////////////////////////////////////////////////////////
+
     public abstract class Term
     {
+        public abstract Term HigherOrder { get; }
+
         public abstract Term Reduce(Context context);
+
+        //////////////////////////////////
+
+        protected static class IdentityGenerator<T>
+        {
+            public static readonly IdentityTerm Instance =
+                new IdentityTerm(typeof(T).FullName);
+        }
+
+        public static IdentityTerm Identity(string identity) =>
+            new IdentityTerm(identity);
+
+        public static BooleanTerm True() =>
+            BooleanTerm.True;
+        public static BooleanTerm False() =>
+            BooleanTerm.False;
+
+        public static BooleanTerm Constant(bool value) =>
+            value ? BooleanTerm.True : BooleanTerm.False;
+
+        public static ApplyTerm Apply(Term function, Term argument) =>
+            new ApplyTerm(function, argument);
+
+        public static LambdaTerm Lambda(string parameter, Term body) =>
+            new LambdaTerm(parameter, body);
+
+        public static AndTerm And(Term lhs) =>
+            new AndTerm(lhs);
     }
+
+    public sealed class UnspecifiedTerm : Term
+    {
+        private UnspecifiedTerm()
+        { }
+
+        public override Term HigherOrder =>
+            null!;
+
+        public override Term Reduce(Context context) =>
+            this;
+
+        public static readonly UnspecifiedTerm Instance =
+            new UnspecifiedTerm();
+    }
+
+    ////////////////////////////////////////////////////////////
 
     public sealed class IdentityTerm : Term
     {
-        public readonly string Identity;
+        public new readonly string Identity;
 
-        public IdentityTerm(string identity) =>
+        internal IdentityTerm(string identity) =>
             this.Identity = identity;
+
+        public override Term HigherOrder =>
+            UnspecifiedTerm.Instance;
 
         public override Term Reduce(Context context) =>
             context.GetBoundTerm(this.Identity) is Term term ?
@@ -73,11 +125,14 @@ namespace LambdaCalculus
         public readonly Term Function;
         public readonly Term Argument;
 
-        public ApplyTerm(Term function, Term argument)
+        internal ApplyTerm(Term function, Term argument)
         {
             this.Function = function;
             this.Argument = argument;
         }
+
+        public override Term HigherOrder =>
+            UnspecifiedTerm.Instance;
 
         public override Term Reduce(Context context)
         {
@@ -101,11 +156,14 @@ namespace LambdaCalculus
         public readonly string Parameter;
         public readonly Term Body;
 
-        public LambdaTerm(string parameter, Term body)
+        internal LambdaTerm(string parameter, Term body)
         {
             this.Parameter = parameter;
             this.Body = body;
         }
+
+        public override Term HigherOrder =>
+            UnspecifiedTerm.Instance;
 
         public override Term Reduce(Context context) =>
             new LambdaTerm(this.Parameter, this.Body.Reduce(context));
@@ -119,44 +177,43 @@ namespace LambdaCalculus
         }
     }
 
-    public abstract class Function2ArgumentsTerm : ApplicableTerm
-    {
-        public readonly Term Lhs;
-
-        public Function2ArgumentsTerm(Term lhs) =>
-            this.Lhs = lhs;
-
-        protected abstract Term Create(Term lhs);
-
-        public override sealed Term Reduce(Context context) =>
-            this.Create(this.Lhs.Reduce(context));
-    }
-
     ////////////////////////////////////////////////////////////
 
     public sealed class BooleanTerm : Term
     {
         public readonly bool Value;
 
-        public BooleanTerm(bool value) =>
+        private BooleanTerm(bool value) =>
             this.Value = value;
+
+        public override Term HigherOrder =>
+            IdentityGenerator<bool>.Instance;
 
         public override Term Reduce(Context context) =>
             this;
+
+        public static new readonly BooleanTerm True =
+            new BooleanTerm(true);
+        public static new readonly BooleanTerm False =
+            new BooleanTerm(false);
     }
 
-    public sealed class AndTerm : Function2ArgumentsTerm
+    public sealed class AndTerm : ApplicableTerm
     {
-        public AndTerm(Term lhs) :
-            base(lhs)
-        { }
+        public readonly Term Lhs;
 
-        protected override Term Create(Term lhs) =>
-            new AndTerm(lhs);
+        internal AndTerm(Term lhs) =>
+            this.Lhs = lhs;
+
+        public override Term HigherOrder =>
+           IdentityGenerator<bool>.Instance;
+
+        public override sealed Term Reduce(Context context) =>
+            new AndTerm(this.Lhs.Reduce(context));
 
         protected internal override Term? Apply(Context context, Term rhs) =>
             (this.Lhs is BooleanTerm l && rhs is BooleanTerm r) ?
-                new BooleanTerm(l.Value && r.Value) :
+                Term.Constant(l.Value && r.Value) :
                 null;
     }
 }

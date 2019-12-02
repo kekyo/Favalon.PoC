@@ -10,11 +10,11 @@ namespace LambdaCalculus
         public void LambdaCallAndFixedResult(bool result)
         {
             var term =
-                new ApplyTerm(
-                    new LambdaTerm(
+                Term.Apply(
+                    Term.Lambda(
                         "a",
-                        new BooleanTerm(result)),
-                new BooleanTerm(false));
+                        Term.Constant(result)),
+                Term.Constant(false));
 
             var context = new Context();
             var actual = term.Reduce(context);
@@ -27,11 +27,11 @@ namespace LambdaCalculus
         public void LambdaCallPassingArgument(bool result)
         {
             var term =
-                new ApplyTerm(
-                    new LambdaTerm(
+                Term.Apply(
+                    Term.Lambda(
                         "a",
-                        new IdentityTerm("a")),
-                new BooleanTerm(result));
+                        Term.Identity("a")),
+                Term.Constant(result));
 
             var context = new Context();
             var actual = term.Reduce(context);
@@ -46,19 +46,19 @@ namespace LambdaCalculus
         public void NestedLambdaCallPassingArgument(bool result, bool lhs, bool rhs)
         {
             var term =
-                new ApplyTerm(
-                    new ApplyTerm(
+                Term.Apply(
+                    Term.Apply(
                         // a -> b -> a && b
-                        new LambdaTerm(
+                        Term.Lambda(
                             "a",
-                            new LambdaTerm(
+                            Term.Lambda(
                                 "b",
-                                new ApplyTerm(
-                                    new AndTerm(
-                                        new IdentityTerm("a")),
-                                    new IdentityTerm("b")))),
-                        new BooleanTerm(lhs)),
-                    new BooleanTerm(rhs));
+                                Term.Apply(
+                                    Term.And(
+                                        Term.Identity("a")),
+                                    Term.Identity("b")))),
+                        Term.Constant(lhs)),
+                    Term.Constant(rhs));
 
             var context = new Context();
             var actual = term.Reduce(context);

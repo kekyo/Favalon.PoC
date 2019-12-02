@@ -156,6 +156,42 @@ namespace LambdaCalculus
         }
     }
 
+    public sealed class LambdaArrowTerm : ApplicableTerm
+    {
+        private LambdaArrowTerm()
+        {
+        }
+
+        public override Term HigherOrder =>
+            UnspecifiedTerm.Instance;
+
+        public override Term Reduce(Context context) =>
+            this;
+
+        protected internal override Term? Apply(Context context, Term rhs) =>
+            new LambdaArrowLeftTerm(((IdentityTerm)rhs).Identity);
+
+        private sealed class LambdaArrowLeftTerm : ApplicableTerm
+        {
+            public readonly string Parameter;
+
+            public LambdaArrowLeftTerm(string parameter) =>
+                this.Parameter = parameter;
+
+            public override Term HigherOrder =>
+                UnspecifiedTerm.Instance;
+
+            public override Term Reduce(Context context) =>
+                this;
+
+            protected internal override Term? Apply(Context context, Term rhs) =>
+                Term.Lambda(this.Parameter, rhs);
+        }
+
+        public static LambdaArrowTerm Instance =
+            new LambdaArrowTerm();
+    }
+
     public sealed class LambdaTerm : ApplicableTerm
     {
         public readonly string Parameter;

@@ -63,9 +63,9 @@ namespace LambdaCalculus
                 this;
     }
 
-    public abstract class CallableTerm : Term
+    public abstract class ApplicableTerm : Term
     {
-        public abstract Term Call(Context context, Term rhs);
+        public abstract Term Apply(Context context, Term rhs);
     }
 
     public sealed class ApplyTerm : Term
@@ -81,12 +81,12 @@ namespace LambdaCalculus
 
         public override Term Reduce(Context context)
         {
-            var argument = this.Argument.Reduce(context);
             var function = this.Function.Reduce(context);
+            var argument = this.Argument.Reduce(context);
 
-            if (function is CallableTerm callable)
+            if (function is ApplicableTerm applicable)
             {
-                return callable.Call(context, argument);
+                return applicable.Apply(context, argument);
             }
             else
             {
@@ -95,7 +95,7 @@ namespace LambdaCalculus
         }
     }
 
-    public sealed class LambdaTerm : CallableTerm
+    public sealed class LambdaTerm : ApplicableTerm
     {
         public readonly string Parameter;
         public readonly Term Body;
@@ -109,7 +109,7 @@ namespace LambdaCalculus
         public override Term Reduce(Context context) =>
             new LambdaTerm(this.Parameter, this.Body.Reduce(context));
 
-        public override Term Call(Context context, Term rhs)
+        public override Term Apply(Context context, Term rhs)
         {
             var newScope = context.NewScope();
 

@@ -1,21 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
 namespace Favalon.Internal
 {
-    internal static partial class ReflectionUtilities
+    internal static class ReflectionUtilities
     {
-        public static IEnumerable<MethodInfo> EnumerableAllPublicStaticMethods(this Assembly assembly) =>
-            assembly.GetTypes().
-            Where(type => (type.IsPublic || type.IsNestedPublic) && !type.IsGenericType).
-            SelectMany(type => type.GetMethods().Where(method => method.IsPublic && method.IsStatic && !method.IsGenericMethod));
-
-        public static string GetFullName(this MemberInfo member)
+        public static string GetFullName(this MemberInfo member, bool containsGenericSignature = true)
         {
-            var parentNames = (member.DeclaringType as Type)?.GetFullName() ??
-                member.AsType()?.Namespace ?? string.Empty;
+            var type = member.AsType();
+            if (type is Type ? type.IsGenericParameter : false)
+            {
+                return type!.Name;
+            }
+
+            var parentNames = member.DeclaringType?.GetFullName().Append(".") ??
+                type?.Namespace.Append(".") ??
+                string.Empty;
             var name = member.Name.IndexOf('`') switch
             {
                 -1 => member.Name,
@@ -24,36 +25,27 @@ namespace Favalon.Internal
 
             switch (member)
             {
-#if NET35 || NET40 || NET45
-                case Type type when type.IsGenericType:
-#else
-                case TypeInfo type when type.IsGenericType:
-#endif
-                    var gta = Join(
+                case MemberInfo(Type _) when containsGenericSignature && type!.IsGenericType():
+                    var gta = StringUtilities.Join(
                         ",",
-                        type.GetGenericArguments().Select(GetFullName));
-                    return $"{parentNames}.{name}<{gta}>";
+                        type!.GetGenericArguments().Select(ga => GetFullName(ga)));
+                    return $"{parentNames}{name}<{gta}>";
 
-                case MethodInfo method when method.IsGenericMethod:
-                    var gma = Join(
+                case MethodInfo method when containsGenericSignature && method.IsGenericMethod:
+                    var gma = StringUtilities.Join(
                         ",",
-                        method.GetGenericArguments().Select(GetFullName));
-                    return $"{parentNames}.{name}<{gma}>";
+                        method.GetGenericArguments().Select(ga => GetFullName(ga)));
+                    return $"{parentNames}{name}<{gma}>";
 
                 default:
-                    return $"{parentNames}.{name}";
+                    return $"{parentNames}{name}";
             }
         }
 
-        public static string GetFullName(this Type type) =>
-            type.AsMemberInfo().GetFullName();
+        public static string GetFullName(this Type type, bool containsGenericSignature = true) =>
+            type.AsMemberInfo().GetFullName(containsGenericSignature);
 
-#if NETSTANDARD1_0
         public static string GetIdentity(this Delegate dlg) =>
-            $"&{dlg.GetHashCode()}";
-#else
-        public static string GetIdentity(this Delegate dlg) =>
-            $"&{dlg.Method.GetFullName()}";
-#endif
+            $"&{dlg.GetMethodInfo().GetFullName()}";
     }
 }

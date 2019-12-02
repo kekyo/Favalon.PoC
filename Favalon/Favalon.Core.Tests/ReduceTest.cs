@@ -10,20 +10,20 @@ namespace Favalon
         // Church numeral calculas
         private static readonly Term one =
             Term.Function(
-                Term.Identity("p"),
+                Term.BoundIdentity("p"),
                 Term.Function(
-                    Term.Identity("x"),
+                    Term.BoundIdentity("x"),
                     Term.Apply(
                         Term.Identity("p"),
                         Term.Identity("x"))));
 
         private static readonly Term increment =
             Term.Function(
-                Term.Identity("n"),
+                Term.BoundIdentity("n"),
                 Term.Function(
-                    Term.Identity("p"),
+                    Term.BoundIdentity("p"),
                     Term.Function(
-                        Term.Identity("x"),
+                        Term.BoundIdentity("x"),
                         Term.Apply(
                             Term.Identity("p"),
                             Term.Apply(
@@ -34,9 +34,9 @@ namespace Favalon
 
         private static readonly Term add =
             Term.Function(
-                Term.Identity("m"),
+                Term.BoundIdentity("m"),
                 Term.Function(
-                    Term.Identity("n"),
+                    Term.BoundIdentity("n"),
                     Term.Apply(
                         Term.Apply(
                             Term.Identity("n"),

@@ -27,6 +27,44 @@ namespace Favalon
         ArithmericMultiplication = 6000,
     }
 
+    public struct BoundTermInformation
+    {
+        public readonly BoundTermNotations Notation;
+        public readonly BoundTermAssociatives Associative;
+        public readonly BoundTermPrecedences? Precedence;
+        public readonly Term Term;
+
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        internal BoundTermInformation(
+            BoundTermNotations notation,
+            BoundTermAssociatives associative,
+            BoundTermPrecedences? precedence,
+            Term term)
+        {
+            this.Notation = notation;
+            this.Associative = associative;
+            this.Precedence = precedence;
+            this.Term = term;
+        }
+
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public void Deconstruct(
+            out BoundTermNotations notation,
+            out BoundTermAssociatives associative,
+            out BoundTermPrecedences? precedence,
+            out Term term)
+        {
+            notation = this.Notation;
+            associative = this.Associative;
+            precedence = this.Precedence;
+            term = this.Term;
+        }
+    }
+
     public class Context
     {
         private protected readonly ManagedDictionary<string, List<BoundTermInformation>> boundTerms;
@@ -37,12 +75,12 @@ namespace Favalon
         internal Context Clone() =>
             new Context(boundTerms.Clone());
 
-        private protected static void InternalAddBoundTerm(
+        internal static void AddBoundTerm(
             ManagedDictionary<string, List<BoundTermInformation>> boundTerms,
             string identity,
             BoundTermNotations notation,
             BoundTermAssociatives associative,
-            BoundTermPrecedences precedence,
+            BoundTermPrecedences? precedence,
             Term term)
         {
             if (!boundTerms.TryGetValue(identity, out var terms))
@@ -59,15 +97,15 @@ namespace Favalon
             BoundTermAssociatives associative,
             int precedence,
             Term term) =>
-            InternalAddBoundTerm(boundTerms, identity, notation, associative, (BoundTermPrecedences)precedence, term);
+            AddBoundTerm(boundTerms, identity, notation, associative, (BoundTermPrecedences)precedence, term);
 
         public void AddBoundTerm(
             string identity,
             BoundTermNotations notation,
             BoundTermAssociatives associative,
-            BoundTermPrecedences precedence,
+            BoundTermPrecedences? precedence,
             Term term) =>
-            InternalAddBoundTerm(boundTerms, identity, notation, associative, precedence, term);
+            AddBoundTerm(boundTerms, identity, notation, associative, precedence, term);
 
         public BoundTermInformation[]? LookupBoundTerms(string identity) =>
             boundTerms.TryGetValue(identity, out var terms) ? terms.ToArray() : null;
@@ -111,5 +149,8 @@ namespace Favalon
 
         public Term Call(CallableTerm term, Term argument) =>
             term.VisitCall(this, argument);
+
+        public Term Infer(Term term) =>
+            term.VisitInfer(this);
     }
 }

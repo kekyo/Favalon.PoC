@@ -7,7 +7,7 @@ namespace Favalon.Tokens
     partial class Token
     {
         public static IEnumerable<char> OperatorChars =>
-            Characters.operatorChars;
+            StringUtilities.operatorChars;
 
         public static IdentityToken Identity(string identity) =>
             new IdentityToken(identity);
@@ -18,12 +18,12 @@ namespace Favalon.Tokens
             NumericalSignToken.Minus;
 
         public static OpenParenthesisToken Open(char symbol) =>
-            Characters.IsOpenParenthesis(symbol) is ParenthesisPair parenthesis ?
+            StringUtilities.IsOpenParenthesis(symbol) is ParenthesisPair parenthesis ?
                 new OpenParenthesisToken(parenthesis) :
                 throw new InvalidOperationException();
 
         public static CloseParenthesisToken Close(char symbol) =>
-            Characters.IsCloseParenthesis(symbol) is ParenthesisPair parenthesis ?
+            StringUtilities.IsCloseParenthesis(symbol) is ParenthesisPair parenthesis ?
                 new CloseParenthesisToken(parenthesis) :
                 throw new InvalidOperationException();
 

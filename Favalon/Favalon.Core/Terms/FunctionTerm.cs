@@ -7,19 +7,19 @@ namespace Favalon.Terms
     {
         public readonly Term Body;
 
-        internal FunctionTerm(IdentityTerm parameter, Term body)
+        internal FunctionTerm(BoundIdentityTerm parameter, Term body)
         {
             this.Parameter = parameter;
             this.Body = body;
         }
 
-        public override IdentityTerm Parameter { get; }
+        public override BoundIdentityTerm Parameter { get; }
 
         protected internal override Term VisitReplace(string identity, Term replacement) =>
-            (this.Parameter is IdentityTerm parameter && parameter.Name == identity) ?
+            (this.Parameter.Name == identity) ?
                 this :  // NOT applicable
                 new FunctionTerm(
-                    (IdentityTerm)this.Parameter.VisitReplace(identity, replacement),
+                    (BoundIdentityTerm)this.Parameter.VisitReplace(identity, replacement),
                     this.Body.VisitReplace(identity, replacement));
 
         protected internal override Term VisitCall(Context context, Term argument) =>
@@ -41,7 +41,7 @@ namespace Favalon.Terms
         protected internal override string VisitTermString(bool includeTermName) =>
             $"{this.Parameter.ToString(includeTermName)} -> {this.Body.ToString(includeTermName)}";
 
-        public void Deconstruct(out Term parameter, out Term body)
+        public void Deconstruct(out BoundIdentityTerm parameter, out Term body)
         {
             parameter = this.Parameter;
             body = this.Body;

@@ -5,12 +5,18 @@ namespace Favalon.Terms
     [DebuggerDisplay("{Readable}")]
     public abstract partial class Term
     {
+        public virtual Term HigherOrder { get; } =
+            null!; // TODO:
+
         internal virtual Term VisitUnveil() =>
             this;
 
         protected internal abstract Term VisitReplace(string identity, Term replacement);
 
         protected internal abstract Term VisitReduce(Context context);
+
+        protected internal virtual Term VisitInfer(Context context) =>
+            this; // TODO:
 
         protected internal abstract string VisitTermString(bool includeTermName);
 

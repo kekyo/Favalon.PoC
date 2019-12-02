@@ -68,5 +68,21 @@ namespace LambdaCalculus
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
+
+        [TestCase(true, "a")]
+        [TestCase(false, "b")]
+        public void If(bool condition, string result)
+        {
+            var term =
+                Term.If(
+                    Term.Constant(condition),
+                    Term.Identity("a"),
+                    Term.Identity("b"));
+
+            var context = new Context();
+            var actual = term.Reduce(context);
+
+            Assert.AreEqual(result, ((IdentityTerm)actual).Identity);
+        }
     }
 }

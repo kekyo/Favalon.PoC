@@ -80,6 +80,11 @@ namespace LambdaCalculus
 
         public static AndTerm And(Term lhs) =>
             new AndTerm(lhs);
+        public static Term And(Term lhs, Term rhs) =>
+            new ApplyTerm(new AndTerm(lhs), rhs);
+
+        public static Term If(Term condition, Term then, Term els) =>
+            new ApplyTerm(new ApplyTerm(new IfTerm(condition), then), els);
     }
 
     public sealed class UnspecifiedTerm : Term
@@ -215,5 +220,59 @@ namespace LambdaCalculus
             (this.Lhs is BooleanTerm l && rhs is BooleanTerm r) ?
                 Term.Constant(l.Value && r.Value) :
                 null;
+    }
+
+    public sealed class IfTerm : ApplicableTerm
+    {
+        public readonly Term Condition;
+
+        internal IfTerm(Term condition) =>
+            this.Condition = condition;
+
+        public override Term HigherOrder =>
+           UnspecifiedTerm.Instance;
+
+        public override sealed Term Reduce(Context context) =>
+            new IfTerm(this.Condition.Reduce(context));
+
+        protected internal override Term? Apply(Context context, Term rhs) =>
+            (this.Condition is BooleanTerm c) ?
+                (c.Value ? (Term)new ThenTerm(rhs) : ElseTerm.Instance) :
+                null;
+
+        private sealed class ThenTerm : ApplicableTerm
+        {
+            public readonly Term Then;
+
+            public ThenTerm(Term then) =>
+                this.Then = then;
+
+            public override Term HigherOrder =>
+                UnspecifiedTerm.Instance;
+
+            public override Term Reduce(Context context) =>
+                this;
+
+            protected internal override Term? Apply(Context context, Term rhs) =>
+                this.Then;
+        }
+
+        private sealed class ElseTerm : ApplicableTerm
+        {
+            private ElseTerm()
+            { }
+
+            public override Term HigherOrder =>
+                UnspecifiedTerm.Instance;
+
+            public override Term Reduce(Context context) =>
+                this;
+
+            protected internal override Term? Apply(Context context, Term rhs) =>
+                rhs;
+
+            public static readonly ElseTerm Instance =
+                new ElseTerm();
+        }
     }
 }

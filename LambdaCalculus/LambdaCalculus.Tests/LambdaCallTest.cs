@@ -53,7 +53,10 @@ namespace LambdaCalculus
                             "a",
                             new LambdaTerm(
                                 "b",
-                                new AndTerm(new IdentityTerm("a"), new IdentityTerm("b")))),
+                                new ApplyTerm(
+                                    new AndTerm(
+                                        new IdentityTerm("a")),
+                                    new IdentityTerm("b")))),
                         new BooleanTerm(lhs)),
                     new BooleanTerm(rhs));
 

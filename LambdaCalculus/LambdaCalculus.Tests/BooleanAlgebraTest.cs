@@ -34,8 +34,9 @@ namespace LambdaCalculus
         public void BooleanAnd(bool result, bool lhs, bool rhs)
         {
             var term =
-                new AndTerm(
-                    new BooleanTerm(lhs),
+                new ApplyTerm(
+                    new AndTerm(
+                        new BooleanTerm(lhs)),
                     new BooleanTerm(rhs));
 
             var context = new Context();
@@ -54,10 +55,12 @@ namespace LambdaCalculus
         public void BooleanAndAnd(bool result, bool lhs, bool chs, bool rhs)
         {
             var term =
-                new AndTerm(
+                new ApplyTerm(
                     new AndTerm(
-                        new BooleanTerm(lhs),
-                        new BooleanTerm(chs)),
+                        new ApplyTerm(
+                            new AndTerm(
+                                new BooleanTerm(lhs)),
+                            new BooleanTerm(chs))),
                     new BooleanTerm(rhs));
 
             var context = new Context();

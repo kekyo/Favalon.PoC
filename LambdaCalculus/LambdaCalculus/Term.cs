@@ -112,10 +112,28 @@ namespace LambdaCalculus
         public override Term Apply(Context context, Term rhs)
         {
             var newScope = context.NewScope();
-
             newScope.AddBoundTerm(this.Parameter, rhs);
+
             return this.Body.Reduce(newScope);
         }
+    }
+
+    public abstract class FunctionTerm : ApplicableTerm
+    {
+        public readonly Term Lhs;
+
+        public FunctionTerm(Term lhs) =>
+            this.Lhs = lhs;
+
+        protected abstract Term Create(Term lhs);
+
+        public override sealed Term Reduce(Context context) =>
+            this.Create(this.Lhs.Reduce(context));
+
+        public override Term Apply(Context context, Term rhs) =>
+            this.Apply(context, this.Lhs, rhs);
+
+        protected abstract Term Apply(Context context, Term lhs, Term rhs);
     }
 
     ////////////////////////////////////////////////////////////
@@ -131,12 +149,12 @@ namespace LambdaCalculus
             this;
     }
 
-    public sealed class AndTerm : Term
+    public sealed class AndTerm2 : Term
     {
         public readonly Term Lhs;
         public readonly Term Rhs;
 
-        public AndTerm(Term lhs, Term rhs)
+        public AndTerm2(Term lhs, Term rhs)
         {
             this.Lhs = lhs;
             this.Rhs = rhs;
@@ -146,13 +164,36 @@ namespace LambdaCalculus
         {
             var lhs = this.Lhs.Reduce(context);
             var rhs = this.Rhs.Reduce(context);
+
             if (lhs is BooleanTerm l && rhs is BooleanTerm r)
             {
                 return new BooleanTerm(l.Value && r.Value);
             }
             else
             {
-                return new AndTerm(lhs, rhs);
+                return new AndTerm2(lhs, rhs);
+            }
+        }
+    }
+
+    public sealed class AndTerm : FunctionTerm
+    {
+        public AndTerm(Term lhs) :
+            base(lhs)
+        { }
+
+        protected override Term Create(Term lhs) =>
+            new AndTerm(lhs);
+
+        protected override Term Apply(Context context, Term lhs, Term rhs)
+        {
+            if (lhs is BooleanTerm l && rhs is BooleanTerm r)
+            {
+                return new BooleanTerm(l.Value && r.Value);
+            }
+            else
+            {
+                return new ApplyTerm(new AndTerm(lhs), rhs);
             }
         }
     }

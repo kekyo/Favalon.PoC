@@ -235,7 +235,7 @@ namespace LambdaCalculus
                 this.Parameter = parameter;
 
             public override Term HigherOrder =>
-                UnspecifiedTerm.Instance;
+                Lambda("?", UnspecifiedTerm.Instance);
 
             public override Term Reduce(Context context) =>
                 this;
@@ -263,7 +263,7 @@ namespace LambdaCalculus
         }
 
         public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
+            Body.HigherOrder;
 
         public override Term Reduce(Context context) =>
             new LambdaTerm(this.Parameter, this.Body.Reduce(context));

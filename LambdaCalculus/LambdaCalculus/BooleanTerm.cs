@@ -85,4 +85,20 @@ namespace LambdaCalculus
                 this.Body.Replace(parameter, replacement) :
                 this;   // Shadowed
     }
+
+    public sealed class IdentityTerm : Term
+    {
+        public readonly string Identity;
+
+        public IdentityTerm(string identity) =>
+            this.Identity = identity;
+
+        public override Term Reduce() =>
+            this;
+
+        public override Term Replace(string parameter, Term replacement) =>
+            (parameter == this.Identity) ?
+                replacement :
+                this;
+    }
 }

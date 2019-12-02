@@ -64,6 +64,7 @@ namespace LambdaCalculus
         }
 
         [TestCase(true)]
+        [TestCase(false)]
         public void LambdaCallAndFixedResult(bool result)
         {
             var term =
@@ -72,6 +73,22 @@ namespace LambdaCalculus
                         "a",
                         new BooleanTerm(result)),
                 new BooleanTerm(false));
+
+            var actual = term.Reduce();
+
+            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void LambdaCallPassingArgument(bool result)
+        {
+            var term =
+                new ApplyTerm(
+                    new LambdaTerm(
+                        "a",
+                        new IdentityTerm("a")),
+                new BooleanTerm(result));
 
             var actual = term.Reduce();
 

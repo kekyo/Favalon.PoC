@@ -62,5 +62,20 @@ namespace LambdaCalculus
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
+
+        [TestCase(true)]
+        public void LambdaCallAndFixedResult(bool result)
+        {
+            var term =
+                new ApplyTerm(
+                    new LambdaTerm(
+                        "a",
+                        new BooleanTerm(result)),
+                new BooleanTerm(false));
+
+            var actual = term.Reduce();
+
+            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        }
     }
 }

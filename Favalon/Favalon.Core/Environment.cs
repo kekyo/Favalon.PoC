@@ -13,6 +13,21 @@ namespace Favalon
 
         static Environment()
         {
+            AddBoundTerm(
+                defaultBoundTerms,
+                "true",
+                BoundTermNotations.Prefix,
+                BoundTermAssociatives.LeftToRight,
+                null,
+                BooleanTerm.True);
+            AddBoundTerm(
+                defaultBoundTerms,
+                "false",
+                BoundTermNotations.Prefix,
+                BoundTermAssociatives.LeftToRight,
+                null,
+                BooleanTerm.False);
+
             TermUtilities.AddBoundTermsFromAssembly(defaultBoundTerms, typeof(object).GetAssembly());
 
             AddBoundTerm(

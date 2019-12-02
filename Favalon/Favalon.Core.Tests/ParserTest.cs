@@ -682,5 +682,33 @@ namespace Favalon
                         Term.Identity("def")) },
                 actual);
         }
+
+        //////////////////////////////////////////////////////////////
+
+        [Test]
+        public void BooleanTrueSymbol()
+        {
+            var actual = Environment.Create().
+                Parse(new[] { Token.Identity("true") }).
+                ToArray();
+
+            Assert.AreEqual(
+                new[] {
+                    Term.Constant(true) },
+                actual);
+        }
+
+        [Test]
+        public void BooleanFalseSymbol()
+        {
+            var actual = Environment.Create().
+                Parse(new[] { Token.Identity("false") }).
+                ToArray();
+
+            Assert.AreEqual(
+                new[] {
+                    Term.Constant(false) },
+                actual);
+        }
     }
 }

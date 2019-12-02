@@ -35,6 +35,8 @@ namespace Favalon.Terms
                 Type gtd when gtd.IsGenericTypeDefinition() => TypeConstructor(gtd),
                 Type type => ValueConstructor(type),
                 MethodBase method => new MethodTerm(method),
+                true => BooleanTerm.True,
+                false => BooleanTerm.False,
                 _ => new ConstantTerm(constant)
             };
     }

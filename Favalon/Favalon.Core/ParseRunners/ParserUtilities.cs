@@ -37,9 +37,15 @@ namespace Favalon.ParseRunners
             }
         }
 
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static Term? HideTerm(Term? term) =>
             term is ApplyTerm apply ? new HidedApplyTerm(apply) : term;
 
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static ConstantTerm GetNumericConstant(string value, NumericalSignes preSign) =>
             new ConstantTerm(int.Parse(value, CultureInfo.InvariantCulture) * (int)preSign);
 
@@ -104,19 +110,19 @@ namespace Favalon.ParseRunners
                     if (runnerContext.CurrentTerm is ApplyTerm(Term left, Term right))
                     {
                         runnerContext.SetTerm(left);
-                        runnerContext.CombineAfter(new IdentityTerm(identity.Identity));
+                        runnerContext.CombineAfter(terms[0].Term);
                         runnerContext.CombineAfter(right);
                     }
                     // "abc +" ==> "+ abc"
                     else
                     {
-                        runnerContext.CombineBefore(new IdentityTerm(identity.Identity));
+                        runnerContext.CombineBefore(terms[0].Term);
                     }
                 }
                 else
                 {
                     // Will not swap
-                    runnerContext.CombineAfter(new IdentityTerm(identity.Identity));
+                    runnerContext.CombineAfter(terms[0].Term);
                 }
 
                 // Pre marking RTL

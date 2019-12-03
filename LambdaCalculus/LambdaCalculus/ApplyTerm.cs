@@ -19,7 +19,7 @@
 
         public override Term HigherOrder =>
             this.Function is ApplicableTerm function ?
-                function.HigherOrder :
+                ((LambdaTerm)function.HigherOrder).Body :
                 UnspecifiedTerm.Instance;  // TODO: ???
 
         public override Term Reduce(ReduceContext context)
@@ -44,7 +44,7 @@
             if (function is ApplicableTerm applicable &&
                 applicable.InferForApply(context, this.Argument) is Term term)
             {
-                return term;
+                return new ApplyTerm(term, this.Argument.Infer(context));
             }
             else
             {

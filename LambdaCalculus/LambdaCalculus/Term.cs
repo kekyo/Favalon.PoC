@@ -61,7 +61,7 @@ namespace LambdaCalculus
             new ApplyTerm(function, argument);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
-            new LambdaTerm(parameter, body);
+            new LambdaTerm(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);
 
         public static AndTerm And(Term lhs, Term rhs) =>
             new AndTerm(lhs, rhs);

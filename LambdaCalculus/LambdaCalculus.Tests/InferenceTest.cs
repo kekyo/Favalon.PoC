@@ -30,7 +30,11 @@ namespace LambdaCalculus
             var environment = Environment.Create();
             var actual = environment.Infer(term);
 
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            var lambda = (LambdaTerm)actual;
+            var higherOrder = (LambdaTerm)lambda.HigherOrder;
+
+            Assert.IsTrue(higherOrder.Parameter is PlaceholderTerm);
+            Assert.AreEqual(Term.Type<bool>(), higherOrder.Body);
         }
 
         [Test]
@@ -46,8 +50,12 @@ namespace LambdaCalculus
             var actual = environment.Infer(term);
 
             var lambda = (LambdaTerm)actual;
+            var higherOrder = (LambdaTerm)lambda.HigherOrder;
 
-            Assert.AreEqual(0, lambda.Body.HigherOrder is PlaceholderTerm placeholder ? placeholder.Index : -1);
+            Assert.IsTrue(higherOrder.Parameter is PlaceholderTerm);
+            Assert.IsTrue(higherOrder.Body is PlaceholderTerm);
+
+            Assert.AreEqual(higherOrder.Parameter, higherOrder.Body);
         }
 
         [Test]

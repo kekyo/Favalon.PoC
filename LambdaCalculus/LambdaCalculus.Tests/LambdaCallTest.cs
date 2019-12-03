@@ -74,9 +74,8 @@ namespace LambdaCalculus
                             "a",
                             Term.Lambda(
                                 "b",
-                                Term.Apply(
-                                    Term.And(
-                                        Term.Identity("a")),
+                                Term.And(
+                                    Term.Identity("a"),
                                     Term.Identity("b")))),
                         Term.Constant(lhs)),
                     Term.Constant(rhs));

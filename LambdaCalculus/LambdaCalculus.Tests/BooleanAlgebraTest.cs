@@ -34,9 +34,8 @@ namespace LambdaCalculus
         public void BooleanAnd(bool result, bool lhs, bool rhs)
         {
             var term =
-                Term.Apply(
-                    Term.And(
-                        Term.Constant(lhs)),
+                Term.And(
+                    Term.Constant(lhs),
                     Term.Constant(rhs));
 
             var context = new Context();
@@ -55,12 +54,10 @@ namespace LambdaCalculus
         public void BooleanAndAnd(bool result, bool lhs, bool chs, bool rhs)
         {
             var term =
-                Term.Apply(
+                Term.And(
                     Term.And(
-                        Term.Apply(
-                            Term.And(
-                                Term.Constant(lhs)),
-                            Term.Constant(chs))),
+                        Term.Constant(lhs),
+                        Term.Constant(chs)),
                     Term.Constant(rhs));
 
             var context = new Context();

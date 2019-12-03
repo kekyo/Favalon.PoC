@@ -9,12 +9,12 @@ namespace LambdaCalculus
         public void ConstantTest()
         {
             var term =
-                Term.Constant(123);
+                Term.Constant(false);
 
             var context = new Context();
             var actual = term.Infer(context);
 
-            Assert.AreEqual(Term.Identity(typeof(int)), actual.HigherOrder);
+            Assert.AreEqual(Term.Identity(typeof(bool)), actual.HigherOrder);
         }
     }
 }

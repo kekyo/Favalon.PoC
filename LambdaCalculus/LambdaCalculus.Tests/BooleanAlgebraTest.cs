@@ -6,7 +6,7 @@ namespace LambdaCalculus
     class BooleanAlgebraTest
     {
         [Test]
-        public void BooleanTrue()
+        public void TrueTerm()
         {
             var term = Term.True();
 
@@ -17,7 +17,7 @@ namespace LambdaCalculus
         }
 
         [Test]
-        public void BooleanFalse()
+        public void FalseTerm()
         {
             var term = Term.False();
 
@@ -31,7 +31,7 @@ namespace LambdaCalculus
         [TestCase(false, false, true)]
         [TestCase(false, true, false)]
         [TestCase(false, false, false)]
-        public void BooleanAnd(bool result, bool lhs, bool rhs)
+        public void AndTerm(bool result, bool lhs, bool rhs)
         {
             var term =
                 Term.And(
@@ -51,7 +51,7 @@ namespace LambdaCalculus
         [TestCase(false, false, false, true)]
         [TestCase(false, true, false, false)]
         [TestCase(false, false, false, false)]
-        public void BooleanAndAnd(bool result, bool lhs, bool chs, bool rhs)
+        public void DoubleAndTerm(bool result, bool lhs, bool chs, bool rhs)
         {
             var term =
                 Term.And(
@@ -66,14 +66,52 @@ namespace LambdaCalculus
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
 
+        [TestCase(true, true, true)]
+        [TestCase(false, false, true)]
+        [TestCase(false, true, false)]
+        [TestCase(false, false, false)]
+        public void AndOperatorTerm(bool result, bool lhs, bool rhs)
+        {
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        LambdaCalculus.AndOperatorTerm.Instance,
+                        Term.Constant(lhs)),
+                    Term.Constant(rhs));
+
+            var context = new Context();
+            var actual = term.Reduce(context);
+
+            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        }
+
         [TestCase(true, "a")]
         [TestCase(false, "b")]
-        public void If(bool condition, string result)
+        public void IfTerm(bool condition, string result)
         {
             var term =
                 Term.If(
                     Term.Constant(condition),
                     Term.Identity("a"),
+                    Term.Identity("b"));
+
+            var context = new Context();
+            var actual = term.Reduce(context);
+
+            Assert.AreEqual(result, ((IdentityTerm)actual).Identity);
+        }
+
+        [TestCase(true, "a")]
+        [TestCase(false, "b")]
+        public void IfOperatorTerm(bool condition, string result)
+        {
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Apply(
+                            LambdaCalculus.IfOperatorTerm.Instance,
+                            Term.Constant(condition)),
+                        Term.Identity("a")),
                     Term.Identity("b"));
 
             var context = new Context();

@@ -47,13 +47,22 @@ namespace LambdaCalculus
 
     ////////////////////////////////////////////////////////////
 
-    public abstract class Term
+    public abstract class Term :
+        IEquatable<Term?>
     {
         public abstract Term HigherOrder { get; }
 
         public abstract Term Reduce(Context context);
 
         public abstract Term Infer(Context context);
+
+        public abstract bool Equals(Term? other);
+
+        bool IEquatable<Term?>.Equals(Term? other) =>
+            this.Equals(other);
+
+        public override bool Equals(object? other) =>
+            this.Equals(other as Term);
 
         //////////////////////////////////
 
@@ -75,6 +84,9 @@ namespace LambdaCalculus
 
         public static IdentityTerm Identity(string identity) =>
             new IdentityTerm(identity, UnspecifiedTerm.Instance);
+
+        public static UnspecifiedTerm Unspecified() =>
+            UnspecifiedTerm.Instance;
 
         public static IdentityTerm Kind() =>
             kind;
@@ -117,6 +129,9 @@ namespace LambdaCalculus
         public override Term Infer(Context context) =>
             this;
 
+        public override bool Equals(Term? other) =>
+            other is UnspecifiedTerm;
+
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();
     }
@@ -144,6 +159,9 @@ namespace LambdaCalculus
             context.GetBoundTerm(this.Identity) is Term term ?
                 term.Infer(context) :
                 this;
+
+        public override bool Equals(Term? other) =>
+            other is IdentityTerm rhs ? this.Identity.Equals(rhs.Identity) : false;
     }
 
     public sealed class ConstantTerm : Term
@@ -161,6 +179,9 @@ namespace LambdaCalculus
 
         public override Term Infer(Context context) =>
             this;
+
+        public override bool Equals(Term? other) =>
+            other is ConstantTerm rhs ? this.Value.Equals(rhs.Value) : false;
     }
 
     public abstract class ApplicableTerm : Term
@@ -204,11 +225,16 @@ namespace LambdaCalculus
 
             return new ApplyTerm(function, argument);
         }
+
+        public override bool Equals(Term? other) =>
+            other is ApplyTerm rhs ?
+                (this.Function.Equals(rhs.Function) && this.Argument.Equals(rhs.Argument)) :
+                false;
     }
 
-    public sealed class LambdaOPeratorTerm : ApplicableTerm
+    public sealed class LambdaOperatorTerm : ApplicableTerm
     {
-        private LambdaOPeratorTerm()
+        private LambdaOperatorTerm()
         { }
 
         public override Term HigherOrder =>
@@ -222,6 +248,12 @@ namespace LambdaCalculus
 
         public override Term Infer(Context context) =>
             this;
+
+        public override bool Equals(Term? other) =>
+            other is LambdaOperatorTerm;
+
+        public static LambdaOperatorTerm Instance =
+            new LambdaOperatorTerm();
 
         private sealed class LambdaArrowParameterTerm : ApplicableTerm
         {
@@ -241,10 +273,10 @@ namespace LambdaCalculus
 
             public override Term Infer(Context context) =>
                 this;
-        }
 
-        public static LambdaOPeratorTerm Instance =
-            new LambdaOPeratorTerm();
+            public override bool Equals(Term? other) =>
+                other is LambdaArrowParameterTerm rhs ? this.Parameter.Equals(rhs.Parameter) : false;
+        }
     }
 
     public sealed class LambdaTerm : ApplicableTerm
@@ -274,14 +306,19 @@ namespace LambdaCalculus
 
         public override Term Infer(Context context) =>
             new LambdaTerm(this.Parameter, this.Body.Infer(context));
+
+        public override bool Equals(Term? other) =>
+            other is LambdaTerm rhs ?
+                (this.Parameter.Equals(rhs.Parameter) && this.Body.Equals(rhs.Body)) :
+                false;
     }
 
     ////////////////////////////////////////////////////////////
 
     public sealed class BooleanTerm : Term
     {
-        internal static readonly IdentityTerm higherOrder =
-            Identity(typeof(bool));
+        internal static readonly Term higherOrder =
+            Constant(typeof(bool));
 
         public readonly bool Value;
 
@@ -296,6 +333,9 @@ namespace LambdaCalculus
 
         public override Term Infer(Context context) =>
             this;
+
+        public override bool Equals(Term? other) =>
+            other is BooleanTerm rhs ? this.Value.Equals(rhs.Value) : false;
 
         public static new readonly BooleanTerm True =
             new BooleanTerm(true);
@@ -320,6 +360,9 @@ namespace LambdaCalculus
         public override Term Infer(Context context) =>
             this;
 
+        public override bool Equals(Term? other) =>
+            other is AndOperatorTerm;
+
         public static readonly AndOperatorTerm Instance =
             new AndOperatorTerm();
 
@@ -341,6 +384,9 @@ namespace LambdaCalculus
 
             public override Term Infer(Context context) =>
                 new AndLeftTerm(this.Lhs.Infer(context));
+
+            public override bool Equals(Term? other) =>
+                other is AndLeftTerm rhs ? this.Lhs.Equals(rhs.Lhs) : false;
         }
     }
 
@@ -391,6 +437,11 @@ namespace LambdaCalculus
 
         public override Term Infer(Context context) =>
             new AndTerm(this.Lhs.Infer(context), this.Rhs.Infer(context));
+
+        public override bool Equals(Term? other) =>
+            other is AndTerm rhs ?
+                (this.Lhs.Equals(rhs.Lhs) && this.Rhs.Equals(rhs.Rhs)) :
+                false;
     }
 
     public sealed class IfOperatorTerm : ApplicableTerm
@@ -409,6 +460,9 @@ namespace LambdaCalculus
 
         public override Term Infer(Context context) =>
             this;
+
+        public override bool Equals(Term? other) =>
+            other is IfOperatorTerm rhs;
 
         public static readonly IfOperatorTerm Instance =
             new IfOperatorTerm();
@@ -431,6 +485,9 @@ namespace LambdaCalculus
 
             public override Term Infer(Context context) =>
                 new ThenTerm(this.Condition.Infer(context));
+
+            public override bool Equals(Term? other) =>
+                other is ThenTerm rhs ? this.Condition.Equals(rhs.Condition) : false;
         }
 
         private sealed class ElseTerm : ApplicableTerm
@@ -448,13 +505,18 @@ namespace LambdaCalculus
                 this.Then.HigherOrder;
 
             public override Term Reduce(Context context) =>
-                this;  // Cannot reduce Then term at this time, because has to examine delayed execution at IfTerm.Reduce().
+                this;  // Cannot reduce then term at this time, because has to examine delayed execution at IfTerm.Reduce().
 
             protected internal override Term? Apply(Context context, Term rhs) =>
                 IfTerm.Reduce(context, this.Condition, this.Then, rhs);
 
             public override Term Infer(Context context) =>
                 new ElseTerm(this.Condition, this.Then.Infer(context));
+
+            public override bool Equals(Term? other) =>
+                other is ElseTerm rhs ?
+                    (this.Condition.Equals(rhs.Condition) && this.Then.Equals(rhs.Then)) :
+                    false;
         }
     }
 
@@ -486,5 +548,10 @@ namespace LambdaCalculus
 
         public override Term Infer(Context context) =>
             new IfTerm(this.Condition.Infer(context), this.Then.Infer(context), this.Else.Infer(context));
+
+        public override bool Equals(Term? other) =>
+            other is IfTerm rhs ?
+                (this.Condition.Equals(rhs.Condition) && this.Then.Equals(rhs.Then) && this.Else.Equals(rhs.Else)) :
+                false;
     }
 }

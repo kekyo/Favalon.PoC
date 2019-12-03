@@ -19,7 +19,7 @@ namespace LambdaCalculus
                     Term.Constant(false));
 
             var context = new Context();
-            context.AddBoundTerm("->", LambdaOPeratorTerm.Instance);
+            context.AddBoundTerm("->", LambdaOperatorTerm.Instance);
 
             var actual = term.Reduce(context);
 

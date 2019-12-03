@@ -17,8 +17,8 @@
         public override Term Infer(InferContext context) =>
             this;
 
-        protected internal override Term? InferForApply(InferContext context, Term rhs) =>
-            new LambdaArrowParameterTerm(rhs.Infer(context));
+        protected internal override Term InferForApply(InferContext context, Term rhs) =>
+            this;
 
         public override Term Fixup(InferContext context) =>
             this;
@@ -48,8 +48,8 @@
             public override Term Infer(InferContext context) =>
                 new LambdaArrowParameterTerm(this.Parameter.Infer(context));
 
-            protected internal override Term? InferForApply(InferContext context, Term rhs) =>
-                new LambdaTerm(this.Parameter, rhs);    // rhs isn't inferred at this time, because lack parameter bound information.
+            protected internal override Term InferForApply(InferContext context, Term rhs) =>
+                LambdaTerm.Infer(context, this.Parameter, rhs);
 
             public override Term Fixup(InferContext context) =>
                 new LambdaArrowParameterTerm(this.Parameter.Fixup(context));
@@ -84,13 +84,30 @@
             return this.Body.Reduce(newScope);
         }
 
-        public override Term Infer(InferContext context) =>
-            new LambdaTerm(this.Parameter.Infer(context), this.Body.Infer(context));
-
-        protected internal override Term? InferForApply(InferContext context, Term rhs)
+        internal static LambdaTerm Infer(InferContext context, Term parameter, Term body)
         {
             var newScope = context.NewScope();
-            newScope.AddBoundTerm(((IdentityTerm)this.Parameter).Identity, rhs);
+            var parameter_ = parameter.Infer(newScope);
+            if (parameter_ is IdentityTerm identity)
+            {
+                newScope.AddBoundTerm(identity.Identity, parameter_);
+            }
+
+            var body_ = body.Infer(newScope);
+
+            return new LambdaTerm(parameter_, body_);
+        }
+
+        public override Term Infer(InferContext context) =>
+            Infer(context, this.Parameter, this.Body);
+
+        protected internal override Term InferForApply(InferContext context, Term rhs)
+        {
+            var newScope = context.NewScope();
+            if (this.Parameter is IdentityTerm identity)
+            {
+                newScope.AddBoundTerm(identity.Identity, rhs);
+            }
 
             return new LambdaTerm(this.Parameter, this.Body.Infer(newScope));
         }

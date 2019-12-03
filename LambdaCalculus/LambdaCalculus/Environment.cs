@@ -123,7 +123,6 @@ namespace LambdaCalculus
 
             if (term1 is PlaceholderTerm placeholder1)
             {
-                Debug.Assert(!(term2 is PlaceholderTerm));
                 Unify(placeholder1, term2);
             }
             else if (term2 is PlaceholderTerm placeholder2)

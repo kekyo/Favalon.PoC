@@ -3,7 +3,7 @@
     public abstract class ApplicableTerm : Term
     {
         protected internal abstract Term? ReduceForApply(ReduceContext context, Term rhs);
-        protected internal abstract Term? InferForApply(InferContext context, Term rhs);
+        protected internal abstract Term InferForApply(InferContext context, Term rhs);
     }
 
     public sealed class ApplyTerm : Term
@@ -40,15 +40,15 @@
         public override Term Infer(InferContext context)
         {
             var function = this.Function.Infer(context);
+            var argument = this.Argument.Infer(context);
 
-            if (function is ApplicableTerm applicable &&
-                applicable.InferForApply(context, this.Argument) is Term term)
+            if (function is ApplicableTerm applicable)
             {
-                return new ApplyTerm(term, this.Argument.Infer(context));
+                return new ApplyTerm(applicable.InferForApply(context, argument), argument);
             }
             else
             {
-                return new ApplyTerm(function, this.Argument.Infer(context));
+                return new ApplyTerm(function, argument);
             }
         }
 

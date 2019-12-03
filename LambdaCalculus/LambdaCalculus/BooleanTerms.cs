@@ -48,8 +48,8 @@
         public override Term Infer(InferContext context) =>
             this;
 
-        protected internal override Term? InferForApply(InferContext context, Term rhs) =>
-            new AndLeftTerm(rhs.Infer(context));
+        protected internal override Term InferForApply(InferContext context, Term rhs) =>
+            this;
 
         public override Term Fixup(InferContext context) =>
             this;
@@ -79,7 +79,7 @@
             public override Term Infer(InferContext context) =>
                 new AndLeftTerm(this.Lhs.Infer(context));
 
-            protected internal override Term? InferForApply(InferContext context, Term rhs) =>
+            protected internal override Term InferForApply(InferContext context, Term rhs) =>
                 AndTerm.Infer(context, this.Lhs, rhs);
 
             public override Term Fixup(InferContext context) =>
@@ -135,7 +135,7 @@
         public override sealed Term Reduce(ReduceContext context) =>
             Reduce(context, this.Lhs, this.Rhs);
 
-        internal static Term Infer(InferContext context, Term lhs, Term rhs)
+        internal static AndTerm Infer(InferContext context, Term lhs, Term rhs)
         {
             var lhs_ = lhs.Infer(context);
             var rhs_ = rhs.Infer(context);
@@ -175,8 +175,8 @@
         public override Term Infer(InferContext context) =>
             this;
 
-        protected internal override Term? InferForApply(InferContext context, Term rhs) =>
-            new ThenTerm(rhs.Infer(context));
+        protected internal override Term InferForApply(InferContext context, Term rhs) =>
+            this;
 
         public override Term Fixup(InferContext context) =>
             this;
@@ -206,8 +206,8 @@
             public override Term Infer(InferContext context) =>
                 new ThenTerm(this.Condition.Infer(context));
 
-            protected internal override Term? InferForApply(InferContext context, Term rhs) =>
-                new ElseTerm(this.Condition.Infer(context), rhs.Infer(context));
+            protected internal override Term InferForApply(InferContext context, Term rhs) =>
+                this;
 
             public override Term Fixup(InferContext context) =>
                 new ThenTerm(this.Condition.Fixup(context));
@@ -239,7 +239,7 @@
             public override Term Infer(InferContext context) =>
                 new ElseTerm(this.Condition.Infer(context), this.Then.Infer(context));
 
-            protected internal override Term? InferForApply(InferContext context, Term rhs) =>
+            protected internal override Term InferForApply(InferContext context, Term rhs) =>
                 IfTerm.Infer(context, this.Condition, this.Then, rhs);
 
             public override Term Fixup(InferContext context) =>
@@ -278,7 +278,7 @@
         public override Term Reduce(ReduceContext context) =>
             Reduce(context, this.Condition, this.Then, this.Else);
 
-        internal static Term Infer(InferContext context, Term condition, Term then, Term @else) =>
+        internal static IfTerm Infer(InferContext context, Term condition, Term then, Term @else) =>
             new IfTerm(condition.Infer(context), then.Infer(context), @else.Infer(context));
 
         public override Term Infer(InferContext context) =>

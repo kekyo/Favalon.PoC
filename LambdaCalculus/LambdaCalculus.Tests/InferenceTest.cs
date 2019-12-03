@@ -14,7 +14,7 @@ namespace LambdaCalculus
             var environment = Environment.Create();
             var actual = environment.Infer(term);
 
-            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
+            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
         }
 
         [Test]
@@ -28,7 +28,7 @@ namespace LambdaCalculus
             var environment = Environment.Create();
             var actual = environment.Infer(term);
 
-            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
+            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace LambdaCalculus
             var environment = Environment.Create();
             var actual = environment.Infer(term);
 
-            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
+            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
         }
 
         [Test]
@@ -75,9 +75,9 @@ namespace LambdaCalculus
             var actual = (AndTerm)environment.Infer(term);
 
             // (a:bool && b:bool):bool
-            Assert.AreEqual(Term.Constant(typeof(bool)), actual.Lhs.HigherOrder);
-            Assert.AreEqual(Term.Constant(typeof(bool)), actual.Rhs.HigherOrder);
-            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
+            Assert.AreEqual(Term.Type<bool>(), actual.Lhs.HigherOrder);
+            Assert.AreEqual(Term.Type<bool>(), actual.Rhs.HigherOrder);
+            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
         }
 
         [Test]
@@ -97,7 +97,7 @@ namespace LambdaCalculus
             var actual = environment.Infer(term);
 
             // a -> (b -> (a:bool && b:bool):bool):bool
-            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
+            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
         }
     }
 }

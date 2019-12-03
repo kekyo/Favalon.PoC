@@ -2,8 +2,8 @@
 {
     public sealed class BooleanTerm : Term
     {
-        internal static readonly Term higherOrder =
-            Constant(typeof(bool));
+        internal static readonly ClrTypeTerm higherOrder =
+            Type<bool>();
 
         public readonly bool Value;
 

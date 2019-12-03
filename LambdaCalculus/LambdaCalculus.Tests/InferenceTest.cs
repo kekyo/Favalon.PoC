@@ -8,6 +8,7 @@ namespace LambdaCalculus
         [Test]
         public void ConstantTest()
         {
+            // false
             var term =
                 Term.Constant(false);
 
@@ -20,6 +21,7 @@ namespace LambdaCalculus
         [Test]
         public void LambdaConstantBodyTest()
         {
+            // a -> false
             var term =
                 Term.Lambda(
                     "a",
@@ -34,6 +36,7 @@ namespace LambdaCalculus
         [Test]
         public void LambdaVariableBodyTest()
         {
+            // a -> a
             var term =
                 Term.Lambda(
                     "a",
@@ -42,13 +45,15 @@ namespace LambdaCalculus
             var environment = Environment.Create();
             var actual = environment.Infer(term);
 
-            Assert.AreEqual(0, actual.HigherOrder is PlaceholderTerm placeholder ? placeholder.Index : -1);
-            Assert.AreEqual(Term.Unspecified(), actual.HigherOrder.HigherOrder);
+            var lambda = (LambdaTerm)actual;
+
+            Assert.AreEqual(0, lambda.Body.HigherOrder is PlaceholderTerm placeholder ? placeholder.Index : -1);
         }
 
         [Test]
         public void BooleanAppliedLambdaVariableBodyTest()
         {
+            // (a -> a) false
             var term =
                 Term.Apply(
                     Term.Lambda(

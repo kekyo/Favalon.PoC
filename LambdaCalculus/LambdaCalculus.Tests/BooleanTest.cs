@@ -3,7 +3,7 @@
 namespace LambdaCalculus
 {
     [TestFixture]
-    class BooleanAlgebraTest
+    class BooleanTest
     {
         [Test]
         public void TrueTerm()

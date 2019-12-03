@@ -33,6 +33,9 @@ namespace LambdaCalculus
         internal ClrTypeTerm(Type type) =>
             this.Type = type;
 
+        public override Term HigherOrder =>
+           higherOrder;
+
         public override Term Reduce(ReduceContext context) =>
             this;
 

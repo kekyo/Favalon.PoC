@@ -7,20 +7,18 @@ namespace LambdaCalculus
     {
         [TestCase(true)]
         [TestCase(false)]
-        public void LambdaArrowCallAndFixedResult(bool result)
+        public void LambdaArrowOperatorCallAndFixedResult(bool result)
         {
             var term =
                 Term.Apply(
                     Term.Apply(
                         Term.Apply(
-                            Term.Identity("->"),
+                            LambdaOperatorTerm.Instance,
                             Term.Identity("a")),
                         Term.Constant(result)),
                     Term.Constant(false));
 
             var context = new Context();
-            context.AddBoundTerm("->", LambdaOperatorTerm.Instance);
-
             var actual = term.Reduce(context);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);

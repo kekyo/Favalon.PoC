@@ -12,6 +12,8 @@ namespace LambdaCalculus
 
         public abstract Term Infer(InferContext context);
 
+        public abstract Term Fixup(InferContext context);
+
         public abstract bool Equals(Term? other);
 
         bool IEquatable<Term?>.Equals(Term? other) =>
@@ -87,6 +89,9 @@ namespace LambdaCalculus
         public override Term Infer(InferContext context) =>
             this;
 
+        public override Term Fixup(InferContext context) =>
+            this;
+
         public override bool Equals(Term? other) =>
             other is UnspecifiedTerm;
 
@@ -129,6 +134,9 @@ namespace LambdaCalculus
             }
         }
 
+        public override Term Fixup(InferContext context) =>
+            new IdentityTerm(this.Identity, this.HigherOrder.Fixup(context));
+
         public override bool Equals(Term? other) =>
             other is IdentityTerm rhs ? this.Identity.Equals(rhs.Identity) : false;
     }
@@ -151,6 +159,9 @@ namespace LambdaCalculus
         public override Term Infer(InferContext context) =>
             new PlaceholderTerm(this.Index, this.HigherOrder.Infer(context));
 
+        public override Term Fixup(InferContext context) =>
+            context.LookupUnifiedTerm(this);
+
         public override bool Equals(Term? other) =>
             other is PlaceholderTerm rhs ? this.Index.Equals(rhs.Index) : false;
     }
@@ -169,6 +180,9 @@ namespace LambdaCalculus
             this;
 
         public override Term Infer(InferContext context) =>
+            this;
+
+        public override Term Fixup(InferContext context) =>
             this;
 
         public override bool Equals(Term? other) =>
@@ -226,6 +240,9 @@ namespace LambdaCalculus
                 return new ApplyTerm(function, this.Argument.Infer(context));
             }
         }
+
+        public override Term Fixup(InferContext context) =>
+            new ApplyTerm(this.Function.Fixup(context), this.Argument.Fixup(context));
 
         public override bool Equals(Term? other) =>
             other is ApplyTerm rhs ?

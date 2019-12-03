@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace LambdaCalculus
 {
@@ -46,7 +47,8 @@ namespace LambdaCalculus
         public Term Infer(Term term)
         {
             var context = new InferContext(this);
-            return term.Infer(context);
+            var inferred = term.Infer(context);
+            return inferred.Fixup(context);
         }
 
         public Term? GetBoundTerm(string identity)
@@ -99,5 +101,58 @@ namespace LambdaCalculus
 
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
+
+        private void Unify(PlaceholderTerm placeholder, Term term)
+        {
+            if (placeholders.TryGetValue(placeholder.Index, out var last))
+            {
+                Unify(last, term);
+            }
+            else
+            {
+                placeholders.Add(placeholder.Index, term);
+            }
+        }
+
+        public void Unify(Term term1, Term term2)
+        {
+            if (object.ReferenceEquals(term1, term2) || term1.Equals(term2))
+            {
+                return;
+            }
+
+            if (term1 is PlaceholderTerm placeholder1)
+            {
+                Debug.Assert(!(term2 is PlaceholderTerm));
+                Unify(placeholder1, term2);
+            }
+            else if (term2 is PlaceholderTerm placeholder2)
+            {
+                Unify(placeholder2, term1);
+            }
+        }
+
+        public Term LookupUnifiedTerm(PlaceholderTerm placeholder)
+        {
+            var current = placeholder;
+            while (true)
+            {
+                if (placeholders.TryGetValue(current.Index, out var next))
+                {
+                    if (next is PlaceholderTerm p)
+                    {
+                        current = p;
+                    }
+                    else
+                    {
+                        return next;
+                    }
+                }
+                else
+                {
+                    return current;
+                }
+            }
+        }
     }
 }

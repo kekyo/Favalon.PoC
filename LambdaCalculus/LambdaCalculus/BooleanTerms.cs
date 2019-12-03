@@ -19,6 +19,9 @@
         public override Term Infer(InferContext context) =>
             this;
 
+        public override Term Fixup(InferContext context) =>
+            this;
+
         public override bool Equals(Term? other) =>
             other is BooleanTerm rhs ? this.Value.Equals(rhs.Value) : false;
 
@@ -48,6 +51,9 @@
         protected internal override Term? InferForApply(InferContext context, Term rhs) =>
             new AndLeftTerm(rhs.Infer(context));
 
+        public override Term Fixup(InferContext context) =>
+            this;
+
         public override bool Equals(Term? other) =>
             other is AndOperatorTerm;
 
@@ -75,6 +81,9 @@
 
             protected internal override Term? InferForApply(InferContext context, Term rhs) =>
                 AndTerm.Infer(context, this.Lhs, rhs);
+
+            public override Term Fixup(InferContext context) =>
+                new AndLeftTerm(this.Lhs.Fixup(context));
 
             public override bool Equals(Term? other) =>
                 other is AndLeftTerm rhs ? this.Lhs.Equals(rhs.Lhs) : false;
@@ -126,11 +135,22 @@
         public override sealed Term Reduce(ReduceContext context) =>
             Reduce(context, this.Lhs, this.Rhs);
 
-        internal static Term Infer(InferContext context, Term lhs, Term rhs) =>
-            new AndTerm(lhs.Infer(context), rhs.Infer(context));
+        internal static Term Infer(InferContext context, Term lhs, Term rhs)
+        {
+            var lhs_ = lhs.Infer(context);
+            var rhs_ = rhs.Infer(context);
+
+            context.Unify(lhs_.HigherOrder, BooleanTerm.higherOrder);
+            context.Unify(rhs_.HigherOrder, BooleanTerm.higherOrder);
+
+            return new AndTerm(lhs_, rhs_);
+        }
 
         public override Term Infer(InferContext context) =>
             Infer(context, this.Lhs, this.Rhs);
+
+        public override Term Fixup(InferContext context) =>
+            new AndTerm(this.Lhs.Fixup(context), this.Rhs.Fixup(context));
 
         public override bool Equals(Term? other) =>
             other is AndTerm rhs ?
@@ -157,6 +177,9 @@
 
         protected internal override Term? InferForApply(InferContext context, Term rhs) =>
             new ThenTerm(rhs.Infer(context));
+
+        public override Term Fixup(InferContext context) =>
+            this;
 
         public override bool Equals(Term? other) =>
             other is IfOperatorTerm;
@@ -185,6 +208,9 @@
 
             protected internal override Term? InferForApply(InferContext context, Term rhs) =>
                 new ElseTerm(this.Condition.Infer(context), rhs.Infer(context));
+
+            public override Term Fixup(InferContext context) =>
+                new ThenTerm(this.Condition.Fixup(context));
 
             public override bool Equals(Term? other) =>
                 other is ThenTerm rhs ? this.Condition.Equals(rhs.Condition) : false;
@@ -215,6 +241,9 @@
 
             protected internal override Term? InferForApply(InferContext context, Term rhs) =>
                 IfTerm.Infer(context, this.Condition, this.Then, rhs);
+
+            public override Term Fixup(InferContext context) =>
+                new ElseTerm(this.Condition.Fixup(context), this.Then.Fixup(context));
 
             public override bool Equals(Term? other) =>
                 other is ElseTerm rhs ?
@@ -254,6 +283,9 @@
 
         public override Term Infer(InferContext context) =>
             Infer(context, this.Condition, this.Then, this.Else);
+
+        public override Term Fixup(InferContext context) =>
+            new IfTerm(this.Condition.Fixup(context), this.Then.Fixup(context), this.Else.Fixup(context));
 
         public override bool Equals(Term? other) =>
             other is IfTerm rhs ?

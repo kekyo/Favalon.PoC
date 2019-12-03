@@ -23,6 +23,9 @@ namespace LambdaCalculus
         protected internal override Term? InferForApply(InferContext context, Term rhs) =>
             new LambdaArrowParameterTerm(((IdentityTerm)rhs.Infer(context)).Identity);
 
+        public override Term Fixup(InferContext context) =>
+            this;
+
         public override bool Equals(Term? other) =>
             other is LambdaOperatorTerm;
 
@@ -50,6 +53,9 @@ namespace LambdaCalculus
 
             protected internal override Term? InferForApply(InferContext context, Term rhs) =>
                 new LambdaTerm(this.Parameter, rhs);    // Doesn't infer at this time, because lack parameter bound information.
+
+            public override Term Fixup(InferContext context) =>
+                this;
 
             public override bool Equals(Term? other) =>
                 other is LambdaArrowParameterTerm rhs ? this.Parameter.Equals(rhs.Parameter) : false;
@@ -91,6 +97,9 @@ namespace LambdaCalculus
 
             return new LambdaTerm(this.Parameter, this.Body.Infer(newScope));
         }
+
+        public override Term Fixup(InferContext context) =>
+            new LambdaTerm(this.Parameter, this.Body.Fixup(context));
 
         public override bool Equals(Term? other) =>
             other is LambdaTerm rhs ?

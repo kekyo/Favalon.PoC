@@ -93,8 +93,8 @@ namespace LambdaCalculus
         public static ApplyTerm Apply(Term function, Term argument) =>
             new ApplyTerm(function, argument);
 
-        public static Term Lambda(string parameter, Term body) =>
-            new ApplyTerm(new ApplyTerm(LambdaArrowTerm.Instance, Identity(parameter)), body);
+        public static LambdaTerm Lambda(string parameter, Term body) =>
+            new LambdaTerm(parameter, body);
 
         public static AndTerm And(Term lhs) =>
             new AndTerm(lhs);
@@ -102,7 +102,7 @@ namespace LambdaCalculus
             new ApplyTerm(new AndTerm(lhs), rhs);
 
         public static Term If(Term condition, Term then, Term els) =>
-            new ApplyTerm(new ApplyTerm(new IfTerm(condition), then), els);
+            new IfTerm(condition, then, els);
     }
 
     public sealed class UnspecifiedTerm : Term
@@ -187,16 +187,15 @@ namespace LambdaCalculus
         public override Term Reduce(Context context)
         {
             var function = this.Function.Reduce(context);
-            var argument = this.Argument.Reduce(context);
 
             if (function is ApplicableTerm applicable &&
-                applicable.Apply(context, argument) is Term term)
+                applicable.Apply(context, this.Argument) is Term term)
             {
                 return term;
             }
             else
             {
-                return new ApplyTerm(function, argument);
+                return new ApplyTerm(function, this.Argument.Reduce(context));
             }
         }
 
@@ -209,9 +208,9 @@ namespace LambdaCalculus
         }
     }
 
-    public sealed class LambdaArrowTerm : ApplicableTerm
+    public sealed class LambdaOPeratorTerm : ApplicableTerm
     {
-        private LambdaArrowTerm()
+        private LambdaOPeratorTerm()
         {
         }
 
@@ -222,16 +221,16 @@ namespace LambdaCalculus
             this;
 
         protected internal override Term? Apply(Context context, Term rhs) =>
-            new LambdaArrowLeftTerm(((IdentityTerm)rhs).Identity);
+            new LambdaArrowParameterTerm(((IdentityTerm)rhs.Reduce(context)).Identity);
 
         public override Term Infer(Context context) =>
             this;
 
-        private sealed class LambdaArrowLeftTerm : ApplicableTerm
+        private sealed class LambdaArrowParameterTerm : ApplicableTerm
         {
             public readonly string Parameter;
 
-            public LambdaArrowLeftTerm(string parameter) =>
+            public LambdaArrowParameterTerm(string parameter) =>
                 this.Parameter = parameter;
 
             public override Term HigherOrder =>
@@ -247,8 +246,8 @@ namespace LambdaCalculus
                 this;
         }
 
-        public static LambdaArrowTerm Instance =
-            new LambdaArrowTerm();
+        public static LambdaOPeratorTerm Instance =
+            new LambdaOPeratorTerm();
     }
 
     public sealed class LambdaTerm : ApplicableTerm
@@ -263,7 +262,7 @@ namespace LambdaCalculus
         }
 
         public override Term HigherOrder =>
-            Body.HigherOrder;
+            this.Body.HigherOrder;
 
         public override Term Reduce(Context context) =>
             new LambdaTerm(this.Parameter, this.Body.Reduce(context));
@@ -320,75 +319,104 @@ namespace LambdaCalculus
         public override sealed Term Reduce(Context context) =>
             new AndTerm(this.Lhs.Reduce(context));
 
-        public override Term Infer(Context context) =>
-            new AndTerm(this.Lhs.Infer(context));
-
         protected internal override Term? Apply(Context context, Term rhs) =>
-            (this.Lhs is BooleanTerm l && rhs is BooleanTerm r) ?
+            (this.Lhs is BooleanTerm l && rhs.Reduce(context) is BooleanTerm r) ?
                 Term.Constant(l.Value && r.Value) :
                 null;
+
+        public override Term Infer(Context context) =>
+            new AndTerm(this.Lhs.Infer(context));
     }
 
-    public sealed class IfTerm : ApplicableTerm
+    public sealed class IfOperatorTerm : ApplicableTerm
     {
-        public readonly Term Condition;
-
-        internal IfTerm(Term condition) =>
-            this.Condition = condition;
+        private IfOperatorTerm()
+        { }
 
         public override Term HigherOrder =>
            UnspecifiedTerm.Instance;
 
         public override sealed Term Reduce(Context context) =>
-            new IfTerm(this.Condition.Reduce(context));
+            this;
 
         protected internal override Term? Apply(Context context, Term rhs) =>
-            (this.Condition is BooleanTerm c) ?
-                (c.Value ? (Term)new ThenTerm(rhs) : ElseTerm.Instance) :
-                null;
+            new ThenTerm(rhs);
 
         public override Term Infer(Context context) =>
-            new IfTerm(this.Condition.Infer(context));
+            this;
+
+        public static readonly IfOperatorTerm Instance =
+            new IfOperatorTerm();
 
         private sealed class ThenTerm : ApplicableTerm
         {
-            public readonly Term Then;
+            public readonly Term Condition;
 
             public ThenTerm(Term then) =>
+                this.Condition = then;
+
+            public override Term HigherOrder =>
+                this.Condition.HigherOrder;
+
+            public override Term Reduce(Context context) =>
+                new ThenTerm(this.Condition.Reduce(context));
+
+            protected internal override Term? Apply(Context context, Term rhs) =>
+                new ElseTerm(this.Condition, rhs);
+
+            public override Term Infer(Context context) =>
+                new ThenTerm(this.Condition.Infer(context));
+        }
+
+        private sealed class ElseTerm : ApplicableTerm
+        {
+            public readonly Term Condition;
+            public readonly Term Then;
+
+            public ElseTerm(Term condition, Term then)
+            {
+                this.Condition = condition;   // Condition term already reduced.
                 this.Then = then;
+            }
 
             public override Term HigherOrder =>
                 this.Then.HigherOrder;
 
             public override Term Reduce(Context context) =>
-                this;
+                this;  // Cannot reduce Then term at this time, because has to examine delayed execution at IfTerm.Reduce().
 
             protected internal override Term? Apply(Context context, Term rhs) =>
-                this.Then;
+                new IfTerm(this.Condition, this.Then, rhs);
 
             public override Term Infer(Context context) =>
-                this;
+                new ElseTerm(this.Condition, this.Then.Infer(context));
         }
+    }
 
-        private sealed class ElseTerm : ApplicableTerm
+    public sealed class IfTerm : Term
+    {
+        public readonly Term Condition;
+        public readonly Term Then;
+        public readonly Term Else;
+
+        internal IfTerm(Term condition, Term then, Term @else)
         {
-            private ElseTerm()
-            { }
-
-            public override Term HigherOrder =>
-                UnspecifiedTerm.Instance;
-
-            public override Term Reduce(Context context) =>
-                this;
-
-            protected internal override Term? Apply(Context context, Term rhs) =>
-                rhs;
-
-            public override Term Infer(Context context) =>
-                this;
-
-            public static readonly ElseTerm Instance =
-                new ElseTerm();
+            this.Condition = condition;
+            this.Then = then;
+            this.Else = @else;
         }
+
+        public override Term HigherOrder =>
+            (this.Condition is BooleanTerm term) ?
+                (term.Value ? this.Then.HigherOrder : this.Else.HigherOrder) :
+                this.Then.HigherOrder;  // TODO: Unspecified or OrTypes
+
+        public override Term Reduce(Context context) =>
+            ((BooleanTerm)this.Condition.Reduce(context)).Value ?
+                this.Then.Reduce(context) :   // Reduce only then or else term by the conditional.
+                this.Else.Reduce(context);
+
+        public override Term Infer(Context context) =>
+            new IfTerm(this.Condition.Infer(context), this.Then.Infer(context), this.Else.Infer(context));
     }
 }

@@ -31,20 +31,20 @@ namespace LambdaCalculus
             Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
         }
 
-        //[Test]
-        //public void LambdaVariableBodyTest()
-        //{
-        //    var term =
-        //        Term.Lambda(
-        //            "a",
-        //            Term.Identity("a"));
+        [Test]
+        public void LambdaVariableBodyTest()
+        {
+            var term =
+                Term.Lambda(
+                    "a",
+                    Term.Identity("a"));
 
-        //    var environment = Environment.Create();
-        //    var actual = environment.Infer(term);
+            var environment = Environment.Create();
+            var actual = environment.Infer(term);
 
-        //    Assert.AreEqual(0, actual.HigherOrder is PlaceholderTerm placeholder ? placeholder.Index : -1);
-        //    Assert.AreEqual(Term.Unspecified(), actual.HigherOrder.HigherOrder);
-        //}
+            Assert.AreEqual(0, actual.HigherOrder is PlaceholderTerm placeholder ? placeholder.Index : -1);
+            Assert.AreEqual(Term.Unspecified(), actual.HigherOrder.HigherOrder);
+        }
 
         [Test]
         public void BooleanAppliedLambdaVariableBodyTest()

@@ -111,10 +111,23 @@ namespace LambdaCalculus
                 term.Reduce(context) :
                 new IdentityTerm(this.Identity, this.HigherOrder.Reduce(context));
 
-        public override Term Infer(InferContext context) =>
-            context.GetBoundTerm(this.Identity) is Term term ?
-                term.Infer(context) :
-                new IdentityTerm(this.Identity, this.HigherOrder.Infer(context));
+        public override Term Infer(InferContext context)
+        {
+            if (context.GetBoundTerm(this.Identity) is Term term)
+            {
+                return term.Infer(context);
+            }
+
+            var higherOrder = this.HigherOrder.Infer(context);
+            if (higherOrder is UnspecifiedTerm)
+            {
+                return new IdentityTerm(this.Identity, context.CreatePlaceholder(UnspecifiedTerm.Instance));
+            }
+            else
+            {
+                return new IdentityTerm(this.Identity, higherOrder);
+            }
+        }
 
         public override bool Equals(Term? other) =>
             other is IdentityTerm rhs ? this.Identity.Equals(rhs.Identity) : false;

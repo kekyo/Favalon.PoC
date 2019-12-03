@@ -93,8 +93,8 @@ namespace LambdaCalculus
         public static ApplyTerm Apply(Term function, Term argument) =>
             new ApplyTerm(function, argument);
 
-        public static LambdaTerm Lambda(string parameter, Term body) =>
-            new LambdaTerm(parameter, body);
+        public static Term Lambda(string parameter, Term body) =>
+            new ApplyTerm(new ApplyTerm(LambdaArrowTerm.Instance, Identity(parameter)), body);
 
         public static AndTerm And(Term lhs) =>
             new AndTerm(lhs);
@@ -241,7 +241,7 @@ namespace LambdaCalculus
                 this;
 
             protected internal override Term? Apply(Context context, Term rhs) =>
-                Lambda(this.Parameter, rhs);
+                new LambdaTerm(this.Parameter, rhs);
 
             public override Term Infer(Context context) =>
                 this;

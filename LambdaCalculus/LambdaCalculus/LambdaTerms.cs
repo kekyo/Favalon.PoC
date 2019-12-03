@@ -11,14 +11,17 @@ namespace LambdaCalculus
         public override Term HigherOrder =>
             UnspecifiedTerm.Instance;
 
-        public override Term Reduce(Context context) =>
+        public override Term Reduce(ReduceContext context) =>
             this;
 
-        protected internal override Term? Apply(Context context, Term rhs) =>
+        protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
             new LambdaArrowParameterTerm(((IdentityTerm)rhs.Reduce(context)).Identity);
 
-        public override Term Infer(Context context) =>
+        public override Term Infer(InferContext context) =>
             this;
+
+        protected internal override Term? InferForApply(InferContext context, Term rhs) =>
+            new LambdaArrowParameterTerm(((IdentityTerm)rhs.Infer(context)).Identity);
 
         public override bool Equals(Term? other) =>
             other is LambdaOperatorTerm;
@@ -36,14 +39,17 @@ namespace LambdaCalculus
             public override Term HigherOrder =>
                 Lambda("?", UnspecifiedTerm.Instance);
 
-            public override Term Reduce(Context context) =>
+            public override Term Reduce(ReduceContext context) =>
                 this;
 
-            protected internal override Term? Apply(Context context, Term rhs) =>
-                new LambdaTerm(this.Parameter, rhs);
+            protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
+                new LambdaTerm(this.Parameter, rhs);    // Doesn't reduce at this time, because the body term can reduce only applying time.
 
-            public override Term Infer(Context context) =>
+            public override Term Infer(InferContext context) =>
                 this;
+
+            protected internal override Term? InferForApply(InferContext context, Term rhs) =>
+                new LambdaTerm(this.Parameter, rhs);    // Doesn't infer at this time, because lack parameter bound information.
 
             public override bool Equals(Term? other) =>
                 other is LambdaArrowParameterTerm rhs ? this.Parameter.Equals(rhs.Parameter) : false;
@@ -64,10 +70,10 @@ namespace LambdaCalculus
         public override Term HigherOrder =>
             this.Body.HigherOrder;
 
-        public override Term Reduce(Context context) =>
+        public override Term Reduce(ReduceContext context) =>
             new LambdaTerm(this.Parameter, this.Body.Reduce(context));
 
-        protected internal override Term? Apply(Context context, Term rhs)
+        protected internal override Term? ReduceForApply(ReduceContext context, Term rhs)
         {
             var newScope = context.NewScope();
             newScope.AddBoundTerm(this.Parameter, rhs);
@@ -75,8 +81,16 @@ namespace LambdaCalculus
             return this.Body.Reduce(newScope);
         }
 
-        public override Term Infer(Context context) =>
+        public override Term Infer(InferContext context) =>
             new LambdaTerm(this.Parameter, this.Body.Infer(context));
+
+        protected internal override Term? InferForApply(InferContext context, Term rhs)
+        {
+            var newScope = context.NewScope();
+            newScope.AddBoundTerm(this.Parameter, rhs);
+
+            return new LambdaTerm(this.Parameter, this.Body.Infer(newScope));
+        }
 
         public override bool Equals(Term? other) =>
             other is LambdaTerm rhs ?

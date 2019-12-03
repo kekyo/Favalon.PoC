@@ -10,8 +10,8 @@ namespace LambdaCalculus
         {
             var term = Term.True();
 
-            var context = new Context();
-            var actual = term.Reduce(context);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(true, ((BooleanTerm)actual).Value);
         }
@@ -21,8 +21,8 @@ namespace LambdaCalculus
         {
             var term = Term.False();
 
-            var context = new Context();
-            var actual = term.Reduce(context);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(false, ((BooleanTerm)actual).Value);
         }
@@ -38,8 +38,8 @@ namespace LambdaCalculus
                     Term.Constant(lhs),
                     Term.Constant(rhs));
 
-            var context = new Context();
-            var actual = term.Reduce(context);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
@@ -60,8 +60,8 @@ namespace LambdaCalculus
                         Term.Constant(chs)),
                     Term.Constant(rhs));
 
-            var context = new Context();
-            var actual = term.Reduce(context);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
@@ -79,8 +79,8 @@ namespace LambdaCalculus
                         Term.Constant(lhs)),
                     Term.Constant(rhs));
 
-            var context = new Context();
-            var actual = term.Reduce(context);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
@@ -95,8 +95,8 @@ namespace LambdaCalculus
                     Term.Identity("a"),
                     Term.Identity("b"));
 
-            var context = new Context();
-            var actual = term.Reduce(context);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((IdentityTerm)actual).Identity);
         }
@@ -114,8 +114,8 @@ namespace LambdaCalculus
                         Term.Identity("a")),
                     Term.Identity("b"));
 
-            var context = new Context();
-            var actual = term.Reduce(context);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((IdentityTerm)actual).Identity);
         }

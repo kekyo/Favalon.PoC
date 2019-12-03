@@ -3,58 +3,14 @@ using System.Collections.Generic;
 
 namespace LambdaCalculus
 {
-    public sealed class Context
-    {
-        private readonly Context? parent;
-        private Dictionary<string, Term>? boundTerms;
-
-        public Context() =>
-            boundTerms = new Dictionary<string, Term>();
-        private Context(Context parent) =>
-            this.parent = parent;
-
-        public Context NewScope() =>
-            new Context(this);
-
-        public void AddBoundTerm(string identity, Term term)
-        {
-            if (boundTerms == null)
-            {
-                boundTerms = new Dictionary<string, Term>();
-            }
-            boundTerms[identity] = term;
-        }
-
-        public Term? GetBoundTerm(string identity)
-        {
-            Context? current = this;
-            do
-            {
-                if (current.boundTerms != null)
-                {
-                    if (current.boundTerms.TryGetValue(identity, out var term))
-                    {
-                        return term;
-                    }
-                }
-                current = current.parent;
-            }
-            while (current != null);
-
-            return null;
-        }
-    }
-
-    ////////////////////////////////////////////////////////////
-
     public abstract class Term :
         IEquatable<Term?>
     {
         public abstract Term HigherOrder { get; }
 
-        public abstract Term Reduce(Context context);
+        public abstract Term Reduce(ReduceContext context);
 
-        public abstract Term Infer(Context context);
+        public abstract Term Infer(InferContext context);
 
         public abstract bool Equals(Term? other);
 
@@ -125,10 +81,10 @@ namespace LambdaCalculus
         public override Term HigherOrder =>
             null!;
 
-        public override Term Reduce(Context context) =>
+        public override Term Reduce(ReduceContext context) =>
             this;
 
-        public override Term Infer(Context context) =>
+        public override Term Infer(InferContext context) =>
             this;
 
         public override bool Equals(Term? other) =>
@@ -150,18 +106,40 @@ namespace LambdaCalculus
 
         public override Term HigherOrder { get; }
 
-        public override Term Reduce(Context context) =>
+        public override Term Reduce(ReduceContext context) =>
             context.GetBoundTerm(this.Identity) is Term term ?
                 term.Reduce(context) :
-                this;
+                new IdentityTerm(this.Identity, this.HigherOrder.Reduce(context));
 
-        public override Term Infer(Context context) =>
+        public override Term Infer(InferContext context) =>
             context.GetBoundTerm(this.Identity) is Term term ?
                 term.Infer(context) :
-                this;
+                new IdentityTerm(this.Identity, this.HigherOrder.Infer(context));
 
         public override bool Equals(Term? other) =>
             other is IdentityTerm rhs ? this.Identity.Equals(rhs.Identity) : false;
+    }
+
+    public sealed class PlaceholderTerm : Term
+    {
+        public readonly int Index;
+
+        internal PlaceholderTerm(int index, Term higherOrder)
+        {
+            this.Index = index;
+            this.HigherOrder = higherOrder;
+        }
+
+        public override Term HigherOrder { get; }
+
+        public override Term Reduce(ReduceContext context) =>
+            new PlaceholderTerm(this.Index, this.HigherOrder.Reduce(context));
+
+        public override Term Infer(InferContext context) =>
+            new PlaceholderTerm(this.Index, this.HigherOrder.Infer(context));
+
+        public override bool Equals(Term? other) =>
+            other is PlaceholderTerm rhs ? this.Index.Equals(rhs.Index) : false;
     }
 
     public sealed class ConstantTerm : Term
@@ -174,10 +152,10 @@ namespace LambdaCalculus
         public override Term HigherOrder =>
             Constant(this.Value.GetType());
 
-        public override Term Reduce(Context context) =>
+        public override Term Reduce(ReduceContext context) =>
             this;
 
-        public override Term Infer(Context context) =>
+        public override Term Infer(InferContext context) =>
             this;
 
         public override bool Equals(Term? other) =>
@@ -186,7 +164,8 @@ namespace LambdaCalculus
 
     public abstract class ApplicableTerm : Term
     {
-        protected internal abstract Term? Apply(Context context, Term rhs);
+        protected internal abstract Term? ReduceForApply(ReduceContext context, Term rhs);
+        protected internal abstract Term? InferForApply(InferContext context, Term rhs);
     }
 
     public sealed class ApplyTerm : Term
@@ -201,14 +180,16 @@ namespace LambdaCalculus
         }
 
         public override Term HigherOrder =>
-            this.Argument.HigherOrder;
+            this.Function is ApplicableTerm function ?
+                function.HigherOrder :
+                UnspecifiedTerm.Instance;  // TODO: ???
 
-        public override Term Reduce(Context context)
+        public override Term Reduce(ReduceContext context)
         {
             var function = this.Function.Reduce(context);
 
             if (function is ApplicableTerm applicable &&
-                applicable.Apply(context, this.Argument) is Term term)
+                applicable.ReduceForApply(context, this.Argument) is Term term)
             {
                 return term;
             }
@@ -218,12 +199,19 @@ namespace LambdaCalculus
             }
         }
 
-        public override Term Infer(Context context)
+        public override Term Infer(InferContext context)
         {
             var function = this.Function.Infer(context);
-            var argument = this.Argument.Infer(context);
 
-            return new ApplyTerm(function, argument);
+            if (function is ApplicableTerm applicable &&
+                applicable.InferForApply(context, this.Argument) is Term term)
+            {
+                return term;
+            }
+            else
+            {
+                return new ApplyTerm(function, this.Argument.Infer(context));
+            }
         }
 
         public override bool Equals(Term? other) =>

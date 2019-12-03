@@ -2,7 +2,7 @@
 {
     public sealed class IdentityTerm : Term
     {
-        public readonly string Identity;
+        public new readonly string Identity;
 
         internal IdentityTerm(string identity, Term higherOrder)
         {
@@ -21,14 +21,7 @@
         {
             if (context.GetBoundTerm(this.Identity) is Term bound)
             {
-                if (!(bound is IdentityTerm))
-                {
-                    return bound.Infer(context);
-                }
-                else
-                {
-                    return bound;
-                }
+                return bound;
             }
 
             var higherOrder = this.HigherOrder.Infer(context);

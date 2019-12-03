@@ -121,5 +121,31 @@ namespace LambdaCalculus
             Assert.AreEqual(Term.Type<bool>(), ((LambdaTerm)higherOrder.Body).Parameter);
             Assert.AreEqual(Term.Type<bool>(), ((LambdaTerm)higherOrder.Body).Body);
         }
+
+        [Test]
+        public void PassingLambdaArgument()
+        {
+            // (a -> b -> a b) (a -> a) false
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        Term.Lambda(
+                            "a",
+                            Term.Lambda(
+                                "b",
+                                Term.Apply(
+                                    Term.Identity("a"),
+                                    Term.Identity("b")))),
+                        Term.Lambda(
+                            "a",
+                            Term.Identity("a"))),
+                    Term.Constant(false));
+
+            var environment = Environment.Create();
+            var actual = environment.Infer(term);
+
+            // (a:(bool -> bool) -> b:bool -> a:(bool -> bool) b:bool) (a:bool -> a:bool):(bool -> bool) false:bool
+            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+        }
     }
 }

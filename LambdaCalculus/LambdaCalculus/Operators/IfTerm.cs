@@ -1,6 +1,6 @@
 ﻿namespace LambdaCalculus.Operators
 {
-    public sealed class IfOperatorTerm : OperatorSymbolTerm<IfOperatorTerm>
+    public sealed class IfOperatorTerm : OperatorSymbolTerm<IfOperatorTerm>, IApplicable
     {
         private static readonly Term higherOrder =
             new LambdaTerm(BooleanTerm.Type, LambdaTerm.Unspecified);
@@ -11,13 +11,13 @@
         public override Term HigherOrder =>
             higherOrder;
 
-        protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
             new ConditionTerm(rhs);
 
         public static readonly IfOperatorTerm Instance =
             new IfOperatorTerm();
 
-        private sealed class ConditionTerm : OperatorArgument0Term<ConditionTerm>
+        private sealed class ConditionTerm : OperatorArgument0Term<ConditionTerm>, IApplicable
         {
             private static readonly Term higherOrder =
                 new LambdaTerm(
@@ -34,11 +34,11 @@
             protected override Term Create(Term argument) =>
                 new ConditionTerm(argument);
 
-            protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
                 new ThenTerm(this.Argument0, rhs);
         }
 
-        private sealed class ThenTerm : OperatorArgument1Term<ThenTerm>
+        private sealed class ThenTerm : OperatorArgument1Term<ThenTerm>, IApplicable
         {
             public ThenTerm(Term condition, Term then) :
                 base(condition, then)
@@ -50,7 +50,7 @@
             protected override Term Create(Term argument0, Term argument1) =>
                 new ThenTerm(argument0, argument1);
 
-            protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
                 IfTerm.Reduce(context, this.Argument0, this.Argument1, rhs);
         }
     }

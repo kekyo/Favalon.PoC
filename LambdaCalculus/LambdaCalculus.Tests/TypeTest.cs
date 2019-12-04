@@ -21,6 +21,7 @@ namespace LambdaCalculus
             Assert.AreEqual(Term.Type(type), actual.HigherOrder);
         }
 
+        [Test]
         public void ComposeTypeConstructor()
         {
             var term =
@@ -29,7 +30,7 @@ namespace LambdaCalculus
                     Term.Type<int>());
 
             var environment = Environment.Create();
-            var actual = environment.Infer(term);
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(Term.Type<Lazy<int>>(), actual);
         }

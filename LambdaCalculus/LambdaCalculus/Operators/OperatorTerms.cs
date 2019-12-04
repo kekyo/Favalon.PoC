@@ -73,7 +73,7 @@
 
     ///////////////////////////////////////////////////////////////////////
 
-    public abstract class OperatorSymbolTerm : ApplicableTerm
+    public abstract class OperatorSymbolTerm : Term
     {
         internal OperatorSymbolTerm()
         { }
@@ -101,7 +101,7 @@
             other is T;
     }
 
-    public abstract class OperatorArgument0Term : ApplicableTerm
+    public abstract class OperatorArgument0Term : Term
     {
         public readonly Term Argument0;
 
@@ -134,7 +134,7 @@
             other is T rhs ? this.Argument0.Equals(rhs.Argument0) : false;
     }
 
-    public abstract class OperatorArgument1Term : ApplicableTerm
+    public abstract class OperatorArgument1Term : Term
     {
         public readonly Term Argument0;
         public readonly Term Argument1;

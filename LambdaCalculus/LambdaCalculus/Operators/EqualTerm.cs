@@ -1,17 +1,17 @@
 ﻿namespace LambdaCalculus.Operators
 {
-    public sealed class EqualOperatorTerm : OperatorSymbolTerm<EqualOperatorTerm>
+    public sealed class EqualOperatorTerm : OperatorSymbolTerm<EqualOperatorTerm>, IApplicable
     {
         private EqualOperatorTerm()
         { }
 
-        protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
             new EqualLeftTerm(rhs);
 
         public static readonly EqualOperatorTerm Instance =
             new EqualOperatorTerm();
 
-        private sealed class EqualLeftTerm : OperatorArgument0Term<EqualLeftTerm>
+        private sealed class EqualLeftTerm : OperatorArgument0Term<EqualLeftTerm>, IApplicable
         {
             public EqualLeftTerm(Term lhs) :
                 base(lhs)
@@ -20,7 +20,7 @@
             protected override Term Create(Term argument) =>
                 new EqualLeftTerm(argument);
 
-            protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
                 EqualTerm.Reduce(context, this.Argument0, rhs);
         }
     }

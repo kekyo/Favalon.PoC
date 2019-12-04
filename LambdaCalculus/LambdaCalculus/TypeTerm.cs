@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+using System.Diagnostics;
 
 namespace LambdaCalculus
 {
@@ -9,8 +8,8 @@ namespace LambdaCalculus
     {
         private static readonly Term higherOrder =
             new IdentityTerm("*", LambdaCalculus.UnspecifiedTerm.Instance);  // TODO:
-        private static readonly Dictionary<Type, ClrTypeTerm> types =
-            new Dictionary<Type, ClrTypeTerm>();
+        private static readonly Dictionary<Type, TypeTerm> clrTypes =
+            new Dictionary<Type, TypeTerm>();
 
         private protected TypeTerm()
         { }
@@ -27,31 +26,67 @@ namespace LambdaCalculus
         public override sealed Term Fixup(InferContext context) =>
             this;
 
+        private protected static bool IsTypeConstructor(Type type) =>
+            type.IsGenericTypeDefinition && (type.GetGenericArguments().Length == 1);
+
         public static TypeTerm From(Type type)
         {
-            if (!types.TryGetValue(type, out var term))
+            if (!clrTypes.TryGetValue(type, out var term))
             {
-                term = new ClrTypeTerm(type);
-                types.Add(type, term);
+                term = IsTypeConstructor(type) ?
+                    (TypeTerm)new ClrTypeConstructorTerm(type) :
+                    new ClrTypeTerm(type);
+                clrTypes.Add(type, term);
             }
             return term;
         }
     }
 
-    public sealed class ClrTypeTerm : TypeTerm
+    internal interface IClrType
     {
-        private static readonly Term higherOrder =
+        Type Type { get; }
+    }
+
+    public sealed class ClrTypeTerm : TypeTerm, IClrType
+    {
+        internal static readonly Term higherOrder =
             From(typeof(Type));
 
-        public new readonly Type Type;
-
-        internal ClrTypeTerm(Type type) =>
+        internal ClrTypeTerm(Type type)
+        {
+            Debug.Assert(!IsTypeConstructor(type));
             this.Type = type;
+        }
+
+        public new Type Type { get; }
 
         public override Term HigherOrder =>
            higherOrder;
 
         public override bool Equals(Term? other) =>
             other is ClrTypeTerm rhs ? this.Type.Equals(rhs.Type) : false;
+    }
+
+    public sealed class ClrTypeConstructorTerm : TypeTerm, IApplicable, IClrType
+    {
+        private static readonly Term higherOrder =
+            new LambdaTerm(ClrTypeTerm.higherOrder, ClrTypeTerm.higherOrder);
+
+        internal ClrTypeConstructorTerm(Type type)
+        {
+            Debug.Assert(IsTypeConstructor(type));
+            this.Type = type;
+        }
+
+        public override Term HigherOrder =>
+            higherOrder;
+
+        public new Type Type { get; }
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
+            From(this.Type.MakeGenericType(((IClrType)rhs.Reduce(context)).Type));
+
+        public override bool Equals(Term? other) =>
+            other is ClrTypeConstructorTerm rhs ? this.Type.Equals(rhs.Type) : false;
     }
 }

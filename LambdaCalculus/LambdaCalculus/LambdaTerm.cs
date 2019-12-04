@@ -1,6 +1,6 @@
 ﻿namespace LambdaCalculus
 {
-    public sealed class LambdaTerm : ApplicableTerm
+    public sealed class LambdaTerm : Term, IApplicable
     {
         public readonly Term Parameter;
         public readonly Term Body;
@@ -17,7 +17,7 @@
         public override Term Reduce(ReduceContext context) =>
             new LambdaTerm(this.Parameter.Reduce(context), this.Body.Reduce(context));
 
-        protected internal override Term? ReduceForApply(ReduceContext context, Term rhs)
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)
         {
             var newScope = context.NewScope();
             newScope.AddBoundTerm(((IdentityTerm)this.Parameter).Identity, rhs);

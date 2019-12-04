@@ -1,8 +1,8 @@
 ﻿namespace LambdaCalculus
 {
-    public abstract class ApplicableTerm : Term
+    public interface IApplicable
     {
-        protected internal abstract Term? ReduceForApply(ReduceContext context, Term rhs);
+        Term? ReduceForApply(ReduceContext context, Term rhs);
     }
 
     public sealed class ApplyTerm : Term
@@ -23,7 +23,7 @@
         {
             var function = this.Function.Reduce(context);
 
-            if (function is ApplicableTerm applicable &&
+            if (function is IApplicable applicable &&
                 applicable.ReduceForApply(context, this.Argument) is Term term)
             {
                 return term;

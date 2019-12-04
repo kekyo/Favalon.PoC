@@ -35,15 +35,15 @@ namespace LambdaCalculus
         public static BooleanTerm False() =>
             BooleanTerm.False;
 
-        public static ClrTypeTerm Type(Type type) =>
-            ClrTypeTerm.From(type);
+        public static TypeTerm Type(Type type) =>
+            TypeTerm.From(type);
         public static ClrTypeTerm Type<T>() =>
-            ClrTypeTerm.From(typeof(T));
+            (ClrTypeTerm)TypeTerm.From(typeof(T));
 
         public static BooleanTerm Constant(bool value) =>
             BooleanTerm.From(value);
-        public static ClrTypeTerm Constant(Type type) =>
-            ClrTypeTerm.From(type);
+        public static TypeTerm Constant(Type type) =>
+            TypeTerm.From(type);
         public static Term Constant(object value) =>
             value switch
             {

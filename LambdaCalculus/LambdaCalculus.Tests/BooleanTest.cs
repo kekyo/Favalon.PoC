@@ -34,7 +34,7 @@ namespace LambdaCalculus
         public void AndTerm(bool result, bool lhs, bool rhs)
         {
             var term =
-                Term.And(
+                Term.AndAlso(
                     Term.Constant(lhs),
                     Term.Constant(rhs));
 
@@ -54,8 +54,8 @@ namespace LambdaCalculus
         public void DoubleAndTerm(bool result, bool lhs, bool chs, bool rhs)
         {
             var term =
-                Term.And(
-                    Term.And(
+                Term.AndAlso(
+                    Term.AndAlso(
                         Term.Constant(lhs),
                         Term.Constant(chs)),
                     Term.Constant(rhs));
@@ -75,7 +75,7 @@ namespace LambdaCalculus
             var term =
                 Term.Apply(
                     Term.Apply(
-                        LambdaCalculus.AndOperatorTerm.Instance,
+                        Operators.AndAlsoOperatorTerm.Instance,
                         Term.Constant(lhs)),
                     Term.Constant(rhs));
 
@@ -109,7 +109,7 @@ namespace LambdaCalculus
                 Term.Apply(
                     Term.Apply(
                         Term.Apply(
-                            LambdaCalculus.IfOperatorTerm.Instance,
+                            Operators.IfOperatorTerm.Instance,
                             Term.Constant(condition)),
                         Term.Identity("a")),
                     Term.Identity("b"));
@@ -118,6 +118,21 @@ namespace LambdaCalculus
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((IdentityTerm)actual).Identity);
+        }
+
+        [TestCase(true, 123)]
+        [TestCase(false, 100)]
+        public void EqualTerm(bool condition, int value)
+        {
+            var term =
+                Term.Equal(
+                    Term.Constant(123),
+                    Term.Constant(value));
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(condition, ((BooleanTerm)actual).Value);
         }
     }
 }

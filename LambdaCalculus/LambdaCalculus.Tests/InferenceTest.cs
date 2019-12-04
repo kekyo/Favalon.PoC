@@ -84,12 +84,12 @@ namespace LambdaCalculus
         {
             // a && b
             var term =
-                Term.And(
+                Term.AndAlso(
                     Term.Identity("a"),
                     Term.Identity("b"));
 
             var environment = Environment.Create();
-            var actual = (AndTerm)environment.Infer(term);
+            var actual = (Operators.AndAlsoTerm)environment.Infer(term);
 
             // (a:bool && b:bool):bool
             Assert.AreEqual(Term.Type<bool>(), actual.Lhs.HigherOrder);
@@ -106,7 +106,7 @@ namespace LambdaCalculus
                     "a",
                     Term.Lambda(
                         "b",
-                        Term.And(
+                        Term.AndAlso(
                             Term.Identity("a"),
                             Term.Identity("b"))));
 

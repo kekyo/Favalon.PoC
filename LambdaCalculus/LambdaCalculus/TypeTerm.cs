@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LambdaCalculus
 {
@@ -25,12 +26,15 @@ namespace LambdaCalculus
 
     public sealed class ClrTypeTerm : TypeTerm
     {
+        private static readonly Dictionary<Type, ClrTypeTerm> types =
+            new Dictionary<Type, ClrTypeTerm>();
+
         private static readonly ClrTypeTerm higherOrder =
             new ClrTypeTerm(typeof(Type));
 
         public new readonly Type Type;
 
-        internal ClrTypeTerm(Type type) =>
+        private ClrTypeTerm(Type type) =>
             this.Type = type;
 
         public override Term HigherOrder =>
@@ -47,5 +51,15 @@ namespace LambdaCalculus
 
         public override bool Equals(Term? other) =>
             other is ClrTypeTerm rhs ? this.Type.Equals(rhs.Type) : false;
+
+        public static ClrTypeTerm From(Type type)
+        {
+            if (!types.TryGetValue(type, out var term))
+            {
+                term = new ClrTypeTerm(type);
+                types.Add(type, term);
+            }
+            return term;
+        }
     }
 }

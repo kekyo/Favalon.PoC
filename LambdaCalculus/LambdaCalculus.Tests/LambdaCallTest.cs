@@ -72,7 +72,7 @@ namespace LambdaCalculus
                             "a",
                             Term.Lambda(
                                 "b",
-                                Term.And(
+                                Term.AndAlso(
                                     Term.Identity("a"),
                                     Term.Identity("b")))),
                         Term.Constant(lhs)),

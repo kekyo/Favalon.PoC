@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LambdaCalculus.Operators;
+using System;
 using System.Collections.Generic;
 
 namespace LambdaCalculus
@@ -19,54 +20,54 @@ namespace LambdaCalculus
         bool IEquatable<Term?>.Equals(Term? other) =>
             this.Equals(other);
 
-        public override bool Equals(object? other) =>
+        public override sealed bool Equals(object? other) =>
             this.Equals(other as Term);
 
         //////////////////////////////////
 
-        private static readonly Dictionary<Type, ClrTypeTerm> types =
-            new Dictionary<Type, ClrTypeTerm>();
-
-        public static ClrTypeTerm Type(Type type)
-        {
-            if (!types.TryGetValue(type, out var term))
-            {
-                term = new ClrTypeTerm(type);
-                types.Add(type, term);
-            }
-            return term;
-        }
-
-        public static ClrTypeTerm Type<T>() =>
-            Type(typeof(T));
-
         public static UnspecifiedTerm Unspecified() =>
             UnspecifiedTerm.Instance;
-
-        public static IdentityTerm Identity(string identity) =>
-            new IdentityTerm(identity, UnspecifiedTerm.Instance);
 
         public static BooleanTerm True() =>
             BooleanTerm.True;
         public static BooleanTerm False() =>
             BooleanTerm.False;
 
+        public static ClrTypeTerm Type(Type type) =>
+            ClrTypeTerm.From(type);
+        public static ClrTypeTerm Type<T>() =>
+            ClrTypeTerm.From(typeof(T));
+
         public static BooleanTerm Constant(bool value) =>
             value ? BooleanTerm.True : BooleanTerm.False;
-
+        public static ClrTypeTerm Constant(Type type) =>
+            ClrTypeTerm.From(type);
         public static Term Constant(object value) =>
-            new ConstantTerm(value);
+            value switch
+            {
+                bool boolValue => boolValue ? BooleanTerm.True : BooleanTerm.False,
+                Type typeValue => ClrTypeTerm.From(typeValue),
+                _ => new ConstantTerm(value)
+            };
+
+        public static IdentityTerm Identity(string identity) =>
+            new IdentityTerm(identity, UnspecifiedTerm.Instance);
 
         public static ApplyTerm Apply(Term function, Term argument) =>
             new ApplyTerm(function, argument, UnspecifiedTerm.Instance);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
             new LambdaTerm(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);
+        public static LambdaTerm Lambda(Term parameter, Term body) =>
+            new LambdaTerm(parameter, body);
 
-        public static AndTerm And(Term lhs, Term rhs) =>
-            new AndTerm(lhs, rhs);
+        public static AndAlsoTerm AndAlso(Term lhs, Term rhs) =>
+            new AndAlsoTerm(lhs, rhs);
 
-        public static Term If(Term condition, Term then, Term @else) =>
+        public static EqualTerm Equal(Term lhs, Term rhs) =>
+            new EqualTerm(lhs, rhs);
+
+        public static IfTerm If(Term condition, Term then, Term @else) =>
             new IfTerm(condition, then, @else, UnspecifiedTerm.Instance);
     }
 

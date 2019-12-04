@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using LambdaCalculus.Operators;
+using NUnit.Framework;
 
 namespace LambdaCalculus
 {
@@ -150,7 +151,7 @@ namespace LambdaCalculus
 
         [TestCase(true, 123, "abc")]
         [TestCase(false, 123, "abc")]
-        public void IfCondition(bool condition, object then, object @else)
+        public void IfFixedInferrable(bool condition, object then, object @else)
         {
             var term =
                 Term.If(
@@ -164,6 +165,40 @@ namespace LambdaCalculus
             Assert.AreEqual(
                 condition ? Term.Constant(then).HigherOrder : Term.Constant(@else).HigherOrder,
                 actual.HigherOrder);
+        }
+
+        [Test]
+        public void IfCondition()
+        {
+            var term =
+                Term.If(
+                    Term.Identity("cond"),
+                    Term.Constant(123),
+                    Term.Constant("abc"));
+
+            var environment = Environment.Create();
+            var actual = (IfTerm)environment.Infer(term);
+
+            Assert.AreEqual(
+                Term.Type<bool>(),
+                actual.Condition.HigherOrder);
+        }
+
+        [Test]
+        public void IfAppliedCondition()
+        {
+            var term =
+                Term.Lambda(
+                    "cond",
+                    Term.If(
+                        Term.Identity("cond"),
+                        Term.Constant(123),
+                        Term.Constant("abc")));
+
+            var environment = Environment.Create();
+            var actual = (LambdaTerm)environment.Infer(term);
+
+            Assert.AreEqual(Term.Type<bool>(), actual.Parameter.HigherOrder);
         }
     }
 }

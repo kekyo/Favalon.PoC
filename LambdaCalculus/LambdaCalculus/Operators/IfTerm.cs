@@ -2,45 +2,53 @@
 {
     public sealed class IfOperatorTerm : OperatorSymbolTerm<IfOperatorTerm>
     {
+        private static readonly Term higherOrder =
+            new LambdaTerm(BooleanTerm.Type, LambdaTerm.Unspecified);
+
         private IfOperatorTerm()
         { }
 
         public override Term HigherOrder =>
-            new LambdaTerm(BooleanTerm.Type, LambdaTerm.Unspecified);
+            higherOrder;
 
         protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
-            new ThenTerm(rhs);
+            new ConditionTerm(rhs);
 
         public static readonly IfOperatorTerm Instance =
             new IfOperatorTerm();
 
-        private sealed class ThenTerm : OperatorArgument0Term<ThenTerm>
+        private sealed class ConditionTerm : OperatorArgument0Term<ConditionTerm>
         {
-            public ThenTerm(Term condition) :
+            private static readonly Term higherOrder =
+                new LambdaTerm(
+                    LambdaCalculus.UnspecifiedTerm.Instance,
+                    LambdaTerm.Unspecified);
+
+            public ConditionTerm(Term condition) :
                 base(condition)
             { }
 
             public override Term HigherOrder =>
-                new LambdaTerm(this.Argument0.HigherOrder, this.Argument0.HigherOrder);
+                higherOrder;
 
             protected override Term Create(Term argument) =>
-                new ThenTerm(argument);
+                new ConditionTerm(argument);
 
             protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
-                new ElseTerm(this.Argument0, rhs);
+                new ThenTerm(this.Argument0, rhs);
         }
 
-        private sealed class ElseTerm : OperatorArgument1Term<ElseTerm>
+        private sealed class ThenTerm : OperatorArgument1Term<ThenTerm>
         {
-            public ElseTerm(Term condition, Term then) :
+            public ThenTerm(Term condition, Term then) :
                 base(condition, then)
             { }
 
-            protected override Term Create(Term argument0, Term argument1) =>
-                new ElseTerm(argument0, argument1);
-
             public override Term HigherOrder =>
                 new LambdaTerm(this.Argument1.HigherOrder, this.Argument1.HigherOrder);
+
+            protected override Term Create(Term argument0, Term argument1) =>
+                new ThenTerm(argument0, argument1);
 
             protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
                 IfTerm.Reduce(context, this.Argument0, this.Argument1, rhs);

@@ -1,58 +1,5 @@
 ﻿namespace LambdaCalculus
 {
-    public sealed class LambdaOperatorTerm : ApplicableTerm
-    {
-        private LambdaOperatorTerm()
-        { }
-
-        public override Term HigherOrder =>
-            LambdaCalculus.UnspecifiedTerm.Instance;
-
-        public override Term Reduce(ReduceContext context) =>
-            this;
-
-        protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
-            new LambdaArrowParameterTerm(rhs.Reduce(context));
-
-        public override Term Infer(InferContext context) =>
-            this;
-
-        public override Term Fixup(InferContext context) =>
-            this;
-
-        public override bool Equals(Term? other) =>
-            other is LambdaOperatorTerm;
-
-        public static LambdaOperatorTerm Instance =
-            new LambdaOperatorTerm();
-
-        private sealed class LambdaArrowParameterTerm : ApplicableTerm
-        {
-            public readonly Term Parameter;
-
-            public LambdaArrowParameterTerm(Term parameter) =>
-                this.Parameter = parameter;
-
-            public override Term HigherOrder =>
-                LambdaCalculus.UnspecifiedTerm.Instance;
-
-            public override Term Reduce(ReduceContext context) =>
-                new LambdaArrowParameterTerm(this.Parameter.Reduce(context));
-
-            protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
-                new LambdaTerm(this.Parameter, rhs);    // rhs isn't reduced at this time, because the body term can reduce only applying time.
-
-            public override Term Infer(InferContext context) =>
-                new LambdaArrowParameterTerm(this.Parameter.Infer(context));
-
-            public override Term Fixup(InferContext context) =>
-                new LambdaArrowParameterTerm(this.Parameter.Fixup(context));
-
-            public override bool Equals(Term? other) =>
-                other is LambdaArrowParameterTerm rhs ? this.Parameter.Equals(rhs.Parameter) : false;
-        }
-    }
-
     public sealed class LambdaTerm : ApplicableTerm
     {
         public readonly Term Parameter;

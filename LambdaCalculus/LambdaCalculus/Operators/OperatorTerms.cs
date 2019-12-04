@@ -70,4 +70,72 @@
                 (this.Lhs.Equals(rhs.Lhs) && this.Rhs.Equals(rhs.Rhs)) :
                 false;
     }
+
+    ///////////////////////////////////////////////////////////////////////
+
+    public abstract class OperatorSymbolTerm : ApplicableTerm
+    {
+        internal OperatorSymbolTerm()
+        { }
+
+        public override sealed Term HigherOrder =>
+            UnspecifiedTerm.Instance;
+
+        protected abstract Term Create(Term argument);
+
+        public override sealed Term Reduce(ReduceContext context) =>
+            this;
+
+        protected internal override sealed Term? ReduceForApply(ReduceContext context, Term rhs) =>
+            this.Create(rhs);
+
+        public override sealed Term Infer(InferContext context) =>
+            this;
+
+        public override sealed Term Fixup(InferContext context) =>
+            this;
+    }
+
+    public abstract class OperatorSymbolTerm<T> : OperatorSymbolTerm
+        where T : Term
+    {
+        protected OperatorSymbolTerm()
+        { }
+
+        public override sealed bool Equals(Term? other) =>
+            other is T;
+    }
+
+    public abstract class OperatorArgumentTerm : ApplicableTerm
+    {
+        public readonly Term Argument;
+
+        internal OperatorArgumentTerm(Term argument) =>
+            this.Argument = argument;
+
+        public override sealed Term HigherOrder =>
+            UnspecifiedTerm.Instance;
+
+        protected abstract Term Create(Term argument);
+
+        public override sealed Term Reduce(ReduceContext context) =>
+            this;
+
+        public override sealed Term Infer(InferContext context) =>
+            this.Create(this.Argument.Infer(context));
+
+        public override sealed Term Fixup(InferContext context) =>
+            this.Create(this.Argument.Fixup(context));
+    }
+
+    public abstract class OperatorArgumentTerm<T> : OperatorArgumentTerm
+        where T : OperatorArgumentTerm
+    {
+        protected OperatorArgumentTerm(Term argument) :
+            base(argument)
+        { }
+
+        public override sealed bool Equals(Term? other) =>
+            other is T rhs ? this.Argument.Equals(rhs.Argument) : false;
+    }
 }

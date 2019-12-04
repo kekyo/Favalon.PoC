@@ -1,55 +1,27 @@
 ﻿namespace LambdaCalculus.Operators
 {
-    public sealed class AndAlsoOperatorTerm : ApplicableTerm
+    public sealed class AndAlsoOperatorTerm : OperatorSymbolTerm<AndAlsoOperatorTerm>
     {
         private AndAlsoOperatorTerm()
         { }
 
-        public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
-
-        public override sealed Term Reduce(ReduceContext context) =>
-            this;
-
-        protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
-            new AndAlsoLeftTerm(rhs.Reduce(context));
-
-        public override Term Infer(InferContext context) =>
-            this;
-
-        public override Term Fixup(InferContext context) =>
-            this;
-
-        public override bool Equals(Term? other) =>
-            other is AndAlsoOperatorTerm;
+        protected override Term Create(Term argument) =>
+            new AndAlsoLeftTerm(argument);
 
         public static readonly AndAlsoOperatorTerm Instance =
             new AndAlsoOperatorTerm();
 
-        private sealed class AndAlsoLeftTerm : ApplicableTerm
+        private sealed class AndAlsoLeftTerm : OperatorArgumentTerm<AndAlsoLeftTerm>
         {
-            public readonly Term Lhs;
+            public AndAlsoLeftTerm(Term lhs) :
+                base(lhs)
+            { }
 
-            public AndAlsoLeftTerm(Term lhs) =>
-                this.Lhs = lhs;
-
-            public override Term HigherOrder =>
-                UnspecifiedTerm.Instance;
-
-            public override Term Reduce(ReduceContext context) =>
-                this;
+            protected override Term Create(Term argument) =>
+                new AndAlsoLeftTerm(argument);
 
             protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
-                AndAlsoTerm.Reduce(context, this.Lhs, rhs);
-
-            public override Term Infer(InferContext context) =>
-                new AndAlsoLeftTerm(this.Lhs.Infer(context));
-
-            public override Term Fixup(InferContext context) =>
-                new AndAlsoLeftTerm(this.Lhs.Fixup(context));
-
-            public override bool Equals(Term? other) =>
-                other is AndAlsoLeftTerm rhs ? this.Lhs.Equals(rhs.Lhs) : false;
+                AndAlsoTerm.Reduce(context, this.Argument, rhs);
         }
     }
 

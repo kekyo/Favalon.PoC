@@ -32,5 +32,8 @@
             new BooleanTerm(true);
         public static new readonly BooleanTerm False =
             new BooleanTerm(false);
+
+        public static BooleanTerm From(bool value) =>
+            value ? True : False;
     }
 }

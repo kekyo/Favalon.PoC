@@ -3,7 +3,6 @@
     public abstract class ApplicableTerm : Term
     {
         protected internal abstract Term? ReduceForApply(ReduceContext context, Term rhs);
-        protected internal abstract Term InferForApply(InferContext context, Term rhs);
     }
 
     public sealed class ApplyTerm : Term
@@ -11,16 +10,14 @@
         public readonly Term Function;
         public readonly Term Argument;
 
-        internal ApplyTerm(Term function, Term argument)
+        internal ApplyTerm(Term function, Term argument, Term higherOrder)
         {
             this.Function = function;
             this.Argument = argument;
+            this.HigherOrder = higherOrder;
         }
 
-        public override Term HigherOrder =>
-            this.Function is ApplicableTerm function ?
-                ((LambdaTerm)function.HigherOrder).Body :
-                UnspecifiedTerm.Instance;  // TODO: ???
+        public override Term HigherOrder { get; }
 
         public override Term Reduce(ReduceContext context)
         {
@@ -33,7 +30,10 @@
             }
             else
             {
-                return new ApplyTerm(function, this.Argument.Reduce(context));
+                return new ApplyTerm(
+                    function,
+                    this.Argument.Reduce(context),
+                    this.HigherOrder.Reduce(context));
             }
         }
 
@@ -41,19 +41,19 @@
         {
             var function = this.Function.Infer(context);
             var argument = this.Argument.Infer(context);
+            var higherOrder = this.HigherOrder.Infer(context);
 
-            if (function is ApplicableTerm applicable)
-            {
-                return new ApplyTerm(applicable.InferForApply(context, argument), argument);
-            }
-            else
-            {
-                return new ApplyTerm(function, argument);
-            }
+            // (f:('1 -> '2) a:'1):'2
+            context.Unify(function.HigherOrder, new LambdaTerm(argument.HigherOrder, higherOrder));
+
+            return new ApplyTerm(function, argument, higherOrder);
         }
 
         public override Term Fixup(InferContext context) =>
-            new ApplyTerm(this.Function.Fixup(context), this.Argument.Fixup(context));
+            new ApplyTerm(
+                this.Function.Fixup(context),
+                this.Argument.Fixup(context),
+                this.HigherOrder.Fixup(context));
 
         public override bool Equals(Term? other) =>
             other is ApplyTerm rhs ?

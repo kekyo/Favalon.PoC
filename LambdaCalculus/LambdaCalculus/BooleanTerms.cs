@@ -25,6 +25,9 @@
         public override bool Equals(Term? other) =>
             other is BooleanTerm rhs ? this.Value.Equals(rhs.Value) : false;
 
+        public void Deconstruct(out bool value) =>
+            value = this.Value;
+
         public static new readonly BooleanTerm True =
             new BooleanTerm(true);
         public static new readonly BooleanTerm False =
@@ -46,9 +49,6 @@
             new AndLeftTerm(rhs.Reduce(context));
 
         public override Term Infer(InferContext context) =>
-            this;
-
-        protected internal override Term InferForApply(InferContext context, Term rhs) =>
             this;
 
         public override Term Fixup(InferContext context) =>
@@ -78,9 +78,6 @@
 
             public override Term Infer(InferContext context) =>
                 new AndLeftTerm(this.Lhs.Infer(context));
-
-            protected internal override Term InferForApply(InferContext context, Term rhs) =>
-                AndTerm.Infer(context, this.Lhs, rhs);
 
             public override Term Fixup(InferContext context) =>
                 new AndLeftTerm(this.Lhs.Fixup(context));
@@ -135,19 +132,16 @@
         public override sealed Term Reduce(ReduceContext context) =>
             Reduce(context, this.Lhs, this.Rhs);
 
-        internal static AndTerm Infer(InferContext context, Term lhs, Term rhs)
+        public override Term Infer(InferContext context)
         {
-            var lhs_ = lhs.Infer(context);
-            var rhs_ = rhs.Infer(context);
+            var lhs = this.Lhs.Infer(context);
+            var rhs = this.Rhs.Infer(context);
 
-            context.Unify(lhs_.HigherOrder, BooleanTerm.higherOrder);
-            context.Unify(rhs_.HigherOrder, BooleanTerm.higherOrder);
+            context.Unify(lhs.HigherOrder, BooleanTerm.higherOrder);
+            context.Unify(rhs.HigherOrder, BooleanTerm.higherOrder);
 
-            return new AndTerm(lhs_, rhs_);
+            return new AndTerm(lhs, rhs);
         }
-
-        public override Term Infer(InferContext context) =>
-            Infer(context, this.Lhs, this.Rhs);
 
         public override Term Fixup(InferContext context) =>
             new AndTerm(this.Lhs.Fixup(context), this.Rhs.Fixup(context));
@@ -173,9 +167,6 @@
             new ThenTerm(rhs);   // Doesn't reduce at this time.
 
         public override Term Infer(InferContext context) =>
-            this;
-
-        protected internal override Term InferForApply(InferContext context, Term rhs) =>
             this;
 
         public override Term Fixup(InferContext context) =>
@@ -205,9 +196,6 @@
 
             public override Term Infer(InferContext context) =>
                 new ThenTerm(this.Condition.Infer(context));
-
-            protected internal override Term InferForApply(InferContext context, Term rhs) =>
-                this;
 
             public override Term Fixup(InferContext context) =>
                 new ThenTerm(this.Condition.Fixup(context));
@@ -239,9 +227,6 @@
             public override Term Infer(InferContext context) =>
                 new ElseTerm(this.Condition.Infer(context), this.Then.Infer(context));
 
-            protected internal override Term InferForApply(InferContext context, Term rhs) =>
-                IfTerm.Infer(context, this.Condition, this.Then, rhs);
-
             public override Term Fixup(InferContext context) =>
                 new ElseTerm(this.Condition.Fixup(context), this.Then.Fixup(context));
 
@@ -258,17 +243,15 @@
         public readonly Term Then;
         public readonly Term Else;
 
-        internal IfTerm(Term condition, Term then, Term @else)
+        internal IfTerm(Term condition, Term then, Term @else, Term higherOrder)
         {
             this.Condition = condition;
             this.Then = then;
             this.Else = @else;
+            this.HigherOrder = higherOrder;
         }
 
-        public override Term HigherOrder =>
-            (this.Condition is BooleanTerm term) ?
-                (term.Value ? this.Then.HigherOrder : this.Else.HigherOrder) :
-                this.Then.HigherOrder;  // TODO: Unspecified or OrTypes
+        public override Term HigherOrder { get; }
 
         internal static Term Reduce(ReduceContext context, Term condition, Term then, Term @else) =>
             ((BooleanTerm)condition.Reduce(context)).Value ?
@@ -278,14 +261,38 @@
         public override Term Reduce(ReduceContext context) =>
             Reduce(context, this.Condition, this.Then, this.Else);
 
-        internal static IfTerm Infer(InferContext context, Term condition, Term then, Term @else) =>
-            new IfTerm(condition.Infer(context), then.Infer(context), @else.Infer(context));
+        public override Term Infer(InferContext context)
+        {
+            var condition = this.Condition.Infer(context);
+            var then = this.Then.Infer(context);
+            var @else = this.Else.Infer(context);
+            var higherOrder = this.HigherOrder.Infer(context);
 
-        public override Term Infer(InferContext context) =>
-            Infer(context, this.Condition, this.Then, this.Else);
+            if (condition is BooleanTerm(bool value))
+            {
+                if (value)
+                {
+                    context.Unify(higherOrder, then.HigherOrder);
+                }
+                else
+                {
+                    context.Unify(higherOrder, @else.HigherOrder);
+                }
+            }
+            else
+            {
+                context.Unify(higherOrder, then.HigherOrder);
+            }
+
+            return new IfTerm(condition, then, @else, higherOrder);
+        }
 
         public override Term Fixup(InferContext context) =>
-            new IfTerm(this.Condition.Fixup(context), this.Then.Fixup(context), this.Else.Fixup(context));
+            new IfTerm(
+                this.Condition.Fixup(context),
+                this.Then.Fixup(context),
+                this.Else.Fixup(context),
+                this.HigherOrder.Fixup(context));
 
         public override bool Equals(Term? other) =>
             other is IfTerm rhs ?

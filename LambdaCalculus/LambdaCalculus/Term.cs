@@ -40,11 +40,11 @@ namespace LambdaCalculus
         public static ClrTypeTerm Type<T>() =>
             Type(typeof(T));
 
-        public static IdentityTerm Identity(string identity) =>
-            new IdentityTerm(identity, UnspecifiedTerm.Instance);
-
         public static UnspecifiedTerm Unspecified() =>
             UnspecifiedTerm.Instance;
+
+        public static IdentityTerm Identity(string identity) =>
+            new IdentityTerm(identity, UnspecifiedTerm.Instance);
 
         public static BooleanTerm True() =>
             BooleanTerm.True;
@@ -58,7 +58,7 @@ namespace LambdaCalculus
             new ConstantTerm(value);
 
         public static ApplyTerm Apply(Term function, Term argument) =>
-            new ApplyTerm(function, argument);
+            new ApplyTerm(function, argument, UnspecifiedTerm.Instance);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
             new LambdaTerm(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);
@@ -66,8 +66,8 @@ namespace LambdaCalculus
         public static AndTerm And(Term lhs, Term rhs) =>
             new AndTerm(lhs, rhs);
 
-        public static Term If(Term condition, Term then, Term els) =>
-            new IfTerm(condition, then, els);
+        public static Term If(Term condition, Term then, Term @else) =>
+            new IfTerm(condition, then, @else, UnspecifiedTerm.Instance);
     }
 
     ////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ namespace LambdaCalculus
             this;
 
         public override Term Infer(InferContext context) =>
-            this;
+            context.CreatePlaceholder(Instance);
 
         public override Term Fixup(InferContext context) =>
             this;

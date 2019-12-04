@@ -121,7 +121,13 @@ namespace LambdaCalculus
                 return;
             }
 
-            if (term1 is PlaceholderTerm placeholder1)
+            if (term1 is LambdaTerm(Term parameter1, Term body1) &&
+                term2 is LambdaTerm(Term parameter2, Term body2))
+            {
+                Unify(parameter1, parameter2);
+                Unify(body1, body2);
+            }
+            else if (term1 is PlaceholderTerm placeholder1)
             {
                 Unify(placeholder1, term2);
             }

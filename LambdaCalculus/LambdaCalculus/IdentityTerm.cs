@@ -25,11 +25,11 @@
             }
 
             var higherOrder = this.HigherOrder.Infer(context);
-            if (higherOrder is UnspecifiedTerm)
-            {
-                return new IdentityTerm(this.Identity, context.CreatePlaceholder(UnspecifiedTerm.Instance));
-            }
-            else
+            //if (higherOrder is UnspecifiedTerm)
+            //{
+            //    return new IdentityTerm(this.Identity, context.CreatePlaceholder(UnspecifiedTerm.Instance));
+            //}
+            //else
             {
                 return new IdentityTerm(this.Identity, higherOrder);
             }

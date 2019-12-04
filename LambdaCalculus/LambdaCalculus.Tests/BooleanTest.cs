@@ -134,5 +134,22 @@ namespace LambdaCalculus
 
             Assert.AreEqual(condition, ((BooleanTerm)actual).Value);
         }
+
+        [TestCase(true, 123)]
+        [TestCase(false, 100)]
+        public void EqualOperatorTerm(bool condition, int value)
+        {
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        Operators.EqualOperatorTerm.Instance,
+                        Term.Constant(123)),
+                    Term.Constant(value));
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(condition, ((BooleanTerm)actual).Value);
+        }
     }
 }

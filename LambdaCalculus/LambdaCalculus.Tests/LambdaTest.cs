@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace LambdaCalculus
 {
     [TestFixture]
-    class LambdaCallTest
+    class LambdaTest
     {
         [TestCase(true)]
         [TestCase(false)]

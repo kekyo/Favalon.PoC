@@ -78,6 +78,8 @@
             var @else = this.Else.Infer(context);
             var higherOrder = this.HigherOrder.Infer(context);
 
+            context.Unify(condition.HigherOrder, BooleanTerm.Type);
+
             if (condition is BooleanTerm(bool value))
             {
                 if (value)

@@ -6,7 +6,7 @@
         { }
 
         public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
+            LambdaCalculus.UnspecifiedTerm.Instance;
 
         public override Term Reduce(ReduceContext context) =>
             this;
@@ -34,7 +34,7 @@
                 this.Parameter = parameter;
 
             public override Term HigherOrder =>
-                UnspecifiedTerm.Instance;
+                LambdaCalculus.UnspecifiedTerm.Instance;
 
             public override Term Reduce(ReduceContext context) =>
                 new LambdaArrowParameterTerm(this.Parameter.Reduce(context));
@@ -105,5 +105,8 @@
             parameter = this.Parameter;
             body = this.Body;
         }
+
+        public static readonly LambdaTerm Unspecified =
+            new LambdaTerm(LambdaCalculus.UnspecifiedTerm.Instance, LambdaCalculus.UnspecifiedTerm.Instance);
     }
 }

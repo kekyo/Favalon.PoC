@@ -1,87 +1,49 @@
 ﻿namespace LambdaCalculus.Operators
 {
-    public sealed class IfOperatorTerm : ApplicableTerm
+    public sealed class IfOperatorTerm : OperatorSymbolTerm<IfOperatorTerm>
     {
         private IfOperatorTerm()
         { }
 
         public override Term HigherOrder =>
-           UnspecifiedTerm.Instance;
-
-        public override sealed Term Reduce(ReduceContext context) =>
-            this;
+            new LambdaTerm(BooleanTerm.Type, LambdaTerm.Unspecified);
 
         protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
-            new ThenTerm(rhs);   // Doesn't reduce at this time.
-
-        public override Term Infer(InferContext context) =>
-            this;
-
-        public override Term Fixup(InferContext context) =>
-            this;
-
-        public override bool Equals(Term? other) =>
-            other is IfOperatorTerm;
+            new ThenTerm(rhs);
 
         public static readonly IfOperatorTerm Instance =
             new IfOperatorTerm();
 
-        private sealed class ThenTerm : ApplicableTerm
+        private sealed class ThenTerm : OperatorArgument0Term<ThenTerm>
         {
-            public readonly Term Condition;
-
-            public ThenTerm(Term then) =>
-                this.Condition = then;
+            public ThenTerm(Term condition) :
+                base(condition)
+            { }
 
             public override Term HigherOrder =>
-                UnspecifiedTerm.Instance;
+                new LambdaTerm(this.Argument0.HigherOrder, this.Argument0.HigherOrder);
 
-            public override Term Reduce(ReduceContext context) =>
-                new ThenTerm(this.Condition.Reduce(context));
+            protected override Term Create(Term argument) =>
+                new ThenTerm(argument);
 
             protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
-                new ElseTerm(this.Condition, rhs);   // Doesn't reduce at this time.
-
-            public override Term Infer(InferContext context) =>
-                new ThenTerm(this.Condition.Infer(context));
-
-            public override Term Fixup(InferContext context) =>
-                new ThenTerm(this.Condition.Fixup(context));
-
-            public override bool Equals(Term? other) =>
-                other is ThenTerm rhs ? this.Condition.Equals(rhs.Condition) : false;
+                new ElseTerm(this.Argument0, rhs);
         }
 
-        private sealed class ElseTerm : ApplicableTerm
+        private sealed class ElseTerm : OperatorArgument1Term<ElseTerm>
         {
-            public readonly Term Condition;
-            public readonly Term Then;
+            public ElseTerm(Term condition, Term then) :
+                base(condition, then)
+            { }
 
-            public ElseTerm(Term condition, Term then)
-            {
-                this.Condition = condition;
-                this.Then = then;
-            }
+            protected override Term Create(Term argument0, Term argument1) =>
+                new ElseTerm(argument0, argument1);
 
             public override Term HigherOrder =>
-                this.Then.HigherOrder;
-
-            public override Term Reduce(ReduceContext context) =>
-                this;  // Cannot reduce then term at this time, because has to examine delayed execution at IfTerm.Reduce().
+                new LambdaTerm(this.Argument1.HigherOrder, this.Argument1.HigherOrder);
 
             protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
-                IfTerm.Reduce(context, this.Condition, this.Then, rhs);
-
-            public override Term Infer(InferContext context) =>
-                new ElseTerm(this.Condition.Infer(context), this.Then.Infer(context));
-
-            public override Term Fixup(InferContext context) =>
-                new ElseTerm(this.Condition.Fixup(context), this.Then.Fixup(context));
-
-            public override bool Equals(Term? other) =>
-                other is ElseTerm rhs ?
-                    (this.Condition.Equals(rhs.Condition) && this.Then.Equals(rhs.Then)) :
-                    false;
+                IfTerm.Reduce(context, this.Argument0, this.Argument1, rhs);
         }
     }
 

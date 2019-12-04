@@ -2,16 +2,13 @@
 {
     public sealed class BooleanTerm : Term
     {
-        internal static readonly ClrTypeTerm higherOrder =
-            Type<bool>();
-
         public readonly bool Value;
 
         private BooleanTerm(bool value) =>
             this.Value = value;
 
         public override Term HigherOrder =>
-            higherOrder;
+            Type;
 
         public override Term Reduce(ReduceContext context) =>
             this;
@@ -27,6 +24,9 @@
 
         public void Deconstruct(out bool value) =>
             value = this.Value;
+
+        public static new readonly ClrTypeTerm Type =
+            Type<bool>();
 
         public static new readonly BooleanTerm True =
             new BooleanTerm(true);

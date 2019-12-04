@@ -6,7 +6,7 @@ namespace LambdaCalculus
     public abstract class TypeTerm : Term
     {
         private static readonly Term higherOrder =
-            new IdentityTerm("*", UnspecifiedTerm.Instance);  // TODO:
+            new IdentityTerm("*", LambdaCalculus.UnspecifiedTerm.Instance);  // TODO:
 
         private protected TypeTerm()
         { }

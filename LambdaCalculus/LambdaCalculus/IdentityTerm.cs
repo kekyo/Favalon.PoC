@@ -13,27 +13,14 @@
         public override Term HigherOrder { get; }
 
         public override Term Reduce(ReduceContext context) =>
-            context.GetBoundTerm(this.Identity) is Term term ?
-                term.Reduce(context) :
+            context.GetBoundTerm(this.Identity) is Term bound ?
+                bound.Reduce(context) :
                 new IdentityTerm(this.Identity, this.HigherOrder.Reduce(context));
 
-        public override Term Infer(InferContext context)
-        {
-            if (context.GetBoundTerm(this.Identity) is Term bound)
-            {
-                return bound;
-            }
-
-            var higherOrder = this.HigherOrder.Infer(context);
-            //if (higherOrder is UnspecifiedTerm)
-            //{
-            //    return new IdentityTerm(this.Identity, context.CreatePlaceholder(UnspecifiedTerm.Instance));
-            //}
-            //else
-            {
-                return new IdentityTerm(this.Identity, higherOrder);
-            }
-        }
+        public override Term Infer(InferContext context) =>
+            context.GetBoundTerm(this.Identity) is Term bound ?
+                bound :
+                new IdentityTerm(this.Identity, this.HigherOrder.Infer(context));
 
         public override Term Fixup(InferContext context) =>
             new IdentityTerm(this.Identity, this.HigherOrder.Fixup(context));

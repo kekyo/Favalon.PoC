@@ -1,11 +1,11 @@
 ﻿using LambdaCalculus.Operators;
 using System;
-using System.Collections.Generic;
+
+#pragma warning disable 659
 
 namespace LambdaCalculus
 {
-    public abstract class Term :
-        IEquatable<Term?>
+    public abstract class Term : IEquatable<Term?>
     {
         public abstract Term HigherOrder { get; }
 
@@ -25,8 +25,10 @@ namespace LambdaCalculus
 
         //////////////////////////////////
 
-        public static UnspecifiedTerm Unspecified() =>
-            UnspecifiedTerm.Instance;
+        public static UnspecifiedTerm UnspecifiedTerm() =>
+            LambdaCalculus.UnspecifiedTerm.Instance;
+        public static LambdaTerm UnspecifiedFunction() =>
+            LambdaTerm.Unspecified;
 
         public static BooleanTerm True() =>
             BooleanTerm.True;
@@ -51,13 +53,13 @@ namespace LambdaCalculus
             };
 
         public static IdentityTerm Identity(string identity) =>
-            new IdentityTerm(identity, UnspecifiedTerm.Instance);
+            new IdentityTerm(identity, LambdaCalculus.UnspecifiedTerm.Instance);
 
         public static ApplyTerm Apply(Term function, Term argument) =>
-            new ApplyTerm(function, argument, UnspecifiedTerm.Instance);
+            new ApplyTerm(function, argument, LambdaCalculus.UnspecifiedTerm.Instance);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
-            new LambdaTerm(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);
+            new LambdaTerm(new IdentityTerm(parameter, LambdaCalculus.UnspecifiedTerm.Instance), body);
         public static LambdaTerm Lambda(Term parameter, Term body) =>
             new LambdaTerm(parameter, body);
 
@@ -68,7 +70,7 @@ namespace LambdaCalculus
             new EqualTerm(lhs, rhs);
 
         public static IfTerm If(Term condition, Term then, Term @else) =>
-            new IfTerm(condition, then, @else, UnspecifiedTerm.Instance);
+            new IfTerm(condition, then, @else, LambdaCalculus.UnspecifiedTerm.Instance);
     }
 
     ////////////////////////////////////////////////////////////

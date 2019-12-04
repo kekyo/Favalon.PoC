@@ -5,13 +5,13 @@
         private AndAlsoOperatorTerm()
         { }
 
-        protected override Term Create(Term argument) =>
-            new AndAlsoLeftTerm(argument);
+        protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
+            new AndAlsoLeftTerm(rhs);
 
         public static readonly AndAlsoOperatorTerm Instance =
             new AndAlsoOperatorTerm();
 
-        private sealed class AndAlsoLeftTerm : OperatorArgumentTerm<AndAlsoLeftTerm>
+        private sealed class AndAlsoLeftTerm : OperatorArgument0Term<AndAlsoLeftTerm>
         {
             public AndAlsoLeftTerm(Term lhs) :
                 base(lhs)
@@ -21,7 +21,7 @@
                 new AndAlsoLeftTerm(argument);
 
             protected internal override Term? ReduceForApply(ReduceContext context, Term rhs) =>
-                AndAlsoTerm.Reduce(context, this.Argument, rhs);
+                AndAlsoTerm.Reduce(context, this.Argument0, rhs);
         }
     }
 

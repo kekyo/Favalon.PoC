@@ -7,7 +7,7 @@
         { }
 
         public override Term HigherOrder =>
-            BooleanTerm.higherOrder;
+            BooleanTerm.Type;
 
         protected override Term Create(Term lhs, Term rhs) =>
             new EqualTerm(lhs, rhs);

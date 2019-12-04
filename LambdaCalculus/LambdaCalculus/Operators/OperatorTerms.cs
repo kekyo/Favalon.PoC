@@ -49,12 +49,12 @@
         { }
 
         public override sealed Term HigherOrder =>
-            BooleanTerm.higherOrder;
+            BooleanTerm.Type;
 
         protected override sealed void Infer(InferContext context, Term lhs, Term rhs)
         {
-            context.Unify(lhs.HigherOrder, BooleanTerm.higherOrder);
-            context.Unify(rhs.HigherOrder, BooleanTerm.higherOrder);
+            context.Unify(lhs.HigherOrder, BooleanTerm.Type);
+            context.Unify(rhs.HigherOrder, BooleanTerm.Type);
         }
     }
 
@@ -78,16 +78,11 @@
         internal OperatorSymbolTerm()
         { }
 
-        public override sealed Term HigherOrder =>
-            UnspecifiedTerm.Instance;
-
-        protected abstract Term Create(Term argument);
+        public override Term HigherOrder =>
+            LambdaCalculus.UnspecifiedTerm.Instance;
 
         public override sealed Term Reduce(ReduceContext context) =>
             this;
-
-        protected internal override sealed Term? ReduceForApply(ReduceContext context, Term rhs) =>
-            this.Create(rhs);
 
         public override sealed Term Infer(InferContext context) =>
             this;
@@ -106,36 +101,75 @@
             other is T;
     }
 
-    public abstract class OperatorArgumentTerm : ApplicableTerm
+    public abstract class OperatorArgument0Term : ApplicableTerm
     {
-        public readonly Term Argument;
+        public readonly Term Argument0;
 
-        internal OperatorArgumentTerm(Term argument) =>
-            this.Argument = argument;
+        internal OperatorArgument0Term(Term argument0) =>
+            this.Argument0 = argument0;
 
-        public override sealed Term HigherOrder =>
-            UnspecifiedTerm.Instance;
+        public override Term HigherOrder =>
+            LambdaCalculus.UnspecifiedTerm.Instance;
 
-        protected abstract Term Create(Term argument);
+        protected abstract Term Create(Term argument0);
 
         public override sealed Term Reduce(ReduceContext context) =>
             this;
 
         public override sealed Term Infer(InferContext context) =>
-            this.Create(this.Argument.Infer(context));
+            this.Create(this.Argument0.Infer(context));
 
         public override sealed Term Fixup(InferContext context) =>
-            this.Create(this.Argument.Fixup(context));
+            this.Create(this.Argument0.Fixup(context));
     }
 
-    public abstract class OperatorArgumentTerm<T> : OperatorArgumentTerm
-        where T : OperatorArgumentTerm
+    public abstract class OperatorArgument0Term<T> : OperatorArgument0Term
+        where T : OperatorArgument0Term
     {
-        protected OperatorArgumentTerm(Term argument) :
+        protected OperatorArgument0Term(Term argument) :
             base(argument)
         { }
 
         public override sealed bool Equals(Term? other) =>
-            other is T rhs ? this.Argument.Equals(rhs.Argument) : false;
+            other is T rhs ? this.Argument0.Equals(rhs.Argument0) : false;
+    }
+
+    public abstract class OperatorArgument1Term : ApplicableTerm
+    {
+        public readonly Term Argument0;
+        public readonly Term Argument1;
+
+        internal OperatorArgument1Term(Term argument0, Term argument1)
+        {
+            this.Argument0 = argument0;
+            this.Argument1 = argument1;
+        }
+
+        public override Term HigherOrder =>
+            LambdaCalculus.UnspecifiedTerm.Instance;
+
+        protected abstract Term Create(Term argument0, Term argument1);
+
+        public override sealed Term Reduce(ReduceContext context) =>
+            this;
+
+        public override sealed Term Infer(InferContext context) =>
+            this.Create(this.Argument0.Infer(context), this.Argument1.Infer(context));
+
+        public override sealed Term Fixup(InferContext context) =>
+            this.Create(this.Argument0.Fixup(context), this.Argument1.Fixup(context));
+    }
+
+    public abstract class OperatorArgument1Term<T> : OperatorArgument1Term
+        where T : OperatorArgument1Term
+    {
+        protected OperatorArgument1Term(Term argument0, Term argument1) :
+            base(argument0, argument1)
+        { }
+
+        public override sealed bool Equals(Term? other) =>
+            other is T rhs ?
+                (this.Argument0.Equals(rhs.Argument0) && this.Argument1.Equals(rhs.Argument1)) :
+                false;
     }
 }

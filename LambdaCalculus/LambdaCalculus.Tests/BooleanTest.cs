@@ -1,5 +1,4 @@
-﻿using LambdaCalculus.Operators;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace LambdaCalculus
 {

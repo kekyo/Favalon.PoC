@@ -29,7 +29,11 @@
             var body = this.Body.Infer(context);
             var bound = this.Bound.Infer(context);
 
-            context.SetBoundTerm(((IdentityTerm)bound).Identity, body);
+            if (bound is IdentityTerm identity)
+            {
+                context.SetBoundTerm(identity.Identity, body);
+            }
+
             context.Unify(bound.HigherOrder, body.HigherOrder);
 
             return new BindExpressionTerm(bound, body);

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace LambdaCalculus
 {
@@ -29,7 +28,14 @@ namespace LambdaCalculus
             this.parent = parent;
         }
 
-        public void AddBoundTerm(string identity, Term term)
+        internal Environment(Environment parent, Dictionary<string, Term> boundTerms)
+        {
+            this.indexer = parent.indexer;
+            this.parent = parent;
+            this.boundTerms = boundTerms;
+        }
+
+        public void SetBoundTerm(string identity, Term term)
         {
             if (boundTerms == null)
             {
@@ -40,7 +46,11 @@ namespace LambdaCalculus
 
         public Term Reduce(Term term)
         {
-            var context = new ReduceContext(this);
+            if (boundTerms == null)
+            {
+                boundTerms = new Dictionary<string, Term>();
+            }
+            var context = new ReduceContext(this, boundTerms);
             return term.Reduce(context);
         }
 
@@ -51,7 +61,7 @@ namespace LambdaCalculus
             return inferred.Fixup(context);
         }
 
-        public Term? GetBoundTerm(string identity)
+        public Term? LookupBoundTerm(string identity)
         {
             Environment? current = this;
             do
@@ -78,6 +88,10 @@ namespace LambdaCalculus
     {
         internal ReduceContext(Environment parent) :
             base(parent)
+        { }
+
+        internal ReduceContext(Environment parent, Dictionary<string, Term> boundTerms) :
+            base(parent, boundTerms)
         { }
 
         public ReduceContext NewScope() =>

@@ -20,7 +20,7 @@
         Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)
         {
             var newScope = context.NewScope();
-            newScope.AddBoundTerm(((IdentityTerm)this.Parameter).Identity, rhs);
+            newScope.SetBoundTerm(((IdentityTerm)this.Parameter).Identity, rhs);
 
             return this.Body.Reduce(newScope);
         }
@@ -31,7 +31,7 @@
             var parameter = this.Parameter.Infer(newScope);
             if (parameter is IdentityTerm identity)
             {
-                newScope.AddBoundTerm(identity.Identity, parameter);
+                newScope.SetBoundTerm(identity.Identity, parameter);
             }
 
             var body = this.Body.Infer(newScope);

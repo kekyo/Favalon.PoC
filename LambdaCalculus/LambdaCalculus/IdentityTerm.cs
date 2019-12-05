@@ -13,12 +13,12 @@
         public override Term HigherOrder { get; }
 
         public override Term Reduce(ReduceContext context) =>
-            context.GetBoundTerm(this.Identity) is Term bound ?
+            context.LookupBoundTerm(this.Identity) is Term bound ?
                 bound.Reduce(context) :
                 new IdentityTerm(this.Identity, this.HigherOrder.Reduce(context));
 
         public override Term Infer(InferContext context) =>
-            context.GetBoundTerm(this.Identity) is Term bound ?
+            context.LookupBoundTerm(this.Identity) is Term bound ?
                 bound :
                 new IdentityTerm(this.Identity, this.HigherOrder.Infer(context));
 

@@ -7,7 +7,7 @@ namespace LambdaCalculus
     {
         [TestCase(true)]
         [TestCase(false)]
-        public void BindConstant(bool result)
+        public void BindInConstant(bool result)
         {
             var term =
                 Term.Bind(
@@ -24,7 +24,7 @@ namespace LambdaCalculus
 
         [TestCase(true)]
         [TestCase(false)]
-        public void BindAppliedIdentity(bool result)
+        public void BindInAppliedIdentity(bool result)
         {
             var term =
                 Term.Apply(
@@ -41,6 +41,23 @@ namespace LambdaCalculus
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, !((BooleanTerm)actual).Value);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void BindConstantWithSideEffect(bool result)
+        {
+            var term =
+                Term.Bind(
+                    "a",
+                    Term.Not(
+                        Term.Constant(result)));
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(result, !((BooleanTerm)actual).Value);
+            Assert.AreEqual(result, !((BooleanTerm)environment.LookupBoundTerm("a")).Value);
         }
     }
 }

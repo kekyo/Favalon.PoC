@@ -44,7 +44,7 @@
                     var rhs_ = rhs.Reduce(context);
                     if (rhs_ is BooleanTerm r)
                     {
-                        return Constant(r.Value);
+                        return BooleanTerm.From(r.Value);
                     }
                     else
                     {

@@ -26,7 +26,7 @@
             var argument_ = argument.Reduce(context);
             if (argument_ is BooleanTerm a)
             {
-                return Constant(!a.Value);
+                return BooleanTerm.From(!a.Value);
             }
             else
             {

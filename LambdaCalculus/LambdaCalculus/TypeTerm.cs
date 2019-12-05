@@ -23,7 +23,7 @@ namespace LambdaCalculus
         public override sealed Term Infer(InferContext context) =>
             this;
 
-        public override sealed Term Fixup(InferContext context) =>
+        public override sealed Term Fixup(FixupContext context) =>
             this;
 
         private protected static bool IsTypeConstructor(Type type) =>

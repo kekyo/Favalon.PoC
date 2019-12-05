@@ -84,17 +84,47 @@ namespace LambdaCalculus
             new ReduceContext(this);
     }
 
-    public sealed class InferContext : Environment
+    public class FixupContext : Environment
     {
-        private readonly Dictionary<int, Term> placeholders;
+        private protected readonly Dictionary<int, Term> placeholders;
 
-        internal InferContext(Environment parent) :
-            base(parent) =>
-            placeholders = new Dictionary<int, Term>();
-
-        private InferContext(Environment parent, Dictionary<int, Term> placeholders) :
+        private protected FixupContext(Environment parent, Dictionary<int, Term> placeholders) :
             base(parent) =>
             this.placeholders = placeholders;
+
+        public Term LookupUnifiedTerm(PlaceholderTerm placeholder)
+        {
+            var current = placeholder;
+            while (true)
+            {
+                if (placeholders.TryGetValue(current.Index, out var next))
+                {
+                    if (next is PlaceholderTerm p)
+                    {
+                        current = p;
+                    }
+                    else
+                    {
+                        return next;
+                    }
+                }
+                else
+                {
+                    return current;
+                }
+            }
+        }
+    }
+
+    public sealed class InferContext : FixupContext
+    {
+        internal InferContext(Environment parent) :
+            base(parent, new Dictionary<int, Term>())
+        { }
+
+        private InferContext(Environment parent, Dictionary<int, Term> placeholders) :
+            base(parent, placeholders)
+        { }
 
         public InferContext NewScope() =>
             new InferContext(this, placeholders);
@@ -134,29 +164,6 @@ namespace LambdaCalculus
             else if (term2 is PlaceholderTerm placeholder2)
             {
                 Unify(placeholder2, term1);
-            }
-        }
-
-        public Term LookupUnifiedTerm(PlaceholderTerm placeholder)
-        {
-            var current = placeholder;
-            while (true)
-            {
-                if (placeholders.TryGetValue(current.Index, out var next))
-                {
-                    if (next is PlaceholderTerm p)
-                    {
-                        current = p;
-                    }
-                    else
-                    {
-                        return next;
-                    }
-                }
-                else
-                {
-                    return current;
-                }
             }
         }
     }

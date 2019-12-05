@@ -39,7 +39,7 @@
             return new LambdaTerm(parameter, body);
         }
 
-        public override Term Fixup(InferContext context) =>
+        public override Term Fixup(FixupContext context) =>
             new LambdaTerm(this.Parameter.Fixup(context), this.Body.Fixup(context));
 
         public override bool Equals(Term? other) =>

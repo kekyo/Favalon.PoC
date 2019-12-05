@@ -80,6 +80,44 @@ namespace LambdaCalculus
             Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
         }
 
+        [TestCase(true)]
+        [TestCase(false)]
+        public void BindConstant(bool result)
+        {
+            var term =
+                Term.Bind(
+                    "a",
+                    Term.Constant(result),
+                    Term.Not(
+                        Term.Identity("a")));
+
+            var environment = Environment.Create();
+            var actual = environment.Infer(term);
+
+            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void BindAppliedIdentity(bool result)
+        {
+            var term =
+                Term.Apply(
+                    Term.Lambda(
+                        "b",
+                        Term.Bind(
+                            "a",
+                            Term.Identity("b"),
+                            Term.Not(
+                                Term.Identity("a")))),
+                    Term.Constant(result));
+
+            var environment = Environment.Create();
+            var actual = environment.Infer(term);
+
+            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+        }
+
         [Test]
         public void BooleanAndBodyTest()
         {

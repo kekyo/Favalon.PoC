@@ -49,7 +49,7 @@
             return new ApplyTerm(function, argument, higherOrder);
         }
 
-        public override Term Fixup(InferContext context) =>
+        public override Term Fixup(FixupContext context) =>
             new ApplyTerm(
                 this.Function.Fixup(context),
                 this.Argument.Fixup(context),

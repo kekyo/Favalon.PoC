@@ -14,7 +14,7 @@
         public override sealed Term Infer(InferContext context) =>
             this;
 
-        public override sealed Term Fixup(InferContext context) =>
+        public override sealed Term Fixup(FixupContext context) =>
             this;
     }
 
@@ -52,7 +52,7 @@
         public override sealed Term Infer(InferContext context) =>
             this.Create(this.Argument0.Infer(context));
 
-        public override sealed Term Fixup(InferContext context) =>
+        public override sealed Term Fixup(FixupContext context) =>
             this.Create(this.Argument0.Fixup(context));
 
         public override int GetHashCode() =>
@@ -92,7 +92,7 @@
         public override sealed Term Infer(InferContext context) =>
             this.Create(this.Argument0.Infer(context), this.Argument1.Infer(context));
 
-        public override sealed Term Fixup(InferContext context) =>
+        public override sealed Term Fixup(FixupContext context) =>
             this.Create(this.Argument0.Fixup(context), this.Argument1.Fixup(context));
 
         public override int GetHashCode() =>

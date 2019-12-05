@@ -22,7 +22,7 @@
                 bound :
                 new IdentityTerm(this.Identity, this.HigherOrder.Infer(context));
 
-        public override Term Fixup(InferContext context) =>
+        public override Term Fixup(FixupContext context) =>
             new IdentityTerm(this.Identity, this.HigherOrder.Fixup(context));
 
         public override bool Equals(Term? other) =>

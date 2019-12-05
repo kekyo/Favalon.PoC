@@ -107,7 +107,7 @@
             return new IfTerm(condition, then, @else, higherOrder);
         }
 
-        public override Term Fixup(InferContext context) =>
+        public override Term Fixup(FixupContext context) =>
             new IfTerm(
                 this.Condition.Fixup(context),
                 this.Then.Fixup(context),

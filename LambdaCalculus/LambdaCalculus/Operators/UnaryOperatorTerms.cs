@@ -15,10 +15,10 @@
         public override sealed Term Infer(InferContext context) =>
             this.Infer(context, this.Argument.Infer(context));
 
-        protected virtual Term Fixup(InferContext context, Term argument) =>
+        protected virtual Term Fixup(FixupContext context, Term argument) =>
             this.Create(argument);
 
-        public override sealed Term Fixup(InferContext context) =>
+        public override sealed Term Fixup(FixupContext context) =>
             this.Fixup(context, this.Argument.Fixup(context));
 
         public override int GetHashCode() =>

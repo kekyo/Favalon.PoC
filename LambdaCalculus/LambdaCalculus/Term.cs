@@ -1,6 +1,6 @@
-﻿using LambdaCalculus.Operators;
+﻿using LambdaCalculus.Algebric;
+using LambdaCalculus.Operators;
 using System;
-using System.Linq;
 
 #pragma warning disable 659
 
@@ -14,7 +14,7 @@ namespace LambdaCalculus
 
         public abstract Term Infer(InferContext context);
 
-        public abstract Term Fixup(InferContext context);
+        public abstract Term Fixup(FixupContext context);
 
         public abstract bool Equals(Term? other);
 
@@ -57,15 +57,20 @@ namespace LambdaCalculus
             };
 
         public static IdentityTerm Identity(string identity) =>
-            new IdentityTerm(identity, LambdaCalculus.UnspecifiedTerm.Instance);
+            new IdentityTerm(identity, UnspecifiedTerm.Instance);
 
         public static ApplyTerm Apply(Term function, Term argument) =>
-            new ApplyTerm(function, argument, LambdaCalculus.UnspecifiedTerm.Instance);
+            new ApplyTerm(function, argument, UnspecifiedTerm.Instance);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
-            new LambdaTerm(new IdentityTerm(parameter, LambdaCalculus.UnspecifiedTerm.Instance), body);
+            new LambdaTerm(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);
         public static LambdaTerm Lambda(Term parameter, Term body) =>
             new LambdaTerm(parameter, body);
+
+        public static BindTerm Bind(string bound, Term body, Term continuation) =>
+            new BindTerm(new IdentityTerm(bound, UnspecifiedTerm.Instance), body, continuation);
+        public static BindTerm Bind(Term bound, Term body, Term continuation) =>
+            new BindTerm(bound, body, continuation);
 
         public static NotTerm Not(Term term) =>
             new NotTerm(term);
@@ -84,6 +89,11 @@ namespace LambdaCalculus
             ProductTerm.Create(term0, term1);
         public static ProductTerm Product(Term term0, Term term1, params Term[] terms) =>
             ProductTerm.Create(term0, term1, terms);
+
+        public static SumTerm Sum(Term term0, Term term1) =>
+            SumTerm.Create(term0, term1);
+        public static SumTerm Sum(Term term0, Term term1, params Term[] terms) =>
+            SumTerm.Create(term0, term1, terms);
     }
 
     ////////////////////////////////////////////////////////////
@@ -105,7 +115,7 @@ namespace LambdaCalculus
         public override Term Infer(InferContext context) =>
             context.CreatePlaceholder(Instance);
 
-        public override Term Fixup(InferContext context) =>
+        public override Term Fixup(FixupContext context) =>
             this;
 
         public override bool Equals(Term? other) =>
@@ -139,7 +149,7 @@ namespace LambdaCalculus
         public override Term Infer(InferContext context) =>
             new PlaceholderTerm(this.Index, this.HigherOrder.Infer(context));
 
-        public override Term Fixup(InferContext context) =>
+        public override Term Fixup(FixupContext context) =>
             context.LookupUnifiedTerm(this);
 
         public override bool Equals(Term? other) =>
@@ -168,7 +178,7 @@ namespace LambdaCalculus
         public override Term Infer(InferContext context) =>
             this;
 
-        public override Term Fixup(InferContext context) =>
+        public override Term Fixup(FixupContext context) =>
             this;
 
         public override bool Equals(Term? other) =>

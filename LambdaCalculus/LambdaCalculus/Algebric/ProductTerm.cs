@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 
-namespace LambdaCalculus
+namespace LambdaCalculus.Algebric
 {
     public sealed class ProductTerm : Term
     {
@@ -30,7 +30,7 @@ namespace LambdaCalculus
         public override Term Infer(InferContext context) =>
             new ProductTerm(this.Terms.Select(term => term.Infer(context)).ToArray());
 
-        public override Term Fixup(InferContext context) =>
+        public override Term Fixup(FixupContext context) =>
             new ProductTerm(this.Terms.Select(term => term.Fixup(context)).ToArray());
 
         public override bool Equals(Term? other) =>

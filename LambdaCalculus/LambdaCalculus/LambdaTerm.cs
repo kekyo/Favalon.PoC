@@ -56,7 +56,7 @@
             body = this.Body;
         }
 
-        public static readonly LambdaTerm Unspecified =
-            new LambdaTerm(LambdaCalculus.UnspecifiedTerm.Instance, LambdaCalculus.UnspecifiedTerm.Instance);
+        public static new readonly LambdaTerm Unspecified =
+            new LambdaTerm(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
     }
 }

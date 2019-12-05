@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using LambdaCalculus.Operators;
+using NUnit.Framework;
 
 namespace LambdaCalculus
 {
@@ -27,11 +28,44 @@ namespace LambdaCalculus
             Assert.AreEqual(false, ((BooleanTerm)actual).Value);
         }
 
+        /////////////////////////////////////////////////////////
+
+        [TestCase(false, true)]
+        [TestCase(true, false)]
+        public void NotTerm(bool result, bool value)
+        {
+            var term =
+                Term.Not(
+                    Term.Constant(value));
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        }
+
+        [TestCase(false, true)]
+        [TestCase(true, false)]
+        public void NotOperatorTerm(bool result, bool value)
+        {
+            var term =
+                Term.Apply(
+                    Operators.NotOperatorTerm.Instance,
+                    Term.Constant(value));
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        }
+
+        /////////////////////////////////////////////////////////
+
         [TestCase(true, true, true)]
         [TestCase(false, false, true)]
         [TestCase(false, true, false)]
         [TestCase(false, false, false)]
-        public void AndTerm(bool result, bool lhs, bool rhs)
+        public void AndAlsoTerm(bool result, bool lhs, bool rhs)
         {
             var term =
                 Term.AndAlso(
@@ -51,7 +85,7 @@ namespace LambdaCalculus
         [TestCase(false, false, false, true)]
         [TestCase(false, true, false, false)]
         [TestCase(false, false, false, false)]
-        public void DoubleAndTerm(bool result, bool lhs, bool chs, bool rhs)
+        public void DoubleAndAlsoTerm(bool result, bool lhs, bool chs, bool rhs)
         {
             var term =
                 Term.AndAlso(
@@ -70,7 +104,7 @@ namespace LambdaCalculus
         [TestCase(false, false, true)]
         [TestCase(false, true, false)]
         [TestCase(false, false, false)]
-        public void AndOperatorTerm(bool result, bool lhs, bool rhs)
+        public void AndAlsoOperatorTerm(bool result, bool lhs, bool rhs)
         {
             var term =
                 Term.Apply(
@@ -84,6 +118,68 @@ namespace LambdaCalculus
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
+
+        /////////////////////////////////////////////////////////
+
+        [TestCase(true, true, true)]
+        [TestCase(true, false, true)]
+        [TestCase(true, true, false)]
+        [TestCase(false, false, false)]
+        public void OrElseTerm(bool result, bool lhs, bool rhs)
+        {
+            var term =
+                Term.OrElse(
+                    Term.Constant(lhs),
+                    Term.Constant(rhs));
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        }
+
+        [TestCase(true, true, true, true)]
+        [TestCase(true, false, true, true)]
+        [TestCase(true, true, false, true)]
+        [TestCase(true, true, true, false)]
+        [TestCase(true, false, false, true)]
+        [TestCase(true, true, false, false)]
+        [TestCase(false, false, false, false)]
+        public void DoubleOrElseTerm(bool result, bool lhs, bool chs, bool rhs)
+        {
+            var term =
+                Term.OrElse(
+                    Term.OrElse(
+                        Term.Constant(lhs),
+                        Term.Constant(chs)),
+                    Term.Constant(rhs));
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        }
+
+        [TestCase(true, true, true)]
+        [TestCase(true, false, true)]
+        [TestCase(true, true, false)]
+        [TestCase(false, false, false)]
+        public void OrElseOperatorTerm(bool result, bool lhs, bool rhs)
+        {
+            var term =
+                Term.Apply(
+                    Term.Apply(
+                        Operators.OrElseOperatorTerm.Instance,
+                        Term.Constant(lhs)),
+                    Term.Constant(rhs));
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        }
+
+        /////////////////////////////////////////////////////////
 
         [TestCase(true, "a")]
         [TestCase(false, "b")]
@@ -119,6 +215,8 @@ namespace LambdaCalculus
 
             Assert.AreEqual(result, ((IdentityTerm)actual).Identity);
         }
+
+        /////////////////////////////////////////////////////////
 
         [TestCase(true, 123)]
         [TestCase(false, 100)]

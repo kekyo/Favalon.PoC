@@ -1,5 +1,6 @@
 ﻿using LambdaCalculus.Operators;
 using System;
+using System.Linq;
 
 #pragma warning disable 659
 
@@ -22,6 +23,9 @@ namespace LambdaCalculus
 
         public override sealed bool Equals(object? other) =>
             this.Equals(other as Term);
+
+        public void Deconstruct(out Term higherOrder) =>
+            higherOrder = this.HigherOrder;
 
         //////////////////////////////////
 
@@ -48,7 +52,7 @@ namespace LambdaCalculus
             value switch
             {
                 bool boolValue => BooleanTerm.From(boolValue),
-                Type typeValue => ClrTypeTerm.From(typeValue),
+                Type typeValue => TypeTerm.From(typeValue),
                 _ => new ConstantTerm(value)
             };
 
@@ -63,8 +67,12 @@ namespace LambdaCalculus
         public static LambdaTerm Lambda(Term parameter, Term body) =>
             new LambdaTerm(parameter, body);
 
+        public static NotTerm Not(Term term) =>
+            new NotTerm(term);
         public static AndAlsoTerm AndAlso(Term lhs, Term rhs) =>
             new AndAlsoTerm(lhs, rhs);
+        public static OrElseTerm OrElse(Term lhs, Term rhs) =>
+            new OrElseTerm(lhs, rhs);
 
         public static EqualTerm Equal(Term lhs, Term rhs) =>
             new EqualTerm(lhs, rhs);

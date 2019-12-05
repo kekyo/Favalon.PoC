@@ -45,7 +45,10 @@
         public override Term Reduce(ReduceContext context) =>
             Reduce(context, this.Lhs, this.Rhs);
 
-        protected override void Infer(InferContext context, Term lhs, Term rhs) =>
+        protected override Term Infer(InferContext context, Term lhs, Term rhs)
+        {
             context.Unify(lhs.HigherOrder, rhs.HigherOrder);
+            return new EqualTerm(lhs, rhs);
+        }
     }
 }

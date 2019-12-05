@@ -25,8 +25,8 @@ namespace LambdaCalculus
 
         //////////////////////////////////
 
-        public static UnspecifiedTerm UnspecifiedTerm() =>
-            LambdaCalculus.UnspecifiedTerm.Instance;
+        public static UnspecifiedTerm Unspecified() =>
+            UnspecifiedTerm.Instance;
         public static LambdaTerm UnspecifiedFunction() =>
             LambdaTerm.Unspecified;
 
@@ -77,6 +77,9 @@ namespace LambdaCalculus
 
     public sealed class UnspecifiedTerm : Term
     {
+        private static readonly int hashCode =
+           typeof(UnspecifiedTerm).GetHashCode();
+
         private UnspecifiedTerm()
         { }
 
@@ -95,12 +98,18 @@ namespace LambdaCalculus
         public override bool Equals(Term? other) =>
             other is UnspecifiedTerm;
 
+        public override int GetHashCode() =>
+            hashCode;
+
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();
     }
 
     public sealed class PlaceholderTerm : Term
     {
+        private static readonly int hashCode =
+            typeof(PlaceholderTerm).GetHashCode();
+
         public readonly int Index;
 
         internal PlaceholderTerm(int index, Term higherOrder)
@@ -122,10 +131,16 @@ namespace LambdaCalculus
 
         public override bool Equals(Term? other) =>
             other is PlaceholderTerm rhs ? this.Index.Equals(rhs.Index) : false;
+
+        public override int GetHashCode() =>
+            hashCode ^ this.Index;
     }
 
     public sealed class ConstantTerm : Term
     {
+        private static readonly int hashCode =
+            typeof(ConstantTerm).GetHashCode();
+
         public readonly object Value;
 
         internal ConstantTerm(object value) =>
@@ -145,5 +160,8 @@ namespace LambdaCalculus
 
         public override bool Equals(Term? other) =>
             other is ConstantTerm rhs ? this.Value.Equals(rhs.Value) : false;
+
+        public override int GetHashCode() =>
+            hashCode ^ this.Value.GetHashCode();
     }
 }

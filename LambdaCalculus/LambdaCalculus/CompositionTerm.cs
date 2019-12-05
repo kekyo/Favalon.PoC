@@ -32,6 +32,9 @@ namespace LambdaCalculus
                 !this.Terms.Except(rhs.Terms).Any() :
                 false;
 
+        public override int GetHashCode() =>
+            this.Terms.Aggregate(int.MinValue, (v, term) => v ^ term.GetHashCode());
+
         private static Term Distinct(IEnumerable<Term> terms)
         {
             var distincted = terms.Distinct().ToArray();

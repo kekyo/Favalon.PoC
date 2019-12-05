@@ -27,5 +27,8 @@
 
         public override bool Equals(Term? other) =>
             other is IdentityTerm rhs ? this.Identity.Equals(rhs.Identity) : false;
+
+        public override int GetHashCode() =>
+            this.Identity.GetHashCode();
     }
 }

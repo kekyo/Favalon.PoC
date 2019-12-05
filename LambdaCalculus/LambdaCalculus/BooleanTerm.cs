@@ -22,6 +22,9 @@
         public override bool Equals(Term? other) =>
             other is BooleanTerm rhs ? this.Value.Equals(rhs.Value) : false;
 
+        public override int GetHashCode() =>
+            this.Value.GetHashCode();
+
         public void Deconstruct(out bool value) =>
             value = this.Value;
 

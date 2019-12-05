@@ -65,6 +65,9 @@ namespace LambdaCalculus
 
         public override bool Equals(Term? other) =>
             other is ClrTypeTerm rhs ? this.Type.Equals(rhs.Type) : false;
+
+        public override int GetHashCode() =>
+            this.Type.GetHashCode();
     }
 
     public sealed class ClrTypeConstructorTerm : TypeTerm, IApplicable, IClrType
@@ -88,5 +91,8 @@ namespace LambdaCalculus
 
         public override bool Equals(Term? other) =>
             other is ClrTypeConstructorTerm rhs ? this.Type.Equals(rhs.Type) : false;
+
+        public override int GetHashCode() =>
+            this.Type.GetHashCode();
     }
 }

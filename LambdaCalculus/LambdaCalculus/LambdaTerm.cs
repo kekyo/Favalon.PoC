@@ -47,6 +47,9 @@
                 (this.Parameter.Equals(rhs.Parameter) && this.Body.Equals(rhs.Body)) :
                 false;
 
+        public override int GetHashCode() =>
+            this.Parameter.GetHashCode() ^ this.Body.GetHashCode();
+
         public void Deconstruct(out Term parameter, out Term body)
         {
             parameter = this.Parameter;

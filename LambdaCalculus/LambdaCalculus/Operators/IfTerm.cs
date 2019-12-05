@@ -118,5 +118,8 @@
             other is IfTerm rhs ?
                 (this.Condition.Equals(rhs.Condition) && this.Then.Equals(rhs.Then) && this.Else.Equals(rhs.Else)) :
                 false;
+
+        public override int GetHashCode() =>
+            this.Condition.GetHashCode() ^ this.Then.GetHashCode() ^ this.Else.GetHashCode();
     }
 }

@@ -27,6 +27,9 @@
 
         public override sealed Term Fixup(InferContext context) =>
             this.Create(this.Lhs.Fixup(context), this.Rhs.Fixup(context));
+
+        public override int GetHashCode() =>
+            this.Lhs.GetHashCode() ^ this.Rhs.GetHashCode();
     }
 
     public abstract class BinaryOperatorTerm<T> : BinaryOperatorTerm
@@ -94,11 +97,17 @@
     public abstract class OperatorSymbolTerm<T> : OperatorSymbolTerm
         where T : Term
     {
+        private static readonly int hashCode =
+            typeof(T).GetHashCode();
+
         protected OperatorSymbolTerm()
         { }
 
         public override sealed bool Equals(Term? other) =>
             other is T;
+
+        public override int GetHashCode() =>
+            hashCode;
     }
 
     public abstract class OperatorArgument0Term : Term
@@ -121,6 +130,9 @@
 
         public override sealed Term Fixup(InferContext context) =>
             this.Create(this.Argument0.Fixup(context));
+
+        public override int GetHashCode() =>
+            this.Argument0.GetHashCode();
     }
 
     public abstract class OperatorArgument0Term<T> : OperatorArgument0Term
@@ -158,6 +170,9 @@
 
         public override sealed Term Fixup(InferContext context) =>
             this.Create(this.Argument0.Fixup(context), this.Argument1.Fixup(context));
+
+        public override int GetHashCode() =>
+            this.Argument0.GetHashCode() ^ this.Argument1.GetHashCode();
     }
 
     public abstract class OperatorArgument1Term<T> : OperatorArgument1Term

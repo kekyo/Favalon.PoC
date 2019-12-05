@@ -59,5 +59,8 @@
             other is ApplyTerm rhs ?
                 (this.Function.Equals(rhs.Function) && this.Argument.Equals(rhs.Argument)) :
                 false;
+
+        public override int GetHashCode() =>
+            this.Function.GetHashCode() ^ this.Argument.GetHashCode();
     }
 }

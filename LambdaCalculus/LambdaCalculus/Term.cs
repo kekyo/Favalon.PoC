@@ -79,6 +79,11 @@ namespace LambdaCalculus
 
         public static IfTerm If(Term condition, Term then, Term @else) =>
             new IfTerm(condition, then, @else, LambdaCalculus.UnspecifiedTerm.Instance);
+
+        public static ProductTerm Product(Term term0, Term term1) =>
+            ProductTerm.Create(term0, term1);
+        public static ProductTerm Product(Term term0, Term term1, params Term[] terms) =>
+            ProductTerm.Create(term0, term1, terms);
     }
 
     ////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 
-namespace LambdaCalculus.Algebric
+namespace Favalon.Algebric
 {
     public sealed class SumTerm : Term
     {

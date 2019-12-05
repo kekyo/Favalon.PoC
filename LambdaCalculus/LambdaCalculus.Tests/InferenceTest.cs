@@ -1,7 +1,7 @@
-﻿using LambdaCalculus.Operators;
+﻿using Favalon.Operators;
 using NUnit.Framework;
 
-namespace LambdaCalculus
+namespace Favalon
 {
     [TestFixture]
     class InferenceTest

@@ -1,4 +1,4 @@
-﻿namespace LambdaCalculus.Operators
+﻿namespace Favalon.Operators
 {
     public sealed class IfOperatorTerm : OperatorSymbolTerm<IfOperatorTerm>, IApplicable
     {
@@ -21,7 +21,7 @@
         {
             private static readonly Term higherOrder =
                 new LambdaTerm(
-                    LambdaCalculus.UnspecifiedTerm.Instance,
+                    UnspecifiedTerm.Instance,
                     LambdaTerm.Unspecified);
 
             public ConditionTerm(Term condition) :

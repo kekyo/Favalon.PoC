@@ -2,7 +2,7 @@
 
 #pragma warning disable 659
 
-namespace LambdaCalculus
+namespace Favalon
 {
     public abstract partial class Term : IEquatable<Term?>
     {

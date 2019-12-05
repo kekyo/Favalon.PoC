@@ -1,4 +1,4 @@
-﻿namespace LambdaCalculus.Operators
+﻿namespace Favalon.Operators
 {
     public abstract class UnaryOperatorTerm : Term
     {

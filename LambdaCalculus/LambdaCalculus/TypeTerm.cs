@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace LambdaCalculus
+namespace Favalon
 {
     public abstract class TypeTerm : Term
     {
         private static readonly Term higherOrder =
-            new IdentityTerm("*", LambdaCalculus.UnspecifiedTerm.Instance);  // TODO:
+            new IdentityTerm("*", UnspecifiedTerm.Instance);  // TODO:
         private static readonly Dictionary<Type, TypeTerm> clrTypes =
             new Dictionary<Type, TypeTerm>();
 

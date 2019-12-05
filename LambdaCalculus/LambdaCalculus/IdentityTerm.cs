@@ -1,4 +1,4 @@
-﻿namespace LambdaCalculus
+﻿namespace Favalon
 {
     public sealed class IdentityTerm : Term
     {

@@ -1,4 +1,4 @@
-﻿namespace LambdaCalculus.Operators
+﻿namespace Favalon.Operators
 {
     public abstract class OperatorSymbolTerm : Term
     {
@@ -42,7 +42,7 @@
             this.Argument0 = argument0;
 
         public override Term HigherOrder =>
-            LambdaCalculus.UnspecifiedTerm.Instance;
+            UnspecifiedTerm.Instance;
 
         protected abstract Term Create(Term argument0);
 
@@ -82,7 +82,7 @@
         }
 
         public override Term HigherOrder =>
-            LambdaCalculus.UnspecifiedTerm.Instance;
+            UnspecifiedTerm.Instance;
 
         protected abstract Term Create(Term argument0, Term argument1);
 

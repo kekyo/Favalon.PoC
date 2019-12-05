@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace LambdaCalculus
+namespace Favalon
 {
     public class Environment
     {

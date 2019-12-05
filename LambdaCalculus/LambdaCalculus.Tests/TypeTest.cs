@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 
-namespace LambdaCalculus
+namespace Favalon
 {
     [TestFixture]
     class TypeTest

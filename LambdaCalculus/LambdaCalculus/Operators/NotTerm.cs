@@ -1,4 +1,4 @@
-﻿namespace LambdaCalculus.Operators
+﻿namespace Favalon.Operators
 {
     public sealed class NotOperatorTerm : OperatorSymbolTerm<NotOperatorTerm>, IApplicable
     {

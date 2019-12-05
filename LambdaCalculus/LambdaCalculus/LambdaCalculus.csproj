@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net45</TargetFramework>
+    <Namespace>Favalon</Namespace>
 
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>

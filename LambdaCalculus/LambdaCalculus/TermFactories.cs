@@ -1,8 +1,8 @@
-﻿using LambdaCalculus.Algebric;
-using LambdaCalculus.Operators;
+﻿using Favalon.Algebric;
+using Favalon.Operators;
 using System;
 
-namespace LambdaCalculus
+namespace Favalon
 {
     partial class Term
     {
@@ -65,7 +65,7 @@ namespace LambdaCalculus
             new EqualTerm(lhs, rhs);
 
         public static IfTerm If(Term condition, Term then, Term @else) =>
-            new IfTerm(condition, then, @else, LambdaCalculus.UnspecifiedTerm.Instance);
+            new IfTerm(condition, then, @else, UnspecifiedTerm.Instance);
 
         public static ProductTerm Product(Term term0, Term term1) =>
             ProductTerm.Create(term0, term1);

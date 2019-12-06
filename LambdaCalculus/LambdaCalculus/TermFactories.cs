@@ -1,6 +1,7 @@
-﻿using Favalon.Algebric;
+﻿using Favalon.AlgebricData;
 using Favalon.Operators;
 using System;
+using System.Linq;
 
 namespace Favalon
 {
@@ -16,6 +17,8 @@ namespace Favalon
         public static BooleanTerm False() =>
             BooleanTerm.False;
 
+        public static DeclareTypeTerm Type(Term declare) =>
+            TypeTerm.From(declare, UnspecifiedTerm.Instance);
         public static TypeTerm Type(Type type) =>
             TypeTerm.From(type);
         public static ClrTypeTerm Type<T>() =>
@@ -67,14 +70,13 @@ namespace Favalon
         public static IfTerm If(Term condition, Term then, Term @else) =>
             new IfTerm(condition, then, @else, UnspecifiedTerm.Instance);
 
-        public static ProductTerm Product(Term term0, Term term1) =>
-            ProductTerm.Create(term0, term1);
-        public static ProductTerm Product(Term term0, Term term1, params Term[] terms) =>
-            ProductTerm.Create(term0, term1, terms);
+        public static PairTerm Pair(Term lhs, Term rhs) =>
+            new PairTerm(lhs, rhs);
 
-        public static SumTerm Sum(Term term0, Term term1) =>
-            SumTerm.Create(term0, term1);
-        public static SumTerm Sum(Term term0, Term term1, params Term[] terms) =>
-            SumTerm.Create(term0, term1, terms);
+        public static ProductTerm Product(Term term0, params Term[] terms) =>
+            new ProductTerm(new[] { term0 }.Concat(terms).ToArray());
+
+        public static SumTerm Sum(Term term0, params Term[] terms) =>
+            new SumTerm(new[] { term0 }.Concat(terms).ToArray());
     }
 }

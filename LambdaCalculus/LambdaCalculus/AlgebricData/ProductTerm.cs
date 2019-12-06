@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 
-namespace Favalon.Algebric
+namespace Favalon.AlgebricData
 {
     public sealed class ProductTerm : Term
     {
         public readonly Term[] Terms;
 
-        private ProductTerm(Term[] terms) =>
+        internal ProductTerm(Term[] terms) =>
             this.Terms = terms;
 
         public override Term HigherOrder =>
@@ -23,7 +22,7 @@ namespace Favalon.Algebric
                     agg.Concat(new[] { term })).
                 ToArray();
 
-            Debug.Assert(terms.Length >= 2);
+            Debug.Assert(terms.Length >= 1);
             return new ProductTerm(terms);
         }
 
@@ -36,9 +35,7 @@ namespace Favalon.Algebric
         public override bool Equals(Term? other) =>
             other is ProductTerm rhs ? rhs.Terms.SequenceEqual(this.Terms) : false;
 
-        public static ProductTerm Create(Term term0, Term term1) =>
-            new ProductTerm(new[] { term0, term1 });
-        public static ProductTerm Create(Term term0, Term term1, IEnumerable<Term> terms) =>
-            new ProductTerm(new[] { term0, term1 }.Concat(terms).ToArray());
+        public void Deconstruct(out Term[] terms) =>
+            terms = this.Terms;
     }
 }

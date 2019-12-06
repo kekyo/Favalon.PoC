@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Favalon.AlgebricData;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Favalon
 {
     public abstract class TypeTerm : Term
     {
-        private static readonly Term higherOrder =
-            new IdentityTerm("*", UnspecifiedTerm.Instance);  // TODO:
         private static readonly Dictionary<Type, TypeTerm> clrTypes =
             new Dictionary<Type, TypeTerm>();
 
@@ -15,19 +15,22 @@ namespace Favalon
         { }
 
         public override Term HigherOrder =>
-            higherOrder;
+            UnspecifiedTerm.Instance;
 
-        public override sealed Term Reduce(ReduceContext context) =>
+        public override Term Reduce(ReduceContext context) =>
             this;
 
-        public override sealed Term Infer(InferContext context) =>
+        public override Term Infer(InferContext context) =>
             this;
 
-        public override sealed Term Fixup(FixupContext context) =>
+        public override Term Fixup(FixupContext context) =>
             this;
 
         private protected static bool IsTypeConstructor(Type type) =>
             type.IsGenericTypeDefinition && (type.GetGenericArguments().Length == 1);
+
+        public static DeclareTypeTerm From(Term declare, Term higherOrder) =>
+            new DeclareTypeTerm(declare, higherOrder);
 
         public static TypeTerm From(Type type)
         {
@@ -40,6 +43,103 @@ namespace Favalon
             }
             return term;
         }
+    }
+
+    public sealed class DeclareTypeTerm : TypeTerm
+    {
+        public readonly Term Declare;
+
+        internal DeclareTypeTerm(Term declare, Term higherOrder)
+        {
+            this.Declare = declare;
+            this.HigherOrder = higherOrder;
+        }
+
+        public override Term HigherOrder { get; }
+
+        public override Term Reduce(ReduceContext context) =>
+            this.Declare switch
+            {
+                // Discriminated union
+                SumTerm(Term[] items) =>
+                    new DiscriminatedUnionTerm(
+                        items.Select(item => (PairTerm)item.Reduce(context)),
+                        this.HigherOrder.Reduce(context)),
+
+                // TODO: Record
+                _ => new DeclareTypeTerm(
+                    this.Declare.Reduce(context),
+                    this.HigherOrder.Reduce(context))
+            };
+
+        public override Term Infer(InferContext context)
+        {
+            switch (this.Declare)
+            {
+                // Discriminated union
+                case SumTerm(Term[] items):
+                    var inferred = items.Select(item => item.Infer(context)).ToArray();
+                    var commonTypeTerm = context.CreatePlaceholder(UnspecifiedTerm.Instance);
+
+                    foreach (var item in inferred)
+                    {
+                        context.Unify(item.HigherOrder, commonTypeTerm);
+                    }
+
+                    return new DeclareTypeTerm(
+                        new SumTerm(inferred),
+                        this.HigherOrder.Infer(context));
+
+                // TODO: Record
+                default:
+                    return new DeclareTypeTerm(
+                        this.Declare.Infer(context),
+                        this.HigherOrder.Infer(context));
+            }
+        }
+
+        public override Term Fixup(FixupContext context) =>
+            new DeclareTypeTerm(this.Declare.Fixup(context), this.HigherOrder.Fixup(context));
+
+        public override bool Equals(Term? other) =>
+            other is DeclareTypeTerm rhs ? this.Declare.Equals(rhs.Declare) : false;
+    }
+
+    public sealed class DiscriminatedUnionTerm : Term
+    {
+        public readonly Dictionary<Term, Term> Items;
+
+        internal DiscriminatedUnionTerm(IEnumerable<PairTerm> items, Term higherOrder)
+        {
+            this.Items = items.ToDictionary(item => item.Lhs, item => item.Rhs);
+            this.HigherOrder = higherOrder;
+        }
+
+        private DiscriminatedUnionTerm(Dictionary<Term, Term> items, Term higherOrder)
+        {
+            this.Items = items;
+            this.HigherOrder = higherOrder;
+        }
+
+        public override Term HigherOrder { get; }
+
+        public override Term Reduce(ReduceContext context) =>
+            new DiscriminatedUnionTerm(
+                this.Items.ToDictionary(item => item.Key.Reduce(context), item => item.Value.Reduce(context)),
+                this.HigherOrder.Reduce(context));
+
+        public override Term Infer(InferContext context) =>
+            new DiscriminatedUnionTerm(
+                this.Items.ToDictionary(item => item.Key.Infer(context), item => item.Value.Infer(context)),
+                this.HigherOrder.Infer(context));
+
+        public override Term Fixup(FixupContext context) =>
+            new DiscriminatedUnionTerm(
+                this.Items.ToDictionary(item => item.Key.Fixup(context), item => item.Value.Fixup(context)),
+                this.HigherOrder.Fixup(context));
+
+        public override bool Equals(Term? other) =>
+            other is DiscriminatedUnionTerm rhs ? this.Items.SequenceEqual(rhs.Items) : false;
     }
 
     internal interface IClrType

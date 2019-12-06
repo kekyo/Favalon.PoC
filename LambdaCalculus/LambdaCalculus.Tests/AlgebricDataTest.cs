@@ -6,17 +6,18 @@ namespace Favalon
     class AlgebricDataTest
     {
         //[Test]
-        public void Either()
+        public void DeclareEither()
         {
             var term =
-                Term.Sum(
-                    Term.Identity("Left"),
-                    Term.Identity("Right"));
+                Term.Type(
+                    Term.Sum(
+                        Term.Identity("Left"),
+                        Term.Identity("Right")));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(term);
 
-            //Assert.AreEqual(true, ((BooleanTerm)actual).Value);
+
         }
     }
 }

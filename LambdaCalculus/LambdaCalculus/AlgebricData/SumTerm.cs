@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 
-namespace Favalon.Algebric
+namespace Favalon.AlgebricData
 {
     public sealed class SumTerm : Term
     {
         public readonly Term[] Terms;
 
-        private SumTerm(Term[] terms) =>
+        internal SumTerm(Term[] terms) =>
             this.Terms = terms;
 
         public override Term HigherOrder =>
@@ -18,12 +17,12 @@ namespace Favalon.Algebric
         {
             var terms = this.Terms.Aggregate(
                 Enumerable.Empty<Term>(),
-                (agg, term) => term is SumTerm product ?
-                    agg.Concat(product.Terms) :
+                (agg, term) => term is SumTerm sum ?
+                    agg.Concat(sum.Terms) :
                     agg.Concat(new[] { term })).
                 ToArray();
 
-            Debug.Assert(terms.Length >= 2);
+            Debug.Assert(terms.Length >= 1);
             return new SumTerm(terms);
         }
 
@@ -36,9 +35,7 @@ namespace Favalon.Algebric
         public override bool Equals(Term? other) =>
             other is SumTerm rhs ? rhs.Terms.SequenceEqual(this.Terms) : false;
 
-        public static SumTerm Create(Term term0, Term term1) =>
-            new SumTerm(new[] { term0, term1 });
-        public static SumTerm Create(Term term0, Term term1, IEnumerable<Term> terms) =>
-            new SumTerm(new[] { term0, term1 }.Concat(terms).ToArray());
+        public void Deconstruct(out Term[] terms) =>
+            terms = this.Terms;
     }
 }

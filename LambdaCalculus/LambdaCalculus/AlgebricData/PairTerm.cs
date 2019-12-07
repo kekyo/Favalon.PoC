@@ -26,6 +26,9 @@
         public override bool Equals(Term? other) =>
             other is PairTerm rhs ? (rhs.Lhs.Equals(this.Lhs) && rhs.Rhs.Equals(this.Rhs)) : false;
 
+        public override int GetHashCode() =>
+            this.Lhs.GetHashCode() ^ this.Rhs.GetHashCode();
+
         public void Deconstruct(out Term lhs, out Term rhs)
         {
             lhs = this.Lhs;

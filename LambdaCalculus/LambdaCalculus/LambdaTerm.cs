@@ -15,7 +15,7 @@
             new LambdaTerm(this.Parameter.HigherOrder, this.Body.HigherOrder);
 
         public override Term Reduce(ReduceContext context) =>
-            new LambdaTerm(this.Parameter.Reduce(context), this.Body.Reduce(context));
+            new LambdaTerm(this.Parameter.Reduce(context), this.Body);
 
         Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)
         {

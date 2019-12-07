@@ -35,6 +35,9 @@ namespace Favalon.AlgebricData
         public override bool Equals(Term? other) =>
             other is SumTerm rhs ? rhs.Terms.SequenceEqual(this.Terms) : false;
 
+        public override int GetHashCode() =>
+            this.Terms.Aggregate(0, (agg, term) => agg ^ term.GetHashCode());
+
         public void Deconstruct(out Term[] terms) =>
             terms = this.Terms;
     }

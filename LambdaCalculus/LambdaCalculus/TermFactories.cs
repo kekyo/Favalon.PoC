@@ -38,6 +38,8 @@ namespace Favalon
 
         public static IdentityTerm Identity(string identity) =>
             new IdentityTerm(identity, UnspecifiedTerm.Instance);
+        public static IdentityTerm Identity(string identity, Term higherOrder) =>
+            new IdentityTerm(identity, higherOrder);
 
         public static ApplyTerm Apply(Term function, Term argument) =>
             new ApplyTerm(function, argument, UnspecifiedTerm.Instance);
@@ -78,5 +80,8 @@ namespace Favalon
 
         public static SumTerm Sum(Term term0, params Term[] terms) =>
             new SumTerm(new[] { term0 }.Concat(terms).ToArray());
+
+        public static MatchTerm Match(Term term, params PairTerm[] matchers) =>
+            new MatchTerm(term, matchers, UnspecifiedTerm.Instance);
     }
 }

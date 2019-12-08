@@ -5,19 +5,17 @@
         Term? ReduceForApply(ReduceContext context, Term rhs);
     }
 
-    public sealed class ApplyTerm : Term
+    public sealed class ApplyTerm : HigherOrderHoldTerm
     {
         public readonly Term Function;
         public readonly Term Argument;
 
-        internal ApplyTerm(Term function, Term argument, Term higherOrder)
+        internal ApplyTerm(Term function, Term argument, Term higherOrder) :
+            base(higherOrder)
         {
             this.Function = function;
             this.Argument = argument;
-            this.HigherOrder = higherOrder;
         }
-
-        public override Term HigherOrder { get; }
 
         public override Term Infer(InferContext context)
         {

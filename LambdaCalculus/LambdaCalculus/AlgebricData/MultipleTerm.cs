@@ -3,14 +3,14 @@ using System.Linq;
 
 namespace Favalon.AlgebricData
 {
-    public abstract class MultipleTerm : Term
+    public abstract class MultipleTerm : HigherOrderLazyTerm
     {
         public readonly Term[] Terms;
 
         private protected MultipleTerm(Term[] terms) =>
             this.Terms = terms;
 
-        public override sealed Term HigherOrder =>
+        protected override sealed Term GetHigherOrder() =>
             this.Create(this.Terms.Select(term => term.HigherOrder).ToArray());
 
         protected abstract Term Create(Term[] terms);

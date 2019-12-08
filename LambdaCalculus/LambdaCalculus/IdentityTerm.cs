@@ -1,16 +1,12 @@
 ﻿namespace Favalon
 {
-    public sealed class IdentityTerm : Term
+    public sealed class IdentityTerm : HigherOrderHoldTerm
     {
         public new readonly string Identity;
 
-        internal IdentityTerm(string identity, Term higherOrder)
-        {
+        internal IdentityTerm(string identity, Term higherOrder) :
+            base(higherOrder) =>
             this.Identity = identity;
-            this.HigherOrder = higherOrder;
-        }
-
-        public override Term HigherOrder { get; }
 
         public override Term Infer(InferContext context)
         {

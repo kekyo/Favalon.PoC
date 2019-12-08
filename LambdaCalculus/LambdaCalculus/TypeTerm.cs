@@ -15,9 +15,6 @@ namespace Favalon
         private protected TypeTerm()
         { }
 
-        public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
-
         public override Term Infer(InferContext context) =>
             this;
 
@@ -46,17 +43,13 @@ namespace Favalon
         }
     }
 
-    public sealed class DeclareTypeTerm : TypeTerm
+    public sealed class DeclareTypeTerm : HigherOrderHoldTerm
     {
         public readonly Term Declare;
 
-        internal DeclareTypeTerm(Term declare, Term higherOrder)
-        {
+        internal DeclareTypeTerm(Term declare, Term higherOrder) :
+            base(higherOrder) =>
             this.Declare = declare;
-            this.HigherOrder = higherOrder;
-        }
-
-        public override Term HigherOrder { get; }
 
         public override Term Infer(InferContext context)
         {
@@ -164,10 +157,10 @@ namespace Favalon
             this.Type = type;
         }
 
-        public new Type Type { get; }
-
         public override Term HigherOrder =>
-           higherOrder;
+            higherOrder;
+
+        public new Type Type { get; }
 
         public override bool Equals(Term? other) =>
             other is ClrTypeTerm rhs ? this.Type.Equals(rhs.Type) : false;

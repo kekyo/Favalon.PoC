@@ -1,6 +1,6 @@
 ﻿namespace Favalon.AlgebricData
 {
-    public sealed class PairTerm : Term
+    public sealed class PairTerm : HigherOrderLazyTerm
     {
         public readonly Term Lhs;
         public readonly Term Rhs;
@@ -11,7 +11,7 @@
             this.Rhs = rhs;
         }
 
-        public override Term HigherOrder =>
+        protected override Term GetHigherOrder() =>
             new PairTerm(this.Lhs.HigherOrder, this.Rhs.HigherOrder);
 
         public override Term Infer(InferContext context)

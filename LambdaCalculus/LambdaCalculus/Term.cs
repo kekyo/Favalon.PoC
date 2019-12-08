@@ -6,6 +6,9 @@ namespace Favalon
 {
     public abstract partial class Term : IEquatable<Term?>
     {
+        protected Term()
+        { }
+
         public abstract Term HigherOrder { get; }
 
         public abstract Term Infer(InferContext context);
@@ -24,6 +27,44 @@ namespace Favalon
 
         public void Deconstruct(out Term higherOrder) =>
             higherOrder = this.HigherOrder;
+    }
+
+    ////////////////////////////////////////////////////////////
+
+    public abstract class HigherOrderHoldTerm : Term
+    {
+        protected HigherOrderHoldTerm(Term higherOrder) =>
+            this.HigherOrder = higherOrder;
+
+        public override sealed Term HigherOrder { get; }
+    }
+
+    public abstract class HigherOrderLazyTerm : Term
+    {
+        private Term? higherOrder;
+
+        protected HigherOrderLazyTerm()
+        { }
+
+        public override sealed Term HigherOrder
+        {
+            get
+            {
+                if (higherOrder == null)
+                {
+                    lock (this)
+                    {
+                        if (higherOrder == null)
+                        {
+                            higherOrder = this.GetHigherOrder();
+                        }
+                    }
+                }
+                return higherOrder;
+            }
+        }
+
+        protected abstract Term GetHigherOrder();
     }
 
     ////////////////////////////////////////////////////////////
@@ -58,20 +99,16 @@ namespace Favalon
             new UnspecifiedTerm();
     }
 
-    public sealed class PlaceholderTerm : Term
+    public sealed class PlaceholderTerm : HigherOrderHoldTerm
     {
         private static readonly int hashCode =
             typeof(PlaceholderTerm).GetHashCode();
 
         public readonly int Index;
 
-        internal PlaceholderTerm(int index, Term higherOrder)
-        {
+        internal PlaceholderTerm(int index, Term higherOrder) :
+            base(higherOrder) =>
             this.Index = index;
-            this.HigherOrder = higherOrder;
-        }
-
-        public override Term HigherOrder { get; }
 
         public override Term Infer(InferContext context) =>
             new PlaceholderTerm(this.Index, this.HigherOrder.Infer(context));
@@ -94,7 +131,7 @@ namespace Favalon
             hashCode ^ this.Index;
     }
 
-    public sealed class ConstantTerm : Term
+    public sealed class ConstantTerm : HigherOrderLazyTerm
     {
         private static readonly int hashCode =
             typeof(ConstantTerm).GetHashCode();
@@ -104,7 +141,7 @@ namespace Favalon
         internal ConstantTerm(object value) =>
             this.Value = value;
 
-        public override Term HigherOrder =>
+        protected override Term GetHigherOrder() =>
             Type(this.Value.GetType());
 
         public override Term Infer(InferContext context) =>

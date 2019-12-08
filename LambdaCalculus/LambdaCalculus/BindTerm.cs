@@ -1,6 +1,6 @@
 ﻿namespace Favalon
 {
-    public sealed class BindExpressionTerm : Term
+    public sealed class BindExpressionTerm : HigherOrderLazyTerm
     {
         public readonly Term Bound;
         public readonly Term Body;
@@ -11,7 +11,7 @@
             this.Body = body;
         }
 
-        public override Term HigherOrder =>
+        protected override Term GetHigherOrder() =>
             this.Body.HigherOrder;
 
         public override Term Infer(InferContext context)
@@ -77,7 +77,7 @@
         }
     }
 
-    public sealed class BindTerm : Term
+    public sealed class BindTerm : HigherOrderLazyTerm
     {
         public readonly Term Expression;
         public readonly Term Continuation;
@@ -88,7 +88,7 @@
             this.Continuation = continuation;
         }
 
-        public override Term HigherOrder =>
+        protected override Term GetHigherOrder() =>
             this.Continuation.HigherOrder;
 
         public override Term Infer(InferContext context)

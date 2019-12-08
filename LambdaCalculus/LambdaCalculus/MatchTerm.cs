@@ -4,17 +4,13 @@ using System.Linq;
 
 namespace Favalon
 {
-    public sealed class MatchTerm : Term, IApplicable
+    public sealed class MatchTerm : HigherOrderHoldTerm, IApplicable
     {
         public readonly Term[] Matchers;
 
-        internal MatchTerm(Term[] matchers, Term higherOrder)
-        {
+        internal MatchTerm(Term[] matchers, Term higherOrder) :
+            base(higherOrder) =>
             this.Matchers = matchers;
-            this.HigherOrder = higherOrder;
-        }
-
-        public override Term HigherOrder { get; }
 
         public override Term Infer(InferContext context)
         {

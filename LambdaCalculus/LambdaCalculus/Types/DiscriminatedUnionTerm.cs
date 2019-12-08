@@ -4,17 +4,13 @@ using System.Linq;
 
 namespace Favalon.Types
 {
-    public sealed class DiscriminatedUnionTerm : Term
+    public sealed class DiscriminatedUnionTerm : HigherOrderHoldTerm
     {
         public readonly PairTerm[] Constructors;
 
-        internal DiscriminatedUnionTerm(IEnumerable<PairTerm> constructors, Term higherOrder)
-        {
+        internal DiscriminatedUnionTerm(IEnumerable<PairTerm> constructors, Term higherOrder) :
+            base(higherOrder) =>
             this.Constructors = constructors.ToArray();
-            this.HigherOrder = higherOrder;
-        }
-
-        public override Term HigherOrder { get; }
 
         public override Term Infer(InferContext context)
         {

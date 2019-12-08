@@ -1,6 +1,6 @@
 ﻿namespace Favalon
 {
-    public sealed class LambdaTerm : Term, IApplicable
+    public sealed class LambdaTerm : HigherOrderLazyTerm, IApplicable
     {
         public readonly Term Parameter;
         public readonly Term Body;
@@ -11,7 +11,7 @@
             this.Body = body;
         }
 
-        public override Term HigherOrder =>
+        protected override Term GetHigherOrder() =>
             new LambdaTerm(this.Parameter.HigherOrder, this.Body.HigherOrder);
 
         public override Term Infer(InferContext context)

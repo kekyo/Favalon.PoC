@@ -8,13 +8,13 @@
         public override Term HigherOrder =>
             UnspecifiedTerm.Instance;
 
-        public override sealed Term Reduce(ReduceContext context) =>
-            this;
-
         public override sealed Term Infer(InferContext context) =>
             this;
 
         public override sealed Term Fixup(FixupContext context) =>
+            this;
+
+        public override sealed Term Reduce(ReduceContext context) =>
             this;
     }
 

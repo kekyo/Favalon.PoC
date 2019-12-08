@@ -55,21 +55,19 @@
         }
     }
 
-    public sealed class IfTerm : Term
+    public sealed class IfTerm : HigherOrderHoldTerm
     {
         public readonly Term Condition;
         public readonly Term Then;
         public readonly Term Else;
 
-        internal IfTerm(Term condition, Term then, Term @else, Term higherOrder)
+        internal IfTerm(Term condition, Term then, Term @else, Term higherOrder) :
+            base(higherOrder)
         {
             this.Condition = condition;
             this.Then = then;
             this.Else = @else;
-            this.HigherOrder = higherOrder;
         }
-
-        public override Term HigherOrder { get; }
 
         public override Term Infer(InferContext context)
         {

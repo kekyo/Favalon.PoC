@@ -14,15 +14,35 @@
         public override Term HigherOrder =>
             new LambdaTerm(this.Parameter.HigherOrder, this.Body.HigherOrder);
 
-        public override Term Reduce(ReduceContext context) =>
-            new LambdaTerm(this.Parameter.Reduce(context), this.Body);
+        public override Term Reduce(ReduceContext context)
+        {
+            var newScope = context.NewScope();
+
+            var parameter = this.Parameter.Reduce(context);
+            if (parameter is IdentityTerm identity)
+            {
+                // Shadowed by self
+                newScope.SetBoundTerm(identity.Identity, identity);
+            }
+
+            var body = this.Body.Reduce(context);
+
+            return new LambdaTerm(parameter, body);
+        }
 
         Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)
         {
             var newScope = context.NewScope();
-            newScope.SetBoundTerm(((IdentityTerm)this.Parameter).Identity, rhs);
 
-            return this.Body.Reduce(newScope);
+            if (this.Parameter is IdentityTerm identity)
+            {
+                newScope.SetBoundTerm(identity.Identity, rhs);
+                return this.Body.Reduce(newScope);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public override Term Infer(InferContext context)

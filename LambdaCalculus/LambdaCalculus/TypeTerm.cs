@@ -1,4 +1,5 @@
 ﻿using Favalon.AlgebricData;
+using Favalon.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -103,43 +104,6 @@ namespace Favalon
 
         public override bool Equals(Term? other) =>
             other is DeclareTypeTerm rhs ? this.Declare.Equals(rhs.Declare) : false;
-    }
-
-    public sealed class DiscriminatedUnionTerm : Term
-    {
-        public readonly Dictionary<Term, Term> Items;
-
-        internal DiscriminatedUnionTerm(IEnumerable<PairTerm> items, Term higherOrder)
-        {
-            this.Items = items.ToDictionary(item => item.Lhs, item => item.Rhs);
-            this.HigherOrder = higherOrder;
-        }
-
-        private DiscriminatedUnionTerm(Dictionary<Term, Term> items, Term higherOrder)
-        {
-            this.Items = items;
-            this.HigherOrder = higherOrder;
-        }
-
-        public override Term HigherOrder { get; }
-
-        public override Term Reduce(ReduceContext context) =>
-            new DiscriminatedUnionTerm(
-                this.Items.ToDictionary(item => item.Key.Reduce(context), item => item.Value.Reduce(context)),
-                this.HigherOrder.Reduce(context));
-
-        public override Term Infer(InferContext context) =>
-            new DiscriminatedUnionTerm(
-                this.Items.ToDictionary(item => item.Key.Infer(context), item => item.Value.Infer(context)),
-                this.HigherOrder.Infer(context));
-
-        public override Term Fixup(FixupContext context) =>
-            new DiscriminatedUnionTerm(
-                this.Items.ToDictionary(item => item.Key.Fixup(context), item => item.Value.Fixup(context)),
-                this.HigherOrder.Fixup(context));
-
-        public override bool Equals(Term? other) =>
-            other is DiscriminatedUnionTerm rhs ? this.Items.SequenceEqual(rhs.Items) : false;
     }
 
     internal interface IClrType

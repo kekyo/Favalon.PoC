@@ -1,5 +1,6 @@
 ﻿using Favalon.AlgebricData;
 using Favalon.Operators;
+using Favalon.Types;
 using System;
 using System.Linq;
 
@@ -81,7 +82,11 @@ namespace Favalon
         public static SumTerm Sum(Term term0, params Term[] terms) =>
             new SumTerm(new[] { term0 }.Concat(terms).ToArray());
 
-        public static MatchTerm Match(Term term, params PairTerm[] matchers) =>
-            new MatchTerm(term, matchers, UnspecifiedTerm.Instance);
+        public static MatchTerm Match(PairTerm matcher0, params PairTerm[] matchers) =>
+            new MatchTerm(new[] { matcher0 }.Concat(matchers).ToArray(), UnspecifiedTerm.Instance);
+
+        public static DiscriminatedUnionTerm DiscriminatedUnion(
+            params PairTerm[] constructors) =>
+            new DiscriminatedUnionTerm(constructors, UnspecifiedTerm.Instance);
     }
 }

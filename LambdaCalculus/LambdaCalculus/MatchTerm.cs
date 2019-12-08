@@ -4,26 +4,27 @@ using System.Linq;
 
 namespace Favalon
 {
-    public sealed class MatchTerm : Term
+    public sealed class MatchTerm : Term, IApplicable
     {
-        public readonly Term Term;
         public readonly PairTerm[] Matchers;
 
-        internal MatchTerm(Term term, PairTerm[] matchers, Term higherOrder)
+        internal MatchTerm(PairTerm[] matchers, Term higherOrder)
         {
-            this.Term = term;
             this.Matchers = matchers;
             this.HigherOrder = higherOrder;
         }
 
         public override Term HigherOrder { get; }
 
-        public override Term Reduce(ReduceContext context)
-        {
-            var term = this.Term.Reduce(context);
+        public override Term Reduce(ReduceContext context) =>
+            this;
 
-            var skipMatches = new List<Term>();
-            foreach (var pair in this.Matchers)
+        internal static Term Reduce(ReduceContext context, Term term, PairTerm[] matchers, Term higherOrder)
+        {
+            var term_ = term.Reduce(context);
+
+            var reducedMatches = new List<Term>();
+            foreach (var pair in matchers)
             {
                 // _ => ...
                 if (pair.Lhs is UnspecifiedTerm)
@@ -31,27 +32,27 @@ namespace Favalon
                     return pair.Rhs.Reduce(context);
                 }
 
-                var match = pair.Lhs.Reduce(context);
-                if (match.Equals(term))
+                var reducedMatch = pair.Lhs.Reduce(context);
+                if (reducedMatch.Equals(term_))   // TODO: Recursive matcher
                 {
                     return pair.Rhs.Reduce(context);
                 }
-                skipMatches.Add(match);
+                reducedMatches.Add(reducedMatch);
             }
 
             return new MatchTerm(
-                term,
-                skipMatches.Zip(
-                    this.Matchers.Select(pair => pair.Rhs.Reduce(context)),
+                reducedMatches.Zip(
+                    matchers.Select(pair => pair.Rhs),
                     (match, body) => new PairTerm(match, body)).
                     ToArray(),
-                this.HigherOrder.Reduce(context));
+                higherOrder.Reduce(context));
         }
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
+            Reduce(context, rhs, this.Matchers, this.HigherOrder);
 
         public override Term Infer(InferContext context)
         {
-            var term = this.Term.Infer(context);
-
             var matchers = this.Matchers.
                 Select(pair => pair.Lhs is UnspecifiedTerm ?
                     new PairTerm(UnspecifiedTerm.Instance, pair.Rhs.Infer(context)) :
@@ -62,27 +63,21 @@ namespace Favalon
 
             foreach (var pair in matchers)
             {
-                // TODO: Maybe ignore if term will be matched by higher orders.
-                //context.Unify(pair.Lhs.HigherOrder, term.HigherOrder);
-
                 context.Unify(pair.Rhs.HigherOrder, higherOrder);
             }
 
-            return new MatchTerm(term, matchers, higherOrder);
+            return new MatchTerm(matchers, higherOrder);
         }
 
         public override Term Fixup(FixupContext context) =>
             new MatchTerm(
-                this.Term.Fixup(context),
                 this.Matchers.Select(pair => (PairTerm)pair.Fixup(context)).ToArray(),
                 this.HigherOrder.Fixup(context));
 
         public override bool Equals(Term? other) =>
-            other is MatchTerm rhs ?
-                (this.Term.Equals(rhs.Term) && this.Matchers.SequenceEqual(rhs.Matchers)) :
-                false;
+            other is MatchTerm rhs ? this.Matchers.SequenceEqual(rhs.Matchers) : false;
 
         public override int GetHashCode() =>
-            this.Matchers.Aggregate(this.Term.GetHashCode(), (agg, pair) => agg ^ pair.GetHashCode());
+            this.Matchers.Aggregate(0, (agg, pair) => agg ^ pair.GetHashCode());
     }
 }

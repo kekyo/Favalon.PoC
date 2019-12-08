@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Favalon.Types;
+using NUnit.Framework;
 using System;
 
 namespace Favalon
@@ -53,6 +54,28 @@ namespace Favalon
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(123, ((ComposeConstructorTarget)((ConstantTerm)actual).Value).Value);
+        }
+
+        [Test]
+        public void ComposeDiscriminatedUnionType()
+        {
+            // type ((True 1) (False 0))
+            var term =
+                Term.DiscriminatedUnion(
+                    Term.Pair(
+                        Term.Identity("True"),
+                        Term.Identity("True0")),
+                    Term.Pair(
+                        Term.Identity("False"),
+                        Term.Identity("False0")));
+
+            var environment = Environment.Create();
+            var inferred = environment.Infer(term);
+            var du = (DiscriminatedUnionTerm)environment.Reduce(inferred);
+
+            var True = environment.LookupBoundTerm("True");
+
+            //Assert.AreEqual(, actual.Constructors[0]);
         }
     }
 }

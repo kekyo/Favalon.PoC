@@ -55,9 +55,8 @@ namespace Favalon
 
             var environment = Environment.Create();
             var actual = environment.Reduce(term);
-            var actual2 = environment.Reduce(actual);
 
-            Assert.AreEqual(result, !((BooleanTerm)actual2).Value);
+            Assert.AreEqual(result, !((BooleanTerm)actual).Value);
             Assert.AreEqual(result, !((BooleanTerm)environment.LookupBoundTerm("a")!).Value);
         }
     }

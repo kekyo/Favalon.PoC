@@ -26,16 +26,31 @@
             var higherOrder = this.HigherOrder.Infer(context);
 
             // (f:('1 -> '2) a:'1):'2
-            context.Unify(function.HigherOrder, new LambdaTerm(argument.HigherOrder, higherOrder));
+            context.Unify(
+                function.HigherOrder,
+                new LambdaTerm(argument.HigherOrder, higherOrder));
 
-            return new ApplyTerm(function, argument, higherOrder);
+            return
+                object.ReferenceEquals(function, this.Function) &&
+                object.ReferenceEquals(argument, this.Argument) &&
+                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                this :
+                new ApplyTerm(function, argument, higherOrder);
         }
 
-        public override Term Fixup(FixupContext context) =>
-            new ApplyTerm(
-                this.Function.Fixup(context),
-                this.Argument.Fixup(context),
-                this.HigherOrder.Fixup(context));
+        public override Term Fixup(FixupContext context)
+        {
+            var function = this.Function.Fixup(context);
+            var argument = this.Argument.Fixup(context);
+            var higherOrder = this.HigherOrder.Fixup(context);
+
+            return
+                object.ReferenceEquals(function, this.Function) &&
+                object.ReferenceEquals(argument, this.Argument) &&
+                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                this :
+                new ApplyTerm(function, argument, higherOrder);
+        }
 
         public override Term Reduce(ReduceContext context)
         {
@@ -46,13 +61,16 @@
             {
                 return term;
             }
-            else
-            {
-                return new ApplyTerm(
-                    function,
-                    this.Argument.Reduce(context),
-                    this.HigherOrder.Reduce(context));
-            }
+
+            var argument = this.Argument.Reduce(context);
+            var higherOrder = this.HigherOrder.Reduce(context);
+
+            return
+                object.ReferenceEquals(function, this.Function) &&
+                object.ReferenceEquals(argument, this.Argument) &&
+                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                this :
+                new ApplyTerm(function, argument, higherOrder);
         }
 
         public override bool Equals(Term? other) =>

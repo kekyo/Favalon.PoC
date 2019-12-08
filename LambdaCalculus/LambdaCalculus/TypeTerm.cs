@@ -64,43 +64,85 @@ namespace Favalon
             {
                 // Discriminated union
                 case SumTerm(Term[] items):
-                    var inferred = items.Select(item => item.Infer(context)).ToArray();
-                    var commonTypeTerm = context.CreatePlaceholder(UnspecifiedTerm.Instance);
-
-                    foreach (var item in inferred)
                     {
-                        context.Unify(item.HigherOrder, commonTypeTerm);
-                    }
+                        var inferred = items.Select(item => item.Infer(context)).ToArray();
+                        var commonHigherOrder = context.CreatePlaceholder(UnspecifiedTerm.Instance);
 
-                    return new DeclareTypeTerm(
-                        new SumTerm(inferred),
-                        this.HigherOrder.Infer(context));
+                        foreach (var inferredItem in inferred)
+                        {
+                            context.Unify(inferredItem.HigherOrder, commonHigherOrder);
+                        }
+
+                        var higherOrder = this.HigherOrder.Infer(context);
+
+                        return
+                            object.ReferenceEquals(higherOrder, this.HigherOrder) &&
+                            inferred.Zip(items, object.ReferenceEquals).All(r => r) ?
+                                this :
+                                new DeclareTypeTerm(new SumTerm(inferred), higherOrder);
+                    }
 
                 // TODO: Record
                 default:
-                    return new DeclareTypeTerm(
-                        this.Declare.Infer(context),
-                        this.HigherOrder.Infer(context));
+                    {
+                        var declare = this.Declare.Infer(context);
+                        var higherOrder = this.HigherOrder.Infer(context);
+
+                        return
+                            object.ReferenceEquals(declare, this.Declare) &&
+                            object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                                this :
+                                new DeclareTypeTerm(declare, higherOrder);
+                    }
             }
         }
 
-        public override Term Fixup(FixupContext context) =>
-            new DeclareTypeTerm(this.Declare.Fixup(context), this.HigherOrder.Fixup(context));
+        public override Term Fixup(FixupContext context)
+        {
+            var declare = this.Declare.Fixup(context);
+            var higherOrder = this.HigherOrder.Fixup(context);
 
-        public override Term Reduce(ReduceContext context) =>
-            this.Declare switch
+            return
+                object.ReferenceEquals(declare, this.Declare) &&
+                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                    this :
+                    new DeclareTypeTerm(declare, higherOrder);
+        }
+
+        public override Term Reduce(ReduceContext context)
+        {
+            switch (this.Declare)
             {
                 // Discriminated union
-                SumTerm(Term[] items) =>
-                    new DiscriminatedUnionTerm(
-                        items.Select(item => (PairTerm)item.Reduce(context)),
-                        this.HigherOrder.Reduce(context)),
+                case SumTerm(Term[] items):
+                    {
+                        var reduced = items.Select(item => item.Reduce(context)).ToArray();
+                        var higherOrder = this.HigherOrder.Reduce(context);
+
+                        return
+                            object.ReferenceEquals(higherOrder, this.HigherOrder) &&
+                            reduced.Zip(items, object.ReferenceEquals).All(r => r) ?
+                                (Term)this :
+                                reduced.All(item => item is PairTerm) ?
+                                    (Term)new DiscriminatedUnionTerm(reduced.Cast<PairTerm>(), higherOrder) :
+                                    new DeclareTypeTerm(this.Declare, higherOrder);
+
+                    }
 
                 // TODO: Record
-                _ => new DeclareTypeTerm(
-                    this.Declare.Reduce(context),
-                    this.HigherOrder.Reduce(context))
+                default:
+                    {
+                        var declare = this.Declare.Reduce(context);
+                        var higherOrder = this.HigherOrder.Reduce(context);
+
+                        return
+                            object.ReferenceEquals(declare, this.Declare) &&
+                            object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                                this :
+                                new DeclareTypeTerm(declare, higherOrder);
+                    }
             };
+        }
 
         public override bool Equals(Term? other) =>
             other is DeclareTypeTerm rhs ? this.Declare.Equals(rhs.Declare) : false;

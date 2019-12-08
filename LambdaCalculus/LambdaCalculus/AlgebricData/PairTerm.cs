@@ -14,14 +14,29 @@
         public override Term HigherOrder =>
             new PairTerm(this.Lhs.HigherOrder, this.Rhs.HigherOrder);
 
-        public override Term Infer(InferContext context) =>
-            new PairTerm(this.Lhs.Infer(context), this.Rhs.Infer(context));
+        public override Term Infer(InferContext context)
+        {
+            var lhs = this.Lhs.Infer(context);
+            var rhs = this.Rhs.Infer(context);
+            
+            return new PairTerm(lhs, rhs);
+        }
 
-        public override Term Fixup(FixupContext context) =>
-            new PairTerm(this.Lhs.Fixup(context), this.Rhs.Fixup(context));
+        public override Term Fixup(FixupContext context)
+        {
+            var lhs = this.Lhs.Fixup(context);
+            var rhs = this.Rhs.Fixup(context);
 
-        public override Term Reduce(ReduceContext context) =>
-            new PairTerm(this.Lhs.Reduce(context), this.Rhs.Reduce(context));
+            return new PairTerm(lhs, rhs);
+        }
+
+        public override Term Reduce(ReduceContext context)
+        {
+            var lhs = this.Lhs.Reduce(context);
+            var rhs = this.Rhs.Reduce(context);
+
+            return new PairTerm(lhs, rhs);
+        }
 
         public override bool Equals(Term? other) =>
             other is PairTerm rhs ? (rhs.Lhs.Equals(this.Lhs) && rhs.Rhs.Equals(this.Rhs)) : false;

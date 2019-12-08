@@ -79,8 +79,13 @@ namespace Favalon
         public override Term Fixup(FixupContext context) =>
             context.LookupUnifiedTerm(this);
 
-        public override Term Reduce(ReduceContext context) =>
-            new PlaceholderTerm(this.Index, this.HigherOrder.Reduce(context));
+        public override Term Reduce(ReduceContext context)
+        {
+            var higherOrder = this.HigherOrder.Reduce(context);
+            return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                this :
+                new PlaceholderTerm(this.Index, higherOrder);
+        }
 
         public override bool Equals(Term? other) =>
             other is PlaceholderTerm rhs ? this.Index.Equals(rhs.Index) : false;

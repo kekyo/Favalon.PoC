@@ -6,9 +6,9 @@ namespace Favalon
 {
     public sealed class MatchTerm : Term, IApplicable
     {
-        public readonly PairTerm[] Matchers;
+        public readonly Term[] Matchers;
 
-        internal MatchTerm(PairTerm[] matchers, Term higherOrder)
+        internal MatchTerm(Term[] matchers, Term higherOrder)
         {
             this.Matchers = matchers;
             this.HigherOrder = higherOrder;
@@ -19,60 +19,100 @@ namespace Favalon
         public override Term Infer(InferContext context)
         {
             var matchers = this.Matchers.
-                Select(pair => pair.Lhs is UnspecifiedTerm ?
-                    new PairTerm(UnspecifiedTerm.Instance, pair.Rhs.Infer(context)) :
-                    (PairTerm)pair.Infer(context)).
+                Select(entry =>
+                {
+                    if (entry is PairTerm(UnspecifiedTerm match, Term body))
+                    {
+                        var body_ = body.Infer(context);
+                        return object.ReferenceEquals(body_, body) ?
+                            entry :
+                            new PairTerm(match, body_);
+                    }
+                    else
+                    {
+                        return entry.Infer(context);
+                    }
+                }).
                 ToArray();
 
             var higherOrder = this.HigherOrder.Infer(context);
 
-            foreach (var pair in matchers)
+            foreach (var entry in matchers)
             {
-                context.Unify(pair.Rhs.HigherOrder, higherOrder);
+                if (entry is PairTerm(_, Term body))
+                {
+                    context.Unify(body.HigherOrder, higherOrder);
+                }
             }
 
-            return new MatchTerm(matchers, higherOrder);
+            return
+                object.ReferenceEquals(higherOrder, this.HigherOrder) &&
+                matchers.Zip(this.Matchers, object.ReferenceEquals).All(r => r) ?
+                this :
+                new MatchTerm(matchers, higherOrder);
         }
 
-        public override Term Fixup(FixupContext context) =>
-            new MatchTerm(
-                this.Matchers.Select(pair => (PairTerm)pair.Fixup(context)).ToArray(),
-                this.HigherOrder.Fixup(context));
+        public override Term Fixup(FixupContext context)
+        {
+            var matchers = this.Matchers.
+                Select(entry => entry.Fixup(context)).
+                ToArray();
+
+            var higherOrder = this.HigherOrder.Fixup(context);
+
+            return
+                object.ReferenceEquals(higherOrder, this.HigherOrder) &&
+                matchers.Zip(this.Matchers, object.ReferenceEquals).All(r => r) ?
+                this :
+                new MatchTerm(matchers, higherOrder);
+        }
 
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        internal static Term Reduce(ReduceContext context, Term term, PairTerm[] matchers, Term higherOrder)
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)
         {
-            var term_ = term.Reduce(context);
+            var argument = rhs.Reduce(context);
 
             var reducedMatches = new List<Term>();
-            foreach (var pair in matchers)
+            foreach (var entry in this.Matchers)
             {
                 // _ => ...
-                if (pair.Lhs is UnspecifiedTerm)
+                if (entry is PairTerm(Term match, Term body))
                 {
-                    return pair.Rhs.Reduce(context);
-                }
+                    if (match is UnspecifiedTerm)
+                    {
+                        return body.Reduce(context);
+                    }
 
-                var reducedMatch = pair.Lhs.Reduce(context);
-                if (reducedMatch.Equals(term_))   // TODO: Recursive matcher
-                {
-                    return pair.Rhs.Reduce(context);
+                    var reducedMatch = match.Reduce(context);
+                    if (reducedMatch.Equals(argument))   // TODO: Recursive matcher
+                    {
+                        return body.Reduce(context);
+                    }
+
+                    reducedMatches.Add(reducedMatch);
                 }
-                reducedMatches.Add(reducedMatch);
+                else
+                {
+                    // TODO: Will cause syntax error for invalid AST format... ?
+                }
             }
 
-            return new MatchTerm(
-                reducedMatches.Zip(
-                    matchers.Select(pair => pair.Rhs),
-                    (match, body) => new PairTerm(match, body)).
-                    ToArray(),
-                higherOrder.Reduce(context));
-        }
+            var matchers = reducedMatches.Zip(
+                this.Matchers.Cast<PairTerm>(),
+                (match, entry) => object.ReferenceEquals(match, entry.Lhs) ?
+                    entry :
+                    new PairTerm(match, entry.Rhs)).
+                ToArray();
+            var higherOrder = this.HigherOrder.Reduce(context);
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-            Reduce(context, rhs, this.Matchers, this.HigherOrder);
+            return
+                object.ReferenceEquals(higherOrder, this.HigherOrder) &&
+                matchers.Zip(this.Matchers, object.ReferenceEquals).All(r => r) ?
+                null :
+                new MatchTerm(matchers, higherOrder);
+        }
 
         public override bool Equals(Term? other) =>
             other is MatchTerm rhs ? this.Matchers.SequenceEqual(rhs.Matchers) : false;

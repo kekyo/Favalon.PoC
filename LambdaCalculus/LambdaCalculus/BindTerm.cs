@@ -19,27 +19,47 @@
             var body = this.Body.Infer(context);
             var bound = this.Bound.Infer(context);
 
-            if (bound is IdentityTerm identity)
+            if (bound is IdentityTerm(string identity))
             {
-                context.SetBoundTerm(identity.Identity, body);
+                context.SetBoundTerm(identity, body);
             }
 
             context.Unify(bound.HigherOrder, body.HigherOrder);
 
-            return new BindExpressionTerm(bound, body);
+            return
+                object.ReferenceEquals(bound, this.Bound) &&
+                object.ReferenceEquals(body, this.Body) ?
+                    this :
+                    new BindExpressionTerm(bound, body);
         }
 
-        public override Term Fixup(FixupContext context) =>
-            new BindExpressionTerm(this.Bound.Fixup(context), this.Body.Fixup(context));
+        public override Term Fixup(FixupContext context)
+        {
+            var body = this.Body.Fixup(context);
+            var bound = this.Bound.Fixup(context);
+
+            return
+                object.ReferenceEquals(bound, this.Bound) &&
+                object.ReferenceEquals(body, this.Body) ?
+                    this :
+                    new BindExpressionTerm(bound, body);
+        }
 
         public override Term Reduce(ReduceContext context)
         {
             var body = this.Body.Reduce(context);
             var bound = this.Bound.Reduce(context);
 
-            context.SetBoundTerm(((IdentityTerm)bound).Identity, body);
+            if (bound is IdentityTerm(string identity))
+            {
+                context.SetBoundTerm(identity, body);
+            }
 
-            return bound;
+            return
+                object.ReferenceEquals(bound, this.Bound) &&
+                object.ReferenceEquals(body, this.Body) ?
+                    this :
+                    bound;
         }
 
         public override bool Equals(Term? other) =>
@@ -77,11 +97,25 @@
 
             var expression = this.Expression.Infer(newScope);
             var continuation = this.Continuation.Infer(newScope);
-            return new BindTerm(expression, continuation);
+
+            return
+                object.ReferenceEquals(expression, this.Expression) &&
+                object.ReferenceEquals(continuation, this.Continuation) ?
+                this :
+                new BindTerm(expression, continuation);
         }
 
-        public override Term Fixup(FixupContext context) =>
-            new BindTerm(this.Expression.Fixup(context), this.Continuation.Fixup(context));
+        public override Term Fixup(FixupContext context)
+        {
+            var expression = this.Expression.Fixup(context);
+            var continuation = this.Continuation.Fixup(context);
+
+            return
+                object.ReferenceEquals(expression, this.Expression) &&
+                object.ReferenceEquals(continuation, this.Continuation) ?
+                this :
+                new BindTerm(expression, continuation);
+        }
 
         public override Term Reduce(ReduceContext context)
         {

@@ -25,11 +25,24 @@
 
             var body = this.Body.Infer(newScope);
 
-            return new LambdaTerm(parameter, body);
+            return
+                object.ReferenceEquals(parameter, this.Parameter) &&
+                object.ReferenceEquals(body, this.Body) ?
+                this :
+                new LambdaTerm(parameter, body);
         }
 
-        public override Term Fixup(FixupContext context) =>
-            new LambdaTerm(this.Parameter.Fixup(context), this.Body.Fixup(context));
+        public override Term Fixup(FixupContext context)
+        {
+            var parameter = this.Parameter.Fixup(context);
+            var body = this.Body.Fixup(context);
+
+            return
+                object.ReferenceEquals(parameter, this.Parameter) &&
+                object.ReferenceEquals(body, this.Body) ?
+                this :
+                new LambdaTerm(parameter, body);
+        }
 
         public override Term Reduce(ReduceContext context)
         {
@@ -44,7 +57,11 @@
 
             var body = this.Body.Reduce(context);
 
-            return new LambdaTerm(parameter, body);
+            return
+                object.ReferenceEquals(parameter, this.Parameter) &&
+                object.ReferenceEquals(body, this.Body) ?
+                this :
+                new LambdaTerm(parameter, body);
         }
 
         Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)

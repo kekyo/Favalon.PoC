@@ -45,26 +45,6 @@ namespace Favalon
             boundTerms[identity] = term;
         }
 
-        public Term Reduce(Term term)
-        {
-            var fixupped = this.Infer(term);
-
-            if (boundTerms == null)
-            {
-                boundTerms = new Dictionary<string, Term>();
-            }
-
-            var context = new ReduceContext(this, boundTerms);
-            return fixupped.Reduce(context);
-        }
-
-        public Term Infer(Term term)
-        {
-            var context = new InferContext(this);
-            var inferred = term.Infer(context);
-            return inferred.Fixup(context);
-        }
-
         public Term? LookupBoundTerm(string identity)
         {
             Environment? current = this;
@@ -82,6 +62,37 @@ namespace Favalon
             while (current != null);
 
             return null;
+        }
+
+        public Term Infer(Term term)
+        {
+            var context = new InferContext(this);
+            var partial = term.Infer(context);
+            return partial.Fixup(context);
+        }
+
+        public Term Reduce(Term term)
+        {
+            var inferred = this.Infer(term);
+
+            if (boundTerms == null)
+            {
+                boundTerms = new Dictionary<string, Term>();
+            }
+
+            var current = inferred;
+            while (true)
+            {
+                var context = new ReduceContext(this, boundTerms);
+
+                var reduced = current.Reduce(context);
+                if (object.ReferenceEquals(reduced, current))
+                {
+                    return reduced;
+                }
+
+                current = reduced;
+            }
         }
 
         public static Environment Create() =>

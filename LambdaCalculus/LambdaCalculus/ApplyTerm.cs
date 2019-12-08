@@ -19,24 +19,6 @@
 
         public override Term HigherOrder { get; }
 
-        public override Term Reduce(ReduceContext context)
-        {
-            var function = this.Function.Reduce(context);
-
-            if (function is IApplicable applicable &&
-                applicable.ReduceForApply(context, this.Argument) is Term term)
-            {
-                return term;
-            }
-            else
-            {
-                return new ApplyTerm(
-                    function,
-                    this.Argument.Reduce(context),
-                    this.HigherOrder.Reduce(context));
-            }
-        }
-
         public override Term Infer(InferContext context)
         {
             var function = this.Function.Infer(context);
@@ -54,6 +36,24 @@
                 this.Function.Fixup(context),
                 this.Argument.Fixup(context),
                 this.HigherOrder.Fixup(context));
+
+        public override Term Reduce(ReduceContext context)
+        {
+            var function = this.Function.Reduce(context);
+
+            if (function is IApplicable applicable &&
+                applicable.ReduceForApply(context, this.Argument) is Term term)
+            {
+                return term;
+            }
+            else
+            {
+                return new ApplyTerm(
+                    function,
+                    this.Argument.Reduce(context),
+                    this.HigherOrder.Reduce(context));
+            }
+        }
 
         public override bool Equals(Term? other) =>
             other is ApplyTerm rhs ?

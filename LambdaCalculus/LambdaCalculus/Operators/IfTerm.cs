@@ -71,14 +71,6 @@
 
         public override Term HigherOrder { get; }
 
-        internal static Term Reduce(ReduceContext context, Term condition, Term then, Term @else) =>
-            ((BooleanTerm)condition.Reduce(context)).Value ?
-                then.Reduce(context) :   // Reduce only then or else term by the conditional.
-                @else.Reduce(context);
-
-        public override Term Reduce(ReduceContext context) =>
-            Reduce(context, this.Condition, this.Then, this.Else);
-
         public override Term Infer(InferContext context)
         {
             var condition = this.Condition.Infer(context);
@@ -113,6 +105,14 @@
                 this.Then.Fixup(context),
                 this.Else.Fixup(context),
                 this.HigherOrder.Fixup(context));
+
+        internal static Term Reduce(ReduceContext context, Term condition, Term then, Term @else) =>
+            ((BooleanTerm)condition.Reduce(context)).Value ?
+                then.Reduce(context) :   // Reduce only then or else term by the conditional.
+                @else.Reduce(context);
+
+        public override Term Reduce(ReduceContext context) =>
+            Reduce(context, this.Condition, this.Then, this.Else);
 
         public override bool Equals(Term? other) =>
             other is IfTerm rhs ?

@@ -8,11 +8,11 @@ namespace Favalon
     {
         public abstract Term HigherOrder { get; }
 
-        public abstract Term Reduce(ReduceContext context);
-
         public abstract Term Infer(InferContext context);
 
         public abstract Term Fixup(FixupContext context);
+
+        public abstract Term Reduce(ReduceContext context);
 
         public abstract bool Equals(Term? other);
 
@@ -39,13 +39,13 @@ namespace Favalon
         public override Term HigherOrder =>
             null!;
 
-        public override Term Reduce(ReduceContext context) =>
-            this;
-
         public override Term Infer(InferContext context) =>
             context.CreatePlaceholder(Instance);
 
         public override Term Fixup(FixupContext context) =>
+            this;
+
+        public override Term Reduce(ReduceContext context) =>
             this;
 
         public override bool Equals(Term? other) =>
@@ -73,14 +73,14 @@ namespace Favalon
 
         public override Term HigherOrder { get; }
 
-        public override Term Reduce(ReduceContext context) =>
-            new PlaceholderTerm(this.Index, this.HigherOrder.Reduce(context));
-
         public override Term Infer(InferContext context) =>
             new PlaceholderTerm(this.Index, this.HigherOrder.Infer(context));
 
         public override Term Fixup(FixupContext context) =>
             context.LookupUnifiedTerm(this);
+
+        public override Term Reduce(ReduceContext context) =>
+            new PlaceholderTerm(this.Index, this.HigherOrder.Reduce(context));
 
         public override bool Equals(Term? other) =>
             other is PlaceholderTerm rhs ? this.Index.Equals(rhs.Index) : false;
@@ -102,13 +102,13 @@ namespace Favalon
         public override Term HigherOrder =>
             Type(this.Value.GetType());
 
-        public override Term Reduce(ReduceContext context) =>
-            this;
-
         public override Term Infer(InferContext context) =>
             this;
 
         public override Term Fixup(FixupContext context) =>
+            this;
+
+        public override Term Reduce(ReduceContext context) =>
             this;
 
         public override bool Equals(Term? other) =>

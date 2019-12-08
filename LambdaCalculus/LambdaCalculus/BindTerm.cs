@@ -14,16 +14,6 @@
         public override Term HigherOrder =>
             this.Body.HigherOrder;
 
-        public override Term Reduce(ReduceContext context)
-        {
-            var body = this.Body.Reduce(context);
-            var bound = this.Bound.Reduce(context);
-
-            context.SetBoundTerm(((IdentityTerm)bound).Identity, body);
-
-            return bound;
-        }
-
         public override Term Infer(InferContext context)
         {
             var body = this.Body.Infer(context);
@@ -41,6 +31,16 @@
 
         public override Term Fixup(FixupContext context) =>
             new BindExpressionTerm(this.Bound.Fixup(context), this.Body.Fixup(context));
+
+        public override Term Reduce(ReduceContext context)
+        {
+            var body = this.Body.Reduce(context);
+            var bound = this.Bound.Reduce(context);
+
+            context.SetBoundTerm(((IdentityTerm)bound).Identity, body);
+
+            return bound;
+        }
 
         public override bool Equals(Term? other) =>
             other is BindExpressionTerm rhs ?
@@ -71,15 +71,6 @@
         public override Term HigherOrder =>
             this.Continuation.HigherOrder;
 
-        public override Term Reduce(ReduceContext context)
-        {
-            var newScope = context.NewScope();
-
-            this.Expression.Reduce(newScope);
-
-            return this.Continuation.Reduce(newScope);
-        }
-
         public override Term Infer(InferContext context)
         {
             var newScope = context.NewScope();
@@ -91,6 +82,15 @@
 
         public override Term Fixup(FixupContext context) =>
             new BindTerm(this.Expression.Fixup(context), this.Continuation.Fixup(context));
+
+        public override Term Reduce(ReduceContext context)
+        {
+            var newScope = context.NewScope();
+
+            this.Expression.Reduce(newScope);
+
+            return this.Continuation.Reduce(newScope);
+        }
 
         public override bool Equals(Term? other) =>
             other is BindTerm rhs ?

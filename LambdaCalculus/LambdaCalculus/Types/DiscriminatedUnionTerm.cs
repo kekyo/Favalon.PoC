@@ -16,23 +16,6 @@ namespace Favalon.Types
 
         public override Term HigherOrder { get; }
 
-        public override Term Reduce(ReduceContext context)
-        {
-            var term = new DiscriminatedUnionTerm(
-                this.Constructors.Select(pair => (PairTerm)pair.Reduce(context)),
-                this.HigherOrder.Reduce(context));
-
-            foreach (var constructor in term.Constructors)
-            {
-                if (constructor.Lhs is IdentityTerm identity)
-                {
-                    context.SetBoundTerm(identity.Identity, constructor.Rhs);
-                }
-            }
-
-            return term;
-        }
-
         public override Term Infer(InferContext context)
         {
             var term = new DiscriminatedUnionTerm(
@@ -55,6 +38,23 @@ namespace Favalon.Types
             new DiscriminatedUnionTerm(
                 this.Constructors.Select(pair => (PairTerm)pair.Fixup(context)),
                 this.HigherOrder.Fixup(context));
+
+        public override Term Reduce(ReduceContext context)
+        {
+            var term = new DiscriminatedUnionTerm(
+                this.Constructors.Select(pair => (PairTerm)pair.Reduce(context)),
+                this.HigherOrder.Reduce(context));
+
+            foreach (var constructor in term.Constructors)
+            {
+                if (constructor.Lhs is IdentityTerm identity)
+                {
+                    context.SetBoundTerm(identity.Identity, constructor.Rhs);
+                }
+            }
+
+            return term;
+        }
 
         public override bool Equals(Term? other) =>
             other is DiscriminatedUnionTerm rhs ? this.Constructors.SequenceEqual(rhs.Constructors) : false;

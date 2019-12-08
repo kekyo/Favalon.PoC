@@ -12,11 +12,6 @@
 
         public override Term HigherOrder { get; }
 
-        public override Term Reduce(ReduceContext context) =>
-            context.LookupBoundTerm(this.Identity) is Term bound ?
-                bound.Reduce(context) :
-                new IdentityTerm(this.Identity, this.HigherOrder.Reduce(context));
-
         public override Term Infer(InferContext context) =>
             context.LookupBoundTerm(this.Identity) is Term bound ?
                 bound :
@@ -24,6 +19,11 @@
 
         public override Term Fixup(FixupContext context) =>
             new IdentityTerm(this.Identity, this.HigherOrder.Fixup(context));
+
+        public override Term Reduce(ReduceContext context) =>
+            context.LookupBoundTerm(this.Identity) is Term bound ?
+                bound.Reduce(context) :
+                new IdentityTerm(this.Identity, this.HigherOrder.Reduce(context));
 
         public override bool Equals(Term? other) =>
             other is IdentityTerm rhs ? this.Identity.Equals(rhs.Identity) : false;

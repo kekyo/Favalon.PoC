@@ -14,6 +14,23 @@
         public override Term HigherOrder =>
             new LambdaTerm(this.Parameter.HigherOrder, this.Body.HigherOrder);
 
+        public override Term Infer(InferContext context)
+        {
+            var newScope = context.NewScope();
+            var parameter = this.Parameter.Infer(newScope);
+            if (parameter is IdentityTerm identity)
+            {
+                newScope.SetBoundTerm(identity.Identity, parameter);
+            }
+
+            var body = this.Body.Infer(newScope);
+
+            return new LambdaTerm(parameter, body);
+        }
+
+        public override Term Fixup(FixupContext context) =>
+            new LambdaTerm(this.Parameter.Fixup(context), this.Body.Fixup(context));
+
         public override Term Reduce(ReduceContext context)
         {
             var newScope = context.NewScope();
@@ -44,23 +61,6 @@
                 return null;
             }
         }
-
-        public override Term Infer(InferContext context)
-        {
-            var newScope = context.NewScope();
-            var parameter = this.Parameter.Infer(newScope);
-            if (parameter is IdentityTerm identity)
-            {
-                newScope.SetBoundTerm(identity.Identity, parameter);
-            }
-
-            var body = this.Body.Infer(newScope);
-
-            return new LambdaTerm(parameter, body);
-        }
-
-        public override Term Fixup(FixupContext context) =>
-            new LambdaTerm(this.Parameter.Fixup(context), this.Body.Fixup(context));
 
         public override bool Equals(Term? other) =>
             other is LambdaTerm rhs ?

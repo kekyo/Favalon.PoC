@@ -16,6 +16,29 @@ namespace Favalon
 
         public override Term HigherOrder { get; }
 
+        public override Term Infer(InferContext context)
+        {
+            var matchers = this.Matchers.
+                Select(pair => pair.Lhs is UnspecifiedTerm ?
+                    new PairTerm(UnspecifiedTerm.Instance, pair.Rhs.Infer(context)) :
+                    (PairTerm)pair.Infer(context)).
+                ToArray();
+
+            var higherOrder = this.HigherOrder.Infer(context);
+
+            foreach (var pair in matchers)
+            {
+                context.Unify(pair.Rhs.HigherOrder, higherOrder);
+            }
+
+            return new MatchTerm(matchers, higherOrder);
+        }
+
+        public override Term Fixup(FixupContext context) =>
+            new MatchTerm(
+                this.Matchers.Select(pair => (PairTerm)pair.Fixup(context)).ToArray(),
+                this.HigherOrder.Fixup(context));
+
         public override Term Reduce(ReduceContext context) =>
             this;
 
@@ -50,29 +73,6 @@ namespace Favalon
 
         Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
             Reduce(context, rhs, this.Matchers, this.HigherOrder);
-
-        public override Term Infer(InferContext context)
-        {
-            var matchers = this.Matchers.
-                Select(pair => pair.Lhs is UnspecifiedTerm ?
-                    new PairTerm(UnspecifiedTerm.Instance, pair.Rhs.Infer(context)) :
-                    (PairTerm)pair.Infer(context)).
-                ToArray();
-
-            var higherOrder = this.HigherOrder.Infer(context);
-
-            foreach (var pair in matchers)
-            {
-                context.Unify(pair.Rhs.HigherOrder, higherOrder);
-            }
-
-            return new MatchTerm(matchers, higherOrder);
-        }
-
-        public override Term Fixup(FixupContext context) =>
-            new MatchTerm(
-                this.Matchers.Select(pair => (PairTerm)pair.Fixup(context)).ToArray(),
-                this.HigherOrder.Fixup(context));
 
         public override bool Equals(Term? other) =>
             other is MatchTerm rhs ? this.Matchers.SequenceEqual(rhs.Matchers) : false;

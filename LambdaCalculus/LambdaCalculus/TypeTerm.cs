@@ -18,13 +18,13 @@ namespace Favalon
         public override Term HigherOrder =>
             UnspecifiedTerm.Instance;
 
-        public override Term Reduce(ReduceContext context) =>
-            this;
-
         public override Term Infer(InferContext context) =>
             this;
 
         public override Term Fixup(FixupContext context) =>
+            this;
+
+        public override Term Reduce(ReduceContext context) =>
             this;
 
         private protected static bool IsTypeConstructor(Type type) =>
@@ -58,21 +58,6 @@ namespace Favalon
 
         public override Term HigherOrder { get; }
 
-        public override Term Reduce(ReduceContext context) =>
-            this.Declare switch
-            {
-                // Discriminated union
-                SumTerm(Term[] items) =>
-                    new DiscriminatedUnionTerm(
-                        items.Select(item => (PairTerm)item.Reduce(context)),
-                        this.HigherOrder.Reduce(context)),
-
-                // TODO: Record
-                _ => new DeclareTypeTerm(
-                    this.Declare.Reduce(context),
-                    this.HigherOrder.Reduce(context))
-            };
-
         public override Term Infer(InferContext context)
         {
             switch (this.Declare)
@@ -101,6 +86,21 @@ namespace Favalon
 
         public override Term Fixup(FixupContext context) =>
             new DeclareTypeTerm(this.Declare.Fixup(context), this.HigherOrder.Fixup(context));
+
+        public override Term Reduce(ReduceContext context) =>
+            this.Declare switch
+            {
+                // Discriminated union
+                SumTerm(Term[] items) =>
+                    new DiscriminatedUnionTerm(
+                        items.Select(item => (PairTerm)item.Reduce(context)),
+                        this.HigherOrder.Reduce(context)),
+
+                // TODO: Record
+                _ => new DeclareTypeTerm(
+                    this.Declare.Reduce(context),
+                    this.HigherOrder.Reduce(context))
+            };
 
         public override bool Equals(Term? other) =>
             other is DeclareTypeTerm rhs ? this.Declare.Equals(rhs.Declare) : false;

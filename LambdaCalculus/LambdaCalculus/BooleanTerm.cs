@@ -10,13 +10,13 @@
         public override Term HigherOrder =>
             Type;
 
-        public override Term Reduce(ReduceContext context) =>
-            this;
-
         public override Term Infer(InferContext context) =>
             this;
 
         public override Term Fixup(FixupContext context) =>
+            this;
+
+        public override Term Reduce(ReduceContext context) =>
             this;
 
         public override bool Equals(Term? other) =>

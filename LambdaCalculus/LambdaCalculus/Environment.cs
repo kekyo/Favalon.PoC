@@ -41,17 +41,21 @@ namespace Favalon
             {
                 boundTerms = new Dictionary<string, Term>();
             }
+
             boundTerms[identity] = term;
         }
 
         public Term Reduce(Term term)
         {
+            var fixupped = this.Infer(term);
+
             if (boundTerms == null)
             {
                 boundTerms = new Dictionary<string, Term>();
             }
+
             var context = new ReduceContext(this, boundTerms);
-            return term.Reduce(context);
+            return fixupped.Reduce(context);
         }
 
         public Term Infer(Term term)
@@ -90,7 +94,9 @@ namespace Favalon
             base(parent)
         { }
 
-        internal ReduceContext(Environment parent, Dictionary<string, Term> boundTerms) :
+        internal ReduceContext(
+            Environment parent,
+            Dictionary<string, Term> boundTerms) :
             base(parent, boundTerms)
         { }
 

@@ -6,48 +6,66 @@ namespace Favalon.Types
 {
     public sealed class DiscriminatedUnionTerm : HigherOrderHoldTerm
     {
-        public readonly PairTerm[] Constructors;
+        public readonly Term[] Constructors;
 
-        internal DiscriminatedUnionTerm(IEnumerable<PairTerm> constructors, Term higherOrder) :
+        internal DiscriminatedUnionTerm(IEnumerable<Term> constructors, Term higherOrder) :
             base(higherOrder) =>
             this.Constructors = constructors.ToArray();
 
         public override Term Infer(InferContext context)
         {
-            var term = new DiscriminatedUnionTerm(
-                this.Constructors.Select(pair => (PairTerm)pair.Infer(context)),
-                this.HigherOrder.Infer(context));
+            var constructors = this.Constructors.
+                Select(constructor => constructor.Infer(context)).
+                ToArray();
+            var higherOrder = this.HigherOrder.Infer(context);
 
-            foreach (var constructor in term.Constructors)
+            if (object.ReferenceEquals(higherOrder, this.HigherOrder) &&
+                constructors.Zip(this.Constructors, object.ReferenceEquals).All(r => r))
             {
-                context.Unify(
-                    constructor.Rhs.HigherOrder is LambdaTerm lambda ?
-                        lambda.Body :
-                        constructor.Rhs.HigherOrder,
-                    term);
+                return this;
+            }
+
+            var term = new DiscriminatedUnionTerm(constructors, higherOrder);
+
+            foreach (var constructor in constructors)
+            {
+                if (constructor is BindExpressionTerm bound)
+                {
+                    context.Unify(
+                        bound.Body.HigherOrder is LambdaTerm lambda ?
+                            lambda.Body :
+                            bound.Body.HigherOrder,
+                        term);
+                }
             }
 
             return term;
         }
 
-        public override Term Fixup(FixupContext context) =>
-            new DiscriminatedUnionTerm(
-                this.Constructors.Select(pair => (PairTerm)pair.Fixup(context)),
-                this.HigherOrder.Fixup(context));
+        public override Term Fixup(FixupContext context)
+        {
+            var constructors = this.Constructors.
+                Select(constructor => constructor.Fixup(context)).
+                ToArray();
+            var higherOrder = this.HigherOrder.Fixup(context);
+
+            if (object.ReferenceEquals(higherOrder, this.HigherOrder) &&
+                constructors.Zip(this.Constructors, object.ReferenceEquals).All(r => r))
+            {
+                return this;
+            }
+
+            var term = new DiscriminatedUnionTerm(constructors, higherOrder);
+
+            return term;
+        }
 
         public override Term Reduce(ReduceContext context)
         {
             var term = new DiscriminatedUnionTerm(
-                this.Constructors.Select(pair => (PairTerm)pair.Reduce(context)),
+                // Side effect: will bind constructor in BindExpressionTerm.
+                this.Constructors.Select(constructor => constructor.Reduce(context)),
                 this.HigherOrder.Reduce(context));
-
-            foreach (var constructor in term.Constructors)
-            {
-                if (constructor.Lhs is IdentityTerm identity)
-                {
-                    context.SetBoundTerm(identity.Identity, constructor.Rhs);
-                }
-            }
 
             return term;
         }

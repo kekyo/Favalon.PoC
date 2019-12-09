@@ -55,11 +55,7 @@
                 context.SetBoundTerm(identity, body);
             }
 
-            return
-                object.ReferenceEquals(bound, this.Bound) &&
-                object.ReferenceEquals(body, this.Body) ?
-                    this :
-                    bound;
+            return bound;
         }
 
         public override bool Equals(Term? other) =>

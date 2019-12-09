@@ -116,8 +116,8 @@ namespace Favalon
                             object.ReferenceEquals(higherOrder, this.HigherOrder) &&
                             reduced.Zip(items, object.ReferenceEquals).All(r => r) ?
                                 (Term)this :
-                                reduced.All(item => item is PairTerm) ?
-                                    (Term)new DiscriminatedUnionTerm(reduced.Cast<PairTerm>(), higherOrder) :
+                                reduced.All(item => item is BindExpressionTerm) ?
+                                    (Term)new DiscriminatedUnionTypeTerm(reduced, higherOrder) :
                                     new DeclareTypeTerm(this.Declare, higherOrder);
 
                     }

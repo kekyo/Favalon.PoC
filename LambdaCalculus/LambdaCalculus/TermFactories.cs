@@ -85,8 +85,8 @@ namespace Favalon
         public static MatchTerm Match(PairTerm matcher0, params PairTerm[] matchers) =>
             new MatchTerm(new[] { matcher0 }.Concat(matchers).ToArray(), UnspecifiedTerm.Instance);
 
-        public static DiscriminatedUnionTerm DiscriminatedUnion(
+        public static DiscriminatedUnionTypeTerm DiscriminatedUnionType(
             params BindExpressionTerm[] constructors) =>
-            new DiscriminatedUnionTerm(constructors, UnspecifiedTerm.Instance);
+            new DiscriminatedUnionTypeTerm(constructors, UnspecifiedTerm.Instance);
     }
 }

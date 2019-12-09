@@ -56,22 +56,22 @@ namespace Favalon
             Assert.AreEqual(123, ((ComposeConstructorTarget)((ConstantTerm)actual).Value).Value);
         }
 
-        //[Test]
+        [Test]
         public void ComposeDiscriminatedUnionType()
         {
             // type ((True 1) (False 0))
             var term =
-                Term.DiscriminatedUnion(
-                    Term.Pair(
+                Term.DiscriminatedUnionType(
+                    Term.Bind(
                         Term.Identity("True"),
                         Term.Identity("True0")),
-                    Term.Pair(
+                    Term.Bind(
                         Term.Identity("False"),
                         Term.Identity("False0")));
 
             var environment = Environment.Create();
             var inferred = environment.Infer(term);
-            var du = (DiscriminatedUnionTerm)environment.Reduce(inferred);
+            var du = (DiscriminatedUnionTypeTerm)environment.Reduce(inferred);
 
             var True = environment.LookupBoundTerm("True");
 

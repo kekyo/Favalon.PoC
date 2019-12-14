@@ -88,8 +88,8 @@ namespace Favalon
                 Term.Bind(
                     "combined",
                     Term.Or(
-                        Term.Identity("System.Int32", Term.Kind()),
-                        Term.Identity("System.String", Term.Kind())));
+                        Term.Identity("System.Int32"),
+                        Term.Identity("System.String")));
 
             var environment = Environment.Create();
             environment.SetBoundTerm("System.Int32", Term.Type<int>());
@@ -100,6 +100,28 @@ namespace Favalon
             Assert.AreEqual(Term.Kind(), actual.HigherOrder);
             Assert.AreEqual(Term.Type<int>(), ((OrTerm)actual).Lhs);
             Assert.AreEqual(Term.Type<string>(), ((OrTerm)actual).Rhs);
+        }
+
+        [Test]
+        public void AndTypeTerm()
+        {
+            // let combined = System.Int32:* & System.String:*
+            var term =
+                Term.Bind(
+                    "combined",
+                    Term.And(
+                        Term.Identity("System.Int32"),
+                        Term.Identity("System.String")));
+
+            var environment = Environment.Create();
+            environment.SetBoundTerm("System.Int32", Term.Type<int>());
+            environment.SetBoundTerm("System.String", Term.Type<string>());
+
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(Term.Kind(), actual.HigherOrder);
+            Assert.AreEqual(Term.Type<int>(), ((AndTerm)actual).Lhs);
+            Assert.AreEqual(Term.Type<string>(), ((AndTerm)actual).Rhs);
         }
     }
 }

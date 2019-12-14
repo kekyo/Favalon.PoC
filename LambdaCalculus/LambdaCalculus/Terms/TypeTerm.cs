@@ -1,11 +1,11 @@
-﻿using Favalon.AlgebricData;
-using Favalon.Types;
+﻿using Favalon.Terms.AlgebricData;
+using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Favalon
+namespace Favalon.Terms
 {
     public abstract class TypeTerm : Term
     {

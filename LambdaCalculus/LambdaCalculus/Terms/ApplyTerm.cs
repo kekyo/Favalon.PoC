@@ -1,4 +1,4 @@
-﻿namespace Favalon
+﻿namespace Favalon.Terms
 {
     public interface IApplicable
     {

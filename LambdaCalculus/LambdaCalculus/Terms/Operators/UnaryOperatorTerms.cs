@@ -1,4 +1,4 @@
-﻿namespace Favalon.Operators
+﻿namespace Favalon.Terms.Operators
 {
     public abstract class UnaryOperatorTerm : Term
     {

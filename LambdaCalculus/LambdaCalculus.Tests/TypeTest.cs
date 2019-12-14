@@ -1,5 +1,6 @@
-﻿using Favalon.Operators;
-using Favalon.Types;
+﻿using Favalon.Terms;
+using Favalon.Terms.Operators;
+using Favalon.Terms.Types;
 using NUnit.Framework;
 using System;
 

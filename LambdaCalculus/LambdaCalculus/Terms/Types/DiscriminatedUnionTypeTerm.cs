@@ -1,8 +1,8 @@
-﻿using Favalon.AlgebricData;
+﻿using Favalon.Terms.AlgebricData;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Favalon.Types
+namespace Favalon.Terms.Types
 {
     public sealed class DiscriminatedUnionTypeTerm : Term
     {

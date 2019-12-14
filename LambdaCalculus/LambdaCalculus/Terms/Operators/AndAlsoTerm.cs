@@ -1,4 +1,4 @@
-﻿namespace Favalon.Operators
+﻿namespace Favalon.Terms.Operators
 {
     public sealed class AndAlsoOperatorTerm : OperatorSymbolTerm<AndAlsoOperatorTerm>, IApplicable
     {

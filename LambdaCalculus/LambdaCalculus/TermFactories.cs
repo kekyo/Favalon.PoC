@@ -1,6 +1,7 @@
-﻿using Favalon.AlgebricData;
-using Favalon.Operators;
-using Favalon.Types;
+﻿using Favalon.Terms;
+using Favalon.Terms.AlgebricData;
+using Favalon.Terms.Operators;
+using Favalon.Terms.Types;
 using System;
 using System.Linq;
 

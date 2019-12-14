@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Favalon.Terms;
+using NUnit.Framework;
 
 namespace Favalon
 {
@@ -49,7 +50,7 @@ namespace Favalon
         {
             var term =
                 Term.Apply(
-                    Operators.NotOperatorTerm.Instance,
+                    Terms.Operators.NotOperatorTerm.Instance,
                     Term.Constant(value));
 
             var environment = Environment.Create();
@@ -108,7 +109,7 @@ namespace Favalon
             var term =
                 Term.Apply(
                     Term.Apply(
-                        Operators.AndAlsoOperatorTerm.Instance,
+                        Terms.Operators.AndAlsoOperatorTerm.Instance,
                         Term.Constant(lhs)),
                     Term.Constant(rhs));
 
@@ -168,7 +169,7 @@ namespace Favalon
             var term =
                 Term.Apply(
                     Term.Apply(
-                        Operators.OrElseOperatorTerm.Instance,
+                        Terms.Operators.OrElseOperatorTerm.Instance,
                         Term.Constant(lhs)),
                     Term.Constant(rhs));
 
@@ -204,7 +205,7 @@ namespace Favalon
                 Term.Apply(
                     Term.Apply(
                         Term.Apply(
-                            Operators.IfOperatorTerm.Instance,
+                            Terms.Operators.IfOperatorTerm.Instance,
                             Term.Constant(condition)),
                         Term.Identity("a")),
                     Term.Identity("b"));
@@ -239,7 +240,7 @@ namespace Favalon
             var term =
                 Term.Apply(
                     Term.Apply(
-                        Operators.EqualOperatorTerm.Instance,
+                        Terms.Operators.EqualOperatorTerm.Instance,
                         Term.Constant(123)),
                     Term.Constant(value));
 

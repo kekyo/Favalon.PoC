@@ -1,4 +1,5 @@
-﻿using Favalon.Operators;
+﻿using Favalon.Terms;
+using Favalon.Terms.Operators;
 using NUnit.Framework;
 
 namespace Favalon
@@ -128,7 +129,7 @@ namespace Favalon
                     Term.Identity("b"));
 
             var environment = Environment.Create();
-            var actual = (Operators.AndAlsoTerm)environment.Infer(term);
+            var actual = (AndAlsoTerm)environment.Infer(term);
 
             // (a:bool && b:bool):bool
             Assert.AreEqual(Term.Type<bool>(), actual.Lhs.HigherOrder);

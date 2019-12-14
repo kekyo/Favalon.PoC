@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Favalon.Terms;
+using NUnit.Framework;
 
 namespace Favalon
 {

@@ -42,6 +42,9 @@ namespace Favalon.Terms
             }
             return term;
         }
+
+        public static readonly TypeTerm Void =
+            From(typeof(void));
     }
 
     public sealed class DeclareTypeTerm : HigherOrderHoldTerm

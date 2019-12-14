@@ -4,6 +4,7 @@ using Favalon.Terms.Operators;
 using Favalon.Terms.Types;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace Favalon
 {
@@ -29,6 +30,9 @@ namespace Favalon
             TypeTerm.From(type);
         public static ClrTypeTerm Type<T>() =>
             (ClrTypeTerm)TypeTerm.From(typeof(T));
+
+        public static ClrMethodTerm Method(MethodInfo method) =>
+            new ClrMethodTerm(method);
 
         public static BooleanTerm Constant(bool value) =>
             BooleanTerm.From(value);

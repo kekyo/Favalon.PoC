@@ -115,7 +115,7 @@ namespace Favalon.Terms
             this.Value = value;
 
         protected override Term GetHigherOrder() =>
-            Type(this.Value.GetType());
+            TypeTerm.From(this.Value.GetType());
 
         public override Term Infer(InferContext context) =>
             this;

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Favalon.Contexts;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Favalon.Terms.AlgebricData

@@ -1,4 +1,6 @@
-﻿namespace Favalon.Terms.Operators
+﻿using Favalon.Contexts;
+
+namespace Favalon.Terms.Operators
 {
     public sealed class NotOperatorTerm : OperatorSymbolTerm<NotOperatorTerm>, IApplicable
     {

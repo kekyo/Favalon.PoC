@@ -1,4 +1,6 @@
-﻿namespace Favalon.Terms
+﻿using Favalon.Contexts;
+
+namespace Favalon.Terms
 {
     public sealed class BooleanTerm : Term
     {

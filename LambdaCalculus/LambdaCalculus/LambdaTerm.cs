@@ -5,7 +5,7 @@
         public readonly Term Parameter;
         public readonly Term Body;
 
-        internal LambdaTerm(Term parameter, Term body)
+        private LambdaTerm(Term parameter, Term body)
         {
             this.Parameter = parameter;
             this.Body = body;
@@ -93,7 +93,25 @@
             body = this.Body;
         }
 
+        public static LambdaTerm Create(Term parameter, Term body)
+        {
+            if (parameter is UnspecifiedTerm && body is UnspecifiedTerm)
+            {
+                return Unspecified;
+            }
+            else if (parameter is KindTerm && body is KindTerm)
+            {
+                return Kind;
+            }
+            else
+            {
+                return new LambdaTerm(parameter, body);
+            }
+        }
+
         public static new readonly LambdaTerm Unspecified =
             new LambdaTerm(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
+        public static new readonly LambdaTerm Kind =
+            new LambdaTerm(KindTerm.Instance, KindTerm.Instance);
     }
 }

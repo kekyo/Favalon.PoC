@@ -21,7 +21,7 @@
                 new LambdaArrowParameterTerm(argument);
 
             Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-                new LambdaTerm(this.Argument0, rhs);    // rhs isn't reduced at this time, because the body term can reduce only applying time.
+                LambdaTerm.Create(this.Argument0, rhs);    // rhs isn't reduced at this time, because the body term can reduce only applying time.
         }
     }
 }

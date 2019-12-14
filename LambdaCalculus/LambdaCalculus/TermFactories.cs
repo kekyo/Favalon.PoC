@@ -12,6 +12,10 @@ namespace Favalon
             UnspecifiedTerm.Instance;
         public static LambdaTerm UnspecifiedFunction() =>
             LambdaTerm.Unspecified;
+        public static KindTerm Kind() =>
+            KindTerm.Instance;
+        public static LambdaTerm KindFunction() =>
+            LambdaTerm.Kind;
 
         public static BooleanTerm True() =>
             BooleanTerm.True;
@@ -46,9 +50,9 @@ namespace Favalon
             new ApplyTerm(function, argument, UnspecifiedTerm.Instance);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
-            new LambdaTerm(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);
+            LambdaTerm.Create(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);
         public static LambdaTerm Lambda(Term parameter, Term body) =>
-            new LambdaTerm(parameter, body);
+            LambdaTerm.Create(parameter, body);
 
         public static BindExpressionTerm Bind(string bound, Term body) =>
             new BindExpressionTerm(new IdentityTerm(bound, UnspecifiedTerm.Instance), body);
@@ -81,6 +85,11 @@ namespace Favalon
 
         public static SumTerm Sum(Term term0, params Term[] terms) =>
             new SumTerm(new[] { term0 }.Concat(terms).ToArray());
+
+        public static AndTerm And(Term lhs, Term rhs) =>
+            new AndTerm(lhs, rhs, UnspecifiedTerm.Instance);
+        public static OrTerm Or(Term lhs, Term rhs) =>
+            new OrTerm(lhs, rhs, UnspecifiedTerm.Instance);
 
         public static MatchTerm Match(PairTerm matcher0, params PairTerm[] matchers) =>
             new MatchTerm(new[] { matcher0 }.Concat(matchers).ToArray(), UnspecifiedTerm.Instance);

@@ -1,4 +1,5 @@
-﻿using Favalon.Types;
+﻿using Favalon.Operators;
+using Favalon.Types;
 using NUnit.Framework;
 using System;
 
@@ -76,6 +77,28 @@ namespace Favalon
             var True = environment.LookupBoundTerm("True");
 
             //Assert.AreEqual(, actual.Constructors[0]);
+        }
+
+        [Test]
+        public void OrTypeTerm()
+        {
+            // let combined = System.Int32:* | System.String:*
+            var term =
+                Term.Bind(
+                    "combined",
+                    Term.Or(
+                        Term.Identity("System.Int32", Term.Kind()),
+                        Term.Identity("System.String", Term.Kind())));
+
+            var environment = Environment.Create();
+            environment.SetBoundTerm("System.Int32", Term.Type<int>());
+            environment.SetBoundTerm("System.String", Term.Type<string>());
+
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(Term.Kind(), actual.HigherOrder);
+            Assert.AreEqual(Term.Type<int>(), ((OrTerm)actual).Lhs);
+            Assert.AreEqual(Term.Type<string>(), ((OrTerm)actual).Rhs);
         }
     }
 }

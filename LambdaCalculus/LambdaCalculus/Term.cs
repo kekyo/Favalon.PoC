@@ -159,4 +159,34 @@ namespace Favalon
         public override int GetHashCode() =>
             hashCode ^ this.Value.GetHashCode();
     }
+
+    public sealed class KindTerm : Term
+    {
+        private static readonly int hashCode =
+           typeof(KindTerm).GetHashCode();
+
+        private KindTerm()
+        { }
+
+        public override Term HigherOrder =>
+            null!;
+
+        public override Term Infer(InferContext context) =>
+            this;
+
+        public override Term Fixup(FixupContext context) =>
+            this;
+
+        public override Term Reduce(ReduceContext context) =>
+            this;
+
+        public override bool Equals(Term? other) =>
+            other is KindTerm;
+
+        public override int GetHashCode() =>
+            hashCode;
+
+        public static readonly KindTerm Instance =
+            new KindTerm();
+    }
 }

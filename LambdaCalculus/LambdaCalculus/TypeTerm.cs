@@ -148,9 +148,6 @@ namespace Favalon
 
     public sealed class ClrTypeTerm : TypeTerm, IClrType
     {
-        internal static readonly Term higherOrder =
-            From(typeof(Type));
-
         internal ClrTypeTerm(Type type)
         {
             Debug.Assert(!IsTypeConstructor(type));
@@ -158,7 +155,7 @@ namespace Favalon
         }
 
         public override Term HigherOrder =>
-            higherOrder;
+            KindTerm.Instance;
 
         public new Type Type { get; }
 
@@ -171,9 +168,6 @@ namespace Favalon
 
     public sealed class ClrTypeConstructorTerm : TypeTerm, IApplicable, IClrType
     {
-        private static readonly Term higherOrder =
-            new LambdaTerm(ClrTypeTerm.higherOrder, ClrTypeTerm.higherOrder);
-
         internal ClrTypeConstructorTerm(Type type)
         {
             Debug.Assert(IsTypeConstructor(type));
@@ -181,7 +175,7 @@ namespace Favalon
         }
 
         public override Term HigherOrder =>
-            higherOrder;
+            LambdaTerm.Kind;   // * -> * (TODO: make nested kind lambda from flatten generic type arguments)
 
         public new Type Type { get; }
 

@@ -26,7 +26,7 @@
             // (f:('1 -> '2) a:'1):'2
             context.Unify(
                 function.HigherOrder,
-                new LambdaTerm(argument.HigherOrder, higherOrder));
+                LambdaTerm.Create(argument.HigherOrder, higherOrder));
 
             return
                 object.ReferenceEquals(function, this.Function) &&

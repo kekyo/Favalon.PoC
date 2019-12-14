@@ -3,7 +3,7 @@
     public sealed class IfOperatorTerm : OperatorSymbolTerm<IfOperatorTerm>, IApplicable
     {
         private static readonly Term higherOrder =
-            new LambdaTerm(BooleanTerm.Type, LambdaTerm.Unspecified);
+            LambdaTerm.Create(BooleanTerm.Type, LambdaTerm.Unspecified);
 
         private IfOperatorTerm()
         { }
@@ -20,9 +20,7 @@
         private sealed class ConditionTerm : OperatorArgument0Term<ConditionTerm>, IApplicable
         {
             private static readonly Term higherOrder =
-                new LambdaTerm(
-                    UnspecifiedTerm.Instance,
-                    LambdaTerm.Unspecified);
+                LambdaTerm.Create(UnspecifiedTerm.Instance, LambdaTerm.Unspecified);
 
             public ConditionTerm(Term condition) :
                 base(condition)
@@ -45,7 +43,7 @@
             { }
 
             public override Term HigherOrder =>
-                new LambdaTerm(this.Argument1.HigherOrder, this.Argument1.HigherOrder);
+                LambdaTerm.Create(this.Argument1.HigherOrder, this.Argument1.HigherOrder);
 
             protected override Term Create(Term argument0, Term argument1) =>
                 new ThenTerm(argument0, argument1);

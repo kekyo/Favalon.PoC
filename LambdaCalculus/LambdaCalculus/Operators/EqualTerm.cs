@@ -34,14 +34,8 @@
         public override Term HigherOrder =>
             BooleanTerm.Type;
 
-        protected override Term Create(Term lhs, Term rhs) =>
+        protected override Term Create(Term lhs, Term rhs, Term higherOrder) =>
             new EqualTerm(lhs, rhs);
-
-        protected override Term Infer(InferContext context, Term lhs, Term rhs)
-        {
-            context.Unify(lhs.HigherOrder, rhs.HigherOrder);
-            return new EqualTerm(lhs, rhs);
-        }
 
         internal static Term Reduce(ReduceContext context, Term lhs, Term rhs) =>
             lhs.Reduce(context).Equals(rhs.Reduce(context)) ?

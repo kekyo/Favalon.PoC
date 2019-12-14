@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon
 {
-    public class Environment
+    public class Context
     {
         internal sealed class PlaceholderIndexer
         {
@@ -13,22 +14,22 @@ namespace Favalon
         }
 
         internal readonly PlaceholderIndexer indexer;
-        internal readonly Environment? parent;
+        internal readonly Context? parent;
         internal Dictionary<string, Term>? boundTerms;
 
-        private Environment()
+        private protected Context()
         {
             indexer = new PlaceholderIndexer();
             boundTerms = new Dictionary<string, Term>();
         }
 
-        internal Environment(Environment parent)
+        private protected Context(Context parent)
         {
             this.indexer = parent.indexer;
             this.parent = parent;
         }
 
-        internal Environment(Environment parent, Dictionary<string, Term> boundTerms)
+        internal Context(Context parent, Dictionary<string, Term> boundTerms)
         {
             this.indexer = parent.indexer;
             this.parent = parent;
@@ -47,7 +48,7 @@ namespace Favalon
 
         public Term? LookupBoundTerm(string identity)
         {
-            Environment? current = this;
+            Context? current = this;
             do
             {
                 if (current.boundTerms != null)
@@ -63,7 +64,10 @@ namespace Favalon
 
             return null;
         }
+    }
 
+    public sealed class Environment : Context
+    {
         public Term Infer(Term term)
         {
             var context = new InferContext(this);
@@ -71,7 +75,7 @@ namespace Favalon
             return partial.Fixup(context);
         }
 
-        public Term Reduce(Term term)
+        public IEnumerable<Term> EnumerableReduce(Term term)
         {
             var inferred = this.Infer(term);
 
@@ -83,30 +87,35 @@ namespace Favalon
             var current = inferred;
             while (true)
             {
+                yield return current;
+
                 var context = new ReduceContext(this, boundTerms);
 
                 var reduced = current.Reduce(context);
                 if (object.ReferenceEquals(reduced, current))
                 {
-                    return reduced;
+                    break;
                 }
 
                 current = reduced;
             }
         }
 
+        public Term Reduce(Term term) =>
+            this.EnumerableReduce(term).Last();
+
         public static Environment Create() =>
             new Environment();
     }
 
-    public sealed class ReduceContext : Environment
+    public sealed class ReduceContext : Context
     {
-        internal ReduceContext(Environment parent) :
+        internal ReduceContext(Context parent) :
             base(parent)
         { }
 
         internal ReduceContext(
-            Environment parent,
+            Context parent,
             Dictionary<string, Term> boundTerms) :
             base(parent, boundTerms)
         { }
@@ -115,11 +124,11 @@ namespace Favalon
             new ReduceContext(this);
     }
 
-    public class FixupContext : Environment
+    public class FixupContext : Context
     {
         private protected readonly Dictionary<int, Term> placeholders;
 
-        private protected FixupContext(Environment parent, Dictionary<int, Term> placeholders) :
+        private protected FixupContext(Context parent, Dictionary<int, Term> placeholders) :
             base(parent) =>
             this.placeholders = placeholders;
 
@@ -149,11 +158,11 @@ namespace Favalon
 
     public sealed class InferContext : FixupContext
     {
-        internal InferContext(Environment parent) :
+        internal InferContext(Context parent) :
             base(parent, new Dictionary<int, Term>())
         { }
 
-        private InferContext(Environment parent, Dictionary<int, Term> placeholders) :
+        private InferContext(Context parent, Dictionary<int, Term> placeholders) :
             base(parent, placeholders)
         { }
 

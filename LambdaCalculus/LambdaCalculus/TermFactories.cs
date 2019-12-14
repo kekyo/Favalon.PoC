@@ -31,8 +31,10 @@ namespace Favalon
         public static ClrTypeTerm Type<T>() =>
             (ClrTypeTerm)TypeTerm.From(typeof(T));
 
-        public static ClrMethodTerm Method(MethodInfo method) =>
-            new ClrMethodTerm(method);
+        public static MethodTerm Method(MethodInfo method) =>
+            MethodTerm.From(new[] { method });
+        public static MethodTerm Method(MethodInfo method0, params MethodInfo[] methods) =>
+            MethodTerm.From(new[] { method0 }.Concat(methods));
 
         public static BooleanTerm Constant(bool value) =>
             BooleanTerm.From(value);
@@ -87,14 +89,13 @@ namespace Favalon
 
         public static ProductTerm Product(Term term0, params Term[] terms) =>
             new ProductTerm(new[] { term0 }.Concat(terms).ToArray());
-
         public static SumTerm Sum(Term term0, params Term[] terms) =>
             new SumTerm(new[] { term0 }.Concat(terms).ToArray());
 
-        public static AndTerm And(Term lhs, Term rhs) =>
-            new AndTerm(lhs, rhs, UnspecifiedTerm.Instance);
-        public static OrTerm Or(Term lhs, Term rhs) =>
-            new OrTerm(lhs, rhs, UnspecifiedTerm.Instance);
+        public static AndTerm And(Term term0, Term term1, params Term[] terms) =>
+            new AndTerm(new[] { term0, term1 }.Concat(terms).ToArray());
+        public static OrTerm Or(Term term0, Term term1, params Term[] terms) =>
+            new OrTerm(new[] { term0, term1 }.Concat(terms).ToArray());
 
         public static MatchTerm Match(PairTerm matcher0, params PairTerm[] matchers) =>
             new MatchTerm(new[] { matcher0 }.Concat(matchers).ToArray(), UnspecifiedTerm.Instance);

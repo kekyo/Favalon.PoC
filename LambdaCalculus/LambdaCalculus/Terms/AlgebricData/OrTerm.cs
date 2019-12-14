@@ -1,12 +1,12 @@
 ﻿namespace Favalon.Terms.AlgebricData
 {
-    public sealed class SumTerm : MultipleTerm<SumTerm>
+    public sealed class OrTerm : MultipleTerm<OrTerm>
     {
-        internal SumTerm(Term[] terms) :
+        internal OrTerm(Term[] terms) :
             base(terms)
         { }
 
         protected override Term Create(Term[] terms) =>
-            new SumTerm(terms);
+            new OrTerm(terms);
     }
 }

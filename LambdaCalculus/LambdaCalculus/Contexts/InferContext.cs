@@ -1,6 +1,6 @@
 ﻿using Favalon.Terms;
+using Favalon.Terms.AlgebricData;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Favalon.Contexts
 {
@@ -39,19 +39,19 @@ namespace Favalon.Contexts
                 return;
             }
 
-            if (term1 is LambdaTerm(Term parameter1, Term body1) &&
-                term2 is LambdaTerm(Term parameter2, Term body2))
-            {
-                Unify(parameter1, parameter2);
-                Unify(body1, body2);
-            }
-            else if (term1 is PlaceholderTerm placeholder1)
+            if (term1 is PlaceholderTerm placeholder1)
             {
                 Unify(placeholder1, term2);
             }
             else if (term2 is PlaceholderTerm placeholder2)
             {
                 Unify(placeholder2, term1);
+            }
+            else if (term1 is LambdaTerm(Term parameter1, Term body1) &&
+                term2 is LambdaTerm(Term parameter2, Term body2))
+            {
+                Unify(parameter1, parameter2);
+                Unify(body1, body2);
             }
         }
     }

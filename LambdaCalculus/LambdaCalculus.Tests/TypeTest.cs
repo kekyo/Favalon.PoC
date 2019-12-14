@@ -1,5 +1,5 @@
 ﻿using Favalon.Terms;
-using Favalon.Terms.Operators;
+using Favalon.Terms.AlgebricData;
 using Favalon.Terms.Types;
 using NUnit.Framework;
 using System;
@@ -98,8 +98,8 @@ namespace Favalon
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(Term.Kind(), actual.HigherOrder);
-            Assert.AreEqual(Term.Type<int>(), ((OrTerm)actual).Lhs);
-            Assert.AreEqual(Term.Type<string>(), ((OrTerm)actual).Rhs);
+            Assert.AreEqual(Term.Type<int>(), ((OrTerm)actual).Terms[0]);
+            Assert.AreEqual(Term.Type<string>(), ((OrTerm)actual).Terms[1]);
         }
 
         [Test]
@@ -120,8 +120,8 @@ namespace Favalon
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(Term.Kind(), actual.HigherOrder);
-            Assert.AreEqual(Term.Type<int>(), ((AndTerm)actual).Lhs);
-            Assert.AreEqual(Term.Type<string>(), ((AndTerm)actual).Rhs);
+            Assert.AreEqual(Term.Type<int>(), ((AndTerm)actual).Terms[0]);
+            Assert.AreEqual(Term.Type<string>(), ((AndTerm)actual).Terms[1]);
         }
     }
 }

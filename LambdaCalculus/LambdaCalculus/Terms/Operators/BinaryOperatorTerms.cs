@@ -38,6 +38,12 @@ namespace Favalon.Terms.Operators
 
         public override int GetHashCode() =>
             this.Lhs.GetHashCode() ^ this.Rhs.GetHashCode();
+
+        public void Deconstruct(out Term lhs, out Term rhs)
+        {
+            lhs = this.Lhs;
+            rhs = this.Rhs;
+        }
     }
 
     public abstract class BinaryOperatorTerm<T> : BinaryOperatorTerm

@@ -1,5 +1,5 @@
 ﻿using Favalon.Contexts;
-using Favalon.Terms.AlgebricData;
+using Favalon.Terms.Algebric;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -82,7 +82,7 @@ namespace Favalon.Terms
             this.Methods = methods;
 
         protected override Term GetHigherOrder() =>
-            new OrTerm(this.Methods.Select(GetMethodHigherOrder).Distinct().ToArray());
+            new SumTerm(this.Methods.Select(GetMethodHigherOrder).Distinct().ToArray());
 
         public override Term Infer(InferContext context) =>
             this;

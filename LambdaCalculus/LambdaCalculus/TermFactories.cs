@@ -1,6 +1,6 @@
 ﻿using Favalon.Terms;
-using Favalon.Terms.AlgebricData;
-using Favalon.Terms.Operators;
+using Favalon.Terms.Algebric;
+using Favalon.Terms.Logical;
 using Favalon.Terms.Types;
 using System;
 using System.Linq;
@@ -91,11 +91,6 @@ namespace Favalon
             new ProductTerm(new[] { term0 }.Concat(terms).ToArray());
         public static SumTerm Sum(Term term0, params Term[] terms) =>
             new SumTerm(new[] { term0 }.Concat(terms).ToArray());
-
-        public static AndTerm And(Term term0, Term term1, params Term[] terms) =>
-            new AndTerm(new[] { term0, term1 }.Concat(terms).ToArray());
-        public static OrTerm Or(Term term0, Term term1, params Term[] terms) =>
-            new OrTerm(new[] { term0, term1 }.Concat(terms).ToArray());
 
         public static MatchTerm Match(PairTerm matcher0, params PairTerm[] matchers) =>
             new MatchTerm(new[] { matcher0 }.Concat(matchers).ToArray(), UnspecifiedTerm.Instance);

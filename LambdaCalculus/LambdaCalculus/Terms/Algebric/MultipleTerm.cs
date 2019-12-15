@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 
-namespace Favalon.Terms.AlgebricData
+namespace Favalon.Terms.Algebric
 {
     public abstract class MultipleTerm : HigherOrderLazyTerm
     {

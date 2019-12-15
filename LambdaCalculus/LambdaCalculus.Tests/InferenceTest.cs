@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms;
+using Favalon.Terms.Logical;
 using Favalon.Terms.Operators;
 using NUnit.Framework;
 

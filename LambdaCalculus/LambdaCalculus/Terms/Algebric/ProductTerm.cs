@@ -1,4 +1,4 @@
-﻿namespace Favalon.Terms.AlgebricData
+﻿namespace Favalon.Terms.Algebric
 {
     public sealed class ProductTerm : MultipleTerm<ProductTerm>
     {

@@ -1,13 +1,13 @@
 ﻿using Favalon.Contexts;
 
-namespace Favalon.Terms.Operators
+namespace Favalon.Terms
 {
-    public abstract class BinaryOperatorTerm : Term
+    public abstract class BinaryTerm : Term
     {
         public readonly Term Lhs;
         public readonly Term Rhs;
 
-        internal BinaryOperatorTerm(Term lhs, Term rhs)
+        internal BinaryTerm(Term lhs, Term rhs)
         {
             this.Lhs = lhs;
             this.Rhs = rhs;
@@ -46,33 +46,10 @@ namespace Favalon.Terms.Operators
         }
     }
 
-    public abstract class BinaryOperatorTerm<T> : BinaryOperatorTerm
-        where T : BinaryOperatorTerm
+    public abstract class BinaryTerm<T> : BinaryTerm
+        where T : BinaryTerm
     {
-        protected BinaryOperatorTerm(Term lhs, Term rhs) :
-            base(lhs, rhs)
-        { }
-
-        public override sealed bool Equals(Term? other) =>
-            other is T rhs ?
-                (this.Lhs.Equals(rhs.Lhs) && this.Rhs.Equals(rhs.Rhs)) :
-                false;
-    }
-
-    public abstract class LogicalBinaryOperatorTerm : BinaryOperatorTerm
-    {
-        internal LogicalBinaryOperatorTerm(Term lhs, Term rhs) :
-            base(lhs, rhs)
-        { }
-
-        public override sealed Term HigherOrder =>
-            BooleanTerm.Type;
-    }
-
-    public abstract class LogicalBinaryOperatorTerm<T> : LogicalBinaryOperatorTerm
-        where T : BinaryOperatorTerm
-    {
-        protected LogicalBinaryOperatorTerm(Term lhs, Term rhs) :
+        protected BinaryTerm(Term lhs, Term rhs) :
             base(lhs, rhs)
         { }
 

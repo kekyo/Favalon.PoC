@@ -1,4 +1,5 @@
 ﻿using Favalon.Contexts;
+using Favalon.Terms.Logical;
 
 namespace Favalon.Terms.Operators
 {
@@ -25,26 +26,5 @@ namespace Favalon.Terms.Operators
             Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
                 EqualTerm.Reduce(context, this.Argument0, rhs);
         }
-    }
-
-    public sealed class EqualTerm : BinaryOperatorTerm<EqualTerm>
-    {
-        internal EqualTerm(Term lhs, Term rhs) :
-            base(lhs, rhs)
-        { }
-
-        public override Term HigherOrder =>
-            BooleanTerm.Type;
-
-        protected override Term Create(Term lhs, Term rhs, Term higherOrder) =>
-            new EqualTerm(lhs, rhs);
-
-        internal static Term Reduce(ReduceContext context, Term lhs, Term rhs) =>
-            lhs.Reduce(context).Equals(rhs.Reduce(context)) ?
-                BooleanTerm.True :
-                BooleanTerm.False;
-
-        public override Term Reduce(ReduceContext context) =>
-            Reduce(context, this.Lhs, this.Rhs);
     }
 }

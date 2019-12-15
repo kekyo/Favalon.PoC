@@ -1,5 +1,5 @@
 ﻿using Favalon.Terms;
-using Favalon.Terms.AlgebricData;
+using Favalon.Terms.Algebric;
 using System.Collections.Generic;
 
 namespace Favalon.Contexts

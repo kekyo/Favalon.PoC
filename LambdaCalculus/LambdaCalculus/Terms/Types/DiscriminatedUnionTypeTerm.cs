@@ -1,5 +1,5 @@
 ﻿using Favalon.Contexts;
-using Favalon.Terms.AlgebricData;
+using Favalon.Terms.Algebric;
 using System.Collections.Generic;
 using System.Linq;
 

@@ -1,6 +1,6 @@
 ﻿using Favalon.Contexts;
 
-namespace Favalon.Terms.AlgebricData
+namespace Favalon.Terms.Algebric
 {
     public sealed class PairTerm : HigherOrderLazyTerm
     {

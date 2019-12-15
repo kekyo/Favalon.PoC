@@ -2,8 +2,10 @@
 
 namespace Favalon.Terms
 {
+    // It's only using in ApplyTerm.
     public interface IApplicable
     {
+        Term InferForApply(InferContext context, Term rhs);
         Term? ReduceForApply(ReduceContext context, Term rhs);
     }
 
@@ -22,6 +24,11 @@ namespace Favalon.Terms
         public override Term Infer(InferContext context)
         {
             var function = this.Function.Infer(context);
+            if (function is IApplicable applicable)
+            {
+                function = applicable.InferForApply(context, this.Argument);
+            }
+
             var argument = this.Argument.Infer(context);
             var higherOrder = this.HigherOrder.Infer(context);
 
@@ -34,8 +41,8 @@ namespace Favalon.Terms
                 object.ReferenceEquals(function, this.Function) &&
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new ApplyTerm(function, argument, higherOrder);
+                    this :
+                    new ApplyTerm(function, argument, higherOrder);
         }
 
         public override Term Fixup(FixupContext context)
@@ -48,14 +55,13 @@ namespace Favalon.Terms
                 object.ReferenceEquals(function, this.Function) &&
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new ApplyTerm(function, argument, higherOrder);
+                    this :
+                    new ApplyTerm(function, argument, higherOrder);
         }
 
         public override Term Reduce(ReduceContext context)
         {
             var function = this.Function.Reduce(context);
-
             if (function is IApplicable applicable &&
                 applicable.ReduceForApply(context, this.Argument) is Term term)
             {
@@ -69,8 +75,8 @@ namespace Favalon.Terms
                 object.ReferenceEquals(function, this.Function) &&
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new ApplyTerm(function, argument, higherOrder);
+                    this :
+                    new ApplyTerm(function, argument, higherOrder);
         }
 
         public override bool Equals(Term? other) =>

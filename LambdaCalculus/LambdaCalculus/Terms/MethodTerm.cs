@@ -24,22 +24,39 @@ namespace Favalon.Terms
             var ms = methods.ToArray();
             return (ms.Length == 1) ?
                 (MethodTerm)new ClrMethodTerm(ms[0]) :
-                new ClrMethodOverloadedTerm(ms);
+                new ClrMethodOverloadedTerm(ms.Select(method => new ClrMethodTerm(method)).ToArray());
         }
     }
 
     public sealed class ClrMethodTerm : MethodTerm, IApplicable
     {
-        public new readonly MethodInfo Method;
+        private readonly MethodInfo method;
 
         internal ClrMethodTerm(MethodInfo method) =>
-            this.Method = method;
+            this.method = method;
 
         protected override Term GetHigherOrder() =>
-            GetMethodHigherOrder(this.Method);
+            GetMethodHigherOrder(this.method);
+
+        public Term ParameterHigherOrder =>
+            ((LambdaTerm)this.HigherOrder).Parameter;
+
+        public Term ReturnHigherOrder =>
+            ((LambdaTerm)this.HigherOrder).Body;
 
         public override Term Infer(InferContext context) =>
             this;
+
+        Term IApplicable.InferForApply(InferContext context, Term rhs)
+        {
+            var argument = rhs.Infer(context);
+
+            context.Unify(
+                ((LambdaTerm)this.HigherOrder).Parameter,
+                argument.HigherOrder);
+
+            return this;
+        }
 
         public override Term Fixup(FixupContext context) =>
             this;
@@ -47,51 +64,72 @@ namespace Favalon.Terms
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)
-        {
-            var reduced = rhs.Reduce(context);
-
-            if (reduced is ConstantTerm constant)
-            {
-                return new ConstantTerm(
-                    this.Method.Invoke(null, new object[] { constant.Value }));
-            }
-            else
-            {
-                return null;
-            }
-        }
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
+            (rhs.Reduce(context) is ConstantTerm constant &&
+             TypeTerm.IsAssignableFrom(constant.HigherOrder, ((LambdaTerm)this.HigherOrder).Parameter)) ?
+                new ConstantTerm(this.method.Invoke(null, new object[] { constant.Value })) :
+                null;
 
         public override bool Equals(Term? other) =>
             other is ClrMethodTerm rhs ?
-                this.Method.Equals(rhs.Method) :
+                this.method.Equals(rhs.method) :
                 false;
 
         public override int GetHashCode() =>
-            this.Method.GetHashCode();
+            this.method.GetHashCode();
     }
 
-    public sealed class ClrMethodOverloadedTerm : MethodTerm
+    public sealed class ClrMethodOverloadedTerm : MethodTerm, IApplicable
     {
         private static readonly int hashCode =
             typeof(ClrMethodOverloadedTerm).GetHashCode();
 
-        public readonly MethodInfo[] Methods;
+        public readonly ClrMethodTerm[] Methods;
 
-        internal ClrMethodOverloadedTerm(MethodInfo[] methods) =>
+        internal ClrMethodOverloadedTerm(ClrMethodTerm[] methods) =>
             this.Methods = methods;
 
         protected override Term GetHigherOrder() =>
-            new SumTerm(this.Methods.Select(GetMethodHigherOrder).Distinct().ToArray());
+            new SumTerm(this.Methods.
+                Select(method => method.HigherOrder).
+                Distinct().
+                ToArray());
 
         public override Term Infer(InferContext context) =>
+            // Best effort infer procedure: cannot fixed.
             this;
+
+        Term IApplicable.InferForApply(InferContext context, Term rhs)
+        {
+            // Strict infer procedure.
+
+            var argument = rhs.Infer(context);
+
+            var selectedMethods = this.Methods.
+                Where(method => TypeTerm.IsAssignableFrom(method.ParameterHigherOrder, argument.HigherOrder)).
+                ToArray();
+
+            return selectedMethods.Length switch
+            {
+                // Exact matched.
+                1 => selectedMethods[0],
+                _ => (selectedMethods.Length != this.Methods.Length) ?
+                    // Partially matched.
+                    new ClrMethodOverloadedTerm(selectedMethods) :
+                    // All matched: not changed.
+                    this
+            };
+        }
 
         public override Term Fixup(FixupContext context) =>
             this;
 
         public override Term Reduce(ReduceContext context) =>
             this;
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
+            // Cannot apply because it isn't fixed overloads.
+            null;
 
         public override bool Equals(Term? other) =>
             other is ClrMethodOverloadedTerm rhs ?

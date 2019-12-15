@@ -20,38 +20,43 @@ namespace Favalon.Contexts
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
 
-        private void Unify(PlaceholderTerm placeholder, Term term)
+        private bool Unify(PlaceholderTerm placeholder, Term term)
         {
             if (placeholders.TryGetValue(placeholder.Index, out var last))
             {
-                Unify(last, term);
+                return Unify(last, term);
             }
             else
             {
                 placeholders.Add(placeholder.Index, term);
+                return true;
             }
         }
 
-        public void Unify(Term term1, Term term2)
+        public bool Unify(Term term1, Term term2)
         {
             if (object.ReferenceEquals(term1, term2) || term1.Equals(term2))
             {
-                return;
+                return true;
             }
-
-            if (term1 is PlaceholderTerm placeholder1)
+            else if (term1 is PlaceholderTerm placeholder1)
             {
-                Unify(placeholder1, term2);
+                return Unify(placeholder1, term2);
             }
             else if (term2 is PlaceholderTerm placeholder2)
             {
-                Unify(placeholder2, term1);
+                return Unify(placeholder2, term1);
             }
             else if (term1 is LambdaTerm(Term parameter1, Term body1) &&
                 term2 is LambdaTerm(Term parameter2, Term body2))
             {
-                Unify(parameter1, parameter2);
-                Unify(body1, body2);
+                var unified1 = Unify(parameter1, parameter2);
+                var unified2 = Unify(body1, body2);
+                return unified1 && unified2;
+            }
+            else
+            {
+                return false;
             }
         }
     }

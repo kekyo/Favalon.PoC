@@ -18,20 +18,49 @@ namespace Favalon.Terms
 
         public override Term Infer(InferContext context)
         {
+            // Best effort infer procedure.
+
             var newScope = context.NewScope();
+
             var parameter = this.Parameter.Infer(newScope);
             if (parameter is IdentityTerm identity)
             {
+                // Shadowed by self.
                 newScope.SetBoundTerm(identity.Identity, parameter);
             }
 
+            // Calculate inferring with parameter identity.
             var body = this.Body.Infer(newScope);
 
             return
                 object.ReferenceEquals(parameter, this.Parameter) &&
                 object.ReferenceEquals(body, this.Body) ?
-                this :
-                new LambdaTerm(parameter, body);
+                    this :
+                    new LambdaTerm(parameter, body);
+        }
+
+        Term IApplicable.InferForApply(InferContext context, Term rhs)
+        {
+            // Strict infer procedure.
+
+            var newScope = context.NewScope();
+
+            var parameter = this.Parameter.Infer(newScope);
+            if (parameter is IdentityTerm identity)
+            {
+                // Applied argument.
+                var argument = rhs.Infer(context);
+                newScope.SetBoundTerm(identity.Identity, argument);
+            }
+
+            // Calculate inferring with applied argument.
+            var body = this.Body.Infer(newScope);
+
+            return
+                object.ReferenceEquals(parameter, this.Parameter) &&
+                object.ReferenceEquals(body, this.Body) ?
+                    this :
+                    new LambdaTerm(parameter, body);
         }
 
         public override Term Fixup(FixupContext context)
@@ -42,8 +71,8 @@ namespace Favalon.Terms
             return
                 object.ReferenceEquals(parameter, this.Parameter) &&
                 object.ReferenceEquals(body, this.Body) ?
-                this :
-                new LambdaTerm(parameter, body);
+                    this :
+                    new LambdaTerm(parameter, body);
         }
 
         public override Term Reduce(ReduceContext context)
@@ -62,17 +91,19 @@ namespace Favalon.Terms
             return
                 object.ReferenceEquals(parameter, this.Parameter) &&
                 object.ReferenceEquals(body, this.Body) ?
-                this :
-                new LambdaTerm(parameter, body);
+                    this :
+                    new LambdaTerm(parameter, body);
         }
 
         Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)
         {
             var newScope = context.NewScope();
 
+            // It'll maybe make identity because already reduced by previous called Reduce().
             if (this.Parameter is IdentityTerm identity)
             {
-                newScope.SetBoundTerm(identity.Identity, rhs);
+                var argument = rhs.Reduce(context);
+                newScope.SetBoundTerm(identity.Identity, argument);
                 return this.Body.Reduce(newScope);
             }
             else

@@ -43,6 +43,64 @@ namespace Favalon.Terms
             return term;
         }
 
+        public static Term? Narrow(InferContext context, Term lhs, Term rhs)
+        {
+            switch ((lhs, rhs))
+            {
+                // int: int <-- int
+                // object: object <-- string
+                // IComparable: IComparable <-- string
+                case (ClrTypeTerm lhsType, ClrTypeTerm rhsTerm):
+                    return lhsType.Type.IsAssignableFrom(rhsTerm.Type) ?
+                        lhsType :
+                        null;
+
+                // _: _ <-- int   [Required unifying]
+                // _: _ <-- (int | double)   [Required unifying]
+                // _[1]: _[1] <-- _[2]   [Required unifying]
+                case (PlaceholderTerm placeholder, _):
+                    return context.Unify(placeholder, rhs) ?
+                        placeholder :
+                        null;
+
+                // (int | double): (int | double) <-- (int | double)
+                // (int | double | string): (int | double | string) <-- (int | double)
+                // (int | IComparable): (int | IComparable) <-- (int | string)
+                // null: int <-- (int | double)
+                // null: (int | double) <-- (int | double | string)
+                // null: (int | IServiceProvider) <-- (int | double)
+                case (_, SumTerm(Term[] rhsTerms)):
+                    var terms1 = rhsTerms.
+                        Select(rhsTerm => Narrow(context, lhs, rhsTerm)).
+                        ToArray();
+                    return terms1.All(term => term != null) ?
+                        new SumTerm(terms1!) :
+                        null;
+
+                // null: int <-- _   [TODO: maybe]
+                case (_, PlaceholderTerm placeholder):
+                    return null;
+
+                // (int | double): (int | double) <-- int
+                // (int | IServiceProvider): (int | IServiceProvider) <-- int
+                // (int | IComparable): (int | IComparable) <-- string
+                case (SumTerm(Term[] lhsTerms), _):
+                    var terms2 = lhsTerms.
+                        Select(lhsTerm => Narrow(context, lhsTerm, rhs)).
+                        Where(term => term != null).
+                        ToArray();
+                    return terms2.Length switch
+                    {
+                        0 => null,
+                        1 => terms2[0],
+                        _ => new SumTerm(terms2!)
+                    };
+
+                default:
+                    return null;
+            }
+        }
+
         public static readonly TypeTerm Void =
             From(typeof(void));
     }

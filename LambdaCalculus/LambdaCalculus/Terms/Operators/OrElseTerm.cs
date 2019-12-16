@@ -8,8 +8,11 @@ namespace Favalon.Terms.Operators
         private OrElseOperatorTerm()
         { }
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-            new OrElseLeftTerm(rhs);
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+           this;
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+            new OrElseLeftTerm(argument);   // NOT reduced at this time.
 
         public static readonly OrElseOperatorTerm Instance =
             new OrElseOperatorTerm();
@@ -23,8 +26,11 @@ namespace Favalon.Terms.Operators
             protected override Term Create(Term argument) =>
                 new OrElseLeftTerm(argument);
 
-            Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-                OrElseTerm.Reduce(context, this.Argument0, rhs);
+            Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+               this;
+
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+                OrElseTerm.Reduce(context, this.Argument0, argument);
         }
     }
 }

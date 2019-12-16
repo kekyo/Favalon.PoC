@@ -5,8 +5,8 @@ namespace Favalon.Terms
     // It's only using in ApplyTerm.
     public interface IApplicable
     {
-        Term InferForApply(InferContext context, Term rhs);
-        Term? ReduceForApply(ReduceContext context, Term rhs);
+        Term InferForApply(InferContext context, Term inferredArgument);
+        Term? ReduceForApply(ReduceContext context, Term argument);
     }
 
     public sealed class ApplyTerm : HigherOrderHoldTerm
@@ -23,13 +23,12 @@ namespace Favalon.Terms
 
         public override Term Infer(InferContext context)
         {
-            var function = this.Function.Infer(context);
-            if (function is IApplicable applicable)
-            {
-                function = applicable.InferForApply(context, this.Argument);
-            }
-
             var argument = this.Argument.Infer(context);
+
+            var function = (this.Function is IApplicable applicable) ?
+                applicable.InferForApply(context, argument) :
+                this.Function.Infer(context);
+
             var higherOrder = this.HigherOrder.Infer(context);
 
             // (f:('1 -> '2) a:'1):'2
@@ -47,8 +46,8 @@ namespace Favalon.Terms
 
         public override Term Fixup(FixupContext context)
         {
-            var function = this.Function.Fixup(context);
             var argument = this.Argument.Fixup(context);
+            var function = this.Function.Fixup(context);
             var higherOrder = this.HigherOrder.Fixup(context);
 
             return
@@ -68,7 +67,7 @@ namespace Favalon.Terms
                 return term;
             }
 
-            var argument = this.Argument.Reduce(context);
+            var argument = this.Argument.Reduce(context);   // TODO: Reduced twice
             var higherOrder = this.HigherOrder.Reduce(context);
 
             return

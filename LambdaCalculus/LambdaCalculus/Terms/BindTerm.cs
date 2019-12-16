@@ -99,8 +99,8 @@ namespace Favalon.Terms
             return
                 object.ReferenceEquals(expression, this.Expression) &&
                 object.ReferenceEquals(continuation, this.Continuation) ?
-                this :
-                new BindTerm(expression, continuation);
+                    this :
+                    new BindTerm(expression, continuation);
         }
 
         public override Term Fixup(FixupContext context)
@@ -111,15 +111,15 @@ namespace Favalon.Terms
             return
                 object.ReferenceEquals(expression, this.Expression) &&
                 object.ReferenceEquals(continuation, this.Continuation) ?
-                this :
-                new BindTerm(expression, continuation);
+                    this :
+                    new BindTerm(expression, continuation);
         }
 
         public override Term Reduce(ReduceContext context)
         {
             var newScope = context.NewScope();
 
-            this.Expression.Reduce(newScope);
+            var _ = this.Expression.Reduce(newScope);
 
             return this.Continuation.Reduce(newScope);
         }

@@ -2,7 +2,7 @@
 
 namespace Favalon.Terms.Logical
 {
-    public sealed class NotTerm : LogicalUnaryOperatorTerm<NotTerm>
+    public sealed class NotTerm : LogicalUnaryTerm<NotTerm>
     {
         internal NotTerm(Term argument) :
             base(argument)

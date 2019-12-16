@@ -8,8 +8,11 @@ namespace Favalon.Terms.Operators
         private EqualOperatorTerm()
         { }
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-            new EqualLeftTerm(rhs);
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+           this;
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+            new EqualLeftTerm(argument);   // NOT reduced at this time.
 
         public static readonly EqualOperatorTerm Instance =
             new EqualOperatorTerm();
@@ -23,8 +26,11 @@ namespace Favalon.Terms.Operators
             protected override Term Create(Term argument) =>
                 new EqualLeftTerm(argument);
 
-            Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-                EqualTerm.Reduce(context, this.Argument0, rhs);
+            Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+               this;
+
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+                EqualTerm.Reduce(context, this.Argument0, argument);
         }
     }
 }

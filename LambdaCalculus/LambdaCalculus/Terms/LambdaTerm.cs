@@ -25,7 +25,7 @@ namespace Favalon.Terms
             var parameter = this.Parameter.Infer(newScope);
             if (parameter is IdentityTerm identity)
             {
-                // Shadowed by self.
+                // Shadowed just parameter, will transfer parameter higherorder.
                 newScope.SetBoundTerm(identity.Identity, parameter);
             }
 
@@ -39,7 +39,7 @@ namespace Favalon.Terms
                     new LambdaTerm(parameter, body);
         }
 
-        Term IApplicable.InferForApply(InferContext context, Term rhs)
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument)
         {
             // Strict infer procedure.
 
@@ -49,8 +49,7 @@ namespace Favalon.Terms
             if (parameter is IdentityTerm identity)
             {
                 // Applied argument.
-                var argument = rhs.Infer(context);
-                newScope.SetBoundTerm(identity.Identity, argument);
+                newScope.SetBoundTerm(identity.Identity, inferredArgument);
             }
 
             // Calculate inferring with applied argument.
@@ -82,7 +81,7 @@ namespace Favalon.Terms
             var parameter = this.Parameter.Reduce(context);
             if (parameter is IdentityTerm identity)
             {
-                // Shadowed by self
+                // Shadowed just parameter, will transfer parameter higherorder.
                 newScope.SetBoundTerm(identity.Identity, identity);
             }
 
@@ -95,17 +94,19 @@ namespace Favalon.Terms
                     new LambdaTerm(parameter, body);
         }
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument)
         {
             var newScope = context.NewScope();
 
             // It'll maybe make identity because already reduced by previous called Reduce().
             if (this.Parameter is IdentityTerm identity)
             {
-                var argument = rhs.Reduce(context);
-                newScope.SetBoundTerm(identity.Identity, argument);
+                var argument_ = argument.Reduce(context);
+                newScope.SetBoundTerm(identity.Identity, argument_);
+
                 return this.Body.Reduce(newScope);
             }
+            // Cannot get identity (cannot apply)
             else
             {
                 return null;

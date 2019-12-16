@@ -14,8 +14,11 @@ namespace Favalon.Terms.Operators
         public override Term HigherOrder =>
             higherOrder;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-            new ConditionTerm(rhs);
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+           this;
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+            new ConditionTerm(argument);   // NOT reduced at this time.
 
         public static readonly IfOperatorTerm Instance =
             new IfOperatorTerm();
@@ -35,8 +38,11 @@ namespace Favalon.Terms.Operators
             protected override Term Create(Term argument) =>
                 new ConditionTerm(argument);
 
-            Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-                new ThenTerm(this.Argument0, rhs);
+            Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+               this;
+
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+                new ThenTerm(this.Argument0, argument);   // NOT reduced at this time.
         }
 
         private sealed class ThenTerm : OperatorArgument1Term<ThenTerm>, IApplicable
@@ -51,8 +57,11 @@ namespace Favalon.Terms.Operators
             protected override Term Create(Term argument0, Term argument1) =>
                 new ThenTerm(argument0, argument1);
 
-            Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-                IfTerm.Reduce(context, this.Argument0, this.Argument1, rhs);
+            Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+               this;
+
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+                IfTerm.Reduce(context, this.Argument0, this.Argument1, argument);
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Favalon.Terms.Logical
 {
-    public sealed class OrElseTerm : LogicalBinaryOperatorTerm<OrElseTerm>
+    public sealed class OrElseTerm : LogicalBinaryTerm<OrElseTerm>
     {
         internal OrElseTerm(Term lhs, Term rhs) :
             base(lhs, rhs)

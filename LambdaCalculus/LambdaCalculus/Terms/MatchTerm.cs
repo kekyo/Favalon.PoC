@@ -15,6 +15,8 @@ namespace Favalon.Terms
 
         public override Term Infer(InferContext context)
         {
+            // Best effort infer procedure.
+
             var matchers = this.Matchers.
                 Select(entry =>
                 {
@@ -45,8 +47,47 @@ namespace Favalon.Terms
             return
                 object.ReferenceEquals(higherOrder, this.HigherOrder) &&
                 matchers.Zip(this.Matchers, object.ReferenceEquals).All(r => r) ?
-                this :
-                new MatchTerm(matchers, higherOrder);
+                    this :
+                    new MatchTerm(matchers, higherOrder);
+        }
+
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument)
+        {
+            // Strict infer procedure.
+
+            var matchers = this.Matchers.
+                Select(entry =>
+                {
+                    if (entry is PairTerm(UnspecifiedTerm match, Term body))
+                    {
+                        var body_ = body.Infer(context);
+                        return object.ReferenceEquals(body_, body) ?
+                            entry :
+                            new PairTerm(match, body_);
+                    }
+                    else
+                    {
+                        return entry.Infer(context);
+                    }
+                }).
+                ToArray();
+
+            var higherOrder = this.HigherOrder.Infer(context);
+            context.Unify(higherOrder, inferredArgument.HigherOrder);
+
+            foreach (var entry in matchers)
+            {
+                if (entry is PairTerm(_, Term body))
+                {
+                    context.Unify(higherOrder, body.HigherOrder);
+                }
+            }
+
+            return
+                object.ReferenceEquals(higherOrder, this.HigherOrder) &&
+                matchers.Zip(this.Matchers, object.ReferenceEquals).All(r => r) ?
+                    this :
+                    new MatchTerm(matchers, higherOrder);
         }
 
         public override Term Fixup(FixupContext context)
@@ -60,8 +101,8 @@ namespace Favalon.Terms
             return
                 object.ReferenceEquals(higherOrder, this.HigherOrder) &&
                 matchers.Zip(this.Matchers, object.ReferenceEquals).All(r => r) ?
-                this :
-                new MatchTerm(matchers, higherOrder);
+                    this :
+                    new MatchTerm(matchers, higherOrder);
         }
 
         public override Term Reduce(ReduceContext context) =>
@@ -96,6 +137,8 @@ namespace Favalon.Terms
                 }
             }
 
+            // Didn't match for all: reconstruct MatchTerm by reduced matchers.
+
             var matchers = reducedMatches.Zip(
                 this.Matchers.Cast<PairTerm>(),
                 (match, entry) => object.ReferenceEquals(match, entry.Lhs) ?
@@ -107,8 +150,8 @@ namespace Favalon.Terms
             return
                 object.ReferenceEquals(higherOrder, this.HigherOrder) &&
                 matchers.Zip(this.Matchers, object.ReferenceEquals).All(r => r) ?
-                null :
-                new MatchTerm(matchers, higherOrder);
+                    null :
+                    new MatchTerm(matchers, higherOrder);
         }
 
         public override bool Equals(Term? other) =>

@@ -1,8 +1,8 @@
 ﻿namespace Favalon.Terms.Logical
 {
-    public abstract class LogicalBinaryOperatorTerm : BinaryTerm
+    public abstract class LogicalBinaryTerm : BinaryTerm
     {
-        internal LogicalBinaryOperatorTerm(Term lhs, Term rhs) :
+        internal LogicalBinaryTerm(Term lhs, Term rhs) :
             base(lhs, rhs)
         { }
 
@@ -10,10 +10,10 @@
             BooleanTerm.Type;
     }
 
-    public abstract class LogicalBinaryOperatorTerm<T> : LogicalBinaryOperatorTerm
+    public abstract class LogicalBinaryTerm<T> : LogicalBinaryTerm
         where T : BinaryTerm
     {
-        protected LogicalBinaryOperatorTerm(Term lhs, Term rhs) :
+        protected LogicalBinaryTerm(Term lhs, Term rhs) :
             base(lhs, rhs)
         { }
 

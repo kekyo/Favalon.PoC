@@ -1,12 +1,11 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Algebric;
-using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Favalon.Terms
+namespace Favalon.Terms.Types
 {
     public abstract class TypeTerm : Term
     {
@@ -43,25 +42,31 @@ namespace Favalon.Terms
             return term;
         }
 
-        public static Term? Narrow(InferContext context, Term lhs, Term rhs)
+        public static Term? Narrow(Term lhs, Term rhs)
         {
             switch ((lhs, rhs))
             {
                 // int: int <-- int
-                // object: object <-- string
+                // IComparable: IComparable <-- IComparable
+                case (_, _) when object.ReferenceEquals(lhs, rhs) || lhs.Equals(rhs):
+                    return lhs;
+
+                // object: object <-- int
                 // IComparable: IComparable <-- string
                 case (ClrTypeTerm lhsType, ClrTypeTerm rhsTerm):
                     return lhsType.Type.IsAssignableFrom(rhsTerm.Type) ?
                         lhsType :
                         null;
 
-                // _: _ <-- int   [Required unifying]
-                // _: _ <-- (int | double)   [Required unifying]
-                // _[1]: _[1] <-- _[2]   [Required unifying]
+                // _: _ <-- int
+                // _: _ <-- (int | double)
+                // _[1]: _[1] <-- _[2]
+                // (int | _): (int | _) <-- string
+                // (int | _): (int | _) <-- (int | string)
+                // (int | _[1]): (int | _[1]) <-- _[2]
+                // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
                 case (PlaceholderTerm placeholder, _):
-                    return context.Unify(placeholder, rhs) ?
-                        placeholder :
-                        null;
+                    return placeholder;
 
                 // (int | double): (int | double) <-- (int | double)
                 // (int | double | string): (int | double | string) <-- (int | double)
@@ -71,7 +76,7 @@ namespace Favalon.Terms
                 // null: (int | IServiceProvider) <-- (int | double)
                 case (_, SumTerm(Term[] rhsTerms)):
                     var terms1 = rhsTerms.
-                        Select(rhsTerm => Narrow(context, lhs, rhsTerm)).
+                        Select(rhsTerm => Narrow(lhs, rhsTerm)).
                         ToArray();
                     return terms1.All(term => term != null) ?
                         new SumTerm(terms1!) :
@@ -86,7 +91,7 @@ namespace Favalon.Terms
                 // (int | IComparable): (int | IComparable) <-- string
                 case (SumTerm(Term[] lhsTerms), _):
                     var terms2 = lhsTerms.
-                        Select(lhsTerm => Narrow(context, lhsTerm, rhs)).
+                        Select(lhsTerm => Narrow(lhsTerm, rhs)).
                         Where(term => term != null).
                         ToArray();
                     return terms2.Length switch
@@ -237,9 +242,13 @@ namespace Favalon.Terms
         }
 
         public override Term HigherOrder =>
-            LambdaTerm.Kind;   // * -> * (TODO: make nested kind lambda from flatten generic type arguments)
+            // * -> * (TODO: make nested kind lambda from flatten generic type arguments: * -> * -> * ...)
+            LambdaTerm.Kind;
 
         public new Type Type { get; }
+
+        Term IApplicable.InferForApply(InferContext context, Term rhs) =>
+            this;
 
         Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
             From(this.Type.MakeGenericType(((IClrType)rhs.Reduce(context)).Type));

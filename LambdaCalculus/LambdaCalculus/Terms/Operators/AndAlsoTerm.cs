@@ -8,8 +8,11 @@ namespace Favalon.Terms.Operators
         private AndAlsoOperatorTerm()
         { }
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-            new AndAlsoLeftTerm(rhs);
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+            this;
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+            new AndAlsoLeftTerm(argument);  // NOT reduced at this time.
 
         public static readonly AndAlsoOperatorTerm Instance =
             new AndAlsoOperatorTerm();
@@ -23,8 +26,11 @@ namespace Favalon.Terms.Operators
             protected override Term Create(Term argument) =>
                 new AndAlsoLeftTerm(argument);
 
-            Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-                AndAlsoTerm.Reduce(context, this.Argument0, rhs);
+            Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+               this;
+
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+                AndAlsoTerm.Reduce(context, this.Argument0, argument);
         }
     }
 }

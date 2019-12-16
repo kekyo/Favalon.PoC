@@ -2,7 +2,7 @@
 
 namespace Favalon.Terms.Logical
 {
-    public sealed class AndAlsoTerm : LogicalBinaryOperatorTerm<AndAlsoTerm>
+    public sealed class AndAlsoTerm : LogicalBinaryTerm<AndAlsoTerm>
     {
         internal AndAlsoTerm(Term lhs, Term rhs) :
             base(lhs, rhs)

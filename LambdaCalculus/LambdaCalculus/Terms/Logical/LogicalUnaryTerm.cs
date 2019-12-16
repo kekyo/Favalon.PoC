@@ -2,9 +2,9 @@
 
 namespace Favalon.Terms.Logical
 {
-    public abstract class LogicalUnaryOperatorTerm : UnaryTerm
+    public abstract class LogicalUnaryTerm : UnaryTerm
     {
-        internal LogicalUnaryOperatorTerm(Term argument) :
+        internal LogicalUnaryTerm(Term argument) :
             base(argument)
         { }
 
@@ -19,10 +19,10 @@ namespace Favalon.Terms.Logical
         }
     }
 
-    public abstract class LogicalUnaryOperatorTerm<T> : LogicalUnaryOperatorTerm
-        where T : LogicalUnaryOperatorTerm
+    public abstract class LogicalUnaryTerm<T> : LogicalUnaryTerm
+        where T : LogicalUnaryTerm
     {
-        protected LogicalUnaryOperatorTerm(Term argument) :
+        protected LogicalUnaryTerm(Term argument) :
             base(argument)
         { }
 

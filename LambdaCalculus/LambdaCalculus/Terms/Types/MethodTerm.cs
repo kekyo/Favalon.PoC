@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Favalon.Terms
+namespace Favalon.Terms.Types
 {
     public abstract class MethodTerm : HigherOrderLazyTerm
     {
@@ -47,13 +47,11 @@ namespace Favalon.Terms
         public override Term Infer(InferContext context) =>
             this;
 
-        Term IApplicable.InferForApply(InferContext context, Term rhs)
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument)
         {
-            var argument = rhs.Infer(context);
-
             context.Unify(
                 ((LambdaTerm)this.HigherOrder).Parameter,
-                argument.HigherOrder);
+                inferredArgument.HigherOrder);
 
             return this;
         }
@@ -64,9 +62,9 @@ namespace Favalon.Terms
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-            (rhs.Reduce(context) is ConstantTerm constant &&
-             TypeTerm.IsAssignableFrom(constant.HigherOrder, ((LambdaTerm)this.HigherOrder).Parameter)) ?
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+            (argument.Reduce(context) is ConstantTerm constant &&
+             TypeTerm.Narrow(((LambdaTerm)this.HigherOrder).Parameter, constant.HigherOrder) is ClrTypeTerm) ?
                 new ConstantTerm(this.method.Invoke(null, new object[] { constant.Value })) :
                 null;
 
@@ -99,23 +97,26 @@ namespace Favalon.Terms
             // Best effort infer procedure: cannot fixed.
             this;
 
-        Term IApplicable.InferForApply(InferContext context, Term rhs)
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument)
         {
             // Strict infer procedure.
 
-            var argument = rhs.Infer(context);
-
-            var selectedMethods = this.Methods.
-                Where(method => TypeTerm.IsAssignableFrom(method.ParameterHigherOrder, argument.HigherOrder)).
+            var narrowed = this.Methods.
+                Select(method => new {
+                    method,
+                    narrow = TypeTerm.Narrow(method.ParameterHigherOrder, inferredArgument.HigherOrder) }).
+                ToArray();
+            var exactMatched = narrowed.
+                Where(entry => entry.narrow is ClrTypeTerm).
                 ToArray();
 
-            return selectedMethods.Length switch
+            return exactMatched.Length switch
             {
                 // Exact matched.
-                1 => selectedMethods[0],
-                _ => (selectedMethods.Length != this.Methods.Length) ?
+                1 => exactMatched[0].method,
+                _ => (exactMatched.Length != this.Methods.Length) ?
                     // Partially matched.
-                    new ClrMethodOverloadedTerm(selectedMethods) :
+                    new ClrMethodOverloadedTerm(exactMatched.Select(entry => entry.method).ToArray()) :
                     // All matched: not changed.
                     this
             };

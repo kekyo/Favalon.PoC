@@ -3,6 +3,7 @@ using Favalon.Terms.Algebric;
 using Favalon.Terms.Types;
 using NUnit.Framework;
 using System;
+using System.Linq;
 
 namespace Favalon
 {
@@ -120,6 +121,72 @@ namespace Favalon
 
             Assert.AreEqual(Term.Type<int>(), ((ProductTerm)actual).Terms[0]);
             Assert.AreEqual(Term.Type<string>(), ((ProductTerm)actual).Terms[1]);
+        }
+
+        private sealed class _1 { }
+        private sealed class _2 { }
+
+        // int: int <-- int
+        // IComparable: IComparable <-- IComparable
+
+        // object: object <-- int
+        // IComparable: IComparable <-- string
+
+        // _: _ <-- int
+        // _: _ <-- (int | double)
+        // _[1]: _[1] <-- _[2]
+        // (int | _): (int | _) <-- string
+        // (int | _): (int | _) <-- (int | string)
+        // (int | _[1]): (int | _[1]) <-- _[2]
+        // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
+
+        // (int | double): (int | double) <-- (int | double)
+        // (int | double | string): (int | double | string) <-- (int | double)
+        // (int | IComparable): (int | IComparable) <-- (int | string)
+        // null: int <-- (int | double)
+        // null: (int | double) <-- (int | double | string)
+        // null: (int | IServiceProvider) <-- (int | double)
+
+        // null: int <-- _   [TODO: maybe]
+
+        // (int | double): (int | double) <-- int
+        // (int | IServiceProvider): (int | IServiceProvider) <-- int
+        // (int | IComparable): (int | IComparable) <-- string
+        [TestCase(new[] { typeof(int) }, new[] { typeof(int) }, new[] { typeof(int) })]
+        [TestCase(new[] { typeof(IComparable) }, new[] { typeof(IComparable) }, new[] { typeof(IComparable) })]
+        [TestCase(new[] { typeof(object) }, new[] { typeof(object) }, new[] { typeof(int) })]
+        [TestCase(new[] { typeof(IComparable) }, new[] { typeof(IComparable) }, new[] { typeof(string) })]
+        [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(int) })]
+        public void InternalNarrowing(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
+        {
+            var environment = Environment.Create();
+            var p1 = environment.CreatePlaceholder(Term.Unspecified());
+            var p2 = environment.CreatePlaceholder(Term.Unspecified());
+
+            Term CreateTermFromType(Type type)
+            {
+                if (typeof(_1).Equals(type))
+                {
+                    return p1;
+                }
+                else if (typeof(_2).Equals(type))
+                {
+                    return p2;
+                }
+                else
+                {
+                    return TypeTerm.From(type);
+                }
+            }
+
+            var actual = TypeTerm.Narrow(
+                Term.Sum(lhsTypes.Select(CreateTermFromType)),
+                Term.Sum(rhsTypes.Select(CreateTermFromType)));
+
+            var expected = 
+                Term.Sum(expectedTypes.Select(CreateTermFromType));
+
+            Assert.AreEqual(expected, actual);
         }
     }
 }

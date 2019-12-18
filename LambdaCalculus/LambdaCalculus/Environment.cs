@@ -1,4 +1,5 @@
 ﻿using Favalon.Contexts;
+using Favalon.Terms;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,6 +9,9 @@ namespace Favalon
     {
         private Environment()
         { }
+
+        public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
+            indexer.Create(higherOrder);
 
         public Term Infer(Term term)
         {

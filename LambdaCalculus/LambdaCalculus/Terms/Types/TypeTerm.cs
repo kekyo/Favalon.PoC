@@ -108,6 +108,9 @@ namespace Favalon.Terms.Types
 
         public static readonly TypeTerm Void =
             From(typeof(void));
+
+        public static readonly TypeTerm Unit =
+            From(typeof(Unit));
     }
 
     public sealed class DeclareTypeTerm : HigherOrderHoldTerm

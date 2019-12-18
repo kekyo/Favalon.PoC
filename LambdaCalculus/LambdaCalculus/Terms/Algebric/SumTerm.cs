@@ -1,4 +1,6 @@
-﻿namespace Favalon.Terms.Algebric
+﻿using System;
+
+namespace Favalon.Terms.Algebric
 {
     public sealed class SumTerm : MultipleTerm<SumTerm>
     {

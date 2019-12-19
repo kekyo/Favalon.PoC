@@ -148,24 +148,28 @@ namespace Favalon
         [TestCase(new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(string) })]
         // (int | _[1]): (int | _[1]) <-- _[2]
         [TestCase(new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(_1) }, new[] { typeof(_2) })]
-
         // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
-
+        [TestCase(new[] { typeof(_1), typeof(_2) }, new[] { typeof(_1), typeof(_2) }, new[] { typeof(_2), typeof(_1) })]
         // (int | double): (int | double) <-- (int | double)
+        [TestCase(new[] { typeof(int), typeof(double) }, new[] { typeof(int), typeof(double) }, new[] { typeof(int), typeof(double) })]
         // (int | double | string): (int | double | string) <-- (int | double)
+        [TestCase(new[] { typeof(int), typeof(double), typeof(string) }, new[] { typeof(int), typeof(double), typeof(string) }, new[] { typeof(int), typeof(double) })]
         // (int | IComparable): (int | IComparable) <-- (int | string)
+        [TestCase(new[] { typeof(int), typeof(IComparable) }, new[] { typeof(int), typeof(IComparable) }, new[] { typeof(int), typeof(string) })]
         // null: int <-- (int | double)
+        [TestCase(new Type[0], new[] { typeof(int) }, new[] { typeof(int), typeof(double) })]
         // null: (int | double) <-- (int | double | string)
+        [TestCase(new Type[0], new[] { typeof(int), typeof(double) }, new[] { typeof(int), typeof(double), typeof(string) })]
         // null: (int | IServiceProvider) <-- (int | double)
-
+        [TestCase(new Type[0], new[] { typeof(int), typeof(IServiceProvider) }, new[] { typeof(int), typeof(double) })]
         // null: int <-- _   [TODO: maybe]
-
+        [TestCase(new Type[0], new[] { typeof(int) }, new[] { typeof(_1) })]
         // (int | double): (int | double) <-- int
+        [TestCase(new[] { typeof(int), typeof(double) }, new[] { typeof(int), typeof(double) }, new[] { typeof(int) })]
         // (int | IServiceProvider): (int | IServiceProvider) <-- int
+        [TestCase(new[] { typeof(int), typeof(IServiceProvider) }, new[] { typeof(int), typeof(IServiceProvider) }, new[] { typeof(int) })]
         // (int | IComparable): (int | IComparable) <-- string
-
-
-
+        [TestCase(new[] { typeof(int), typeof(IComparable) }, new[] { typeof(int), typeof(IComparable) }, new[] { typeof(string) })]
         public void InternalNarrowing(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
         {
             Assert.IsTrue(lhsTypes.Length >= 1);

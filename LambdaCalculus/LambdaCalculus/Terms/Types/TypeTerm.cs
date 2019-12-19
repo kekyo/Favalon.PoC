@@ -76,8 +76,8 @@ namespace Favalon.Terms.Types
                 // (int | _): (int | _) <-- (int | string)
                 // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
                 case (SumTerm(Term[] lhsTerms), SumTerm(Term[] rhsTerms)):
-                    var terms1 = lhsTerms.
-                        Select(lhsTerm => rhsTerms.Any(rhsTerm => Narrow(lhsTerm, rhsTerm) != null)).
+                    var terms1 = rhsTerms.
+                        Select(rhsTerm => lhsTerms.Any(lhsTerm => Narrow(lhsTerm, rhsTerm) != null)).
                         ToArray();
                     return terms1.All(term => term) ?
                         lhs :
@@ -91,10 +91,6 @@ namespace Favalon.Terms.Types
                     return terms2.All(term => term != null) ?
                         new SumTerm(terms2!) :
                         null;
-
-                // null: int <-- _   [TODO: maybe]
-                case (_, PlaceholderTerm placeholder):
-                    return null;
 
                 // (int | double): (int | double) <-- int
                 // (int | IServiceProvider): (int | IServiceProvider) <-- int
@@ -123,6 +119,10 @@ namespace Favalon.Terms.Types
                     {
                         return null;
                     }
+
+                // null: int <-- _   [TODO: maybe]
+                case (_, PlaceholderTerm placeholder):
+                    return null;
 
                 default:
                     return null;

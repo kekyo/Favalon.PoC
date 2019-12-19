@@ -195,13 +195,13 @@ namespace Favalon
                 }
             }
 
-            var lhs = Term.SumOrJust(lhsTypes.Select(CreateTermFromType))!;
-            var rhs = Term.SumOrJust(rhsTypes.Select(CreateTermFromType))!;
+            var lhs = Term.ComposedSum(lhsTypes.Select(CreateTermFromType))!;
+            var rhs = Term.ComposedSum(rhsTypes.Select(CreateTermFromType))!;
 
             var actual = TypeTerm.Narrow(lhs, rhs);
 
             var expected = 
-                Term.SumOrJust(expectedTypes.Select(CreateTermFromType));
+                Term.ComposedSum(expectedTypes.Select(CreateTermFromType));
 
             Assert.AreEqual(expected, actual);
         }

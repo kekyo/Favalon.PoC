@@ -24,20 +24,20 @@ namespace Favalon
             Assert.AreEqual(Term.Constant(123), actual);
         }
 
-        //[Test]
-        //public void OverloadedMethods()
-        //{
-        //    var term =
-        //        Term.Apply(
-        //            Term.Method(typeof(int).GetMethods().
-        //                Where(method => (method.Name == "Parse") && (method.GetParameters().Length == 1)).
-        //                ToArray()),
-        //            Term.Constant("123"));
+        [Test]
+        public void OverloadedMethods()
+        {
+            var term =
+                Term.Apply(
+                    Term.Method(typeof(Convert).GetMethods().
+                        Where(method => (method.Name == "ToInt32") && (method.GetParameters().Length == 1)).
+                        ToArray()),
+                    Term.Constant("123"));
 
-        //    var environment = Environment.Create();
-        //    var actual = environment.Reduce(term);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
-        //    Assert.AreEqual(Term.Constant(123), actual);
-        //}
+            Assert.AreEqual(Term.Constant(123), actual);
+        }
     }
 }

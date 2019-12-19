@@ -36,6 +36,15 @@ namespace Favalon
             MethodTerm.From(new[] { method });
         public static MethodTerm Method(MethodInfo method0, params MethodInfo[] methods) =>
             MethodTerm.From(new[] { method0 }.Concat(methods));
+        public static MethodTerm Method(IEnumerable<MethodInfo> methods)
+        {
+            var ms = methods.ToArray();
+            return ms.Length switch
+            {
+                0 => throw new ArgumentException(),
+                _ => MethodTerm.From(ms)
+            };
+        }
 
         public static BooleanTerm Constant(bool value) =>
             BooleanTerm.From(value);
@@ -102,7 +111,7 @@ namespace Favalon
                 _ => new SumTerm(ts)
             };
         }
-        public static Term? SumOrJust(IEnumerable<Term> terms)
+        public static Term? ComposedSum(IEnumerable<Term> terms)
         {
             var ts = terms.ToArray();
             return ts.Length switch

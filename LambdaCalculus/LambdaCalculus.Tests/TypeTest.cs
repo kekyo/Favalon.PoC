@@ -127,17 +127,28 @@ namespace Favalon
         private sealed class _2 { }
 
         // int: int <-- int
+        [TestCase(new[] { typeof(int) }, new[] { typeof(int) }, new[] { typeof(int) })]
         // IComparable: IComparable <-- IComparable
-
+        [TestCase(new[] { typeof(IComparable) }, new[] { typeof(IComparable) }, new[] { typeof(IComparable) })]
+        // _[1]: _[1] <-- _[1]
+        [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(_1) })]
         // object: object <-- int
+        [TestCase(new[] { typeof(object) }, new[] { typeof(object) }, new[] { typeof(int) })]
         // IComparable: IComparable <-- string
-
+        [TestCase(new[] { typeof(IComparable) }, new[] { typeof(IComparable) }, new[] { typeof(string) })]
         // _: _ <-- int
+        [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(int) })]
         // _: _ <-- (int | double)
+        [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(int), typeof(double) })]
         // _[1]: _[1] <-- _[2]
+        [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(_2) })]
         // (int | _): (int | _) <-- string
+        [TestCase(new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(_1) }, new[] { typeof(string) })]
         // (int | _): (int | _) <-- (int | string)
+        [TestCase(new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(string) })]
         // (int | _[1]): (int | _[1]) <-- _[2]
+        [TestCase(new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(_1) }, new[] { typeof(_2) })]
+
         // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
 
         // (int | double): (int | double) <-- (int | double)
@@ -152,13 +163,14 @@ namespace Favalon
         // (int | double): (int | double) <-- int
         // (int | IServiceProvider): (int | IServiceProvider) <-- int
         // (int | IComparable): (int | IComparable) <-- string
-        [TestCase(new[] { typeof(int) }, new[] { typeof(int) }, new[] { typeof(int) })]
-        [TestCase(new[] { typeof(IComparable) }, new[] { typeof(IComparable) }, new[] { typeof(IComparable) })]
-        [TestCase(new[] { typeof(object) }, new[] { typeof(object) }, new[] { typeof(int) })]
-        [TestCase(new[] { typeof(IComparable) }, new[] { typeof(IComparable) }, new[] { typeof(string) })]
-        [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(int) })]
+
+
+
         public void InternalNarrowing(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
         {
+            Assert.IsTrue(lhsTypes.Length >= 1);
+            Assert.IsTrue(rhsTypes.Length >= 1);
+
             var environment = Environment.Create();
             var p1 = environment.CreatePlaceholder(Term.Unspecified());
             var p2 = environment.CreatePlaceholder(Term.Unspecified());
@@ -179,12 +191,13 @@ namespace Favalon
                 }
             }
 
-            var actual = TypeTerm.Narrow(
-                Term.Sum(lhsTypes.Select(CreateTermFromType)),
-                Term.Sum(rhsTypes.Select(CreateTermFromType)));
+            var lhs = Term.SumOrJust(lhsTypes.Select(CreateTermFromType))!;
+            var rhs = Term.SumOrJust(rhsTypes.Select(CreateTermFromType))!;
+
+            var actual = TypeTerm.Narrow(lhs, rhs);
 
             var expected = 
-                Term.Sum(expectedTypes.Select(CreateTermFromType));
+                Term.SumOrJust(expectedTypes.Select(CreateTermFromType));
 
             Assert.AreEqual(expected, actual);
         }

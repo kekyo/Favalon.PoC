@@ -90,6 +90,7 @@ namespace Favalon
 
         public static ProductTerm Product(Term term0, params Term[] terms) =>
             new ProductTerm(new[] { term0 }.Concat(terms).ToArray());
+
         public static SumTerm Sum(Term term0, params Term[] terms) =>
             new SumTerm(new[] { term0 }.Concat(terms).ToArray());
         public static SumTerm Sum(IEnumerable<Term> terms)
@@ -98,6 +99,16 @@ namespace Favalon
             return ts.Length switch
             {
                 0 => throw new ArgumentException(),
+                _ => new SumTerm(ts)
+            };
+        }
+        public static Term? SumOrJust(IEnumerable<Term> terms)
+        {
+            var ts = terms.ToArray();
+            return ts.Length switch
+            {
+                0 => null,
+                1 => ts[0],
                 _ => new SumTerm(ts)
             };
         }

@@ -48,6 +48,7 @@ namespace Favalon.Terms.Types
             {
                 // int: int <-- int
                 // IComparable: IComparable <-- IComparable
+                // _[1]: _[1] <-- _[1]
                 case (_, _) when object.ReferenceEquals(lhs, rhs) || lhs.Equals(rhs):
                     return lhs;
 
@@ -58,28 +59,37 @@ namespace Favalon.Terms.Types
                         lhsType :
                         null;
 
+                // _[1]: _[1] <-- _[2]
+                case (PlaceholderTerm placeholder, PlaceholderTerm _):
+                    return placeholder;
+
                 // _: _ <-- int
                 // _: _ <-- (int | double)
-                // _[1]: _[1] <-- _[2]
-                // (int | _): (int | _) <-- string
-                // (int | _): (int | _) <-- (int | string)
-                // (int | _[1]): (int | _[1]) <-- _[2]
-                // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
                 case (PlaceholderTerm placeholder, _):
                     return placeholder;
 
                 // (int | double): (int | double) <-- (int | double)
                 // (int | double | string): (int | double | string) <-- (int | double)
                 // (int | IComparable): (int | IComparable) <-- (int | string)
-                // null: int <-- (int | double)
                 // null: (int | double) <-- (int | double | string)
                 // null: (int | IServiceProvider) <-- (int | double)
+                // (int | _): (int | _) <-- (int | string)
+                // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
+                case (SumTerm(Term[] lhsTerms), SumTerm(Term[] rhsTerms)):
+                    var terms1 = lhsTerms.
+                        Select(lhsTerm => rhsTerms.Any(rhsTerm => Narrow(lhsTerm, rhsTerm) != null)).
+                        ToArray();
+                    return terms1.All(term => term) ?
+                        lhs :
+                        null;
+
+                // null: int <-- (int | double)
                 case (_, SumTerm(Term[] rhsTerms)):
-                    var terms1 = rhsTerms.
+                    var terms2 = rhsTerms.
                         Select(rhsTerm => Narrow(lhs, rhsTerm)).
                         ToArray();
-                    return terms1.All(term => term != null) ?
-                        new SumTerm(terms1!) :
+                    return terms2.All(term => term != null) ?
+                        new SumTerm(terms2!) :
                         null;
 
                 // null: int <-- _   [TODO: maybe]
@@ -89,17 +99,30 @@ namespace Favalon.Terms.Types
                 // (int | double): (int | double) <-- int
                 // (int | IServiceProvider): (int | IServiceProvider) <-- int
                 // (int | IComparable): (int | IComparable) <-- string
+                // (int | _): (int | _) <-- string
+                // (int | _[1]): (int | _[1]) <-- _[2]
                 case (SumTerm(Term[] lhsTerms), _):
-                    var terms2 = lhsTerms.
+                    var terms3 = lhsTerms.
                         Select(lhsTerm => Narrow(lhsTerm, rhs)).
-                        Where(term => term != null).
                         ToArray();
-                    return terms2.Length switch
+                    // Requirements: 1 or any terms narrowed.
+                    if (terms3.Any(term => term != null))
                     {
-                        0 => null,
-                        1 => terms2[0],
-                        _ => new SumTerm(terms2!)
-                    };
+                        terms3 = terms3.
+                            Zip(lhsTerms, (term, lhsTerm) => term ?? lhsTerm).
+                            ToArray();
+                        return terms3.Length switch
+                        {
+                            0 => null,
+                            1 => terms3[0],
+                            _ => new SumTerm(terms3!)
+                        };
+                    }
+                    // Couldn't narrow: (int | double) <-- string
+                    else
+                    {
+                        return null;
+                    }
 
                 default:
                     return null;

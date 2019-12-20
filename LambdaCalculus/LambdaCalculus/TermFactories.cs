@@ -62,6 +62,8 @@ namespace Favalon
 
         public static ApplyTerm Apply(Term function, Term argument) =>
             new ApplyTerm(function, argument, UnspecifiedTerm.Instance);
+        public static ApplyTerm Apply(Term function, Term argument, Term higherOrder) =>
+            new ApplyTerm(function, argument, higherOrder);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
             LambdaTerm.Create(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);

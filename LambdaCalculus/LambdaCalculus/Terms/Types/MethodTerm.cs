@@ -35,9 +35,6 @@ namespace Favalon.Terms.Types
         internal ClrMethodTerm(MethodInfo method) =>
             this.method = method;
 
-        LambdaTerm IApplicable.FunctionHigherOrder =>
-            (LambdaTerm)this.HigherOrder;
-
         protected override Term GetHigherOrder() =>
             GetMethodHigherOrder(this.method);
 
@@ -90,9 +87,6 @@ namespace Favalon.Terms.Types
         internal ClrMethodOverloadedTerm(ClrMethodTerm[] methods) =>
             this.Methods = methods;
 
-        LambdaTerm IApplicable.FunctionHigherOrder =>
-            (LambdaTerm)this.HigherOrder;
-
         protected override Term GetHigherOrder() =>
             new SumTerm(this.Methods.
                 Select(method => method.HigherOrder).
@@ -116,7 +110,7 @@ namespace Favalon.Terms.Types
                 ToArray();
 
             var orderedNarrowed = narrowed.
-                OrderBy(entry => (LambdaTerm)entry.narrow.HigherOrder, TypeTerm.DeriverComparer).
+                OrderBy(entry => entry.narrow, TypeTerm.ConcreterComparer).
                 ToArray();
             var exactMatched = orderedNarrowed.
                 FirstOrDefault(entry => entry.narrow.Equals(inferredArgument.HigherOrder));

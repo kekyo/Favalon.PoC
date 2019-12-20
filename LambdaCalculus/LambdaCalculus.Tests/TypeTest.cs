@@ -246,11 +246,11 @@ namespace Favalon
         [TestCase(
             new[] { typeof(Guid), typeof(DateTime), typeof(Uri) },
             new[] { typeof(Uri), typeof(Guid), typeof(DateTime) })]
-        public void DeriverComparer(Type[] expectedTypes, Type[] targetTypes)
+        public void ConcreterComparer(Type[] expectedTypes, Type[] targetTypes)
         {
             var actual = targetTypes.Select(
                 targetType => Term.Type(targetType)).
-                OrderBy(term => term, TypeTerm.DeriverComparer).
+                OrderBy(term => term, TypeTerm.ConcreterComparer).
                 ToArray();
 
             var expected = expectedTypes.Select(

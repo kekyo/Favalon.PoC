@@ -15,9 +15,6 @@ namespace Favalon.Terms
             this.Body = body;
         }
 
-        LambdaTerm IApplicable.FunctionHigherOrder =>
-            (LambdaTerm)this.HigherOrder;
-
         protected override Term GetHigherOrder() =>
             new LambdaTerm(this.Parameter.HigherOrder, this.Body.HigherOrder);
 

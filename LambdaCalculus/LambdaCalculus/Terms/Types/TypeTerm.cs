@@ -135,10 +135,10 @@ namespace Favalon.Terms.Types
             }
         }
 
-        public static readonly IComparer<Term> DeriverComparer =
-            new DeriverComparerImpl();
+        public static readonly IComparer<Term> ConcreterComparer =
+            new ConcreterComparerImpl();
 
-        private sealed class DeriverComparerImpl : IComparer<Term>
+        private sealed class ConcreterComparerImpl : IComparer<Term>
         {
             private int Compare(Type x, Type y)
             {
@@ -363,9 +363,6 @@ namespace Favalon.Terms.Types
         public override Term HigherOrder =>
             // * -> * (TODO: make nested kind lambda from flatten generic type arguments: * -> * -> * ...)
             LambdaTerm.Kind;
-
-        LambdaTerm IApplicable.FunctionHigherOrder =>
-            (LambdaTerm)this.HigherOrder;
 
         public new Type Type { get; }
 

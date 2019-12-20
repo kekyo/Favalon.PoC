@@ -4,13 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 
 namespace Favalon.Terms.Types
 {
     public abstract class TypeTerm : Term
     {
-        private static readonly Dictionary<Type, TypeTerm> clrTypes =
-            new Dictionary<Type, TypeTerm>();
+        private static readonly Dictionary<Type, Term> clrTypes =
+            new Dictionary<Type, Term>();
 
         private protected TypeTerm()
         { }
@@ -30,13 +31,18 @@ namespace Favalon.Terms.Types
         public static DeclareTypeTerm From(Term declare, Term higherOrder) =>
             new DeclareTypeTerm(declare, higherOrder);
 
-        public static TypeTerm From(Type type)
+        public static Term From(Type type)
         {
             if (!clrTypes.TryGetValue(type, out var term))
             {
-                term = IsTypeConstructor(type) ?
-                    (TypeTerm)new ClrTypeConstructorTerm(type) :
-                    new ClrTypeTerm(type);
+                if (IsTypeConstructor(type))
+                {
+                    term = new ClrTypeConstructorTerm(type);
+                }
+                else
+                {
+                    term = new ClrTypeTerm(type);
+                }
                 clrTypes.Add(type, term);
             }
             return term;
@@ -129,11 +135,95 @@ namespace Favalon.Terms.Types
             }
         }
 
-        public static readonly TypeTerm Void =
-            From(typeof(void));
+        public static readonly IComparer<Term> DeriverComparer =
+            new DeriverComparerImpl();
 
-        public static readonly TypeTerm Unit =
-            From(typeof(Unit));
+        private sealed class DeriverComparerImpl : IComparer<Term>
+        {
+            private int Compare(Type x, Type y)
+            {
+                if (x.Equals(y))
+                {
+                    return 0;
+                }
+                else if (x.IsPrimitive && !y.IsPrimitive)
+                {
+                    return -1;
+                }
+                else if (!x.IsPrimitive && y.IsPrimitive)
+                {
+                    return 1;
+                }
+                else if (x.IsPrimitive && y.IsPrimitive)
+                {
+                    var cx = x.IsClsCompliant();
+                    var cy = y.IsClsCompliant();
+                    if (cx && !cy)
+                    {
+                        return -1;
+                    }
+                    else if (!cx && cy)
+                    {
+                        return -1;
+                    }
+
+                    var ix = x.IsInteger();
+                    var iy = y.IsInteger();
+                    if (ix && !iy)
+                    {
+                        return -1;
+                    }
+                    else if (!ix && iy)
+                    {
+                        return -1;
+                    }
+
+                    var sx = x.SizeOf();
+                    var sy = y.SizeOf();
+                    if (sx < sy)
+                    {
+                        return -1;
+                    }
+                    else if (sx > sy)
+                    {
+                        return 1;
+                    }
+                }
+                else if (x.IsValueType && !y.IsValueType)
+                {
+                    return -1;
+                }
+                else if (!x.IsValueType && y.IsValueType)
+                {
+                    return 1;
+                }
+                else if (y.IsAssignableFrom(x))
+                {
+                    return -1;
+                }
+                else if (x.IsAssignableFrom(y))
+                {
+                    return 1;
+                }
+
+                return -1;
+            }
+
+            public int Compare(Term x, Term y) =>
+                (x, y) switch
+                {
+                    (ClrTypeTerm(Type tx), ClrTypeTerm(Type ty)) => this.Compare(tx, ty),
+                    (ClrTypeTerm(_), _) => -1,
+                    (_, ClrTypeTerm(_)) => 1,
+                    _ => 0
+                };
+        }
+
+        public static readonly ClrTypeTerm Void =
+            (ClrTypeTerm)From(typeof(void));
+
+        public static readonly ClrTypeTerm Unit =
+            (ClrTypeTerm)From(typeof(Unit));
     }
 
     public sealed class DeclareTypeTerm : HigherOrderHoldTerm
@@ -257,6 +347,9 @@ namespace Favalon.Terms.Types
 
         public override int GetHashCode() =>
             this.Type.GetHashCode();
+
+        public void Deconstruct(out Type type) =>
+            type = this.Type;
     }
 
     public sealed class ClrTypeConstructorTerm : TypeTerm, IApplicable, IClrType
@@ -270,6 +363,9 @@ namespace Favalon.Terms.Types
         public override Term HigherOrder =>
             // * -> * (TODO: make nested kind lambda from flatten generic type arguments: * -> * -> * ...)
             LambdaTerm.Kind;
+
+        LambdaTerm IApplicable.FunctionHigherOrder =>
+            (LambdaTerm)this.HigherOrder;
 
         public new Type Type { get; }
 

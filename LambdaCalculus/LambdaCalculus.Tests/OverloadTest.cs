@@ -1,8 +1,10 @@
-﻿using Favalon.Terms;
+﻿using Favalon.Contexts;
+using Favalon.Terms;
 using Favalon.Terms.Operators;
 using Favalon.Terms.Types;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon

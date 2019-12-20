@@ -35,6 +35,9 @@ namespace Favalon.Terms.Types
         internal ClrMethodTerm(MethodInfo method) =>
             this.method = method;
 
+        LambdaTerm IApplicable.FunctionHigherOrder =>
+            (LambdaTerm)this.HigherOrder;
+
         protected override Term GetHigherOrder() =>
             GetMethodHigherOrder(this.method);
 
@@ -87,6 +90,9 @@ namespace Favalon.Terms.Types
         internal ClrMethodOverloadedTerm(ClrMethodTerm[] methods) =>
             this.Methods = methods;
 
+        LambdaTerm IApplicable.FunctionHigherOrder =>
+            (LambdaTerm)this.HigherOrder;
+
         protected override Term GetHigherOrder() =>
             new SumTerm(this.Methods.
                 Select(method => method.HigherOrder).
@@ -102,21 +108,26 @@ namespace Favalon.Terms.Types
             // Strict infer procedure.
 
             var narrowed = this.Methods.
-                Select(method => new {
+                Select(method => (
                     method,
-                    narrow = TypeTerm.Narrow(method.ParameterHigherOrder, inferredArgument.HigherOrder) }).
-                ToArray();
-            var exactMatched = narrowed.
+                    narrow: TypeTerm.Narrow(method.ParameterHigherOrder, inferredArgument.HigherOrder))).
                 Where(entry => entry.narrow is ClrTypeTerm).
+                Select(entry => (entry.method, narrow: (ClrTypeTerm)entry.narrow!)).
                 ToArray();
 
-            return exactMatched.Length switch
+            var orderedNarrowed = narrowed.
+                OrderBy(entry => (LambdaTerm)entry.narrow.HigherOrder, TypeTerm.DeriverComparer).
+                ToArray();
+            var exactMatched = orderedNarrowed.
+                FirstOrDefault(entry => entry.narrow.Equals(inferredArgument.HigherOrder));
+
+            return exactMatched switch
             {
                 // Exact matched.
-                1 => exactMatched[0].method,
-                _ => (exactMatched.Length != this.Methods.Length) ?
+                (ClrMethodTerm method, _) => method,
+                _ => (orderedNarrowed.Length != this.Methods.Length) ?
                     // Partially matched.
-                    new ClrMethodOverloadedTerm(exactMatched.Select(entry => entry.method).ToArray()) :
+                    new ClrMethodOverloadedTerm(orderedNarrowed.Select(entry => entry.method).ToArray()) :
                     // All matched: not changed.
                     this
             };

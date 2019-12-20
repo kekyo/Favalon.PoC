@@ -27,10 +27,11 @@ namespace Favalon
 
         public static DeclareTypeTerm Type(Term declare) =>
             TypeTerm.From(declare, UnspecifiedTerm.Instance);
-        public static TypeTerm Type(Type type) =>
+
+        public static Term Type(Type type) =>
             TypeTerm.From(type);
-        public static ClrTypeTerm Type<T>() =>
-            (ClrTypeTerm)TypeTerm.From(typeof(T));
+        public static Term Type<T>() =>
+            TypeTerm.From(typeof(T));
 
         public static MethodTerm Method(MethodInfo method) =>
             MethodTerm.From(new[] { method });
@@ -46,10 +47,6 @@ namespace Favalon
             };
         }
 
-        public static BooleanTerm Constant(bool value) =>
-            BooleanTerm.From(value);
-        public static TypeTerm Constant(Type type) =>
-            TypeTerm.From(type);
         public static Term Constant(object value) =>
             value switch
             {

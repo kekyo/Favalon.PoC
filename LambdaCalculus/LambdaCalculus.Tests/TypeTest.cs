@@ -3,6 +3,7 @@ using Favalon.Terms.Algebric;
 using Favalon.Terms.Types;
 using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Linq;
 
 namespace Favalon
@@ -202,6 +203,59 @@ namespace Favalon
 
             var expected = 
                 Term.ComposedSum(expectedTypes.Select(CreateTermFromType));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestCase(
+            new[] { typeof(byte), typeof(short), typeof(int), typeof(long) },
+            new[] { typeof(short), typeof(long), typeof(byte), typeof(int) })]
+        [TestCase(
+            new[] { typeof(int), typeof(long), typeof(sbyte), typeof(ushort) },
+            new[] { typeof(ushort), typeof(long), typeof(sbyte), typeof(int) })]
+        [TestCase(
+            new[] { typeof(byte), typeof(short), typeof(int), typeof(long), typeof(float), typeof(double) },
+            new[] { typeof(short), typeof(double), typeof(long), typeof(float), typeof(byte), typeof(int) })]
+        [TestCase(
+            new[] { typeof(byte), typeof(short), typeof(int), typeof(long), typeof(DateTime), typeof(Guid) },
+            new[] { typeof(short), typeof(Guid), typeof(long), typeof(DateTime), typeof(byte), typeof(int) })]
+        [TestCase(
+            new[] { typeof(string), typeof(object) },
+            new[] { typeof(object), typeof(string) })]
+        [TestCase(
+            new[] { typeof(string), typeof(IComparable) },
+            new[] { typeof(IComparable), typeof(string) })]
+        [TestCase(
+            new[] { typeof(string), typeof(IComparable), typeof(object) },
+            new[] { typeof(IComparable), typeof(object), typeof(string) })]
+        [TestCase(
+            new[] { typeof(int), typeof(string), typeof(object) },
+            new[] { typeof(object), typeof(string), typeof(int) })]
+        [TestCase(
+            new[] { typeof(int[]), typeof(Array), typeof(ICollection) },
+            new[] { typeof(ICollection), typeof(int[]), typeof(Array) })]
+        [TestCase(
+            new[] { typeof(IList), typeof(ICollection), typeof(IEnumerable) },
+            new[] { typeof(ICollection), typeof(IList), typeof(IEnumerable) })]
+        [TestCase(
+            new[] { typeof(DateTime), typeof(Uri) },
+            new[] { typeof(Uri), typeof(DateTime) })]
+        [TestCase(
+            new[] { typeof(DateTime), typeof(Guid), typeof(Uri) },
+            new[] { typeof(Uri), typeof(DateTime), typeof(Guid) })]
+        [TestCase(
+            new[] { typeof(Guid), typeof(DateTime), typeof(Uri) },
+            new[] { typeof(Uri), typeof(Guid), typeof(DateTime) })]
+        public void DeriverComparer(Type[] expectedTypes, Type[] targetTypes)
+        {
+            var actual = targetTypes.Select(
+                targetType => Term.Type(targetType)).
+                OrderBy(term => term, TypeTerm.DeriverComparer).
+                ToArray();
+
+            var expected = expectedTypes.Select(
+                targetType => Term.Type(targetType)).
+                ToArray();
 
             Assert.AreEqual(expected, actual);
         }

@@ -5,6 +5,8 @@ namespace Favalon.Terms
     // It's only using in ApplyTerm.
     public interface IApplicable
     {
+        LambdaTerm FunctionHigherOrder { get; }
+
         Term InferForApply(InferContext context, Term inferredArgument);
         Term? ReduceForApply(ReduceContext context, Term argument);
     }

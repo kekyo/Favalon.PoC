@@ -32,7 +32,7 @@ namespace Favalon.Terms
             value = this.Value;
 
         public static new readonly ClrTypeTerm Type =
-            Type<bool>();
+            (ClrTypeTerm)Type<bool>();
 
         public static new readonly BooleanTerm True =
             new BooleanTerm(true);

@@ -1,4 +1,6 @@
 ﻿using Favalon.Contexts;
+using Favalon.Terms.Types;
+using System.Collections.Generic;
 
 namespace Favalon.Terms
 {
@@ -12,6 +14,9 @@ namespace Favalon.Terms
             this.Parameter = parameter;
             this.Body = body;
         }
+
+        LambdaTerm IApplicable.FunctionHigherOrder =>
+            (LambdaTerm)this.HigherOrder;
 
         protected override Term GetHigherOrder() =>
             new LambdaTerm(this.Parameter.HigherOrder, this.Body.HigherOrder);

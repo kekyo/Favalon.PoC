@@ -107,21 +107,20 @@ namespace Favalon.Terms.Types
                     narrow: TypeTerm.Narrow(method.ParameterHigherOrder, inferredArgument.HigherOrder))).
                 Where(entry => entry.narrow is ClrTypeTerm).
                 Select(entry => (entry.method, narrow: (ClrTypeTerm)entry.narrow!)).
-                ToArray();
-
-            var orderedNarrowed = narrowed.
                 OrderBy(entry => entry.narrow, TypeTerm.ConcreterComparer).
                 ToArray();
-            var exactMatched = orderedNarrowed.
-                FirstOrDefault(entry => entry.narrow.Equals(inferredArgument.HigherOrder));
 
-            return exactMatched switch
+            var exactMatched = narrowed.
+                Where(entry => entry.narrow.Equals(inferredArgument.HigherOrder)).
+                ToArray();
+
+            return exactMatched.Length switch
             {
                 // Exact matched.
-                (ClrMethodTerm method, _) => method,
-                _ => (orderedNarrowed.Length != this.Methods.Length) ?
+                1 => exactMatched[0].method,
+                _ => (narrowed.Length != this.Methods.Length) ?
                     // Partially matched.
-                    new ClrMethodOverloadedTerm(orderedNarrowed.Select(entry => entry.method).ToArray()) :
+                    new ClrMethodOverloadedTerm(narrowed.Select(entry => entry.method).ToArray()) :
                     // All matched: not changed.
                     this
             };

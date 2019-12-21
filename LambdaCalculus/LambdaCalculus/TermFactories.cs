@@ -25,9 +25,6 @@ namespace Favalon
         public static BooleanTerm False() =>
             BooleanTerm.False;
 
-        public static DeclareTypeTerm Type(Term declare) =>
-            TypeTerm.From(declare, UnspecifiedTerm.Instance);
-
         public static Term Type(Type type) =>
             TypeTerm.From(type);
         public static Term Type<T>() =>
@@ -123,9 +120,5 @@ namespace Favalon
 
         public static MatchTerm Match(PairTerm matcher0, params PairTerm[] matchers) =>
             new MatchTerm(new[] { matcher0 }.Concat(matchers).ToArray(), UnspecifiedTerm.Instance);
-
-        public static DiscriminatedUnionTypeTerm DiscriminatedUnionType(
-            params BindExpressionTerm[] constructors) =>
-            new DiscriminatedUnionTypeTerm(constructors, UnspecifiedTerm.Instance);
     }
 }

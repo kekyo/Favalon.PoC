@@ -60,32 +60,10 @@ namespace Favalon
             Assert.AreEqual(123, ((ComposeConstructorTarget)((ConstantTerm)actual).Value).Value);
         }
 
-        //[Test]
-        public void ComposeDiscriminatedUnionType()
-        {
-            // type ((True 1) (False 0))
-            var term =
-                Term.DiscriminatedUnionType(
-                    Term.Bind(
-                        Term.Identity("True"),
-                        Term.Identity("True0")),
-                    Term.Bind(
-                        Term.Identity("False"),
-                        Term.Identity("False0")));
-
-            var environment = Environment.Create();
-            var inferred = environment.Infer(term);
-            var du = (DiscriminatedUnionTypeTerm)environment.Reduce(inferred);
-
-            var True = environment.LookupBoundTerm("True");
-
-            //Assert.AreEqual(, actual.Constructors[0]);
-        }
-
         [Test]
-        public void OrTypeTerm()
+        public void SumTypeTerm()
         {
-            // let combined = System.Int32:* | System.String:*
+            // let combined = System.Int32:* + System.String:*
             var term =
                 Term.Bind(
                     "combined",
@@ -104,9 +82,9 @@ namespace Favalon
         }
 
         [Test]
-        public void AndTypeTerm()
+        public void ProductTypeTerm()
         {
-            // let combined = System.Int32:* & System.String:*
+            // let combined = System.Int32:* * System.String:*
             var term =
                 Term.Bind(
                     "combined",
@@ -139,37 +117,37 @@ namespace Favalon
         [TestCase(new[] { typeof(IComparable) }, new[] { typeof(IComparable) }, new[] { typeof(string) })]
         // _: _ <-- int
         [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(int) })]
-        // _: _ <-- (int | double)
+        // _: _ <-- (int + double)
         [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(int), typeof(double) })]
         // _[1]: _[1] <-- _[2]
         [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(_2) })]
-        // (int | _): (int | _) <-- string
+        // (int + _): (int + _) <-- string
         [TestCase(new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(_1) }, new[] { typeof(string) })]
-        // (int | _): (int | _) <-- (int | string)
+        // (int + _): (int + _) <-- (int + string)
         [TestCase(new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(string) })]
-        // (int | _[1]): (int | _[1]) <-- _[2]
+        // (int + _[1]): (int + _[1]) <-- _[2]
         [TestCase(new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(_1) }, new[] { typeof(_2) })]
-        // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
+        // (_[1] + _[2]): (_[1] + _[2]) <-- (_[2] + _[1])
         [TestCase(new[] { typeof(_1), typeof(_2) }, new[] { typeof(_1), typeof(_2) }, new[] { typeof(_2), typeof(_1) })]
-        // (int | double): (int | double) <-- (int | double)
+        // (int + double): (int + double) <-- (int + double)
         [TestCase(new[] { typeof(int), typeof(double) }, new[] { typeof(int), typeof(double) }, new[] { typeof(int), typeof(double) })]
-        // (int | double | string): (int | double | string) <-- (int | double)
+        // (int + double + string): (int + double + string) <-- (int + double)
         [TestCase(new[] { typeof(int), typeof(double), typeof(string) }, new[] { typeof(int), typeof(double), typeof(string) }, new[] { typeof(int), typeof(double) })]
-        // (int | IComparable): (int | IComparable) <-- (int | string)
+        // (int + IComparable): (int + IComparable) <-- (int + string)
         [TestCase(new[] { typeof(int), typeof(IComparable) }, new[] { typeof(int), typeof(IComparable) }, new[] { typeof(int), typeof(string) })]
-        // null: int <-- (int | double)
+        // null: int <-- (int + double)
         [TestCase(new Type[0], new[] { typeof(int) }, new[] { typeof(int), typeof(double) })]
-        // null: (int | double) <-- (int | double | string)
+        // null: (int + double) <-- (int + double + string)
         [TestCase(new Type[0], new[] { typeof(int), typeof(double) }, new[] { typeof(int), typeof(double), typeof(string) })]
-        // null: (int | IServiceProvider) <-- (int | double)
+        // null: (int + IServiceProvider) <-- (int + double)
         [TestCase(new Type[0], new[] { typeof(int), typeof(IServiceProvider) }, new[] { typeof(int), typeof(double) })]
         // null: int <-- _   [TODO: maybe]
         [TestCase(new Type[0], new[] { typeof(int) }, new[] { typeof(_1) })]
-        // (int | double): (int | double) <-- int
+        // (int + double): (int + double) <-- int
         [TestCase(new[] { typeof(int), typeof(double) }, new[] { typeof(int), typeof(double) }, new[] { typeof(int) })]
-        // (int | IServiceProvider): (int | IServiceProvider) <-- int
+        // (int + IServiceProvider): (int + IServiceProvider) <-- int
         [TestCase(new[] { typeof(int), typeof(IServiceProvider) }, new[] { typeof(int), typeof(IServiceProvider) }, new[] { typeof(int) })]
-        // (int | IComparable): (int | IComparable) <-- string
+        // (int + IComparable): (int + IComparable) <-- string
         [TestCase(new[] { typeof(int), typeof(IComparable) }, new[] { typeof(int), typeof(IComparable) }, new[] { typeof(string) })]
         public void InternalNarrowing(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
         {

@@ -1,7 +1,9 @@
-﻿using LambdaCalculus.Operators;
+﻿using Favalon.Terms;
+using Favalon.Terms.Logical;
+using Favalon.Terms.Operators;
 using NUnit.Framework;
 
-namespace LambdaCalculus
+namespace Favalon
 {
     [TestFixture]
     class InferenceTest
@@ -80,6 +82,44 @@ namespace LambdaCalculus
             Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
         }
 
+        [TestCase(true)]
+        [TestCase(false)]
+        public void BindConstant(bool result)
+        {
+            var term =
+                Term.Bind(
+                    "a",
+                    Term.Constant(result),
+                    Term.Not(
+                        Term.Identity("a")));
+
+            var environment = Environment.Create();
+            var actual = environment.Infer(term);
+
+            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void BindAppliedIdentity(bool result)
+        {
+            var term =
+                Term.Apply(
+                    Term.Lambda(
+                        "b",
+                        Term.Bind(
+                            "a",
+                            Term.Identity("b"),
+                            Term.Not(
+                                Term.Identity("a")))),
+                    Term.Constant(result));
+
+            var environment = Environment.Create();
+            var actual = environment.Infer(term);
+
+            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+        }
+
         [Test]
         public void BooleanAndBodyTest()
         {
@@ -90,7 +130,7 @@ namespace LambdaCalculus
                     Term.Identity("b"));
 
             var environment = Environment.Create();
-            var actual = (Operators.AndAlsoTerm)environment.Infer(term);
+            var actual = (AndAlsoTerm)environment.Infer(term);
 
             // (a:bool && b:bool):bool
             Assert.AreEqual(Term.Type<bool>(), actual.Lhs.HigherOrder);

@@ -1,12 +1,17 @@
-﻿namespace LambdaCalculus.Operators
+﻿using Favalon.Contexts;
+
+namespace Favalon.Terms.Operators
 {
     public sealed class LambdaOperatorTerm : OperatorSymbolTerm<LambdaOperatorTerm>, IApplicable
     {
         private LambdaOperatorTerm()
         { }
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-            new LambdaArrowParameterTerm(rhs);
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+           this;
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+            new LambdaArrowParameterTerm(argument);   // NOT reduced at this time.
 
         public static LambdaOperatorTerm Instance =
             new LambdaOperatorTerm();
@@ -20,8 +25,11 @@
             protected override Term Create(Term argument) =>
                 new LambdaArrowParameterTerm(argument);
 
-            Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-                new LambdaTerm(this.Argument0, rhs);    // rhs isn't reduced at this time, because the body term can reduce only applying time.
+            Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+               this;
+
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+                LambdaTerm.Create(this.Argument0, argument);
         }
     }
 }

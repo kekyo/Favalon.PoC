@@ -1,4 +1,7 @@
-﻿namespace LambdaCalculus
+﻿using Favalon.Contexts;
+using Favalon.Terms.Types;
+
+namespace Favalon.Terms
 {
     public sealed class BooleanTerm : Term
     {
@@ -10,13 +13,13 @@
         public override Term HigherOrder =>
             Type;
 
-        public override Term Reduce(ReduceContext context) =>
-            this;
-
         public override Term Infer(InferContext context) =>
             this;
 
-        public override Term Fixup(InferContext context) =>
+        public override Term Fixup(FixupContext context) =>
+            this;
+
+        public override Term Reduce(ReduceContext context) =>
             this;
 
         public override bool Equals(Term? other) =>
@@ -29,7 +32,7 @@
             value = this.Value;
 
         public static new readonly ClrTypeTerm Type =
-            Type<bool>();
+            (ClrTypeTerm)Type<bool>();
 
         public static new readonly BooleanTerm True =
             new BooleanTerm(true);

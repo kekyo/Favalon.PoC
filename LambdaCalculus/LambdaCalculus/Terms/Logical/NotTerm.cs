@@ -1,18 +1,8 @@
-﻿namespace LambdaCalculus.Operators
+﻿using Favalon.Contexts;
+
+namespace Favalon.Terms.Logical
 {
-    public sealed class NotOperatorTerm : OperatorSymbolTerm<NotOperatorTerm>, IApplicable
-    {
-        private NotOperatorTerm()
-        { }
-
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-            NotTerm.Reduce(context, rhs);
-
-        public static readonly NotOperatorTerm Instance =
-            new NotOperatorTerm();
-    }
-
-    public sealed class NotTerm : LogicalUnaryOperatorTerm<NotTerm>
+    public sealed class NotTerm : LogicalUnaryTerm<NotTerm>
     {
         internal NotTerm(Term argument) :
             base(argument)
@@ -26,7 +16,7 @@
             var argument_ = argument.Reduce(context);
             if (argument_ is BooleanTerm a)
             {
-                return Constant(!a.Value);
+                return BooleanTerm.From(!a.Value);
             }
             else
             {

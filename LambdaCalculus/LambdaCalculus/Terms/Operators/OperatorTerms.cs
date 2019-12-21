@@ -1,4 +1,6 @@
-﻿namespace LambdaCalculus.Operators
+﻿using Favalon.Contexts;
+
+namespace Favalon.Terms.Operators
 {
     public abstract class OperatorSymbolTerm : Term
     {
@@ -8,13 +10,13 @@
         public override Term HigherOrder =>
             UnspecifiedTerm.Instance;
 
-        public override sealed Term Reduce(ReduceContext context) =>
-            this;
-
         public override sealed Term Infer(InferContext context) =>
             this;
 
-        public override sealed Term Fixup(InferContext context) =>
+        public override sealed Term Fixup(FixupContext context) =>
+            this;
+
+        public override sealed Term Reduce(ReduceContext context) =>
             this;
     }
 
@@ -42,7 +44,7 @@
             this.Argument0 = argument0;
 
         public override Term HigherOrder =>
-            LambdaCalculus.UnspecifiedTerm.Instance;
+            UnspecifiedTerm.Instance;
 
         protected abstract Term Create(Term argument0);
 
@@ -52,7 +54,7 @@
         public override sealed Term Infer(InferContext context) =>
             this.Create(this.Argument0.Infer(context));
 
-        public override sealed Term Fixup(InferContext context) =>
+        public override sealed Term Fixup(FixupContext context) =>
             this.Create(this.Argument0.Fixup(context));
 
         public override int GetHashCode() =>
@@ -82,18 +84,18 @@
         }
 
         public override Term HigherOrder =>
-            LambdaCalculus.UnspecifiedTerm.Instance;
+            UnspecifiedTerm.Instance;
 
         protected abstract Term Create(Term argument0, Term argument1);
-
-        public override sealed Term Reduce(ReduceContext context) =>
-            this;
 
         public override sealed Term Infer(InferContext context) =>
             this.Create(this.Argument0.Infer(context), this.Argument1.Infer(context));
 
-        public override sealed Term Fixup(InferContext context) =>
+        public override sealed Term Fixup(FixupContext context) =>
             this.Create(this.Argument0.Fixup(context), this.Argument1.Fixup(context));
+
+        public override sealed Term Reduce(ReduceContext context) =>
+            this;
 
         public override int GetHashCode() =>
             this.Argument0.GetHashCode() ^ this.Argument1.GetHashCode();

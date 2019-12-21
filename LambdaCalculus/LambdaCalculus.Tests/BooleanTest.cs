@@ -1,7 +1,7 @@
-﻿using LambdaCalculus.Operators;
+﻿using Favalon.Terms;
 using NUnit.Framework;
 
-namespace LambdaCalculus
+namespace Favalon
 {
     [TestFixture]
     class BooleanTest
@@ -50,7 +50,7 @@ namespace LambdaCalculus
         {
             var term =
                 Term.Apply(
-                    Operators.NotOperatorTerm.Instance,
+                    Terms.Operators.NotOperatorTerm.Instance,
                     Term.Constant(value));
 
             var environment = Environment.Create();
@@ -109,7 +109,7 @@ namespace LambdaCalculus
             var term =
                 Term.Apply(
                     Term.Apply(
-                        Operators.AndAlsoOperatorTerm.Instance,
+                        Terms.Operators.AndAlsoOperatorTerm.Instance,
                         Term.Constant(lhs)),
                     Term.Constant(rhs));
 
@@ -169,7 +169,7 @@ namespace LambdaCalculus
             var term =
                 Term.Apply(
                     Term.Apply(
-                        Operators.OrElseOperatorTerm.Instance,
+                        Terms.Operators.OrElseOperatorTerm.Instance,
                         Term.Constant(lhs)),
                     Term.Constant(rhs));
 
@@ -205,7 +205,7 @@ namespace LambdaCalculus
                 Term.Apply(
                     Term.Apply(
                         Term.Apply(
-                            Operators.IfOperatorTerm.Instance,
+                            Terms.Operators.IfOperatorTerm.Instance,
                             Term.Constant(condition)),
                         Term.Identity("a")),
                     Term.Identity("b"));
@@ -240,7 +240,7 @@ namespace LambdaCalculus
             var term =
                 Term.Apply(
                     Term.Apply(
-                        Operators.EqualOperatorTerm.Instance,
+                        Terms.Operators.EqualOperatorTerm.Instance,
                         Term.Constant(123)),
                     Term.Constant(value));
 

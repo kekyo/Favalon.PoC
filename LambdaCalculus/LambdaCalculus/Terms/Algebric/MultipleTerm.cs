@@ -16,9 +16,21 @@ namespace Favalon.Terms.Algebric
 
         protected abstract Term Create(Term[] terms);
 
-        public override sealed Term Infer(InferContext context)
+        public override sealed Term Infer(InferContext context, Term higherOrderHint)
         {
-            var terms = this.Terms.Select(term => term.Infer(context)).ToArray();
+            Term[] terms;
+
+            if (higherOrderHint is MultipleTerm(Term[] termHigherOrderHints))
+            {
+                terms = termHigherOrderHints.Zip(
+                    this.Terms,
+                    (higherOrderHint, term) => term.Infer(context, higherOrderHint)).ToArray();
+            }
+            else
+            {
+                terms = this.Terms.Select(term =>
+                    term.Infer(context, higherOrderHint)).ToArray();
+            }
 
             Debug.Assert(terms.Length >= 1);
             return terms.Zip(this.Terms, object.ReferenceEquals).All(r => r) ?

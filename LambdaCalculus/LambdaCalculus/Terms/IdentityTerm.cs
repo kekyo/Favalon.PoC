@@ -10,14 +10,16 @@ namespace Favalon.Terms
             base(higherOrder) =>
             this.Identity = identity;
 
-        public override Term Infer(InferContext context)
+        public override Term Infer(InferContext context, Term higherOrderHint)
         {
             if (context.LookupBoundTerm(this.Identity) is Term bound)
             {
+                // TODO: infer?
                 return bound;
             }
 
-            var higherOrder = this.HigherOrder.Infer(context);
+            var higherOrder = this.HigherOrder.Infer(context, higherOrderHint.HigherOrder);
+            higherOrder = context.Unify(higherOrder, higherOrderHint).Term;
 
             return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                 this :

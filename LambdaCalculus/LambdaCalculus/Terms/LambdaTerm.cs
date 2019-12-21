@@ -1,6 +1,7 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Types;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Favalon.Terms
 {
@@ -16,15 +17,26 @@ namespace Favalon.Terms
         }
 
         protected override Term GetHigherOrder() =>
-            new LambdaTerm(this.Parameter.HigherOrder, this.Body.HigherOrder);
+            (this.Parameter.HigherOrder is Term parameter && this.Body.HigherOrder is Term body) ?
+                new LambdaTerm(parameter, body) :
+                Unspecified;
 
-        public override Term Infer(InferContext context)
+        public override Term Infer(InferContext context, Term higherOrderHint)
         {
             // Best effort infer procedure.
 
+            var higherOrder = this.HigherOrder.Infer(context, higherOrderHint.HigherOrder);
+            Debug.Assert(higherOrder is LambdaTerm);
+
+            higherOrder = context.Unify(higherOrder, higherOrderHint).Term;
+
             var newScope = context.NewScope();
 
-            var parameter = this.Parameter.Infer(newScope);
+            var parameter = this.Parameter.Infer(
+                newScope,
+                higherOrderHint is LambdaTerm(Term parameterHigherOrder, _) ?
+                    parameterHigherOrder :
+                    ((LambdaTerm)higherOrder).Parameter);
             if (parameter is IdentityTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higherorder.
@@ -32,7 +44,11 @@ namespace Favalon.Terms
             }
 
             // Calculate inferring with parameter identity.
-            var body = this.Body.Infer(newScope);
+            var body = this.Body.Infer(
+                newScope,
+                higherOrderHint is LambdaTerm(_, Term bodyHigherOrder) ?
+                    bodyHigherOrder :
+                    ((LambdaTerm)higherOrder).Body);
 
             return
                 object.ReferenceEquals(parameter, this.Parameter) &&

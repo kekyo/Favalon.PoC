@@ -52,10 +52,12 @@ namespace Favalon.Terms
         { }
 
         public override Term HigherOrder =>
-            null!;
+            null!;  // !!!
 
-        public override Term Infer(InferContext context) =>
-            context.CreatePlaceholder(Instance);
+        public override Term Infer(InferContext context, Term higherOrderHint) =>
+            context.CreatePlaceholder(
+                // It isn't understandable null dodging, UnspecifiedTerm will be inferred with Unspecified higher order.
+                higherOrderHint ?? Instance);
 
         public override Term Fixup(FixupContext context) =>
             this;
@@ -84,8 +86,13 @@ namespace Favalon.Terms
             base(higherOrder) =>
             this.Index = index;
 
-        public override Term Infer(InferContext context) =>
-            new PlaceholderTerm(this.Index, this.HigherOrder.Infer(context));
+        public override Term Infer(InferContext context, Term higherOrderHint)
+        {
+            var higherOrder = this.HigherOrder.Infer(context, higherOrderHint.HigherOrder);
+            higherOrder = context.Unify(higherOrder, higherOrderHint).Term;
+
+            return new PlaceholderTerm(this.Index, higherOrder);
+        }
 
         public override Term Fixup(FixupContext context) =>
             context.LookupUnifiedTerm(this);
@@ -118,8 +125,11 @@ namespace Favalon.Terms
         protected override Term GetHigherOrder() =>
             TypeTerm.From(this.Value.GetType());
 
-        public override Term Infer(InferContext context) =>
-            this;
+        public override Term Infer(InferContext context, Term higherOrderHint)
+        {
+            context.Unify(higherOrderHint, this.HigherOrder);
+            return this;
+        }
 
         public override Term Fixup(FixupContext context) =>
             this;
@@ -145,7 +155,8 @@ namespace Favalon.Terms
         public override Term HigherOrder =>
             null!;
 
-        public override Term Infer(InferContext context) =>
+        public override Term Infer(InferContext context, Term higherOrderHint) =>
+            // Cannot unify order 4th.
             this;
 
         public override Term Fixup(FixupContext context) =>

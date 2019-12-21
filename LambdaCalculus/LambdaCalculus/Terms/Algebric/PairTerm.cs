@@ -16,12 +16,27 @@ namespace Favalon.Terms.Algebric
         protected override Term GetHigherOrder() =>
             new PairTerm(this.Lhs.HigherOrder, this.Rhs.HigherOrder);
 
-        public override Term Infer(InferContext context)
+        public override Term Infer(InferContext context, Term higherOrderHint)
         {
-            var lhs = this.Lhs.Infer(context);
-            var rhs = this.Rhs.Infer(context);
-            
-            return new PairTerm(lhs, rhs);
+            Term lhs;
+            Term rhs;
+
+            if (higherOrderHint is PairTerm(Term lhsHigherOrder, Term rhsHigherOrder))
+            {
+                lhs = this.Lhs.Infer(context, lhsHigherOrder);
+                rhs = this.Rhs.Infer(context, rhsHigherOrder);
+            }
+            else
+            {
+                lhs = this.Lhs.Infer(context, UnspecifiedTerm.Instance);
+                rhs = this.Rhs.Infer(context, UnspecifiedTerm.Instance);
+            }
+
+            return
+                (object.ReferenceEquals(lhs, this.Lhs) &&
+                 object.ReferenceEquals(rhs, this.Rhs)) ?
+                    this :
+                    new PairTerm(lhs, rhs);
         }
 
         public override Term Fixup(FixupContext context)

@@ -10,7 +10,7 @@ namespace Favalon.Terms.Operators
         public override Term HigherOrder =>
             UnspecifiedTerm.Instance;
 
-        public override sealed Term Infer(InferContext context) =>
+        public override sealed Term Infer(InferContext context, Term higherOrderHint) =>
             this;
 
         public override sealed Term Fixup(FixupContext context) =>
@@ -51,8 +51,8 @@ namespace Favalon.Terms.Operators
         public override sealed Term Reduce(ReduceContext context) =>
             this;
 
-        public override sealed Term Infer(InferContext context) =>
-            this.Create(this.Argument0.Infer(context));
+        public override sealed Term Infer(InferContext context, Term higherOrderHint) =>
+            this.Create(this.Argument0.Infer(context, UnspecifiedTerm.Instance));
 
         public override sealed Term Fixup(FixupContext context) =>
             this.Create(this.Argument0.Fixup(context));
@@ -88,8 +88,8 @@ namespace Favalon.Terms.Operators
 
         protected abstract Term Create(Term argument0, Term argument1);
 
-        public override sealed Term Infer(InferContext context) =>
-            this.Create(this.Argument0.Infer(context), this.Argument1.Infer(context));
+        public override sealed Term Infer(InferContext context, Term higherOrderHint) =>
+            this.Create(this.Argument0.Infer(context, UnspecifiedTerm.Instance), this.Argument1.Infer(context, UnspecifiedTerm.Instance));
 
         public override sealed Term Fixup(FixupContext context) =>
             this.Create(this.Argument0.Fixup(context), this.Argument1.Fixup(context));

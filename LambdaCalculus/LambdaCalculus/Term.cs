@@ -12,7 +12,7 @@ namespace Favalon
 
         public abstract Term HigherOrder { get; }
 
-        public abstract Term Infer(InferContext context);
+        public abstract Term Infer(InferContext context, Term higherOrderHint);
 
         public abstract Term Fixup(FixupContext context);
 

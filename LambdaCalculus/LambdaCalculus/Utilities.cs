@@ -83,6 +83,18 @@ namespace System
     }
 }
 
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Method)]
+    internal sealed class TupleElementNamesAttribute : Attribute
+    {
+        public readonly string[] TransformNames;
+
+        public TupleElementNamesAttribute(string[] transformNames) =>
+            this.TransformNames = transformNames;
+    }
+}
+
 namespace System.Linq
 {
     internal static class EnumerableExtension

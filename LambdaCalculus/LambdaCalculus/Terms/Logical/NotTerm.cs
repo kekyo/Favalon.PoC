@@ -8,7 +8,7 @@ namespace Favalon.Terms.Logical
             base(argument)
         { }
 
-        protected override Term Create(Term argument) =>
+        protected override Term Create(Term argument, Term higherOrder) =>
             new NotTerm(argument);
 
         internal static Term Reduce(ReduceContext context, Term argument)

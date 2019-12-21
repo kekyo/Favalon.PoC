@@ -15,14 +15,16 @@ namespace Favalon.Terms
 
         protected abstract Term Create(Term lhs, Term rhs, Term higherOrder);
 
-        protected virtual Term Infer(InferContext context, Term lhs, Term rhs, Term higherOrder) =>
-            this.Create(lhs, rhs, higherOrder);
+        protected virtual Term Infer(InferContext context, Term lhs, Term rhs, Term higherOrderHint) =>
+            this.Create(lhs, rhs, higherOrderHint);
 
-        public override sealed Term Infer(InferContext context)
+        public override sealed Term Infer(InferContext context, Term higherOrderHint)
         {
-            var lhs = this.Lhs.Infer(context);
-            var rhs = this.Rhs.Infer(context);
-            var higherOrder = this.HigherOrder.Infer(context);
+            var higherOrder = this.HigherOrder.Infer(context, higherOrderHint.HigherOrder);
+            higherOrder = context.Unify(higherOrder, higherOrderHint).Term;
+
+            var lhs = this.Lhs.Infer(context, higherOrder);
+            var rhs = this.Rhs.Infer(context, higherOrder);
 
             context.Unify(lhs.HigherOrder, higherOrder);
             context.Unify(rhs.HigherOrder, higherOrder);

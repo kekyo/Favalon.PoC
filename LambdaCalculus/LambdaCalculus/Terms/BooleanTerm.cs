@@ -13,8 +13,11 @@ namespace Favalon.Terms
         public override Term HigherOrder =>
             Type;
 
-        public override Term Infer(InferContext context) =>
-            this;
+        public override Term Infer(InferContext context, Term higherOrderHint)
+        {
+            context.Unify(higherOrderHint, Type);
+            return this;
+        }
 
         public override Term Fixup(FixupContext context) =>
             this;

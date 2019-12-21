@@ -16,17 +16,21 @@ namespace Favalon.Terms
         protected override Term GetHigherOrder() =>
             this.Body.HigherOrder;
 
-        public override Term Infer(InferContext context)
+        public override Term Infer(InferContext context, Term higherOrderHint)
         {
-            var body = this.Body.Infer(context);
-            var bound = this.Bound.Infer(context);
+            var higherOrder = this.Body.HigherOrder.Infer(context, higherOrderHint.HigherOrder);
+            higherOrder = context.Unify(higherOrder, higherOrderHint).Term;
+
+            var body = this.Body.Infer(context, higherOrderHint);
+            var bound = this.Bound.Infer(context, higherOrderHint);
 
             if (bound is IdentityTerm(string identity))
             {
                 context.SetBoundTerm(identity, body);
             }
 
-            context.Unify(bound.HigherOrder, body.HigherOrder);
+            context.Unify(bound.HigherOrder, higherOrderHint);
+            context.Unify(body.HigherOrder, higherOrderHint);
 
             return
                 object.ReferenceEquals(bound, this.Bound) &&
@@ -89,12 +93,17 @@ namespace Favalon.Terms
         protected override Term GetHigherOrder() =>
             this.Continuation.HigherOrder;
 
-        public override Term Infer(InferContext context)
+        public override Term Infer(InferContext context, Term higherOrderHint)
         {
+            var higherOrder = this.Continuation.HigherOrder.Infer(context, higherOrderHint.HigherOrder);
+            higherOrder = context.Unify(higherOrder, higherOrderHint).Term;
+
             var newScope = context.NewScope();
 
-            var expression = this.Expression.Infer(newScope);
-            var continuation = this.Continuation.Infer(newScope);
+            var expression = this.Expression.Infer(newScope, this.Expression.HigherOrder);
+            var continuation = this.Continuation.Infer(newScope, higherOrderHint);
+
+            context.Unify(continuation.HigherOrder, higherOrder);
 
             return
                 object.ReferenceEquals(expression, this.Expression) &&

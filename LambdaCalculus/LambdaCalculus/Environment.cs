@@ -13,10 +13,13 @@ namespace Favalon
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
 
-        public Term Infer(Term term)
+        public Term Infer(Term term) =>
+            this.Infer(term, UnspecifiedTerm.Instance);
+
+        public Term Infer(Term term, Term higherOrderHint)
         {
             var context = new InferContext(this);
-            var partial = term.Infer(context);
+            var partial = term.Infer(context, higherOrderHint);
             return partial.Fixup(context);
         }
 

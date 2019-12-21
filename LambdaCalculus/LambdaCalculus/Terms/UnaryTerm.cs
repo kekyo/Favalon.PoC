@@ -9,19 +9,27 @@ namespace Favalon.Terms
         internal UnaryTerm(Term argument) =>
             this.Argument = argument;
 
-        protected abstract Term Create(Term argument);
+        protected abstract Term Create(Term argument, Term higherOrder);
 
-        protected virtual Term Infer(InferContext context, Term argument) =>
-            this.Create(argument);
+        protected virtual Term Infer(InferContext context, Term argument, Term higherOrderHint) =>
+            this.Create(argument, higherOrderHint);
 
-        public override sealed Term Infer(InferContext context) =>
-            this.Infer(context, this.Argument.Infer(context));
+        public override sealed Term Infer(InferContext context, Term higherOrderHint)
+        {
+            var higherOrder = this.HigherOrder.Infer(context, higherOrderHint.HigherOrder);
+            higherOrder = context.Unify(higherOrder, higherOrderHint).Term;
 
-        protected virtual Term Fixup(FixupContext context, Term argument) =>
-            this.Create(argument);
+            var argument = this.Argument.Infer(context, higherOrder);
+            context.Unify(argument.HigherOrder, higherOrder);            
+
+            return this.Infer(context, argument, higherOrder);
+        }
+
+        protected virtual Term Fixup(FixupContext context, Term argument, Term higherOrder) =>
+            this.Create(argument, higherOrder);
 
         public override sealed Term Fixup(FixupContext context) =>
-            this.Fixup(context, this.Argument.Fixup(context));
+            this.Fixup(context, this.Argument.Fixup(context), this.HigherOrder.Fixup(context));
 
         public override int GetHashCode() =>
             this.Argument.GetHashCode();

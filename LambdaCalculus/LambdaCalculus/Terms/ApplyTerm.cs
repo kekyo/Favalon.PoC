@@ -21,15 +21,16 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        public override Term Infer(InferContext context)
+        public override Term Infer(InferContext context, Term higherOrderHint)
         {
+            var higherOrder = this.HigherOrder.Infer(context, higherOrderHint.HigherOrder);
+            higherOrder = context.Unify(higherOrder, higherOrderHint).Term;
+
             var argument = this.Argument.Infer(context);
 
             var function = (this.Function is IApplicable applicable) ?
                 applicable.InferForApply(context, argument) :
                 this.Function.Infer(context);
-
-            var higherOrder = this.HigherOrder.Infer(context);
 
             // (f:('1 -> '2) a:'1):'2
             context.Unify(

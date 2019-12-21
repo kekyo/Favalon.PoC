@@ -1,5 +1,4 @@
 ﻿using Favalon.Terms;
-using Favalon.Terms.Algebric;
 using System.Collections.Generic;
 
 namespace Favalon.Contexts
@@ -20,43 +19,50 @@ namespace Favalon.Contexts
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
 
-        private bool Unify(PlaceholderTerm placeholder, Term term)
+        private UnifyResult Unify(PlaceholderTerm placeholder, Term term)
         {
             if (placeholders.TryGetValue(placeholder.Index, out var last))
             {
-                return Unify(last, term);
+                return this.Unify(last, term);
             }
             else
             {
                 placeholders.Add(placeholder.Index, term);
-                return true;
+                return new UnifyResult(true, term);
             }
         }
 
-        public bool Unify(Term term1, Term term2)
+        // Basically term2 will replace term1, but also swaps when be included PlaceHolderTerm.
+        public UnifyResult Unify(Term term1, Term term2)
         {
             if (object.ReferenceEquals(term1, term2) || term1.Equals(term2))
             {
-                return true;
+                return new UnifyResult(true, term1);
             }
             else if (term1 is PlaceholderTerm placeholder1)
             {
-                return Unify(placeholder1, term2);
+                return this.Unify(placeholder1, term2);
             }
             else if (term2 is PlaceholderTerm placeholder2)
             {
-                return Unify(placeholder2, term1);
+                return this.Unify(placeholder2, term1);
             }
-            else if (term1 is LambdaTerm(Term parameter1, Term body1) &&
-                term2 is LambdaTerm(Term parameter2, Term body2))
+            else if
+                (term1 is LambdaTerm(Term parameter1, Term body1) &&
+                 term2 is LambdaTerm(Term parameter2, Term body2))
             {
-                var unified1 = Unify(parameter1, parameter2);
-                var unified2 = Unify(body1, body2);
-                return unified1 && unified2;
+                var (parameterUnified, parameterTerm) = this.Unify(parameter1, parameter2);
+                var (bodyUnified, bodyTerm) = this.Unify(body1, body2);
+
+                return new UnifyResult(
+                    parameterUnified && bodyUnified,
+                    LambdaTerm.Create(parameterTerm, bodyTerm));
             }
             else
             {
-                return false;
+                // Higher priority term2 rather than term1.
+                // (The terms unmarked nullable-refs in C#, but also come from 4th order or Unspecified higher order 8)
+                return new UnifyResult(false, term2 ?? term1);
             }
         }
     }

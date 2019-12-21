@@ -13,28 +13,39 @@ namespace Favalon.Terms
             base(higherOrder) =>
             this.Matchers = matchers;
 
-        public override Term Infer(InferContext context)
+        public override Term Infer(InferContext context, Term higherOrderHint)
         {
             // Best effort infer procedure.
+
+            var higherOrder = this.HigherOrder.Infer(context, higherOrderHint.HigherOrder);
+            higherOrder = context.Unify(higherOrder, higherOrderHint).Term;
 
             var matchers = this.Matchers.
                 Select(entry =>
                 {
-                    if (entry is PairTerm(UnspecifiedTerm match, Term body))
+                    // Unmatched entry
+                    if (entry is PairTerm(UnspecifiedTerm _, Term unmatchedBody))
                     {
-                        var body_ = body.Infer(context);
-                        return object.ReferenceEquals(body_, body) ?
+                        var body = unmatchedBody.Infer(context, higherOrder);
+                        return object.ReferenceEquals(body, unmatchedBody) ?
                             entry :
-                            new PairTerm(match, body_);
+                            new PairTerm(UnspecifiedTerm.Instance, body);
                     }
+                    // Matcher
+                    else if (entry is PairTerm(Term match, Term matchedBody))
+                    {
+                        var body = matchedBody.Infer(context, higherOrder);
+                        return object.ReferenceEquals(body, matchedBody) ?
+                            entry :
+                            new PairTerm(match, body);
+                    }
+                    // Unresolved entry
                     else
                     {
-                        return entry.Infer(context);
+                        return entry.Infer(context, UnspecifiedTerm.Instance);
                     }
                 }).
                 ToArray();
-
-            var higherOrder = this.HigherOrder.Infer(context);
 
             foreach (var entry in matchers)
             {
@@ -55,6 +66,9 @@ namespace Favalon.Terms
         {
             // Strict infer procedure.
 
+            var higherOrder = this.HigherOrder.Infer(context);
+            context.Unify(higherOrder, inferredArgument.HigherOrder);
+
             var matchers = this.Matchers.
                 Select(entry =>
                 {
@@ -71,9 +85,6 @@ namespace Favalon.Terms
                     }
                 }).
                 ToArray();
-
-            var higherOrder = this.HigherOrder.Infer(context);
-            context.Unify(higherOrder, inferredArgument.HigherOrder);
 
             foreach (var entry in matchers)
             {

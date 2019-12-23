@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 
 namespace Favalon.Terms.Types
 {
@@ -265,11 +264,11 @@ namespace Favalon.Terms.Types
 
         public new Type Type { get; }
 
-        Term IApplicable.InferForApply(InferContext context, Term rhs) =>
+        Term IApplicable.InferForApply(InferContext context, Term argument, Term higherOrderHint) =>
             this;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-            From(this.Type.MakeGenericType(((IClrType)rhs.Reduce(context)).Type));
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+            From(this.Type.MakeGenericType(((IClrType)argument.Reduce(context)).Type));
 
         public override bool Equals(Term? other) =>
             other is ClrTypeConstructorTerm rhs ? this.Type.Equals(rhs.Type) : false;

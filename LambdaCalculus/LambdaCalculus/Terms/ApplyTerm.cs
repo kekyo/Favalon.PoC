@@ -1,12 +1,13 @@
 ﻿using Favalon.Contexts;
+using System.Diagnostics;
 
 namespace Favalon.Terms
 {
     // It's only using in ApplyTerm.
     public interface IApplicable
     {
-        Term InferForApply(InferContext context, Term inferredArgument);
-        Term? ReduceForApply(ReduceContext context, Term argument);
+        Term InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint);
+        Term? ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint);
     }
 
     public sealed class ApplyTerm : HigherOrderHoldTerm
@@ -24,12 +25,11 @@ namespace Favalon.Terms
         public override Term Infer(InferContext context)
         {
             var argument = this.Argument.Infer(context);
+            var higherOrder = this.HigherOrder.Infer(context);
 
             var function = (this.Function is IApplicable applicable) ?
-                applicable.InferForApply(context, argument) :
+                applicable.InferForApply(context, argument, higherOrder) :
                 this.Function.Infer(context);
-
-            var higherOrder = this.HigherOrder.Infer(context);
 
             // (f:('1 -> '2) a:'1):'2
             context.Unify(
@@ -61,14 +61,17 @@ namespace Favalon.Terms
         public override Term Reduce(ReduceContext context)
         {
             var function = this.Function.Reduce(context);
+            var higherOrder = this.HigherOrder.Reduce(context);
+
             if (function is IApplicable applicable &&
-                applicable.ReduceForApply(context, this.Argument) is Term term)
+                applicable.ReduceForApply(context, this.Argument, higherOrder) is Term term)
             {
+                Debug.Assert(term.HigherOrder.Equals(higherOrder));
+
                 return term;
             }
 
             var argument = this.Argument.Reduce(context);   // TODO: Reduced twice
-            var higherOrder = this.HigherOrder.Reduce(context);
 
             return
                 object.ReferenceEquals(function, this.Function) &&

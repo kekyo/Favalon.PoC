@@ -7,10 +7,10 @@ namespace Favalon.Terms.Operators
         private LambdaOperatorTerm()
         { }
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint) =>
            this;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             new LambdaArrowParameterTerm(argument);   // NOT reduced at this time.
 
         public static LambdaOperatorTerm Instance =
@@ -25,10 +25,10 @@ namespace Favalon.Terms.Operators
             protected override Term Create(Term argument) =>
                 new LambdaArrowParameterTerm(argument);
 
-            Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+            Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint) =>
                this;
 
-            Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
                 LambdaTerm.Create(this.Argument0, argument);
         }
     }

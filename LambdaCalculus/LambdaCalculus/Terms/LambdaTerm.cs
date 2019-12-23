@@ -41,7 +41,7 @@ namespace Favalon.Terms
                     new LambdaTerm(parameter, body);
         }
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument)
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint)
         {
             // Strict infer procedure.
 
@@ -56,6 +56,8 @@ namespace Favalon.Terms
 
             // Calculate inferring with applied argument.
             var body = this.Body.Infer(newScope);
+
+            context.Unify(body.HigherOrder, higherOrderHint);
 
             return
                 object.ReferenceEquals(parameter, this.Parameter) &&
@@ -96,7 +98,7 @@ namespace Favalon.Terms
                     new LambdaTerm(parameter, body);
         }
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument)
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
         {
             var newScope = context.NewScope();
 

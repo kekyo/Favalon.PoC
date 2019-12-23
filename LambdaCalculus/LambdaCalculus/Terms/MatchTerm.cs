@@ -51,9 +51,12 @@ namespace Favalon.Terms
                     new MatchTerm(matchers, higherOrder);
         }
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument)
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint)
         {
             // Strict infer procedure.
+
+            var higherOrder = this.HigherOrder.Infer(context);
+            context.Unify(higherOrder, higherOrderHint);
 
             var matchers = this.Matchers.
                 Select(entry =>
@@ -67,19 +70,17 @@ namespace Favalon.Terms
                     }
                     else
                     {
+                        // Infer entry but cannot derives higher order hint.
                         return entry.Infer(context);
                     }
                 }).
                 ToArray();
 
-            var higherOrder = this.HigherOrder.Infer(context);
-            context.Unify(higherOrder, inferredArgument.HigherOrder);
-
             foreach (var entry in matchers)
             {
                 if (entry is PairTerm(_, Term body))
                 {
-                    context.Unify(higherOrder, body.HigherOrder);
+                    context.Unify(body.HigherOrder, higherOrderHint);
                 }
             }
 
@@ -108,9 +109,9 @@ namespace Favalon.Terms
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
         {
-            var argument = rhs.Reduce(context);
+            var argument_ = argument.Reduce(context);
 
             var reducedMatches = new List<Term>();
             foreach (var entry in this.Matchers)
@@ -124,7 +125,7 @@ namespace Favalon.Terms
                     }
 
                     var reducedMatch = match.Reduce(context);
-                    if (reducedMatch.Equals(argument))   // TODO: Recursive matcher
+                    if (reducedMatch.Equals((Term)argument_))   // TODO: Recursive matcher
                     {
                         return body.Reduce(context);
                     }

@@ -87,9 +87,6 @@ namespace Favalon
         public static EqualTerm Equal(Term lhs, Term rhs) =>
             new EqualTerm(lhs, rhs);
 
-        public static IfTerm If(Term condition, Term then, Term @else) =>
-            new IfTerm(condition, then, @else, UnspecifiedTerm.Instance);
-
         public static PairTerm Pair(Term lhs, Term rhs) =>
             new PairTerm(lhs, rhs);
 

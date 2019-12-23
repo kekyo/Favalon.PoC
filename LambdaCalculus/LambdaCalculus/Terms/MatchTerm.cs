@@ -93,11 +93,44 @@ namespace Favalon.Terms
 
         public override Term Fixup(FixupContext context)
         {
+            // Best effort fixup procedure.
+
             var matchers = this.Matchers.
                 Select(entry => entry.Fixup(context)).
                 ToArray();
 
             var higherOrder = this.HigherOrder.Fixup(context);
+
+            return
+                object.ReferenceEquals(higherOrder, this.HigherOrder) &&
+                matchers.Zip(this.Matchers, object.ReferenceEquals).All(r => r) ?
+                    this :
+                    new MatchTerm(matchers, higherOrder);
+        }
+
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint)
+        {
+            // Strict fixup procedure.
+
+            var higherOrder = this.HigherOrder.Fixup(context);
+
+            var matchers = this.Matchers.
+                Select(entry =>
+                {
+                    if (entry is PairTerm(UnspecifiedTerm match, Term body))
+                    {
+                        var body_ = body.Fixup(context);
+                        return object.ReferenceEquals(body_, body) ?
+                            entry :
+                            new PairTerm(match, body_);
+                    }
+                    else
+                    {
+                        // Infer entry but cannot derives higher order hint.
+                        return entry.Fixup(context);
+                    }
+                }).
+                ToArray();
 
             return
                 object.ReferenceEquals(higherOrder, this.HigherOrder) &&

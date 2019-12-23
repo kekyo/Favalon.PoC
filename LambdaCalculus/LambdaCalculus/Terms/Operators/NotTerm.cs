@@ -11,6 +11,9 @@ namespace Favalon.Terms.Operators
         Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint) =>
            this;
 
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint) =>
+            this;
+
         Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             NotTerm.Reduce(context, argument);
 

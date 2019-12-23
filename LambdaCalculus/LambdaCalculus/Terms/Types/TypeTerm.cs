@@ -267,6 +267,9 @@ namespace Favalon.Terms.Types
         Term IApplicable.InferForApply(InferContext context, Term argument, Term higherOrderHint) =>
             this;
 
+        Term IApplicable.FixupForApply(FixupContext context, Term argument, Term higherOrderHint) =>
+            this;
+
         Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             From(this.Type.MakeGenericType(((IClrType)argument.Reduce(context)).Type));
 

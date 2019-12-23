@@ -68,6 +68,22 @@ namespace Favalon.Terms
 
         public override Term Fixup(FixupContext context)
         {
+            // Best effort fixup procedure.
+
+            var parameter = this.Parameter.Fixup(context);
+            var body = this.Body.Fixup(context);
+
+            return
+                object.ReferenceEquals(parameter, this.Parameter) &&
+                object.ReferenceEquals(body, this.Body) ?
+                    this :
+                    new LambdaTerm(parameter, body);
+        }
+
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint)
+        {
+            // Strict fixup procedure.
+
             var parameter = this.Parameter.Fixup(context);
             var body = this.Body.Fixup(context);
 

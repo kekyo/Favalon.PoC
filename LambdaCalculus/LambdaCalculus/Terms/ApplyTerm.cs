@@ -7,6 +7,9 @@ namespace Favalon.Terms
     public interface IApplicable
     {
         Term InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint);
+
+        Term FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint);
+
         Term? ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint);
     }
 
@@ -47,8 +50,11 @@ namespace Favalon.Terms
         public override Term Fixup(FixupContext context)
         {
             var argument = this.Argument.Fixup(context);
-            var function = this.Function.Fixup(context);
             var higherOrder = this.HigherOrder.Fixup(context);
+
+            var function = (this.Function is IApplicable applicable) ?
+                applicable.FixupForApply(context, argument, higherOrder) :
+                this.Function.Fixup(context);
 
             return
                 object.ReferenceEquals(function, this.Function) &&
@@ -66,7 +72,8 @@ namespace Favalon.Terms
             if (function is IApplicable applicable &&
                 applicable.ReduceForApply(context, this.Argument, higherOrder) is Term term)
             {
-                Debug.Assert(term.HigherOrder.Equals(higherOrder));
+                // TODO:
+                //Debug.Assert(term.HigherOrder.Equals(higherOrder));
 
                 return term;
             }

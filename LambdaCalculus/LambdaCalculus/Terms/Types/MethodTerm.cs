@@ -1,6 +1,5 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Algebric;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -63,6 +62,9 @@ namespace Favalon.Terms.Types
         public override Term Fixup(FixupContext context) =>
             this;
 
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint) =>
+            this;
+
         public override Term Reduce(ReduceContext context) =>
             this;
 
@@ -99,21 +101,20 @@ namespace Favalon.Terms.Types
                 Distinct().
                 ToArray());
 
-        public override Term Infer(InferContext context) =>
-            // Best effort infer procedure: cannot fixed.
-            this;
-
         private IEnumerable<ClrMethodTerm> GetFittedAndOrderedMethods(Term parameterHigherOrder, Term returnHigherOrderHint) =>
             this.Methods.
                 Select(method => (
                     method,
                     parameterType: TypeTerm.Narrow(method.ParameterHigherOrder, parameterHigherOrder),
                     returnType: TypeTerm.Narrow(returnHigherOrderHint, method.ReturnHigherOrder))).
-                Where(entry => entry.parameterType is ClrTypeTerm && entry.returnType is ClrTypeTerm).
-                Select(entry => (entry.method, parameterType: (ClrTypeTerm)entry.parameterType!, returnType: (ClrTypeTerm)entry.returnType!)).
-                OrderBy(entry => entry.parameterType, TypeTerm.ConcreterComparer).
-                ThenBy(entry => entry.returnType, TypeTerm.ConcreterComparer).
+                Where(entry => entry.parameterType is Term && entry.returnType is Term).
+                OrderBy(entry => entry.parameterType!, TypeTerm.ConcreterComparer).
+                ThenBy(entry => entry.returnType!, TypeTerm.ConcreterComparer).
                 Select(entry => entry.method);
+
+        public override Term Infer(InferContext context) =>
+            // Best effort infer procedure: cannot fixed.
+            this;
 
         Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint)
         {
@@ -139,7 +140,31 @@ namespace Favalon.Terms.Types
         }
 
         public override Term Fixup(FixupContext context) =>
+            // Best effort fixup procedure: cannot fixed.
             this;
+
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint)
+        {
+            // Strict fixup procedure.
+
+            var fittedMethods =
+                this.GetFittedAndOrderedMethods(fixuppedArgument.HigherOrder, higherOrderHint).
+                ToArray();
+
+            return fittedMethods.Length switch
+            {
+                // Matched single method:
+                1 => fittedMethods[0],
+                // No matched: it contains illegal terms, reducer cause error when will not fixed.
+                0 => this,
+                // Matched multiple methods:
+                _ => (fittedMethods.Length != this.Methods.Length) ?
+                    // Partially matched.
+                    new ClrMethodOverloadedTerm(fittedMethods) :
+                    // All matched: not changed.
+                    this
+            };
+        }
 
         public override Term Reduce(ReduceContext context) =>
             this;

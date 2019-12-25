@@ -98,78 +98,21 @@ namespace Favalon.Terms.Types
             // Best effort infer procedure: cannot fixed.
             this;
 
-        private static IEnumerable<T> GetFittedAndOrderedMethods<T>(T[] methods, Term parameterHigherOrder, Term returnHigherOrderHint)
-            where T : Term =>
-            methods.
-                Select(method =>
-                    (method.HigherOrder is LambdaTerm methodHigherOrder) ?
-                        (method,
-                         parameterType: TypeTerm.Narrow(methodHigherOrder.Parameter, parameterHigherOrder),
-                         returnType: TypeTerm.Narrow(returnHigherOrderHint, methodHigherOrder.Body)) :
-                        (method, null, null)).
-                Where(entry => entry.parameterType is Term && entry.returnType is Term).
-                OrderBy(entry => entry.parameterType!, TypeTerm.ConcreterComparer).
-                ThenBy(entry => entry.returnType!, TypeTerm.ConcreterComparer).
-                Select(entry => entry.method);
-
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint)
-        {
-            // Strict infer procedure.
-
-            var fittedMethods =
-                GetFittedAndOrderedMethods(this.Methods, inferredArgument.HigherOrder, higherOrderHint).
-                ToArray();
-
-            return fittedMethods.Length switch
-            {
-                // Matched single method:
-                1 => fittedMethods[0],
-                // No matched: it contains illegal terms, reducer cause error when will not fixed.
-                0 => this,
-                // Matched multiple methods:
-                _ => (fittedMethods.Length != this.Methods.Length) ?
-                    // Partially matched.
-                    new ClrMethodOverloadedTerm(fittedMethods) :
-                    // All matched: not changed.
-                    this
-            };
-        }
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint) =>
+            ApplyTerm.AggregateForApply(this, this.Methods, inferredArgument, higherOrderHint);
 
         public override Term Fixup(FixupContext context) =>
             // Best effort fixup procedure: cannot fixed.
             this;
 
-        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint)
-        {
-            // Strict fixup procedure.
-
-            var fittedMethods =
-                this.GetFittedAndOrderedMethods(fixuppedArgument.HigherOrder, higherOrderHint).
-                ToArray();
-
-            return fittedMethods.Length switch
-            {
-                // Matched single method:
-                1 => fittedMethods[0],
-                // No matched: it contains illegal terms, reducer cause error when will not fixed.
-                0 => this,
-                // Matched multiple methods:
-                _ => (fittedMethods.Length != this.Methods.Length) ?
-                    // Partially matched.
-                    new ClrMethodOverloadedTerm(fittedMethods) :
-                    // All matched: not changed.
-                    this
-            };
-        }
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint) =>
+            ApplyTerm.AggregateForApply(this, this.Methods, fixuppedArgument, higherOrderHint);
 
         public override Term Reduce(ReduceContext context) =>
             this;
 
         Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
-            (argument.Reduce(context) is ConstantTerm constantArgument) ?
-                this.GetFittedAndOrderedMethods(constantArgument.HigherOrder, higherOrderHint).
-                FirstOrDefault()?.Invoke(constantArgument) :
-                null;
+            ApplyTerm.ReduceForApply(this, this.Methods, context, argument, higherOrderHint);
 
         public override bool Equals(Term? other) =>
             other is ClrMethodOverloadedTerm rhs ?

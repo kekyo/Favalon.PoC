@@ -38,12 +38,6 @@ namespace Favalon.Terms.Types
         protected override Term GetHigherOrder() =>
             GetMethodHigherOrder(this.method);
 
-        public Term ParameterHigherOrder =>
-            ((LambdaTerm)this.HigherOrder).Parameter;
-
-        public Term ReturnHigherOrder =>
-            ((LambdaTerm)this.HigherOrder).Body;
-
         public override Term Infer(InferContext context) =>
             this;
 
@@ -102,10 +96,12 @@ namespace Favalon.Terms.Types
 
         private IEnumerable<ClrMethodTerm> GetFittedAndOrderedMethods(Term parameterHigherOrder, Term returnHigherOrderHint) =>
             this.Methods.
-                Select(method => (
-                    method,
-                    parameterType: TypeTerm.Narrow(method.ParameterHigherOrder, parameterHigherOrder),
-                    returnType: TypeTerm.Narrow(returnHigherOrderHint, method.ReturnHigherOrder))).
+                Select(method =>
+                    (method.HigherOrder is LambdaTerm methodHigherOrder) ?
+                        (method,
+                         parameterType: TypeTerm.Narrow(methodHigherOrder.Parameter, parameterHigherOrder),
+                         returnType: TypeTerm.Narrow(returnHigherOrderHint, methodHigherOrder.Body)) :
+                        (method, null, null)).
                 Where(entry => entry.parameterType is Term && entry.returnType is Term).
                 OrderBy(entry => entry.parameterType!, TypeTerm.ConcreterComparer).
                 ThenBy(entry => entry.returnType!, TypeTerm.ConcreterComparer).

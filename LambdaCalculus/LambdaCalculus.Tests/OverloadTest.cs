@@ -87,7 +87,7 @@ namespace Favalon
                     expected);
 
             var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+            var actual = environment.Infer(term);
 
             Assert.AreEqual(expected, actual.HigherOrder);
         }

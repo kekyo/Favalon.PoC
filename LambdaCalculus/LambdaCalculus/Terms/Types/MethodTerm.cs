@@ -94,8 +94,13 @@ namespace Favalon.Terms.Types
                 Select(method => method.HigherOrder).
                 Distinct())!;
 
-        private IEnumerable<ClrMethodTerm> GetFittedAndOrderedMethods(Term parameterHigherOrder, Term returnHigherOrderHint) =>
-            this.Methods.
+        public override Term Infer(InferContext context) =>
+            // Best effort infer procedure: cannot fixed.
+            this;
+
+        private static IEnumerable<T> GetFittedAndOrderedMethods<T>(T[] methods, Term parameterHigherOrder, Term returnHigherOrderHint)
+            where T : Term =>
+            methods.
                 Select(method =>
                     (method.HigherOrder is LambdaTerm methodHigherOrder) ?
                         (method,
@@ -107,16 +112,12 @@ namespace Favalon.Terms.Types
                 ThenBy(entry => entry.returnType!, TypeTerm.ConcreterComparer).
                 Select(entry => entry.method);
 
-        public override Term Infer(InferContext context) =>
-            // Best effort infer procedure: cannot fixed.
-            this;
-
         Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint)
         {
             // Strict infer procedure.
 
             var fittedMethods =
-                this.GetFittedAndOrderedMethods(inferredArgument.HigherOrder, higherOrderHint).
+                GetFittedAndOrderedMethods(this.Methods, inferredArgument.HigherOrder, higherOrderHint).
                 ToArray();
 
             return fittedMethods.Length switch

@@ -25,6 +25,48 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
+        private static IEnumerable<T> GetFittedAndOrderedMethods<T>(T[] methods, Term parameterHigherOrder, Term returnHigherOrderHint)
+            where T : Term =>
+            methods.
+                Select(method =>
+                    (method.HigherOrder is LambdaTerm methodHigherOrder) ?
+                        (method,
+                         parameterType: TypeTerm.Narrow(methodHigherOrder.Parameter, parameterHigherOrder),
+                         returnType: TypeTerm.Narrow(returnHigherOrderHint, methodHigherOrder.Body)) :
+                        (method, null, null)).
+                Where(entry => entry.parameterType is Term && entry.returnType is Term).
+                OrderBy(entry => entry.parameterType!, TypeTerm.ConcreterComparer).
+                ThenBy(entry => entry.returnType!, TypeTerm.ConcreterComparer).
+                Select(entry => entry.method);
+
+        private static Term InferForApply(
+            Term @this,
+            Term[] methods,
+            InferContext context,
+            Term inferredArgument,
+            Term higherOrderHint)
+        {
+            // Strict infer procedure.
+
+            var fittedMethods =
+                GetFittedAndOrderedMethods(methods, inferredArgument.HigherOrder, higherOrderHint).
+                ToArray();
+
+            return fittedMethods.Length switch
+            {
+                // Matched single method:
+                1 => fittedMethods[0],
+                // No matched: it contains illegal terms, reducer cause error when will not fixed.
+                0 => @this,
+                // Matched multiple methods:
+                _ => (fittedMethods.Length != methods.Length) ?
+                    // Partially matched.
+                    new SumTerm(fittedMethods) :
+                    // All matched: not changed.
+                    @this
+            };
+        }
+
         public override Term Infer(InferContext context)
         {
             var argument = this.Argument.Infer(context);

@@ -12,7 +12,7 @@ namespace Favalon.Terms.Algebric
             this.Terms = terms;
 
         protected override sealed Term GetHigherOrder() =>
-            this.Create(this.Terms.Select(term => term.HigherOrder).ToArray());
+            this.Create(this.Terms.Select(term => term.HigherOrder).Distinct().ToArray());
 
         protected abstract Term Create(Term[] terms);
 

@@ -6,6 +6,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Favalon
 {
@@ -65,6 +66,30 @@ namespace Favalon
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(Term.Constant(expected), actual);
+        }
+
+        [TestCase(typeof(int), typeof(double))]
+        public void OverloadedMethodsFromAnnotatedReturnTypes(params Type[] requiredTypes)
+        {
+            var ms = typeof(Convert).GetMethods(
+                BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).
+                Where(m => m.GetParameters().Length == 1).
+                ToArray();
+
+            var expected =
+                Term.Sum(
+                    requiredTypes.Select(t => Term.Type(t)));
+
+            var term =
+                Term.Apply(
+                    Term.Method(ms),
+                    Term.Constant("123"),
+                    expected);
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(expected, actual.HigherOrder);
         }
     }
 }

@@ -96,10 +96,9 @@ namespace Favalon.Terms.Types
             this.Methods = methods;
 
         protected override Term GetHigherOrder() =>
-            new SumTerm(this.Methods.
+            SumTerm.Composed(this.Methods.
                 Select(method => method.HigherOrder).
-                Distinct().
-                ToArray());
+                Distinct())!;
 
         private IEnumerable<ClrMethodTerm> GetFittedAndOrderedMethods(Term parameterHigherOrder, Term returnHigherOrderHint) =>
             this.Methods.

@@ -176,6 +176,6 @@ namespace Favalon.Terms
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            $"{this.Function.PrettyPrint(context)} {this.Argument.PrettyPrint(context)}";
+            $"({this.Function.PrettyPrint(context)}) {this.Argument.PrettyPrint(context)}";
     }
 }

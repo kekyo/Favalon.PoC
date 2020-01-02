@@ -12,9 +12,10 @@ namespace Favalon.Contexts
             base(parent) =>
             this.placeholders = placeholders;
 
-        public Term LookupUnifiedTerm(PlaceholderTerm placeholder)
+        public Term? LookupUnifiedTerm(PlaceholderTerm placeholder)
         {
             var current = placeholder;
+            Term? last = null;
             while (true)
             {
                 if (placeholders.TryGetValue(current.Index, out var next))
@@ -22,6 +23,7 @@ namespace Favalon.Contexts
                     if (next is PlaceholderTerm p)
                     {
                         current = p;
+                        last = p;
                     }
                     else
                     {
@@ -30,7 +32,7 @@ namespace Favalon.Contexts
                 }
                 else
                 {
-                    return current;
+                    return last;
                 }
             }
         }

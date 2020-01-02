@@ -1,6 +1,7 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Types;
 using LambdaCalculus.Contexts;
+using System;
 
 #pragma warning disable 659
 
@@ -70,6 +71,9 @@ namespace Favalon.Terms
         public override int GetHashCode() =>
             hashCode;
 
+        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+            false;
+
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             "?";
 
@@ -92,7 +96,9 @@ namespace Favalon.Terms
             new PlaceholderTerm(this.Index, this.HigherOrder.Infer(context));
 
         public override Term Fixup(FixupContext context) =>
-            context.LookupUnifiedTerm(this);
+            context.LookupUnifiedTerm(this) is Term term ?
+                term.Fixup(context) :
+                this;
 
         public override Term Reduce(ReduceContext context)
         {

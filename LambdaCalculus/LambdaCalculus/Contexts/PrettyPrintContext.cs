@@ -15,5 +15,12 @@
         {
             this.HigherOrderDetail = higherOrderDetail;
         }
+
+        internal PrettyPrintContext DropReadable() =>
+            this.HigherOrderDetail switch
+            {
+                HigherOrderDetails.Readable => new PrettyPrintContext(HigherOrderDetails.None),
+                _ => this
+            };
     }
 }

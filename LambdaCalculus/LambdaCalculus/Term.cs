@@ -28,8 +28,8 @@ namespace Favalon
             };
 
         public string PrettyPrint(PrettyPrintContext context) =>
-            this.IsInclude(context.HigherOrderDetail) ?
-                $"({this.OnPrettyPrint(context)}):{this.HigherOrder.PrettyPrint(context)}" :
+            this.HigherOrder is Term && this.IsInclude(context.HigherOrderDetail) ?
+                $"({this.OnPrettyPrint(context)}):{this.HigherOrder.PrettyPrint(context.DropReadable())}" :
                 this.OnPrettyPrint(context);
 
         public string DebuggerDisplay =>

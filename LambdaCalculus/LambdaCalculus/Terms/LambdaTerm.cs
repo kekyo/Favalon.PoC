@@ -17,7 +17,7 @@ namespace Favalon.Terms
         }
 
         protected override Term GetHigherOrder() =>
-            new LambdaTerm(this.Parameter.HigherOrder, this.Body.HigherOrder);
+            Create(this.Parameter.HigherOrder, this.Body.HigherOrder);
 
         public override Term Infer(InferContext context)
         {
@@ -39,7 +39,7 @@ namespace Favalon.Terms
                 object.ReferenceEquals(parameter, this.Parameter) &&
                 object.ReferenceEquals(body, this.Body) ?
                     this :
-                    new LambdaTerm(parameter, body);
+                    Create(parameter, body);
         }
 
         Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint)
@@ -64,7 +64,7 @@ namespace Favalon.Terms
                 object.ReferenceEquals(parameter, this.Parameter) &&
                 object.ReferenceEquals(body, this.Body) ?
                     this :
-                    new LambdaTerm(parameter, body);
+                    Create(parameter, body);
         }
 
         public override Term Fixup(FixupContext context)
@@ -78,7 +78,7 @@ namespace Favalon.Terms
                 object.ReferenceEquals(parameter, this.Parameter) &&
                 object.ReferenceEquals(body, this.Body) ?
                     this :
-                    new LambdaTerm(parameter, body);
+                    Create(parameter, body);
         }
 
         Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint)
@@ -92,7 +92,7 @@ namespace Favalon.Terms
                 object.ReferenceEquals(parameter, this.Parameter) &&
                 object.ReferenceEquals(body, this.Body) ?
                     this :
-                    new LambdaTerm(parameter, body);
+                    Create(parameter, body);
         }
 
         public override Term Reduce(ReduceContext context)
@@ -112,7 +112,7 @@ namespace Favalon.Terms
                 object.ReferenceEquals(parameter, this.Parameter) &&
                 object.ReferenceEquals(body, this.Body) ?
                     this :
-                    new LambdaTerm(parameter, body);
+                    Create(parameter, body);
         }
 
         Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
@@ -148,24 +148,21 @@ namespace Favalon.Terms
             body = this.Body;
         }
 
+        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+            base.IsInclude(higherOrderDetail) &&
+            this.Parameter.HigherOrder is Term &&
+            this.Body.HigherOrder is Term;
+
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Parameter.PrettyPrint(context)} -> {this.Body.PrettyPrint(context)}";
 
-        public static LambdaTerm Create(Term parameter, Term body)
-        {
-            if (parameter is UnspecifiedTerm && body is UnspecifiedTerm)
+        public static LambdaTerm Create(Term parameter, Term body) =>
+            (parameter, body) switch
             {
-                return Unspecified;
-            }
-            else if (parameter is KindTerm && body is KindTerm)
-            {
-                return Kind;
-            }
-            else
-            {
-                return new LambdaTerm(parameter, body);
-            }
-        }
+                (UnspecifiedTerm _, UnspecifiedTerm _) => Unspecified,
+                (KindTerm _, KindTerm _) => Kind,
+                _ => new LambdaTerm(parameter, body)
+            };
 
         public static new readonly LambdaTerm Unspecified =
             new LambdaTerm(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);

@@ -1,4 +1,5 @@
 ﻿using Favalon.Contexts;
+using LambdaCalculus.Contexts;
 
 namespace Favalon.Terms.Operators
 {
@@ -18,6 +19,9 @@ namespace Favalon.Terms.Operators
 
         public override sealed Term Reduce(ReduceContext context) =>
             this;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            "(opsym)";  // TODO:
     }
 
     public abstract class OperatorSymbolTerm<T> : OperatorSymbolTerm
@@ -59,6 +63,9 @@ namespace Favalon.Terms.Operators
 
         public override int GetHashCode() =>
             this.Argument0.GetHashCode();
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            "(oparg0)";  // TODO:
     }
 
     public abstract class OperatorArgument0Term<T> : OperatorArgument0Term
@@ -99,6 +106,9 @@ namespace Favalon.Terms.Operators
 
         public override int GetHashCode() =>
             this.Argument0.GetHashCode() ^ this.Argument1.GetHashCode();
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            "(oparg1)";  // TODO:
     }
 
     public abstract class OperatorArgument1Term<T> : OperatorArgument1Term

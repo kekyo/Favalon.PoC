@@ -1,5 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Algebric;
+using LambdaCalculus.Contexts;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -193,5 +194,13 @@ namespace Favalon.Terms
 
         public override int GetHashCode() =>
             this.Matchers.Aggregate(0, (agg, pair) => agg ^ pair.GetHashCode());
+
+        protected override string OnPrettyPrint(PrettyPrintContext context)
+        {
+            var matchers = Utilities.Join(
+                " ",
+                this.Matchers.Select(matcher => $"({matcher.PrettyPrint(context)})"));
+            return $"match ({matchers})";
+        }
     }
 }

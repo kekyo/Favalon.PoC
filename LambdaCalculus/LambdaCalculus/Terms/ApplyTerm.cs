@@ -1,6 +1,7 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Algebric;
 using Favalon.Terms.Types;
+using LambdaCalculus.Contexts;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -173,5 +174,8 @@ namespace Favalon.Terms
 
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"{this.Function.PrettyPrint(context)} {this.Argument.PrettyPrint(context)}";
     }
 }

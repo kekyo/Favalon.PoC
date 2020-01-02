@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LambdaCalculus.Contexts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,6 +10,14 @@ namespace Favalon.Terms.Algebric
         internal SumTerm(Term[] terms) :
             base(terms)
         { }
+
+        protected override string OnPrettyPrint(PrettyPrintContext context)
+        {
+            var terms = Utilities.Join(
+                " + ",
+                this.Terms.Select(term => $"({term.PrettyPrint(context)})"));
+            return $"({terms})";
+        }
 
         protected override Term Create(Term[] terms) =>
             Composed(terms)!;

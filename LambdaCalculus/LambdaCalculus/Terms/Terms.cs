@@ -1,5 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Types;
+using LambdaCalculus.Contexts;
 
 #pragma warning disable 659
 
@@ -69,6 +70,9 @@ namespace Favalon.Terms
         public override int GetHashCode() =>
             hashCode;
 
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            "?";
+
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();
     }
@@ -103,6 +107,9 @@ namespace Favalon.Terms
 
         public override int GetHashCode() =>
             hashCode ^ this.Index;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"'{this.Index}";
     }
 
     public sealed class ConstantTerm : HigherOrderLazyTerm
@@ -132,6 +139,19 @@ namespace Favalon.Terms
 
         public override int GetHashCode() =>
             hashCode ^ this.Value.GetHashCode();
+
+        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+            higherOrderDetail switch
+            {
+                HigherOrderDetails.None => false,
+                HigherOrderDetails.Full => true,
+                _ => this.Value is string || this.Value is char
+            };
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            this.Value is string str ? $"\"{str}\"" :
+            this.Value is char ch ? $"'{ch}'" :
+            this.Value.ToString();
     }
 
     public sealed class KindTerm : Term
@@ -159,6 +179,12 @@ namespace Favalon.Terms
 
         public override int GetHashCode() =>
             hashCode;
+
+        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+            false;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            "*";
 
         public static readonly KindTerm Instance =
             new KindTerm();

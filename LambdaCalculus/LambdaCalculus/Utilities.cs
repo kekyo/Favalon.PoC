@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LambdaCalculus.Contexts;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -56,6 +58,20 @@ namespace Favalon
                 (invoke.ReturnType, parameters.Select(parameter => parameter.ParameterType).ToArray()) :
                 (invoke.ReturnType, Type.EmptyTypes);
         }
+
+        public static string PrettyPrint(this Type type, PrettyPrintContext context) =>
+            context.HigherOrderDetail switch
+            {
+                HigherOrderDetails.Full => type.FullName,
+                _ => type.Name
+            };
+
+        public static string Join(string separator, IEnumerable<string> values) =>
+#if NET35
+            string.Join(separator, values.ToArray());
+#else
+            string.Join(separator, values);
+#endif
     }
 }
 

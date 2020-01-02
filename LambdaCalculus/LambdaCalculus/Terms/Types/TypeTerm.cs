@@ -1,5 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Algebric;
+using LambdaCalculus.Contexts;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -248,6 +249,9 @@ namespace Favalon.Terms.Types
 
         public void Deconstruct(out Type type) =>
             type = this.Type;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"{this.Type.PrettyPrint(context)}";
     }
 
     public sealed class ClrTypeConstructorTerm : TypeTerm, IApplicable, IClrType
@@ -278,5 +282,8 @@ namespace Favalon.Terms.Types
 
         public override int GetHashCode() =>
             this.Type.GetHashCode();
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"{this.Type.PrettyPrint(context)}";
     }
 }

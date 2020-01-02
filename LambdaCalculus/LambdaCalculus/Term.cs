@@ -1,16 +1,50 @@
 ﻿using Favalon.Contexts;
+using Favalon.Terms;
+using LambdaCalculus.Contexts;
 using System;
-
-#pragma warning disable 659
+using System.Diagnostics;
 
 namespace Favalon
 {
-    public abstract partial class Term : IEquatable<Term?>
+    [DebuggerDisplay("{DebuggerDisplay}")]
+    public abstract partial class TermBase
     {
-        protected Term()
+        private protected TermBase()
         { }
 
         public abstract Term HigherOrder { get; }
+
+        public void Deconstruct(out Term higherOrder) =>
+            higherOrder = this.HigherOrder;
+
+        protected abstract string OnPrettyPrint(PrettyPrintContext context);
+
+        protected virtual bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+            higherOrderDetail switch
+            {
+                HigherOrderDetails.None => false,
+                HigherOrderDetails.Full => true,
+                _ => !(this.HigherOrder is UnspecifiedTerm)
+            };
+
+        public string PrettyPrint(PrettyPrintContext context) =>
+            this.IsInclude(context.HigherOrderDetail) ?
+                $"({this.OnPrettyPrint(context)}):{this.HigherOrder.PrettyPrint(context)}" :
+                this.OnPrettyPrint(context);
+
+        public string DebuggerDisplay =>
+            this.PrettyPrint(new PrettyPrintContext(HigherOrderDetails.Readable));
+
+        public override string ToString() =>
+            this.PrettyPrint(new PrettyPrintContext(HigherOrderDetails.None));
+    }
+
+#pragma warning disable 659
+
+    public abstract partial class Term : TermBase, IEquatable<Term?>
+    {
+        protected Term()
+        { }
 
         public abstract Term Infer(InferContext context);
 
@@ -25,8 +59,5 @@ namespace Favalon
 
         public override sealed bool Equals(object? other) =>
             this.Equals(other as Term);
-
-        public void Deconstruct(out Term higherOrder) =>
-            higherOrder = this.HigherOrder;
     }
 }

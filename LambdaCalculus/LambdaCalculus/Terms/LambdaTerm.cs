@@ -1,5 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Types;
+using LambdaCalculus.Contexts;
 using System.Collections.Generic;
 
 namespace Favalon.Terms
@@ -146,6 +147,9 @@ namespace Favalon.Terms
             parameter = this.Parameter;
             body = this.Body;
         }
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"{this.Parameter.PrettyPrint(context)} -> {this.Body.PrettyPrint(context)}";
 
         public static LambdaTerm Create(Term parameter, Term body)
         {

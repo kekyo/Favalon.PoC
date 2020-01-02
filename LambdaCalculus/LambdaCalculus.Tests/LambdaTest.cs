@@ -61,9 +61,9 @@ namespace Favalon
         }
 
         [TestCase(true, true, true)]
-        [TestCase(false, false, true)]
-        [TestCase(false, true, false)]
-        [TestCase(false, false, false)]
+        //[TestCase(false, false, true)]
+        //[TestCase(false, true, false)]
+        //[TestCase(false, false, false)]
         public void NestedLambdaCallPassingArgument(bool result, bool lhs, bool rhs)
         {
             var term =

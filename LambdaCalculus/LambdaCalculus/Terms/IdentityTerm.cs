@@ -1,4 +1,5 @@
 ﻿using Favalon.Contexts;
+using LambdaCalculus.Contexts;
 
 namespace Favalon.Terms
 {
@@ -55,5 +56,8 @@ namespace Favalon.Terms
 
         public void Deconstruct(out string identity) =>
             identity = this.Identity;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            this.Identity;
     }
 }

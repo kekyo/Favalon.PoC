@@ -1,4 +1,5 @@
 ﻿using Favalon.Contexts;
+using LambdaCalculus.Contexts;
 
 namespace Favalon.Terms.Logical
 {
@@ -26,5 +27,8 @@ namespace Favalon.Terms.Logical
 
         public override Term Reduce(ReduceContext context) =>
             Reduce(context, this.Argument);
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"!{this.Argument.PrettyPrint(context)}";
     }
 }

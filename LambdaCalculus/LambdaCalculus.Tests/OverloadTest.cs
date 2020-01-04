@@ -6,6 +6,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Favalon
 {
@@ -48,13 +49,16 @@ namespace Favalon
         [TestCase(123.0, typeof(double))]
         public void OverloadedMethodsWithDifferentReturnType(object expected, Type required)
         {
-            var m1 = typeof(Convert).GetMethod("ToInt32", new[] { typeof(string) });
-            var m2 = typeof(Convert).GetMethod("ToInt64", new[] { typeof(string) });
-            var m3 = typeof(Convert).GetMethod("ToDouble", new[] { typeof(string) });
+            var m1 = typeof(Convert).GetMethod("ToInt32", new[] { typeof(object) });
+            var m2 = typeof(Convert).GetMethod("ToInt64", new[] { typeof(object) });
+            var m3 = typeof(Convert).GetMethod("ToDouble", new[] { typeof(object) });
+            var m4 = typeof(Convert).GetMethod("ToInt32", new[] { typeof(string) });
+            var m5 = typeof(Convert).GetMethod("ToInt64", new[] { typeof(string) });
+            var m6 = typeof(Convert).GetMethod("ToDouble", new[] { typeof(string) });
 
             var term =
                 Term.Apply(
-                    Term.Method(m1, m2, m3),
+                    Term.Method(m1, m2, m3, m4, m5, m6),
                     Term.Constant("123"),
                     Term.Type(required));
 
@@ -62,6 +66,30 @@ namespace Favalon
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(Term.Constant(expected), actual);
+        }
+
+        [TestCase(typeof(int), typeof(double))]
+        public void OverloadedMethodsFromAnnotatedReturnTypes(params Type[] requiredTypes)
+        {
+            var ms = typeof(Convert).GetMethods(
+                BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).
+                Where(m => m.GetParameters().Length == 1).
+                ToArray();
+
+            var expected =
+                Term.Sum(
+                    requiredTypes.Select(t => Term.Type(t)));
+
+            var term =
+                Term.Apply(
+                    Term.Method(ms),
+                    Term.Constant("123"),
+                    expected);
+
+            var environment = Environment.Create();
+            var actual = environment.Infer(term);
+
+            Assert.AreEqual(expected, actual.HigherOrder);
         }
     }
 }

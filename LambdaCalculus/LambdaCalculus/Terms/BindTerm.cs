@@ -1,4 +1,5 @@
 ﻿using Favalon.Contexts;
+using LambdaCalculus.Contexts;
 
 namespace Favalon.Terms
 {
@@ -73,6 +74,9 @@ namespace Favalon.Terms
             bound = this.Bound;
             body = this.Body;
         }
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"{this.Bound.PrettyPrint(context)} = {this.Body.PrettyPrint(context)}";
     }
 
     public sealed class BindTerm : HigherOrderLazyTerm
@@ -137,5 +141,8 @@ namespace Favalon.Terms
             expression = this.Expression;
             continuation = this.Continuation;
         }
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"{this.Expression.PrettyPrint(context)} in {this.Continuation.PrettyPrint(context)}";
     }
 }

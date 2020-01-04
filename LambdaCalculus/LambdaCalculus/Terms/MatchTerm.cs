@@ -1,5 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Algebric;
+using LambdaCalculus.Contexts;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -51,9 +52,12 @@ namespace Favalon.Terms
                     new MatchTerm(matchers, higherOrder);
         }
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument)
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint)
         {
             // Strict infer procedure.
+
+            var higherOrder = this.HigherOrder.Infer(context);
+            context.Unify(higherOrder, higherOrderHint);
 
             var matchers = this.Matchers.
                 Select(entry =>
@@ -67,19 +71,17 @@ namespace Favalon.Terms
                     }
                     else
                     {
+                        // Infer entry but cannot derives higher order hint.
                         return entry.Infer(context);
                     }
                 }).
                 ToArray();
 
-            var higherOrder = this.HigherOrder.Infer(context);
-            context.Unify(higherOrder, inferredArgument.HigherOrder);
-
             foreach (var entry in matchers)
             {
                 if (entry is PairTerm(_, Term body))
                 {
-                    context.Unify(higherOrder, body.HigherOrder);
+                    context.Unify(body.HigherOrder, higherOrderHint);
                 }
             }
 
@@ -92,6 +94,8 @@ namespace Favalon.Terms
 
         public override Term Fixup(FixupContext context)
         {
+            // Best effort fixup procedure.
+
             var matchers = this.Matchers.
                 Select(entry => entry.Fixup(context)).
                 ToArray();
@@ -105,12 +109,43 @@ namespace Favalon.Terms
                     new MatchTerm(matchers, higherOrder);
         }
 
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint)
+        {
+            // Strict fixup procedure.
+
+            var higherOrder = this.HigherOrder.Fixup(context);
+
+            var matchers = this.Matchers.
+                Select(entry =>
+                {
+                    if (entry is PairTerm(UnspecifiedTerm match, Term body))
+                    {
+                        var body_ = body.Fixup(context);
+                        return object.ReferenceEquals(body_, body) ?
+                            entry :
+                            new PairTerm(match, body_);
+                    }
+                    else
+                    {
+                        // Infer entry but cannot derives higher order hint.
+                        return entry.Fixup(context);
+                    }
+                }).
+                ToArray();
+
+            return
+                object.ReferenceEquals(higherOrder, this.HigherOrder) &&
+                matchers.Zip(this.Matchers, object.ReferenceEquals).All(r => r) ?
+                    this :
+                    new MatchTerm(matchers, higherOrder);
+        }
+
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs)
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
         {
-            var argument = rhs.Reduce(context);
+            var argument_ = argument.Reduce(context);
 
             var reducedMatches = new List<Term>();
             foreach (var entry in this.Matchers)
@@ -124,7 +159,7 @@ namespace Favalon.Terms
                     }
 
                     var reducedMatch = match.Reduce(context);
-                    if (reducedMatch.Equals(argument))   // TODO: Recursive matcher
+                    if (reducedMatch.Equals((Term)argument_))   // TODO: Recursive matcher
                     {
                         return body.Reduce(context);
                     }
@@ -159,5 +194,13 @@ namespace Favalon.Terms
 
         public override int GetHashCode() =>
             this.Matchers.Aggregate(0, (agg, pair) => agg ^ pair.GetHashCode());
+
+        protected override string OnPrettyPrint(PrettyPrintContext context)
+        {
+            var matchers = Utilities.Join(
+                " ",
+                this.Matchers.Select(matcher => $"({matcher.PrettyPrint(context)})"));
+            return $"match ({matchers})";
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Favalon.Contexts;
+using LambdaCalculus.Contexts;
 using System.Diagnostics;
 using System.Linq;
 
@@ -12,7 +13,7 @@ namespace Favalon.Terms.Algebric
             this.Terms = terms;
 
         protected override sealed Term GetHigherOrder() =>
-            this.Create(this.Terms.Select(term => term.HigherOrder).ToArray());
+            this.Create(this.Terms.Select(term => term.HigherOrder).Distinct().ToArray());
 
         protected abstract Term Create(Term[] terms);
 
@@ -51,6 +52,14 @@ namespace Favalon.Terms.Algebric
 
         public void Deconstruct(out Term[] terms) =>
             terms = this.Terms;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context)
+        {
+            var terms = Utilities.Join(
+                " ",
+                this.Terms.Select(term => $"({term.PrettyPrint(context)})"));
+            return $"({terms})";
+        }
     }
 
     public abstract class MultipleTerm<T> : MultipleTerm

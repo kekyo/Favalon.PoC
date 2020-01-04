@@ -1,5 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Types;
+using LambdaCalculus.Contexts;
 
 namespace Favalon.Terms
 {
@@ -30,6 +31,12 @@ namespace Favalon.Terms
 
         public void Deconstruct(out bool value) =>
             value = this.Value;
+
+        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+            false;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            this.Value ? "true" : "false";
 
         public static new readonly ClrTypeTerm Type =
             (ClrTypeTerm)Type<bool>();

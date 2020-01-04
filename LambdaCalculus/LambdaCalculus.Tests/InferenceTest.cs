@@ -188,57 +188,5 @@ namespace Favalon
             // (a:(bool -> bool) -> b:bool -> a:(bool -> bool) b:bool) (a:bool -> a:bool):(bool -> bool) false:bool
             Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
         }
-
-        [TestCase(true, 123, "abc")]
-        [TestCase(false, 123, "abc")]
-        public void IfFixedInferrable(bool condition, object then, object @else)
-        {
-            var term =
-                Term.If(
-                    Term.Constant(condition),
-                    Term.Constant(then),
-                    Term.Constant(@else));
-
-            var environment = Environment.Create();
-            var actual = environment.Infer(term);
-
-            Assert.AreEqual(
-                condition ? Term.Constant(then).HigherOrder : Term.Constant(@else).HigherOrder,
-                actual.HigherOrder);
-        }
-
-        [Test]
-        public void IfCondition()
-        {
-            var term =
-                Term.If(
-                    Term.Identity("cond"),
-                    Term.Constant(123),
-                    Term.Constant("abc"));
-
-            var environment = Environment.Create();
-            var actual = (IfTerm)environment.Infer(term);
-
-            Assert.AreEqual(
-                Term.Type<bool>(),
-                actual.Condition.HigherOrder);
-        }
-
-        [Test]
-        public void IfAppliedCondition()
-        {
-            var term =
-                Term.Lambda(
-                    "cond",
-                    Term.If(
-                        Term.Identity("cond"),
-                        Term.Constant(123),
-                        Term.Constant("abc")));
-
-            var environment = Environment.Create();
-            var actual = (LambdaTerm)environment.Infer(term);
-
-            Assert.AreEqual(Term.Type<bool>(), actual.Parameter.HigherOrder);
-        }
     }
 }

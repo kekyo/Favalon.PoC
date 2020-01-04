@@ -1,4 +1,6 @@
 ﻿using Favalon.Contexts;
+using LambdaCalculus.Contexts;
+using System.Diagnostics;
 
 namespace Favalon.Terms
 {
@@ -12,12 +14,14 @@ namespace Favalon.Terms
 
         public override Term Infer(InferContext context)
         {
+            var higherOrder = this.HigherOrder.Infer(context);
+
             if (context.LookupBoundTerm(this.Identity) is Term bound)
             {
-                return bound;
-            }
+                context.Unify(bound.HigherOrder, higherOrder);
 
-            var higherOrder = this.HigherOrder.Infer(context);
+                return new IdentityTerm(this.Identity, higherOrder);
+            }
 
             return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                 this :
@@ -37,7 +41,8 @@ namespace Favalon.Terms
         {
             if (context.LookupBoundTerm(this.Identity) is Term bound)
             {
-                return bound.Reduce(context);
+                // Ignore repeating self references (will cause stack overflow)
+                return bound is IdentityTerm ? bound : bound.Reduce(context);
             }
 
             var higherOrder = this.HigherOrder.Reduce(context);
@@ -55,5 +60,8 @@ namespace Favalon.Terms
 
         public void Deconstruct(out string identity) =>
             identity = this.Identity;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            this.Identity;
     }
 }

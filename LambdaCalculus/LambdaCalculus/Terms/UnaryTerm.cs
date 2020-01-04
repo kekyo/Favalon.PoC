@@ -1,4 +1,5 @@
 ﻿using Favalon.Contexts;
+using LambdaCalculus.Contexts;
 
 namespace Favalon.Terms
 {
@@ -25,6 +26,9 @@ namespace Favalon.Terms
 
         public override int GetHashCode() =>
             this.Argument.GetHashCode();
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            this.Argument.PrettyPrint(context);
     }
 
     public abstract class UnaryTerm<T> : UnaryTerm

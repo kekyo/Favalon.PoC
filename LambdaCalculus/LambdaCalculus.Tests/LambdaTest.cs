@@ -80,6 +80,8 @@ namespace Favalon
                         Term.Constant(lhs)),
                     Term.Constant(rhs));
 
+            var a = term.DebuggerDisplay;
+
             var environment = Environment.Create();
             var actual = environment.Reduce(term);
 

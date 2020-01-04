@@ -8,10 +8,13 @@ namespace Favalon.Terms.Operators
         private AndAlsoOperatorTerm()
         { }
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint) =>
             this;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint) =>
+            this;
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             new AndAlsoLeftTerm(argument);  // NOT reduced at this time.
 
         public static readonly AndAlsoOperatorTerm Instance =
@@ -26,10 +29,13 @@ namespace Favalon.Terms.Operators
             protected override Term Create(Term argument) =>
                 new AndAlsoLeftTerm(argument);
 
-            Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+            Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint) =>
                this;
 
-            Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+            Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint) =>
+                this;
+
+            Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
                 AndAlsoTerm.Reduce(context, this.Argument0, argument);
         }
     }

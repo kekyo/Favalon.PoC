@@ -1,4 +1,5 @@
 ﻿using Favalon.Contexts;
+using LambdaCalculus.Contexts;
 
 namespace Favalon.Terms
 {
@@ -44,6 +45,9 @@ namespace Favalon.Terms
             lhs = this.Lhs;
             rhs = this.Rhs;
         }
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"({this.Lhs.PrettyPrint(context)} {this.Rhs.PrettyPrint(context)})";
     }
 
     public abstract class BinaryTerm<T> : BinaryTerm

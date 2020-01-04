@@ -87,9 +87,6 @@ namespace Favalon
         public static EqualTerm Equal(Term lhs, Term rhs) =>
             new EqualTerm(lhs, rhs);
 
-        public static IfTerm If(Term condition, Term then, Term @else) =>
-            new IfTerm(condition, then, @else, UnspecifiedTerm.Instance);
-
         public static PairTerm Pair(Term lhs, Term rhs) =>
             new PairTerm(lhs, rhs);
 
@@ -98,25 +95,10 @@ namespace Favalon
 
         public static SumTerm Sum(Term term0, params Term[] terms) =>
             new SumTerm(new[] { term0 }.Concat(terms).ToArray());
-        public static SumTerm Sum(IEnumerable<Term> terms)
-        {
-            var ts = terms.ToArray();
-            return ts.Length switch
-            {
-                0 => throw new ArgumentException(),
-                _ => new SumTerm(ts)
-            };
-        }
-        public static Term? ComposedSum(IEnumerable<Term> terms)
-        {
-            var ts = terms.ToArray();
-            return ts.Length switch
-            {
-                0 => null,
-                1 => ts[0],
-                _ => new SumTerm(ts)
-            };
-        }
+        public static SumTerm Sum(IEnumerable<Term> terms) =>
+            SumTerm.Composed(terms) is SumTerm term ? term : throw new ArgumentException();
+        public static Term? ComposedSum(IEnumerable<Term> terms) =>
+            SumTerm.Composed(terms);
 
         public static MatchTerm Match(PairTerm matcher0, params PairTerm[] matchers) =>
             new MatchTerm(new[] { matcher0 }.Concat(matchers).ToArray(), UnspecifiedTerm.Instance);

@@ -8,10 +8,13 @@ namespace Favalon.Terms.Operators
         private NotOperatorTerm()
         { }
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument) =>
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint) =>
            this;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint) =>
+            this;
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             NotTerm.Reduce(context, argument);
 
         public static readonly NotOperatorTerm Instance =

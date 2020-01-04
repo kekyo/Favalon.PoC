@@ -1,5 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Algebric;
+using LambdaCalculus.Contexts;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -38,20 +39,17 @@ namespace Favalon.Terms.Types
         protected override Term GetHigherOrder() =>
             GetMethodHigherOrder(this.method);
 
-        public Term ParameterHigherOrder =>
-            ((LambdaTerm)this.HigherOrder).Parameter;
-
-        public Term ReturnHigherOrder =>
-            ((LambdaTerm)this.HigherOrder).Body;
-
         public override Term Infer(InferContext context) =>
             this;
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument)
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint)
         {
             context.Unify(
                 ((LambdaTerm)this.HigherOrder).Parameter,
                 inferredArgument.HigherOrder);
+            context.Unify(
+                ((LambdaTerm)this.HigherOrder).Body,
+                higherOrderHint);
 
             return this;
         }
@@ -59,13 +57,18 @@ namespace Favalon.Terms.Types
         public override Term Fixup(FixupContext context) =>
             this;
 
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint) =>
+            this;
+
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument) =>
-            (argument.Reduce(context) is ConstantTerm constant &&
-             TypeTerm.Narrow(((LambdaTerm)this.HigherOrder).Parameter, constant.HigherOrder) is ClrTypeTerm) ?
-                new ConstantTerm(this.method.Invoke(null, new object[] { constant.Value })) :
+        internal ConstantTerm Invoke(ConstantTerm constantArgument) =>
+            new ConstantTerm(this.method.Invoke(null, new object[] { constantArgument.Value }));
+
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+            (argument.Reduce(context) is ConstantTerm constantArgument) ?
+                this.Invoke(constantArgument) :
                 null;
 
         public override bool Equals(Term? other) =>
@@ -75,6 +78,9 @@ namespace Favalon.Terms.Types
 
         public override int GetHashCode() =>
             this.method.GetHashCode();
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"{this.method.DeclaringType.PrettyPrint(context)}.{this.method.Name}";
     }
 
     public sealed class ClrMethodOverloadedTerm : MethodTerm, IApplicable
@@ -88,53 +94,29 @@ namespace Favalon.Terms.Types
             this.Methods = methods;
 
         protected override Term GetHigherOrder() =>
-            new SumTerm(this.Methods.
+            SumTerm.Composed(this.Methods.
                 Select(method => method.HigherOrder).
-                Distinct().
-                ToArray());
+                Distinct())!;
 
         public override Term Infer(InferContext context) =>
             // Best effort infer procedure: cannot fixed.
             this;
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument)
-        {
-            // Strict infer procedure.
-
-            var narrowed = this.Methods.
-                Select(method => (
-                    method,
-                    narrow: TypeTerm.Narrow(method.ParameterHigherOrder, inferredArgument.HigherOrder))).
-                Where(entry => entry.narrow is ClrTypeTerm).
-                Select(entry => (entry.method, narrow: (ClrTypeTerm)entry.narrow!)).
-                OrderBy(entry => entry.narrow, TypeTerm.ConcreterComparer).
-                ToArray();
-
-            var exactMatched = narrowed.
-                Where(entry => entry.narrow.Equals(inferredArgument.HigherOrder)).
-                ToArray();
-
-            return exactMatched.Length switch
-            {
-                // Exact matched.
-                1 => exactMatched[0].method,
-                _ => (narrowed.Length != this.Methods.Length) ?
-                    // Partially matched.
-                    new ClrMethodOverloadedTerm(narrowed.Select(entry => entry.method).ToArray()) :
-                    // All matched: not changed.
-                    this
-            };
-        }
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint) =>
+            ApplyTerm.AggregateForApply(this, this.Methods, inferredArgument, higherOrderHint);
 
         public override Term Fixup(FixupContext context) =>
+            // Best effort fixup procedure: cannot fixed.
             this;
+
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint) =>
+            ApplyTerm.AggregateForApply(this, this.Methods, fixuppedArgument, higherOrderHint);
 
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term rhs) =>
-            // Cannot apply because it isn't fixed overloads.
-            null;
+        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+            ApplyTerm.ReduceForApply(this, this.Methods, context, argument, higherOrderHint);
 
         public override bool Equals(Term? other) =>
             other is ClrMethodOverloadedTerm rhs ?
@@ -143,5 +125,13 @@ namespace Favalon.Terms.Types
 
         public override int GetHashCode() =>
             this.Methods.Aggregate(hashCode, (v, method) => v ^ method.GetHashCode());
+
+        protected override string OnPrettyPrint(PrettyPrintContext context)
+        {
+            var methods = Utilities.Join(
+                " + ",
+                this.Methods.Select(method => $"({method.PrettyPrint(context)})"));
+            return $"({methods})";
+        }
     }
 }

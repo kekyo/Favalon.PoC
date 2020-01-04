@@ -1,12 +1,21 @@
 ﻿using Favalon.Contexts;
+using Favalon.Terms.Algebric;
+using Favalon.Terms.Types;
+using LambdaCalculus.Contexts;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Favalon.Terms
 {
     // It's only using in ApplyTerm.
     public interface IApplicable
     {
-        Term InferForApply(InferContext context, Term inferredArgument);
-        Term? ReduceForApply(ReduceContext context, Term argument);
+        Term InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint);
+
+        Term FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint);
+
+        Term? ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint);
     }
 
     public sealed class ApplyTerm : HigherOrderHoldTerm
@@ -21,15 +30,58 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
+        private static IEnumerable<T> GetFittedAndOrderedMethods<T>(T[] methods, Term parameterHigherOrder, Term returnHigherOrderHint)
+            where T : Term =>
+            methods.
+                Select(method =>
+                    (method.HigherOrder is LambdaTerm methodHigherOrder) ?
+                        (method,
+                         parameterType: TypeTerm.Narrow(methodHigherOrder.Parameter, parameterHigherOrder),
+                         returnType: TypeTerm.Narrow(returnHigherOrderHint, methodHigherOrder.Body)) :
+                        (method, null, null)).
+                Where(entry => entry.parameterType is Term && entry.returnType is Term).
+                OrderBy(entry => entry.parameterType!, TypeTerm.ConcreterComparer).
+                ThenBy(entry => entry.returnType!, TypeTerm.ConcreterComparer).
+                Select(entry => entry.method);
+
+        internal static Term AggregateForApply(
+            Term @this,
+            Term[] terms,
+            Term argument,
+            Term higherOrderHint)
+        {
+            // Strict infer procedure.
+
+            var fittedMethods =
+                GetFittedAndOrderedMethods(terms, argument.HigherOrder, higherOrderHint).
+                ToArray();
+
+            return fittedMethods.Length switch
+            {
+                // Matched single method:
+                1 => fittedMethods[0],
+                // No matched: it contains illegal terms, reducer cause error when will not fixed.
+                0 => @this,
+                // Matched multiple methods:
+                _ => (fittedMethods.Length != terms.Length) ?
+                    // Partially matched.
+                    new SumTerm(fittedMethods) :
+                    // All matched: not changed.
+                    @this
+            };
+        }
+
         public override Term Infer(InferContext context)
         {
             var argument = this.Argument.Infer(context);
-
-            var function = (this.Function is IApplicable applicable) ?
-                applicable.InferForApply(context, argument) :
-                this.Function.Infer(context);
-
             var higherOrder = this.HigherOrder.Infer(context);
+
+            var function = this.Function switch
+            {
+                IApplicable applicable => applicable.InferForApply(context, argument, higherOrder),
+                SumTerm sum => AggregateForApply(sum, sum.Terms, argument, higherOrder),
+                _ => this.Function.Infer(context)
+            };
 
             // (f:('1 -> '2) a:'1):'2
             context.Unify(
@@ -47,8 +99,14 @@ namespace Favalon.Terms
         public override Term Fixup(FixupContext context)
         {
             var argument = this.Argument.Fixup(context);
-            var function = this.Function.Fixup(context);
             var higherOrder = this.HigherOrder.Fixup(context);
+
+            var function = this.Function switch
+            {
+                IApplicable applicable => applicable.FixupForApply(context, argument, higherOrder),
+                SumTerm sum => AggregateForApply(sum, sum.Terms, argument, higherOrder),
+                _ => this.Function.Fixup(context)
+            };
 
             return
                 object.ReferenceEquals(function, this.Function) &&
@@ -58,17 +116,68 @@ namespace Favalon.Terms
                     new ApplyTerm(function, argument, higherOrder);
         }
 
+        internal static Term? ReduceForApply(
+            Term @this,
+            Term[] terms,
+            ReduceContext context,
+            Term argument,
+            Term higherOrderHint)
+
+        {
+            var applicables =
+                GetFittedAndOrderedMethods(terms, argument.HigherOrder, higherOrderHint).
+                ToArray();
+
+            return applicables.FirstOrDefault() switch
+            {
+                // Matched single method:
+                IApplicable applicable => applicable.ReduceForApply(context, argument, higherOrderHint),
+                // Matched multiple methods:
+                _ => (applicables.Length != terms.Length) ?
+                    // Partially matched.
+                    new SumTerm(applicables) :
+                    // All matched: not changed.
+                    @this
+            };
+        }
+
         public override Term Reduce(ReduceContext context)
         {
-            var function = this.Function.Reduce(context);
-            if (function is IApplicable applicable &&
-                applicable.ReduceForApply(context, this.Argument) is Term term)
+            var higherOrder = this.HigherOrder.Reduce(context);
+
+            Term? function = this.Function;
+            for (var iteration = 0; iteration < context.Iterations; iteration++)
             {
-                return term;
+                if (function is IApplicable applicable)
+                {
+                    function = applicable.ReduceForApply(context, this.Argument, higherOrder);
+                    if (function is Term)
+                    {
+                        return function;
+                    }
+                }
+                else if (function is SumTerm sum)  // TODO: omit specialized for SumTerm
+                {
+                    function = ReduceForApply(sum, sum.Terms, context, this.Argument, higherOrder);
+                    if (function is Term)
+                    {
+                        return function;
+                    }
+                }
+                else
+                {
+                    function = function!.Reduce(context);
+                }
+
+                if (object.ReferenceEquals(function, this.Function))
+                {
+                    break;
+                }
             }
 
-            var argument = this.Argument.Reduce(context);   // TODO: Reduced twice
-            var higherOrder = this.HigherOrder.Reduce(context);
+            // TODO: Detects uninterpretable terms on many iterations.
+
+            var argument = this.Argument.Reduce(context);
 
             return
                 object.ReferenceEquals(function, this.Function) &&
@@ -85,5 +194,8 @@ namespace Favalon.Terms
 
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            $"{this.Function.PrettyPrint(context)} {this.Argument.PrettyPrint(context)}";
     }
 }

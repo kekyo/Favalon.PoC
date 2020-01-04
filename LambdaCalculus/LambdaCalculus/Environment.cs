@@ -1,7 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Favalon
 {
@@ -20,23 +19,30 @@ namespace Favalon
             return partial.Fixup(context);
         }
 
-        public IEnumerable<Term> EnumerableReduce(Term term)
+        public IEnumerable<Term> EnumerableReduce(Term term, int iterations = int.MaxValue)
         {
-            var inferred = this.Infer(term);
-
             if (boundTerms == null)
             {
                 boundTerms = new Dictionary<string, Term>();
             }
 
-            var current = inferred;
-            while (true)
+            var current = term;
+            for (var iteration = 0; iteration < iterations; iteration++)
             {
                 yield return current;
 
-                var context = new ReduceContext(this, boundTerms);
+                var inferred = this.Infer(current);
 
-                var reduced = current.Reduce(context);
+                if (object.ReferenceEquals(inferred, current))
+                {
+                    break;
+                }
+
+                yield return inferred;
+
+                var context = new ReduceContext(this, boundTerms, iterations);
+                var reduced = inferred.Reduce(context);
+
                 if (object.ReferenceEquals(reduced, current))
                 {
                     break;
@@ -44,12 +50,55 @@ namespace Favalon
 
                 current = reduced;
             }
+
+            // TODO: Detects uninterpretable terms on many iterations.
         }
 
-        public Term Reduce(Term term, bool oneTime = false) =>
-            oneTime ?
-                this.EnumerableReduce(term).First() :
-                this.EnumerableReduce(term).Last();
+        public Term ReduceOne(Term term, int iterations = int.MaxValue)
+        {
+            if (boundTerms == null)
+            {
+                boundTerms = new Dictionary<string, Term>();
+            }
+
+            var inferred = this.Infer(term);
+
+            var context = new ReduceContext(this, boundTerms, iterations);
+            return inferred.Reduce(context);
+        }
+
+        public Term Reduce(Term term, int iterations = int.MaxValue)
+        {
+            if (boundTerms == null)
+            {
+                boundTerms = new Dictionary<string, Term>();
+            }
+
+            var current = term;
+            for (var iteration = 0; iteration < iterations; iteration++)
+            {
+                var inferred = this.Infer(current);
+
+                if (object.ReferenceEquals(inferred, current))
+                {
+                    break;
+                }
+
+                var context = new ReduceContext(this, boundTerms, iterations);
+                var reduced = inferred.Reduce(context);
+
+                if (object.ReferenceEquals(reduced, current))
+                {
+                    break;
+                }
+
+                current = reduced;
+            }
+
+            // TODO: Detects uninterpretable terms on many iterations.
+
+            return current;
+        }
 
         public static Environment Create() =>
             new Environment();

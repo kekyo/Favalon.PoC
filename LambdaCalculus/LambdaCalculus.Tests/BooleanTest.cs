@@ -181,43 +181,6 @@ namespace Favalon
 
         /////////////////////////////////////////////////////////
 
-        [TestCase(true, "a")]
-        [TestCase(false, "b")]
-        public void IfTerm(bool condition, string result)
-        {
-            var term =
-                Term.If(
-                    Term.Constant(condition),
-                    Term.Identity("a"),
-                    Term.Identity("b"));
-
-            var environment = Environment.Create();
-            var actual = environment.Reduce(term);
-
-            Assert.AreEqual(result, ((IdentityTerm)actual).Identity);
-        }
-
-        [TestCase(true, "a")]
-        [TestCase(false, "b")]
-        public void IfOperatorTerm(bool condition, string result)
-        {
-            var term =
-                Term.Apply(
-                    Term.Apply(
-                        Term.Apply(
-                            Terms.Operators.IfOperatorTerm.Instance,
-                            Term.Constant(condition)),
-                        Term.Identity("a")),
-                    Term.Identity("b"));
-
-            var environment = Environment.Create();
-            var actual = environment.Reduce(term);
-
-            Assert.AreEqual(result, ((IdentityTerm)actual).Identity);
-        }
-
-        /////////////////////////////////////////////////////////
-
         [TestCase(true, 123)]
         [TestCase(false, 100)]
         public void EqualTerm(bool condition, int value)

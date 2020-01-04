@@ -146,7 +146,7 @@ namespace Favalon.Terms
             var higherOrder = this.HigherOrder.Reduce(context);
 
             Term? function = this.Function;
-            while (true)
+            for (var iteration = 0; iteration < context.Iterations; iteration++)
             {
                 if (function is IApplicable applicable)
                 {
@@ -156,7 +156,7 @@ namespace Favalon.Terms
                         return function;
                     }
                 }
-                else if (function is SumTerm sum)
+                else if (function is SumTerm sum)  // TODO: omit specialized for SumTerm
                 {
                     function = ReduceForApply(sum, sum.Terms, context, this.Argument, higherOrder);
                     if (function is Term)
@@ -170,6 +170,8 @@ namespace Favalon.Terms
                     break;
                 }
             }
+
+            // TODO: Detects uninterpretable terms on many iterations.
 
             var argument = this.Argument.Reduce(context);
 

@@ -106,7 +106,7 @@ namespace Favalon.Terms
                 newScope.SetBoundTerm(identity.Identity, identity);
             }
 
-            var body = this.Body.Reduce(context);
+            var body = this.Body.Reduce(newScope);
 
             return
                 object.ReferenceEquals(parameter, this.Parameter) &&

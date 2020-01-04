@@ -60,10 +60,10 @@ namespace Favalon
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
 
-        //[TestCase(true, true, true)]
-        //[TestCase(false, false, true)]
-        //[TestCase(false, true, false)]
-        //[TestCase(false, false, false)]
+        [TestCase(true, true, true)]
+        [TestCase(false, false, true)]
+        [TestCase(false, true, false)]
+        [TestCase(false, false, false)]
         public void NestedLambdaCallPassingArgument(bool result, bool lhs, bool rhs)
         {
             var term =

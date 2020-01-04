@@ -4,15 +4,18 @@ namespace Favalon.Contexts
 {
     public sealed class ReduceContext : Context
     {
-        internal ReduceContext(Context parent) :
-            base(parent)
-        { }
+        internal int Iterations;
+
+        private ReduceContext(ReduceContext parent) :
+            base(parent) =>
+            this.Iterations = parent.Iterations;
 
         internal ReduceContext(
             Context parent,
-            Dictionary<string, Term> boundTerms) :
-            base(parent, boundTerms)
-        { }
+            Dictionary<string, Term> boundTerms,
+            int iterations) :
+            base(parent, boundTerms) =>
+            this.Iterations = iterations;
 
         public ReduceContext NewScope() =>
             new ReduceContext(this);

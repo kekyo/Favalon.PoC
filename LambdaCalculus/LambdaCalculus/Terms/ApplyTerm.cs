@@ -167,6 +167,10 @@ namespace Favalon.Terms
                 else
                 {
                     function = function!.Reduce(context);
+                }
+
+                if (object.ReferenceEquals(function, this.Function))
+                {
                     break;
                 }
             }

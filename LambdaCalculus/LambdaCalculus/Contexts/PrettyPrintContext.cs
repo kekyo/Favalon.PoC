@@ -1,5 +1,9 @@
 ﻿namespace LambdaCalculus.Contexts
 {
+    public interface IRightToLeftPrettyPrintingTerm
+    {
+    }
+
     public enum HigherOrderDetails
     {
         None,

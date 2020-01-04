@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Favalon.Terms
 {
-    public sealed class LambdaTerm : HigherOrderLazyTerm, IApplicable
+    public sealed class LambdaTerm : HigherOrderLazyTerm, IApplicable, IRightToLeftPrettyPrintingTerm
     {
         public readonly Term Parameter;
         public readonly Term Body;

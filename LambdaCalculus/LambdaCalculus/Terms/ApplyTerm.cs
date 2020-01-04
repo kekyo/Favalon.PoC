@@ -145,26 +145,40 @@ namespace Favalon.Terms
         {
             var higherOrder = this.HigherOrder.Reduce(context);
 
-            if (this.Function switch
+            Term? function = this.Function;
+            while (true)
             {
-                IApplicable applicable =>
-                    applicable.ReduceForApply(context, this.Argument, higherOrder),
-                SumTerm sum =>
-                    ReduceForApply(sum, sum.Terms, context, this.Argument, higherOrder),
-                _ =>
-                    this.Function.Reduce(context)
-            } is Term term)
-            {
-                return term;
+                if (function is IApplicable applicable)
+                {
+                    function = applicable.ReduceForApply(context, this.Argument, higherOrder);
+                    if (function is Term)
+                    {
+                        return function;
+                    }
+                }
+                else if (function is SumTerm sum)
+                {
+                    function = ReduceForApply(sum, sum.Terms, context, this.Argument, higherOrder);
+                    if (function is Term)
+                    {
+                        return function;
+                    }
+                }
+                else
+                {
+                    function = function!.Reduce(context);
+                    break;
+                }
             }
 
-            var argument = this.Argument.Reduce(context);   // TODO: Reduced twice
+            var argument = this.Argument.Reduce(context);
 
             return
+                object.ReferenceEquals(function, this.Function) &&
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                     this :
-                    new ApplyTerm(this.Function, argument, higherOrder);
+                    new ApplyTerm(function, argument, higherOrder);
         }
 
         public override bool Equals(Term? other) =>
@@ -176,6 +190,6 @@ namespace Favalon.Terms
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            $"({this.Function.PrettyPrint(context)}) {this.Argument.PrettyPrint(context)}";
+            $"{this.Function.PrettyPrint(context)} {this.Argument.PrettyPrint(context)}";
     }
 }

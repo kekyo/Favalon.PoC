@@ -28,7 +28,7 @@ namespace Favalon.Terms
             this.Argument.GetHashCode();
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            $"({this.Argument.PrettyPrint(context)})";
+            this.Argument.PrettyPrint(context);
     }
 
     public abstract class UnaryTerm<T> : UnaryTerm

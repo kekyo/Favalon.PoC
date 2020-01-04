@@ -1,338 +1,69 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Favalon.Contexts;
+using Favalon.Terms;
+using LambdaCalculus.Contexts;
+using System;
+using System.Diagnostics;
 
-namespace LambdaCalculus
+namespace Favalon
 {
-    public sealed class Context
+    [DebuggerDisplay("{DebuggerDisplay}")]
+    public abstract partial class TermBase
     {
-        private readonly Context? parent;
-        private Dictionary<string, Term>? boundTerms;
-
-        public Context() =>
-            boundTerms = new Dictionary<string, Term>();
-        private Context(Context parent) =>
-            this.parent = parent;
-
-        public Context NewScope() =>
-            new Context(this);
-
-        public void AddBoundTerm(string identity, Term term)
-        {
-            if (boundTerms == null)
-            {
-                boundTerms = new Dictionary<string, Term>();
-            }
-            boundTerms[identity] = term;
-        }
-
-        public Term? GetBoundTerm(string identity)
-        {
-            Context? current = this;
-            do
-            {
-                if (current.boundTerms != null)
-                {
-                    if (current.boundTerms.TryGetValue(identity, out var term))
-                    {
-                        return term;
-                    }
-                }
-                current = current.parent;
-            }
-            while (current != null);
-
-            return null;
-        }
-    }
-
-    ////////////////////////////////////////////////////////////
-
-    public abstract class Term
-    {
-        public abstract Term HigherOrder { get; }
-
-        public abstract Term Reduce(Context context);
-
-        //////////////////////////////////
-
-        private static readonly Dictionary<Type, IdentityTerm> types =
-            new Dictionary<Type, IdentityTerm>();
-
-        protected static IdentityTerm Identity(Type type)
-        {
-            if (!types.TryGetValue(type, out var term))
-            {
-                term = new IdentityTerm(type.FullName);
-                types.Add(type, term);
-            }
-            return term;
-        }
-
-        public static IdentityTerm Identity(string identity) =>
-            new IdentityTerm(identity);
-
-        public static BooleanTerm True() =>
-            BooleanTerm.True;
-        public static BooleanTerm False() =>
-            BooleanTerm.False;
-
-        public static BooleanTerm Constant(bool value) =>
-            value ? BooleanTerm.True : BooleanTerm.False;
-
-        public static ApplyTerm Apply(Term function, Term argument) =>
-            new ApplyTerm(function, argument);
-
-        public static LambdaTerm Lambda(string parameter, Term body) =>
-            new LambdaTerm(parameter, body);
-
-        public static AndTerm And(Term lhs) =>
-            new AndTerm(lhs);
-        public static Term And(Term lhs, Term rhs) =>
-            new ApplyTerm(new AndTerm(lhs), rhs);
-
-        public static Term If(Term condition, Term then, Term els) =>
-            new ApplyTerm(new ApplyTerm(new IfTerm(condition), then), els);
-    }
-
-    public sealed class UnspecifiedTerm : Term
-    {
-        private UnspecifiedTerm()
+        private protected TermBase()
         { }
 
-        public override Term HigherOrder =>
-            null!;
+        public abstract Term HigherOrder { get; }
 
-        public override Term Reduce(Context context) =>
-            this;
+        public void Deconstruct(out Term higherOrder) =>
+            higherOrder = this.HigherOrder;
 
-        public static readonly UnspecifiedTerm Instance =
-            new UnspecifiedTerm();
-    }
+        protected abstract string OnPrettyPrint(PrettyPrintContext context);
 
-    ////////////////////////////////////////////////////////////
-
-    public sealed class IdentityTerm : Term
-    {
-        public new readonly string Identity;
-
-        internal IdentityTerm(string identity) =>
-            this.Identity = identity;
-
-        public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
-
-        public override Term Reduce(Context context) =>
-            context.GetBoundTerm(this.Identity) is Term term ?
-                term :
-                this;
-    }
-
-    public sealed class ConstantTerm : Term
-    {
-        public readonly object Value;
-
-        internal ConstantTerm(object value) =>
-            this.Value = value;
-
-        public override Term HigherOrder =>
-            Identity(this.Value.GetType());
-
-        public override Term Reduce(Context context) =>
-            this;
-    }
-
-    public abstract class ApplicableTerm : Term
-    {
-        protected internal abstract Term? Apply(Context context, Term rhs);
-    }
-
-    public sealed class ApplyTerm : Term
-    {
-        public readonly Term Function;
-        public readonly Term Argument;
-
-        internal ApplyTerm(Term function, Term argument)
-        {
-            this.Function = function;
-            this.Argument = argument;
-        }
-
-        public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
-
-        public override Term Reduce(Context context)
-        {
-            var function = this.Function.Reduce(context);
-            var argument = this.Argument.Reduce(context);
-
-            if (function is ApplicableTerm applicable &&
-                applicable.Apply(context, argument) is Term term)
+        protected virtual bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+            higherOrderDetail switch
             {
-                return term;
-            }
-            else
+                HigherOrderDetails.None => false,
+                HigherOrderDetails.Full => true,
+                _ => !(this.HigherOrder is UnspecifiedTerm)
+            };
+
+        public string PrettyPrint(PrettyPrintContext context) =>
+            (this.HigherOrder, this.IsInclude(context.HigherOrderDetail), this) switch
             {
-                return new ApplyTerm(function, argument);
-            }
-        }
+                (Term _, true, _) =>
+                    $"({this.OnPrettyPrint(context)}):{this.HigherOrder.PrettyPrint(context.DropReadable())}",
+                (_, _, IRightToLeftPrettyPrintingTerm _) =>
+                    $"({this.OnPrettyPrint(context)})",
+                _ =>
+                    this.OnPrettyPrint(context)
+            };
+
+        public string DebuggerDisplay =>
+            this.PrettyPrint(new PrettyPrintContext(HigherOrderDetails.Readable));
+
+        public override string ToString() =>
+            this.PrettyPrint(new PrettyPrintContext(HigherOrderDetails.None));
     }
 
-    public sealed class LambdaArrowTerm : ApplicableTerm
+#pragma warning disable 659
+
+    public abstract partial class Term : TermBase, IEquatable<Term?>
     {
-        private LambdaArrowTerm()
-        {
-        }
+        protected Term()
+        { }
 
-        public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
+        public abstract Term Infer(InferContext context);
 
-        public override Term Reduce(Context context) =>
-            this;
+        public abstract Term Fixup(FixupContext context);
 
-        protected internal override Term? Apply(Context context, Term rhs) =>
-            new LambdaArrowLeftTerm(((IdentityTerm)rhs).Identity);
+        public abstract Term Reduce(ReduceContext context);
 
-        private sealed class LambdaArrowLeftTerm : ApplicableTerm
-        {
-            public readonly string Parameter;
+        public abstract bool Equals(Term? other);
 
-            public LambdaArrowLeftTerm(string parameter) =>
-                this.Parameter = parameter;
+        bool IEquatable<Term?>.Equals(Term? other) =>
+            this.Equals(other);
 
-            public override Term HigherOrder =>
-                UnspecifiedTerm.Instance;
-
-            public override Term Reduce(Context context) =>
-                this;
-
-            protected internal override Term? Apply(Context context, Term rhs) =>
-                Term.Lambda(this.Parameter, rhs);
-        }
-
-        public static LambdaArrowTerm Instance =
-            new LambdaArrowTerm();
-    }
-
-    public sealed class LambdaTerm : ApplicableTerm
-    {
-        public readonly string Parameter;
-        public readonly Term Body;
-
-        internal LambdaTerm(string parameter, Term body)
-        {
-            this.Parameter = parameter;
-            this.Body = body;
-        }
-
-        public override Term HigherOrder =>
-            UnspecifiedTerm.Instance;
-
-        public override Term Reduce(Context context) =>
-            new LambdaTerm(this.Parameter, this.Body.Reduce(context));
-
-        protected internal override Term? Apply(Context context, Term rhs)
-        {
-            var newScope = context.NewScope();
-            newScope.AddBoundTerm(this.Parameter, rhs);
-
-            return this.Body.Reduce(newScope);
-        }
-    }
-
-    ////////////////////////////////////////////////////////////
-
-    public sealed class BooleanTerm : Term
-    {
-        internal static readonly IdentityTerm higherOrder =
-            Identity(typeof(bool));
-
-        public readonly bool Value;
-
-        private BooleanTerm(bool value) =>
-            this.Value = value;
-
-        public override Term HigherOrder =>
-            higherOrder;
-
-        public override Term Reduce(Context context) =>
-            this;
-
-        public static new readonly BooleanTerm True =
-            new BooleanTerm(true);
-        public static new readonly BooleanTerm False =
-            new BooleanTerm(false);
-    }
-
-    public sealed class AndTerm : ApplicableTerm
-    {
-        public readonly Term Lhs;
-
-        internal AndTerm(Term lhs) =>
-            this.Lhs = lhs;
-
-        public override Term HigherOrder =>
-           BooleanTerm.higherOrder;
-
-        public override sealed Term Reduce(Context context) =>
-            new AndTerm(this.Lhs.Reduce(context));
-
-        protected internal override Term? Apply(Context context, Term rhs) =>
-            (this.Lhs is BooleanTerm l && rhs is BooleanTerm r) ?
-                Term.Constant(l.Value && r.Value) :
-                null;
-    }
-
-    public sealed class IfTerm : ApplicableTerm
-    {
-        public readonly Term Condition;
-
-        internal IfTerm(Term condition) =>
-            this.Condition = condition;
-
-        public override Term HigherOrder =>
-           UnspecifiedTerm.Instance;
-
-        public override sealed Term Reduce(Context context) =>
-            new IfTerm(this.Condition.Reduce(context));
-
-        protected internal override Term? Apply(Context context, Term rhs) =>
-            (this.Condition is BooleanTerm c) ?
-                (c.Value ? (Term)new ThenTerm(rhs) : ElseTerm.Instance) :
-                null;
-
-        private sealed class ThenTerm : ApplicableTerm
-        {
-            public readonly Term Then;
-
-            public ThenTerm(Term then) =>
-                this.Then = then;
-
-            public override Term HigherOrder =>
-                UnspecifiedTerm.Instance;
-
-            public override Term Reduce(Context context) =>
-                this;
-
-            protected internal override Term? Apply(Context context, Term rhs) =>
-                this.Then;
-        }
-
-        private sealed class ElseTerm : ApplicableTerm
-        {
-            private ElseTerm()
-            { }
-
-            public override Term HigherOrder =>
-                UnspecifiedTerm.Instance;
-
-            public override Term Reduce(Context context) =>
-                this;
-
-            protected internal override Term? Apply(Context context, Term rhs) =>
-                rhs;
-
-            public static readonly ElseTerm Instance =
-                new ElseTerm();
-        }
+        public override sealed bool Equals(object? other) =>
+            this.Equals(other as Term);
     }
 }

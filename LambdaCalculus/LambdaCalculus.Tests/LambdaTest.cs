@@ -1,27 +1,27 @@
-﻿using NUnit.Framework;
+﻿using Favalon.Terms;
+using Favalon.Terms.Operators;
+using NUnit.Framework;
 
-namespace LambdaCalculus
+namespace Favalon
 {
     [TestFixture]
-    class LambdaCallTest
+    class LambdaTest
     {
         [TestCase(true)]
         [TestCase(false)]
-        public void LambdaArrowCallAndFixedResult(bool result)
+        public void LambdaArrowOperatorCallAndFixedResult(bool result)
         {
             var term =
                 Term.Apply(
                     Term.Apply(
                         Term.Apply(
-                            Term.Identity("->"),
+                            LambdaOperatorTerm.Instance,
                             Term.Identity("a")),
                         Term.Constant(result)),
                     Term.Constant(false));
 
-            var context = new Context();
-            context.AddBoundTerm("->", LambdaArrowTerm.Instance);
-
-            var actual = term.Reduce(context);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
@@ -37,8 +37,8 @@ namespace LambdaCalculus
                         Term.Constant(result)),
                 Term.Constant(false));
 
-            var context = new Context();
-            var actual = term.Reduce(context);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
@@ -54,8 +54,8 @@ namespace LambdaCalculus
                         Term.Identity("a")),
                 Term.Constant(result));
 
-            var context = new Context();
-            var actual = term.Reduce(context);
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
@@ -74,15 +74,16 @@ namespace LambdaCalculus
                             "a",
                             Term.Lambda(
                                 "b",
-                                Term.Apply(
-                                    Term.And(
-                                        Term.Identity("a")),
+                                Term.AndAlso(
+                                    Term.Identity("a"),
                                     Term.Identity("b")))),
                         Term.Constant(lhs)),
                     Term.Constant(rhs));
 
-            var context = new Context();
-            var actual = term.Reduce(context);
+            var a = term.DebuggerDisplay;
+
+            var environment = Environment.Create();
+            var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }

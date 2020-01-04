@@ -60,7 +60,7 @@ namespace Favalon
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
         }
 
-        [TestCase(true, true, true)]
+        //[TestCase(true, true, true)]
         //[TestCase(false, false, true)]
         //[TestCase(false, true, false)]
         //[TestCase(false, false, false)]

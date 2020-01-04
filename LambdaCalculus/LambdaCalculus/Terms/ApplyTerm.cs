@@ -184,7 +184,7 @@ namespace Favalon.Terms
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                     this :
-                    new ApplyTerm(function, argument, higherOrder);
+                    new ApplyTerm(function!, argument, higherOrder);
         }
 
         public override bool Equals(Term? other) =>

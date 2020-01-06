@@ -1,6 +1,4 @@
 ﻿using Favalon.Terms;
-using Favalon.Terms.Algebric;
-using Favalon.Terms.Logical;
 using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;
@@ -45,12 +43,7 @@ namespace Favalon
         }
 
         public static Term Constant(object value) =>
-            value switch
-            {
-                bool boolValue => BooleanTerm.From(boolValue),
-                Type typeValue => TypeTerm.From(typeValue),
-                _ => new ConstantTerm(value)
-            };
+            ValueTerm.Create(value);
 
         public static IdentityTerm Identity(string identity) =>
             new IdentityTerm(identity, UnspecifiedTerm.Instance);
@@ -58,14 +51,14 @@ namespace Favalon
             new IdentityTerm(identity, higherOrder);
 
         public static ApplyTerm Apply(Term function, Term argument) =>
-            new ApplyTerm(function, argument, UnspecifiedTerm.Instance);
+            ApplyTerm.Create(function, argument, UnspecifiedTerm.Instance);
         public static ApplyTerm Apply(Term function, Term argument, Term higherOrder) =>
-            new ApplyTerm(function, argument, higherOrder);
+            ApplyTerm.Create(function, argument, higherOrder);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
-            LambdaTerm.Create(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);
+            LambdaTerm.From(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);
         public static LambdaTerm Lambda(Term parameter, Term body) =>
-            LambdaTerm.Create(parameter, body);
+            LambdaTerm.From(parameter, body);
 
         public static BindExpressionTerm Bind(string bound, Term body) =>
             new BindExpressionTerm(new IdentityTerm(bound, UnspecifiedTerm.Instance), body);
@@ -76,31 +69,5 @@ namespace Favalon
             new BindTerm(new BindExpressionTerm(new IdentityTerm(bound, UnspecifiedTerm.Instance), body), continuation);
         public static BindTerm Bind(Term bound, Term body, Term continuation) =>
             new BindTerm(new BindExpressionTerm(bound, body), continuation);
-
-        public static NotTerm Not(Term term) =>
-            new NotTerm(term);
-        public static AndAlsoTerm AndAlso(Term lhs, Term rhs) =>
-            new AndAlsoTerm(lhs, rhs);
-        public static OrElseTerm OrElse(Term lhs, Term rhs) =>
-            new OrElseTerm(lhs, rhs);
-
-        public static EqualTerm Equal(Term lhs, Term rhs) =>
-            new EqualTerm(lhs, rhs);
-
-        public static PairTerm Pair(Term lhs, Term rhs) =>
-            new PairTerm(lhs, rhs);
-
-        public static ProductTerm Product(Term term0, params Term[] terms) =>
-            new ProductTerm(new[] { term0 }.Concat(terms).ToArray());
-
-        public static SumTerm Sum(Term term0, params Term[] terms) =>
-            new SumTerm(new[] { term0 }.Concat(terms).ToArray());
-        public static SumTerm Sum(IEnumerable<Term> terms) =>
-            SumTerm.Composed(terms) is SumTerm term ? term : throw new ArgumentException();
-        public static Term? ComposedSum(IEnumerable<Term> terms) =>
-            SumTerm.Composed(terms);
-
-        public static MatchTerm Match(PairTerm matcher0, params PairTerm[] matchers) =>
-            new MatchTerm(new[] { matcher0 }.Concat(matchers).ToArray(), UnspecifiedTerm.Instance);
     }
 }

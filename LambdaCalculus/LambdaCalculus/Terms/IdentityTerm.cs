@@ -1,6 +1,5 @@
 ﻿using Favalon.Contexts;
 using LambdaCalculus.Contexts;
-using System.Diagnostics;
 
 namespace Favalon.Terms
 {

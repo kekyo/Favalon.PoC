@@ -8,14 +8,41 @@ using System.Linq;
 
 namespace Favalon.Terms
 {
+    public struct AppliedResult
+    {
+        public readonly bool IsApplied;
+        public readonly Term Result;
+        public readonly Term Argument;
+
+        private AppliedResult(bool isApplied, Term result, Term argument)
+        {
+            this.IsApplied = isApplied;
+            this.Result = result;
+            this.Argument = argument;
+        }
+
+        public void Deconstruct(out bool isApplied, out Term result, out Term argument)
+        {
+            isApplied = this.IsApplied;
+            result = this.Result;
+            argument = this.Argument;
+        }
+
+        public static AppliedResult Applied(Term applied, Term reducedArgument) =>
+            new AppliedResult(true, applied, reducedArgument);
+
+        public static AppliedResult Ignored(Term term, Term argument) =>
+            new AppliedResult(false, term, argument);
+    }
+
     // It's only using in ApplyTerm.
     public interface IApplicable
     {
-        Term InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint);
+        Term InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint);
 
-        Term FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint);
+        Term FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint);
 
-        Term? ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint);
+        AppliedResult ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint);
     }
 
     public sealed class ApplyTerm : HigherOrderHoldTerm
@@ -23,7 +50,7 @@ namespace Favalon.Terms
         public readonly Term Function;
         public readonly Term Argument;
 
-        internal ApplyTerm(Term function, Term argument, Term higherOrder) :
+        private ApplyTerm(Term function, Term argument, Term higherOrder) :
             base(higherOrder)
         {
             this.Function = function;
@@ -79,21 +106,20 @@ namespace Favalon.Terms
             var function = this.Function switch
             {
                 IApplicable applicable => applicable.InferForApply(context, argument, higherOrder),
-                SumTerm sum => AggregateForApply(sum, sum.Terms, argument, higherOrder),
                 _ => this.Function.Infer(context)
             };
 
             // (f:('1 -> '2) a:'1):'2
             context.Unify(
                 function.HigherOrder,
-                LambdaTerm.Create(argument.HigherOrder, higherOrder));
+                LambdaTerm.From(argument.HigherOrder, higherOrder));
 
             return
                 object.ReferenceEquals(function, this.Function) &&
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                     this :
-                    new ApplyTerm(function, argument, higherOrder);
+                    ApplyTerm.Create(function, argument, higherOrder);
         }
 
         public override Term Fixup(FixupContext context)
@@ -104,7 +130,6 @@ namespace Favalon.Terms
             var function = this.Function switch
             {
                 IApplicable applicable => applicable.FixupForApply(context, argument, higherOrder),
-                SumTerm sum => AggregateForApply(sum, sum.Terms, argument, higherOrder),
                 _ => this.Function.Fixup(context)
             };
 
@@ -113,7 +138,7 @@ namespace Favalon.Terms
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                     this :
-                    new ApplyTerm(function, argument, higherOrder);
+                    ApplyTerm.Create(function, argument, higherOrder);
         }
 
         internal static Term? ReduceForApply(
@@ -145,31 +170,29 @@ namespace Favalon.Terms
         {
             var higherOrder = this.HigherOrder.Reduce(context);
 
-            Term? function = this.Function;
+            var function = this.Function;
+            var argument = this.Argument;
             for (var iteration = 0; iteration < context.Iterations; iteration++)
             {
                 if (function is IApplicable applicable)
                 {
-                    function = applicable.ReduceForApply(context, this.Argument, higherOrder);
-                    if (function is Term)
+                    switch (applicable.ReduceForApply(context, argument, higherOrder))
                     {
-                        return function;
-                    }
-                }
-                else if (function is SumTerm sum)  // TODO: omit specialized for SumTerm
-                {
-                    function = ReduceForApply(sum, sum.Terms, context, this.Argument, higherOrder);
-                    if (function is Term)
-                    {
-                        return function;
+                        case AppliedResult(true, Term reduced, _):
+                            return reduced;
+                        case AppliedResult(false, Term f, Term a):
+                            function = f;
+                            argument = a;
+                            break;
                     }
                 }
                 else
                 {
-                    function = function!.Reduce(context);
+                    function = function.Reduce(context);
                 }
 
-                if (object.ReferenceEquals(function, this.Function))
+                if (object.ReferenceEquals(function, this.Function) &&
+                    object.ReferenceEquals(argument, this.Argument))
                 {
                     break;
                 }
@@ -177,14 +200,12 @@ namespace Favalon.Terms
 
             // TODO: Detects uninterpretable terms on many iterations.
 
-            var argument = this.Argument.Reduce(context);
-
             return
                 object.ReferenceEquals(function, this.Function) &&
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                     this :
-                    new ApplyTerm(function!, argument, higherOrder);
+                    ApplyTerm.Create(function, argument, higherOrder);
         }
 
         public override bool Equals(Term? other) =>
@@ -197,5 +218,21 @@ namespace Favalon.Terms
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Function.PrettyPrint(context)} {this.Argument.PrettyPrint(context)}";
+
+        public void Deconstruct(out Term function, out Term argument)
+        {
+            function = this.Function;
+            argument = this.Argument;
+        }
+
+        public void Deconstruct(out Term function, out Term argument, out Term higherOrder)
+        {
+            function = this.Function;
+            argument = this.Argument;
+            higherOrder = this.HigherOrder;
+        }
+
+        public static ApplyTerm Create(Term function, Term argument, Term higherOrder) =>
+            new ApplyTerm(function, argument, higherOrder);
     }
 }

@@ -72,67 +72,32 @@ namespace Favalon
 #else
             string.Join(separator, values);
 #endif
-    }
-}
 
-namespace System
-{
-    public struct Unit
-    {
-        public static readonly Unit Value = new Unit();
-    }
-}
-
-#if NET35
-namespace System
-{
-    internal struct ValueTuple<T1, T2>
-    {
-        public readonly T1 Item1;
-        public readonly T2 Item2;
-
-        public ValueTuple(T1 item1, T2 item2)
+        public static IEnumerable<T> Traverse<T>(this T? value, Func<T, T?> next, bool includeFirst = true)
+            where T : class
         {
-            this.Item1 = item1;
-            this.Item2 = item2;
-        }
-    }
+            var current = value;
 
-    internal struct ValueTuple<T1, T2, T3>
-    {
-        public readonly T1 Item1;
-        public readonly T2 Item2;
-        public readonly T3 Item3;
-
-        public ValueTuple(T1 item1, T2 item2, T3 item3)
-        {
-            this.Item1 = item1;
-            this.Item2 = item2;
-            this.Item3 = item3;
-        }
-    }
-}
-
-namespace System.Linq
-{
-    internal static class EnumerableExtension
-    {
-        public static IEnumerable<TResult> Zip<TFirst, TSecond, TResult>(
-            this IEnumerable<TFirst> first,
-            IEnumerable<TSecond> second,
-            Func<TFirst, TSecond, TResult> resultSelector)
-        {
-            using (var f = first.GetEnumerator())
+            if (includeFirst)
             {
-                using (var s = second.GetEnumerator())
+                while (current != null)
                 {
-                    while (f.MoveNext() && s.MoveNext())
+                    yield return current;
+                    current = next(current);
+                }
+            }
+            else if (current != null)
+            {
+                while (true)
+                {
+                    current = next(current);
+                    if (current == null)
                     {
-                        yield return resultSelector(f.Current, s.Current);
+                        break;
                     }
+                    yield return current;
                 }
             }
         }
     }
 }
-#endif

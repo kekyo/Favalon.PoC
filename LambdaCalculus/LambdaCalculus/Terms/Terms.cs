@@ -118,48 +118,6 @@ namespace Favalon.Terms
             $"'{this.Index}";
     }
 
-    public sealed class ConstantTerm : HigherOrderLazyTerm
-    {
-        private static readonly int hashCode =
-            typeof(ConstantTerm).GetHashCode();
-
-        public readonly object Value;
-
-        internal ConstantTerm(object value) =>
-            this.Value = value;
-
-        protected override Term GetHigherOrder() =>
-            TypeTerm.From(this.Value.GetType());
-
-        public override Term Infer(InferContext context) =>
-            this;
-
-        public override Term Fixup(FixupContext context) =>
-            this;
-
-        public override Term Reduce(ReduceContext context) =>
-            this;
-
-        public override bool Equals(Term? other) =>
-            other is ConstantTerm rhs ? this.Value.Equals(rhs.Value) : false;
-
-        public override int GetHashCode() =>
-            hashCode ^ this.Value.GetHashCode();
-
-        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
-            higherOrderDetail switch
-            {
-                HigherOrderDetails.None => false,
-                HigherOrderDetails.Full => true,
-                _ => this.Value is string || this.Value is char
-            };
-
-        protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            this.Value is string str ? $"\"{str}\"" :
-            this.Value is char ch ? $"'{ch}'" :
-            this.Value.ToString();
-    }
-
     public sealed class KindTerm : Term
     {
         private static readonly int hashCode =

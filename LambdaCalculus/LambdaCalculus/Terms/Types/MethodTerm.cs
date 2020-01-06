@@ -15,7 +15,7 @@ namespace Favalon.Terms.Types
         private protected static LambdaTerm GetMethodHigherOrder(MethodInfo method)
         {
             var parameters = method.GetParameters();
-            return LambdaTerm.Create(
+            return LambdaTerm.From(
                 TypeTerm.From((parameters.Length == 0) ? typeof(void) : parameters[0].ParameterType),
                 TypeTerm.From(method.ReturnType));
         }
@@ -42,11 +42,11 @@ namespace Favalon.Terms.Types
         public override Term Infer(InferContext context) =>
             this;
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint)
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
         {
             context.Unify(
                 ((LambdaTerm)this.HigherOrder).Parameter,
-                inferredArgument.HigherOrder);
+                inferredArgumentHint.HigherOrder);
             context.Unify(
                 ((LambdaTerm)this.HigherOrder).Body,
                 higherOrderHint);
@@ -57,7 +57,7 @@ namespace Favalon.Terms.Types
         public override Term Fixup(FixupContext context) =>
             this;
 
-        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint) =>
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint) =>
             this;
 
         public override Term Reduce(ReduceContext context) =>
@@ -66,10 +66,10 @@ namespace Favalon.Terms.Types
         internal ConstantTerm Invoke(ConstantTerm constantArgument) =>
             new ConstantTerm(this.method.Invoke(null, new object[] { constantArgument.Value }));
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+        AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             (argument.Reduce(context) is ConstantTerm constantArgument) ?
-                this.Invoke(constantArgument) :
-                null;
+                AppliedResult.Applied(this.Invoke(constantArgument), constantArgument) :
+                AppliedResult.Ignored(this, argument);
 
         public override bool Equals(Term? other) =>
             other is ClrMethodTerm rhs ?
@@ -102,15 +102,15 @@ namespace Favalon.Terms.Types
             // Best effort infer procedure: cannot fixed.
             this;
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint) =>
-            ApplyTerm.AggregateForApply(this, this.Methods, inferredArgument, higherOrderHint);
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint) =>
+            ApplyTerm.AggregateForApply(this, this.Methods, inferredArgumentHint, higherOrderHint);
 
         public override Term Fixup(FixupContext context) =>
             // Best effort fixup procedure: cannot fixed.
             this;
 
-        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint) =>
-            ApplyTerm.AggregateForApply(this, this.Methods, fixuppedArgument, higherOrderHint);
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint) =>
+            ApplyTerm.AggregateForApply(this, this.Methods, fixuppedArgumentHint, higherOrderHint);
 
         public override Term Reduce(ReduceContext context) =>
             this;

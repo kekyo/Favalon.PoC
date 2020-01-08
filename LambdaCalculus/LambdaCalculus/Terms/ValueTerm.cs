@@ -1,5 +1,5 @@
 ﻿using Favalon.Contexts;
-using Favalon.Terms.Types;
+//using Favalon.Terms.Types;
 using LambdaCalculus.Contexts;
 using System;
 
@@ -46,7 +46,7 @@ namespace Favalon.Terms
             value switch
             {
                 bool boolValue => BooleanTerm.From(boolValue),
-                Type typeValue => TypeTerm.From(typeValue),
+                //Type typeValue => TypeTerm.From(typeValue),
                 _ => new ConstantTerm(value)
             };
     }

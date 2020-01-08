@@ -1,4 +1,4 @@
-﻿using Favalon.Terms.Types;
+﻿//using Favalon.Terms.Types;
 using LambdaCalculus.Contexts;
 
 namespace Favalon.Terms
@@ -22,8 +22,8 @@ namespace Favalon.Terms
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             this.Value ? "true" : "false";
 
-        public static new readonly ClrTypeTerm Type =
-            (ClrTypeTerm)Type<bool>();
+        public static readonly Term Type =
+            Constant(typeof(bool));   // TODO:
 
         public static new readonly BooleanTerm True =
             new BooleanTerm(true);

@@ -1,4 +1,4 @@
-﻿using Favalon.Terms.Types;
+﻿//using Favalon.Terms.Types;
 using LambdaCalculus.Contexts;
 
 namespace Favalon.Terms
@@ -11,7 +11,7 @@ namespace Favalon.Terms
             this.value = value;
 
         public override Term HigherOrder =>
-            TypeTerm.From(this.value.GetType());
+            Constant(this.value.GetType());
 
         protected override object GetValue() =>
             this.value;

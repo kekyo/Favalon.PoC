@@ -1,6 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Algebric;
-using Favalon.Terms.Types;
+//using Favalon.Terms.Types;
 using LambdaCalculus.Contexts;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -57,46 +57,46 @@ namespace Favalon.Terms
             this.Argument = argument;
         }
 
-        private static IEnumerable<T> GetFittedAndOrderedMethods<T>(T[] methods, Term parameterHigherOrder, Term returnHigherOrderHint)
-            where T : Term =>
-            methods.
-                Select(method =>
-                    (method.HigherOrder is LambdaTerm methodHigherOrder) ?
-                        (method,
-                         parameterType: TypeTerm.Narrow(methodHigherOrder.Parameter, parameterHigherOrder),
-                         returnType: TypeTerm.Narrow(returnHigherOrderHint, methodHigherOrder.Body)) :
-                        (method, null, null)).
-                Where(entry => entry.parameterType is Term && entry.returnType is Term).
-                OrderBy(entry => entry.parameterType!, TypeTerm.ConcreterComparer).
-                ThenBy(entry => entry.returnType!, TypeTerm.ConcreterComparer).
-                Select(entry => entry.method);
+        //private static IEnumerable<T> GetFittedAndOrderedMethods<T>(T[] methods, Term parameterHigherOrder, Term returnHigherOrderHint)
+        //    where T : Term =>
+        //    methods.
+        //        Select(method =>
+        //            (method.HigherOrder is LambdaTerm methodHigherOrder) ?
+        //                (method,
+        //                 parameterType: TypeTerm.Narrow(methodHigherOrder.Parameter, parameterHigherOrder),
+        //                 returnType: TypeTerm.Narrow(returnHigherOrderHint, methodHigherOrder.Body)) :
+        //                (method, null, null)).
+        //        Where(entry => entry.parameterType is Term && entry.returnType is Term).
+        //        OrderBy(entry => entry.parameterType!, TypeTerm.ConcreterComparer).
+        //        ThenBy(entry => entry.returnType!, TypeTerm.ConcreterComparer).
+        //        Select(entry => entry.method);
 
-        internal static Term AggregateForApply(
-            Term @this,
-            Term[] terms,
-            Term argument,
-            Term higherOrderHint)
-        {
-            // Strict infer procedure.
+        //internal static Term AggregateForApply(
+        //    Term @this,
+        //    Term[] terms,
+        //    Term argument,
+        //    Term higherOrderHint)
+        //{
+        //    // Strict infer procedure.
 
-            var fittedMethods =
-                GetFittedAndOrderedMethods(terms, argument.HigherOrder, higherOrderHint).
-                ToArray();
+        //    var fittedMethods =
+        //        GetFittedAndOrderedMethods(terms, argument.HigherOrder, higherOrderHint).
+        //        ToArray();
 
-            return fittedMethods.Length switch
-            {
-                // Matched single method:
-                1 => fittedMethods[0],
-                // No matched: it contains illegal terms, reducer cause error when will not fixed.
-                0 => @this,
-                // Matched multiple methods:
-                _ => (fittedMethods.Length != terms.Length) ?
-                    // Partially matched.
-                    new SumTerm(fittedMethods) :
-                    // All matched: not changed.
-                    @this
-            };
-        }
+        //    return fittedMethods.Length switch
+        //    {
+        //        // Matched single method:
+        //        1 => fittedMethods[0],
+        //        // No matched: it contains illegal terms, reducer cause error when will not fixed.
+        //        0 => @this,
+        //        // Matched multiple methods:
+        //        _ => (fittedMethods.Length != terms.Length) ?
+        //            // Partially matched.
+        //            new SumTerm(fittedMethods) :
+        //            // All matched: not changed.
+        //            @this
+        //    };
+        //}
 
         public override Term Infer(InferContext context)
         {
@@ -119,7 +119,7 @@ namespace Favalon.Terms
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                     this :
-                    ApplyTerm.Create(function, argument, higherOrder);
+                    new ApplyTerm(function, argument, higherOrder);
         }
 
         public override Term Fixup(FixupContext context)
@@ -138,32 +138,7 @@ namespace Favalon.Terms
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                     this :
-                    ApplyTerm.Create(function, argument, higherOrder);
-        }
-
-        internal static Term? ReduceForApply(
-            Term @this,
-            Term[] terms,
-            ReduceContext context,
-            Term argument,
-            Term higherOrderHint)
-
-        {
-            var applicables =
-                GetFittedAndOrderedMethods(terms, argument.HigherOrder, higherOrderHint).
-                ToArray();
-
-            return applicables.FirstOrDefault() switch
-            {
-                // Matched single method:
-                IApplicable applicable => applicable.ReduceForApply(context, argument, higherOrderHint),
-                // Matched multiple methods:
-                _ => (applicables.Length != terms.Length) ?
-                    // Partially matched.
-                    new SumTerm(applicables) :
-                    // All matched: not changed.
-                    @this
-            };
+                    new ApplyTerm(function, argument, higherOrder);
         }
 
         public override Term Reduce(ReduceContext context)
@@ -205,7 +180,7 @@ namespace Favalon.Terms
                 object.ReferenceEquals(argument, this.Argument) &&
                 object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                     this :
-                    ApplyTerm.Create(function, argument, higherOrder);
+                    new ApplyTerm(function, argument, higherOrder);
         }
 
         public override bool Equals(Term? other) =>

@@ -1,5 +1,5 @@
 ﻿using Favalon.Terms;
-using Favalon.Terms.Operators;
+//using Favalon.Terms.Operators;
 using NUnit.Framework;
 
 namespace Favalon
@@ -7,24 +7,24 @@ namespace Favalon
     [TestFixture]
     class LambdaTest
     {
-        [TestCase(true)]
-        [TestCase(false)]
-        public void LambdaArrowOperatorCallAndFixedResult(bool result)
-        {
-            var term =
-                Term.Apply(
-                    Term.Apply(
-                        Term.Apply(
-                            LambdaOperatorTerm.Instance,
-                            Term.Identity("a")),
-                        Term.Constant(result)),
-                    Term.Constant(false));
+        //[TestCase(true)]
+        //[TestCase(false)]
+        //public void LambdaArrowOperatorCallAndFixedResult(bool result)
+        //{
+        //    var term =
+        //        Term.Apply(
+        //            Term.Apply(
+        //                Term.Apply(
+        //                    LambdaOperatorTerm.Instance,
+        //                    Term.Identity("a")),
+        //                Term.Constant(result)),
+        //            Term.Constant(false));
 
-            var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+        //    var environment = Environment.Create();
+        //    var actual = environment.Reduce(term);
 
-            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
-        }
+        //    Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        //}
 
         [TestCase(true)]
         [TestCase(false)]

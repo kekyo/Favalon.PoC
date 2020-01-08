@@ -1,5 +1,5 @@
 ﻿using Favalon.Terms;
-using Favalon.Terms.Types;
+//using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,24 +23,24 @@ namespace Favalon
         public static BooleanTerm False() =>
             BooleanTerm.False;
 
-        public static Term Type(Type type) =>
-            TypeTerm.From(type);
-        public static Term Type<T>() =>
-            TypeTerm.From(typeof(T));
+        //public static Term Type(Type type) =>
+        //    TypeTerm.From(type);
+        //public static Term Type<T>() =>
+        //    TypeTerm.From(typeof(T));
 
-        public static MethodTerm Method(MethodInfo method) =>
-            MethodTerm.From(new[] { method });
-        public static MethodTerm Method(MethodInfo method0, params MethodInfo[] methods) =>
-            MethodTerm.From(new[] { method0 }.Concat(methods));
-        public static MethodTerm Method(IEnumerable<MethodInfo> methods)
-        {
-            var ms = methods.ToArray();
-            return ms.Length switch
-            {
-                0 => throw new ArgumentException(),
-                _ => MethodTerm.From(ms)
-            };
-        }
+        //public static MethodTerm Method(MethodInfo method) =>
+        //    MethodTerm.From(new[] { method });
+        //public static MethodTerm Method(MethodInfo method0, params MethodInfo[] methods) =>
+        //    MethodTerm.From(new[] { method0 }.Concat(methods));
+        //public static MethodTerm Method(IEnumerable<MethodInfo> methods)
+        //{
+        //    var ms = methods.ToArray();
+        //    return ms.Length switch
+        //    {
+        //        0 => throw new ArgumentException(),
+        //        _ => MethodTerm.From(ms)
+        //    };
+        //}
 
         public static Term Constant(object value) =>
             ValueTerm.Create(value);

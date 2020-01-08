@@ -1,6 +1,6 @@
 ﻿using Favalon.Terms;
-using Favalon.Terms.Logical;
-using Favalon.Terms.Operators;
+//using Favalon.Terms.Logical;
+//using Favalon.Terms.Operators;
 using NUnit.Framework;
 
 namespace Favalon
@@ -19,7 +19,7 @@ namespace Favalon
             var actual = environment.Infer(term);
 
             // false:bool
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace Favalon
 
             // a:'0 -> false:bool
             Assert.IsTrue(higherOrder.Parameter is PlaceholderTerm);
-            Assert.AreEqual(Term.Type<bool>(), higherOrder.Body);
+            Assert.AreEqual(Term.Constant(typeof(bool)), higherOrder.Body);
         }
 
         [Test]
@@ -79,7 +79,7 @@ namespace Favalon
             var actual = environment.Infer(term);
 
             // (a:bool -> a:bool) false:bool
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
         }
 
         [TestCase(true)]
@@ -96,7 +96,7 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Infer(term);
 
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
         }
 
         [TestCase(true)]
@@ -117,7 +117,7 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Infer(term);
 
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
         }
 
         [Test]
@@ -133,9 +133,9 @@ namespace Favalon
             var actual = (AndAlsoTerm)environment.Infer(term);
 
             // (a:bool && b:bool):bool
-            Assert.AreEqual(Term.Type<bool>(), actual.Lhs.HigherOrder);
-            Assert.AreEqual(Term.Type<bool>(), actual.Rhs.HigherOrder);
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Term.Constant(typeof(bool)), actual.Lhs.HigherOrder);
+            Assert.AreEqual(Term.Constant(typeof(bool)), actual.Rhs.HigherOrder);
+            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
         }
 
         [Test]
@@ -158,9 +158,9 @@ namespace Favalon
             var higherOrder = (LambdaTerm)lambda.HigherOrder;
 
             // a:bool -> (b:bool -> (a:bool && b:bool):bool):bool
-            Assert.AreEqual(Term.Type<bool>(), higherOrder.Parameter);
-            Assert.AreEqual(Term.Type<bool>(), ((LambdaTerm)higherOrder.Body).Parameter);
-            Assert.AreEqual(Term.Type<bool>(), ((LambdaTerm)higherOrder.Body).Body);
+            Assert.AreEqual(Term.Constant(typeof(bool)), higherOrder.Parameter);
+            Assert.AreEqual(Term.Constant(typeof(bool)), ((LambdaTerm)higherOrder.Body).Parameter);
+            Assert.AreEqual(Term.Constant(typeof(bool)), ((LambdaTerm)higherOrder.Body).Body);
         }
 
         [Test]
@@ -186,7 +186,7 @@ namespace Favalon
             var actual = environment.Infer(term);
 
             // (a:(bool -> bool) -> b:bool -> a:(bool -> bool) b:bool) (a:bool -> a:bool):(bool -> bool) false:bool
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Term.Constant(typeof(bool)), actual.HigherOrder);
         }
     }
 }

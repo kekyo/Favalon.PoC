@@ -1,5 +1,4 @@
 ﻿using Favalon.Contexts;
-using LambdaCalculus.Contexts;
 
 namespace Favalon.Terms
 {

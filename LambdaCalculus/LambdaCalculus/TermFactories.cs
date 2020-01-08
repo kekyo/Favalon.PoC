@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms;
+using Favalon.Terms.Logical;
 //using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ namespace Favalon
         //}
 
         public static Term Constant(object value) =>
-            ValueTerm.Create(value);
+            ValueTerm.From(value);
 
         public static IdentityTerm Identity(string identity) =>
             new IdentityTerm(identity, UnspecifiedTerm.Instance);
@@ -69,5 +70,11 @@ namespace Favalon
             new BindTerm(new BindExpressionTerm(new IdentityTerm(bound, UnspecifiedTerm.Instance), body), continuation);
         public static BindTerm Bind(Term bound, Term body, Term continuation) =>
             new BindTerm(new BindExpressionTerm(bound, body), continuation);
+
+        public static AndAlsoTerm AndAlso(Term lhs, Term rhs) =>
+            AndAlsoTerm.Create(lhs, rhs);
+
+        public static OrElseTerm OrElse(Term lhs, Term rhs) =>
+            OrElseTerm.Create(lhs, rhs);
     }
 }

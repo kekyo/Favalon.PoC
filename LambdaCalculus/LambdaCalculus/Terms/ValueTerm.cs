@@ -1,6 +1,5 @@
 ﻿using Favalon.Contexts;
 //using Favalon.Terms.Types;
-using LambdaCalculus.Contexts;
 using System;
 
 namespace Favalon.Terms
@@ -42,7 +41,7 @@ namespace Favalon.Terms
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             this.Value.ToString();
 
-        public static Term Create(object value) =>
+        public static Term From(object value) =>
             value switch
             {
                 bool boolValue => BooleanTerm.From(boolValue),

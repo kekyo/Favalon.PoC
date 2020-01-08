@@ -1,5 +1,6 @@
 ﻿using Favalon.Contexts;
-using LambdaCalculus.Contexts;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon.Terms
 {
@@ -8,18 +9,18 @@ namespace Favalon.Terms
         public readonly Term Lhs;
         public readonly Term Rhs;
 
-        internal BinaryTerm(Term lhs, Term rhs)
+        protected BinaryTerm(Term lhs, Term rhs, Term higherOrder)
         {
             this.Lhs = lhs;
             this.Rhs = rhs;
+            this.HigherOrder = higherOrder;
         }
 
-        protected abstract Term Create(Term lhs, Term rhs, Term higherOrder);
+        public override sealed Term HigherOrder { get; }
 
-        protected virtual Term Infer(InferContext context, Term lhs, Term rhs, Term higherOrder) =>
-            this.Create(lhs, rhs, higherOrder);
+        protected abstract Term OnCreate(Term lhs, Term rhs, Term higherOrder);
 
-        public override sealed Term Infer(InferContext context)
+        public override Term Infer(InferContext context)
         {
             var lhs = this.Lhs.Infer(context);
             var rhs = this.Rhs.Infer(context);
@@ -28,38 +29,57 @@ namespace Favalon.Terms
             context.Unify(lhs.HigherOrder, higherOrder);
             context.Unify(rhs.HigherOrder, higherOrder);
 
-            return this.Infer(context, lhs, rhs, higherOrder);
+            return
+                object.ReferenceEquals(lhs, this.Lhs) &&
+                object.ReferenceEquals(rhs, this.Rhs) &&
+                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                    this :
+                    this.OnCreate(lhs, rhs, higherOrder);
         }
 
-        protected virtual Term Fixup(FixupContext context, Term lhs, Term rhs, Term higherOrder) =>
-            this.Create(lhs, rhs, higherOrder);
+        public override Term Fixup(FixupContext context)
+        {
+            var lhs = this.Lhs.Fixup(context);
+            var rhs = this.Rhs.Fixup(context);
+            var higherOrder = this.HigherOrder.Fixup(context);
 
-        public override sealed Term Fixup(FixupContext context) =>
-            this.Fixup(context, this.Lhs.Fixup(context), this.Rhs.Fixup(context), this.HigherOrder.Fixup(context));
-
-        public override int GetHashCode() =>
-            this.Lhs.GetHashCode() ^ this.Rhs.GetHashCode();
+            return
+                object.ReferenceEquals(lhs, this.Lhs) &&
+                object.ReferenceEquals(rhs, this.Rhs) &&
+                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                    this :
+                    this.OnCreate(lhs, rhs, higherOrder);
+        }
 
         public void Deconstruct(out Term lhs, out Term rhs)
         {
             lhs = this.Lhs;
             rhs = this.Rhs;
         }
-
-        protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            $"({this.Lhs.PrettyPrint(context)} {this.Rhs.PrettyPrint(context)})";
     }
 
     public abstract class BinaryTerm<T> : BinaryTerm
         where T : BinaryTerm
     {
-        protected BinaryTerm(Term lhs, Term rhs) :
-            base(lhs, rhs)
+        protected BinaryTerm(Term lhs, Term rhs, Term higherOrder) :
+            base(lhs, rhs, higherOrder)
         { }
 
-        public override sealed bool Equals(Term? other) =>
-            other is T rhs ?
-                (this.Lhs.Equals(rhs.Lhs) && this.Rhs.Equals(rhs.Rhs)) :
-                false;
+        public override bool Equals(Term? other) =>
+            object.ReferenceEquals(this, other) ||
+                (other is T term ?
+                    this.Lhs.Equals(term.Lhs) && this.Rhs.Equals(term.Rhs) :
+                    false);
+
+        public IEnumerable<Term> Flatten() =>
+            (this.Lhs is BinaryTerm<T> lhs ?
+                lhs.Flatten() :
+                new[] { this.Lhs }).
+            Concat(this.Rhs is BinaryTerm<T> rhs ?
+                rhs.Flatten() :
+                new[] { this.Rhs });
+
+        public void Deconstruct(out Term[] terms) =>
+            terms = this.Flatten().ToArray();
     }
 }

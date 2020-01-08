@@ -1,7 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms.Algebric;
 //using Favalon.Terms.Types;
-using LambdaCalculus.Contexts;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;

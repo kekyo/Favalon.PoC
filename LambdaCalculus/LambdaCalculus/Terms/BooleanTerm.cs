@@ -1,5 +1,5 @@
 ﻿//using Favalon.Terms.Types;
-using LambdaCalculus.Contexts;
+using Favalon.Contexts;
 
 namespace Favalon.Terms
 {

@@ -77,8 +77,8 @@ namespace Favalon
 
             var actual = environment.Reduce(term);
 
-            Assert.AreEqual(Term.Type<int>(), ((SumTerm)actual).Terms[0]);
-            Assert.AreEqual(Term.Type<string>(), ((SumTerm)actual).Terms[1]);
+            Assert.AreEqual(Term.Type<int>(), ((Terms.Algebric.SumTerm)actual).Terms[0]);
+            Assert.AreEqual(Term.Type<string>(), ((Terms.Algebric.SumTerm)actual).Terms[1]);
         }
 
         [Test]

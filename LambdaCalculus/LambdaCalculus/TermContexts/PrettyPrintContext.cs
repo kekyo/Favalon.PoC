@@ -1,4 +1,4 @@
-﻿namespace LambdaCalculus.Contexts
+﻿namespace Favalon.Contexts
 {
     public interface IRightToLeftPrettyPrintingTerm
     {

@@ -1,5 +1,4 @@
 ﻿using Favalon.Contexts;
-using LambdaCalculus.Contexts;
 using System.Collections.Generic;
 using System.Linq;
 

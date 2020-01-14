@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Favalon.Terms.Types
 {
-    public sealed class SumTypeTerm : BinaryTerm<SumTypeTerm>
+    public sealed class SumTypeTerm : BinaryTerm<SumTypeTerm>, ITypeTerm
     {
         private static readonly Term higherOrder =
             ValueTerm.From(typeof(Type));
@@ -13,6 +13,14 @@ namespace Favalon.Terms.Types
         private SumTypeTerm(Term lhs, Term rhs) :
             base(lhs, rhs, higherOrder)
         { }
+
+        public bool IsAssignableFrom(ITypeTerm fromType) =>
+            TypeCalculator.Widening(this, (Term)fromType) != null;
+
+        public int CompareTo(ITypeTerm other)
+        {
+            throw new NotImplementedException();
+        }
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
             new SumTypeTerm(lhs, rhs);
@@ -46,7 +54,12 @@ namespace Favalon.Terms.Types
 
         public static SumTypeTerm Create(Term lhs, Term rhs) =>
             new SumTypeTerm(lhs, rhs);
-        public static SumTypeTerm Create(IEnumerable<Term> terms) =>
-            terms.Aggregate((lhs, rhs) => (Term)new SumTypeTerm(lhs, rhs));
+        public static Term? Create(IEnumerable<Term> terms) =>
+            terms.ToArray() switch
+            {
+                (Term[] ts, 0) => default,
+                (Term[] ts, 1) => ts[0],
+                Term[] ts => ts.Aggregate((lhs, rhs) => new SumTypeTerm(lhs, rhs))
+            };
     }
 }

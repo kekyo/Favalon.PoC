@@ -1,15 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon.Terms.Types
 {
-    public interface ITypeTerm : IComparable<ITypeTerm>
-    {
-        bool IsAssignableFrom(ITypeTerm fromType);
-    }
-
     internal static class TypeCalculator
     {
+        public static readonly IComparer<ITypeTerm> WideningComparer =
+            new WideningComparerImpl();
+
+        private sealed class WideningComparerImpl : IComparer<ITypeTerm>
+        {
+            public int Compare(ITypeTerm x, ITypeTerm y) =>
+                (x, y) switch
+                {
+                    (Term xt, Term yt) => (Widening(xt, yt) != null) ? -1 : 0,
+                    _ => -1
+                };
+        }
+
         public static Term? Widening(Term lhs, Term rhs)
         {
             switch ((lhs, rhs))
@@ -19,13 +28,6 @@ namespace Favalon.Terms.Types
                 // _[1]: _[1] <-- _[1]
                 case (_, _) when object.ReferenceEquals(lhs, rhs) || lhs.Equals(rhs):
                     return lhs;
-
-                // object: object <-- int
-                // IComparable: IComparable <-- string
-                case (ITypeTerm lhsType, ITypeTerm rhsTerm):
-                    return lhsType.IsAssignableFrom(rhsTerm) ?
-                        lhs :
-                        null;
 
                 // _[1]: _[1] <-- _[2]
                 case (PlaceholderTerm placeholder, PlaceholderTerm _):
@@ -48,6 +50,13 @@ namespace Favalon.Terms.Types
                         Select(rhsTerm => lhsTerms.Any(lhsTerm => Widening(lhsTerm, rhsTerm) != null)).
                         ToArray();
                     return terms1.All(term => term) ?
+                        lhs :
+                        null;
+
+                // object: object <-- int
+                // IComparable: IComparable <-- string
+                case (ITypeTerm lhsType, ITypeTerm rhsTerm):
+                    return lhsType.IsAssignableFrom(rhsTerm) ?
                         lhs :
                         null;
 

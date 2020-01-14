@@ -99,5 +99,31 @@ namespace Favalon
                 }
             }
         }
+
+        public static void Deconstruct<T>(this IEnumerable<T> @this, out T[]? arr)
+        {
+            if (@this is T[] a)
+            {
+                arr = a;
+            }
+            else
+            {
+                arr = default;
+            }
+        }
+
+        public static void Deconstruct<T>(this IEnumerable<T> @this, out T[]? arr, out int length)
+        {
+            if (@this is T[] a)
+            {
+                arr = a;
+                length = a.Length;
+            }
+            else
+            {
+                arr = default;
+                length = -1;
+            }
+        }
     }
 }

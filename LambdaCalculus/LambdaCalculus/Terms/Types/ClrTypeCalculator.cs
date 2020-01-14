@@ -6,10 +6,10 @@ namespace Favalon.Terms.Types
 {
     internal static class ClrTypeCalculator
     {
-        public static readonly IComparer<Term> ConcreterComparer =
-            new ConcreterComparerImpl();
+        public static readonly IComparer<IClrTypeTerm> WideningComparer =
+            new WideningComparerImpl();
 
-        private sealed class ConcreterComparerImpl : IComparer<Term>
+        private sealed class WideningComparerImpl : IComparer<IClrTypeTerm>
         {
             private int Compare(Type x, Type y)
             {
@@ -80,12 +80,12 @@ namespace Favalon.Terms.Types
                 return -1;
             }
 
-            public int Compare(Term x, Term y) =>
+            public int Compare(IClrTypeTerm x, IClrTypeTerm y) =>
                 (x, y) switch
                 {
-                    (ClrTypeTerm(Type tx), ClrTypeTerm(Type ty)) => this.Compare(tx, ty),
-                    (ClrTypeTerm(_), _) => -1,
-                    (_, ClrTypeTerm(_)) => 1,
+                    (Type tx, Type ty) => this.Compare(tx, ty),
+                    //(ClrTypeTerm(_), _) => -1,
+                    //(_, ClrTypeTerm(_)) => 1,
                     _ => 0
                 };
         }

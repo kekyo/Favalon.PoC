@@ -4,12 +4,13 @@ using System.Linq;
 
 namespace Favalon.Terms.Types
 {
-    internal static class ClrTypeCalculator
+    internal sealed class ClrTypeCalculator : TypeCalculator
     {
-        public static readonly IComparer<IClrTypeTerm> WideningComparer =
-            new WideningComparerImpl();
+        private ClrTypeCalculator() :
+            base(new WideningComparerImpl())
+        { }
 
-        private sealed class WideningComparerImpl : IComparer<IClrTypeTerm>
+        private sealed class WideningComparerImpl : IComparer<ITypeTerm>
         {
             private int Compare(Type x, Type y)
             {
@@ -80,13 +81,12 @@ namespace Favalon.Terms.Types
                 return -1;
             }
 
-            public int Compare(IClrTypeTerm x, IClrTypeTerm y) =>
+            public int Compare(ITypeTerm x, ITypeTerm y) =>
                 (x, y) switch
                 {
-                    (Type tx, Type ty) => this.Compare(tx, ty),
-                    //(ClrTypeTerm(_), _) => -1,
-                    //(_, ClrTypeTerm(_)) => 1,
-                    _ => 0
+                    (IClrTypeTerm(Type tx), IClrTypeTerm(Type ty)) => this.Compare(tx, ty),
+                    (ITypeTerm _, ITypeTerm _) => base.Compare(x, y),
+                    _ => -1
                 };
         }
     }

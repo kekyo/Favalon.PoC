@@ -1,25 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon.Terms.Types
 {
-    internal static class TypeCalculator
+    public interface ITypeCalculator
     {
-        public static readonly IComparer<ITypeTerm> WideningComparer =
-            new WideningComparerImpl();
+        IComparer<ITypeTerm> WideningComparer { get; }
 
+        Term? Widening(Term lhs, Term rhs);
+    }
+
+    public class TypeCalculator : ITypeCalculator
+    {
         private sealed class WideningComparerImpl : IComparer<ITypeTerm>
         {
+            private readonly TypeCalculator parent;
+
+            public WideningComparerImpl(TypeCalculator parent) =>
+                this.parent = parent;
+
             public int Compare(ITypeTerm x, ITypeTerm y) =>
                 (x, y) switch
                 {
-                    (Term xt, Term yt) => (Widening(xt, yt) != null) ? -1 : 0,
+                    (Term xt, Term yt) => (parent.Widening(xt, yt) != null) ? -1 : 0,
                     _ => -1
                 };
         }
 
-        public static Term? Widening(Term lhs, Term rhs)
+        private readonly IComparer<ITypeTerm> wideningComparer;
+
+        private TypeCalculator() =>
+            this.wideningComparer = new WideningComparerImpl(this);
+
+        protected TypeCalculator(IComparer<ITypeTerm> wideningComparer) =>
+            this.wideningComparer = wideningComparer;
+
+        public IComparer<ITypeTerm> WideningComparer =>
+            this.wideningComparer;
+
+        public virtual Term? Widening(Term lhs, Term rhs)
         {
             switch ((lhs, rhs))
             {

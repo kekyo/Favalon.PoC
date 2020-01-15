@@ -17,10 +17,8 @@ namespace Favalon.Terms.Types
         public bool IsAssignableFrom(ITypeTerm fromType) =>
             TypeCalculator.Widening(this, (Term)fromType) != null;
 
-        public int CompareTo(ITypeTerm other)
-        {
-            throw new NotImplementedException();
-        }
+        public int CompareTo(ITypeTerm other) =>
+            TypeCalculator.WideningComparer.Compare(this, other);
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
             new SumTypeTerm(lhs, rhs);
@@ -51,15 +49,5 @@ namespace Favalon.Terms.Types
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Lhs.PrettyPrint(context)} + {this.Rhs.PrettyPrint(context)}";
-
-        public static SumTypeTerm Create(Term lhs, Term rhs) =>
-            new SumTypeTerm(lhs, rhs);
-        public static Term? Create(IEnumerable<Term> terms) =>
-            terms.ToArray() switch
-            {
-                (Term[] ts, 0) => default,
-                (Term[] ts, 1) => ts[0],
-                Term[] ts => ts.Aggregate((lhs, rhs) => new SumTypeTerm(lhs, rhs))
-            };
     }
 }

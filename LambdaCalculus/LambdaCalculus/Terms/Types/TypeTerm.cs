@@ -5,15 +5,12 @@ namespace Favalon.Terms.Types
 {
     public interface ITypeTerm : IComparable<ITypeTerm>
     {
-        bool IsAssignableFrom(ITypeTerm fromType);
     }
 
     public abstract class TypeTerm : Term, ITypeTerm
     {
         protected TypeTerm()
         { }
-
-        public abstract bool IsAssignableFrom(ITypeTerm fromType);
 
         public abstract int CompareTo(ITypeTerm other);
 

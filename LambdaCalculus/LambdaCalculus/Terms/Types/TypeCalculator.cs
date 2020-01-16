@@ -1,16 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon.Terms.Types
 {
-    public interface ITypeCalculator
-    {
-        IComparer<ITypeTerm> WideningComparer { get; }
-
-        Term? Widening(Term lhs, Term rhs);
-    }
-
-    public class TypeCalculator : ITypeCalculator
+    public class TypeCalculator
     {
         private sealed class WideningComparerImpl : IComparer<ITypeTerm>
         {
@@ -35,10 +29,13 @@ namespace Favalon.Terms.Types
         protected TypeCalculator(IComparer<ITypeTerm> wideningComparer) =>
             this.wideningComparer = wideningComparer;
 
+        public virtual bool IsAssignableFrom(ITypeTerm toType, ITypeTerm fromType) =>
+            toType.Equals(fromType);
+
         public IComparer<ITypeTerm> WideningComparer =>
             this.wideningComparer;
 
-        public virtual Term? Widening(Term lhs, Term rhs)
+        public Term? Widening(Term lhs, Term rhs)
         {
             switch ((lhs, rhs))
             {
@@ -75,7 +72,7 @@ namespace Favalon.Terms.Types
                 // object: object <-- int
                 // IComparable: IComparable <-- string
                 case (ITypeTerm lhsType, ITypeTerm rhsTerm):
-                    return lhsType.IsAssignableFrom(rhsTerm) ?
+                    return this.IsAssignableFrom(lhsType, rhsTerm) ?
                         lhs :
                         null;
 
@@ -85,7 +82,7 @@ namespace Favalon.Terms.Types
                         Select(rhsTerm => Widening(lhs, rhsTerm)).
                         ToArray();
                     return terms2.All(term => term != null) ?
-                        SumTypeTerm.Create(terms2!) :
+                        this.Sum(terms2!) :
                         null;
 
                 // (int | double): (int | double) <-- int
@@ -107,7 +104,7 @@ namespace Favalon.Terms.Types
                         {
                             0 => null,
                             1 => terms3[0],
-                            _ => SumTypeTerm.Create(terms3!)
+                            _ => this.Sum(terms3!)
                         };
                     }
                     // Couldn't narrow: (int | double) <-- string
@@ -124,5 +121,17 @@ namespace Favalon.Terms.Types
                     return null;
             }
         }
+
+        public Term Sum(Term lhs, Term rhs) =>
+            SumTypeTerm.Create(lhs, rhs, this);
+
+        public Term Sum(IEnumerable<Term> terms) =>
+            terms.ToArray() switch
+            {
+                Term[] ts when ts.Length == 1 => ts[0],
+                Term[] ts when ts.Length >= 2 => (SumTypeTerm) ts.Aggregate(this.Sum),
+                _ => throw new InvalidOperationException()
+            };
+
     }
 }

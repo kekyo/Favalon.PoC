@@ -1,7 +1,5 @@
 ﻿using Favalon.Contexts;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Favalon.Terms.Types
 {
@@ -10,18 +8,17 @@ namespace Favalon.Terms.Types
         private static readonly Term higherOrder =
             ValueTerm.From(typeof(Type));
 
-        private SumTypeTerm(Term lhs, Term rhs) :
-            base(lhs, rhs, higherOrder)
-        { }
+        private readonly TypeCalculator typeCalculator;
 
-        public bool IsAssignableFrom(ITypeTerm fromType) =>
-            TypeCalculator.Widening(this, (Term)fromType) != null;
+        private  SumTypeTerm(Term lhs, Term rhs, TypeCalculator typeCalculator) :
+            base(lhs, rhs, higherOrder) =>
+            this.typeCalculator = typeCalculator;
 
         public int CompareTo(ITypeTerm other) =>
-            TypeCalculator.WideningComparer.Compare(this, other);
+            typeCalculator.WideningComparer.Compare(this, other);
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
-            new SumTypeTerm(lhs, rhs);
+            typeCalculator.Sum(lhs, rhs);
 
         public override Term Reduce(ReduceContext context)
         {
@@ -44,10 +41,13 @@ namespace Favalon.Terms.Types
                 object.ReferenceEquals(lhs, this.Lhs) &&
                 object.ReferenceEquals(rhs, this.Rhs) ?
                     this :
-                    new SumTypeTerm(lhs, rhs);
+                    typeCalculator.Sum(lhs, rhs);
         }
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Lhs.PrettyPrint(context)} + {this.Rhs.PrettyPrint(context)}";
+
+        public static SumTypeTerm Create(Term lhs, Term rhs, TypeCalculator typeCalculator) =>
+            new SumTypeTerm(lhs, rhs, typeCalculator);
     }
 }

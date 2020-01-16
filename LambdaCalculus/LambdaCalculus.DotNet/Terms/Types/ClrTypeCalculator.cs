@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Favalon.Terms.Types
 {
     internal sealed class ClrTypeCalculator : TypeCalculator
     {
-        private ClrTypeCalculator() :
-            base(new WideningComparerImpl())
-        { }
-
         private sealed class WideningComparerImpl : IComparer<ITypeTerm>
         {
             private int Compare(Type x, Type y)
@@ -89,5 +84,16 @@ namespace Favalon.Terms.Types
                     _ => -1
                 };
         }
+
+        private ClrTypeCalculator() :
+            base(new WideningComparerImpl())
+        { }
+
+        public override bool IsAssignableFrom(ITypeTerm toType, ITypeTerm fromType) =>
+            (toType, fromType) switch
+            {
+                (IClrTypeTerm to, IClrTypeTerm from) => to.Type.IsAssignableFrom(from.Type),
+                _ => 
+            };
     }
 }

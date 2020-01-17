@@ -3,7 +3,7 @@ using System;
 
 namespace Favalon.Terms.Types
 {
-    public sealed class SumTypeTerm : BinaryTerm<SumTypeTerm>, ITypeTerm
+    public sealed class SumTypeTerm : BinaryTerm<SumTypeTerm>
     {
         private static readonly Term higherOrder =
             ValueTerm.From(typeof(Type));
@@ -13,9 +13,6 @@ namespace Favalon.Terms.Types
         private  SumTypeTerm(Term lhs, Term rhs, TypeCalculator typeCalculator) :
             base(lhs, rhs, higherOrder) =>
             this.typeCalculator = typeCalculator;
-
-        public int CompareTo(ITypeTerm other) =>
-            typeCalculator.WideningComparer.Compare(this, other);
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
             typeCalculator.Sum(lhs, rhs);

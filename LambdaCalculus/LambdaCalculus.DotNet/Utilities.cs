@@ -1,10 +1,8 @@
 ﻿using Favalon.Contexts;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 
 namespace Favalon
 {
@@ -46,6 +44,9 @@ namespace Favalon
 
         public static bool IsInteger(this Type type) =>
             knownInteger.Contains(type);
+
+        public static bool IsTypeConstructor(Type type) =>
+            type.IsGenericTypeDefinition && (type.GetGenericArguments().Length == 1);
 
         public static (Type, Type[]) GetDelegateSignature(Type delegateType)
         {

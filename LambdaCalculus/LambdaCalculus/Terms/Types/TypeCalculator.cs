@@ -4,36 +4,16 @@ using System.Linq;
 
 namespace Favalon.Terms.Types
 {
-    public class TypeCalculator
+    public class TypeCalculator : IComparer<Term>
     {
-        private sealed class WideningComparerImpl : IComparer<ITypeTerm>
-        {
-            private readonly TypeCalculator parent;
+        protected TypeCalculator()
+        { }
 
-            public WideningComparerImpl(TypeCalculator parent) =>
-                this.parent = parent;
-
-            public int Compare(ITypeTerm x, ITypeTerm y) =>
-                (x, y) switch
-                {
-                    (Term xt, Term yt) => (parent.Widening(xt, yt) != null) ? -1 : 0,
-                    _ => -1
-                };
-        }
-
-        private readonly IComparer<ITypeTerm> wideningComparer;
-
-        private TypeCalculator() =>
-            this.wideningComparer = new WideningComparerImpl(this);
-
-        protected TypeCalculator(IComparer<ITypeTerm> wideningComparer) =>
-            this.wideningComparer = wideningComparer;
-
-        public virtual bool IsAssignableFrom(ITypeTerm toType, ITypeTerm fromType) =>
+        public virtual bool IsAssignable(TypeTerm toType, TypeTerm fromType) =>
             toType.Equals(fromType);
 
-        public IComparer<ITypeTerm> WideningComparer =>
-            this.wideningComparer;
+        public virtual int Compare(Term x, Term y) =>
+            (this.Widening(x, y) != null) ? -1 : 0;
 
         public Term? Widening(Term lhs, Term rhs)
         {
@@ -71,8 +51,8 @@ namespace Favalon.Terms.Types
 
                 // object: object <-- int
                 // IComparable: IComparable <-- string
-                case (ITypeTerm lhsType, ITypeTerm rhsTerm):
-                    return this.IsAssignableFrom(lhsType, rhsTerm) ?
+                case (TypeTerm lhsType, TypeTerm rhsTerm):
+                    return this.IsAssignable(lhsType, rhsTerm) ?
                         lhs :
                         null;
 
@@ -129,9 +109,11 @@ namespace Favalon.Terms.Types
             terms.ToArray() switch
             {
                 Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => (SumTypeTerm) ts.Aggregate(this.Sum),
+                Term[] ts when ts.Length >= 2 => ts.Aggregate(this.Sum),
                 _ => throw new InvalidOperationException()
             };
 
+        public static readonly TypeCalculator Instance =
+            new TypeCalculator();
     }
 }

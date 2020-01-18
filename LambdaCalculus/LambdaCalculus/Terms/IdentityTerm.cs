@@ -4,7 +4,7 @@ namespace Favalon.Terms
 {
     public sealed class IdentityTerm : HigherOrderHoldTerm
     {
-        public new readonly string Identity;
+        public readonly string Identity;
 
         internal IdentityTerm(string identity, Term higherOrder) :
             base(higherOrder) =>

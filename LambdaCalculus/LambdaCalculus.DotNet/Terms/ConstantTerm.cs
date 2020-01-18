@@ -1,5 +1,4 @@
-﻿//using Favalon.Terms.Types;
-using Favalon.Contexts;
+﻿using Favalon.Contexts;
 
 namespace Favalon.Terms
 {
@@ -11,7 +10,7 @@ namespace Favalon.Terms
             this.value = value;
 
         public override Term HigherOrder =>
-            Constant(this.value.GetType());
+            ClrTermFactory.Constant(this.value.GetType());
 
         protected override object GetValue() =>
             this.value;

@@ -46,7 +46,7 @@ namespace Favalon
 
 #pragma warning disable 659
 
-    public abstract partial class Term : TermBase, IEquatable<Term?>
+    public abstract class Term : TermBase, IEquatable<Term?>
     {
         protected Term()
         { }

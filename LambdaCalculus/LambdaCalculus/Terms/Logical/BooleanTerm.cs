@@ -1,7 +1,6 @@
-﻿//using Favalon.Terms.Types;
-using Favalon.Contexts;
+﻿using Favalon.Contexts;
 
-namespace Favalon.Terms
+namespace Favalon.Terms.Logical
 {
     public sealed class BooleanTerm : ValueTerm<BooleanTerm>
     {
@@ -23,11 +22,11 @@ namespace Favalon.Terms
             this.Value ? "true" : "false";
 
         public static readonly Term Type =
-            Constant(typeof(bool));   // TODO:
+            TermFactory.Identity("bool");   // TODO: misunderstanding overrided bool terms.
 
-        public static new readonly BooleanTerm True =
+        public static readonly BooleanTerm True =
             new BooleanTerm(true);
-        public static new readonly BooleanTerm False =
+        public static readonly BooleanTerm False =
             new BooleanTerm(false);
 
         public static BooleanTerm From(bool value) =>

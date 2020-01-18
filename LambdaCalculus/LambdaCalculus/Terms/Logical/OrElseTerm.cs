@@ -4,11 +4,8 @@ namespace Favalon.Terms.Logical
 {
     public sealed class OrElseTerm : BinaryTerm<OrElseTerm>
     {
-        private static readonly Term higherOrder =
-            ValueTerm.From(typeof(bool));
-
         private OrElseTerm(Term lhs, Term rhs) :
-            base(lhs, rhs, higherOrder)
+            base(lhs, rhs, BooleanTerm.Type)
         { }
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>

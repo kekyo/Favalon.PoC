@@ -179,7 +179,7 @@ namespace Favalon.Terms
             };
 
         // ? -> ?
-        public static new readonly LambdaTerm Unspecified =
+        public static readonly LambdaTerm Unspecified =
             new LambdaTerm(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
 
         // ? -> ? -> ?
@@ -187,7 +187,7 @@ namespace Favalon.Terms
             new LambdaTerm(UnspecifiedTerm.Instance, Unspecified);
 
         // * -> *
-        public static new readonly LambdaTerm Kind =
+        public static readonly LambdaTerm Kind =
             new LambdaTerm(KindTerm.Instance, KindTerm.Instance);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Terms.Algebraic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -30,18 +31,18 @@ namespace Favalon.Terms.Types
                     return placeholder;
 
                 // _: _ <-- int
-                // _: _ <-- (int | double)
+                // _: _ <-- (int + double)
                 case (PlaceholderTerm placeholder, _):
                     return placeholder;
 
-                // (int | double): (int | double) <-- (int | double)
-                // (int | double | string): (int | double | string) <-- (int | double)
-                // (int | IComparable): (int | IComparable) <-- (int | string)
-                // null: (int | double) <-- (int | double | string)
-                // null: (int | IServiceProvider) <-- (int | double)
-                // (int | _): (int | _) <-- (int | string)
-                // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
-                case (SumTypeTerm(Term[] lhsTerms), SumTypeTerm(Term[] rhsTerms)):
+                // (int + double): (int + double) <-- (int + double)
+                // (int + double + string): (int + double + string) <-- (int + double)
+                // (int + IComparable): (int + IComparable) <-- (int + string)
+                // null: (int + double) <-- (int + double + string)
+                // null: (int + IServiceProvider) <-- (int + double)
+                // (int + _): (int + _) <-- (int + string)
+                // (_[1] + _[2]): (_[1] + _[2]) <-- (_[2] + _[1])
+                case (SumTerm(Term[] lhsTerms), SumTerm(Term[] rhsTerms)):
                     var terms1 = rhsTerms.
                         Select(rhsTerm => lhsTerms.Any(lhsTerm => Widening(lhsTerm, rhsTerm) != null)).
                         ToArray();
@@ -56,21 +57,21 @@ namespace Favalon.Terms.Types
                         lhs :
                         null;
 
-                // null: int <-- (int | double)
-                case (_, SumTypeTerm(Term[] rhsTerms)):
+                // null: int <-- (int + double)
+                case (_, SumTerm(Term[] rhsTerms)):
                     var terms2 = rhsTerms.
                         Select(rhsTerm => Widening(lhs, rhsTerm)).
                         ToArray();
                     return terms2.All(term => term != null) ?
-                        this.Sum(terms2!) :
+                        TermFactory.Sum(terms2!) :
                         null;
 
-                // (int | double): (int | double) <-- int
-                // (int | IServiceProvider): (int | IServiceProvider) <-- int
-                // (int | IComparable): (int | IComparable) <-- string
-                // (int | _): (int | _) <-- string
-                // (int | _[1]): (int | _[1]) <-- _[2]
-                case (SumTypeTerm(Term[] lhsTerms), _):
+                // (int + double): (int + double) <-- int
+                // (int + IServiceProvider): (int + IServiceProvider) <-- int
+                // (int + IComparable): (int + IComparable) <-- string
+                // (int + _): (int + _) <-- string
+                // (int + _[1]): (int + _[1]) <-- _[2]
+                case (SumTerm(Term[] lhsTerms), _):
                     var terms3 = lhsTerms.
                         Select(lhsTerm => Widening(lhsTerm, rhs)).
                         ToArray();
@@ -84,10 +85,10 @@ namespace Favalon.Terms.Types
                         {
                             0 => null,
                             1 => terms3[0],
-                            _ => this.Sum(terms3!)
+                            _ => TermFactory.Sum(terms3!)
                         };
                     }
-                    // Couldn't narrow: (int | double) <-- string
+                    // Couldn't narrow: (int + double) <-- string
                     else
                     {
                         return null;
@@ -101,17 +102,6 @@ namespace Favalon.Terms.Types
                     return null;
             }
         }
-
-        public Term Sum(Term lhs, Term rhs) =>
-            SumTypeTerm.Create(lhs, rhs, this);
-
-        public Term Sum(IEnumerable<Term> terms) =>
-            terms.ToArray() switch
-            {
-                Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(this.Sum),
-                _ => throw new InvalidOperationException()
-            };
 
         public static readonly TypeCalculator Instance =
             new TypeCalculator();

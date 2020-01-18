@@ -51,10 +51,11 @@ namespace Favalon.Terms
                     this.OnCreate(lhs, rhs, higherOrder);
         }
 
-        public void Deconstruct(out Term lhs, out Term rhs)
+        public void Deconstruct(out Term lhs, out Term rhs, out Term higherOrder)
         {
             lhs = this.Lhs;
             rhs = this.Rhs;
+            higherOrder = this.HigherOrder;
         }
     }
 

@@ -1,14 +1,13 @@
 ﻿using Favalon.Terms;
+using Favalon.Terms.Algebraic;
 using Favalon.Terms.Logical;
-//using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Favalon
 {
-    partial class Term
+    public static class TermFactory
     {
         public static UnspecifiedTerm Unspecified() =>
             UnspecifiedTerm.Instance;
@@ -23,28 +22,6 @@ namespace Favalon
             BooleanTerm.True;
         public static BooleanTerm False() =>
             BooleanTerm.False;
-
-        //public static Term Type(Type type) =>
-        //    TypeTerm.From(type);
-        //public static Term Type<T>() =>
-        //    TypeTerm.From(typeof(T));
-
-        //public static MethodTerm Method(MethodInfo method) =>
-        //    MethodTerm.From(new[] { method });
-        //public static MethodTerm Method(MethodInfo method0, params MethodInfo[] methods) =>
-        //    MethodTerm.From(new[] { method0 }.Concat(methods));
-        //public static MethodTerm Method(IEnumerable<MethodInfo> methods)
-        //{
-        //    var ms = methods.ToArray();
-        //    return ms.Length switch
-        //    {
-        //        0 => throw new ArgumentException(),
-        //        _ => MethodTerm.From(ms)
-        //    };
-        //}
-
-        public static Term Constant(object value) =>
-            ValueTerm.From(value);
 
         public static IdentityTerm Identity(string identity) =>
             new IdentityTerm(identity, UnspecifiedTerm.Instance);
@@ -71,10 +48,35 @@ namespace Favalon
         public static BindTerm Bind(Term bound, Term body, Term continuation) =>
             new BindTerm(new BindExpressionTerm(bound, body), continuation);
 
+        public static SumTerm Sum(Term lhs, Term rhs) =>
+            SumTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);
+        public static Term Sum(params Term[] terms) =>
+            Sum((IEnumerable<Term>)terms);
+        public static Term Sum(IEnumerable<Term> terms) =>
+            terms.ToArray() switch
+            {
+                Term[] ts when ts.Length == 1 => ts[0],
+                Term[] ts when ts.Length >= 2 => ts.Aggregate(Sum),
+                _ => throw new InvalidOperationException()
+            };
+
+        public static ProductTerm Product(Term lhs, Term rhs) =>
+            ProductTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);
+        public static Term Product(params Term[] terms) =>
+            Product((IEnumerable<Term>)terms);
+        public static Term Product(IEnumerable<Term> terms) =>
+            terms.ToArray() switch
+            {
+                Term[] ts when ts.Length == 1 => ts[0],
+                Term[] ts when ts.Length >= 2 => ts.Aggregate(Product),
+                _ => throw new InvalidOperationException()
+            };
+
         public static AndAlsoTerm AndAlso(Term lhs, Term rhs) =>
             AndAlsoTerm.Create(lhs, rhs);
-
         public static OrElseTerm OrElse(Term lhs, Term rhs) =>
             OrElseTerm.Create(lhs, rhs);
+        public static NotTerm Not(Term argument) =>
+            NotTerm.Create(argument);
     }
 }

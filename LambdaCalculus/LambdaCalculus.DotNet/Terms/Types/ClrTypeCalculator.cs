@@ -2,7 +2,7 @@
 
 namespace Favalon.Terms.Types
 {
-    internal sealed class ClrTypeCalculator : TypeCalculator
+    public sealed class ClrTypeCalculator : TypeCalculator
     {
         private ClrTypeCalculator()
         { }
@@ -89,5 +89,8 @@ namespace Favalon.Terms.Types
                 (ClrTypeTerm to, ClrTypeTerm from) => this.Compare(to.Type, from.Type),
                 _ => base.Compare(x, y)
             };
+
+        public static readonly new ClrTypeCalculator Instance =
+            new ClrTypeCalculator();
     }
 }

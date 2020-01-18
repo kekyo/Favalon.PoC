@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Favalon.Terms.Algebric
+namespace Favalon.Terms.Algebraic
 {
     public sealed class SumOperatorTerm<TSumTerm> : Term, IApplicable
         where TSumTerm : BinaryTerm, new()

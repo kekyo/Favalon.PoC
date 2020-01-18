@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace Favalon
 {
-    public sealed class Environment : Context
+    public class Environment : Context
     {
-        private Environment()
+        protected Environment()
         { }
 
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>

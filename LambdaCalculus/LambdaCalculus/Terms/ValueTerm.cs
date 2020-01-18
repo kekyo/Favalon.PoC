@@ -40,13 +40,6 @@ namespace Favalon.Terms
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             this.Value.ToString();
-
-        public static Term From(object value) =>
-            value switch
-            {
-                bool boolValue => BooleanTerm.From(boolValue),
-                _ => new ConstantTerm(value)
-            };
     }
 
     public abstract class ValueTerm<T> : ValueTerm

@@ -1,9 +1,4 @@
 ﻿using Favalon.Contexts;
-using Favalon.Terms.Algebric;
-//using Favalon.Terms.Types;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace Favalon.Terms
 {

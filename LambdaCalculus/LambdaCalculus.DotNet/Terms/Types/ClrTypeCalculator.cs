@@ -7,7 +7,7 @@ namespace Favalon.Terms.Types
         private ClrTypeCalculator()
         { }
 
-        public override bool IsAssignable(TypeTerm toType, TypeTerm fromType) =>
+        public override bool IsAssignable(Term toType, Term fromType) =>
             (toType, fromType) switch
             {
                 (ClrTypeTerm to, ClrTypeTerm from) => to.Type.IsAssignableFrom(from.Type),

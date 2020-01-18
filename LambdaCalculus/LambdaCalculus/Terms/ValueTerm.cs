@@ -45,7 +45,6 @@ namespace Favalon.Terms
             value switch
             {
                 bool boolValue => BooleanTerm.From(boolValue),
-                //Type typeValue => TypeTerm.From(typeValue),
                 _ => new ConstantTerm(value)
             };
     }

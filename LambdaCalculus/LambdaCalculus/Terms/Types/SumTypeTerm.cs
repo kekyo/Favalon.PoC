@@ -10,7 +10,7 @@ namespace Favalon.Terms.Types
 
         private readonly TypeCalculator typeCalculator;
 
-        private  SumTypeTerm(Term lhs, Term rhs, TypeCalculator typeCalculator) :
+        private SumTypeTerm(Term lhs, Term rhs, TypeCalculator typeCalculator) :
             base(lhs, rhs, higherOrder) =>
             this.typeCalculator = typeCalculator;
 

@@ -4,18 +4,27 @@ using System.Collections.Generic;
 
 namespace Favalon.Terms.Types
 {
-    public sealed class ClrTypeTerm : TypeTerm
+    public sealed class ClrTypeTerm : Term
     {
         private static readonly Dictionary<Type, Term> clrTypes =
             new Dictionary<Type, Term>();
 
-        internal ClrTypeTerm(Type type) =>
+        private ClrTypeTerm(Type type) =>
             this.Type = type;
 
         public override Term HigherOrder =>
             KindTerm.Instance;
 
         internal Type Type { get; }
+
+        public override Term Infer(InferContext context) =>
+            this;
+
+        public override Term Fixup(FixupContext context) =>
+            this;
+
+        public override Term Reduce(ReduceContext context) =>
+            this;
 
         public override bool Equals(Term? other) =>
             other is ClrTypeTerm rhs ? this.Type.Equals(rhs.Type) : false;
@@ -24,7 +33,7 @@ namespace Favalon.Terms.Types
             this.Type.GetHashCode();
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            $"{this.Type.PrettyPrint(context)}";
+            this.Type.PrettyPrint(context);
 
         public static Term From(Type type)
         {
@@ -43,6 +52,9 @@ namespace Favalon.Terms.Types
             return term;
         }
 
+        public static Term From<T>() =>
+            From(typeof(T));
+
         public static readonly ClrTypeTerm Void =
             (ClrTypeTerm)From(typeof(void));
 
@@ -50,7 +62,7 @@ namespace Favalon.Terms.Types
             (ClrTypeTerm)From(typeof(Unit));
     }
 
-    public sealed class ClrTypeConstructorTerm : TypeTerm, IApplicable
+    public sealed class ClrTypeConstructorTerm : Term, IApplicable
     {
         private readonly Type type;
 
@@ -61,10 +73,19 @@ namespace Favalon.Terms.Types
             // * -> * (TODO: make nested kind lambda from flatten generic type arguments: * -> * -> * ...)
             LambdaTerm.Kind;
 
+        public override Term Infer(InferContext context) =>
+            this;
+
         Term IApplicable.InferForApply(InferContext context, Term argument, Term higherOrderHint) =>
             this;
 
+        public override Term Fixup(FixupContext context) =>
+            this;
+
         Term IApplicable.FixupForApply(FixupContext context, Term argument, Term higherOrderHint) =>
+            this;
+
+        public override Term Reduce(ReduceContext context) =>
             this;
 
         AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
@@ -89,6 +110,6 @@ namespace Favalon.Terms.Types
             type.GetHashCode();
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            $"{type.PrettyPrint(context)}";
+            type.PrettyPrint(context);
     }
 }

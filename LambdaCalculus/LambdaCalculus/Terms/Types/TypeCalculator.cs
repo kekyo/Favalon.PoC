@@ -9,7 +9,7 @@ namespace Favalon.Terms.Types
         protected TypeCalculator()
         { }
 
-        public virtual bool IsAssignable(TypeTerm toType, TypeTerm fromType) =>
+        public virtual bool IsAssignable(Term toType, Term fromType) =>
             toType.Equals(fromType);
 
         public virtual int Compare(Term x, Term y) =>
@@ -51,7 +51,7 @@ namespace Favalon.Terms.Types
 
                 // object: object <-- int
                 // IComparable: IComparable <-- string
-                case (TypeTerm lhsType, TypeTerm rhsTerm):
+                case (Term lhsType, Term rhsTerm):
                     return this.IsAssignable(lhsType, rhsTerm) ?
                         lhs :
                         null;

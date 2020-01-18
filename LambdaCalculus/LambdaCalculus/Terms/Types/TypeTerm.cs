@@ -1,20 +1,24 @@
 ﻿using Favalon.Contexts;
-using System;
 
 namespace Favalon.Terms.Types
 {
-    public abstract class TypeTerm : Term
-    {
-        protected TypeTerm()
-        { }
+    //public abstract class TypeTerm : Term
+    //{
+    //    private readonly TypeCalculator typeCalculator;
 
-        public override Term Infer(InferContext context) =>
-            this;
+    //    protected TypeTerm(TypeCalculator typeCalculator) =>
+    //        this.typeCalculator = typeCalculator;
 
-        public override Term Fixup(FixupContext context) =>
-            this;
+    //    public override Term HigherOrder =>
+    //        KindTerm.Instance;
 
-        public override Term Reduce(ReduceContext context) =>
-            this;
-    }
+    //    public override Term Infer(InferContext context) =>
+    //        this;
+
+    //    public override Term Fixup(FixupContext context) =>
+    //        this;
+
+    //    public override Term Reduce(ReduceContext context) =>
+    //        this;
+    //}
 }

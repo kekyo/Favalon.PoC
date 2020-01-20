@@ -5,12 +5,16 @@ namespace Favalon.Contexts
 {
     public sealed class InferContext : FixupContext
     {
-        internal InferContext(Context parent) :
-            base(parent, new Dictionary<int, Term>())
+        internal InferContext(
+            Context parent,
+            Dictionary<string, Term> boundTerms) :
+            base(parent, boundTerms, new Dictionary<int, Term>())
         { }
 
-        private InferContext(Context parent, Dictionary<int, Term> placeholders) :
-            base(parent, placeholders)
+        private InferContext(
+            Context parent,
+            Dictionary<int, Term> placeholders) :
+            base(parent, new Dictionary<string, Term>(), placeholders)
         { }
 
         public InferContext NewScope() =>

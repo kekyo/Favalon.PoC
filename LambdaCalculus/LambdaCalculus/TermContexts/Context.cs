@@ -125,6 +125,8 @@ namespace Favalon.Contexts
 
             if (iteration >= iterations)
             {
+                yield return current;
+
                 // TODO: Detects uninterpretable terms on many iterations.
                 throw new InvalidOperationException();
             }
@@ -134,10 +136,13 @@ namespace Favalon.Contexts
             {
                 if (this.boundTerms != null)
                 {
-                    // Apply finally bound result.
-                    foreach (var entry in boundTerms)
+                    if (!object.ReferenceEquals(boundTerms, this.boundTerms))
                     {
-                        this.boundTerms[entry.Key] = entry.Value;
+                        // Apply finally bound result.
+                        foreach (var entry in boundTerms)
+                        {
+                            this.boundTerms[entry.Key] = entry.Value;
+                        }
                     }
                 }
                 else
@@ -145,6 +150,8 @@ namespace Favalon.Contexts
                     this.boundTerms = boundTerms;
                 }
             }
+
+            yield return current;
         }
     }
 }

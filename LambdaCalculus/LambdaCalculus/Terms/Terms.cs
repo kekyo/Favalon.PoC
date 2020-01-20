@@ -44,6 +44,42 @@ namespace Favalon.Terms
 
     ////////////////////////////////////////////////////////////
 
+    internal sealed class TerminationTerm : Term
+    {
+        private static readonly int hashCode =
+           typeof(TerminationTerm).GetHashCode();
+
+        private TerminationTerm()
+        { }
+
+        public override Term HigherOrder =>
+            null!;
+
+        public override Term Infer(InferContext context) =>
+            this;
+
+        public override Term Fixup(FixupContext context) =>
+            this;
+
+        public override Term Reduce(ReduceContext context) =>
+            this;
+
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
+            other is TerminationTerm;
+
+        public override int GetHashCode() =>
+            hashCode;
+
+        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+            false;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            "?TERM";
+
+        public static readonly TerminationTerm Instance =
+            new TerminationTerm();
+    }
+
     public sealed class UnspecifiedTerm : Term
     {
         private static readonly int hashCode =

@@ -134,7 +134,7 @@ namespace Favalon.Terms
             {
                 // Cannot reduce the body, so recreate lambda with reduced parameter.
                 return AppliedResult.Ignored(
-                    LambdaTerm.From(parameter, this.Body),
+                    From(parameter, this.Body),
                     argument);
             }
         }
@@ -171,12 +171,13 @@ namespace Favalon.Terms
         public static LambdaTerm From(Term parameter, Term body) =>
             (parameter, body) switch
             {
-                (Term _, null) => From(parameter, UnspecifiedTerm.Instance),
-                (null, Term _) => From(UnspecifiedTerm.Instance, body),
+                (null, null) => Termination,
+                (Term _, null) => From(parameter, TerminationTerm.Instance),
+                (null, Term _) => From(TerminationTerm.Instance, body),
                 (UnspecifiedTerm _, UnspecifiedTerm _) => Unspecified,
                 (KindTerm _, KindTerm _) => Kind,
-                (LambdaTerm(Term p, Term b), _) => new LambdaTerm(From(p, b), body),
-                (_, LambdaTerm(Term p, Term b)) => new LambdaTerm(parameter, From(p, b)),
+                (LambdaTerm(Term p, Term b), Term _) => From(From(p, b), body),
+                (Term _, LambdaTerm(Term p, Term b)) => From(parameter, From(p, b)),
                 _ => new LambdaTerm(parameter, body)
             };
 
@@ -187,6 +188,10 @@ namespace Favalon.Terms
         // ? -> ? -> ?
         public static readonly LambdaTerm Unspecified3 =
             new LambdaTerm(UnspecifiedTerm.Instance, Unspecified);
+
+        // ? -> ?
+        internal static readonly LambdaTerm Termination =
+            new LambdaTerm(TerminationTerm.Instance, TerminationTerm.Instance);
 
         // * -> *
         public static readonly LambdaTerm Kind =

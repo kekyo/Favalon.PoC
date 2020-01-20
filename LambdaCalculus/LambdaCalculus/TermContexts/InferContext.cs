@@ -38,43 +38,47 @@ namespace Favalon.Contexts
 
         public bool Unify(Term term1, Term term2)
         {
-            if (term1 is Term && term2 is Term)
-            {
-                bool unified;
-
-                if (term1.Equals(term2))
-                {
-                    unified = true;
-                }
-                else if (term1 is PlaceholderTerm placeholder1)
-                {
-                    unified = Unify(placeholder1, term2);
-                }
-                else if (term2 is PlaceholderTerm placeholder2)
-                {
-                    unified = Unify(placeholder2, term1);
-                }
-                else if (term1 is LambdaTerm(Term parameter1, Term body1) &&
-                    term2 is LambdaTerm(Term parameter2, Term body2))
-                {
-                    var unified1 = Unify(parameter1, parameter2);
-                    var unified2 = Unify(body1, body2);
-                    unified = unified1 && unified2;
-                }
-                else
-                {
-                    unified = false;
-                }
-
-                // Unify higher orders.
-                this.Unify(term1.HigherOrder, term2.HigherOrder);
-
-                return unified;
-            }
-            else
+            if (term1 == null || term2 == null)
             {
                 return false;
             }
+
+            if (term1 is TerminationTerm || term2 is TerminationTerm)
+            {
+                return false;
+            }
+
+            if (term1.EqualsWithHigherOrder(term2))
+            {
+                return true;
+            }
+
+            bool unified;
+
+            if (term1 is PlaceholderTerm placeholder1)
+            {
+                unified = Unify(placeholder1, term2);
+            }
+            else if (term2 is PlaceholderTerm placeholder2)
+            {
+                unified = Unify(placeholder2, term1);
+            }
+            else if (term1 is LambdaTerm(Term parameter1, Term body1) &&
+                term2 is LambdaTerm(Term parameter2, Term body2))
+            {
+                var unified1 = Unify(parameter1, parameter2);
+                var unified2 = Unify(body1, body2);
+                unified = unified1 && unified2;
+            }
+            else
+            {
+                unified = false;
+            }
+
+            // Unify higher orders.
+            this.Unify(term1.HigherOrder, term2.HigherOrder);
+
+            return unified;
         }
     }
 }

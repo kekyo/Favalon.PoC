@@ -23,10 +23,10 @@ namespace Favalon
         public static BooleanTerm False() =>
             BooleanTerm.False;
 
-        public static IdentityTerm Identity(string identity) =>
-            new IdentityTerm(identity, UnspecifiedTerm.Instance);
-        public static IdentityTerm Identity(string identity, Term higherOrder) =>
-            new IdentityTerm(identity, higherOrder);
+        public static FreeVariableTerm Identity(string identity) =>
+            FreeVariableTerm.Create(identity, UnspecifiedTerm.Instance);
+        public static FreeVariableTerm Identity(string identity, Term higherOrder) =>
+            FreeVariableTerm.Create(identity, higherOrder);
 
         public static ApplyTerm Apply(Term function, Term argument) =>
             ApplyTerm.Create(function, argument, UnspecifiedTerm.Instance);
@@ -34,19 +34,19 @@ namespace Favalon
             ApplyTerm.Create(function, argument, higherOrder);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
-            LambdaTerm.From(new IdentityTerm(parameter, UnspecifiedTerm.Instance), body);
+            LambdaTerm.From(FreeVariableTerm.Create(parameter, UnspecifiedTerm.Instance), body);
         public static LambdaTerm Lambda(Term parameter, Term body) =>
             LambdaTerm.From(parameter, body);
 
         public static BindExpressionTerm Bind(string bound, Term body) =>
-            new BindExpressionTerm(new IdentityTerm(bound, UnspecifiedTerm.Instance), body);
+            BindExpressionTerm.Create(BoundVariableTerm.Create(bound, UnspecifiedTerm.Instance), body);
         public static BindExpressionTerm Bind(Term bound, Term body) =>
-            new BindExpressionTerm(bound, body);
+            BindExpressionTerm.Create(bound, body);
 
         public static BindTerm Bind(string bound, Term body, Term continuation) =>
-            new BindTerm(new BindExpressionTerm(new IdentityTerm(bound, UnspecifiedTerm.Instance), body), continuation);
+            BindTerm.Create(BindExpressionTerm.Create(BoundVariableTerm.Create(bound, UnspecifiedTerm.Instance), body), continuation);
         public static BindTerm Bind(Term bound, Term body, Term continuation) =>
-            new BindTerm(new BindExpressionTerm(bound, body), continuation);
+            BindTerm.Create(BindExpressionTerm.Create(bound, body), continuation);
 
         public static SumTerm Sum(Term lhs, Term rhs) =>
             SumTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);

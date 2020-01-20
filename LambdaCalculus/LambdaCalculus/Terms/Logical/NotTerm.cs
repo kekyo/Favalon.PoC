@@ -13,13 +13,13 @@ namespace Favalon.Terms.Logical
 
         public override Term Reduce(ReduceContext context)
         {
+            var higherOrder = this.HigherOrder.Reduce(context);
+
             var argument = this.Argument.Reduce(context);
             if (argument is BooleanTerm boolArgument)
             {
-                return BooleanTerm.From(!boolArgument.Value);
+                return BooleanTerm.Create(!boolArgument.Value, higherOrder);
             }
-
-            var higherOrder = this.HigherOrder.Reduce(context);
 
             return
                 this.Argument.EqualsWithHigherOrder(argument) &&

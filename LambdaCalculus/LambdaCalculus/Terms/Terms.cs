@@ -93,7 +93,14 @@ namespace Favalon.Terms
 
         public override Term Infer(InferContext context)
         {
+            // Will stop infinite inferring.
+            if (this.HigherOrder is UnspecifiedTerm)
+            {
+                return this;
+            }
+
             var higherOrder = this.HigherOrder.Infer(context);
+
             return
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
@@ -108,6 +115,7 @@ namespace Favalon.Terms
         public override Term Reduce(ReduceContext context)
         {
             var higherOrder = this.HigherOrder.Reduce(context);
+
             return 
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :

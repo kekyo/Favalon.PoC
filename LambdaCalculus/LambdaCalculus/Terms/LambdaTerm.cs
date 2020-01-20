@@ -23,7 +23,7 @@ namespace Favalon.Terms
             var newScope = context.NewScope();
 
             var parameter = this.Parameter.Infer(newScope);
-            if (parameter is IdentityTerm identity)
+            if (parameter is FreeVariableTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higherorder.
                 newScope.SetBoundTerm(identity.Identity, parameter);
@@ -46,7 +46,7 @@ namespace Favalon.Terms
             var newScope = context.NewScope();
 
             var parameter = this.Parameter.Infer(newScope);
-            if (parameter is IdentityTerm identity)
+            if (parameter is FreeVariableTerm identity)
             {
                 // Applied argument.
                 newScope.SetBoundTerm(identity.Identity, inferredArgumentHint);
@@ -97,7 +97,7 @@ namespace Favalon.Terms
             var newScope = context.NewScope();
 
             var parameter = this.Parameter.Reduce(context);
-            if (parameter is IdentityTerm identity)
+            if (parameter is FreeVariableTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higherorder.
                 newScope.SetBoundTerm(identity.Identity, identity);
@@ -117,7 +117,7 @@ namespace Favalon.Terms
             // The parameter and argument are out of inner scope.
             var parameter = this.Parameter.Reduce(context);
 
-            if (parameter is IdentityTerm identity)
+            if (parameter is FreeVariableTerm identity)
             {
                 var reducedArgument = argument.Reduce(context);
 
@@ -171,6 +171,8 @@ namespace Favalon.Terms
         public static LambdaTerm From(Term parameter, Term body) =>
             (parameter, body) switch
             {
+                (Term _, null) => From(parameter, UnspecifiedTerm.Instance),
+                (null, Term _) => From(UnspecifiedTerm.Instance, body),
                 (UnspecifiedTerm _, UnspecifiedTerm _) => Unspecified,
                 (KindTerm _, KindTerm _) => Kind,
                 (LambdaTerm(Term p, Term b), _) => new LambdaTerm(From(p, b), body),

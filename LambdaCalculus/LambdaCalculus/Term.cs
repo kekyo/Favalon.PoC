@@ -31,13 +31,39 @@ namespace Favalon
     {
         protected abstract bool OnEquals(EqualsContext context, Term? other);
 
-        public bool Equals(EqualsContext context, Term? other) =>
-            object.ReferenceEquals(this, other) ||
-            (this.OnEquals(context, other) &&
-                (!context.IncludeHigherOrder ||
-                (this.HigherOrder is Term && other?.HigherOrder is Term) ?
-                    this.HigherOrder.Equals(context, other?.HigherOrder) :
-                    false));
+        //public bool Equals(EqualsContext context, Term? other) =>
+        //    object.ReferenceEquals(this, other) ||
+        //    (this.OnEquals(context, other) &&
+        //        (!context.IncludeHigherOrder ||
+        //        (this.HigherOrder is Term && other?.HigherOrder is Term) ?
+        //            this.HigherOrder.Equals(context, other?.HigherOrder) :
+        //            false));
+
+        public bool Equals(EqualsContext context, Term? other)
+        {
+            if (object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (!this.OnEquals(context, other))
+            {
+                return false;
+            }
+
+            if (!context.IncludeHigherOrder)
+            {
+                return true;
+            }
+
+            if (this.HigherOrder is Term && other?.HigherOrder is Term)
+            {
+                var result = this.HigherOrder.Equals(context, other?.HigherOrder);
+                return result;
+            }
+
+            return false;
+        }
 
         public bool Equals(Term? other) =>
             this.Equals(new EqualsContext(false), other);

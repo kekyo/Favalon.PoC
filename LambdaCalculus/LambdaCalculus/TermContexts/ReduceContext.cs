@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon.Contexts
 {
@@ -19,5 +20,8 @@ namespace Favalon.Contexts
 
         public ReduceContext NewScope() =>
             new ReduceContext(this);
+
+        public Term ReduceAll(Term term) =>
+            this.InternalEnumerableReduce(term, this.Iterations).Last();
     }
 }

@@ -7,7 +7,7 @@ namespace Favalon.Terms
         public readonly Term Bound;
         public readonly Term Body;
 
-        internal BindExpressionTerm(Term bound, Term body)
+        private BindExpressionTerm(Term bound, Term body)
         {
             this.Bound = bound;
             this.Body = body;
@@ -49,15 +49,21 @@ namespace Favalon.Terms
 
         public override Term Reduce(ReduceContext context)
         {
-            var body = this.Body.Reduce(context);
-            var bound = this.Bound.Reduce(context);
+            // Try reduce reaching finished.
+            var body = context.ReduceAll(this.Body);
 
+            var bound = this.Bound.Reduce(context);
             if (bound is IdentityTerm(string identity))
             {
                 context.SetBoundTerm(identity, body);
+                return FreeVariableTerm.Create(identity, bound.HigherOrder);
             }
 
-            return bound;
+            return
+                this.Bound.EqualsWithHigherOrder(bound) &&
+                this.Body.EqualsWithHigherOrder(body) ?
+                    this :
+                    new BindExpressionTerm(bound, body);
         }
 
         protected override bool OnEquals(EqualsContext context, Term? other) =>
@@ -76,6 +82,9 @@ namespace Favalon.Terms
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Bound.PrettyPrint(context)} = {this.Body.PrettyPrint(context)}";
+
+        public static BindExpressionTerm Create(Term bound, Term body) =>
+            new BindExpressionTerm(bound, body);
     }
 
     public sealed class BindTerm : HigherOrderLazyTerm
@@ -83,7 +92,7 @@ namespace Favalon.Terms
         public readonly Term Expression;
         public readonly Term Continuation;
 
-        internal BindTerm(Term expression, Term continuation)
+        private BindTerm(Term expression, Term continuation)
         {
             this.Expression = expression;
             this.Continuation = continuation;
@@ -143,5 +152,8 @@ namespace Favalon.Terms
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Expression.PrettyPrint(context)} in {this.Continuation.PrettyPrint(context)}";
+
+        public static BindTerm Create(Term expression, Term continuation) =>
+            new BindTerm(expression, continuation);
     }
 }

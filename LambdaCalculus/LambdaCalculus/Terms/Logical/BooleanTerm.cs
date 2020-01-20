@@ -6,14 +6,15 @@ namespace Favalon.Terms.Logical
     {
         public new readonly bool Value;
 
-        private BooleanTerm(bool value) =>
+        private BooleanTerm(bool value, Term higherOrder) :
+            base(higherOrder) =>
             this.Value = value;
 
         protected override object GetValue() =>
             this.Value;
 
-        public override Term HigherOrder =>
-            Type;
+        protected override Term OnCreate(object value, Term higherOrder) =>
+            new BooleanTerm((bool)value, higherOrder);
 
         public void Deconstruct(out bool value) =>
             value = this.Value;
@@ -24,12 +25,15 @@ namespace Favalon.Terms.Logical
         public static readonly Term Type =
             TermFactory.Identity("bool");   // TODO: misunderstanding overrided bool terms.
 
-        public static readonly BooleanTerm True =
-            new BooleanTerm(true);
-        public static readonly BooleanTerm False =
-            new BooleanTerm(false);
+        public static BooleanTerm Create(bool value, Term higherOrder) =>
+            new BooleanTerm(value, higherOrder);
 
         public static BooleanTerm From(bool value) =>
             value ? True : False;
+
+        public static readonly BooleanTerm True =
+            new BooleanTerm(true, Type);
+        public static readonly BooleanTerm False =
+            new BooleanTerm(false, Type);
     }
 }

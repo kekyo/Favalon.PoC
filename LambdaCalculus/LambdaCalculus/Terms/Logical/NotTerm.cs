@@ -4,12 +4,12 @@ namespace Favalon.Terms.Logical
 {
     public sealed class NotTerm : UnaryTerm<NotTerm>
     {
-        private NotTerm(Term argument) :
-            base(argument, BooleanTerm.Type)
+        private NotTerm(Term argument, Term higherOrder) :
+            base(argument, higherOrder)
         { }
 
         protected override Term OnCreate(Term argument, Term higherOrder) =>
-            new NotTerm(argument);
+            new NotTerm(argument, higherOrder);
 
         public override Term Reduce(ReduceContext context)
         {
@@ -19,16 +19,19 @@ namespace Favalon.Terms.Logical
                 return BooleanTerm.From(!boolArgument.Value);
             }
 
+            var higherOrder = this.HigherOrder.Reduce(context);
+
             return
-                this.Argument.EqualsWithHigherOrder(argument) ?
+                this.Argument.EqualsWithHigherOrder(argument) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
-                    new NotTerm(argument);
+                    new NotTerm(argument, higherOrder);
         }
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"!{this.Argument.PrettyPrint(context)}";
 
-        public static NotTerm Create(Term argument) =>
-            new NotTerm(argument);
+        public static NotTerm Create(Term argument, Term higherOrder) =>
+            new NotTerm(argument, higherOrder);
     }
 }

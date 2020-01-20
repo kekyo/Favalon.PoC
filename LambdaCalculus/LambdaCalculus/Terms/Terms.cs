@@ -91,8 +91,14 @@ namespace Favalon.Terms
             base(higherOrder) =>
             this.Index = index;
 
-        public override Term Infer(InferContext context) =>
-            new PlaceholderTerm(this.Index, this.HigherOrder.Infer(context));
+        public override Term Infer(InferContext context)
+        {
+            var higherOrder = this.HigherOrder.Infer(context);
+            return
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    new PlaceholderTerm(this.Index, higherOrder);
+        }
 
         public override Term Fixup(FixupContext context) =>
             context.LookupUnifiedTerm(this) is Term term ?

@@ -35,7 +35,7 @@ namespace Favalon.Terms.Types
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             this.Type.PrettyPrint(context);
 
-        public static Term From(Type type)
+        internal static Term From(Type type)
         {
             if (!clrTypes.TryGetValue(type, out var term))
             {
@@ -51,15 +51,6 @@ namespace Favalon.Terms.Types
             }
             return term;
         }
-
-        public static Term From<T>() =>
-            From(typeof(T));
-
-        public static readonly ClrTypeTerm Void =
-            (ClrTypeTerm)From(typeof(void));
-
-        public static readonly ClrTypeTerm Unit =
-            (ClrTypeTerm)From(typeof(Unit));
     }
 
     public sealed class ClrTypeConstructorTerm : Term, IApplicable

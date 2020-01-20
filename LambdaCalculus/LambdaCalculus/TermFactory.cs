@@ -73,10 +73,10 @@ namespace Favalon
             };
 
         public static AndAlsoTerm AndAlso(Term lhs, Term rhs) =>
-            AndAlsoTerm.Create(lhs, rhs);
+            AndAlsoTerm.Create(lhs, rhs, BooleanTerm.Type);
         public static OrElseTerm OrElse(Term lhs, Term rhs) =>
-            OrElseTerm.Create(lhs, rhs);
+            OrElseTerm.Create(lhs, rhs, BooleanTerm.Type);
         public static NotTerm Not(Term argument) =>
-            NotTerm.Create(argument);
+            NotTerm.Create(argument, BooleanTerm.Type);
     }
 }

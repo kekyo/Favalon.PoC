@@ -24,8 +24,8 @@ namespace Favalon.Terms
             context.Unify(argument.HigherOrder, higherOrder);
 
             return
-                object.ReferenceEquals(argument, this.Argument) &&
-                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                argument.Equals(this.Argument, true) &&
+                higherOrder.Equals(this.HigherOrder, true) ?
                     this :
                     this.OnCreate(argument, higherOrder);
         }
@@ -36,8 +36,8 @@ namespace Favalon.Terms
             var higherOrder = this.HigherOrder.Fixup(context);
 
             return
-                object.ReferenceEquals(argument, this.Argument) &&
-                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                argument.Equals(this.Argument, true) &&
+                higherOrder.Equals(this.HigherOrder, true) ?
                     this :
                     this.OnCreate(argument, higherOrder);
         }

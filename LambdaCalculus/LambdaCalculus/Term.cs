@@ -1,7 +1,6 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 #pragma warning disable 659

@@ -2,7 +2,7 @@
 
 namespace Favalon.Terms.Algebraic
 {
-    public sealed class SumTerm : BinaryTerm<SumTerm>
+    public sealed class SumTerm : AlgebraicTerm<SumTerm>
     {
         private SumTerm(Term lhs, Term rhs, Term higherOrder) :
             base(lhs, rhs, higherOrder)
@@ -10,20 +10,6 @@ namespace Favalon.Terms.Algebraic
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
             new SumTerm(lhs, rhs, higherOrder);
-
-        public override Term Reduce(ReduceContext context)
-        {
-            var lhs = this.Lhs.Reduce(context);
-            var rhs = this.Rhs.Reduce(context);
-            var higherOrder = this.HigherOrder.Reduce(context);
-
-            return
-                object.ReferenceEquals(lhs, this.Lhs) &&
-                object.ReferenceEquals(rhs, this.Rhs) &&
-                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                    this :
-                    new SumTerm(lhs, rhs, higherOrder);
-        }
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Lhs.PrettyPrint(context)} + {this.Rhs.PrettyPrint(context)}";

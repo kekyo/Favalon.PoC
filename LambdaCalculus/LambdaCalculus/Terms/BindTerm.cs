@@ -29,8 +29,8 @@ namespace Favalon.Terms
             context.Unify(bound.HigherOrder, body.HigherOrder);
 
             return
-                object.ReferenceEquals(bound, this.Bound) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Bound.Equals(bound, true) &&
+                this.Body.Equals(body, true) ?
                     this :
                     new BindExpressionTerm(bound, body);
         }
@@ -41,8 +41,8 @@ namespace Favalon.Terms
             var bound = this.Bound.Fixup(context);
 
             return
-                object.ReferenceEquals(bound, this.Bound) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Bound.Equals(bound, true) &&
+                this.Body.Equals(body, true) ?
                     this :
                     new BindExpressionTerm(bound, body);
         }
@@ -100,8 +100,8 @@ namespace Favalon.Terms
             var continuation = this.Continuation.Infer(newScope);
 
             return
-                object.ReferenceEquals(expression, this.Expression) &&
-                object.ReferenceEquals(continuation, this.Continuation) ?
+                this.Expression.Equals(expression, true) &&
+                this.Continuation.Equals(continuation, true) ?
                     this :
                     new BindTerm(expression, continuation);
         }
@@ -112,8 +112,8 @@ namespace Favalon.Terms
             var continuation = this.Continuation.Fixup(context);
 
             return
-                object.ReferenceEquals(expression, this.Expression) &&
-                object.ReferenceEquals(continuation, this.Continuation) ?
+                this.Expression.Equals(expression, true) &&
+                this.Continuation.Equals(continuation, true) ?
                     this :
                     new BindTerm(expression, continuation);
         }

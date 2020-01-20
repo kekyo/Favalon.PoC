@@ -1,6 +1,4 @@
 ﻿using Favalon.Contexts;
-//using Favalon.Terms.Types;
-using System;
 
 namespace Favalon.Terms
 {

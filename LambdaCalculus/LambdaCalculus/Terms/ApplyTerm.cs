@@ -109,9 +109,9 @@ namespace Favalon.Terms
                 LambdaTerm.From(argument.HigherOrder, higherOrder));
 
             return
-                object.ReferenceEquals(function, this.Function) &&
-                object.ReferenceEquals(argument, this.Argument) &&
-                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                this.Function.Equals(function, true) &&
+                this.Argument.Equals(argument, true) &&
+                this.HigherOrder.Equals(higherOrder, true) ?
                     this :
                     new ApplyTerm(function, argument, higherOrder);
         }
@@ -128,9 +128,9 @@ namespace Favalon.Terms
             };
 
             return
-                object.ReferenceEquals(function, this.Function) &&
-                object.ReferenceEquals(argument, this.Argument) &&
-                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                this.Function.Equals(function, true) &&
+                this.Argument.Equals(argument, true) &&
+                this.HigherOrder.Equals(higherOrder, true) ?
                     this :
                     new ApplyTerm(function, argument, higherOrder);
         }
@@ -141,6 +141,7 @@ namespace Favalon.Terms
 
             var function = this.Function;
             var argument = this.Argument;
+
             for (var iteration = 0; iteration < context.Iterations; iteration++)
             {
                 if (function is IApplicable applicable)
@@ -160,8 +161,8 @@ namespace Favalon.Terms
                     function = function.Reduce(context);
                 }
 
-                if (object.ReferenceEquals(function, this.Function) &&
-                    object.ReferenceEquals(argument, this.Argument))
+                if (this.Function.Equals(function, true) &&
+                    this.Argument.Equals(argument, true))
                 {
                     break;
                 }
@@ -170,9 +171,9 @@ namespace Favalon.Terms
             // TODO: Detects uninterpretable terms on many iterations.
 
             return
-                object.ReferenceEquals(function, this.Function) &&
-                object.ReferenceEquals(argument, this.Argument) &&
-                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                this.Function.Equals(function, true) &&
+                this.Argument.Equals(argument, true) &&
+                this.HigherOrder.Equals(higherOrder, true) ?
                     this :
                     new ApplyTerm(function, argument, higherOrder);
         }

@@ -20,7 +20,7 @@ namespace Favalon.Terms.Logical
             }
 
             return
-                object.ReferenceEquals(argument, this.Argument) ?
+                this.Argument.Equals(argument, true) ?
                     this :
                     new NotTerm(argument);
         }

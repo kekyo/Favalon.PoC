@@ -30,9 +30,9 @@ namespace Favalon.Terms
             context.Unify(rhs.HigherOrder, higherOrder);
 
             return
-                object.ReferenceEquals(lhs, this.Lhs) &&
-                object.ReferenceEquals(rhs, this.Rhs) &&
-                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                this.Lhs.Equals(lhs, true) &&
+                this.Rhs.Equals(rhs, true) &&
+                this.HigherOrder.Equals(higherOrder, true) ?
                     this :
                     this.OnCreate(lhs, rhs, higherOrder);
         }
@@ -44,12 +44,23 @@ namespace Favalon.Terms
             var higherOrder = this.HigherOrder.Fixup(context);
 
             return
-                object.ReferenceEquals(lhs, this.Lhs) &&
-                object.ReferenceEquals(rhs, this.Rhs) &&
-                object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                this.Lhs.Equals(lhs, true) &&
+                this.Rhs.Equals(rhs, true) &&
+                this.HigherOrder.Equals(higherOrder, true) ?
                     this :
                     this.OnCreate(lhs, rhs, higherOrder);
         }
+
+        public IEnumerable<Term> Flatten() =>
+            (this.Lhs is BinaryTerm lhs ?
+                lhs.Flatten() :
+                new[] { this.Lhs }).
+            Concat(this.Rhs is BinaryTerm rhs ?
+                rhs.Flatten() :
+                new[] { this.Rhs });
+
+        public void Deconstruct(out Term[] terms) =>
+            terms = this.Flatten().ToArray();
 
         public void Deconstruct(out Term lhs, out Term rhs, out Term higherOrder)
         {
@@ -70,16 +81,5 @@ namespace Favalon.Terms
             other is T term ?
                 this.Lhs.Equals(term.Lhs) && this.Rhs.Equals(term.Rhs) :
                 false;
-
-        public IEnumerable<Term> Flatten() =>
-            (this.Lhs is BinaryTerm<T> lhs ?
-                lhs.Flatten() :
-                new[] { this.Lhs }).
-            Concat(this.Rhs is BinaryTerm<T> rhs ?
-                rhs.Flatten() :
-                new[] { this.Rhs });
-
-        public void Deconstruct(out Term[] terms) =>
-            terms = this.Flatten().ToArray();
     }
 }

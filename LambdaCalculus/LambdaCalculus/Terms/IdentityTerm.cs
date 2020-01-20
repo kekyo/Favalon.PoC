@@ -21,18 +21,20 @@ namespace Favalon.Terms
                 return new IdentityTerm(this.Identity, higherOrder);
             }
 
-            return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new IdentityTerm(this.Identity, higherOrder);
+            return
+                this.HigherOrder.Equals(higherOrder, true) ?
+                    this :
+                    new IdentityTerm(this.Identity, higherOrder);
         }
 
         public override Term Fixup(FixupContext context)
         {
             var higherOrder = this.HigherOrder.Fixup(context);
 
-            return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new IdentityTerm(this.Identity, higherOrder);
+            return
+                this.HigherOrder.Equals(higherOrder, true) ?
+                    this :
+                    new IdentityTerm(this.Identity, higherOrder);
         }
 
         public override Term Reduce(ReduceContext context)
@@ -45,9 +47,10 @@ namespace Favalon.Terms
 
             var higherOrder = this.HigherOrder.Reduce(context);
 
-            return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new IdentityTerm(this.Identity, higherOrder);
+            return
+                this.HigherOrder.Equals(higherOrder, true) ?
+                    this :
+                    new IdentityTerm(this.Identity, higherOrder);
         }
 
         protected override bool OnEquals(Term? other) =>

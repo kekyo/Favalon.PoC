@@ -6,6 +6,8 @@ namespace Favalon
 {
     public class Environment : Context
     {
+        public const int Iterations = 1000;
+
         protected Environment()
         { }
 
@@ -19,7 +21,7 @@ namespace Favalon
             return partial.Fixup(context);
         }
 
-        public IEnumerable<Term> EnumerableReduce(Term term, int iterations = int.MaxValue)
+        public IEnumerable<Term> EnumerableReduce(Term term, int iterations = Iterations)
         {
             if (boundTerms == null)
             {
@@ -54,7 +56,7 @@ namespace Favalon
             // TODO: Detects uninterpretable terms on many iterations.
         }
 
-        public Term ReduceOne(Term term, int iterations = int.MaxValue)
+        public Term ReduceOne(Term term, int iterations = Iterations)
         {
             if (boundTerms == null)
             {
@@ -67,7 +69,7 @@ namespace Favalon
             return inferred.Reduce(context);
         }
 
-        public Term Reduce(Term term, int iterations = int.MaxValue)
+        public Term Reduce(Term term, int iterations = Iterations)
         {
             if (boundTerms == null)
             {

@@ -2,13 +2,13 @@
 
 namespace Favalon.Terms.Logical
 {
-    public sealed class AndAlsoTerm : BinaryTerm<AndAlsoTerm>
+    public sealed class AndAlsoTerm : LogicalBinaryTerm<AndAlsoTerm>
     {
         private AndAlsoTerm(Term lhs, Term rhs) :
-            base(lhs, rhs, BooleanTerm.Type)
+            base(lhs, rhs)
         { }
 
-        protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
+        protected override Term OnCreate(Term lhs, Term rhs) =>
             new AndAlsoTerm(lhs, rhs);
 
         public override Term Reduce(ReduceContext context)
@@ -29,8 +29,8 @@ namespace Favalon.Terms.Logical
             }
 
             return
-                object.ReferenceEquals(lhs, this.Lhs) &&
-                object.ReferenceEquals(rhs, this.Rhs) ?
+                lhs.Equals(this.Lhs, true) &&
+                rhs.Equals(this.Rhs, true) ?
                     this :
                     new AndAlsoTerm(lhs, rhs);
         }

@@ -33,8 +33,8 @@ namespace Favalon.Terms
             var body = this.Body.Infer(newScope);
 
             return
-                object.ReferenceEquals(parameter, this.Parameter) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Parameter.Equals(parameter, true) &&
+                this.Body.Equals(body, true) ?
                     this :
                     From(parameter, body);
         }
@@ -58,8 +58,8 @@ namespace Favalon.Terms
             context.Unify(body.HigherOrder, higherOrderHint);
 
             return
-                object.ReferenceEquals(parameter, this.Parameter) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Parameter.Equals(parameter, true) &&
+                this.Body.Equals(body, true) ?
                     this :
                     From(parameter, body);
         }
@@ -72,8 +72,8 @@ namespace Favalon.Terms
             var body = this.Body.Fixup(context);
 
             return
-                object.ReferenceEquals(parameter, this.Parameter) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Parameter.Equals(parameter, true) &&
+                this.Body.Equals(body, true) ?
                     this :
                     From(parameter, body);
         }
@@ -86,8 +86,8 @@ namespace Favalon.Terms
             var body = this.Body.Fixup(context);
 
             return
-                object.ReferenceEquals(parameter, this.Parameter) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Parameter.Equals(parameter, true) &&
+                this.Body.Equals(body, true) ?
                     this :
                     From(parameter, body);
         }
@@ -106,8 +106,8 @@ namespace Favalon.Terms
             var body = this.Body.Reduce(newScope);
 
             return
-                object.ReferenceEquals(parameter, this.Parameter) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Parameter.Equals(parameter, true) &&
+                this.Body.Equals(body, true) ?
                     this :
                     From(parameter, body);
         }

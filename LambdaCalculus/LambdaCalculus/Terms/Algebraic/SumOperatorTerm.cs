@@ -14,7 +14,7 @@ namespace Favalon.Terms.Algebraic
 
         public override Term Infer(InferContext context)
         {
-            var higherOrder = this.HigherOrder.Infer(context);
+            var higherOrder = context.ResolveHigherOrder(this);
 
             return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
                 this :
@@ -23,7 +23,7 @@ namespace Favalon.Terms.Algebraic
 
         Term IApplicable.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
         {
-            var higherOrder = this.HigherOrder.Infer(context);
+            var higherOrder = context.ResolveHigherOrder(this);
 
             // (? -> inferredArgumentHint:? -> ?):higherOrderHint
             var higherOrderFromArgument = LambdaTerm.From(
@@ -101,7 +101,7 @@ namespace Favalon.Terms.Algebraic
 
             public override Term Infer(InferContext context)
             {
-                var higherOrder = this.HigherOrder.Infer(context);
+                var higherOrder = context.ResolveHigherOrder(this);
                 var lhs = this.lhs.Infer(context);
 
                 context.Unify(lhs.HigherOrder, higherOrder);
@@ -115,7 +115,7 @@ namespace Favalon.Terms.Algebraic
 
             Term IApplicable.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
             {
-                var higherOrder = this.HigherOrder.Infer(context);
+                var higherOrder = context.ResolveHigherOrder(this);
                 var lhs = this.lhs.Infer(context);
 
                 // ? -> ?

@@ -16,25 +16,33 @@ namespace Favalon.Contexts
 
         internal readonly PlaceholderIndexer indexer;
         internal readonly Context? parent;
-        internal Dictionary<string, Term>? boundTerms;
+        internal Dictionary<string, Term>? boundTerms
+        {
+            get;
+            private set;
+        }
 
-        private protected Context()
+        public readonly int Iterations;
+
+        private protected Context(int iterations)
         {
             indexer = new PlaceholderIndexer();
-            boundTerms = new Dictionary<string, Term>();
+            this.Iterations = iterations;
         }
 
         private protected Context(Context parent)
         {
             this.indexer = parent.indexer;
             this.parent = parent;
+            this.Iterations = parent.Iterations;
         }
 
-        internal Context(Context parent, Dictionary<string, Term> boundTerms)
+        private protected Context(Context parent, Dictionary<string, Term> boundTerms)
         {
             this.indexer = parent.indexer;
             this.parent = parent;
             this.boundTerms = boundTerms;
+            this.Iterations = parent.Iterations;
         }
 
         /////////////////////////////////////////////////////////////////////////
@@ -72,21 +80,14 @@ namespace Favalon.Contexts
         /////////////////////////////////////////////////////////////////////////
         // Infer
 
-        private Term InternalInfer(
-            Term term,
-            Dictionary<string, Term> boundTerms,
-            bool higherOrderInferOnly,
-            int iterations)
+        private Term InternalInfer(Term term, Dictionary<string, Term> boundTerms, bool higherOrderInferOnly)
         {
-            var context = new InferContext(this, boundTerms, higherOrderInferOnly, iterations);
+            var context = new InferContext(this, boundTerms, higherOrderInferOnly);
             var partial = term.Infer(context);
             return partial.Fixup(context);
         }
 
-        private protected IEnumerable<Term> InternalEnumerableInfer(
-            Term term,
-            bool higherOrderInferOnly,
-            int iterations)
+        private protected IEnumerable<Term> InternalEnumerableInfer(Term term, bool higherOrderInferOnly)
         {
             var boundTerms =
                 this.boundTerms is Dictionary<string, Term> bt ?
@@ -95,11 +96,11 @@ namespace Favalon.Contexts
 
             var current = term;
             var iteration = 0;
-            for (; iteration < iterations; iteration++)
+            for (; iteration < this.Iterations; iteration++)
             {
                 yield return current;
 
-                var inferred = this.InternalInfer(current, boundTerms, higherOrderInferOnly, iterations);
+                var inferred = this.InternalInfer(current, boundTerms, higherOrderInferOnly);
                 if (current.EqualsWithHigherOrder(inferred))
                 {
                     break;
@@ -108,7 +109,7 @@ namespace Favalon.Contexts
                 current = inferred;
             }
 
-            if (iteration >= iterations)
+            if (iteration >= this.Iterations)
             {
                 yield return current;
 
@@ -120,13 +121,13 @@ namespace Favalon.Contexts
         /////////////////////////////////////////////////////////////////////////
         // Reduce
 
-        private protected Term InternalReduce(Term term, Dictionary<string, Term> boundTerms, int iterations)
+        private protected Term InternalReduce(Term term, Dictionary<string, Term> boundTerms)
         {
-            var context = new ReduceContext(this, boundTerms, iterations);
+            var context = new ReduceContext(this, boundTerms);
             return term.Reduce(context);
         }
 
-        private protected IEnumerable<Term> InternalEnumerableReduce(Term term, int iterations)
+        private protected IEnumerable<Term> InternalEnumerableReduce(Term term)
         {
             var boundTerms =
                 this.boundTerms is Dictionary<string, Term> bt ?
@@ -135,18 +136,18 @@ namespace Favalon.Contexts
 
             var current = term;
             var iteration = 0;
-            for (; iteration < iterations; iteration++)
+            for (; iteration < this.Iterations; iteration++)
             {
                 yield return current;
 
-                var inferred = this.InternalInfer(current, boundTerms, false, iterations);
+                var inferred = this.InternalInfer(current, boundTerms, false);
                 if (!current.EqualsWithHigherOrder(inferred))
                 {
                     yield return inferred;
                 }
 
-                var reduced = this.InternalReduce(inferred, boundTerms, iterations);
-                if (current.EqualsWithHigherOrder(reduced))
+                var reduced = this.InternalReduce(inferred, boundTerms);
+                if (inferred.EqualsWithHigherOrder(reduced))
                 {
                     break;
                 }
@@ -154,7 +155,7 @@ namespace Favalon.Contexts
                 current = reduced;
             }
 
-            if (iteration >= iterations)
+            if (iteration >= this.Iterations)
             {
                 yield return current;
 
@@ -163,26 +164,7 @@ namespace Favalon.Contexts
             }
 
             // Applied if wasn't caused exceptions.
-            if (boundTerms != null)
-            {
-                if (this.boundTerms != null)
-                {
-                    if (!object.ReferenceEquals(boundTerms, this.boundTerms))
-                    {
-                        // Apply finally bound result.
-                        foreach (var entry in boundTerms)
-                        {
-                            this.boundTerms[entry.Key] = entry.Value;
-                        }
-                    }
-                }
-                else
-                {
-                    this.boundTerms = boundTerms;
-                }
-            }
-
-            yield return current;
+            this.boundTerms = boundTerms;
         }
     }
 }

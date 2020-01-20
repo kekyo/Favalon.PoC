@@ -7,68 +7,49 @@ namespace Favalon
 {
     public class Environment : Context
     {
-        public readonly int DefaultIterations;
+        protected const int DefaultIterations = 1000;
 
-        protected Environment(int defaultIterations)
-        {
-            this.DefaultIterations = defaultIterations;
-        }
+        protected Environment(int iterations) :
+            base(iterations)
+        { }
 
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
 
-        public static Environment Create(int defaultIterations = 10000) =>
+        public static Environment Create(int defaultIterations = DefaultIterations) =>
             new Environment(defaultIterations);
 
         /////////////////////////////////////////////////////////////////////////
         // Infer
 
-        public IEnumerable<Term> EnumerableInfer(
-            Term term,
-            int iterations,
-            bool higherOrderInferOnly) =>
-            base.InternalEnumerableInfer(term, higherOrderInferOnly, iterations);
+        public IEnumerable<Term> EnumerableInfer(Term term, bool higherOrderInferOnly) =>
+            base.InternalEnumerableInfer(term, higherOrderInferOnly);
 
         public IEnumerable<Term> EnumerableInfer(Term term) =>
-            base.InternalEnumerableInfer(term, false, DefaultIterations);
+            base.InternalEnumerableInfer(term, false);
 
-        public Term Infer(
-            Term term,
-            int iterations,
-            bool higherOrderInferOnly) =>
-            base.InternalEnumerableInfer(term, higherOrderInferOnly, iterations).Last();
+        public Term Infer(Term term, bool higherOrderInferOnly) =>
+            base.InternalEnumerableInfer(term, higherOrderInferOnly).Last();
 
         public Term Infer(Term term) =>
-            base.InternalEnumerableInfer(term, false, DefaultIterations).Last();
+            base.InternalEnumerableInfer(term, false).Last();
 
-        public Term InferOne(
-            Term term,
-            int iterations,
-            bool higherOrderInferOnly) =>
-            base.InternalEnumerableInfer(term, higherOrderInferOnly, iterations).First();
+        public Term InferOne(Term term, bool higherOrderInferOnly) =>
+            base.InternalEnumerableInfer(term, higherOrderInferOnly).First();
 
         public Term InferOne(Term term) =>
-            base.InternalEnumerableInfer(term, false, DefaultIterations).First();
+            base.InternalEnumerableInfer(term, false).First();
 
         /////////////////////////////////////////////////////////////////////////
         // Reduce
 
-        public IEnumerable<Term> EnumerableReduce(Term term, int iterations) =>
-            base.InternalEnumerableReduce(term, iterations);
-
         public IEnumerable<Term> EnumerableReduce(Term term) =>
-            base.InternalEnumerableReduce(term, DefaultIterations);
-
-        public Term Reduce(Term term, int iterations) =>
-            base.InternalEnumerableReduce(term, iterations).Last();
+            base.InternalEnumerableReduce(term);
 
         public Term Reduce(Term term) =>
-            base.InternalEnumerableReduce(term, DefaultIterations).Last();
-
-        public Term ReduceOne(Term term, int iterations) =>
-            base.InternalEnumerableReduce(term, iterations).First();
+            base.InternalEnumerableReduce(term).Last();
 
         public Term ReduceOne(Term term) =>
-            base.InternalEnumerableReduce(term, DefaultIterations).First();
+            base.InternalEnumerableReduce(term).First();
     }
 }

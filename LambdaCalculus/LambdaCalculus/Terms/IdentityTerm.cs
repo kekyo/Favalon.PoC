@@ -14,7 +14,7 @@ namespace Favalon.Terms
 
         public override Term Infer(InferContext context)
         {
-            var higherOrder = this.HigherOrder.Infer(context);
+            var higherOrder = context.ResolveHigherOrder(this);
 
             if (context.LookupBoundTerm(this.Identity) is Term bound)
             {

@@ -7,27 +7,19 @@ namespace Favalon.Contexts
     public sealed class InferContext : FixupContext
     {
         private readonly bool higherOrderInferOnly;
-        private readonly int iterations;
 
         internal InferContext(
             Context parent,
             Dictionary<string, Term> boundTerms,
-            bool higherOrderInferOnly,
-            int iterations) :
-            base(parent, boundTerms, new Dictionary<int, Term>())
-        {
+            bool higherOrderInferOnly) :
+            base(parent, boundTerms, new Dictionary<int, Term>()) =>
             this.higherOrderInferOnly = higherOrderInferOnly;
-            this.iterations = iterations;
-        }
 
         private InferContext(
             InferContext parent,
             Dictionary<int, Term> placeholders) :
-            base(parent, new Dictionary<string, Term>(), placeholders)
-        {
+            base(parent, new Dictionary<string, Term>(), placeholders) =>
             this.higherOrderInferOnly = parent.higherOrderInferOnly;
-            this.iterations = parent.iterations;
-        }
 
         public InferContext NewScope() =>
             new InferContext(this, placeholders);
@@ -35,10 +27,10 @@ namespace Favalon.Contexts
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
 
-        public Term ResolveHigherOrder(Term higherOrder) =>
+        public Term ResolveHigherOrder(Term term) =>
             higherOrderInferOnly ?
-                higherOrder.Infer(this) :
-                base.InternalEnumerableReduce(higherOrder, iterations).Last();
+                term.HigherOrder.Infer(this) :
+                base.InternalEnumerableReduce(term.HigherOrder).Last();
 
         /////////////////////////////////////////////////////////////////////////
         // Unify
@@ -47,7 +39,7 @@ namespace Favalon.Contexts
         {
             if (placeholders.TryGetValue(placeholder.Index, out var last))
             {
-                return Unify(last, term);
+                return this.Unify(last, term);
             }
             else
             {
@@ -63,7 +55,7 @@ namespace Favalon.Contexts
                 return false;
             }
 
-            if (term1 is TerminationTerm || term2 is TerminationTerm)
+            if (!term1.ValidTerm || !term2.ValidTerm)
             {
                 return false;
             }
@@ -77,17 +69,17 @@ namespace Favalon.Contexts
 
             if (term1 is PlaceholderTerm placeholder1)
             {
-                unified = Unify(placeholder1, term2);
+                unified = this.Unify(placeholder1, term2);
             }
             else if (term2 is PlaceholderTerm placeholder2)
             {
-                unified = Unify(placeholder2, term1);
+                unified = this.Unify(placeholder2, term1);
             }
             else if (term1 is LambdaTerm(Term parameter1, Term body1) &&
                 term2 is LambdaTerm(Term parameter2, Term body2))
             {
-                var unified1 = Unify(parameter1, parameter2);
-                var unified2 = Unify(body1, body2);
+                var unified1 = this.Unify(parameter1, parameter2);
+                var unified2 = this.Unify(body1, body2);
                 unified = unified1 && unified2;
             }
             else

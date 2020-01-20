@@ -18,7 +18,7 @@ namespace Favalon.Terms
 
         public override sealed Term Infer(InferContext context)
         {
-            var higherOrder = this.HigherOrder.Infer(context);
+            var higherOrder = context.ResolveHigherOrder(this);
 
             return
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?

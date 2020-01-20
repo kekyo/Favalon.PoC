@@ -24,7 +24,7 @@ namespace Favalon.Terms
         {
             var lhs = this.Lhs.Infer(context);
             var rhs = this.Rhs.Infer(context);
-            var higherOrder = this.HigherOrder.Infer(context);
+            var higherOrder = context.ResolveHigherOrder(this);
 
             context.Unify(lhs.HigherOrder, higherOrder);
             context.Unify(rhs.HigherOrder, higherOrder);

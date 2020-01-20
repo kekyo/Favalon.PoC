@@ -13,6 +13,9 @@ namespace Favalon.Terms
             this.Body = body;
         }
 
+        internal override bool ValidTerm =>
+            this.Parameter.ValidTerm && this.Body.ValidTerm;
+
         protected override Term GetHigherOrder() =>
             From(this.Parameter.HigherOrder, this.Body.HigherOrder);
 

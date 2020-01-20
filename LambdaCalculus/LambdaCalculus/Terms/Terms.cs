@@ -55,6 +55,9 @@ namespace Favalon.Terms
         public override Term HigherOrder =>
             null!;
 
+        internal override bool ValidTerm =>
+            false;
+
         public override Term Infer(InferContext context) =>
             this;
 
@@ -135,7 +138,7 @@ namespace Favalon.Terms
                 return this;
             }
 
-            var higherOrder = this.HigherOrder.Infer(context);
+            var higherOrder = context.ResolveHigherOrder(this);
 
             return
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?

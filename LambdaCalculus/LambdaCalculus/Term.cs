@@ -14,6 +14,9 @@ namespace Favalon
 
         public abstract Term HigherOrder { get; }
 
+        internal virtual bool ValidTerm =>
+            true;
+
         public void Deconstruct(out Term higherOrder) =>
             higherOrder = this.HigherOrder;
 
@@ -44,6 +47,11 @@ namespace Favalon
             if (object.ReferenceEquals(this, other))
             {
                 return true;
+            }
+
+            if (!this.ValidTerm || !(other?.ValidTerm ?? false))
+            {
+                return false;
             }
 
             if (!this.OnEquals(context, other))

@@ -70,7 +70,7 @@ namespace Favalon.Terms.Algebraic
                 new SumClosureTerm(argument, this.HigherOrder.Reduce(context)),
                 argument);
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(Term? other) =>
             other is SumOperatorTerm<TSumTerm>;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
@@ -177,7 +177,7 @@ namespace Favalon.Terms.Algebraic
                 //    new TSumTerm(lhs, rhs, higherOrder), rhs);
             }
 
-            public override bool Equals(Term? other) =>
+            protected override bool OnEquals(Term? other) =>
                 other is TSumTerm;
 
             protected override string OnPrettyPrint(PrettyPrintContext context) =>

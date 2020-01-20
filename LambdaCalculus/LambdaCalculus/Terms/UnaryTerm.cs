@@ -56,10 +56,9 @@ namespace Favalon.Terms
             base(argument, higherOrder)
         { }
 
-        public override sealed bool Equals(Term? other) =>
-            object.ReferenceEquals(this, other) ||
-                (other is T term ?
-                    this.Argument.Equals(term.Argument) :
-                    false);
+        protected override sealed bool OnEquals(Term? other) =>
+            other is T term ?
+               this.Argument.Equals(term.Argument) :
+               false;
     }
 }

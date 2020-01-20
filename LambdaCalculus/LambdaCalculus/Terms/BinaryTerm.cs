@@ -66,11 +66,10 @@ namespace Favalon.Terms
             base(lhs, rhs, higherOrder)
         { }
 
-        public override bool Equals(Term? other) =>
-            object.ReferenceEquals(this, other) ||
-                (other is T term ?
-                    this.Lhs.Equals(term.Lhs) && this.Rhs.Equals(term.Rhs) :
-                    false);
+        protected override bool OnEquals(Term? other) =>
+            other is T term ?
+                this.Lhs.Equals(term.Lhs) && this.Rhs.Equals(term.Rhs) :
+                false;
 
         public IEnumerable<Term> Flatten() =>
             (this.Lhs is BinaryTerm<T> lhs ?

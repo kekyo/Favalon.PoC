@@ -64,7 +64,7 @@ namespace Favalon.Terms
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(Term? other) =>
             other is UnspecifiedTerm;
 
         public override int GetHashCode() =>
@@ -107,7 +107,7 @@ namespace Favalon.Terms
                 new PlaceholderTerm(this.Index, higherOrder);
         }
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(Term? other) =>
             other is PlaceholderTerm rhs ? this.Index.Equals(rhs.Index) : false;
 
         public override int GetHashCode() =>
@@ -137,7 +137,7 @@ namespace Favalon.Terms
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(Term? other) =>
             other is KindTerm;
 
         public override int GetHashCode() =>

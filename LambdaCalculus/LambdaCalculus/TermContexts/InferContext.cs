@@ -34,7 +34,7 @@ namespace Favalon.Contexts
 
         public bool Unify(Term term1, Term term2)
         {
-            if (object.ReferenceEquals(term1, term2) || term1.Equals(term2))
+            if (term1.Equals(term2))
             {
                 return true;
             }

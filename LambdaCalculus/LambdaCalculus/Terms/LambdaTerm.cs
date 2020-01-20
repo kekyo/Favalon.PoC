@@ -139,7 +139,7 @@ namespace Favalon.Terms
             }
         }
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(Term? other) =>
             other is LambdaTerm rhs ?
                 (this.Parameter.Equals(rhs.Parameter) && this.Body.Equals(rhs.Body)) :
                 false;

@@ -48,7 +48,7 @@ namespace Favalon.Terms
         protected ValueTerm()
         { }
 
-        public override sealed bool Equals(Term? other) =>
+        protected override sealed bool OnEquals(Term? other) =>
             other is T rhs ? this.Value.Equals(rhs.Value) : false;
     }
 }

@@ -23,7 +23,7 @@ namespace Favalon.Terms.Types
                 // int: int <-- int
                 // IComparable: IComparable <-- IComparable
                 // _[1]: _[1] <-- _[1]
-                case (_, _) when object.ReferenceEquals(lhs, rhs) || lhs.Equals(rhs):
+                case (_, _) when lhs.Equals(rhs):
                     return lhs;
 
                 // _[1]: _[1] <-- _[2]

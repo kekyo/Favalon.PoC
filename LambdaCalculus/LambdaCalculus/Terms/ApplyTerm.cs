@@ -177,7 +177,7 @@ namespace Favalon.Terms
                     new ApplyTerm(function, argument, higherOrder);
         }
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(Term? other) =>
             other is ApplyTerm rhs ?
                 (this.Function.Equals(rhs.Function) && this.Argument.Equals(rhs.Argument)) :
                 false;

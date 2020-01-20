@@ -60,7 +60,7 @@ namespace Favalon.Terms
             return bound;
         }
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(Term? other) =>
             other is BindExpressionTerm rhs ?
                 (this.Bound.Equals(rhs.Bound) && this.Body.Equals(rhs.Body)) :
                 false;
@@ -127,7 +127,7 @@ namespace Favalon.Terms
             return this.Continuation.Reduce(newScope);
         }
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(Term? other) =>
             other is BindTerm rhs ?
                 (this.Expression.Equals(rhs.Expression) && this.Continuation.Equals(rhs.Continuation)) :
                 false;

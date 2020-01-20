@@ -1,4 +1,6 @@
-﻿namespace Favalon.Terms.Logical
+﻿using Favalon.Contexts;
+
+namespace Favalon.Terms.Logical
 {
     public abstract class LogicalBinaryTerm : BinaryTerm
     {
@@ -19,9 +21,9 @@
             base(lhs, rhs)
         { }
 
-        protected override bool OnEquals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is T term ?
-                this.Lhs.Equals(term.Lhs) && this.Rhs.Equals(term.Rhs) :
+                this.Lhs.Equals(context, term.Lhs) && this.Rhs.Equals(context, term.Rhs) :
                 false;
     }
 }

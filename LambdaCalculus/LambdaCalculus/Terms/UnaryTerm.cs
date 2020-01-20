@@ -24,8 +24,8 @@ namespace Favalon.Terms
             context.Unify(argument.HigherOrder, higherOrder);
 
             return
-                argument.Equals(this.Argument, true) &&
-                higherOrder.Equals(this.HigherOrder, true) ?
+                this.Argument.EqualsWithHigherOrder(argument) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
                     this.OnCreate(argument, higherOrder);
         }
@@ -36,8 +36,8 @@ namespace Favalon.Terms
             var higherOrder = this.HigherOrder.Fixup(context);
 
             return
-                argument.Equals(this.Argument, true) &&
-                higherOrder.Equals(this.HigherOrder, true) ?
+                this.Argument.EqualsWithHigherOrder(argument) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
                     this.OnCreate(argument, higherOrder);
         }
@@ -56,9 +56,9 @@ namespace Favalon.Terms
             base(argument, higherOrder)
         { }
 
-        protected override sealed bool OnEquals(Term? other) =>
+        protected override sealed bool OnEquals(EqualsContext context, Term? other) =>
             other is T term ?
-               this.Argument.Equals(term.Argument) :
+               this.Argument.Equals(context, term.Argument) :
                false;
     }
 }

@@ -109,9 +109,9 @@ namespace Favalon.Terms
                 LambdaTerm.From(argument.HigherOrder, higherOrder));
 
             return
-                this.Function.Equals(function, true) &&
-                this.Argument.Equals(argument, true) &&
-                this.HigherOrder.Equals(higherOrder, true) ?
+                this.Function.EqualsWithHigherOrder(function) &&
+                this.Argument.EqualsWithHigherOrder(argument) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
                     new ApplyTerm(function, argument, higherOrder);
         }
@@ -128,9 +128,9 @@ namespace Favalon.Terms
             };
 
             return
-                this.Function.Equals(function, true) &&
-                this.Argument.Equals(argument, true) &&
-                this.HigherOrder.Equals(higherOrder, true) ?
+                this.Function.EqualsWithHigherOrder(function) &&
+                this.Argument.EqualsWithHigherOrder(argument) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
                     new ApplyTerm(function, argument, higherOrder);
         }
@@ -161,8 +161,8 @@ namespace Favalon.Terms
                     function = function.Reduce(context);
                 }
 
-                if (this.Function.Equals(function, true) &&
-                    this.Argument.Equals(argument, true))
+                if (this.Function.EqualsWithHigherOrder(function) &&
+                    this.Argument.EqualsWithHigherOrder(argument))
                 {
                     break;
                 }
@@ -171,16 +171,16 @@ namespace Favalon.Terms
             // TODO: Detects uninterpretable terms on many iterations.
 
             return
-                this.Function.Equals(function, true) &&
-                this.Argument.Equals(argument, true) &&
-                this.HigherOrder.Equals(higherOrder, true) ?
+                this.Function.EqualsWithHigherOrder(function) &&
+                this.Argument.EqualsWithHigherOrder(argument) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
                     new ApplyTerm(function, argument, higherOrder);
         }
 
-        protected override bool OnEquals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is ApplyTerm rhs ?
-                (this.Function.Equals(rhs.Function) && this.Argument.Equals(rhs.Argument)) :
+                (this.Function.Equals(context, rhs.Function) && this.Argument.Equals(context, rhs.Argument)) :
                 false;
 
         public override int GetHashCode() =>

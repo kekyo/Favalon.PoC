@@ -29,8 +29,8 @@ namespace Favalon.Terms.Logical
             }
 
             return
-                lhs.Equals(this.Lhs, true) &&
-                rhs.Equals(this.Rhs, true) ?
+                lhs.EqualsWithHigherOrder(this.Lhs) &&
+                rhs.EqualsWithHigherOrder(this.Rhs) ?
                     this :
                     new OrElseTerm(lhs, rhs);
         }

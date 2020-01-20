@@ -22,7 +22,7 @@ namespace Favalon.Terms
             }
 
             return
-                this.HigherOrder.Equals(higherOrder, true) ?
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
                     new IdentityTerm(this.Identity, higherOrder);
         }
@@ -32,7 +32,7 @@ namespace Favalon.Terms
             var higherOrder = this.HigherOrder.Fixup(context);
 
             return
-                this.HigherOrder.Equals(higherOrder, true) ?
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
                     new IdentityTerm(this.Identity, higherOrder);
         }
@@ -48,13 +48,13 @@ namespace Favalon.Terms
             var higherOrder = this.HigherOrder.Reduce(context);
 
             return
-                this.HigherOrder.Equals(higherOrder, true) ?
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
                     new IdentityTerm(this.Identity, higherOrder);
         }
 
-        protected override bool OnEquals(Term? other) =>
-            other is IdentityTerm rhs ? this.Identity.Equals(rhs.Identity) : false;
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
+            other is IdentityTerm rhs ? (this.Identity == rhs.Identity) : false;
 
         public override int GetHashCode() =>
             this.Identity.GetHashCode();

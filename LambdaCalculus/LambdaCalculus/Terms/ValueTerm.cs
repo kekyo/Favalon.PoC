@@ -46,7 +46,7 @@ namespace Favalon.Terms
         protected ValueTerm()
         { }
 
-        protected override sealed bool OnEquals(Term? other) =>
+        protected override sealed bool OnEquals(EqualsContext context, Term? other) =>
             other is T rhs ? this.Value.Equals(rhs.Value) : false;
     }
 }

@@ -33,8 +33,8 @@ namespace Favalon.Terms
             var body = this.Body.Infer(newScope);
 
             return
-                this.Parameter.Equals(parameter, true) &&
-                this.Body.Equals(body, true) ?
+                this.Parameter.EqualsWithHigherOrder(parameter) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
                     From(parameter, body);
         }
@@ -58,8 +58,8 @@ namespace Favalon.Terms
             context.Unify(body.HigherOrder, higherOrderHint);
 
             return
-                this.Parameter.Equals(parameter, true) &&
-                this.Body.Equals(body, true) ?
+                this.Parameter.EqualsWithHigherOrder(parameter) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
                     From(parameter, body);
         }
@@ -72,8 +72,8 @@ namespace Favalon.Terms
             var body = this.Body.Fixup(context);
 
             return
-                this.Parameter.Equals(parameter, true) &&
-                this.Body.Equals(body, true) ?
+                this.Parameter.EqualsWithHigherOrder(parameter) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
                     From(parameter, body);
         }
@@ -86,8 +86,8 @@ namespace Favalon.Terms
             var body = this.Body.Fixup(context);
 
             return
-                this.Parameter.Equals(parameter, true) &&
-                this.Body.Equals(body, true) ?
+                this.Parameter.EqualsWithHigherOrder(parameter) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
                     From(parameter, body);
         }
@@ -106,8 +106,8 @@ namespace Favalon.Terms
             var body = this.Body.Reduce(newScope);
 
             return
-                this.Parameter.Equals(parameter, true) &&
-                this.Body.Equals(body, true) ?
+                this.Parameter.EqualsWithHigherOrder(parameter) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
                     From(parameter, body);
         }
@@ -139,9 +139,9 @@ namespace Favalon.Terms
             }
         }
 
-        protected override bool OnEquals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is LambdaTerm rhs ?
-                (this.Parameter.Equals(rhs.Parameter) && this.Body.Equals(rhs.Body)) :
+                (this.Parameter.Equals(context, rhs.Parameter) && this.Body.Equals(context, rhs.Body)) :
                 false;
 
         public override int GetHashCode() =>

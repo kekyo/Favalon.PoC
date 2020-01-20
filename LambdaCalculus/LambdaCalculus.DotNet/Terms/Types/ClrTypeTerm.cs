@@ -26,7 +26,7 @@ namespace Favalon.Terms.Types
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        protected override bool OnEquals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is ClrTypeTerm rhs ? this.Type.Equals(rhs.Type) : false;
 
         public override int GetHashCode() =>
@@ -103,7 +103,7 @@ namespace Favalon.Terms.Types
             }
         }
 
-        protected override bool OnEquals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is ClrTypeConstructorTerm rhs ? type.Equals(rhs.type) : false;
 
         public override int GetHashCode() =>

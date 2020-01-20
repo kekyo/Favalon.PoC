@@ -20,7 +20,7 @@ namespace Favalon.Terms.Logical
             }
 
             return
-                this.Argument.Equals(argument, true) ?
+                this.Argument.EqualsWithHigherOrder(argument) ?
                     this :
                     new NotTerm(argument);
         }

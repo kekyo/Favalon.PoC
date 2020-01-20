@@ -29,8 +29,8 @@ namespace Favalon.Terms
             context.Unify(bound.HigherOrder, body.HigherOrder);
 
             return
-                this.Bound.Equals(bound, true) &&
-                this.Body.Equals(body, true) ?
+                this.Bound.EqualsWithHigherOrder(bound) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
                     new BindExpressionTerm(bound, body);
         }
@@ -41,8 +41,8 @@ namespace Favalon.Terms
             var bound = this.Bound.Fixup(context);
 
             return
-                this.Bound.Equals(bound, true) &&
-                this.Body.Equals(body, true) ?
+                this.Bound.EqualsWithHigherOrder(bound) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
                     new BindExpressionTerm(bound, body);
         }
@@ -60,9 +60,9 @@ namespace Favalon.Terms
             return bound;
         }
 
-        protected override bool OnEquals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is BindExpressionTerm rhs ?
-                (this.Bound.Equals(rhs.Bound) && this.Body.Equals(rhs.Body)) :
+                (this.Bound.Equals(context, rhs.Bound) && this.Body.Equals(context, rhs.Body)) :
                 false;
 
         public override int GetHashCode() =>
@@ -100,8 +100,8 @@ namespace Favalon.Terms
             var continuation = this.Continuation.Infer(newScope);
 
             return
-                this.Expression.Equals(expression, true) &&
-                this.Continuation.Equals(continuation, true) ?
+                this.Expression.EqualsWithHigherOrder(expression) &&
+                this.Continuation.EqualsWithHigherOrder(continuation) ?
                     this :
                     new BindTerm(expression, continuation);
         }
@@ -112,8 +112,8 @@ namespace Favalon.Terms
             var continuation = this.Continuation.Fixup(context);
 
             return
-                this.Expression.Equals(expression, true) &&
-                this.Continuation.Equals(continuation, true) ?
+                this.Expression.EqualsWithHigherOrder(expression) &&
+                this.Continuation.EqualsWithHigherOrder(continuation) ?
                     this :
                     new BindTerm(expression, continuation);
         }
@@ -127,9 +127,9 @@ namespace Favalon.Terms
             return this.Continuation.Reduce(newScope);
         }
 
-        protected override bool OnEquals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is BindTerm rhs ?
-                (this.Expression.Equals(rhs.Expression) && this.Continuation.Equals(rhs.Continuation)) :
+                (this.Expression.Equals(context, rhs.Expression) && this.Continuation.Equals(context, rhs.Continuation)) :
                 false;
 
         public override int GetHashCode() =>

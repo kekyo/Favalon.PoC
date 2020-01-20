@@ -33,36 +33,40 @@ namespace Favalon.Terms.Algebraic
             context.Unify(higherOrder, higherOrderHint);
             context.Unify(higherOrderFromArgument, higherOrderHint);
 
-            return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new SumOperatorTerm<TSumTerm>(higherOrder);
+            return
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    new SumOperatorTerm<TSumTerm>(higherOrder);
         }
 
         public override Term Fixup(FixupContext context)
         {
             var higherOrder = this.HigherOrder.Fixup(context);
 
-            return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new SumOperatorTerm<TSumTerm>(higherOrder);
+            return
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    new SumOperatorTerm<TSumTerm>(higherOrder);
         }
 
         Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
         {
             var higherOrder = this.HigherOrder.Fixup(context);
 
-            return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new SumOperatorTerm<TSumTerm>(higherOrder);
+            return
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    new SumOperatorTerm<TSumTerm>(higherOrder);
         }
 
         public override Term Reduce(ReduceContext context)
         {
             var higherOrder = this.HigherOrder.Reduce(context);
 
-            return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new SumOperatorTerm<TSumTerm>(higherOrder);
+            return
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    new SumOperatorTerm<TSumTerm>(higherOrder);
         }
 
         AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
@@ -70,7 +74,7 @@ namespace Favalon.Terms.Algebraic
                 new SumClosureTerm(argument, this.HigherOrder.Reduce(context)),
                 argument);
 
-        protected override bool OnEquals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is SumOperatorTerm<TSumTerm>;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
@@ -103,8 +107,8 @@ namespace Favalon.Terms.Algebraic
                 context.Unify(lhs.HigherOrder, higherOrder);
 
                 return
-                    object.ReferenceEquals(lhs, this.lhs) &&
-                    object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                    this.lhs.EqualsWithHigherOrder(lhs) &&
+                    this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                         this :
                         new SumClosureTerm(lhs, higherOrder);
             }
@@ -123,8 +127,8 @@ namespace Favalon.Terms.Algebraic
                 context.Unify(higherOrderFromArgument, higherOrderHint);
 
                 return
-                    object.ReferenceEquals(lhs, this.lhs) &&
-                    object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                    this.lhs.EqualsWithHigherOrder(lhs) &&
+                    this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                         this :
                         new SumClosureTerm(lhs, higherOrder);
             }
@@ -135,8 +139,8 @@ namespace Favalon.Terms.Algebraic
                 var lhs = this.lhs.Fixup(context);
 
                 return
-                    object.ReferenceEquals(lhs, this.lhs) &&
-                    object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                    this.lhs.EqualsWithHigherOrder(lhs) &&
+                    this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                         this :
                         new SumClosureTerm(lhs, higherOrder);
             }
@@ -147,8 +151,8 @@ namespace Favalon.Terms.Algebraic
                 var lhs = this.lhs.Fixup(context);
 
                 return
-                    object.ReferenceEquals(lhs, this.lhs) &&
-                    object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                    this.lhs.EqualsWithHigherOrder(lhs) &&
+                    this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                         this :
                         new SumClosureTerm(lhs, higherOrder);
             }
@@ -159,8 +163,8 @@ namespace Favalon.Terms.Algebraic
                 var lhs = this.lhs.Reduce(context);
 
                 return
-                    object.ReferenceEquals(lhs, this.lhs) &&
-                    object.ReferenceEquals(higherOrder, this.HigherOrder) ?
+                    this.lhs.EqualsWithHigherOrder(lhs) &&
+                    this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                         this :
                         new SumClosureTerm(lhs, higherOrder);
             }
@@ -177,7 +181,7 @@ namespace Favalon.Terms.Algebraic
                 //    new TSumTerm(lhs, rhs, higherOrder), rhs);
             }
 
-            protected override bool OnEquals(Term? other) =>
+            protected override bool OnEquals(EqualsContext context, Term? other) =>
                 other is TSumTerm;
 
             protected override string OnPrettyPrint(PrettyPrintContext context) =>

@@ -15,9 +15,9 @@ namespace Favalon.Terms.Algebraic
             var higherOrder = this.HigherOrder.Reduce(context);
 
             return
-                this.Lhs.Equals(lhs, true) &&
-                this.Rhs.Equals(rhs, true) &&
-                this.HigherOrder.Equals(higherOrder, true) ?
+                this.Lhs.EqualsWithHigherOrder(lhs) &&
+                this.Rhs.EqualsWithHigherOrder(rhs) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
                     this.OnCreate(lhs, rhs, higherOrder);
         }
@@ -30,9 +30,9 @@ namespace Favalon.Terms.Algebraic
             base(lhs, rhs, higherOrder)
         { }
 
-        protected override bool OnEquals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is T term ?
-                this.Lhs.Equals(term.Lhs) && this.Rhs.Equals(term.Rhs) :
+                this.Lhs.Equals(context, term.Lhs) && this.Rhs.Equals(context, term.Rhs) :
                 false;
     }
 }

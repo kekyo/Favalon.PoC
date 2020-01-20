@@ -29,15 +29,21 @@ namespace Favalon
 
     partial class Term : IEquatable<Term?>
     {
-        protected abstract bool OnEquals(Term? other);
+        protected abstract bool OnEquals(EqualsContext context, Term? other);
 
-        public bool Equals(Term? other, bool includeHigherOrder = false) =>
+        public bool Equals(EqualsContext context, Term? other) =>
             object.ReferenceEquals(this, other) ||
-            (this.OnEquals(other) &&
-                (!includeHigherOrder ||
+            (this.OnEquals(context, other) &&
+                (!context.IncludeHigherOrder ||
                 (this.HigherOrder is Term && other?.HigherOrder is Term) ?
-                    this.HigherOrder.Equals(other?.HigherOrder, true) :
+                    this.HigherOrder.Equals(context, other?.HigherOrder) :
                     false));
+
+        public bool Equals(Term? other) =>
+            this.Equals(new EqualsContext(false), other);
+
+        public bool EqualsWithHigherOrder(Term? other) =>
+            this.Equals(new EqualsContext(true), other);
 
         bool IEquatable<Term?>.Equals(Term? other) =>
             this.Equals(other);

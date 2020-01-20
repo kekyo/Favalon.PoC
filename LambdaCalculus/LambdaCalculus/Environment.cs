@@ -6,10 +6,12 @@ namespace Favalon
 {
     public class Environment : Context
     {
-        public const int Iterations = 1000;
+        public readonly int DefaultIterations;
 
-        protected Environment()
-        { }
+        protected Environment(int defaultIterations)
+        {
+            this.DefaultIterations = defaultIterations;
+        }
 
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
@@ -21,7 +23,10 @@ namespace Favalon
             return partial.Fixup(context);
         }
 
-        public IEnumerable<Term> EnumerableReduce(Term term, int iterations = Iterations)
+        public IEnumerable<Term> EnumerableReduce(Term term) =>
+            this.EnumerableReduce(term, DefaultIterations);
+
+        public IEnumerable<Term> EnumerableReduce(Term term, int iterations)
         {
             if (boundTerms == null)
             {
@@ -56,7 +61,10 @@ namespace Favalon
             // TODO: Detects uninterpretable terms on many iterations.
         }
 
-        public Term ReduceOne(Term term, int iterations = Iterations)
+        public Term ReduceOne(Term term) =>
+            this.ReduceOne(term, DefaultIterations);
+
+        public Term ReduceOne(Term term, int iterations)
         {
             if (boundTerms == null)
             {
@@ -69,7 +77,10 @@ namespace Favalon
             return inferred.Reduce(context);
         }
 
-        public Term Reduce(Term term, int iterations = Iterations)
+        public Term Reduce(Term term) =>
+            this.Reduce(term, DefaultIterations);
+
+        public Term Reduce(Term term, int iterations)
         {
             if (boundTerms == null)
             {
@@ -102,7 +113,7 @@ namespace Favalon
             return current;
         }
 
-        public static Environment Create() =>
-            new Environment();
+        public static Environment Create(int defaultIterations = 10000) =>
+            new Environment(defaultIterations);
     }
 }

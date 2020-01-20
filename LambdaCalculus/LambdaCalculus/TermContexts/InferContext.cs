@@ -1,27 +1,47 @@
 ﻿using Favalon.Terms;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon.Contexts
 {
     public sealed class InferContext : FixupContext
     {
+        private readonly bool higherOrderInferOnly;
+        private readonly int iterations;
+
         internal InferContext(
             Context parent,
-            Dictionary<string, Term> boundTerms) :
+            Dictionary<string, Term> boundTerms,
+            bool higherOrderInferOnly,
+            int iterations) :
             base(parent, boundTerms, new Dictionary<int, Term>())
-        { }
+        {
+            this.higherOrderInferOnly = higherOrderInferOnly;
+            this.iterations = iterations;
+        }
 
         private InferContext(
-            Context parent,
+            InferContext parent,
             Dictionary<int, Term> placeholders) :
             base(parent, new Dictionary<string, Term>(), placeholders)
-        { }
+        {
+            this.higherOrderInferOnly = parent.higherOrderInferOnly;
+            this.iterations = parent.iterations;
+        }
 
         public InferContext NewScope() =>
             new InferContext(this, placeholders);
 
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
+
+        public Term ResolveHigherOrder(Term higherOrder) =>
+            higherOrderInferOnly ?
+                higherOrder.Infer(this) :
+                base.InternalEnumerableReduce(higherOrder, iterations).Last();
+
+        /////////////////////////////////////////////////////////////////////////
+        // Unify
 
         private bool Unify(PlaceholderTerm placeholder, Term term)
         {

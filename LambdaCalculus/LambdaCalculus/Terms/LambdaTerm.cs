@@ -176,8 +176,6 @@ namespace Favalon.Terms
                 (null, Term _) => From(TerminationTerm.Instance, body),
                 (UnspecifiedTerm _, UnspecifiedTerm _) => Unspecified,
                 (KindTerm _, KindTerm _) => Kind,
-                (LambdaTerm(Term p, Term b), Term _) => From(From(p, b), body),
-                (Term _, LambdaTerm(Term p, Term b)) => From(parameter, From(p, b)),
                 _ => new LambdaTerm(parameter, body)
             };
 

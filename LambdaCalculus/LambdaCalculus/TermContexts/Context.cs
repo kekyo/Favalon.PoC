@@ -72,19 +72,50 @@ namespace Favalon.Contexts
         /////////////////////////////////////////////////////////////////////////
         // Infer
 
-        private protected Term InternalInfer(Term term, Dictionary<string, Term> boundTerms)
+        private Term InternalInfer(
+            Term term,
+            Dictionary<string, Term> boundTerms,
+            bool higherOrderInferOnly,
+            int iterations)
         {
-            var context = new InferContext(this, boundTerms);
+            var context = new InferContext(this, boundTerms, higherOrderInferOnly, iterations);
             var partial = term.Infer(context);
             return partial.Fixup(context);
         }
 
-        private protected Term InternalInfer(Term term) =>
-            this.InternalInfer(
-                term,
-                this.boundTerms is Dictionary<string, Term> boundTerms ?
-                    new Dictionary<string, Term>(boundTerms) : // Copied, eliminate side effects by BindTerm
-                    new Dictionary<string, Term>());
+        private protected IEnumerable<Term> InternalEnumerableInfer(
+            Term term,
+            bool higherOrderInferOnly,
+            int iterations)
+        {
+            var boundTerms =
+                this.boundTerms is Dictionary<string, Term> bt ?
+                    new Dictionary<string, Term>(bt) : // Copied, eliminate side effects by BindTerm
+                    new Dictionary<string, Term>();
+
+            var current = term;
+            var iteration = 0;
+            for (; iteration < iterations; iteration++)
+            {
+                yield return current;
+
+                var inferred = this.InternalInfer(current, boundTerms, higherOrderInferOnly, iterations);
+                if (current.EqualsWithHigherOrder(inferred))
+                {
+                    break;
+                }
+
+                current = inferred;
+            }
+
+            if (iteration >= iterations)
+            {
+                yield return current;
+
+                // TODO: Detects uninterpretable terms on many iterations.
+                throw new InvalidOperationException();
+            }
+        }
 
         /////////////////////////////////////////////////////////////////////////
         // Reduce
@@ -108,7 +139,7 @@ namespace Favalon.Contexts
             {
                 yield return current;
 
-                var inferred = this.InternalInfer(current, boundTerms);
+                var inferred = this.InternalInfer(current, boundTerms, false, iterations);
                 if (!current.EqualsWithHigherOrder(inferred))
                 {
                     yield return inferred;

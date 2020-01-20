@@ -1,6 +1,5 @@
 ﻿using Favalon.Contexts;
 using Favalon.Terms;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,8 +20,38 @@ namespace Favalon
         public static Environment Create(int defaultIterations = 10000) =>
             new Environment(defaultIterations);
 
+        /////////////////////////////////////////////////////////////////////////
+        // Infer
+
+        public IEnumerable<Term> EnumerableInfer(
+            Term term,
+            int iterations,
+            bool higherOrderInferOnly) =>
+            base.InternalEnumerableInfer(term, higherOrderInferOnly, iterations);
+
+        public IEnumerable<Term> EnumerableInfer(Term term) =>
+            base.InternalEnumerableInfer(term, false, DefaultIterations);
+
+        public Term Infer(
+            Term term,
+            int iterations,
+            bool higherOrderInferOnly) =>
+            base.InternalEnumerableInfer(term, higherOrderInferOnly, iterations).Last();
+
         public Term Infer(Term term) =>
-            base.InternalInfer(term);
+            base.InternalEnumerableInfer(term, false, DefaultIterations).Last();
+
+        public Term InferOne(
+            Term term,
+            int iterations,
+            bool higherOrderInferOnly) =>
+            base.InternalEnumerableInfer(term, higherOrderInferOnly, iterations).First();
+
+        public Term InferOne(Term term) =>
+            base.InternalEnumerableInfer(term, false, DefaultIterations).First();
+
+        /////////////////////////////////////////////////////////////////////////
+        // Reduce
 
         public IEnumerable<Term> EnumerableReduce(Term term, int iterations) =>
             base.InternalEnumerableReduce(term, iterations);
@@ -30,29 +59,16 @@ namespace Favalon
         public IEnumerable<Term> EnumerableReduce(Term term) =>
             base.InternalEnumerableReduce(term, DefaultIterations);
 
-        public Term ReduceOne(Term term, int iterations)
-        {
-            var boundTerms =
-                this.boundTerms is Dictionary<string, Term> bt ?
-                    new Dictionary<string, Term>(bt) : // Copied, eliminate side effects by BindTerm
-                    new Dictionary<string, Term>();
-
-            var inferred = base.InternalInfer(term, boundTerms);
-            var reduced = base.InternalReduce(inferred, boundTerms, iterations);
-
-            // Applied if wasn't caused exceptions.
-            this.boundTerms = boundTerms;
-
-            return reduced;
-        }
-
-        public Term ReduceOne(Term term) =>
-            this.ReduceOne(term, DefaultIterations);
-
         public Term Reduce(Term term, int iterations) =>
-            this.EnumerableReduce(term, iterations).Last();
+            base.InternalEnumerableReduce(term, iterations).Last();
 
         public Term Reduce(Term term) =>
-            this.Reduce(term, DefaultIterations);
+            base.InternalEnumerableReduce(term, DefaultIterations).Last();
+
+        public Term ReduceOne(Term term, int iterations) =>
+            base.InternalEnumerableReduce(term, iterations).First();
+
+        public Term ReduceOne(Term term) =>
+            base.InternalEnumerableReduce(term, DefaultIterations).First();
     }
 }

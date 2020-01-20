@@ -22,6 +22,6 @@ namespace Favalon.Contexts
             new ReduceContext(this);
 
         public Term ReduceAll(Term term) =>
-            this.InternalEnumerableReduce(term, this.Iterations).Last();
+            base.InternalEnumerableReduce(term, this.Iterations).Last();
     }
 }

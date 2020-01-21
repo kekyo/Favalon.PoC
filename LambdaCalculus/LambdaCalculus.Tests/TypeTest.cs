@@ -1,10 +1,13 @@
 ﻿using Favalon.Terms;
-using Favalon.Terms.Algebric;
+using Favalon.Terms.Algebraic;
 using Favalon.Terms.Types;
 using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Linq;
+
+using static Favalon.TermFactory;
+using static Favalon.ClrTermFactory;
 
 namespace Favalon
 {
@@ -17,26 +20,26 @@ namespace Favalon
         public void Order1(Type type, object value)
         {
             var term =
-                Term.Constant(value);
+                Constant(value);
 
             var environment = Environment.Create();
             var actual = environment.Infer(term);
 
-            Assert.AreEqual(Term.Type(type), actual.HigherOrder);
+            Assert.AreEqual(Constant(type), actual.HigherOrder);
         }
 
         [Test]
         public void ComposeTypeConstructor()
         {
             var term =
-                Term.Apply(
-                    Term.Type(typeof(Lazy<>)),
-                    Term.Type<int>());
+                Apply(
+                    Constant(typeof(Lazy<>)),
+                    Type<int>());
 
             var environment = Environment.Create();
             var actual = environment.Reduce(term);
 
-            Assert.AreEqual(Term.Type<Lazy<int>>(), actual);
+            Assert.AreEqual(Type<Lazy<int>>(), actual);
         }
 
         public sealed class ComposeConstructorTarget
@@ -50,9 +53,9 @@ namespace Favalon
         public void ComposeConstructor()
         {
             var term =
-                Term.Apply(
-                    Term.Type<ComposeConstructorTarget>(),
-                    Term.Constant(123));
+                Apply(
+                    Type<ComposeConstructorTarget>(),
+                    Constant(123));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(term);
@@ -65,20 +68,20 @@ namespace Favalon
         {
             // let combined = System.Int32:* + System.String:*
             var term =
-                Term.Bind(
+                Bind(
                     "combined",
-                    Term.Sum(
-                        Term.Identity("System.Int32"),
-                        Term.Identity("System.String")));
+                    Sum(
+                        Identity("System.Int32"),
+                        Identity("System.String")));
 
             var environment = Environment.Create();
-            environment.SetBoundTerm("System.Int32", Term.Type<int>());
-            environment.SetBoundTerm("System.String", Term.Type<string>());
+            environment.SetBindTerm("System.Int32", Type<int>());
+            environment.SetBindTerm("System.String", Type<string>());
 
             var actual = environment.Reduce(term);
 
-            Assert.AreEqual(Term.Type<int>(), ((SumTerm)actual).Terms[0]);
-            Assert.AreEqual(Term.Type<string>(), ((SumTerm)actual).Terms[1]);
+            Assert.AreEqual(Type<int>(), ((SumTerm)actual).Flatten().ElementAt(0));
+            Assert.AreEqual(Type<string>(), ((SumTerm)actual).Flatten().ElementAt(1));
         }
 
         [Test]
@@ -86,20 +89,20 @@ namespace Favalon
         {
             // let combined = System.Int32:* * System.String:*
             var term =
-                Term.Bind(
+                Bind(
                     "combined",
-                    Term.Product(
-                        Term.Identity("System.Int32"),
-                        Term.Identity("System.String")));
+                    Product(
+                        Identity("System.Int32"),
+                        Identity("System.String")));
 
             var environment = Environment.Create();
-            environment.SetBoundTerm("System.Int32", Term.Type<int>());
-            environment.SetBoundTerm("System.String", Term.Type<string>());
+            environment.SetBindTerm("System.Int32", Type<int>());
+            environment.SetBindTerm("System.String", Type<string>());
 
             var actual = environment.Reduce(term);
 
-            Assert.AreEqual(Term.Type<int>(), ((ProductTerm)actual).Terms[0]);
-            Assert.AreEqual(Term.Type<string>(), ((ProductTerm)actual).Terms[1]);
+            Assert.AreEqual(Type<int>(), ((ProductTerm)actual).Flatten().ElementAt(0));
+            Assert.AreEqual(Type<string>(), ((ProductTerm)actual).Flatten().ElementAt(1));
         }
 
         private sealed class _1 { }
@@ -155,8 +158,8 @@ namespace Favalon
             Assert.IsTrue(rhsTypes.Length >= 1);
 
             var environment = Environment.Create();
-            var p1 = environment.CreatePlaceholder(Term.Unspecified());
-            var p2 = environment.CreatePlaceholder(Term.Unspecified());
+            var p1 = environment.CreatePlaceholder(Unspecified());
+            var p2 = environment.CreatePlaceholder(Unspecified());
 
             Term CreateTermFromType(Type type)
             {
@@ -170,17 +173,17 @@ namespace Favalon
                 }
                 else
                 {
-                    return TypeTerm.From(type);
+                    return Constant(type);
                 }
             }
 
-            var lhs = Term.ComposedSum(lhsTypes.Select(CreateTermFromType))!;
-            var rhs = Term.ComposedSum(rhsTypes.Select(CreateTermFromType))!;
+            var lhs = Sum(lhsTypes.Select(CreateTermFromType))!;
+            var rhs = Sum(rhsTypes.Select(CreateTermFromType))!;
 
-            var actual = TypeTerm.Narrow(lhs, rhs);
+            var actual = ClrTypeCalculator.Instance.Widening(lhs, rhs);
 
             var expected = 
-                Term.ComposedSum(expectedTypes.Select(CreateTermFromType));
+                Sum(expectedTypes.Select(CreateTermFromType));
 
             Assert.AreEqual(expected, actual);
         }
@@ -227,12 +230,12 @@ namespace Favalon
         public void ConcreterComparer(Type[] expectedTypes, Type[] targetTypes)
         {
             var actual = targetTypes.Select(
-                targetType => Term.Type(targetType)).
-                OrderBy(term => term, TypeTerm.ConcreterComparer).
+                targetType => Constant(targetType)).
+                OrderBy(term => term, ClrTypeCalculator.Instance).
                 ToArray();
 
             var expected = expectedTypes.Select(
-                targetType => Term.Type(targetType)).
+                targetType => Constant(targetType)).
                 ToArray();
 
             Assert.AreEqual(expected, actual);

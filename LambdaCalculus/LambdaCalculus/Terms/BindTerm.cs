@@ -1,5 +1,4 @@
-﻿using Favalon.Contexts;
-using LambdaCalculus.Contexts;
+﻿using Favalon.Terms.Contexts;
 
 namespace Favalon.Terms
 {
@@ -8,7 +7,7 @@ namespace Favalon.Terms
         public readonly Term Bound;
         public readonly Term Body;
 
-        internal BindExpressionTerm(Term bound, Term body)
+        private BindExpressionTerm(Term bound, Term body)
         {
             this.Bound = bound;
             this.Body = body;
@@ -24,14 +23,14 @@ namespace Favalon.Terms
 
             if (bound is IdentityTerm(string identity))
             {
-                context.SetBoundTerm(identity, body);
+                context.SetBindTerm(identity, body);
             }
 
             context.Unify(bound.HigherOrder, body.HigherOrder);
 
             return
-                object.ReferenceEquals(bound, this.Bound) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Bound.EqualsWithHigherOrder(bound) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
                     new BindExpressionTerm(bound, body);
         }
@@ -42,28 +41,34 @@ namespace Favalon.Terms
             var bound = this.Bound.Fixup(context);
 
             return
-                object.ReferenceEquals(bound, this.Bound) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Bound.EqualsWithHigherOrder(bound) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
                     new BindExpressionTerm(bound, body);
         }
 
         public override Term Reduce(ReduceContext context)
         {
-            var body = this.Body.Reduce(context);
-            var bound = this.Bound.Reduce(context);
+            // Try reduce to finished.
+            var body = context.ReduceAll(this.Body);
 
+            var bound = this.Bound.Reduce(context);
             if (bound is IdentityTerm(string identity))
             {
-                context.SetBoundTerm(identity, body);
+                context.SetBindTerm(identity, body);
+                return body;
             }
 
-            return bound;
+            return
+                this.Bound.EqualsWithHigherOrder(bound) &&
+                this.Body.EqualsWithHigherOrder(body) ?
+                    this :
+                    new BindExpressionTerm(bound, body);
         }
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is BindExpressionTerm rhs ?
-                (this.Bound.Equals(rhs.Bound) && this.Body.Equals(rhs.Body)) :
+                (this.Bound.Equals(context, rhs.Bound) && this.Body.Equals(context, rhs.Body)) :
                 false;
 
         public override int GetHashCode() =>
@@ -77,6 +82,9 @@ namespace Favalon.Terms
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Bound.PrettyPrint(context)} = {this.Body.PrettyPrint(context)}";
+
+        public static BindExpressionTerm Create(Term bound, Term body) =>
+            new BindExpressionTerm(bound, body);
     }
 
     public sealed class BindTerm : HigherOrderLazyTerm
@@ -84,7 +92,7 @@ namespace Favalon.Terms
         public readonly Term Expression;
         public readonly Term Continuation;
 
-        internal BindTerm(Term expression, Term continuation)
+        private BindTerm(Term expression, Term continuation)
         {
             this.Expression = expression;
             this.Continuation = continuation;
@@ -101,8 +109,8 @@ namespace Favalon.Terms
             var continuation = this.Continuation.Infer(newScope);
 
             return
-                object.ReferenceEquals(expression, this.Expression) &&
-                object.ReferenceEquals(continuation, this.Continuation) ?
+                this.Expression.EqualsWithHigherOrder(expression) &&
+                this.Continuation.EqualsWithHigherOrder(continuation) ?
                     this :
                     new BindTerm(expression, continuation);
         }
@@ -113,8 +121,8 @@ namespace Favalon.Terms
             var continuation = this.Continuation.Fixup(context);
 
             return
-                object.ReferenceEquals(expression, this.Expression) &&
-                object.ReferenceEquals(continuation, this.Continuation) ?
+                this.Expression.EqualsWithHigherOrder(expression) &&
+                this.Continuation.EqualsWithHigherOrder(continuation) ?
                     this :
                     new BindTerm(expression, continuation);
         }
@@ -128,9 +136,9 @@ namespace Favalon.Terms
             return this.Continuation.Reduce(newScope);
         }
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is BindTerm rhs ?
-                (this.Expression.Equals(rhs.Expression) && this.Continuation.Equals(rhs.Continuation)) :
+                (this.Expression.Equals(context, rhs.Expression) && this.Continuation.Equals(context, rhs.Continuation)) :
                 false;
 
         public override int GetHashCode() =>
@@ -144,5 +152,8 @@ namespace Favalon.Terms
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Expression.PrettyPrint(context)} in {this.Continuation.PrettyPrint(context)}";
+
+        public static BindTerm Create(Term expression, Term continuation) =>
+            new BindTerm(expression, continuation);
     }
 }

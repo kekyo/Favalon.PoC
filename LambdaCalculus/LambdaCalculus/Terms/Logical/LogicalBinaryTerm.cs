@@ -1,25 +1,24 @@
-﻿namespace Favalon.Terms.Logical
+﻿using Favalon.Terms.Contexts;
+
+namespace Favalon.Terms.Logical
 {
     public abstract class LogicalBinaryTerm : BinaryTerm
     {
-        internal LogicalBinaryTerm(Term lhs, Term rhs) :
-            base(lhs, rhs)
+        protected LogicalBinaryTerm(Term lhs, Term rhs, Term higherOrder) :
+            base(lhs, rhs, higherOrder)
         { }
-
-        public override sealed Term HigherOrder =>
-            BooleanTerm.Type;
     }
 
     public abstract class LogicalBinaryTerm<T> : LogicalBinaryTerm
-        where T : BinaryTerm
+        where T : LogicalBinaryTerm
     {
-        protected LogicalBinaryTerm(Term lhs, Term rhs) :
-            base(lhs, rhs)
+        protected LogicalBinaryTerm(Term lhs, Term rhs, Term higherOrder) :
+            base(lhs, rhs, higherOrder)
         { }
 
-        public override sealed bool Equals(Term? other) =>
-            other is T rhs ?
-                (this.Lhs.Equals(rhs.Lhs) && this.Rhs.Equals(rhs.Rhs)) :
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
+            other is T term ?
+                this.Lhs.Equals(context, term.Lhs) && this.Rhs.Equals(context, term.Rhs) :
                 false;
     }
 }

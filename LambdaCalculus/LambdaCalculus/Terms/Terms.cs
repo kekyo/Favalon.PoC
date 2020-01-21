@@ -1,6 +1,5 @@
-﻿using Favalon.Contexts;
-using Favalon.Terms.Types;
-using LambdaCalculus.Contexts;
+﻿using Favalon.Terms.Contexts;
+//using Favalon.Terms.Types;
 using System;
 
 #pragma warning disable 659
@@ -45,6 +44,45 @@ namespace Favalon.Terms
 
     ////////////////////////////////////////////////////////////
 
+    internal sealed class TerminationTerm : Term
+    {
+        private static readonly int hashCode =
+           typeof(TerminationTerm).GetHashCode();
+
+        private TerminationTerm()
+        { }
+
+        public override Term HigherOrder =>
+            null!;
+
+        internal override bool ValidTerm =>
+            false;
+
+        public override Term Infer(InferContext context) =>
+            this;
+
+        public override Term Fixup(FixupContext context) =>
+            this;
+
+        public override Term Reduce(ReduceContext context) =>
+            this;
+
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
+            other is TerminationTerm;
+
+        public override int GetHashCode() =>
+            hashCode;
+
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
+            false;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            "?TERM";
+
+        public static readonly TerminationTerm Instance =
+            new TerminationTerm();
+    }
+
     public sealed class UnspecifiedTerm : Term
     {
         private static readonly int hashCode =
@@ -65,13 +103,13 @@ namespace Favalon.Terms
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is UnspecifiedTerm;
 
         public override int GetHashCode() =>
             hashCode;
 
-        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
             false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
@@ -92,8 +130,21 @@ namespace Favalon.Terms
             base(higherOrder) =>
             this.Index = index;
 
-        public override Term Infer(InferContext context) =>
-            new PlaceholderTerm(this.Index, this.HigherOrder.Infer(context));
+        public override Term Infer(InferContext context)
+        {
+            // Will stop infinite inferring.
+            if (this.HigherOrder is UnspecifiedTerm)
+            {
+                return this;
+            }
+
+            var higherOrder = context.ResolveHigherOrder(this);
+
+            return
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    new PlaceholderTerm(this.Index, higherOrder);
+        }
 
         public override Term Fixup(FixupContext context) =>
             context.LookupUnifiedTerm(this) is Term term ?
@@ -103,61 +154,21 @@ namespace Favalon.Terms
         public override Term Reduce(ReduceContext context)
         {
             var higherOrder = this.HigherOrder.Reduce(context);
-            return object.ReferenceEquals(higherOrder, this.HigherOrder) ?
-                this :
-                new PlaceholderTerm(this.Index, higherOrder);
+
+            return 
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    new PlaceholderTerm(this.Index, higherOrder);
         }
 
-        public override bool Equals(Term? other) =>
-            other is PlaceholderTerm rhs ? this.Index.Equals(rhs.Index) : false;
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
+            other is PlaceholderTerm rhs ? (this.Index == rhs.Index) : false;
 
         public override int GetHashCode() =>
             hashCode ^ this.Index;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"'{this.Index}";
-    }
-
-    public sealed class ConstantTerm : HigherOrderLazyTerm
-    {
-        private static readonly int hashCode =
-            typeof(ConstantTerm).GetHashCode();
-
-        public readonly object Value;
-
-        internal ConstantTerm(object value) =>
-            this.Value = value;
-
-        protected override Term GetHigherOrder() =>
-            TypeTerm.From(this.Value.GetType());
-
-        public override Term Infer(InferContext context) =>
-            this;
-
-        public override Term Fixup(FixupContext context) =>
-            this;
-
-        public override Term Reduce(ReduceContext context) =>
-            this;
-
-        public override bool Equals(Term? other) =>
-            other is ConstantTerm rhs ? this.Value.Equals(rhs.Value) : false;
-
-        public override int GetHashCode() =>
-            hashCode ^ this.Value.GetHashCode();
-
-        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
-            higherOrderDetail switch
-            {
-                HigherOrderDetails.None => false,
-                HigherOrderDetails.Full => true,
-                _ => this.Value is string || this.Value is char
-            };
-
-        protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            this.Value is string str ? $"\"{str}\"" :
-            this.Value is char ch ? $"'{ch}'" :
-            this.Value.ToString();
     }
 
     public sealed class KindTerm : Term
@@ -180,13 +191,13 @@ namespace Favalon.Terms
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is KindTerm;
 
         public override int GetHashCode() =>
             hashCode;
 
-        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
             false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>

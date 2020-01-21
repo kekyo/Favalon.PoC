@@ -1,5 +1,4 @@
-﻿using Favalon.Contexts;
-using LambdaCalculus.Contexts;
+﻿using Favalon.Terms.Contexts;
 
 namespace Favalon.Terms
 {
@@ -7,40 +6,59 @@ namespace Favalon.Terms
     {
         public readonly Term Argument;
 
-        internal UnaryTerm(Term argument) =>
+        internal UnaryTerm(Term argument, Term higherOrder)
+        {
             this.Argument = argument;
+            this.HigherOrder = higherOrder;
+        }
 
-        protected abstract Term Create(Term argument);
+        public override sealed Term HigherOrder { get; }
 
-        protected virtual Term Infer(InferContext context, Term argument) =>
-            this.Create(argument);
+        protected abstract Term OnCreate(Term argument, Term higherOrder);
 
-        public override sealed Term Infer(InferContext context) =>
-            this.Infer(context, this.Argument.Infer(context));
+        public override Term Infer(InferContext context)
+        {
+            var argument = this.Argument.Infer(context);
+            var higherOrder = context.ResolveHigherOrder(this);
 
-        protected virtual Term Fixup(FixupContext context, Term argument) =>
-            this.Create(argument);
+            context.Unify(argument.HigherOrder, higherOrder);
 
-        public override sealed Term Fixup(FixupContext context) =>
-            this.Fixup(context, this.Argument.Fixup(context));
+            return
+                this.Argument.EqualsWithHigherOrder(argument) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    this.OnCreate(argument, higherOrder);
+        }
 
-        public override int GetHashCode() =>
-            this.Argument.GetHashCode();
+        public override Term Fixup(FixupContext context)
+        {
+            var argument = this.Argument.Fixup(context);
+            var higherOrder = this.HigherOrder.Fixup(context);
 
-        protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            this.Argument.PrettyPrint(context);
+            return
+                this.Argument.EqualsWithHigherOrder(argument) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    this.OnCreate(argument, higherOrder);
+        }
+
+        public void Deconstruct(out Term argument, out Term higherOrder)
+        {
+            argument = this.Argument;
+            higherOrder = this.HigherOrder;
+        }
     }
 
     public abstract class UnaryTerm<T> : UnaryTerm
         where T : UnaryTerm
     {
-        protected UnaryTerm(Term argument) :
-            base(argument)
+        protected UnaryTerm(Term argument, Term higherOrder) :
+            base(argument, higherOrder)
         { }
 
-        public override sealed bool Equals(Term? other) =>
+        protected override sealed bool OnEquals(EqualsContext context, Term? other) =>
             other is T term ?
-                this.Argument.Equals(term.Argument) :
-                false;
+               this.Argument.Equals(context, term.Argument) :
+               false;
     }
 }

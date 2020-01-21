@@ -1,7 +1,9 @@
 ﻿using Favalon.Terms;
 using Favalon.Terms.Logical;
-using Favalon.Terms.Operators;
 using NUnit.Framework;
+
+using static Favalon.TermFactory;
+using static Favalon.ClrTermFactory;
 
 namespace Favalon
 {
@@ -13,13 +15,13 @@ namespace Favalon
         {
             // false
             var term =
-                Term.Constant(false);
+                Constant(false);
 
-            var environment = Environment.Create();
+            var environment = ClrEnvironment.Create();
             var actual = environment.Infer(term);
 
             // false:bool
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Constant(typeof(bool)), actual.HigherOrder);
         }
 
         [Test]
@@ -27,11 +29,11 @@ namespace Favalon
         {
             // a -> false
             var term =
-                Term.Lambda(
+                Lambda(
                     "a",
-                    Term.Constant(false));
+                    Constant(false));
 
-            var environment = Environment.Create();
+            var environment = ClrEnvironment.Create();
             var actual = environment.Infer(term);
 
             var lambda = (LambdaTerm)actual;
@@ -39,7 +41,7 @@ namespace Favalon
 
             // a:'0 -> false:bool
             Assert.IsTrue(higherOrder.Parameter is PlaceholderTerm);
-            Assert.AreEqual(Term.Type<bool>(), higherOrder.Body);
+            Assert.AreEqual(Constant(typeof(bool)), higherOrder.Body);
         }
 
         [Test]
@@ -47,11 +49,11 @@ namespace Favalon
         {
             // a -> a
             var term =
-                Term.Lambda(
+                Lambda(
                     "a",
-                    Term.Identity("a"));
+                    Identity("a"));
 
-            var environment = Environment.Create();
+            var environment = ClrEnvironment.Create();
             var actual = environment.Infer(term);
 
             var lambda = (LambdaTerm)actual;
@@ -69,17 +71,17 @@ namespace Favalon
         {
             // (a -> a) false
             var term =
-                Term.Apply(
-                    Term.Lambda(
+                Apply(
+                    Lambda(
                         "a",
-                        Term.Identity("a")),
-                    Term.Constant(false));
+                        Identity("a")),
+                    Constant(false));
 
-            var environment = Environment.Create();
+            var environment = ClrEnvironment.Create();
             var actual = environment.Infer(term);
 
             // (a:bool -> a:bool) false:bool
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Constant(typeof(bool)), actual.HigherOrder);
         }
 
         [TestCase(true)]
@@ -87,16 +89,16 @@ namespace Favalon
         public void BindConstant(bool result)
         {
             var term =
-                Term.Bind(
+                Bind(
                     "a",
-                    Term.Constant(result),
-                    Term.Not(
-                        Term.Identity("a")));
+                    Constant(result),
+                    Not(
+                        Identity("a")));
 
-            var environment = Environment.Create();
+            var environment = ClrEnvironment.Create();
             var actual = environment.Infer(term);
 
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Constant(typeof(bool)), actual.HigherOrder);
         }
 
         [TestCase(true)]
@@ -104,20 +106,20 @@ namespace Favalon
         public void BindAppliedIdentity(bool result)
         {
             var term =
-                Term.Apply(
-                    Term.Lambda(
+                Apply(
+                    Lambda(
                         "b",
-                        Term.Bind(
+                        Bind(
                             "a",
-                            Term.Identity("b"),
-                            Term.Not(
-                                Term.Identity("a")))),
-                    Term.Constant(result));
+                            Identity("b"),
+                            Not(
+                                Identity("a")))),
+                    Constant(result));
 
-            var environment = Environment.Create();
+            var environment = ClrEnvironment.Create();
             var actual = environment.Infer(term);
 
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Constant(typeof(bool)), actual.HigherOrder);
         }
 
         [Test]
@@ -125,17 +127,17 @@ namespace Favalon
         {
             // a && b
             var term =
-                Term.AndAlso(
-                    Term.Identity("a"),
-                    Term.Identity("b"));
+                AndAlso(
+                    Identity("a"),
+                    Identity("b"));
 
-            var environment = Environment.Create();
-            var actual = (AndAlsoTerm)environment.Infer(term);
+            var environment = ClrEnvironment.Create();
+            var actual = (AndAlsoTerm)environment.Reduce(term);
 
             // (a:bool && b:bool):bool
-            Assert.AreEqual(Term.Type<bool>(), actual.Lhs.HigherOrder);
-            Assert.AreEqual(Term.Type<bool>(), actual.Rhs.HigherOrder);
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Constant(typeof(bool)), actual.Lhs.HigherOrder);
+            Assert.AreEqual(Constant(typeof(bool)), actual.Rhs.HigherOrder);
+            Assert.AreEqual(Constant(typeof(bool)), actual.HigherOrder);
         }
 
         [Test]
@@ -143,24 +145,24 @@ namespace Favalon
         {
             // a -> b -> a && b
             var term =
-                Term.Lambda(
+                Lambda(
                     "a",
-                    Term.Lambda(
+                    Lambda(
                         "b",
-                        Term.AndAlso(
-                            Term.Identity("a"),
-                            Term.Identity("b"))));
+                        AndAlso(
+                            Identity("a"),
+                            Identity("b"))));
 
-            var environment = Environment.Create();
+            var environment = ClrEnvironment.Create();
             var actual = environment.Infer(term);
 
             var lambda = (LambdaTerm)actual;
             var higherOrder = (LambdaTerm)lambda.HigherOrder;
 
             // a:bool -> (b:bool -> (a:bool && b:bool):bool):bool
-            Assert.AreEqual(Term.Type<bool>(), higherOrder.Parameter);
-            Assert.AreEqual(Term.Type<bool>(), ((LambdaTerm)higherOrder.Body).Parameter);
-            Assert.AreEqual(Term.Type<bool>(), ((LambdaTerm)higherOrder.Body).Body);
+            Assert.AreEqual(Constant(typeof(bool)), higherOrder.Parameter);
+            Assert.AreEqual(Constant(typeof(bool)), ((LambdaTerm)higherOrder.Body).Parameter);
+            Assert.AreEqual(Constant(typeof(bool)), ((LambdaTerm)higherOrder.Body).Body);
         }
 
         [Test]
@@ -168,25 +170,25 @@ namespace Favalon
         {
             // (a -> b -> a b) (a -> a) false
             var term =
-                Term.Apply(
-                    Term.Apply(
-                        Term.Lambda(
+                Apply(
+                    Apply(
+                        Lambda(
                             "a",
-                            Term.Lambda(
+                            Lambda(
                                 "b",
-                                Term.Apply(
-                                    Term.Identity("a"),
-                                    Term.Identity("b")))),
-                        Term.Lambda(
+                                Apply(
+                                    Identity("a"),
+                                    Identity("b")))),
+                        Lambda(
                             "a",
-                            Term.Identity("a"))),
-                    Term.Constant(false));
+                            Identity("a"))),
+                    Constant(false));
 
-            var environment = Environment.Create();
+            var environment = ClrEnvironment.Create();
             var actual = environment.Infer(term);
 
             // (a:(bool -> bool) -> b:bool -> a:(bool -> bool) b:bool) (a:bool -> a:bool):(bool -> bool) false:bool
-            Assert.AreEqual(Term.Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(Constant(typeof(bool)), actual.HigherOrder);
         }
     }
 }

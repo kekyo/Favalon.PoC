@@ -1,5 +1,8 @@
-﻿using Favalon.Terms;
+﻿using Favalon.Terms.Logical;
 using NUnit.Framework;
+
+using static Favalon.TermFactory;
+using static Favalon.ClrTermFactory;
 
 namespace Favalon
 {
@@ -11,11 +14,11 @@ namespace Favalon
         public void BindInConstant(bool result)
         {
             var term =
-                Term.Bind(
+                Bind(
                     "a",
-                    Term.Constant(result),
-                    Term.Not(
-                        Term.Identity("a")));
+                    Constant(result),
+                    Not(
+                        Identity("a")));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(term);
@@ -28,15 +31,15 @@ namespace Favalon
         public void BindInAppliedIdentity(bool result)
         {
             var term =
-                Term.Apply(
-                    Term.Lambda(
+                Apply(
+                    Lambda(
                         "b",
-                        Term.Bind(
+                        Bind(
                             "a",
-                            Term.Identity("b"),
-                            Term.Not(
-                                Term.Identity("a")))),
-                    Term.Constant(result));
+                            Identity("b"),
+                            Not(
+                                Identity("a")))),
+                    Constant(result));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(term);
@@ -49,10 +52,10 @@ namespace Favalon
         public void BindConstantWithSideEffect(bool result)
         {
             var term =
-                Term.Bind(
+                Bind(
                     "a",
-                    Term.Not(
-                        Term.Constant(result)));
+                    Not(
+                        Constant(result)));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(term);

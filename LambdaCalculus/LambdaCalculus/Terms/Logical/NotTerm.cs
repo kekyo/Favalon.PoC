@@ -1,34 +1,37 @@
-﻿using Favalon.Contexts;
-using LambdaCalculus.Contexts;
+﻿using Favalon.Terms.Contexts;
 
 namespace Favalon.Terms.Logical
 {
-    public sealed class NotTerm : LogicalUnaryTerm<NotTerm>
+    public sealed class NotTerm : UnaryTerm<NotTerm>
     {
-        internal NotTerm(Term argument) :
-            base(argument)
+        private NotTerm(Term argument, Term higherOrder) :
+            base(argument, higherOrder)
         { }
 
-        protected override Term Create(Term argument) =>
-            new NotTerm(argument);
+        protected override Term OnCreate(Term argument, Term higherOrder) =>
+            new NotTerm(argument, higherOrder);
 
-        internal static Term Reduce(ReduceContext context, Term argument)
+        public override Term Reduce(ReduceContext context)
         {
-            var argument_ = argument.Reduce(context);
-            if (argument_ is BooleanTerm a)
-            {
-                return BooleanTerm.From(!a.Value);
-            }
-            else
-            {
-                return new NotTerm(argument_);
-            }
-        }
+            var higherOrder = this.HigherOrder.Reduce(context);
 
-        public override Term Reduce(ReduceContext context) =>
-            Reduce(context, this.Argument);
+            var argument = this.Argument.Reduce(context);
+            if (argument is BooleanTerm boolArgument)
+            {
+                return BooleanTerm.Create(!boolArgument.Value, higherOrder);
+            }
+
+            return
+                this.Argument.EqualsWithHigherOrder(argument) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    new NotTerm(argument, higherOrder);
+        }
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"!{this.Argument.PrettyPrint(context)}";
+
+        public static NotTerm Create(Term argument, Term higherOrder) =>
+            new NotTerm(argument, higherOrder);
     }
 }

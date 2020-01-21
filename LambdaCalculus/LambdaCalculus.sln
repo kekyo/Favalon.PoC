@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LambdaCalculus", "LambdaCalculus\LambdaCalculus.csproj", "{B6CCEDF7-A1D3-4BA7-B3F1-3D434D56092D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaCalculus", "LambdaCalculus\LambdaCalculus.csproj", "{B6CCEDF7-A1D3-4BA7-B3F1-3D434D56092D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaCalculus.Tests", "LambdaCalculus.Tests\LambdaCalculus.Tests.csproj", "{DC70723D-CB7F-4FDD-AE34-8FBB5F2D5E82}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaCalculus.DotNet", "LambdaCalculus.DotNet\LambdaCalculus.DotNet.csproj", "{ACE5A5B2-6EED-44A1-B42D-8EFB31A5A7AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{DC70723D-CB7F-4FDD-AE34-8FBB5F2D5E82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC70723D-CB7F-4FDD-AE34-8FBB5F2D5E82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC70723D-CB7F-4FDD-AE34-8FBB5F2D5E82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACE5A5B2-6EED-44A1-B42D-8EFB31A5A7AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACE5A5B2-6EED-44A1-B42D-8EFB31A5A7AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACE5A5B2-6EED-44A1-B42D-8EFB31A5A7AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACE5A5B2-6EED-44A1-B42D-8EFB31A5A7AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -51,8 +51,13 @@ namespace Favalon
         public static BindTerm Bind(Term bound, Term body, Term continuation) =>
             BindTerm.Create(BindExpressionTerm.Create(bound, body), continuation);
 
-        public static SumTerm Sum(Term lhs, Term rhs) =>
-            SumTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);
+        public static Term Sum(Term lhs, Term rhs) =>
+            ApplyTerm.Create(
+                ApplyTerm.Create(
+                    FreeVariableTerm.Create("+", LambdaTerm.Unspecified2),
+                    lhs,
+                    UnspecifiedTerm.Instance),
+                rhs, UnspecifiedTerm.Instance);
         public static Term Sum(params Term[] terms) =>
             Sum((IEnumerable<Term>)terms);
         public static Term Sum(IEnumerable<Term> terms) =>
@@ -63,8 +68,13 @@ namespace Favalon
                 _ => throw new InvalidOperationException()
             };
 
-        public static ProductTerm Product(Term lhs, Term rhs) =>
-            ProductTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);
+        public static Term Product(Term lhs, Term rhs) =>
+            ApplyTerm.Create(
+                ApplyTerm.Create(
+                    FreeVariableTerm.Create("*", LambdaTerm.Unspecified2),
+                    lhs,
+                    UnspecifiedTerm.Instance),
+                rhs, UnspecifiedTerm.Instance);
         public static Term Product(params Term[] terms) =>
             Product((IEnumerable<Term>)terms);
         public static Term Product(IEnumerable<Term> terms) =>

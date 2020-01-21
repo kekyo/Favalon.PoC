@@ -1,6 +1,9 @@
 ﻿using Favalon.Terms;
 using Favalon.Terms.Logical;
+using Favalon.Terms.Types;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalon
 {

@@ -29,7 +29,7 @@ namespace Favalon.Terms
             if (parameter is FreeVariableTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higherorder.
-                newScope.SetBindTerm(identity.Identity, parameter);
+                newScope.BindTerm(identity.Identity, parameter);
             }
 
             // Calculate inferring with parameter identity.
@@ -52,7 +52,7 @@ namespace Favalon.Terms
             if (parameter is FreeVariableTerm identity)
             {
                 // Applied argument.
-                newScope.SetBindTerm(identity.Identity, inferredArgumentHint);
+                newScope.BindTerm(identity.Identity, inferredArgumentHint);
             }
 
             // Calculate inferring with applied argument.
@@ -103,7 +103,7 @@ namespace Favalon.Terms
             if (parameter is FreeVariableTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higherorder.
-                newScope.SetBindTerm(identity.Identity, identity);
+                newScope.BindTerm(identity.Identity, identity);
             }
 
             var body = this.Body.Reduce(newScope);
@@ -126,7 +126,7 @@ namespace Favalon.Terms
 
                 // Bound on inner scope
                 var newScope = context.NewScope();
-                newScope.SetBindTerm(identity.Identity, reducedArgument);
+                newScope.BindTerm(identity.Identity, reducedArgument);
 
                 var reducedBody = this.Body.Reduce(newScope);
 
@@ -185,7 +185,7 @@ namespace Favalon.Terms
             new LambdaTerm(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
 
         // ? -> ? -> ?
-        public static readonly LambdaTerm Unspecified3 =
+        public static readonly LambdaTerm Unspecified2 =
             new LambdaTerm(UnspecifiedTerm.Instance, Unspecified);
 
         // ? -> ?
@@ -195,5 +195,9 @@ namespace Favalon.Terms
         // * -> *
         public static readonly LambdaTerm Kind =
             new LambdaTerm(KindTerm.Instance, KindTerm.Instance);
+
+        // * -> * -> *
+        public static readonly LambdaTerm Kind2 =
+            new LambdaTerm(KindTerm.Instance, Kind);
     }
 }

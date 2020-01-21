@@ -74,14 +74,31 @@ namespace Favalon
                         Identity("System.Int32"),
                         Identity("System.String")));
 
-            var environment = Environment.Create();
-            environment.SetBindTerm("System.Int32", Type<int>());
-            environment.SetBindTerm("System.String", Type<string>());
+            var environment = ClrEnvironment.Create();
 
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(Type<int>(), ((SumTerm)actual).Flatten().ElementAt(0));
             Assert.AreEqual(Type<string>(), ((SumTerm)actual).Flatten().ElementAt(1));
+        }
+
+        [Test]
+        public void SumToCombinedTypeTerm()
+        {
+            // let combined = System.Int32:* + System.IFormattable:*
+            // --> System.IFormattable:*
+            var term =
+                Bind(
+                    "combined",
+                    Sum(
+                        Identity("System.Int32"),
+                        Identity("System.IFormattable")));
+
+            var environment = ClrEnvironment.Create();
+
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(Type<IFormattable>(), actual);
         }
 
         [Test]
@@ -95,9 +112,7 @@ namespace Favalon
                         Identity("System.Int32"),
                         Identity("System.String")));
 
-            var environment = Environment.Create();
-            environment.SetBindTerm("System.Int32", Type<int>());
-            environment.SetBindTerm("System.String", Type<string>());
+            var environment = ClrEnvironment.Create();
 
             var actual = environment.Reduce(term);
 
@@ -152,12 +167,12 @@ namespace Favalon
         [TestCase(new[] { typeof(int), typeof(IServiceProvider) }, new[] { typeof(int), typeof(IServiceProvider) }, new[] { typeof(int) })]
         // (int + IComparable): (int + IComparable) <-- string
         [TestCase(new[] { typeof(int), typeof(IComparable) }, new[] { typeof(int), typeof(IComparable) }, new[] { typeof(string) })]
-        public void InternalNarrowing(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
+        public void InternalWidening(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
         {
             Assert.IsTrue(lhsTypes.Length >= 1);
             Assert.IsTrue(rhsTypes.Length >= 1);
 
-            var environment = Environment.Create();
+            var environment = ClrEnvironment.Create();
             var p1 = environment.CreatePlaceholder(Unspecified());
             var p2 = environment.CreatePlaceholder(Unspecified());
 

@@ -49,6 +49,42 @@ namespace Favalon
         public static bool IsTypeConstructor(Type type) =>
             type.IsGenericTypeDefinition() && (type.GetGenericArguments().Length == 1);
 
+        public static string GetName(this MemberInfo member, bool containsGenericSignature = true)
+        {
+            var type = member.AsType();
+            if (type is Type ? type.IsGenericParameter : false)
+            {
+                return type!.Name;
+            }
+
+            var name = member.Name.IndexOf('`') switch
+            {
+                -1 => member.Name,
+                int index => member.Name.Substring(0, index)
+            };
+
+            switch (type, member)
+            {
+                case (Type _, _) when containsGenericSignature && type!.IsGenericType():
+                    var gta = Utilities.Join(
+                        ",",
+                        type!.GetGenericArguments().Select(ga => GetName(ga)));
+                    return $"{name}<{gta}>";
+
+                case (_, MethodInfo method) when containsGenericSignature && method.IsGenericMethod:
+                    var gma = Utilities.Join(
+                        ",",
+                        method.GetGenericArguments().Select(ga => GetName(ga)));
+                    return $"{name}<{gma}>";
+
+                default:
+                    return $"{name}";
+            }
+        }
+
+        public static string GetName(this Type type, bool containsGenericSignature = true) =>
+            type.AsMemberInfo().GetName(containsGenericSignature);
+
         private static string Append(this string a, string b) =>
             a + b;
 
@@ -107,7 +143,7 @@ namespace Favalon
             context.HigherOrderDetail switch
             {
                 HigherOrderDetails.Full => type.GetFullName(),
-                _ => type.Name
+                _ => type.GetName()
             };
 
         public static string Join(string separator, IEnumerable<string> values) =>

@@ -17,6 +17,9 @@ namespace Favalon
         internal virtual bool ValidTerm =>
             true;
 
+        internal bool SpecifiedTerm =>
+            this.ValidTerm && !(this is UnspecifiedTerm);
+
         public void Deconstruct(out Term higherOrder) =>
             higherOrder = this.HigherOrder;
 
@@ -78,31 +81,35 @@ namespace Favalon
             this.Equals(other as Term);
     }
 
-    [DebuggerDisplay("{DebuggerDisplay}")]
+    [DebuggerDisplay("{Specified}")]
     partial class Term
     {
         protected abstract string OnPrettyPrint(PrettyPrintContext context);
 
-        protected virtual bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+        protected virtual bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
             higherOrderDetail switch
             {
                 HigherOrderDetails.None => false,
-                HigherOrderDetails.Full => true,
-                _ => !(this.HigherOrder is UnspecifiedTerm)
+                HigherOrderDetails.Specified => this.HigherOrder.SpecifiedTerm,
+                _ => this.HigherOrder.ValidTerm,
             };
 
         public string PrettyPrint(PrettyPrintContext context) =>
-            (this.HigherOrder, this.IsInclude(context.HigherOrderDetail), this) switch
+            (this.HigherOrder, this.IsIncludeHigherOrderInPrettyPrinting(context.HigherOrderDetail), this) switch
             {
                 (Term _, true, _) =>
-                    $"({this.OnPrettyPrint(context)}):{this.HigherOrder.PrettyPrint(context.DropReadable())}",
+                    $"({this.OnPrettyPrint(context)}):{this.HigherOrder.PrettyPrint(context.DropSpecified())}",
                 (_, _, IRightToLeftPrettyPrintingTerm _) =>
                     $"({this.OnPrettyPrint(context)})",
                 _ =>
                     this.OnPrettyPrint(context)
             };
 
-        public string DebuggerDisplay =>
-            this.PrettyPrint(new PrettyPrintContext(HigherOrderDetails.Readable));
+        public string Simple =>
+            this.PrettyPrint(new PrettyPrintContext(HigherOrderDetails.None));
+        public string Specified =>
+            this.PrettyPrint(new PrettyPrintContext(HigherOrderDetails.Specified));
+        public string Full =>
+            this.PrettyPrint(new PrettyPrintContext(HigherOrderDetails.Full));
     }
 }

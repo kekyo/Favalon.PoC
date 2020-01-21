@@ -73,7 +73,7 @@ namespace Favalon.Terms
         public override int GetHashCode() =>
             hashCode;
 
-        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
             false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
@@ -109,7 +109,7 @@ namespace Favalon.Terms
         public override int GetHashCode() =>
             hashCode;
 
-        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
             false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
@@ -197,7 +197,7 @@ namespace Favalon.Terms
         public override int GetHashCode() =>
             hashCode;
 
-        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
             false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>

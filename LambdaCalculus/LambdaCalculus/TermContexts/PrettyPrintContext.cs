@@ -7,7 +7,7 @@
     public enum HigherOrderDetails
     {
         None,
-        Readable,
+        Specified,
         Full
     }
 
@@ -15,15 +15,13 @@
     {
         public readonly HigherOrderDetails HigherOrderDetail;
 
-        internal PrettyPrintContext(HigherOrderDetails higherOrderDetail)
-        {
+        internal PrettyPrintContext(HigherOrderDetails higherOrderDetail) =>
             this.HigherOrderDetail = higherOrderDetail;
-        }
 
-        internal PrettyPrintContext DropReadable() =>
+        internal PrettyPrintContext DropSpecified() =>
             this.HigherOrderDetail switch
             {
-                HigherOrderDetails.Readable => new PrettyPrintContext(HigherOrderDetails.None),
+                HigherOrderDetails.Specified => new PrettyPrintContext(HigherOrderDetails.None),
                 _ => this
             };
     }

@@ -163,10 +163,8 @@ namespace Favalon.Terms
             higherOrder = this.HigherOrder;
         }
 
-        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
-            base.IsInclude(higherOrderDetail) &&
-            this.Parameter.HigherOrder is Term &&
-            this.Body.HigherOrder is Term;
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
+            false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Parameter.PrettyPrint(context)} -> {this.Body.PrettyPrint(context)}";

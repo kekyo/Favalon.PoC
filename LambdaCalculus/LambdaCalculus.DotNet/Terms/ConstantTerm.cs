@@ -24,7 +24,7 @@ namespace Favalon.Terms
         protected override Term OnCreate(object value, Term higherOrder) =>
             new ConstantTerm(value, higherOrder);
 
-        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
             higherOrderDetail switch
             {
                 HigherOrderDetails.None => false,

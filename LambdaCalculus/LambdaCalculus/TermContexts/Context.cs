@@ -116,12 +116,29 @@ namespace Favalon.TermContexts
                 // TODO: Detects uninterpretable terms on many iterations.
                 throw new InvalidOperationException();
             }
+
+            // Inferring with reducing will side effect bounding terms.
+            if (!higherOrderInferOnly)
+            {
+                // Applied bound terms if wasn't caused exceptions.
+                if (this.boundTerms != null)
+                {
+                    foreach (var entry in boundTerms)
+                    {
+                        this.boundTerms[entry.Key] = entry.Value;
+                    }
+                }
+                else
+                {
+                    this.boundTerms = boundTerms;
+                }
+            }
         }
 
         /////////////////////////////////////////////////////////////////////////
         // Reduce
 
-        private protected Term InternalReduce(Term term, Dictionary<string, Term> boundTerms)
+        private Term InternalReduce(Term term, Dictionary<string, Term> boundTerms)
         {
             var context = new ReduceContext(this, boundTerms);
             return term.Reduce(context);
@@ -163,8 +180,18 @@ namespace Favalon.TermContexts
                 throw new InvalidOperationException();
             }
 
-            // Applied if wasn't caused exceptions.
-            this.boundTerms = boundTerms;
+            // Applied bound terms if wasn't caused exceptions.
+            if (this.boundTerms != null)
+            {
+                foreach (var entry in boundTerms)
+                {
+                    this.boundTerms[entry.Key] = entry.Value;
+                }
+            }
+            else
+            {
+                this.boundTerms = boundTerms;
+            }
         }
     }
 }

@@ -75,8 +75,8 @@ namespace Favalon
                         Identity("System.String")));
 
             var environment = Environment.Create();
-            environment.SetBoundTerm("System.Int32", Type<int>());
-            environment.SetBoundTerm("System.String", Type<string>());
+            environment.SetBindTerm("System.Int32", Type<int>());
+            environment.SetBindTerm("System.String", Type<string>());
 
             var actual = environment.Reduce(term);
 
@@ -96,8 +96,8 @@ namespace Favalon
                         Identity("System.String")));
 
             var environment = Environment.Create();
-            environment.SetBoundTerm("System.Int32", Type<int>());
-            environment.SetBoundTerm("System.String", Type<string>());
+            environment.SetBindTerm("System.Int32", Type<int>());
+            environment.SetBindTerm("System.String", Type<string>());
 
             var actual = environment.Reduce(term);
 

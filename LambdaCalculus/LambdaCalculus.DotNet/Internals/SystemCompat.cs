@@ -1,4 +1,5 @@
-﻿using Favalon.Contexts;
+﻿using Favalon;
+using Favalon.TermContexts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -76,6 +77,18 @@ namespace System.Reflection
     internal static class TypeExtension
     {
 #if NETSTANDARD1_0
+        public static bool IsPublic(this Type type) =>
+            type.GetTypeInfo().IsPublic;
+
+        public static bool IsPrimitive(this Type type) =>
+            type.GetTypeInfo().IsPrimitive;
+
+        public static bool IsValueType(this Type type) =>
+            type.GetTypeInfo().IsValueType;
+
+        public static bool IsGenericType(this Type type) =>
+            type.GetTypeInfo().IsGenericType;
+
         public static bool IsGenericTypeDefinition(this Type type) =>
             type.GetTypeInfo().IsGenericTypeDefinition;
 
@@ -85,23 +98,44 @@ namespace System.Reflection
         public static bool IsAssignableFrom(this Type type, Type from) =>
             type.GetTypeInfo().IsAssignableFrom(from.GetTypeInfo());
 
+        public static Assembly GetAssembly(this Type type) =>
+            type.GetTypeInfo().Assembly;
+
         public static MethodInfo GetMethod(this Type type, string name) =>
             type.GetTypeInfo().GetDeclaredMethod(name);
 
-        public static bool IsPrimitive(this Type type) =>
-            type.GetTypeInfo().IsPrimitive;
+        public static IEnumerable<Type> GetTypes(this Assembly assembly) =>
+            assembly.DefinedTypes.Select(typeInfo => typeInfo.AsType());
 
-        public static bool IsValueType(this Type type) =>
-            type.GetTypeInfo().IsValueType;
+        public static MemberInfo AsMemberInfo(this Type type) =>
+            type.GetTypeInfo();
+
+        public static Type? AsType(this MemberInfo member) =>
+            member is TypeInfo typeInfo ? typeInfo.AsType() : null;
 #else
-        public static bool IsGenericTypeDefinition(this Type type) =>
-            type.IsGenericTypeDefinition;
+        public static bool IsPublic(this Type type) =>
+            type.IsPublic;
 
         public static bool IsPrimitive(this Type type) =>
             type.IsPrimitive;
 
         public static bool IsValueType(this Type type) =>
             type.IsValueType;
+
+        public static bool IsGenericType(this Type type) =>
+            type.IsGenericType;
+
+        public static bool IsGenericTypeDefinition(this Type type) =>
+            type.IsGenericTypeDefinition;
+        
+        public static Assembly GetAssembly(this Type type) =>
+            type.Assembly;
+
+        public static MemberInfo AsMemberInfo(this Type type) =>
+            type;
+
+        public static Type? AsType(this MemberInfo member) =>
+            member as Type;
 #endif
     }
 }

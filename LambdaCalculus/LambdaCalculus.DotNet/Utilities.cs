@@ -1,4 +1,4 @@
-﻿using Favalon.Contexts;
+﻿using Favalon.TermContexts;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -49,6 +49,48 @@ namespace Favalon
         public static bool IsTypeConstructor(Type type) =>
             type.IsGenericTypeDefinition() && (type.GetGenericArguments().Length == 1);
 
+        private static string Append(this string a, string b) =>
+            a + b;
+
+        public static string GetFullName(this MemberInfo member, bool containsGenericSignature = true)
+        {
+            var type = member.AsType();
+            if (type is Type ? type.IsGenericParameter : false)
+            {
+                return type!.Name;
+            }
+
+            var parentNames = member.DeclaringType?.GetFullName().Append(".") ??
+                type?.Namespace.Append(".") ??
+                string.Empty;
+            var name = member.Name.IndexOf('`') switch
+            {
+                -1 => member.Name,
+                int index => member.Name.Substring(0, index)
+            };
+
+            switch (type, member)
+            {
+                case (Type _, _) when containsGenericSignature && type!.IsGenericType():
+                    var gta = Utilities.Join(
+                        ",",
+                        type!.GetGenericArguments().Select(ga => GetFullName(ga)));
+                    return $"{parentNames}{name}<{gta}>";
+
+                case (_, MethodInfo method) when containsGenericSignature && method.IsGenericMethod:
+                    var gma = Utilities.Join(
+                        ",",
+                        method.GetGenericArguments().Select(ga => GetFullName(ga)));
+                    return $"{parentNames}{name}<{gma}>";
+
+                default:
+                    return $"{parentNames}{name}";
+            }
+        }
+
+        public static string GetFullName(this Type type, bool containsGenericSignature = true) =>
+            type.AsMemberInfo().GetFullName(containsGenericSignature);
+
         public static (Type, Type[]) GetDelegateSignature(Type delegateType)
         {
             Debug.Assert(typeof(Delegate).IsAssignableFrom(delegateType));
@@ -64,7 +106,7 @@ namespace Favalon
         public static string PrettyPrint(this Type type, PrettyPrintContext context) =>
             context.HigherOrderDetail switch
             {
-                HigherOrderDetails.Full => type.FullName,
+                HigherOrderDetails.Full => type.GetFullName(),
                 _ => type.Name
             };
 

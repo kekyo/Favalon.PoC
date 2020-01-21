@@ -1,7 +1,7 @@
 ﻿using Favalon.Terms;
 using System.Collections.Generic;
 
-namespace Favalon.Contexts
+namespace Favalon.TermContexts
 {
     public class FixupContext : Context
     {

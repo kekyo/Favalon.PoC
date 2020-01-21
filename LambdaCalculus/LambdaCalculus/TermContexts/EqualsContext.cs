@@ -1,4 +1,4 @@
-﻿namespace Favalon.Contexts
+﻿namespace Favalon.TermContexts
 {
     public sealed class EqualsContext
     {

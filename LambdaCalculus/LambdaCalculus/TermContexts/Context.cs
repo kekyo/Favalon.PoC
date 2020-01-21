@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Favalon.Contexts
+namespace Favalon.TermContexts
 {
     public abstract class Context
     {
@@ -48,7 +48,7 @@ namespace Favalon.Contexts
         /////////////////////////////////////////////////////////////////////////
         // Binder
 
-        public void SetBoundTerm(string identity, Term term)
+        public void SetBindTerm(string identity, Term term)
         {
             if (boundTerms == null)
             {

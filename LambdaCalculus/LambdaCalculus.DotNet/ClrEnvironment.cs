@@ -1,11 +1,14 @@
-﻿namespace Favalon
+﻿using System.Reflection;
+
+namespace Favalon
 {
     public sealed class ClrEnvironment : Environment
     {
         private ClrEnvironment(int iterations) :
             base(iterations)
         {
-            this.SetBoundTerm("bool", ClrTermFactory.Type<bool>());
+            this.BoundPublicTypes(typeof(object).GetAssembly());
+            this.BindCSharpTypes();
         }
 
         public static new ClrEnvironment Create(int iterations = DefaultIterations) =>

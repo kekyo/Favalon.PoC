@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Favalon.Contexts
+namespace Favalon.TermContexts
 {
     public sealed class InferContext : FixupContext
     {

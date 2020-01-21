@@ -1,4 +1,4 @@
-﻿using Favalon.Contexts;
+﻿using Favalon.TermContexts;
 
 namespace Favalon.Terms
 {
@@ -29,7 +29,7 @@ namespace Favalon.Terms
             if (parameter is FreeVariableTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higherorder.
-                newScope.SetBoundTerm(identity.Identity, parameter);
+                newScope.SetBindTerm(identity.Identity, parameter);
             }
 
             // Calculate inferring with parameter identity.
@@ -52,7 +52,7 @@ namespace Favalon.Terms
             if (parameter is FreeVariableTerm identity)
             {
                 // Applied argument.
-                newScope.SetBoundTerm(identity.Identity, inferredArgumentHint);
+                newScope.SetBindTerm(identity.Identity, inferredArgumentHint);
             }
 
             // Calculate inferring with applied argument.
@@ -103,7 +103,7 @@ namespace Favalon.Terms
             if (parameter is FreeVariableTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higherorder.
-                newScope.SetBoundTerm(identity.Identity, identity);
+                newScope.SetBindTerm(identity.Identity, identity);
             }
 
             var body = this.Body.Reduce(newScope);
@@ -126,7 +126,7 @@ namespace Favalon.Terms
 
                 // Bound on inner scope
                 var newScope = context.NewScope();
-                newScope.SetBoundTerm(identity.Identity, reducedArgument);
+                newScope.SetBindTerm(identity.Identity, reducedArgument);
 
                 var reducedBody = this.Body.Reduce(newScope);
 

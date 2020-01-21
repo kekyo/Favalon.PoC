@@ -1,4 +1,4 @@
-﻿using Favalon.Contexts;
+﻿using Favalon.TermContexts;
 using Favalon.Terms;
 using System;
 using System.Diagnostics;
@@ -33,14 +33,6 @@ namespace Favalon
     partial class Term : IEquatable<Term?>
     {
         protected abstract bool OnEquals(EqualsContext context, Term? other);
-
-        //public bool Equals(EqualsContext context, Term? other) =>
-        //    object.ReferenceEquals(this, other) ||
-        //    (this.OnEquals(context, other) &&
-        //        (!context.IncludeHigherOrder ||
-        //        (this.HigherOrder is Term && other?.HigherOrder is Term) ?
-        //            this.HigherOrder.Equals(context, other?.HigherOrder) :
-        //            false));
 
         public bool Equals(EqualsContext context, Term? other)
         {

@@ -49,14 +49,14 @@ namespace Favalon.Terms
 
         public override Term Reduce(ReduceContext context)
         {
-            // Try reduce reaching finished.
+            // Try reduce to finished.
             var body = context.ReduceAll(this.Body);
 
             var bound = this.Bound.Reduce(context);
             if (bound is IdentityTerm(string identity))
             {
                 context.SetBoundTerm(identity, body);
-                return FreeVariableTerm.Create(identity, bound.HigherOrder);
+                return body;
             }
 
             return

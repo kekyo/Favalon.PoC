@@ -1,4 +1,4 @@
-﻿using Favalon.TermContexts;
+﻿using Favalon.Terms.Contexts;
 //using Favalon.Terms.Types;
 using System;
 

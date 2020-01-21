@@ -7,8 +7,11 @@ using System.Linq;
 
 namespace Favalon
 {
-    public static class TermFactory
+    public abstract class TermFactory
     {
+        protected TermFactory() =>
+            throw new InvalidOperationException();
+
         public static UnspecifiedTerm Unspecified() =>
             UnspecifiedTerm.Instance;
         public static LambdaTerm UnspecifiedFunction() =>

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Favalon.TermContexts
+namespace Favalon.Terms.Contexts
 {
     public abstract class Context
     {

@@ -1,5 +1,5 @@
 ﻿using Favalon;
-using Favalon.TermContexts;
+using Favalon.Terms.Contexts;
 using System;
 using System.Collections;
 using System.Collections.Generic;

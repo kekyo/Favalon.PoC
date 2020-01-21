@@ -4,8 +4,11 @@ using System;
 
 namespace Favalon
 {
-    public static class ClrTermFactory
+    public sealed class ClrTermFactory : TermFactory
     {
+        private ClrTermFactory()
+        { }
+
         //public static MethodTerm Method(MethodInfo method) =>
         //    MethodTerm.From(new[] { method });
         //public static MethodTerm Method(MethodInfo method0, params MethodInfo[] methods) =>

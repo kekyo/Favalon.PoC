@@ -59,3 +59,49 @@ namespace System.Linq
     }
 }
 #endif
+
+namespace System.Reflection
+{
+    internal static class TypeEx
+    {
+#if NETSTANDARD1_0
+        public static readonly Type[] EmptyTypes =
+            new Type[0];
+#else
+        public static Type[] EmptyTypes =>
+            Type.EmptyTypes;
+#endif
+    }
+
+    internal static class TypeExtension
+    {
+#if NETSTANDARD1_0
+        public static bool IsGenericTypeDefinition(this Type type) =>
+            type.GetTypeInfo().IsGenericTypeDefinition;
+
+        public static Type[] GetGenericArguments(this Type type) =>
+            type.GenericTypeArguments;
+
+        public static bool IsAssignableFrom(this Type type, Type from) =>
+            type.GetTypeInfo().IsAssignableFrom(from.GetTypeInfo());
+
+        public static MethodInfo GetMethod(this Type type, string name) =>
+            type.GetTypeInfo().GetDeclaredMethod(name);
+
+        public static bool IsPrimitive(this Type type) =>
+            type.GetTypeInfo().IsPrimitive;
+
+        public static bool IsValueType(this Type type) =>
+            type.GetTypeInfo().IsValueType;
+#else
+        public static bool IsGenericTypeDefinition(this Type type) =>
+            type.IsGenericTypeDefinition;
+
+        public static bool IsPrimitive(this Type type) =>
+            type.IsPrimitive;
+
+        public static bool IsValueType(this Type type) =>
+            type.IsValueType;
+#endif
+    }
+}

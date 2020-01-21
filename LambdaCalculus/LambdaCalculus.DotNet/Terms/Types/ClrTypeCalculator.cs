@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Favalon.Terms.Types
 {
@@ -20,15 +21,15 @@ namespace Favalon.Terms.Types
             {
                 return 0;
             }
-            else if (x.IsPrimitive && !y.IsPrimitive)
+            else if (x.IsPrimitive() && !y.IsPrimitive())
             {
                 return -1;
             }
-            else if (!x.IsPrimitive && y.IsPrimitive)
+            else if (!x.IsPrimitive() && y.IsPrimitive())
             {
                 return 1;
             }
-            else if (x.IsPrimitive && y.IsPrimitive)
+            else if (x.IsPrimitive() && y.IsPrimitive())
             {
                 var cx = x.IsClsCompliant();
                 var cy = y.IsClsCompliant();
@@ -63,11 +64,11 @@ namespace Favalon.Terms.Types
                     return 1;
                 }
             }
-            else if (x.IsValueType && !y.IsValueType)
+            else if (x.IsValueType() && !y.IsValueType())
             {
                 return -1;
             }
-            else if (!x.IsValueType && y.IsValueType)
+            else if (!x.IsValueType() && y.IsValueType())
             {
                 return 1;
             }

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>net35;net45</TargetFrameworks>
+    <TargetFrameworks>net35;net45;netstandard1.0;netstandard2.0</TargetFrameworks>
     <Namespace>Favalon</Namespace>
 
     <LangVersion>8.0</LangVersion>

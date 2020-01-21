@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 
 namespace Favalon
 {
@@ -46,7 +47,7 @@ namespace Favalon
             knownInteger.Contains(type);
 
         public static bool IsTypeConstructor(Type type) =>
-            type.IsGenericTypeDefinition && (type.GetGenericArguments().Length == 1);
+            type.IsGenericTypeDefinition() && (type.GetGenericArguments().Length == 1);
 
         public static (Type, Type[]) GetDelegateSignature(Type delegateType)
         {
@@ -57,7 +58,7 @@ namespace Favalon
             var parameters = invoke.GetParameters();
             return parameters.Length >= 1 ?
                 (invoke.ReturnType, parameters.Select(parameter => parameter.ParameterType).ToArray()) :
-                (invoke.ReturnType, Type.EmptyTypes);
+                (invoke.ReturnType, TypeEx.EmptyTypes);
         }
 
         public static string PrettyPrint(this Type type, PrettyPrintContext context) =>

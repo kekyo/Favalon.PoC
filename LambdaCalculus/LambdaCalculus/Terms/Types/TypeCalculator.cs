@@ -27,8 +27,8 @@ namespace Favalon.Terms.Types
                     return lhs;
 
                 // _[1]: _[1] <-- _[2]
-                //case (PlaceholderTerm placeholder, PlaceholderTerm _):
-                //    return placeholder;
+                case (PlaceholderTerm placeholder, PlaceholderTerm _):
+                    return placeholder;
 
                 // _: _ <-- int
                 // _: _ <-- (int + double)

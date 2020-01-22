@@ -192,13 +192,13 @@ namespace Favalon
                 }
             }
 
-            var lhs = Sum(lhsTypes.Select(CreateTermFromType))!;
-            var rhs = Sum(rhsTypes.Select(CreateTermFromType))!;
+            var lhs = SumType(lhsTypes.Select(CreateTermFromType))!;
+            var rhs = SumType(rhsTypes.Select(CreateTermFromType))!;
 
             var actual = ClrTypeCalculator.Instance.Widening(lhs, rhs);
 
-            var expected = 
-                Sum(expectedTypes.Select(CreateTermFromType));
+            var expected =
+                SumType(expectedTypes.Select(CreateTermFromType));
 
             Assert.AreEqual(expected, actual);
         }

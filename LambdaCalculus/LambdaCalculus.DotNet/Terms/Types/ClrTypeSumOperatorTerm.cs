@@ -119,23 +119,11 @@ namespace Favalon.Terms.Types
                         new SumClosureTerm(lhs);
             }
 
-            AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
-            {
-                var lhs = this.lhs.Reduce(context);
-                var rhs = argument.Reduce(context);
-
-                if (ClrTypeCalculator.Instance.Widening(lhs, rhs) is Term applied1)
-                {
-                    return AppliedResult.Applied(applied1, rhs);
-                }
-
-                if (ClrTypeCalculator.Instance.Widening(rhs, lhs) is Term applied2)
-                {
-                    return AppliedResult.Applied(applied2, rhs);
-                }
-
-                return AppliedResult.Applied(ClrTypeSumTerm.Create(lhs, rhs), rhs);
-            }
+            AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+                ClrTypeSumTerm.InternalReduce(context, this.lhs, argument,
+                    (term, rhs) => (term != null) ?
+                        AppliedResult.Applied(term, rhs) :
+                        AppliedResult.Ignored(this, rhs));
 
             protected override bool OnEquals(EqualsContext context, Term? other) =>
                 other is SumClosureTerm term ? this.lhs.Equals(term.lhs) : false;

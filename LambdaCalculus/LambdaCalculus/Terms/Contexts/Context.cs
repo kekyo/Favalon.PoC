@@ -16,11 +16,8 @@ namespace Favalon.Terms.Contexts
 
         internal readonly PlaceholderIndexer indexer;
         internal readonly Context? parent;
-        internal Dictionary<string, Term>? boundTerms
-        {
-            get;
-            private set;
-        }
+
+        private Dictionary<string, Term>? boundTerms;
 
         public readonly int Iterations;
 
@@ -96,9 +93,15 @@ namespace Favalon.Terms.Contexts
 
             var current = term;
             var iteration = 0;
-            for (; iteration < this.Iterations; iteration++)
+            while (true)
             {
                 yield return current;
+
+                if (iteration >= this.Iterations)
+                {
+                    // TODO: Detects uninterpretable terms on many iterations.
+                    throw new InvalidOperationException();
+                }
 
                 var inferred = this.InternalInfer(current, boundTerms, higherOrderInferOnly);
                 if (current.EqualsWithHigherOrder(inferred))
@@ -107,14 +110,7 @@ namespace Favalon.Terms.Contexts
                 }
 
                 current = inferred;
-            }
-
-            if (iteration >= this.Iterations)
-            {
-                yield return current;
-
-                // TODO: Detects uninterpretable terms on many iterations.
-                throw new InvalidOperationException();
+                iteration++;
             }
 
             // Inferring with reducing will side effect bounding terms.
@@ -153,9 +149,15 @@ namespace Favalon.Terms.Contexts
 
             var current = term;
             var iteration = 0;
-            for (; iteration < this.Iterations; iteration++)
+            while (true)
             {
                 yield return current;
+
+                if (iteration >= this.Iterations)
+                {
+                    // TODO: Detects uninterpretable terms on many iterations.
+                    throw new InvalidOperationException();
+                }
 
                 var inferred = this.InternalInfer(current, boundTerms, false);
                 if (!current.EqualsWithHigherOrder(inferred))
@@ -170,14 +172,7 @@ namespace Favalon.Terms.Contexts
                 }
 
                 current = reduced;
-            }
-
-            if (iteration >= this.Iterations)
-            {
-                yield return current;
-
-                // TODO: Detects uninterpretable terms on many iterations.
-                throw new InvalidOperationException();
+                iteration++;
             }
 
             // Applied bound terms if wasn't caused exceptions.

@@ -36,16 +36,28 @@ namespace Favalon
         public static Term Constant(object value) =>
             ConstantTerm.From(value);
 
-        public static Term SumType(Term lhs, Term rhs) =>
+        public static ClrTypeSumTerm SumType(Term lhs, Term rhs) =>
             ClrTypeSumTerm.Create(lhs, rhs);
-        public static Term SumType(params Term[] terms) =>
+        public static Term? SumType(params Term[] terms) =>
             SumType((IEnumerable<Term>)terms);
-        public static Term SumType(IEnumerable<Term> terms) =>
+        public static Term? SumType(IEnumerable<Term> terms) =>
             terms.ToArray() switch
             {
                 Term[] ts when ts.Length == 1 => ts[0],
                 Term[] ts when ts.Length >= 2 => ts.Aggregate(SumType),
-                _ => throw new InvalidOperationException()
+                _ => null
+            };
+
+        public static ClrTypeProductTerm ProductType(Term lhs, Term rhs) =>
+            ClrTypeProductTerm.Create(lhs, rhs);
+        public static Term? ProductType(params Term[] terms) =>
+            ProductType((IEnumerable<Term>)terms);
+        public static Term? ProductType(IEnumerable<Term> terms) =>
+            terms.ToArray() switch
+            {
+                Term[] ts when ts.Length == 1 => ts[0],
+                Term[] ts when ts.Length >= 2 => ts.Aggregate(ProductType),
+                _ => null
             };
     }
 }

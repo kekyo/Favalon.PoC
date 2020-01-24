@@ -197,8 +197,7 @@ namespace Favalon
 
             var actual = ClrTypeCalculator.Instance.Widening(lhs, rhs);
 
-            var expected =
-                SumType(expectedTypes.Select(CreateTermFromType));
+            var expected = SumType(expectedTypes.Select(CreateTermFromType));
 
             Assert.AreEqual(expected, actual);
         }

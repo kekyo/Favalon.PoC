@@ -1,5 +1,4 @@
 ﻿using Favalon.Terms;
-using Favalon.Terms.Algebraic;
 using Favalon.Terms.Logical;
 using System;
 using System.Collections.Generic;
@@ -58,14 +57,14 @@ namespace Favalon
                     lhs,
                     UnspecifiedTerm.Instance),
                 rhs, UnspecifiedTerm.Instance);
-        public static Term Sum(params Term[] terms) =>
+        public static Term? Sum(params Term[] terms) =>
             Sum((IEnumerable<Term>)terms);
-        public static Term Sum(IEnumerable<Term> terms) =>
+        public static Term? Sum(IEnumerable<Term> terms) =>
             terms.ToArray() switch
             {
                 Term[] ts when ts.Length == 1 => ts[0],
                 Term[] ts when ts.Length >= 2 => ts.Aggregate(Sum),
-                _ => throw new InvalidOperationException()
+                _ => null
             };
 
         public static Term Product(Term lhs, Term rhs) =>
@@ -75,14 +74,14 @@ namespace Favalon
                     lhs,
                     UnspecifiedTerm.Instance),
                 rhs, UnspecifiedTerm.Instance);
-        public static Term Product(params Term[] terms) =>
+        public static Term? Product(params Term[] terms) =>
             Product((IEnumerable<Term>)terms);
-        public static Term Product(IEnumerable<Term> terms) =>
+        public static Term? Product(IEnumerable<Term> terms) =>
             terms.ToArray() switch
             {
                 Term[] ts when ts.Length == 1 => ts[0],
                 Term[] ts when ts.Length >= 2 => ts.Aggregate(Product),
-                _ => throw new InvalidOperationException()
+                _ => null
             };
 
         public static AndAlsoTerm AndAlso(Term lhs, Term rhs) =>

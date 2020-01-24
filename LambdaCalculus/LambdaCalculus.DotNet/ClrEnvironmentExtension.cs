@@ -9,34 +9,30 @@ namespace Favalon
 {
     public static class ClrEnvironmentExtension
     {
-        private static void BindType(Environment environment, string identity, Type type)
+        private static Environment BindClrType(Environment environment, string identity, Type type)
         {
             var term = ClrTypeTerm.From(type);
             environment.BindTerm(identity, term);
 
             // TODO: constructor functions
+
+            return environment;
         }
 
-        public static void BindType(this Environment environment, Type type) =>
-            BindType(environment, type.GetFullName(false), type);
+        public static Environment BindClrType(this Environment environment, Type type) =>
+            BindClrType(environment, type.GetFullName(false), type);
 
-        public static void BindType(this Environment environment, IEnumerable<Type> types)
-        {
-            foreach (var type in types)
-            {
-                BindType(environment, type);
-            }
-        }
+        public static Environment BindClrType(this Environment environment, IEnumerable<Type> types) =>
+            types.Aggregate(environment, BindClrType);
 
-        public static void BindType(this Environment environment, params Type[] types) =>
-            BindType(environment, types);
+        public static Environment BindClrType(this Environment environment, params Type[] types) =>
+            BindClrType(environment, (IEnumerable<Type>)types);
 
-        public static void BoundPublicTypes(this Environment environment, Assembly assembly) =>
-            BindType(environment, assembly.GetTypes().Where(type => type.IsPublic()));
+        public static Environment BindClrPublicTypes(this Environment environment, Assembly assembly) =>
+            BindClrType(environment, assembly.GetTypes().Where(type => type.IsPublic()));
 
-        public static void BindCSharpTypes(this Environment environment)
-        {
-            foreach (var (identity, type) in new[]
+        public static Environment BindClrAliasTypes(this Environment environment) =>
+            new[]
             {
                 ("object", typeof(object)),
                 ("bool", typeof(bool)),
@@ -51,22 +47,16 @@ namespace Favalon
                 ("float", typeof(float)),
                 ("double", typeof(double)),
                 ("string", typeof(string)),
-            })
-            {
-                BindType(environment, identity, type);
-            }
-        }
+            }.Aggregate(environment, (env, entry) => BindClrType(env, entry.Item1, entry.Item2));
 
-        public static void BindClrTypeOperators(this Environment environment)
-        {
-            environment.BindTerm("+", ClrTypeSumOperatorTerm.Instance);
-            environment.BindTerm("*", ClrTypeProductOperatorTerm.Instance);
-        }
+        public static Environment BindClrTypeOperators(this Environment environment) =>
+            environment.
+                BindTerm("+", ClrTypeSumOperatorTerm.Instance).
+                BindTerm("*", ClrTypeProductOperatorTerm.Instance);
 
-        public static void BindBooleanConstant(this Environment environment)
-        {
-            environment.BindTerm("true", ClrConstantTerm.From(true));
-            environment.BindTerm("false", ClrConstantTerm.From(false));
-        }
+        public static Environment BindClrBooleanConstant(this Environment environment) =>
+            environment.
+                BindTerm("true", ClrConstantTerm.From(true)).
+                BindTerm("false", ClrConstantTerm.From(false));
     }
 }

@@ -12,23 +12,49 @@ namespace Favalon
         [Test]
         public void TrueTerm()
         {
-            var term = True();
+            var term = TermFactory.True();
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(true, ((BooleanTerm)actual).Value);
+            Assert.AreEqual(BooleanTerm.Type, actual.HigherOrder);
         }
 
         [Test]
         public void FalseTerm()
         {
-            var term = False();
+            var term = TermFactory.False();
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(false, ((BooleanTerm)actual).Value);
+            Assert.AreEqual(BooleanTerm.Type, actual.HigherOrder);
+        }
+
+        [Test]
+        public void ClrTrueTerm()
+        {
+            var term = TermFactory.True();
+
+            var environment = ClrEnvironmentFactory.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(true, ((BooleanTerm)actual).Value);
+            Assert.AreEqual(Type<bool>(), actual.HigherOrder);
+        }
+
+        [Test]
+        public void ClrFalseTerm()
+        {
+            var term = TermFactory.False();
+
+            var environment = ClrEnvironmentFactory.Create();
+            var actual = environment.Reduce(term);
+
+            Assert.AreEqual(false, ((BooleanTerm)actual).Value);
+            Assert.AreEqual(Type<bool>(), actual.HigherOrder);
         }
 
         /////////////////////////////////////////////////////////
@@ -39,9 +65,9 @@ namespace Favalon
         {
             var term =
                 Not(
-                    Constant(value));
+                    BooleanTerm.From(value));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
@@ -54,9 +80,9 @@ namespace Favalon
         //    var term =
         //        Apply(
         //            NotOperatorTerm.Instance,
-        //            Constant(value));
+        //            BooleanTerm.From(value));
 
-        //    var environment = Environment.Create();
+        //    var environment = EnvironmentFactory.Create();
         //    var actual = environment.Reduce(term);
 
         //    Assert.AreEqual(result, ((BooleanTerm)actual).Value);
@@ -72,10 +98,10 @@ namespace Favalon
         {
             var term =
                 AndAlso(
-                    Constant(lhs),
-                    Constant(rhs));
+                    BooleanTerm.From(lhs),
+                    BooleanTerm.From(rhs));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
@@ -93,11 +119,11 @@ namespace Favalon
             var term =
                 AndAlso(
                     AndAlso(
-                        Constant(lhs),
-                        Constant(chs)),
-                    Constant(rhs));
+                        BooleanTerm.From(lhs),
+                        BooleanTerm.From(chs)),
+                    BooleanTerm.From(rhs));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
@@ -113,8 +139,8 @@ namespace Favalon
         //        Apply(
         //            Apply(
         //                Terms.Operators.AndAlsoOperatorTerm.Instance,
-        //                Constant(lhs)),
-        //            Constant(rhs));
+        //                BooleanTerm.From(lhs)),
+        //            BooleanTerm.From(rhs));
 
         //    var environment = Environment.Create();
         //    var actual = environment.Reduce(term);
@@ -132,10 +158,10 @@ namespace Favalon
         {
             var term =
                 OrElse(
-                    Constant(lhs),
-                    Constant(rhs));
+                    BooleanTerm.From(lhs),
+                    BooleanTerm.From(rhs));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
@@ -153,11 +179,11 @@ namespace Favalon
             var term =
                 OrElse(
                     OrElse(
-                        Constant(lhs),
-                        Constant(chs)),
-                    Constant(rhs));
+                        BooleanTerm.From(lhs),
+                        BooleanTerm.From(chs)),
+                    BooleanTerm.From(rhs));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
@@ -173,10 +199,10 @@ namespace Favalon
         //        Apply(
         //            Apply(
         //                Terms.Operators.OrElseOperatorTerm.Instance,
-        //                Constant(lhs)),
-        //            Constant(rhs));
+        //                BooleanTerm.From(lhs)),
+        //            BooleanTerm.From(rhs));
 
-        //    var environment = Environment.Create();
+        //    var environment = EnvironmentFactory.Create();
         //    var actual = environment.Reduce(term);
 
         //    Assert.AreEqual(result, ((BooleanTerm)actual).Value);
@@ -190,10 +216,10 @@ namespace Favalon
         //{
         //    var term =
         //        Equal(
-        //            Constant(123),
-        //            Constant(value));
+        //            BooleanTerm.From(123),
+        //            BooleanTerm.From(value));
 
-        //    var environment = Environment.Create();
+        //    var environment = EnvironmentFactory.Create();
         //    var actual = environment.Reduce(term);
 
         //    Assert.AreEqual(condition, ((BooleanTerm)actual).Value);
@@ -207,10 +233,10 @@ namespace Favalon
         //        Apply(
         //            Apply(
         //                Terms.Operators.EqualOperatorTerm.Instance,
-        //                Constant(123)),
-        //            Constant(value));
+        //                BooleanTerm.From(123)),
+        //            BooleanTerm.From(value));
 
-        //    var environment = Environment.Create();
+        //    var environment = EnvironmentFactory.Create();
         //    var actual = environment.Reduce(term);
 
         //    Assert.AreEqual(condition, ((BooleanTerm)actual).Value);

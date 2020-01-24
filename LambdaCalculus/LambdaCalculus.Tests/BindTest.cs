@@ -20,7 +20,7 @@ namespace Favalon
                     Not(
                         Identity("a")));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, !((BooleanTerm)actual).Value);
@@ -41,7 +41,7 @@ namespace Favalon
                                 Identity("a")))),
                     Constant(result));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, !((BooleanTerm)actual).Value);
@@ -57,7 +57,7 @@ namespace Favalon
                     Not(
                         Constant(result)));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, !((BooleanTerm)actual).Value);

@@ -44,7 +44,7 @@ namespace Favalon.Terms.Logical
             if (context.LookupBoundTerm(this.Identity) is Term bound)
             {
                 // Ignore repeating self references (will cause stack overflow)
-                return bound is BooleanTerm ? bound : bound.Reduce(context);
+                return bound is IIdentityTerm ? bound : bound.Reduce(context);
             }
 
             var higherOrder = this.HigherOrder.Reduce(context);

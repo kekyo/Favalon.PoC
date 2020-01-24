@@ -22,7 +22,7 @@ namespace Favalon
         //                Constant(result)),
         //            Constant(false));
 
-        //    var environment = Environment.Create();
+        //    var environment = EnvironmentFactory.Create();
         //    var actual = environment.Reduce(term);
 
         //    Assert.AreEqual(result, ((BooleanTerm)actual).Value);
@@ -39,7 +39,7 @@ namespace Favalon
                         Constant(result)),
                 Constant(false));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
@@ -56,7 +56,7 @@ namespace Favalon
                         Identity("a")),
                 Constant(result));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);
@@ -82,7 +82,7 @@ namespace Favalon
                         Constant(lhs)),
                     Constant(rhs));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(result, ((BooleanTerm)actual).Value);

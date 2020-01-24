@@ -6,19 +6,26 @@ using System.Diagnostics;
 
 namespace Favalon
 {
-    public class Environment : Context
+    public sealed class Environment : Context
     {
-        protected const int DefaultIterations = 1000;
-
-        protected Environment(int iterations) :
+        private Environment(int iterations) :
             base(iterations)
         { }
 
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
 
-        public static Environment Create(int defaultIterations = DefaultIterations) =>
-            new Environment(defaultIterations);
+        public static Environment Pure(int iterations = EnvironmentFactory.DefaultIterations) =>
+            new Environment(iterations);
+
+        /////////////////////////////////////////////////////////////////////////
+        // Binder
+
+        public new Environment BindTerm(string identity, Term term)
+        {
+            base.BindTerm(identity, term);
+            return this;
+        }
 
         /////////////////////////////////////////////////////////////////////////
         // Infer

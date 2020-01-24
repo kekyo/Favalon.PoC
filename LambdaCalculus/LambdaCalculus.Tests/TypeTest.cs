@@ -22,7 +22,7 @@ namespace Favalon
             var term =
                 Constant(value);
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Infer(term);
 
             Assert.AreEqual(Constant(type), actual.HigherOrder);
@@ -36,7 +36,7 @@ namespace Favalon
                     Constant(typeof(Lazy<>)),
                     Type<int>());
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(Type<Lazy<int>>(), actual);
@@ -57,7 +57,7 @@ namespace Favalon
                     Type<ComposeConstructorTarget>(),
                     Constant(123));
 
-            var environment = Environment.Create();
+            var environment = EnvironmentFactory.Create();
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(123, ((ComposeConstructorTarget)((ClrConstantTerm)actual).Value).Value);
@@ -74,7 +74,7 @@ namespace Favalon
                         Identity("System.Int32"),
                         Identity("System.String")));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
 
             var actual = environment.Reduce(term);
 
@@ -94,7 +94,7 @@ namespace Favalon
                         Identity("System.Int32"),
                         Identity("System.IFormattable")));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
 
             var actual = environment.Reduce(term);
 
@@ -112,7 +112,7 @@ namespace Favalon
                         Identity("System.Int32"),
                         Identity("System.String")));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
 
             var actual = environment.Reduce(term);
 
@@ -172,7 +172,7 @@ namespace Favalon
             Assert.IsTrue(lhsTypes.Length >= 1);
             Assert.IsTrue(rhsTypes.Length >= 1);
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
             var p1 = environment.CreatePlaceholder(Unspecified());
             var p2 = environment.CreatePlaceholder(Unspecified());
 

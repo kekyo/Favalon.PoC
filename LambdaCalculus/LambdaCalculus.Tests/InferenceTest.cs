@@ -17,7 +17,7 @@ namespace Favalon
             var term =
                 Constant(false);
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
             var actual = environment.Infer(term);
 
             // false:bool
@@ -33,7 +33,7 @@ namespace Favalon
                     "a",
                     Constant(false));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
             var actual = environment.Infer(term);
 
             var lambda = (LambdaTerm)actual;
@@ -53,7 +53,7 @@ namespace Favalon
                     "a",
                     Identity("a"));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
             var actual = environment.Infer(term);
 
             var lambda = (LambdaTerm)actual;
@@ -77,7 +77,7 @@ namespace Favalon
                         Identity("a")),
                     Constant(false));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
             var actual = environment.Infer(term);
 
             // (a:bool -> a:bool) false:bool
@@ -95,7 +95,7 @@ namespace Favalon
                     Not(
                         Identity("a")));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
             var actual = environment.Infer(term);
 
             Assert.AreEqual(Constant(typeof(bool)), actual.HigherOrder);
@@ -116,7 +116,7 @@ namespace Favalon
                                 Identity("a")))),
                     Constant(result));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
             var actual = environment.Infer(term);
 
             Assert.AreEqual(Constant(typeof(bool)), actual.HigherOrder);
@@ -131,7 +131,7 @@ namespace Favalon
                     Identity("a"),
                     Identity("b"));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
             var actual = (AndAlsoTerm)environment.Reduce(term);
 
             // (a:bool && b:bool):bool
@@ -153,7 +153,7 @@ namespace Favalon
                             Identity("a"),
                             Identity("b"))));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
             var actual = environment.Infer(term);
 
             var lambda = (LambdaTerm)actual;
@@ -184,7 +184,7 @@ namespace Favalon
                             Identity("a"))),
                     Constant(false));
 
-            var environment = ClrEnvironment.Create();
+            var environment = ClrEnvironmentFactory.Create();
             var actual = environment.Infer(term);
 
             // (a:(bool -> bool) -> b:bool -> a:(bool -> bool) b:bool) (a:bool -> a:bool):(bool -> bool) false:bool

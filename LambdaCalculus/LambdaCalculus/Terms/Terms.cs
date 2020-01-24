@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms.Contexts;
+
 #pragma warning disable 659
 
 namespace Favalon.Terms

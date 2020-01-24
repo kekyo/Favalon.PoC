@@ -1,5 +1,6 @@
 ﻿using Favalon.Terms;
 using Favalon.Terms.Logical;
+using Favalon.Terms.Methods;
 using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;
@@ -65,6 +66,5 @@ namespace Favalon
                 _ => ClrMethodTerm.From(ms)
             };
         }
-
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms;
+using Favalon.Terms.Operators;
 using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;

@@ -1,10 +1,11 @@
 ﻿using Favalon.Terms.Contexts;
+using Favalon.Terms.Types;
 
-namespace Favalon.Terms.Types
+namespace Favalon.Terms.Operators
 {
-    public sealed class ClrTypeProductOperatorTerm : Term, IApplicableTerm
+    public sealed class ClrTypeSumOperatorTerm : Term, IApplicableTerm
     {
-        private ClrTypeProductOperatorTerm()
+        private ClrTypeSumOperatorTerm()
         { }
 
         public override Term HigherOrder =>
@@ -37,23 +38,23 @@ namespace Favalon.Terms.Types
 
         AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             AppliedResult.Applied(
-                new ProductClosureTerm(argument),
+                new SumClosureTerm(argument),
                 argument);
 
         protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is ClrTypeSumOperatorTerm;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            "*";
+            "+";
 
-        public static readonly ClrTypeProductOperatorTerm Instance =
-            new ClrTypeProductOperatorTerm();
+        public static readonly ClrTypeSumOperatorTerm Instance =
+            new ClrTypeSumOperatorTerm();
 
-        private sealed class ProductClosureTerm : Term, IApplicableTerm
+        private sealed class SumClosureTerm : Term, IApplicableTerm
         {
             private readonly Term lhs;
 
-            public ProductClosureTerm(Term lhs) =>
+            public SumClosureTerm(Term lhs) =>
                 this.lhs = lhs;
 
             public override Term HigherOrder =>
@@ -68,7 +69,7 @@ namespace Favalon.Terms.Types
                 return
                     this.lhs.EqualsWithHigherOrder(lhs) ?
                         this :
-                        new ProductClosureTerm(lhs);
+                        new SumClosureTerm(lhs);
             }
 
             Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
@@ -86,7 +87,7 @@ namespace Favalon.Terms.Types
                 return
                     this.lhs.EqualsWithHigherOrder(lhs) ?
                         this :
-                        new ProductClosureTerm(lhs);
+                        new SumClosureTerm(lhs);
             }
 
             public override Term Fixup(FixupContext context)
@@ -96,7 +97,7 @@ namespace Favalon.Terms.Types
                 return
                     this.lhs.EqualsWithHigherOrder(lhs)  ?
                         this :
-                        new ProductClosureTerm(lhs);
+                        new SumClosureTerm(lhs);
             }
 
             Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
@@ -106,7 +107,7 @@ namespace Favalon.Terms.Types
                 return
                     this.lhs.EqualsWithHigherOrder(lhs) ?
                         this :
-                        new ProductClosureTerm(lhs);
+                        new SumClosureTerm(lhs);
             }
 
             public override Term Reduce(ReduceContext context)
@@ -116,33 +117,20 @@ namespace Favalon.Terms.Types
                 return
                     this.lhs.EqualsWithHigherOrder(lhs)  ?
                         this :
-                        new ProductClosureTerm(lhs);
+                        new SumClosureTerm(lhs);
             }
 
-            AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
-            {
-                var lhs = this.lhs.Reduce(context);
-                var rhs = argument.Reduce(context);
-
-                // TODO: calculate product between types.
-                if (ClrTypeCalculator.Instance.Widening(lhs, rhs) is Term applied1)
-                {
-                    return AppliedResult.Applied(applied1, rhs);
-                }
-
-                if (ClrTypeCalculator.Instance.Widening(rhs, lhs) is Term applied2)
-                {
-                    return AppliedResult.Applied(applied2, rhs);
-                }
-
-                return AppliedResult.Applied(ClrTypeProductTerm.Create(lhs, rhs), rhs);
-            }
+            AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+                ClrTypeSumTerm.InternalReduce(context, this.lhs, argument,
+                    (term, rhs) => (term != null) ?
+                        AppliedResult.Applied(term, rhs) :
+                        AppliedResult.Ignored(this, rhs));
 
             protected override bool OnEquals(EqualsContext context, Term? other) =>
-                other is ProductClosureTerm term ? this.lhs.Equals(term.lhs) : false;
+                other is SumClosureTerm term ? this.lhs.Equals(term.lhs) : false;
 
             protected override string OnPrettyPrint(PrettyPrintContext context) =>
-                $"* {this.lhs.PrettyPrint(context)}";
+                $"+ {this.lhs.PrettyPrint(context)}";
 
             public void Deconstruct(out Term lhs, out Term higherOrder)
             {

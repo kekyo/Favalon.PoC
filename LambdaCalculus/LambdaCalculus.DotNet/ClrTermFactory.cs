@@ -14,20 +14,28 @@ namespace Favalon
         private ClrTermFactory()
         { }
 
+        ///////////////////////////////////////////////////////////////////////////
+        // Constants
+
         public static new BooleanTerm True() =>
             ClrConstantTerm.True;
         public static new BooleanTerm False() =>
             ClrConstantTerm.False;
 
-        public static Term Type<T>() =>
-            ClrConstantTerm.From(typeof(T));
-
         public static Term Constant(Type type) =>
-            ClrConstantTerm.From(type);
+            ClrTypeTerm.From(type);
+        public static Term Constant(MethodInfo method) =>
+            ClrMethodTerm.From(method);
         public static BooleanTerm Constant(bool value) =>
             ClrConstantTerm.From(value);
         public static Term Constant(object value) =>
             ClrConstantTerm.From(value);
+
+        ///////////////////////////////////////////////////////////////////////////
+        // Types
+
+        public static Term Type<T>() =>
+            ClrConstantTerm.From(typeof(T));
 
         public static ClrTypeSumTerm SumType(Term lhs, Term rhs) =>
             ClrTypeSumTerm.Create(lhs, rhs);
@@ -53,18 +61,22 @@ namespace Favalon
                 _ => null
             };
 
-        public static Term Method(MethodInfo method) =>
-            ClrMethodTerm.From(new[] { method });
-        public static Term Method(MethodInfo method0, params MethodInfo[] methods) =>
-            ClrMethodTerm.From(new[] { method0 }.Concat(methods));
-        public static Term Method(IEnumerable<MethodInfo> methods)
-        {
-            var ms = methods.ToArray();
-            return ms.Length switch
+        ///////////////////////////////////////////////////////////////////////////
+        // Methods
+
+        public static Term Method<T>(string name, params Type[] argumentTypes) =>
+            ClrMethodTerm.From(typeof(T).GetMethod(name, argumentTypes));
+
+        public static ClrMethodSumTerm SumMethod(Term lhs, Term rhs) =>
+            ClrMethodSumTerm.Create(lhs, rhs);
+        public static Term? SumMethod(params Term[] terms) =>
+            SumMethod((IEnumerable<Term>)terms);
+        public static Term? SumMethod(IEnumerable<Term> terms) =>
+            terms.ToArray() switch
             {
-                0 => throw new ArgumentException(),
-                _ => ClrMethodTerm.From(ms)
+                Term[] ts when ts.Length == 1 => ts[0],
+                Term[] ts when ts.Length >= 2 => ts.Aggregate(SumMethod),
+                _ => null
             };
-        }
     }
 }

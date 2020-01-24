@@ -101,8 +101,8 @@ namespace System.Reflection
         public static Assembly GetAssembly(this Type type) =>
             type.GetTypeInfo().Assembly;
 
-        public static MethodInfo GetMethod(this Type type, string name) =>
-            type.GetTypeInfo().GetDeclaredMethod(name);
+        public static MethodInfo GetMethod(this Type type, string name, params Type[] argumentTypes) =>
+            type.GetRuntimeMethod(name, argumentTypes);
 
         public static IEnumerable<Type> GetTypes(this Assembly assembly) =>
             assembly.DefinedTypes.Select(typeInfo => typeInfo.AsType());

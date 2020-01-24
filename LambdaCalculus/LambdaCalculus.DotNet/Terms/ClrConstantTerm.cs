@@ -1,5 +1,6 @@
 ﻿using Favalon.Terms.Contexts;
 using Favalon.Terms.Logical;
+using Favalon.Terms.Methods;
 using Favalon.Terms.Types;
 using System;
 using System.Diagnostics;
@@ -50,6 +51,7 @@ namespace Favalon.Terms
                 true => True,
                 false => False,
                 Type type => ClrTypeTerm.From(type),
+                MethodInfo method => ClrMethodTerm.From(method),
                 _ => new ClrConstantTerm(value, ClrTypeTerm.From(value.GetType()))
             };
 

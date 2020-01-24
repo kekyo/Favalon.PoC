@@ -19,7 +19,7 @@ namespace Favalon
         {
             var term =
                 Apply(
-                    Method(typeof(int).GetMethod("Parse", new[] { typeof(string) })),
+                    Method<int>("Parse", typeof(string)),
                     Constant("123"));
 
             var environment = ClrEnvironmentFactory.Create();

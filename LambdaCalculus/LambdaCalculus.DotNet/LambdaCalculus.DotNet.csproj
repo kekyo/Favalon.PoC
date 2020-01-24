@@ -14,6 +14,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Terms\Methods\ClrMethodOverloadedTerm.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Terms\Methods\ClrMethodOverloadedTerm.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LambdaCalculus\LambdaCalculus.csproj" />
   </ItemGroup>
 

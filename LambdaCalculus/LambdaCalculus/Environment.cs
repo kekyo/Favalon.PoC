@@ -1,106 +1,82 @@
-﻿using Favalon.Contexts;
+﻿using Favalon.Terms.Contexts;
 using Favalon.Terms;
 using System.Collections.Generic;
+using System.Linq;
+using System.Diagnostics;
 
 namespace Favalon
 {
-    public sealed class Environment : Context
+    public class Environment : Context
     {
-        private Environment()
+        protected const int DefaultIterations = 1000;
+
+        protected Environment(int iterations) :
+            base(iterations)
         { }
 
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
 
-        public Term Infer(Term term)
+        public static Environment Create(int defaultIterations = DefaultIterations) =>
+            new Environment(defaultIterations);
+
+        /////////////////////////////////////////////////////////////////////////
+        // Infer
+
+        public IEnumerable<Term> EnumerableInfer(Term term, bool higherOrderInferOnly) =>
+            base.InternalEnumerableInfer(term, higherOrderInferOnly);
+
+        public IEnumerable<Term> EnumerableInfer(Term term) =>
+            base.InternalEnumerableInfer(term, false);
+
+#if DEBUG
+        public Term Infer(Term term, bool higherOrderInferOnly)
         {
-            var context = new InferContext(this);
-            var partial = term.Infer(context);
-            return partial.Fixup(context);
+            Term? result = null;
+            foreach (var inferred in base.InternalEnumerableInfer(term, higherOrderInferOnly))
+            {
+                result = inferred;
+                Debug.WriteLine(inferred.Full);
+            }
+            return result!;
         }
+#else
+        public Term Infer(Term term, bool higherOrderInferOnly) =>
+            base.InternalEnumerableInfer(term, higherOrderInferOnly).Last();
+#endif
 
-        public IEnumerable<Term> EnumerableReduce(Term term, int iterations = int.MaxValue)
+        public Term Infer(Term term) =>
+            this.Infer(term, false);
+
+        public Term InferOne(Term term, bool higherOrderInferOnly) =>
+            base.InternalEnumerableInfer(term, higherOrderInferOnly).First();
+
+        public Term InferOne(Term term) =>
+            base.InternalEnumerableInfer(term, false).First();
+
+        /////////////////////////////////////////////////////////////////////////
+        // Reduce
+
+        public IEnumerable<Term> EnumerableReduce(Term term) =>
+            base.InternalEnumerableReduce(term);
+
+#if DEBUG
+        public Term Reduce(Term term)
         {
-            if (boundTerms == null)
+            Term? result = null;
+            foreach (var reduced in InternalEnumerableReduce(term))
             {
-                boundTerms = new Dictionary<string, Term>();
+                result = reduced;
+                Debug.WriteLine(reduced.Full);
             }
-
-            var current = term;
-            for (var iteration = 0; iteration < iterations; iteration++)
-            {
-                yield return current;
-
-                var inferred = this.Infer(current);
-
-                if (object.ReferenceEquals(inferred, current))
-                {
-                    break;
-                }
-
-                yield return inferred;
-
-                var context = new ReduceContext(this, boundTerms, iterations);
-                var reduced = inferred.Reduce(context);
-
-                if (object.ReferenceEquals(reduced, current))
-                {
-                    break;
-                }
-
-                current = reduced;
-            }
-
-            // TODO: Detects uninterpretable terms on many iterations.
+            return result!;
         }
+#else
+        public Term Reduce(Term term) =>
+            base.InternalEnumerableReduce(term).Last();
+#endif
 
-        public Term ReduceOne(Term term, int iterations = int.MaxValue)
-        {
-            if (boundTerms == null)
-            {
-                boundTerms = new Dictionary<string, Term>();
-            }
-
-            var inferred = this.Infer(term);
-
-            var context = new ReduceContext(this, boundTerms, iterations);
-            return inferred.Reduce(context);
-        }
-
-        public Term Reduce(Term term, int iterations = int.MaxValue)
-        {
-            if (boundTerms == null)
-            {
-                boundTerms = new Dictionary<string, Term>();
-            }
-
-            var current = term;
-            for (var iteration = 0; iteration < iterations; iteration++)
-            {
-                var inferred = this.Infer(current);
-
-                if (object.ReferenceEquals(inferred, current))
-                {
-                    break;
-                }
-
-                var context = new ReduceContext(this, boundTerms, iterations);
-                var reduced = inferred.Reduce(context);
-
-                if (object.ReferenceEquals(reduced, current))
-                {
-                    break;
-                }
-
-                current = reduced;
-            }
-
-            // TODO: Detects uninterpretable terms on many iterations.
-
-            return current;
-        }
-
-        public static Environment Create() =>
-            new Environment();
+        public Term ReduceOne(Term term) =>
+            base.InternalEnumerableReduce(term).First();
     }
 }

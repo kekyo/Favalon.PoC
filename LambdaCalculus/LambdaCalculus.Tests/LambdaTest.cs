@@ -1,41 +1,43 @@
-﻿using Favalon.Terms;
-using Favalon.Terms.Operators;
+﻿using Favalon.Terms.Logical;
 using NUnit.Framework;
+
+using static Favalon.TermFactory;
+using static Favalon.ClrTermFactory;
 
 namespace Favalon
 {
     [TestFixture]
     class LambdaTest
     {
-        [TestCase(true)]
-        [TestCase(false)]
-        public void LambdaArrowOperatorCallAndFixedResult(bool result)
-        {
-            var term =
-                Term.Apply(
-                    Term.Apply(
-                        Term.Apply(
-                            LambdaOperatorTerm.Instance,
-                            Term.Identity("a")),
-                        Term.Constant(result)),
-                    Term.Constant(false));
+        //[TestCase(true)]
+        //[TestCase(false)]
+        //public void LambdaArrowOperatorCallAndFixedResult(bool result)
+        //{
+        //    var term =
+        //        Apply(
+        //            Apply(
+        //                Apply(
+        //                    LambdaOperatorTerm.Instance,
+        //                    Identity("a")),
+        //                Constant(result)),
+        //            Constant(false));
 
-            var environment = Environment.Create();
-            var actual = environment.Reduce(term);
+        //    var environment = Environment.Create();
+        //    var actual = environment.Reduce(term);
 
-            Assert.AreEqual(result, ((BooleanTerm)actual).Value);
-        }
+        //    Assert.AreEqual(result, ((BooleanTerm)actual).Value);
+        //}
 
         [TestCase(true)]
         [TestCase(false)]
         public void LambdaCallAndFixedResult(bool result)
         {
             var term =
-                Term.Apply(
-                    Term.Lambda(
+                Apply(
+                    Lambda(
                         "a",
-                        Term.Constant(result)),
-                Term.Constant(false));
+                        Constant(result)),
+                Constant(false));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(term);
@@ -48,11 +50,11 @@ namespace Favalon
         public void LambdaCallPassingArgument(bool result)
         {
             var term =
-                Term.Apply(
-                    Term.Lambda(
+                Apply(
+                    Lambda(
                         "a",
-                        Term.Identity("a")),
-                Term.Constant(result));
+                        Identity("a")),
+                Constant(result));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(term);
@@ -67,20 +69,18 @@ namespace Favalon
         public void NestedLambdaCallPassingArgument(bool result, bool lhs, bool rhs)
         {
             var term =
-                Term.Apply(
-                    Term.Apply(
+                Apply(
+                    Apply(
                         // a -> b -> a && b
-                        Term.Lambda(
+                        Lambda(
                             "a",
-                            Term.Lambda(
+                            Lambda(
                                 "b",
-                                Term.AndAlso(
-                                    Term.Identity("a"),
-                                    Term.Identity("b")))),
-                        Term.Constant(lhs)),
-                    Term.Constant(rhs));
-
-            var a = term.DebuggerDisplay;
+                                AndAlso(
+                                    Identity("a"),
+                                    Identity("b")))),
+                        Constant(lhs)),
+                    Constant(rhs));
 
             var environment = Environment.Create();
             var actual = environment.Reduce(term);

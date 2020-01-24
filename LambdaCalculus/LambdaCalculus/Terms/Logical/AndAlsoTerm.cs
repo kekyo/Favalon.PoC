@@ -1,49 +1,47 @@
-﻿using Favalon.Contexts;
-using LambdaCalculus.Contexts;
+﻿using Favalon.Terms.Contexts;
 
 namespace Favalon.Terms.Logical
 {
     public sealed class AndAlsoTerm : LogicalBinaryTerm<AndAlsoTerm>
     {
-        internal AndAlsoTerm(Term lhs, Term rhs) :
-            base(lhs, rhs)
+        private AndAlsoTerm(Term lhs, Term rhs, Term higherOrder) :
+            base(lhs, rhs, higherOrder)
         { }
 
-        protected override Term Create(Term lhs, Term rhs, Term higherOrder) =>
-            new AndAlsoTerm(lhs, rhs);
+        protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
+            new AndAlsoTerm(lhs, rhs, higherOrder);
 
-        internal static Term Reduce(ReduceContext context, Term lhs, Term rhs)
+        public override Term Reduce(ReduceContext context)
         {
-            var lhs_ = lhs.Reduce(context);
-            if (lhs_ is BooleanTerm l)
+            var lhs = this.Lhs.Reduce(context);
+            if (lhs is BooleanTerm boolLhs)
             {
-                if (l.Value)
-                {
-                    var rhs_ = rhs.Reduce(context);
-                    if (rhs_ is BooleanTerm r)
-                    {
-                        return BooleanTerm.From(r.Value);
-                    }
-                    else
-                    {
-                        return new AndAlsoTerm(lhs_, rhs_);
-                    }
-                }
-                else
+                if (!boolLhs.Value)
                 {
                     return BooleanTerm.False;
                 }
             }
-            else
+
+            var rhs = this.Rhs.Reduce(context);
+            if (rhs is BooleanTerm boolRhs)
             {
-                return new AndAlsoTerm(lhs_, rhs);
+                return boolRhs;
             }
+
+            var higherOrder = this.HigherOrder.Reduce(context);
+
+            return
+                this.Lhs.EqualsWithHigherOrder(lhs) &&
+                this.Rhs.EqualsWithHigherOrder(rhs) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    new AndAlsoTerm(lhs, rhs, higherOrder);
         }
 
-        public override Term Reduce(ReduceContext context) =>
-            Reduce(context, this.Lhs, this.Rhs);
-
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            $"({this.Lhs.PrettyPrint(context)} && {this.Rhs.PrettyPrint(context)})";
+            $"{this.Lhs.PrettyPrint(context)} && {this.Rhs.PrettyPrint(context)}";
+
+        public static AndAlsoTerm Create(Term lhs, Term rhs, Term higherOrder) =>
+            new AndAlsoTerm(lhs, rhs, higherOrder);
     }
 }

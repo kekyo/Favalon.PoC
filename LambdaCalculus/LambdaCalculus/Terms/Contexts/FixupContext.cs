@@ -1,15 +1,17 @@
 ﻿using Favalon.Terms;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace Favalon.Contexts
+namespace Favalon.Terms.Contexts
 {
     public class FixupContext : Context
     {
         private protected readonly Dictionary<int, Term> placeholders;
 
-        private protected FixupContext(Context parent, Dictionary<int, Term> placeholders) :
-            base(parent) =>
+        private protected FixupContext(
+            Context parent,
+            Dictionary<string, Term> boundTerms,
+            Dictionary<int, Term> placeholders) :
+            base(parent, boundTerms) =>
             this.placeholders = placeholders;
 
         public Term? LookupUnifiedTerm(PlaceholderTerm placeholder)

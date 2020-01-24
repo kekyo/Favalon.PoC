@@ -14,11 +14,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Terms\Types\MethodTerm.cs" />
+    <Compile Remove="Terms\Types\ClrMethodTerm.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Terms\Types\MethodTerm.cs" />
+    <None Include="Terms\Types\ClrMethodTerm.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LambdaCalculus\LambdaCalculus.csproj" />
   </ItemGroup>
 
 </Project>

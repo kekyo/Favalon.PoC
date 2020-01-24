@@ -1,7 +1,4 @@
-﻿using Favalon.Contexts;
-using Favalon.Terms.Types;
-using LambdaCalculus.Contexts;
-using System.Collections.Generic;
+﻿using Favalon.Terms.Contexts;
 
 namespace Favalon.Terms
 {
@@ -16,8 +13,11 @@ namespace Favalon.Terms
             this.Body = body;
         }
 
+        internal override bool ValidTerm =>
+            this.Parameter.ValidTerm && this.Body.ValidTerm;
+
         protected override Term GetHigherOrder() =>
-            Create(this.Parameter.HigherOrder, this.Body.HigherOrder);
+            From(this.Parameter.HigherOrder, this.Body.HigherOrder);
 
         public override Term Infer(InferContext context)
         {
@@ -26,33 +26,33 @@ namespace Favalon.Terms
             var newScope = context.NewScope();
 
             var parameter = this.Parameter.Infer(newScope);
-            if (parameter is IdentityTerm identity)
+            if (parameter is FreeVariableTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higherorder.
-                newScope.SetBoundTerm(identity.Identity, parameter);
+                newScope.BindTerm(identity.Identity, parameter);
             }
 
             // Calculate inferring with parameter identity.
             var body = this.Body.Infer(newScope);
 
             return
-                object.ReferenceEquals(parameter, this.Parameter) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Parameter.EqualsWithHigherOrder(parameter) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
-                    Create(parameter, body);
+                    From(parameter, body);
         }
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgument, Term higherOrderHint)
+        Term IApplicable.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
         {
             // Strict infer procedure.
 
             var newScope = context.NewScope();
 
             var parameter = this.Parameter.Infer(newScope);
-            if (parameter is IdentityTerm identity)
+            if (parameter is FreeVariableTerm identity)
             {
                 // Applied argument.
-                newScope.SetBoundTerm(identity.Identity, inferredArgument);
+                newScope.BindTerm(identity.Identity, inferredArgumentHint);
             }
 
             // Calculate inferring with applied argument.
@@ -61,10 +61,10 @@ namespace Favalon.Terms
             context.Unify(body.HigherOrder, higherOrderHint);
 
             return
-                object.ReferenceEquals(parameter, this.Parameter) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Parameter.EqualsWithHigherOrder(parameter) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
-                    Create(parameter, body);
+                    From(parameter, body);
         }
 
         public override Term Fixup(FixupContext context)
@@ -75,13 +75,13 @@ namespace Favalon.Terms
             var body = this.Body.Fixup(context);
 
             return
-                object.ReferenceEquals(parameter, this.Parameter) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Parameter.EqualsWithHigherOrder(parameter) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
-                    Create(parameter, body);
+                    From(parameter, body);
         }
 
-        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgument, Term higherOrderHint)
+        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
         {
             // Strict fixup procedure.
 
@@ -89,10 +89,10 @@ namespace Favalon.Terms
             var body = this.Body.Fixup(context);
 
             return
-                object.ReferenceEquals(parameter, this.Parameter) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Parameter.EqualsWithHigherOrder(parameter) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
-                    Create(parameter, body);
+                    From(parameter, body);
         }
 
         public override Term Reduce(ReduceContext context)
@@ -100,43 +100,51 @@ namespace Favalon.Terms
             var newScope = context.NewScope();
 
             var parameter = this.Parameter.Reduce(context);
-            if (parameter is IdentityTerm identity)
+            if (parameter is FreeVariableTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higherorder.
-                newScope.SetBoundTerm(identity.Identity, identity);
+                newScope.BindTerm(identity.Identity, identity);
             }
 
             var body = this.Body.Reduce(newScope);
 
             return
-                object.ReferenceEquals(parameter, this.Parameter) &&
-                object.ReferenceEquals(body, this.Body) ?
+                this.Parameter.EqualsWithHigherOrder(parameter) &&
+                this.Body.EqualsWithHigherOrder(body) ?
                     this :
-                    Create(parameter, body);
+                    From(parameter, body);
         }
 
-        Term? IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
+        AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
         {
-            var newScope = context.NewScope();
+            // The parameter and argument are out of inner scope.
+            var parameter = this.Parameter.Reduce(context);
 
-            // It'll maybe make identity because already reduced by previous called Reduce().
-            if (this.Parameter is IdentityTerm identity)
+            if (parameter is FreeVariableTerm identity)
             {
-                var argument_ = argument.Reduce(context);
-                newScope.SetBoundTerm(identity.Identity, argument_);
+                var reducedArgument = argument.Reduce(context);
 
-                return this.Body.Reduce(newScope);
+                // Bound on inner scope
+                var newScope = context.NewScope();
+                newScope.BindTerm(identity.Identity, reducedArgument);
+
+                var reducedBody = this.Body.Reduce(newScope);
+
+                return AppliedResult.Applied(reducedBody, reducedArgument);
             }
             // Cannot get identity (cannot apply)
             else
             {
-                return null;
+                // Cannot reduce the body, so recreate lambda with reduced parameter.
+                return AppliedResult.Ignored(
+                    From(parameter, this.Body),
+                    argument);
             }
         }
 
-        public override bool Equals(Term? other) =>
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is LambdaTerm rhs ?
-                (this.Parameter.Equals(rhs.Parameter) && this.Body.Equals(rhs.Body)) :
+                (this.Parameter.Equals(context, rhs.Parameter) && this.Body.Equals(context, rhs.Body)) :
                 false;
 
         public override int GetHashCode() =>
@@ -148,25 +156,48 @@ namespace Favalon.Terms
             body = this.Body;
         }
 
-        protected override bool IsInclude(HigherOrderDetails higherOrderDetail) =>
-            base.IsInclude(higherOrderDetail) &&
-            this.Parameter.HigherOrder is Term &&
-            this.Body.HigherOrder is Term;
+        public void Deconstruct(out Term parameter, out Term body, out Term higherOrder)
+        {
+            parameter = this.Parameter;
+            body = this.Body;
+            higherOrder = this.HigherOrder;
+        }
+
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
+            false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Parameter.PrettyPrint(context)} -> {this.Body.PrettyPrint(context)}";
 
-        public static LambdaTerm Create(Term parameter, Term body) =>
+        public static LambdaTerm From(Term parameter, Term body) =>
             (parameter, body) switch
             {
+                (null, null) => Termination,
+                (Term _, null) => From(parameter, TerminationTerm.Instance),
+                (null, Term _) => From(TerminationTerm.Instance, body),
                 (UnspecifiedTerm _, UnspecifiedTerm _) => Unspecified,
                 (KindTerm _, KindTerm _) => Kind,
                 _ => new LambdaTerm(parameter, body)
             };
 
-        public static new readonly LambdaTerm Unspecified =
+        // ? -> ?
+        public static readonly LambdaTerm Unspecified =
             new LambdaTerm(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
-        public static new readonly LambdaTerm Kind =
+
+        // ? -> ? -> ?
+        public static readonly LambdaTerm Unspecified2 =
+            new LambdaTerm(UnspecifiedTerm.Instance, Unspecified);
+
+        // ? -> ?
+        internal static readonly LambdaTerm Termination =
+            new LambdaTerm(TerminationTerm.Instance, TerminationTerm.Instance);
+
+        // * -> *
+        public static readonly LambdaTerm Kind =
             new LambdaTerm(KindTerm.Instance, KindTerm.Instance);
+
+        // * -> * -> *
+        public static readonly LambdaTerm Kind2 =
+            new LambdaTerm(KindTerm.Instance, Kind);
     }
 }

@@ -2,13 +2,18 @@
 
 namespace Favalon.Terms
 {
-    public abstract class IdentityTerm : HigherOrderHoldTerm
+    public interface IIdentityTerm
     {
-        public readonly string Identity;
+        string Identity { get; }
+    }
 
+    public abstract class IdentityTerm : HigherOrderHoldTerm, IIdentityTerm
+    {
         internal IdentityTerm(string identity, Term higherOrder) :
             base(higherOrder) =>
             this.Identity = identity;
+
+        public string Identity { get; }
 
         protected abstract Term OnCreate(string identity, Term higherOrder);
 

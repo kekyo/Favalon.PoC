@@ -26,15 +26,20 @@ namespace Favalon
         //    };
         //}
 
+        public static new BooleanTerm True() =>
+            ClrConstantTerm.True;
+        public static new BooleanTerm False() =>
+            ClrConstantTerm.False;
+
         public static Term Type<T>() =>
-            ConstantTerm.From(typeof(T));
+            ClrConstantTerm.From(typeof(T));
 
         public static Term Constant(Type type) =>
-            ConstantTerm.From(type);
+            ClrConstantTerm.From(type);
         public static BooleanTerm Constant(bool value) =>
-            ConstantTerm.From(value);
+            ClrConstantTerm.From(value);
         public static Term Constant(object value) =>
-            ConstantTerm.From(value);
+            ClrConstantTerm.From(value);
 
         public static ClrTypeSumTerm SumType(Term lhs, Term rhs) =>
             ClrTypeSumTerm.Create(lhs, rhs);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Terms;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -64,6 +65,24 @@ namespace Favalon
                 arr = default;
                 length = -1;
             }
+        }
+
+        public static void Deconstruct(this Term term, out bool? value)
+        {
+            if (term is IdentityTerm identity)
+            {
+                if (identity.Identity == "true")
+                {
+                    value = true;
+                    return;
+                }
+                else if (identity.Identity == "false")
+                {
+                    value = false;
+                    return;
+                }
+            }
+            value = null;
         }
     }
 }

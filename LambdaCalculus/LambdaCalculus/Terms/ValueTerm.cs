@@ -2,7 +2,12 @@
 
 namespace Favalon.Terms
 {
-    public abstract class ValueTerm : Term
+    public interface IValueTerm
+    {
+        object Value { get; }
+    }
+
+    public abstract class ValueTerm : Term, IValueTerm
     {
         protected ValueTerm(Term higherOrder) =>
             this.HigherOrder = higherOrder;

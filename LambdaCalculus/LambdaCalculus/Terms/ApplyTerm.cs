@@ -30,7 +30,7 @@ namespace Favalon.Terms
     }
 
     // It's only using in ApplyTerm.
-    public interface IApplicable
+    public interface IApplicableTerm
     {
         Term InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint);
 
@@ -99,7 +99,7 @@ namespace Favalon.Terms
 
             var function = this.Function switch
             {
-                IApplicable applicable => applicable.InferForApply(context, argument, higherOrder),
+                IApplicableTerm applicable => applicable.InferForApply(context, argument, higherOrder),
                 _ => this.Function.Infer(context)
             };
 
@@ -123,7 +123,7 @@ namespace Favalon.Terms
 
             var function = this.Function switch
             {
-                IApplicable applicable => applicable.FixupForApply(context, argument, higherOrder),
+                IApplicableTerm applicable => applicable.FixupForApply(context, argument, higherOrder),
                 _ => this.Function.Fixup(context)
             };
 
@@ -144,7 +144,7 @@ namespace Favalon.Terms
 
             for (var iteration = 0; iteration < context.Iterations; iteration++)
             {
-                if (function is IApplicable applicable)
+                if (function is IApplicableTerm applicable)
                 {
                     switch (applicable.ReduceForApply(context, argument, higherOrder))
                     {

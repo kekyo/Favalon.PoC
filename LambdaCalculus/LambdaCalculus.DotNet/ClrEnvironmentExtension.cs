@@ -65,8 +65,8 @@ namespace Favalon
 
         public static void BindBooleanConstant(this Environment environment)
         {
-            environment.BindTerm("true", ConstantTerm.From(true));
-            environment.BindTerm("false", ConstantTerm.From(false));
+            environment.BindTerm("true", ClrConstantTerm.From(true));
+            environment.BindTerm("false", ClrConstantTerm.From(false));
         }
     }
 }

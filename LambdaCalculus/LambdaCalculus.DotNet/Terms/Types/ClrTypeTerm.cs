@@ -53,7 +53,7 @@ namespace Favalon.Terms.Types
         }
     }
 
-    public sealed class ClrTypeConstructorTerm : Term, IApplicable
+    public sealed class ClrTypeConstructorTerm : Term, IApplicableTerm
     {
         private readonly Type type;
 
@@ -67,19 +67,19 @@ namespace Favalon.Terms.Types
         public override Term Infer(InferContext context) =>
             this;
 
-        Term IApplicable.InferForApply(InferContext context, Term argument, Term higherOrderHint) =>
+        Term IApplicableTerm.InferForApply(InferContext context, Term argument, Term higherOrderHint) =>
             this;
 
         public override Term Fixup(FixupContext context) =>
             this;
 
-        Term IApplicable.FixupForApply(FixupContext context, Term argument, Term higherOrderHint) =>
+        Term IApplicableTerm.FixupForApply(FixupContext context, Term argument, Term higherOrderHint) =>
             this;
 
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
+        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
         {
             var argument_ = argument.Reduce(context);
 

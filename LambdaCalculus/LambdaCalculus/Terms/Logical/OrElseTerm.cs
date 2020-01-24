@@ -14,18 +14,18 @@ namespace Favalon.Terms.Logical
         public override Term Reduce(ReduceContext context)
         {
             var lhs = this.Lhs.Reduce(context);
-            if (lhs is BooleanTerm boolLhs)
+            if (lhs is BooleanTerm lhsBoolean)
             {
-                if (boolLhs.Equals(BooleanTerm.True))
+                if (lhsBoolean.Value)
                 {
-                    return boolLhs;
+                    return lhsBoolean;
                 }
             }
 
             var rhs = this.Rhs.Reduce(context);
-            if (rhs is BooleanTerm boolRhs)
+            if (rhs is BooleanTerm rhsBoolean)
             {
-                return boolRhs;
+                return rhsBoolean;
             }
 
             var higherOrder = this.HigherOrder.Reduce(context);

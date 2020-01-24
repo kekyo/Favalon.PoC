@@ -2,7 +2,7 @@
 
 namespace Favalon.Terms.Types
 {
-    public sealed class ClrTypeSumOperatorTerm : Term, IApplicable
+    public sealed class ClrTypeSumOperatorTerm : Term, IApplicableTerm
     {
         private ClrTypeSumOperatorTerm()
         { }
@@ -13,7 +13,7 @@ namespace Favalon.Terms.Types
         public override Term Infer(InferContext context) =>
             this;
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
+        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
         {
             // (? -> inferredArgumentHint:? -> ?):higherOrderHint
             var higherOrderFromArgument = LambdaTerm.From(
@@ -29,13 +29,13 @@ namespace Favalon.Terms.Types
         public override Term Fixup(FixupContext context) =>
             this;
 
-        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint) =>
+        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint) =>
             this;
 
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             AppliedResult.Applied(
                 new SumClosureTerm(argument),
                 argument);
@@ -49,7 +49,7 @@ namespace Favalon.Terms.Types
         public static readonly ClrTypeSumOperatorTerm Instance =
             new ClrTypeSumOperatorTerm();
 
-        private sealed class SumClosureTerm : Term, IApplicable
+        private sealed class SumClosureTerm : Term, IApplicableTerm
         {
             private readonly Term lhs;
 
@@ -71,7 +71,7 @@ namespace Favalon.Terms.Types
                         new SumClosureTerm(lhs);
             }
 
-            Term IApplicable.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
+            Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
             {
                 var lhs = this.lhs.Infer(context);
 
@@ -99,7 +99,7 @@ namespace Favalon.Terms.Types
                         new SumClosureTerm(lhs);
             }
 
-            Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
+            Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
             {
                 var lhs = this.lhs.Fixup(context);
 
@@ -119,7 +119,7 @@ namespace Favalon.Terms.Types
                         new SumClosureTerm(lhs);
             }
 
-            AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+            AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
                 ClrTypeSumTerm.InternalReduce(context, this.lhs, argument,
                     (term, rhs) => (term != null) ?
                         AppliedResult.Applied(term, rhs) :

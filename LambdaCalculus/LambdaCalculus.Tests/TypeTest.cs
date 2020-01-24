@@ -60,7 +60,7 @@ namespace Favalon
             var environment = Environment.Create();
             var actual = environment.Reduce(term);
 
-            Assert.AreEqual(123, ((ComposeConstructorTarget)((ConstantTerm)actual).Value).Value);
+            Assert.AreEqual(123, ((ComposeConstructorTarget)((ClrConstantTerm)actual).Value).Value);
         }
 
         [Test]

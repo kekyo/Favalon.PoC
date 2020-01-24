@@ -2,61 +2,76 @@
 
 namespace Favalon.Terms.Logical
 {
-    public abstract class BooleanTerm : IdentityTerm<BooleanTerm>
+    public sealed class BooleanTerm : Term, IIdentityTerm, IValueTerm
     {
-        private protected BooleanTerm(string identity, Term higherOrder) :
-            base(identity, higherOrder)
-        { }
+        public readonly bool Value;
 
-        public abstract bool Value { get; }
+        private BooleanTerm(bool value, Term higherOrder)
+        {
+            this.Value = value;
+            this.HigherOrder = higherOrder;
+        }
 
-        protected override sealed bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
+        public override Term HigherOrder { get; }
+
+        object IValueTerm.Value =>
+            this.Value;
+
+        public string Identity =>
+            this.Value ? "true" : "false";
+
+        public override Term Infer(InferContext context)
+        {
+            var higherOrder = context.ResolveHigherOrder(this);
+
+            if (context.LookupBoundTerm(this.Identity) is Term bound)
+            {
+                context.Unify(bound.HigherOrder, higherOrder);
+                return From(Value, higherOrder);
+            }
+
+            return From(Value, higherOrder);
+        }
+
+        public override Term Fixup(FixupContext context)
+        {
+            var higherOrder = this.HigherOrder.Fixup(context);
+            return From(Value, higherOrder);
+        }
+
+        public override Term Reduce(ReduceContext context)
+        {
+            if (context.LookupBoundTerm(this.Identity) is Term bound)
+            {
+                // Ignore repeating self references (will cause stack overflow)
+                return bound is BooleanTerm ? bound : bound.Reduce(context);
+            }
+
+            var higherOrder = this.HigherOrder.Reduce(context);
+            return From(Value, higherOrder);
+        }
+
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
+            other is BooleanTerm rhs ? (Value == rhs.Value) : false;
+
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
             false;
 
-        public static readonly Term Type =
-            TermFactory.Identity("bool");   // TODO: misunderstanding overrided bool terms...?
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            this.Identity;
+
+        public static BooleanTerm From(bool value, Term higherOrder) =>
+            higherOrder.Equals(Type) ? From(value) : new BooleanTerm(value, higherOrder);
 
         public static BooleanTerm From(bool value) =>
             value ? True : False;
 
-        public static BooleanTerm From(bool value, Term higherOrder) =>
-            higherOrder.Equals(Type) ? From(value) :
-                value ? (BooleanTerm)new TrueTerm(higherOrder) : new FalseTerm(higherOrder);
+        public static readonly Term Type =
+            FreeVariableTerm.Create("bool", UnspecifiedTerm.Instance);
 
         public static readonly BooleanTerm True =
-            new TrueTerm(Type);
+            new BooleanTerm(true, Type);
         public static readonly BooleanTerm False =
-            new FalseTerm(Type);
-
-        public static implicit operator bool(BooleanTerm term) =>
-            term.Value;
-        public static bool operator !(BooleanTerm term) =>
-            !term.Value;
-    }
-
-    public class TrueTerm : BooleanTerm
-    {
-        protected internal TrueTerm(Term higherOrder) :
-            base("true", higherOrder)
-        { }
-
-        public override sealed bool Value =>
-            true;
-
-        protected override Term OnCreate(string identity, Term higherOrder) =>
-            new TrueTerm(higherOrder);
-    }
-
-    public class FalseTerm : BooleanTerm
-    {
-        protected internal FalseTerm(Term higherOrder) :
-            base("false", higherOrder)
-        { }
-
-        public override sealed bool Value =>
-            false;
-
-        protected override Term OnCreate(string identity, Term higherOrder) =>
-            new FalseTerm(higherOrder);
+            new BooleanTerm(false, Type);
     }
 }

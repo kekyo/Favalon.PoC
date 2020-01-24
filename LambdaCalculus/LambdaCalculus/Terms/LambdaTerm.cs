@@ -2,7 +2,7 @@
 
 namespace Favalon.Terms
 {
-    public sealed class LambdaTerm : HigherOrderLazyTerm, IApplicable, IRightToLeftPrettyPrintingTerm
+    public sealed class LambdaTerm : HigherOrderLazyTerm, IApplicableTerm, IRightToLeftPrettyPrintingTerm
     {
         public readonly Term Parameter;
         public readonly Term Body;
@@ -42,7 +42,7 @@ namespace Favalon.Terms
                     From(parameter, body);
         }
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
+        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
         {
             // Strict infer procedure.
 
@@ -81,7 +81,7 @@ namespace Favalon.Terms
                     From(parameter, body);
         }
 
-        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
+        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
         {
             // Strict fixup procedure.
 
@@ -115,7 +115,7 @@ namespace Favalon.Terms
                     From(parameter, body);
         }
 
-        AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
+        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
         {
             // The parameter and argument are out of inner scope.
             var parameter = this.Parameter.Reduce(context);

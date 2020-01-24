@@ -20,11 +20,6 @@ namespace Favalon
         public static LambdaTerm KindFunction() =>
             LambdaTerm.Kind;
 
-        public static BooleanTerm True() =>
-            BooleanTerm.True;
-        public static BooleanTerm False() =>
-            BooleanTerm.False;
-
         public static FreeVariableTerm Identity(string identity) =>
             FreeVariableTerm.Create(identity, UnspecifiedTerm.Instance);
         public static FreeVariableTerm Identity(string identity, Term higherOrder) =>
@@ -83,6 +78,16 @@ namespace Favalon
                 Term[] ts when ts.Length >= 2 => ts.Aggregate(Product),
                 _ => null
             };
+
+        internal static BooleanTerm True(Term higherOrder) =>
+            BooleanTerm.From(true, higherOrder);
+        internal static BooleanTerm False(Term higherOrder) =>
+            BooleanTerm.From(false, higherOrder);
+
+        public static BooleanTerm True() =>
+            BooleanTerm.True;
+        public static BooleanTerm False() =>
+            BooleanTerm.False;
 
         public static AndAlsoTerm AndAlso(Term lhs, Term rhs) =>
             AndAlsoTerm.Create(lhs, rhs, BooleanTerm.Type);

@@ -2,30 +2,28 @@
 using Favalon.Terms.Logical;
 using Favalon.Terms.Types;
 using System;
+using System.Diagnostics;
 
 namespace Favalon.Terms
 {
-    public sealed class ConstantTerm : ValueTerm<ConstantTerm>
+    public sealed class ClrConstantTerm : ValueTerm<ClrConstantTerm>
     {
-        internal static readonly Term ClrBooleanType =
-            ClrTypeTerm.From(typeof(bool));
-
-        private static readonly BooleanTerm trueTerm =
-            new ClrTrueTerm();
-        private static readonly BooleanTerm falseTerm =
-            new ClrFalseTerm();
-
         private readonly object value;
 
-        internal ConstantTerm(object value, Term higherOrder) :
-            base(higherOrder) =>
-            this.value = value;
+        internal ClrConstantTerm(object value, Term higherOrder) :
+            base(higherOrder)
+        {
+            Debug.Assert(value != null);
+            Debug.Assert(!(value is bool));
+
+            this.value = value!;
+        }
 
         protected override object GetValue() =>
             this.value;
 
         protected override Term OnCreate(object value, Term higherOrder) =>
-            new ConstantTerm(value, higherOrder);
+            new ClrConstantTerm(value, higherOrder);
 
         protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
             higherOrderDetail switch
@@ -40,7 +38,7 @@ namespace Favalon.Terms
             this.Value.ToString();
 
         public static BooleanTerm From(bool value) =>
-            value ? trueTerm : falseTerm;
+            value ? True : False;
 
         public static Term From(Type type) =>
             ClrTypeTerm.From(type);
@@ -48,10 +46,15 @@ namespace Favalon.Terms
         public static Term From(object value) =>
             value switch
             {
-                true => trueTerm,
-                false => falseTerm,
+                true => True,
+                false => False,
                 Type type => ClrTypeTerm.From(type),
-                _ => new ConstantTerm(value, ClrTypeTerm.From(value.GetType()))
+                _ => new ClrConstantTerm(value, ClrTypeTerm.From(value.GetType()))
             };
+
+        public static readonly BooleanTerm True =
+            BooleanTerm.From(true, ClrTypeTerm.From(typeof(bool)));
+        public static readonly BooleanTerm False =
+            BooleanTerm.From(false, ClrTypeTerm.From(typeof(bool)));
     }
 }

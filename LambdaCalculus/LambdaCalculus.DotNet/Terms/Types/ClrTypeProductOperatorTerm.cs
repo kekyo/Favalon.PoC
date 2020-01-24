@@ -2,7 +2,7 @@
 
 namespace Favalon.Terms.Types
 {
-    public sealed class ClrTypeProductOperatorTerm : Term, IApplicable
+    public sealed class ClrTypeProductOperatorTerm : Term, IApplicableTerm
     {
         private ClrTypeProductOperatorTerm()
         { }
@@ -13,7 +13,7 @@ namespace Favalon.Terms.Types
         public override Term Infer(InferContext context) =>
             this;
 
-        Term IApplicable.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
+        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
         {
             // (? -> inferredArgumentHint:? -> ?):higherOrderHint
             var higherOrderFromArgument = LambdaTerm.From(
@@ -29,13 +29,13 @@ namespace Favalon.Terms.Types
         public override Term Fixup(FixupContext context) =>
             this;
 
-        Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint) =>
+        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint) =>
             this;
 
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             AppliedResult.Applied(
                 new ProductClosureTerm(argument),
                 argument);
@@ -49,7 +49,7 @@ namespace Favalon.Terms.Types
         public static readonly ClrTypeProductOperatorTerm Instance =
             new ClrTypeProductOperatorTerm();
 
-        private sealed class ProductClosureTerm : Term, IApplicable
+        private sealed class ProductClosureTerm : Term, IApplicableTerm
         {
             private readonly Term lhs;
 
@@ -71,7 +71,7 @@ namespace Favalon.Terms.Types
                         new ProductClosureTerm(lhs);
             }
 
-            Term IApplicable.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
+            Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
             {
                 var lhs = this.lhs.Infer(context);
 
@@ -99,7 +99,7 @@ namespace Favalon.Terms.Types
                         new ProductClosureTerm(lhs);
             }
 
-            Term IApplicable.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
+            Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
             {
                 var lhs = this.lhs.Fixup(context);
 
@@ -119,7 +119,7 @@ namespace Favalon.Terms.Types
                         new ProductClosureTerm(lhs);
             }
 
-            AppliedResult IApplicable.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
+            AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
             {
                 var lhs = this.lhs.Reduce(context);
                 var rhs = argument.Reduce(context);

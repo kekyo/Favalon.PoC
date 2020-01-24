@@ -1,6 +1,4 @@
-﻿using Favalon.Terms.Contexts;
-
-namespace Favalon.Terms
+﻿namespace Favalon.Terms
 {
     public sealed class FreeVariableTerm : IdentityTerm<FreeVariableTerm>
     {

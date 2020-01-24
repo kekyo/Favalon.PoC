@@ -9,6 +9,7 @@ namespace Favalon
         {
             this.BoundPublicTypes(typeof(object).GetAssembly());
             this.BindCSharpTypes();
+            this.BindClrTypeOperators();
         }
 
         public static new ClrEnvironment Create(int iterations = DefaultIterations) =>

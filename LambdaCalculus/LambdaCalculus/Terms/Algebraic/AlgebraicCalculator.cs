@@ -1,24 +1,20 @@
-﻿using Favalon.Terms.Algebraic;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
-namespace Favalon.Terms.Types
+namespace Favalon.Terms.Algebraic
 {
-    public class TypeCalculator : IComparer<Term>
+    public class AlgebraicCalculator : IComparer<Term>
     {
-        protected TypeCalculator()
+        protected AlgebraicCalculator()
         { }
 
-        public virtual bool IsAssignable(Term toType, Term fromType) =>
-            toType.Equals(fromType);
+        protected virtual Term Sum(IEnumerable<Term> terms) =>
+            TermFactory.Sum(terms)!;
 
-        public virtual int Compare(Term x, Term y) =>
-            (this.Widening(x, y) != null) ? -1 : 0;
-
-        public Term? Widening(Term lhs, Term rhs)
+        public virtual Term? Widening(Term lhs, Term rhs)
         {
-            switch ((lhs, rhs))
+            switch (lhs, rhs)
             {
                 // int: int <-- int
                 // IComparable: IComparable <-- IComparable
@@ -50,20 +46,14 @@ namespace Favalon.Terms.Types
                         lhs :
                         null;
 
-                // object: object <-- int
-                // IComparable: IComparable <-- string
-                case (Term lhsType, Term rhsTerm):
-                    return this.IsAssignable(lhsType, rhsTerm) ?
-                        lhs :
-                        null;
-
                 // null: int <-- (int + double)
                 case (_, SumTerm(Term[] rhsTerms)):
+                    Debug.Assert(rhsTerms.Length >= 2);
                     var terms2 = rhsTerms.
                         Select(rhsTerm => Widening(lhs, rhsTerm)).
                         ToArray();
                     return terms2.All(term => term != null) ?
-                        TermFactory.Sum(terms2!) :
+                        this.Sum(terms2!) :
                         null;
 
                 // (int + double): (int + double) <-- int
@@ -72,21 +62,16 @@ namespace Favalon.Terms.Types
                 // (int + _): (int + _) <-- string
                 // (int + _[1]): (int + _[1]) <-- _[2]
                 case (SumTerm(Term[] lhsTerms), _):
+                    Debug.Assert(lhsTerms.Length >= 2);
                     var terms3 = lhsTerms.
                         Select(lhsTerm => Widening(lhsTerm, rhs)).
                         ToArray();
-                    // Requirements: 1 or any terms narrowed.
+                    // Requirements: 1 or any terms widened.
                     if (terms3.Any(term => term != null))
                     {
-                        terms3 = terms3.
+                        return this.Sum(terms3.
                             Zip(lhsTerms, (term, lhsTerm) => term ?? lhsTerm).
-                            ToArray();
-                        return terms3.Length switch
-                        {
-                            0 => null,
-                            1 => terms3[0],
-                            _ => TermFactory.Sum(terms3!)
-                        };
+                            ToArray());
                     }
                     // Couldn't narrow: (int + double) <-- string
                     else
@@ -94,7 +79,7 @@ namespace Favalon.Terms.Types
                         return null;
                     }
 
-                // null: int <-- _   [TODO: maybe]
+                // null: int <-- _   [TODO: maybe?]
                 case (_, PlaceholderTerm placeholder):
                     return null;
 
@@ -103,7 +88,18 @@ namespace Favalon.Terms.Types
             }
         }
 
-        public static readonly TypeCalculator Instance =
-            new TypeCalculator();
+        public virtual int Compare(Term x, Term y)
+        {
+            if (x.Equals(y))
+            {
+                return 0;
+            }
+
+            var widened = this.Widening(x, y);
+            return (widened is Term) ? -1 : 1;
+        }
+
+        public static readonly AlgebraicCalculator Instance =
+            new AlgebraicCalculator();
     }
 }

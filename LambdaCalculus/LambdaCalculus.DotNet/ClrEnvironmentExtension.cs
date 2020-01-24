@@ -11,7 +11,7 @@ namespace Favalon
         private static void BindType(Environment environment, string identity, Type type)
         {
             var term = ClrTypeTerm.From(type);
-            environment.SetBindTerm(identity, term);
+            environment.BindTerm(identity, term);
 
             // TODO: constructor functions
         }
@@ -54,6 +54,12 @@ namespace Favalon
             {
                 BindType(environment, identity, type);
             }
+        }
+
+        public static void BindClrTypeOperators(this Environment environment)
+        {
+            environment.BindTerm("+", ClrTypeSumOperatorTerm.Instance);
+            environment.BindTerm("*", ClrTypeProductOperatorTerm.Instance);
         }
     }
 }

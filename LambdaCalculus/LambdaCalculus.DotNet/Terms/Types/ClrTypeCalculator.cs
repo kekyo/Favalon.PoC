@@ -1,19 +1,31 @@
-﻿using System;
+﻿using Favalon.Terms.Algebraic;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Favalon.Terms.Types
 {
-    public sealed class ClrTypeCalculator : TypeCalculator
+    public sealed class ClrTypeCalculator : AlgebraicCalculator
     {
         private ClrTypeCalculator()
         { }
 
-        public override bool IsAssignable(Term toType, Term fromType) =>
-            (toType, fromType) switch
+        protected override Term Sum(IEnumerable<Term> terms) =>
+            ClrTermFactory.SumType(terms)!;
+
+        public override Term? Widening(Term lhs, Term rhs)
+        {
+            switch ((lhs, rhs))
             {
-                (ClrTypeTerm to, ClrTypeTerm from) => to.Type.IsAssignableFrom(from.Type),
-                _ => base.IsAssignable(toType, fromType)
-            };
+                // object: object <-- int
+                // IComparable: IComparable <-- string
+                case (ClrTypeTerm to, ClrTypeTerm from):
+                    return to.Type.IsAssignableFrom(from.Type) ? to : null;
+
+                default:
+                    return base.Widening(lhs, rhs);
+            }
+        }
 
         private int Compare(Type x, Type y)
         {

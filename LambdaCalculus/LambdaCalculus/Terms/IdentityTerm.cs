@@ -7,11 +7,15 @@ namespace Favalon.Terms
         string Identity { get; }
     }
 
-    public abstract class IdentityTerm : HigherOrderHoldTerm, IIdentityTerm
+    public abstract class IdentityTerm : Term, IIdentityTerm
     {
-        internal IdentityTerm(string identity, Term higherOrder) :
-            base(higherOrder) =>
+        internal IdentityTerm(string identity, Term higherOrder)
+        {
             this.Identity = identity;
+            this.HigherOrder = higherOrder;
+        }
+
+        public override Term HigherOrder { get; }
 
         public string Identity { get; }
 

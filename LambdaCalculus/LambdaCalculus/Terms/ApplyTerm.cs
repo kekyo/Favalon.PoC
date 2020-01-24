@@ -39,17 +39,19 @@ namespace Favalon.Terms
         AppliedResult ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint);
     }
 
-    public sealed class ApplyTerm : HigherOrderHoldTerm
+    public sealed class ApplyTerm : Term
     {
         public readonly Term Function;
         public readonly Term Argument;
 
-        private ApplyTerm(Term function, Term argument, Term higherOrder) :
-            base(higherOrder)
+        private ApplyTerm(Term function, Term argument, Term higherOrder)
         {
             this.Function = function;
             this.Argument = argument;
+            this.HigherOrder = higherOrder;
         }
+
+        public override Term HigherOrder { get; }
 
         //private static IEnumerable<T> GetFittedAndOrderedMethods<T>(T[] methods, Term parameterHigherOrder, Term returnHigherOrderHint)
         //    where T : Term =>

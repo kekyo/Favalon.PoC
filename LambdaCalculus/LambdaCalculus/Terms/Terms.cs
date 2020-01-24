@@ -1,19 +1,8 @@
 ﻿using Favalon.Terms.Contexts;
-//using Favalon.Terms.Types;
-using System;
-
 #pragma warning disable 659
 
 namespace Favalon.Terms
 {
-    public abstract class HigherOrderHoldTerm : Term
-    {
-        protected HigherOrderHoldTerm(Term higherOrder) =>
-            this.HigherOrder = higherOrder;
-
-        public override sealed Term HigherOrder { get; }
-    }
-
     public abstract class HigherOrderLazyTerm : Term
     {
         private Term? higherOrder;
@@ -119,16 +108,20 @@ namespace Favalon.Terms
             new UnspecifiedTerm();
     }
 
-    public sealed class PlaceholderTerm : HigherOrderHoldTerm
+    public sealed class PlaceholderTerm : Term
     {
         private static readonly int hashCode =
             typeof(PlaceholderTerm).GetHashCode();
 
         public readonly int Index;
 
-        internal PlaceholderTerm(int index, Term higherOrder) :
-            base(higherOrder) =>
+        internal PlaceholderTerm(int index, Term higherOrder)
+        {
             this.Index = index;
+            this.HigherOrder = higherOrder;
+        }
+
+        public override Term HigherOrder { get; }
 
         public override Term Infer(InferContext context)
         {

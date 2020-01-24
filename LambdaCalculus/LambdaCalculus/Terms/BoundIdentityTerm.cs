@@ -2,14 +2,14 @@
 
 namespace Favalon.Terms
 {
-    public sealed class BoundVariableTerm : IdentityTerm<BoundVariableTerm>
+    public sealed class BoundIdentityTerm : IdentityTerm<BoundIdentityTerm>
     {
-        private BoundVariableTerm(string identity, Term higherOrder) :
+        private BoundIdentityTerm(string identity, Term higherOrder) :
             base(identity, higherOrder)
         { }
 
         protected override Term OnCreate(string identity, Term higherOrder) =>
-            new BoundVariableTerm(identity, higherOrder);
+            new BoundIdentityTerm(identity, higherOrder);
 
         public override Term Reduce(ReduceContext context)
         {
@@ -18,10 +18,10 @@ namespace Favalon.Terms
             return
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
-                    new BoundVariableTerm(this.Identity, higherOrder);
+                    new BoundIdentityTerm(this.Identity, higherOrder);
         }
 
-        public static BoundVariableTerm Create(string identity, Term higherOrder) =>
-            new BoundVariableTerm(identity, higherOrder);
+        public static BoundIdentityTerm Create(string identity, Term higherOrder) =>
+            new BoundIdentityTerm(identity, higherOrder);
     }
 }

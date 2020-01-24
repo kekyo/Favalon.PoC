@@ -2,38 +2,61 @@
 
 namespace Favalon.Terms.Logical
 {
-    public sealed class BooleanTerm : ValueTerm<BooleanTerm>
+    public abstract class BooleanTerm : IdentityTerm<BooleanTerm>
     {
-        public new readonly bool Value;
+        private protected BooleanTerm(string identity, Term higherOrder) :
+            base(identity, higherOrder)
+        { }
 
-        private BooleanTerm(bool value, Term higherOrder) :
-            base(higherOrder) =>
-            this.Value = value;
+        public abstract bool Value { get; }
 
-        protected override object GetValue() =>
-            this.Value;
-
-        protected override Term OnCreate(object value, Term higherOrder) =>
-            new BooleanTerm((bool)value, higherOrder);
-
-        public void Deconstruct(out bool value) =>
-            value = this.Value;
-
-        protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            this.Value ? "true" : "false";
+        protected override sealed bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
+            false;
 
         public static readonly Term Type =
-            TermFactory.Identity("bool");   // TODO: misunderstanding overrided bool terms.
-
-        public static BooleanTerm Create(bool value, Term higherOrder) =>
-            new BooleanTerm(value, higherOrder);
+            TermFactory.Identity("bool");   // TODO: misunderstanding overrided bool terms...?
 
         public static BooleanTerm From(bool value) =>
             value ? True : False;
 
+        public static BooleanTerm From(bool value, Term higherOrder) =>
+            higherOrder.Equals(Type) ? From(value) :
+                value ? (BooleanTerm)new TrueTerm(higherOrder) : new FalseTerm(higherOrder);
+
         public static readonly BooleanTerm True =
-            new BooleanTerm(true, Type);
+            new TrueTerm(Type);
         public static readonly BooleanTerm False =
-            new BooleanTerm(false, Type);
+            new FalseTerm(Type);
+
+        public static implicit operator bool(BooleanTerm term) =>
+            term.Value;
+        public static bool operator !(BooleanTerm term) =>
+            !term.Value;
+    }
+
+    public class TrueTerm : BooleanTerm
+    {
+        protected internal TrueTerm(Term higherOrder) :
+            base("true", higherOrder)
+        { }
+
+        public override sealed bool Value =>
+            true;
+
+        protected override Term OnCreate(string identity, Term higherOrder) =>
+            new TrueTerm(higherOrder);
+    }
+
+    public class FalseTerm : BooleanTerm
+    {
+        protected internal FalseTerm(Term higherOrder) :
+            base("false", higherOrder)
+        { }
+
+        public override sealed bool Value =>
+            false;
+
+        protected override Term OnCreate(string identity, Term higherOrder) =>
+            new FalseTerm(higherOrder);
     }
 }

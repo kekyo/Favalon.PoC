@@ -41,12 +41,12 @@ namespace Favalon
             LambdaTerm.From(parameter, body);
 
         public static BindExpressionTerm Bind(string bound, Term body) =>
-            BindExpressionTerm.Create(BoundVariableTerm.Create(bound, UnspecifiedTerm.Instance), body);
+            BindExpressionTerm.Create(BoundIdentityTerm.Create(bound, UnspecifiedTerm.Instance), body);
         public static BindExpressionTerm Bind(Term bound, Term body) =>
             BindExpressionTerm.Create(bound, body);
 
         public static BindTerm Bind(string bound, Term body, Term continuation) =>
-            BindTerm.Create(BindExpressionTerm.Create(BoundVariableTerm.Create(bound, UnspecifiedTerm.Instance), body), continuation);
+            BindTerm.Create(BindExpressionTerm.Create(BoundIdentityTerm.Create(bound, UnspecifiedTerm.Instance), body), continuation);
         public static BindTerm Bind(Term bound, Term body, Term continuation) =>
             BindTerm.Create(BindExpressionTerm.Create(bound, body), continuation);
 

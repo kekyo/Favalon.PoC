@@ -16,9 +16,9 @@ namespace Favalon.Terms.Logical
             var lhs = this.Lhs.Reduce(context);
             if (lhs is BooleanTerm boolLhs)
             {
-                if (!boolLhs.Value)
+                if (boolLhs.Equals(BooleanTerm.False))
                 {
-                    return BooleanTerm.False;
+                    return boolLhs;
                 }
             }
 

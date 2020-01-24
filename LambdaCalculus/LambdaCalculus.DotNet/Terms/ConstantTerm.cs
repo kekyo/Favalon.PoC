@@ -7,10 +7,13 @@ namespace Favalon.Terms
 {
     public sealed class ConstantTerm : ValueTerm<ConstantTerm>
     {
+        internal static readonly Term ClrBooleanType =
+            ClrTypeTerm.From(typeof(bool));
+
         private static readonly BooleanTerm trueTerm =
-            BooleanTerm.Create(true, ClrTypeTerm.From(typeof(bool)));
+            new ClrTrueTerm();
         private static readonly BooleanTerm falseTerm =
-            BooleanTerm.Create(false, ClrTypeTerm.From(typeof(bool)));
+            new ClrFalseTerm();
 
         private readonly object value;
 

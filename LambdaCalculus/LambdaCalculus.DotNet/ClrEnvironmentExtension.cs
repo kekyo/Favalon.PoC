@@ -1,4 +1,5 @@
-﻿using Favalon.Terms.Types;
+﻿using Favalon.Terms;
+using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,6 +61,12 @@ namespace Favalon
         {
             environment.BindTerm("+", ClrTypeSumOperatorTerm.Instance);
             environment.BindTerm("*", ClrTypeProductOperatorTerm.Instance);
+        }
+
+        public static void BindBooleanConstant(this Environment environment)
+        {
+            environment.BindTerm("true", ConstantTerm.From(true));
+            environment.BindTerm("false", ConstantTerm.From(false));
         }
     }
 }

@@ -56,6 +56,22 @@ namespace Favalon.Terms
             base(identity, higherOrder)
         { }
 
+        public override Term Reduce(ReduceContext context)
+        {
+            if (context.LookupBoundTerm(this.Identity) is Term bound)
+            {
+                // Ignore repeating self references (will cause stack overflow)
+                return bound is T ? bound : bound.Reduce(context);
+            }
+
+            var higherOrder = this.HigherOrder.Reduce(context);
+
+            return
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    this.OnCreate(this.Identity, higherOrder);
+        }
+
         protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is T rhs ? (this.Identity == rhs.Identity) : false;
     }

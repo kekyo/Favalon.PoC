@@ -18,7 +18,7 @@ namespace Favalon.Terms.Logical
             var argument = this.Argument.Reduce(context);
             if (argument is BooleanTerm boolArgument)
             {
-                return BooleanTerm.Create(!boolArgument.Value, higherOrder);
+                return BooleanTerm.From(!boolArgument, higherOrder);
             }
 
             return

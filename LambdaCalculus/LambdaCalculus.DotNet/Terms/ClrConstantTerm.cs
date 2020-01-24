@@ -3,6 +3,7 @@ using Favalon.Terms.Logical;
 using Favalon.Terms.Types;
 using System;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Favalon.Terms
 {
@@ -30,7 +31,7 @@ namespace Favalon.Terms
             {
                 HigherOrderDetails.None => false,
                 HigherOrderDetails.Full => true,
-                _ => this.Value is string || this.Value is char
+                _ => !(this.Value.GetType().IsPrimitive() || this.Value is string)
             };
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>

@@ -4,10 +4,12 @@ using System.Collections.Generic;
 
 namespace Favalon.Terms.Types
 {
-    public sealed class ClrTypeTerm : Term
+    public sealed class ClrTypeTerm : Term, IValueTerm
     {
         private static readonly Dictionary<Type, Term> clrTypes =
             new Dictionary<Type, Term>();
+
+        public readonly Type Type;
 
         private ClrTypeTerm(Type type) =>
             this.Type = type;
@@ -15,7 +17,8 @@ namespace Favalon.Terms.Types
         public override Term HigherOrder =>
             KindTerm.Instance;
 
-        internal Type Type { get; }
+        object IValueTerm.Value =>
+            this.Type;
 
         public override Term Infer(InferContext context) =>
             this;

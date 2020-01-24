@@ -4,6 +4,7 @@ using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Favalon
 {
@@ -11,20 +12,6 @@ namespace Favalon
     {
         private ClrTermFactory()
         { }
-
-        //public static MethodTerm Method(MethodInfo method) =>
-        //    MethodTerm.From(new[] { method });
-        //public static MethodTerm Method(MethodInfo method0, params MethodInfo[] methods) =>
-        //    MethodTerm.From(new[] { method0 }.Concat(methods));
-        //public static MethodTerm Method(IEnumerable<MethodInfo> methods)
-        //{
-        //    var ms = methods.ToArray();
-        //    return ms.Length switch
-        //    {
-        //        0 => throw new ArgumentException(),
-        //        _ => MethodTerm.From(ms)
-        //    };
-        //}
 
         public static new BooleanTerm True() =>
             ClrConstantTerm.True;
@@ -64,5 +51,20 @@ namespace Favalon
                 Term[] ts when ts.Length >= 2 => ts.Aggregate(ProductType),
                 _ => null
             };
+
+        public static Term Method(MethodInfo method) =>
+            ClrMethodTerm.From(new[] { method });
+        public static Term Method(MethodInfo method0, params MethodInfo[] methods) =>
+            ClrMethodTerm.From(new[] { method0 }.Concat(methods));
+        public static Term Method(IEnumerable<MethodInfo> methods)
+        {
+            var ms = methods.ToArray();
+            return ms.Length switch
+            {
+                0 => throw new ArgumentException(),
+                _ => ClrMethodTerm.From(ms)
+            };
+        }
+
     }
 }

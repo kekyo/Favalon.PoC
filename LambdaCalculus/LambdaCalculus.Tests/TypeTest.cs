@@ -172,6 +172,17 @@ namespace Favalon
             Assert.IsTrue(lhsTypes.Length >= 1);
             Assert.IsTrue(rhsTypes.Length >= 1);
 
+            // object: object <-- int
+            this.TermWidening(expectedTypes, lhsTypes, rhsTypes);
+            // int->object: int->object <-- object->int
+            this.LambdaSimpleTermWidening(expectedTypes, lhsTypes, rhsTypes);
+        }
+
+        private void TermWidening(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
+        {
+            Assert.IsTrue(lhsTypes.Length >= 1);
+            Assert.IsTrue(rhsTypes.Length >= 1);
+
             var environment = ClrEnvironmentFactory.Create();
             var p1 = environment.CreatePlaceholder(Unspecified());
             var p2 = environment.CreatePlaceholder(Unspecified());
@@ -189,6 +200,41 @@ namespace Favalon
                 else
                 {
                     return Constant(type);
+                }
+            }
+
+            var lhs = SumType(lhsTypes.Select(CreateTermFromType))!;
+            var rhs = SumType(rhsTypes.Select(CreateTermFromType))!;
+
+            var actual = ClrTypeCalculator.Instance.Widening(lhs, rhs);
+
+            var expected = SumType(expectedTypes.Select(CreateTermFromType));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        private void LambdaSimpleTermWidening(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
+        {
+            Assert.IsTrue(lhsTypes.Length >= 1);
+            Assert.IsTrue(rhsTypes.Length >= 1);
+
+            var environment = ClrEnvironmentFactory.Create();
+            var p1 = environment.CreatePlaceholder(Unspecified());
+            var p2 = environment.CreatePlaceholder(Unspecified());
+
+            Term CreateTermFromType(Type type)
+            {
+                if (typeof(_1).Equals(type))
+                {
+                    return Lambda(p1, p1);
+                }
+                else if (typeof(_2).Equals(type))
+                {
+                    return Lambda(p2, p2);
+                }
+                else
+                {
+                    return Lambda(Constant(type), Constant(type));
                 }
             }
 

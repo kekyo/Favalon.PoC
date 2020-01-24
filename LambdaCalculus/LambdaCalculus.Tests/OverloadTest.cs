@@ -28,23 +28,24 @@ namespace Favalon
             Assert.AreEqual(Constant(123), actual);
         }
 
-        //[TestCase(123, "123")]
-        //[TestCase(123, 123)]
-        //[TestCase(123, 123.456)]
-        //public void OverloadedMethods(int expected, object value)
-        //{
-        //    var term =
-        //        Term.Apply(
-        //            Term.Method(typeof(Convert).GetMethods().
-        //                Where(method => (method.Name == "ToInt32") && (method.GetParameters().Length == 1)).
-        //                ToArray()),
-        //            Term.Constant(value));
+        [TestCase(123, "123")]
+        [TestCase(123, 123)]
+        [TestCase(123, 123.456)]
+        public void OverloadedMethods(int expected, object value)
+        {
+            var term =
+                Apply(
+                    SumMethod(
+                        typeof(Convert).GetMethods().
+                        Where(method => (method.Name == "ToInt32") && (method.GetParameters().Length == 1)).
+                        Select(Constant))!,
+                    Constant(value));
 
-        //    var environment = Environment.Create();
-        //    var actual = environment.Reduce(term);
+            var environment = ClrEnvironmentFactory.Create();
+            var actual = environment.Reduce(term);
 
-        //    Assert.AreEqual(Term.Constant(expected), actual);
-        //}
+            Assert.AreEqual(Constant(expected), actual);
+        }
 
         //[TestCase(123, typeof(int))]
         //[TestCase(123.0, typeof(double))]

@@ -13,17 +13,17 @@ namespace Favalon.Terms.Types
         protected override Term Sum(IEnumerable<Term> terms) =>
             ClrTermFactory.SumType(terms)!;
 
-        public override Term? Widening(Term lhs, Term rhs)
+        public override Term? Widening(Term to, Term from)
         {
-            switch ((lhs, rhs))
+            switch (to, from)
             {
                 // object: object <-- int
                 // IComparable: IComparable <-- string
-                case (ClrTypeTerm to, ClrTypeTerm from):
-                    return to.Type.IsAssignableFrom(from.Type) ? to : null;
+                case (ClrTypeTerm toType, ClrTypeTerm fromType):
+                    return toType.Type.IsAssignableFrom(fromType.Type) ? to : null;
 
                 default:
-                    return base.Widening(lhs, rhs);
+                    return base.Widening(to, from);
             }
         }
 

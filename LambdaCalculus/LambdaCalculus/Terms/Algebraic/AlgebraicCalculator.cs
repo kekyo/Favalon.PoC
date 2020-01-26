@@ -12,24 +12,32 @@ namespace Favalon.Terms.Algebraic
         protected virtual Term Sum(IEnumerable<Term> terms) =>
             TermFactory.Sum(terms)!;
 
-        public virtual Term? Widening(Term lhs, Term rhs)
+        public virtual Term? Widening(Term to, Term from)
         {
-            switch (lhs, rhs)
+            switch (to, from)
             {
                 // int: int <-- int
                 // IComparable: IComparable <-- IComparable
                 // _[1]: _[1] <-- _[1]
-                case (_, _) when lhs.Equals(rhs):
-                    return lhs;
+                case (_, _) when to.Equals(from):
+                    return to;
 
                 // _[1]: _[1] <-- _[2]
-                case (PlaceholderTerm placeholder, PlaceholderTerm _):
-                    return placeholder;
+                //case (PlaceholderTerm placeholder, PlaceholderTerm _):
+                //    return placeholder;
 
                 // _: _ <-- int
                 // _: _ <-- (int + double)
                 case (PlaceholderTerm placeholder, _):
                     return placeholder;
+
+                // int->object: int->object <-- object->int
+                case (LambdaTerm(Term toParameter, Term toBody), LambdaTerm(Term fromParameter, Term fromBody)):
+                    var parameterTerm = this.Widening(fromParameter, toParameter);
+                    var bodyTerm = this.Widening(toBody, fromBody);
+                    return parameterTerm is Term pt && bodyTerm is Term bt ?
+                        LambdaTerm.From(pt, bt) :
+                        null;
 
                 // (int + double): (int + double) <-- (int + double)
                 // (int + double + string): (int + double + string) <-- (int + double)
@@ -38,19 +46,19 @@ namespace Favalon.Terms.Algebraic
                 // null: (int + IServiceProvider) <-- (int + double)
                 // (int + _): (int + _) <-- (int + string)
                 // (_[1] + _[2]): (_[1] + _[2]) <-- (_[2] + _[1])
-                case (SumTerm(Term[] lhsTerms), SumTerm(Term[] rhsTerms)):
-                    var terms1 = rhsTerms.
-                        Select(rhsTerm => lhsTerms.Any(lhsTerm => Widening(lhsTerm, rhsTerm) != null)).
+                case (SumTerm(Term[] toTerms), SumTerm(Term[] fromTerms)):
+                    var terms1 = fromTerms.
+                        Select(rhsTerm => toTerms.Any(lhsTerm => Widening(lhsTerm, rhsTerm) != null)).
                         ToArray();
                     return terms1.All(term => term) ?
-                        lhs :
+                        to :
                         null;
 
                 // null: int <-- (int + double)
-                case (_, SumTerm(Term[] rhsTerms)):
-                    Debug.Assert(rhsTerms.Length >= 2);
-                    var terms2 = rhsTerms.
-                        Select(rhsTerm => Widening(lhs, rhsTerm)).
+                case (_, SumTerm(Term[] fromTerms)):
+                    Debug.Assert(fromTerms.Length >= 2);
+                    var terms2 = fromTerms.
+                        Select(rhsTerm => Widening(to, rhsTerm)).
                         ToArray();
                     return terms2.All(term => term != null) ?
                         this.Sum(terms2!) :
@@ -61,16 +69,16 @@ namespace Favalon.Terms.Algebraic
                 // (int + IComparable): (int + IComparable) <-- string
                 // (int + _): (int + _) <-- string
                 // (int + _[1]): (int + _[1]) <-- _[2]
-                case (SumTerm(Term[] lhsTerms), _):
-                    Debug.Assert(lhsTerms.Length >= 2);
-                    var terms3 = lhsTerms.
-                        Select(lhsTerm => Widening(lhsTerm, rhs)).
+                case (SumTerm(Term[] toTerms), _):
+                    Debug.Assert(toTerms.Length >= 2);
+                    var terms3 = toTerms.
+                        Select(lhsTerm => Widening(lhsTerm, from)).
                         ToArray();
                     // Requirements: 1 or any terms widened.
                     if (terms3.Any(term => term != null))
                     {
                         return this.Sum(terms3.
-                            Zip(lhsTerms, (term, lhsTerm) => term ?? lhsTerm).
+                            Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).
                             ToArray());
                     }
                     // Couldn't narrow: (int + double) <-- string

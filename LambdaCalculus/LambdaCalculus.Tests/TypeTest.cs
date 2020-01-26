@@ -138,7 +138,7 @@ namespace Favalon
         // _: _ <-- (int + double)
         [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(int), typeof(double) })]
         // _[1]: _[1] <-- _[2]
-        [TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(_2) })]
+        //[TestCase(new[] { typeof(_1) }, new[] { typeof(_1) }, new[] { typeof(_2) })]
         // (int + _): (int + _) <-- string
         [TestCase(new[] { typeof(int), typeof(_1) }, new[] { typeof(int), typeof(_1) }, new[] { typeof(string) })]
         // (int + _): (int + _) <-- (int + string)
@@ -167,21 +167,22 @@ namespace Favalon
         [TestCase(new[] { typeof(int), typeof(IServiceProvider) }, new[] { typeof(int), typeof(IServiceProvider) }, new[] { typeof(int) })]
         // (int + IComparable): (int + IComparable) <-- string
         [TestCase(new[] { typeof(int), typeof(IComparable) }, new[] { typeof(int), typeof(IComparable) }, new[] { typeof(string) })]
-        public void InternalWidening(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
+        public void InternalWidening(Type[] expectedTypes, Type[] toTypes, Type[] fromTypes)
         {
-            Assert.IsTrue(lhsTypes.Length >= 1);
-            Assert.IsTrue(rhsTypes.Length >= 1);
+            Assert.IsTrue(toTypes.Length >= 1);
+            Assert.IsTrue(fromTypes.Length >= 1);
 
             // object: object <-- int
-            this.TermWidening(expectedTypes, lhsTypes, rhsTypes);
+            this.TermWidening(expectedTypes, toTypes, fromTypes);
+
             // int->object: int->object <-- object->int
-            this.LambdaSimpleTermWidening(expectedTypes, lhsTypes, rhsTypes);
+            this.LambdaSimpleTermWidening(expectedTypes, toTypes, fromTypes);
         }
 
-        private void TermWidening(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
+        private void TermWidening(Type[] expectedTypes, Type[] toTypes, Type[] fromTypes)
         {
-            Assert.IsTrue(lhsTypes.Length >= 1);
-            Assert.IsTrue(rhsTypes.Length >= 1);
+            Assert.IsTrue(toTypes.Length >= 1);
+            Assert.IsTrue(fromTypes.Length >= 1);
 
             var environment = ClrEnvironmentFactory.Create();
             var p1 = environment.CreatePlaceholder(Unspecified());
@@ -203,20 +204,20 @@ namespace Favalon
                 }
             }
 
-            var lhs = SumType(lhsTypes.Select(CreateTermFromType))!;
-            var rhs = SumType(rhsTypes.Select(CreateTermFromType))!;
+            var to = SumType(toTypes.Select(CreateTermFromType))!;
+            var from = SumType(fromTypes.Select(CreateTermFromType))!;
 
-            var actual = ClrTypeCalculator.Instance.Widening(lhs, rhs);
+            var actual = ClrTypeCalculator.Instance.Widening(to, from);
 
             var expected = SumType(expectedTypes.Select(CreateTermFromType));
 
             Assert.AreEqual(expected, actual);
         }
 
-        private void LambdaSimpleTermWidening(Type[] expectedTypes, Type[] lhsTypes, Type[] rhsTypes)
+        private void LambdaSimpleTermWidening(Type[] expectedTypes, Type[] toTypes, Type[] fromTypes)
         {
-            Assert.IsTrue(lhsTypes.Length >= 1);
-            Assert.IsTrue(rhsTypes.Length >= 1);
+            Assert.IsTrue(toTypes.Length >= 1);
+            Assert.IsTrue(fromTypes.Length >= 1);
 
             var environment = ClrEnvironmentFactory.Create();
             var p1 = environment.CreatePlaceholder(Unspecified());
@@ -226,24 +227,27 @@ namespace Favalon
             {
                 if (typeof(_1).Equals(type))
                 {
-                    return Lambda(p1, p1);
+                    return p1;
                 }
                 else if (typeof(_2).Equals(type))
                 {
-                    return Lambda(p2, p2);
+                    return p2;
                 }
                 else
                 {
-                    return Lambda(Constant(type), Constant(type));
+                    return Constant(type);
                 }
             }
 
-            var lhs = SumType(lhsTypes.Select(CreateTermFromType))!;
-            var rhs = SumType(rhsTypes.Select(CreateTermFromType))!;
+            Term CreateLambdaTermFromType(Type parameter, Type body) =>
+                Lambda(CreateTermFromType(parameter), CreateTermFromType(body));
 
-            var actual = ClrTypeCalculator.Instance.Widening(lhs, rhs);
+            var to = SumType(fromTypes.SelectMany(fromType => toTypes.Select(toType => CreateLambdaTermFromType(fromType, toType))))!;
+            var from = SumType(toTypes.SelectMany(toType => fromTypes.Select(fromType => CreateLambdaTermFromType(toType, fromType))))!;
 
-            var expected = SumType(expectedTypes.Select(CreateTermFromType));
+            var actual = ClrTypeCalculator.Instance.Widening(to, from);
+
+            var expected = SumType(expectedTypes.Select(t => CreateLambdaTermFromType(t, t)));
 
             Assert.AreEqual(expected, actual);
         }

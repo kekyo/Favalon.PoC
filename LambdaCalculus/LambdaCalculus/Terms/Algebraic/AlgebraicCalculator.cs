@@ -22,23 +22,6 @@ namespace Favalon.Terms.Algebraic
                 case (_, _) when to.Equals(from):
                     return to;
 
-                // _[1]: _[1] <-- _[2]
-                //case (PlaceholderTerm placeholder, PlaceholderTerm _):
-                //    return placeholder;
-
-                // _: _ <-- int
-                // _: _ <-- (int + double)
-                case (PlaceholderTerm placeholder, _):
-                    return placeholder;
-
-                // int->object: int->object <-- object->int
-                case (LambdaTerm(Term toParameter, Term toBody), LambdaTerm(Term fromParameter, Term fromBody)):
-                    var parameterTerm = this.Widening(fromParameter, toParameter);
-                    var bodyTerm = this.Widening(toBody, fromBody);
-                    return parameterTerm is Term pt && bodyTerm is Term bt ?
-                        LambdaTerm.From(pt, bt) :
-                        null;
-
                 // (int + double): (int + double) <-- (int + double)
                 // (int + double + string): (int + double + string) <-- (int + double)
                 // (int + IComparable): (int + IComparable) <-- (int + string)
@@ -86,10 +69,6 @@ namespace Favalon.Terms.Algebraic
                     {
                         return null;
                     }
-
-                // null: int <-- _   [TODO: maybe?]
-                case (_, PlaceholderTerm placeholder):
-                    return null;
 
                 default:
                     return null;

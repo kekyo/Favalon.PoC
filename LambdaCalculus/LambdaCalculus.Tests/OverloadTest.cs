@@ -19,7 +19,7 @@ namespace Favalon
         {
             var term =
                 Apply(
-                    Method<int>("Parse", typeof(string)),
+                    ClrMethod<int>("Parse", typeof(string)),
                     Constant("123"));
 
             var environment = ClrEnvironmentFactory.Create();
@@ -35,7 +35,7 @@ namespace Favalon
         {
             var term =
                 Apply(
-                    SumMethod(
+                    SumClrMethod(
                         typeof(Convert).GetMethods().
                         Where(method => (method.Name == "ToInt32") && (method.GetParameters().Length == 1)).
                         Select(Constant))!,

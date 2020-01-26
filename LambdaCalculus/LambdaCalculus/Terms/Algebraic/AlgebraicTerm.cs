@@ -4,9 +4,11 @@ namespace Favalon.Terms.Algebraic
 {
     public abstract class AlgebraicTerm : BinaryTerm
     {
-        protected AlgebraicTerm(Term lhs, Term rhs, Term higherOrder) :
-            base(lhs, rhs, higherOrder)
-        { }
+        protected readonly AlgebraicCalculator Calculator;
+
+        protected AlgebraicTerm(Term lhs, Term rhs, Term higherOrder, AlgebraicCalculator calculator) :
+            base(lhs, rhs, higherOrder) =>
+            this.Calculator = calculator;
 
         public override Term Reduce(ReduceContext context)
         {
@@ -26,8 +28,8 @@ namespace Favalon.Terms.Algebraic
     public abstract class AlgebraicTerm<T> : AlgebraicTerm
         where T : AlgebraicTerm
     {
-        protected AlgebraicTerm(Term lhs, Term rhs, Term higherOrder) :
-            base(lhs, rhs, higherOrder)
+        protected AlgebraicTerm(Term lhs, Term rhs, Term higherOrder, AlgebraicCalculator calculator) :
+            base(lhs, rhs, higherOrder, calculator)
         { }
 
         protected override bool OnEquals(EqualsContext context, Term? other) =>

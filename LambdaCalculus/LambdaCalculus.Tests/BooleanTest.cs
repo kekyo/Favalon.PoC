@@ -42,7 +42,7 @@ namespace Favalon
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(true, ((BooleanTerm)actual).Value);
-            Assert.AreEqual(Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(ClrType<bool>(), actual.HigherOrder);
         }
 
         [Test]
@@ -54,7 +54,7 @@ namespace Favalon
             var actual = environment.Reduce(term);
 
             Assert.AreEqual(false, ((BooleanTerm)actual).Value);
-            Assert.AreEqual(Type<bool>(), actual.HigherOrder);
+            Assert.AreEqual(ClrType<bool>(), actual.HigherOrder);
         }
 
         /////////////////////////////////////////////////////////

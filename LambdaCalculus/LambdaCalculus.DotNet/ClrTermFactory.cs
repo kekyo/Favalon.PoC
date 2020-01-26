@@ -15,7 +15,7 @@ namespace Favalon
         { }
 
         ///////////////////////////////////////////////////////////////////////////
-        // Constants
+        // CLR Constants
 
         public static new BooleanTerm True() =>
             ClrConstantTerm.True;
@@ -32,50 +32,50 @@ namespace Favalon
             ClrConstantTerm.From(value);
 
         ///////////////////////////////////////////////////////////////////////////
-        // Types
+        // CLR Types
 
-        public static Term Type<T>() =>
+        public static Term ClrType<T>() =>
             ClrConstantTerm.From(typeof(T));
 
-        public static ClrTypeSumTerm SumType(Term lhs, Term rhs) =>
+        public static ClrTypeSumTerm SumClrType(Term lhs, Term rhs) =>
             ClrTypeSumTerm.Create(lhs, rhs);
-        public static Term? SumType(params Term[] terms) =>
-            SumType((IEnumerable<Term>)terms);
-        public static Term? SumType(IEnumerable<Term> terms) =>
+        public static Term? SumClrType(params Term[] terms) =>
+            SumClrType((IEnumerable<Term>)terms);
+        public static Term? SumClrType(IEnumerable<Term> terms) =>
             terms.ToArray() switch
             {
                 Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(SumType),
+                Term[] ts when ts.Length >= 2 => ts.Aggregate(SumClrType),
                 _ => null
             };
 
-        public static ClrTypeProductTerm ProductType(Term lhs, Term rhs) =>
+        public static ClrTypeProductTerm ProductClrType(Term lhs, Term rhs) =>
             ClrTypeProductTerm.Create(lhs, rhs);
-        public static Term? ProductType(params Term[] terms) =>
-            ProductType((IEnumerable<Term>)terms);
-        public static Term? ProductType(IEnumerable<Term> terms) =>
+        public static Term? ProductClrType(params Term[] terms) =>
+            ProductClrType((IEnumerable<Term>)terms);
+        public static Term? ProductClrType(IEnumerable<Term> terms) =>
             terms.ToArray() switch
             {
                 Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(ProductType),
+                Term[] ts when ts.Length >= 2 => ts.Aggregate(ProductClrType),
                 _ => null
             };
 
         ///////////////////////////////////////////////////////////////////////////
-        // Methods
+        // CLR Methods
 
-        public static Term Method<T>(string name, params Type[] argumentTypes) =>
+        public static Term ClrMethod<T>(string name, params Type[] argumentTypes) =>
             ClrMethodTerm.From(typeof(T).GetMethod(name, argumentTypes));
 
-        public static ClrMethodSumTerm SumMethod(Term lhs, Term rhs) =>
+        public static ClrMethodSumTerm SumClrMethod(Term lhs, Term rhs) =>
             ClrMethodSumTerm.Create(lhs, rhs);
-        public static Term? SumMethod(params Term[] terms) =>
-            SumMethod((IEnumerable<Term>)terms);
-        public static Term? SumMethod(IEnumerable<Term> terms) =>
+        public static Term? SumClrMethod(params Term[] terms) =>
+            SumClrMethod((IEnumerable<Term>)terms);
+        public static Term? SumClrMethod(IEnumerable<Term> terms) =>
             terms.ToArray() switch
             {
                 Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(SumMethod),
+                Term[] ts when ts.Length >= 2 => ts.Aggregate(SumClrMethod),
                 _ => null
             };
     }

@@ -1,15 +1,18 @@
-﻿using Favalon.Terms.Contexts;
+﻿using Favalon.Terms.Algebraic;
+using Favalon.Terms.Contexts;
 using Favalon.Terms.Types;
 
 namespace Favalon.Terms.Operators
 {
-    public sealed class ClrTypeSumOperatorTerm : Term, IApplicableTerm
+    public class SumOperatorTerm : Term, IApplicableTerm
     {
-        private ClrTypeSumOperatorTerm()
-        { }
+        private readonly AlgebraicCalculator calculator;
+
+        protected SumOperatorTerm(AlgebraicCalculator calculator) =>
+            this.calculator = calculator;
 
         public override Term HigherOrder =>
-            LambdaTerm.Kind2;
+            LambdaTerm.Unspecified2;
 
         public override Term Infer(InferContext context) =>
             this;
@@ -21,8 +24,10 @@ namespace Favalon.Terms.Operators
                 inferredArgumentHint.HigherOrder,
                 LambdaTerm.From(inferredArgumentHint.HigherOrder, inferredArgumentHint.HigherOrder));
 
-            context.Unify(higherOrderHint, LambdaTerm.Kind2);
-            context.Unify(higherOrderFromArgument, LambdaTerm.Kind2);
+            var higherOrder = this.HigherOrder.Infer(context);
+
+            context.Unify(higherOrderHint, higherOrder);
+            context.Unify(higherOrderFromArgument, higherOrder);
 
             return this;
         }
@@ -38,27 +43,31 @@ namespace Favalon.Terms.Operators
 
         AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             AppliedResult.Applied(
-                new SumClosureTerm(argument),
+                new SumClosureTerm(calculator, argument),
                 argument);
 
         protected override bool OnEquals(EqualsContext context, Term? other) =>
-            other is ClrTypeSumOperatorTerm;
+            other is SumOperatorTerm;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             "+";
 
-        public static readonly ClrTypeSumOperatorTerm Instance =
-            new ClrTypeSumOperatorTerm();
+        public static readonly SumOperatorTerm Instance =
+            new SumOperatorTerm(AlgebraicCalculator.Instance);
 
         private sealed class SumClosureTerm : Term, IApplicableTerm
         {
+            private readonly AlgebraicCalculator calculator;
             private readonly Term lhs;
 
-            public SumClosureTerm(Term lhs) =>
+            public SumClosureTerm(AlgebraicCalculator calculator, Term lhs)
+            {
+                this.calculator = calculator;
                 this.lhs = lhs;
+            }
 
             public override Term HigherOrder =>
-                LambdaTerm.Kind;
+                LambdaTerm.Unspecified;
 
             public override Term Infer(InferContext context)
             {
@@ -69,7 +78,7 @@ namespace Favalon.Terms.Operators
                 return
                     this.lhs.EqualsWithHigherOrder(lhs) ?
                         this :
-                        new SumClosureTerm(lhs);
+                        new SumClosureTerm(calculator, lhs);
             }
 
             Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
@@ -87,7 +96,7 @@ namespace Favalon.Terms.Operators
                 return
                     this.lhs.EqualsWithHigherOrder(lhs) ?
                         this :
-                        new SumClosureTerm(lhs);
+                        new SumClosureTerm(calculator, lhs);
             }
 
             public override Term Fixup(FixupContext context)
@@ -97,7 +106,7 @@ namespace Favalon.Terms.Operators
                 return
                     this.lhs.EqualsWithHigherOrder(lhs)  ?
                         this :
-                        new SumClosureTerm(lhs);
+                        new SumClosureTerm(calculator, lhs);
             }
 
             Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
@@ -107,7 +116,7 @@ namespace Favalon.Terms.Operators
                 return
                     this.lhs.EqualsWithHigherOrder(lhs) ?
                         this :
-                        new SumClosureTerm(lhs);
+                        new SumClosureTerm(calculator, lhs);
             }
 
             public override Term Reduce(ReduceContext context)
@@ -117,11 +126,11 @@ namespace Favalon.Terms.Operators
                 return
                     this.lhs.EqualsWithHigherOrder(lhs)  ?
                         this :
-                        new SumClosureTerm(lhs);
+                        new SumClosureTerm(calculator, lhs);
             }
 
             AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
-                ClrTypeSumTerm.InternalReduce(
+                TypeSumTerm.InternalReduce(
                     context,
                     this.lhs,
                     argument,
@@ -129,8 +138,8 @@ namespace Favalon.Terms.Operators
                     (term, rhs) => (term != null) ?
                         AppliedResult.Applied(term, rhs) :
                         AppliedResult.Ignored(this, rhs),
-                    ClrTypeCalculator.Instance,
-                    ClrTypeSumTerm.Create);
+                    TypeCalculator.Instance,
+                    TypeSumTerm.Create);
 
             protected override bool OnEquals(EqualsContext context, Term? other) =>
                 other is SumClosureTerm term ? this.lhs.Equals(term.lhs) : false;

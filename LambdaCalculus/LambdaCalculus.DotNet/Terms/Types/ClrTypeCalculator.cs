@@ -5,13 +5,13 @@ using System.Reflection;
 
 namespace Favalon.Terms.Types
 {
-    public sealed class ClrTypeCalculator : AlgebraicCalculator
+    public sealed class ClrTypeCalculator : TypeCalculator
     {
         private ClrTypeCalculator()
         { }
 
         protected override Term Sum(IEnumerable<Term> terms) =>
-            ClrTermFactory.SumType(terms)!;
+            ClrTermFactory.SumClrType(terms)!;
 
         public override Term? Widening(Term to, Term from)
         {

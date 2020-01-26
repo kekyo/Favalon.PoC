@@ -1,5 +1,6 @@
 ﻿using Favalon.Terms;
 using Favalon.Terms.Logical;
+using Favalon.Terms.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,9 @@ namespace Favalon
     {
         protected TermFactory() =>
             throw new InvalidOperationException();
+
+        ///////////////////////////////////////////////////////////////////////////
+        // Lambda calculus
 
         public static UnspecifiedTerm Unspecified() =>
             UnspecifiedTerm.Instance;
@@ -35,6 +39,9 @@ namespace Favalon
         public static LambdaTerm Lambda(Term parameter, Term body) =>
             LambdaTerm.From(parameter, body);
 
+        ///////////////////////////////////////////////////////////////////////////
+        // Bind
+
         public static BindExpressionTerm Bind(string bound, Term body) =>
             BindExpressionTerm.Create(BoundIdentityTerm.Create(bound, UnspecifiedTerm.Instance), body);
         public static BindExpressionTerm Bind(Term bound, Term body) =>
@@ -44,6 +51,9 @@ namespace Favalon
             BindTerm.Create(BindExpressionTerm.Create(BoundIdentityTerm.Create(bound, UnspecifiedTerm.Instance), body), continuation);
         public static BindTerm Bind(Term bound, Term body, Term continuation) =>
             BindTerm.Create(BindExpressionTerm.Create(bound, body), continuation);
+
+        ///////////////////////////////////////////////////////////////////////////
+        // Algebraic
 
         public static Term Sum(Term lhs, Term rhs) =>
             ApplyTerm.Create(
@@ -79,6 +89,9 @@ namespace Favalon
                 _ => null
             };
 
+        ///////////////////////////////////////////////////////////////////////////
+        // Logical
+
         internal static BooleanTerm True(Term higherOrder) =>
             BooleanTerm.From(true, higherOrder);
         internal static BooleanTerm False(Term higherOrder) =>
@@ -95,5 +108,32 @@ namespace Favalon
             OrElseTerm.Create(lhs, rhs, BooleanTerm.Type);
         public static NotTerm Not(Term argument) =>
             NotTerm.Create(argument, BooleanTerm.Type);
+
+        ///////////////////////////////////////////////////////////////////////////
+        // Types
+
+        public static TypeSumTerm SumType(Term lhs, Term rhs) =>
+            TypeSumTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);
+        public static Term? SumType(params Term[] terms) =>
+            SumType((IEnumerable<Term>)terms);
+        public static Term? SumType(IEnumerable<Term> terms) =>
+            terms.ToArray() switch
+            {
+                Term[] ts when ts.Length == 1 => ts[0],
+                Term[] ts when ts.Length >= 2 => ts.Aggregate(SumType),
+                _ => null
+            };
+
+        public static TypeProductTerm ProductType(Term lhs, Term rhs) =>
+            TypeProductTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);
+        public static Term? ProductType(params Term[] terms) =>
+            ProductType((IEnumerable<Term>)terms);
+        public static Term? ProductType(IEnumerable<Term> terms) =>
+            terms.ToArray() switch
+            {
+                Term[] ts when ts.Length == 1 => ts[0],
+                Term[] ts when ts.Length >= 2 => ts.Aggregate(ProductType),
+                _ => null
+            };
     }
 }

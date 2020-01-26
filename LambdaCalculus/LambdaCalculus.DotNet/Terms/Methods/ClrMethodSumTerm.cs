@@ -1,13 +1,12 @@
-﻿using Favalon.Terms.Algebraic;
-using Favalon.Terms.Contexts;
+﻿using Favalon.Terms.Contexts;
 using System;
 
 namespace Favalon.Terms.Types
 {
-    public sealed class ClrMethodSumTerm : SumTerm
+    public sealed class ClrMethodSumTerm : TypeSumTerm
     {
         private ClrMethodSumTerm(Term lhs, Term rhs) :
-            base(lhs, rhs, LambdaTerm.Kind)
+            base(lhs, rhs, LambdaTerm.Kind, ClrTypeCalculator.Instance)
         { }
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
@@ -19,6 +18,7 @@ namespace Favalon.Terms.Types
             var lhs_ = lhs.Reduce(context);
             var rhs_ = rhs.Reduce(context);
 
+            // TODO: make method type reducer
             if (ClrTypeCalculator.Instance.Widening(lhs_, rhs_) is Term term1)
             {
                 return applied(term1, rhs_);

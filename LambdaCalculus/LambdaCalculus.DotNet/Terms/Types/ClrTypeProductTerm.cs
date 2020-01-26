@@ -1,11 +1,9 @@
-﻿using Favalon.Terms.Algebraic;
-
-namespace Favalon.Terms.Types
+﻿namespace Favalon.Terms.Types
 {
-    public sealed class ClrTypeProductTerm : ProductTerm
+    public sealed class ClrTypeProductTerm : TypeProductTerm
     {
         private ClrTypeProductTerm(Term lhs, Term rhs) :
-            base(lhs, rhs, KindTerm.Instance)
+            base(lhs, rhs, KindTerm.Instance, ClrTypeCalculator.Instance)
         { }
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>

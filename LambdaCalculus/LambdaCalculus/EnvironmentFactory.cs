@@ -6,6 +6,7 @@
 
         public static Environment Create(int iterations = DefaultIterations) =>
             Environment.Pure(iterations).
-            BindBooleanTerms();
+            BindBooleanTerms().
+            BindTypeOperators();
     }
 }

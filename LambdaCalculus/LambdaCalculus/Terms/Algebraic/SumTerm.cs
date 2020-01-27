@@ -37,7 +37,8 @@ namespace Favalon.Terms.Algebraic
 
             return
                 lhs.EqualsWithHigherOrder(lhs_) &&
-                rhs.EqualsWithHigherOrder(rhs_) ?
+                rhs.EqualsWithHigherOrder(rhs_) &&
+                higherOrder.EqualsWithHigherOrder(higherOrder_) ?
                     applied(null, rhs_) :
                     applied(onCreate(lhs_, rhs_, higherOrder_), rhs_);
         }

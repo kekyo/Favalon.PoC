@@ -3,146 +3,34 @@ using Favalon.Terms.Types;
 
 namespace Favalon.Terms.Operators
 {
-    public sealed class ClrTypeSumOperatorTerm : Term, IApplicableTerm
+    public sealed class ClrTypeSumOperatorTerm : SumOperatorTerm<ClrTypeCalculator>
     {
-        private ClrTypeSumOperatorTerm()
+        private ClrTypeSumOperatorTerm() :
+            base(ClrTypeCalculator.Instance)
         { }
 
-        public override Term HigherOrder =>
-            LambdaTerm.Kind2;
-
-        public override Term Infer(InferContext context) =>
-            this;
-
-        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
-        {
-            // (? -> inferredArgumentHint:? -> ?):higherOrderHint
-            var higherOrderFromArgument = LambdaTerm.From(
-                inferredArgumentHint.HigherOrder,
-                LambdaTerm.From(inferredArgumentHint.HigherOrder, inferredArgumentHint.HigherOrder));
-
-            context.Unify(higherOrderHint, LambdaTerm.Kind2);
-            context.Unify(higherOrderFromArgument, LambdaTerm.Kind2);
-
-            return this;
-        }
-
-        public override Term Fixup(FixupContext context) =>
-            this;
-
-        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint) =>
-            this;
-
-        public override Term Reduce(ReduceContext context) =>
-            this;
-
-        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+        protected override AppliedResult ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
             AppliedResult.Applied(
-                new SumClosureTerm(argument),
+                new ClrTypeSumOperatorClosureTerm(argument),
                 argument);
-
-        protected override bool OnEquals(EqualsContext context, Term? other) =>
-            other is ClrTypeSumOperatorTerm;
-
-        protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            "+";
 
         public static readonly ClrTypeSumOperatorTerm Instance =
             new ClrTypeSumOperatorTerm();
+    }
 
-        private sealed class SumClosureTerm : Term, IApplicableTerm
-        {
-            private readonly Term lhs;
+    internal sealed class ClrTypeSumOperatorClosureTerm : SumOperatorClosureTerm<ClrTypeCalculator>
+    {
+        public ClrTypeSumOperatorClosureTerm(Term lhs) :
+            base(ClrTypeCalculator.Instance, lhs)
+        { }
 
-            public SumClosureTerm(Term lhs) =>
-                this.lhs = lhs;
+        protected override Term OnCreate(ClrTypeCalculator calculator, Term lhs) =>
+            new ClrTypeSumOperatorClosureTerm(lhs);
 
-            public override Term HigherOrder =>
-                LambdaTerm.Kind;
+        protected override Term OnCreateTerm(Term lhs, Term rhs, Term higherOrder) =>
+            ClrTypeSumTerm.Create(lhs, rhs);
 
-            public override Term Infer(InferContext context)
-            {
-                var lhs = this.lhs.Infer(context);
-
-                context.Unify(lhs.HigherOrder, KindTerm.Instance);
-
-                return
-                    this.lhs.EqualsWithHigherOrder(lhs) ?
-                        this :
-                        new SumClosureTerm(lhs);
-            }
-
-            Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
-            {
-                var lhs = this.lhs.Infer(context);
-
-                // (inferredArgumentHint -> ?):higherOrderHint
-                var higherOrderFromArgument = LambdaTerm.From(
-                    lhs.HigherOrder,
-                    inferredArgumentHint.HigherOrder);
-
-                context.Unify(higherOrderHint, LambdaTerm.Kind);
-                context.Unify(higherOrderFromArgument, LambdaTerm.Kind);
-
-                return
-                    this.lhs.EqualsWithHigherOrder(lhs) ?
-                        this :
-                        new SumClosureTerm(lhs);
-            }
-
-            public override Term Fixup(FixupContext context)
-            {
-                var lhs = this.lhs.Fixup(context);
-
-                return
-                    this.lhs.EqualsWithHigherOrder(lhs)  ?
-                        this :
-                        new SumClosureTerm(lhs);
-            }
-
-            Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
-            {
-                var lhs = this.lhs.Fixup(context);
-
-                return
-                    this.lhs.EqualsWithHigherOrder(lhs) ?
-                        this :
-                        new SumClosureTerm(lhs);
-            }
-
-            public override Term Reduce(ReduceContext context)
-            {
-                var lhs = this.lhs.Reduce(context);
-
-                return
-                    this.lhs.EqualsWithHigherOrder(lhs)  ?
-                        this :
-                        new SumClosureTerm(lhs);
-            }
-
-            AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
-                ClrTypeSumTerm.InternalReduce(
-                    context,
-                    this.lhs,
-                    argument,
-                    KindTerm.Instance,
-                    (term, rhs) => (term != null) ?
-                        AppliedResult.Applied(term, rhs) :
-                        AppliedResult.Ignored(this, rhs),
-                    ClrTypeCalculator.Instance,
-                    ClrTypeSumTerm.Create);
-
-            protected override bool OnEquals(EqualsContext context, Term? other) =>
-                other is SumClosureTerm term ? this.lhs.Equals(term.lhs) : false;
-
-            protected override string OnPrettyPrint(PrettyPrintContext context) =>
-                $"+ {this.lhs.PrettyPrint(context)}";
-
-            public void Deconstruct(out Term lhs, out Term higherOrder)
-            {
-                lhs = this.lhs;
-                higherOrder = this.HigherOrder;
-            }
-        }
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
+            other is ClrTypeSumOperatorClosureTerm term ? this.Lhs.Equals(term.Lhs) : false;
     }
 }

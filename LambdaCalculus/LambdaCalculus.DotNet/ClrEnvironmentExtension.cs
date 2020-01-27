@@ -50,14 +50,14 @@ namespace Favalon
                 ("string", typeof(string)),
             }.Aggregate(environment, (env, entry) => BindClrType(env, entry.Item1, entry.Item2));
 
-        public static Environment BindClrTypeOperators(this Environment environment) =>
-            environment.
-                BindTerm("+", ClrTypeSumOperatorTerm.Instance).
-                BindTerm("*", ClrTypeProductOperatorTerm.Instance);
-
         public static Environment BindClrBooleanConstant(this Environment environment) =>
             environment.
                 BindTerm("true", ClrConstantTerm.From(true)).
                 BindTerm("false", ClrConstantTerm.From(false));
+
+        public static Environment BindClrTypeOperators(this Environment environment) =>
+            environment.
+                BindTerm("+", ClrTypeSumOperatorTerm.Instance).
+                BindTerm("*", ClrTypeProductOperatorTerm.Instance);
     }
 }

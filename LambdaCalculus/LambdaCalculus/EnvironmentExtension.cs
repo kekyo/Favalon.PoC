@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms.Logical;
+using Favalon.Terms.Operators;
 
 namespace Favalon
 {
@@ -12,5 +13,10 @@ namespace Favalon
 
             return environment;
         }
+
+        public static Environment BindTypeOperators(this Environment environment) =>
+            environment.
+                BindTerm("+", TypeSumOperatorTerm.Instance).
+                BindTerm("*", TypeProductOperatorTerm.Instance);
     }
 }

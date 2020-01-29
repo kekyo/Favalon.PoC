@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms;
+using Favalon.Terms.Methods;
 using Favalon.Terms.Operators;
 using Favalon.Terms.Types;
 using System;
@@ -10,29 +11,57 @@ namespace Favalon
 {
     public static class ClrEnvironmentExtension
     {
-        private static Environment BindClrType(Environment environment, string identity, Type type)
+        public static Environment BindMutableClrConstructor(this Environment environment, string identity, ConstructorInfo constructor)
         {
-            var term = ClrTypeTerm.From(type);
-            environment.BindMutable(identity, term);
-
-            // TODO: constructor functions
+            //var term = ClrMethodTerm.From(constructor);
+            //environment.BindMutable(identity, term);
 
             return environment;
         }
 
-        public static Environment BindClrType(this Environment environment, Type type) =>
-            BindClrType(environment, type.GetFullName(false), type);
+        public static Environment BindMutableClrMethod(this Environment environment, string identity, MethodInfo method)
+        {
+            var term = ClrMethodTerm.From(method);
+            environment.BindMutable(identity, term);
 
-        public static Environment BindClrType(this Environment environment, IEnumerable<Type> types) =>
-            types.Aggregate(environment, BindClrType);
+            return environment;
+        }
 
-        public static Environment BindClrType(this Environment environment, params Type[] types) =>
-            BindClrType(environment, (IEnumerable<Type>)types);
+        private static Environment BindMutableClrType(Environment environment, string identity, Type type)
+        {
+            var term = ClrTypeTerm.From(type);
+            environment.BindMutable(identity, term);
 
-        public static Environment BindClrPublicTypes(this Environment environment, Assembly assembly) =>
-            BindClrType(environment, assembly.GetTypes().Where(type => type.IsPublic()));
+            if (!type.IsGenericType() || !type.IsGenericTypeDefinition())
+            {
+                foreach (var constructor in type.GetDeclaredConstructors())
+                {
+                    BindMutableClrConstructor(environment, identity, constructor);
+                }
 
-        public static Environment BindClrAliasTypes(this Environment environment) =>
+                // TODO: instance method
+                foreach (var method in type.GetDeclaredMethods().Where(m => m.IsStatic))
+                {
+                    BindMutableClrMethod(environment, method.GetName(NameOptions.Symbols), method);
+                }
+            }
+
+            return environment;
+        }
+
+        public static Environment BindMutableClrType(this Environment environment, Type type) =>
+            BindMutableClrType(environment, type.GetFullName(false), type);
+
+        public static Environment BindMutableClrType(this Environment environment, IEnumerable<Type> types) =>
+            types.Aggregate(environment, BindMutableClrType);
+
+        public static Environment BindMutableClrType(this Environment environment, params Type[] types) =>
+            BindMutableClrType(environment, (IEnumerable<Type>)types);
+
+        public static Environment BindMutableClrPublicTypes(this Environment environment, Assembly assembly) =>
+            BindMutableClrType(environment, assembly.GetTypes().Where(type => type.IsPublic()));
+
+        public static Environment BindMutableClrAliasTypes(this Environment environment) =>
             new[]
             {
                 ("void", typeof(void)),
@@ -53,15 +82,15 @@ namespace Favalon
                 ("guid", typeof(Guid)),
                 ("string", typeof(string)),
                 ("unit", typeof(Unit)),
-            }.Aggregate(environment, (env, entry) => BindClrType(env, entry.Item1, entry.Item2));
+            }.Aggregate(environment, (env, entry) => BindMutableClrType(env, entry.Item1, entry.Item2));
 
-        public static Environment BindClrConstants(this Environment environment) =>
+        public static Environment BindMutableClrConstants(this Environment environment) =>
             environment.
                 BindMutable("()", ClrConstantTerm.From(Unit.Value)).
                 BindMutable("true", ClrConstantTerm.From(true)).
                 BindMutable("false", ClrConstantTerm.From(false));
 
-        public static Environment BindClrTypeOperators(this Environment environment) =>
+        public static Environment BindMutableClrTypeOperators(this Environment environment) =>
             environment.
                 BindMutable("+", ClrTypeSumOperatorTerm.Instance).
                 BindMutable("*", ClrTypeProductOperatorTerm.Instance);

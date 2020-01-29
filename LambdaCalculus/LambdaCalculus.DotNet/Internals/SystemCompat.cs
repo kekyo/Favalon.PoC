@@ -107,6 +107,21 @@ namespace System.Reflection
         public static IEnumerable<Type> GetTypes(this Assembly assembly) =>
             assembly.DefinedTypes.Select(typeInfo => typeInfo.AsType());
 
+        public static IEnumerable<ConstructorInfo> GetDeclaredConstructors(this Type type) =>
+            type.GetTypeInfo().DeclaredConstructors.Where(constructor => !constructor.IsStatic);
+
+        public static IEnumerable<MethodInfo> GetDeclaredMethods(this Type type) =>
+            type.GetTypeInfo().DeclaredMethods.Where(method => method.IsPublic);
+
+        public static IEnumerable<PropertyInfo> GetDeclaredProperties(this Type type) =>
+            type.GetTypeInfo().DeclaredProperties;
+
+        public static MethodInfo GetGetMethod(this PropertyInfo property) =>
+            property.GetMethod;
+
+        public static MethodInfo GetSetMethod(this PropertyInfo property) =>
+            property.SetMethod;
+
         public static MemberInfo AsMemberInfo(this Type type) =>
             type.GetTypeInfo();
 
@@ -130,6 +145,15 @@ namespace System.Reflection
         
         public static Assembly GetAssembly(this Type type) =>
             type.Assembly;
+
+        public static ConstructorInfo[] GetDeclaredConstructors(this Type type) =>
+            type.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+        public static MethodInfo[] GetDeclaredMethods(this Type type) =>
+            type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+
+        public static PropertyInfo[] GetDeclaredProperties(this Type type) =>
+            type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
 
         public static MemberInfo AsMemberInfo(this Type type) =>
             type;

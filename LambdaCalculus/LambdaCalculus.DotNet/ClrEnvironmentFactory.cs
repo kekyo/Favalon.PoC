@@ -6,9 +6,9 @@ namespace Favalon
     {
         public static Environment Create(int iterations = EnvironmentFactory.DefaultIterations) =>
             Environment.Pure(iterations).
-            BindClrPublicTypes(typeof(object).GetAssembly()).
-            BindClrAliasTypes().
-            BindClrTypeOperators().
-            BindClrConstants();
+            BindMutableClrPublicTypes(typeof(object).GetAssembly()).
+            BindMutableClrAliasTypes().
+            BindMutableClrTypeOperators().
+            BindMutableClrConstants();
     }
 }

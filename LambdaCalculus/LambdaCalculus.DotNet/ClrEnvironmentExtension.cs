@@ -13,7 +13,7 @@ namespace Favalon
         private static Environment BindClrType(Environment environment, string identity, Type type)
         {
             var term = ClrTypeTerm.From(type);
-            environment.BindTerm(identity, term);
+            environment.BindMutable(identity, term);
 
             // TODO: constructor functions
 
@@ -57,13 +57,13 @@ namespace Favalon
 
         public static Environment BindClrConstants(this Environment environment) =>
             environment.
-                BindTerm("()", ClrConstantTerm.From(Unit.Value)).
-                BindTerm("true", ClrConstantTerm.From(true)).
-                BindTerm("false", ClrConstantTerm.From(false));
+                BindMutable("()", ClrConstantTerm.From(Unit.Value)).
+                BindMutable("true", ClrConstantTerm.From(true)).
+                BindMutable("false", ClrConstantTerm.From(false));
 
         public static Environment BindClrTypeOperators(this Environment environment) =>
             environment.
-                BindTerm("+", ClrTypeSumOperatorTerm.Instance).
-                BindTerm("*", ClrTypeProductOperatorTerm.Instance);
+                BindMutable("+", ClrTypeSumOperatorTerm.Instance).
+                BindMutable("*", ClrTypeProductOperatorTerm.Instance);
     }
 }

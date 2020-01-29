@@ -21,9 +21,9 @@ namespace Favalon
         /////////////////////////////////////////////////////////////////////////
         // Binder
 
-        public new Environment BindTerm(string identity, Term term)
+        public new Environment BindMutable(string identity, Term term)
         {
-            base.BindTerm(identity, term);
+            base.BindMutable(identity, term);
             return this;
         }
 

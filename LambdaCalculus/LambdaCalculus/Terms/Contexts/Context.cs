@@ -44,7 +44,7 @@ namespace Favalon.Terms.Contexts
         /////////////////////////////////////////////////////////////////////////
         // Binder
 
-        public void BindTerm(string identity, Term term)
+        public void BindMutable(string identity, Term term)
         {
             if (boundTerms == null)
             {

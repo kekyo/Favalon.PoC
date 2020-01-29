@@ -1,5 +1,4 @@
-﻿using Favalon.Terms;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon.Terms.Contexts

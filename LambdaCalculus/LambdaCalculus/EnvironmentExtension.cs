@@ -7,16 +7,16 @@ namespace Favalon
     {
         public static Environment BindBooleanTerms(this Environment environment)
         {
-            environment.BindTerm("bool", BooleanTerm.Type);
-            environment.BindTerm("true", BooleanTerm.From(true));
-            environment.BindTerm("false", BooleanTerm.From(false));
+            environment.BindMutable("bool", BooleanTerm.Type);
+            environment.BindMutable("true", BooleanTerm.From(true));
+            environment.BindMutable("false", BooleanTerm.From(false));
 
             return environment;
         }
 
         public static Environment BindTypeOperators(this Environment environment) =>
             environment.
-                BindTerm("+", TypeSumOperatorTerm.Instance).
-                BindTerm("*", TypeProductOperatorTerm.Instance);
+                BindMutable("+", TypeSumOperatorTerm.Instance).
+                BindMutable("*", TypeProductOperatorTerm.Instance);
     }
 }

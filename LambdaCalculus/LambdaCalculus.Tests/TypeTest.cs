@@ -208,6 +208,8 @@ namespace Favalon
         [TestCase(new[] { typeof(Func<int, double>) }, new[] { typeof(Func<int, double>) }, new[] { typeof(Func<int, double>) })]
         // int->double: int->double <== object->double
         [TestCase(new[] { typeof(Func<int, double>) }, new[] { typeof(Func<int, double>) }, new[] { typeof(Func<object, double>) })]
+        // int->object: int->object <== int->double
+        [TestCase(new[] { typeof(Func<int, object>) }, new[] { typeof(Func<int, object>) }, new[] { typeof(Func<int, double>) })]
         public void LambdaTypeWidening(Type[] expectedTypes, Type[] toTypes, Type[] fromTypes)
         {
             Assert.IsTrue(toTypes.Length >= 1);
@@ -248,6 +250,149 @@ namespace Favalon
             var expected = SumClrType(expectedTypes.Select(CreateTermFromType));
 
             Assert.AreEqual(expected, actual);
+        }
+
+        // decimal <== double
+        [TestCase(typeof(decimal), typeof(double))]
+        // decimal <== float
+        [TestCase(typeof(decimal), typeof(float))]
+        // decimal <== long
+        [TestCase(typeof(decimal), typeof(long))]
+        // decimal <== ulong
+        [TestCase(typeof(decimal), typeof(ulong))]
+        // decimal <== int
+        [TestCase(typeof(decimal), typeof(int))]
+        // decimal <== uint
+        [TestCase(typeof(decimal), typeof(uint))]
+        // decimal <== short
+        [TestCase(typeof(decimal), typeof(short))]
+        // decimal <== ushort
+        [TestCase(typeof(decimal), typeof(ushort))]
+        // decimal <== byte
+        [TestCase(typeof(decimal), typeof(byte))]
+        // decimal <== sbyte
+        [TestCase(typeof(decimal), typeof(sbyte))]
+        // decimal <== char
+        [TestCase(typeof(decimal), typeof(char))]
+
+        // double <== float
+        [TestCase(typeof(double), typeof(float))]
+        // double <== int
+        [TestCase(typeof(double), typeof(int))]
+        // double <== uint
+        [TestCase(typeof(double), typeof(uint))]
+        // double <== short
+        [TestCase(typeof(double), typeof(short))]
+        // double <== ushort
+        [TestCase(typeof(double), typeof(ushort))]
+        // double <== byte
+        [TestCase(typeof(double), typeof(byte))]
+        // double <== sbyte
+        [TestCase(typeof(double), typeof(sbyte))]
+        // double <== char
+        [TestCase(typeof(double), typeof(char))]
+
+        // float <== int
+        [TestCase(typeof(float), typeof(int))]
+        // float <== uint
+        [TestCase(typeof(float), typeof(uint))]
+        // float <== short
+        [TestCase(typeof(float), typeof(short))]
+        // float <== ushort
+        [TestCase(typeof(float), typeof(ushort))]
+        // float <== byte
+        [TestCase(typeof(float), typeof(byte))]
+        // float <== sbyte
+        [TestCase(typeof(float), typeof(sbyte))]
+        // float <== char
+        [TestCase(typeof(float), typeof(char))]
+
+        // long <== int
+        [TestCase(typeof(long), typeof(int))]
+        // long <== uint
+        [TestCase(typeof(long), typeof(uint))]
+        // long <== short
+        [TestCase(typeof(long), typeof(short))]
+        // long <== ushort
+        [TestCase(typeof(long), typeof(ushort))]
+        // long <== byte
+        [TestCase(typeof(long), typeof(byte))]
+        // long <== sbyte
+        [TestCase(typeof(long), typeof(sbyte))]
+        // long <== char
+        [TestCase(typeof(long), typeof(char))]
+
+        // ulong <== uint
+        [TestCase(typeof(ulong), typeof(uint))]
+        // ulong <== ushort
+        [TestCase(typeof(ulong), typeof(ushort))]
+        // ulong <== byte
+        [TestCase(typeof(ulong), typeof(byte))]
+        // ulong <== char
+        [TestCase(typeof(ulong), typeof(char))]
+
+        // int <== short
+        [TestCase(typeof(int), typeof(short))]
+        // int <== ushort
+        [TestCase(typeof(int), typeof(ushort))]
+        // int <== byte
+        [TestCase(typeof(int), typeof(byte))]
+        // int <== sbyte
+        [TestCase(typeof(int), typeof(sbyte))]
+        // int <== char
+        [TestCase(typeof(int), typeof(char))]
+
+        // uint <== ushort
+        [TestCase(typeof(uint), typeof(ushort))]
+        // uint <== byte
+        [TestCase(typeof(uint), typeof(byte))]
+        // uint <== char
+        [TestCase(typeof(uint), typeof(char))]
+
+        // short <== byte
+        [TestCase(typeof(short), typeof(byte))]
+        // short <== sbyte
+        [TestCase(typeof(short), typeof(sbyte))]
+
+        // ushort <== byte
+        [TestCase(typeof(ushort), typeof(byte))]
+
+        // char <== byte
+        [TestCase(typeof(char), typeof(byte))]
+        public void PrimitiveTypeWidening(Type toType, Type fromType)
+        {
+            var environment = ClrEnvironmentFactory.Create();
+
+            var to = Constant(toType);
+            var from = Constant(fromType);
+
+            var actual1 = ClrTypeCalculator.Instance.Widening(to, from);
+
+            Assert.AreEqual(to, actual1);
+
+            var actual2 = ClrTypeCalculator.Instance.Widening(from, to);
+
+            Assert.IsNull(actual2);
+        }
+
+        [Test]
+        public void CharTypeWidening()
+        {
+            // Both are correct:
+            // ushort <== char
+            // char <== ushort
+            var environment = ClrEnvironmentFactory.Create();
+
+            var to = Constant(typeof(char));
+            var from = Constant(typeof(ushort));
+
+            var actual1 = ClrTypeCalculator.Instance.Widening(to, from);
+
+            Assert.AreEqual(to, actual1);
+
+            var actual2 = ClrTypeCalculator.Instance.Widening(from, to);
+
+            Assert.AreEqual(from, actual2);
         }
 
         [TestCase(

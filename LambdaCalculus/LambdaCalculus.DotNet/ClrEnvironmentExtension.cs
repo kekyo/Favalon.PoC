@@ -35,6 +35,7 @@ namespace Favalon
         public static Environment BindClrAliasTypes(this Environment environment) =>
             new[]
             {
+                ("void", typeof(void)),
                 ("object", typeof(object)),
                 ("bool", typeof(bool)),
                 ("byte", typeof(byte)),
@@ -47,11 +48,16 @@ namespace Favalon
                 ("ulong", typeof(ulong)),
                 ("float", typeof(float)),
                 ("double", typeof(double)),
+                ("decimal", typeof(decimal)),
+                ("char", typeof(char)),
+                ("guid", typeof(Guid)),
                 ("string", typeof(string)),
+                ("unit", typeof(Unit)),
             }.Aggregate(environment, (env, entry) => BindClrType(env, entry.Item1, entry.Item2));
 
-        public static Environment BindClrBooleanConstant(this Environment environment) =>
+        public static Environment BindClrConstants(this Environment environment) =>
             environment.
+                BindTerm("()", ClrConstantTerm.From(Unit.Value)).
                 BindTerm("true", ClrConstantTerm.From(true)).
                 BindTerm("false", ClrConstantTerm.From(false));
 

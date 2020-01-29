@@ -9,6 +9,6 @@ namespace Favalon
             BindClrPublicTypes(typeof(object).GetAssembly()).
             BindClrAliasTypes().
             BindClrTypeOperators().
-            BindClrBooleanConstant();
+            BindClrConstants();
     }
 }

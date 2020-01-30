@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms.Contexts;
+using System.Linq;
 
 namespace Favalon.Terms
 {
@@ -176,19 +177,20 @@ namespace Favalon.Terms
                 (Term _, null) => From(parameter, TerminationTerm.Instance),
                 (null, Term _) => From(TerminationTerm.Instance, body),
                 (UnspecifiedTerm _, UnspecifiedTerm _) => Unspecified,
-                (KindTerm _, KindTerm _) => Kind,
+                (KindTerm _, KindTerm _) when
+                    parameter.Equals(KindTerm.Instance) && body.Equals(KindTerm.Instance) => Kind,
                 _ => new LambdaTerm(parameter, body)
             };
 
-        // ? -> ?
+        // _ -> _
         public static readonly LambdaTerm Unspecified =
             new LambdaTerm(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
 
-        // ? -> ? -> ?
+        // _ -> _ -> _
         public static readonly LambdaTerm Unspecified2 =
             new LambdaTerm(UnspecifiedTerm.Instance, Unspecified);
 
-        // ? -> ?
+        // # -> #
         internal static readonly LambdaTerm Termination =
             new LambdaTerm(TerminationTerm.Instance, TerminationTerm.Instance);
 
@@ -199,5 +201,20 @@ namespace Favalon.Terms
         // * -> * -> *
         public static readonly LambdaTerm Kind2 =
             new LambdaTerm(KindTerm.Instance, Kind);
+
+        public static Term CreateUnspecified(int parameterCount) =>
+            Enumerable.
+                Range(0, parameterCount).
+                Aggregate((Term)UnspecifiedTerm.Instance, (agg, _) => From(UnspecifiedTerm.Instance, agg));
+
+        public static Term CreateKind(int parameterCount) =>
+            Enumerable.
+                Range(0, parameterCount).
+                Aggregate((Term)KindTerm.Instance, (agg, _) => From(KindTerm.Instance, agg));
+
+        public static Term CreateKind(string identity, int parameterCount) =>
+            Enumerable.
+                Range(0, parameterCount).
+                Aggregate((Term)KindTerm.Create(identity), (agg, _) => From(KindTerm.Create(identity), agg));
     }
 }

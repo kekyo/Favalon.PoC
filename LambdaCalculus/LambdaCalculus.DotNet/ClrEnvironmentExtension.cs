@@ -81,6 +81,8 @@ namespace Favalon
                 ("char", typeof(char)),
                 ("guid", typeof(Guid)),
                 ("string", typeof(string)),
+                ("intptr", typeof(IntPtr)),
+                ("uintptr", typeof(UIntPtr)),
                 ("unit", typeof(Unit)),
             }.Aggregate(environment, (env, entry) => BindMutableClrType(env, entry.Item1, entry.Item2));
 

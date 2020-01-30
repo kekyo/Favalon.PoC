@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Terms.Methods;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -40,6 +41,11 @@ namespace Favalon.Terms.Types
                 case (ClrTypeTerm toType, ClrTypeTerm fromType):
                     return IsAssignableFrom(toType.Type, fromType.Type) ?
                         to :
+                        null;
+
+                case (ClrMethodTerm toMethod, ClrMethodTerm fromMethod):
+                    return (this.Widening(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?
+                        toMethod :
                         null;
 
                 default:

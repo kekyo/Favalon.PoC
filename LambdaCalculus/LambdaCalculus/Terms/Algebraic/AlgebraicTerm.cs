@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms.Contexts;
+using System;
 
 namespace Favalon.Terms.Algebraic
 {
@@ -6,9 +7,18 @@ namespace Favalon.Terms.Algebraic
     {
         protected readonly AlgebraicCalculator Calculator;
 
-        protected AlgebraicTerm(Term lhs, Term rhs, Term higherOrder, AlgebraicCalculator calculator) :
-            base(lhs, rhs, higherOrder) =>
+        protected AlgebraicTerm(Term lhs, Term rhs, AlgebraicCalculator calculator) :
+            base(lhs, rhs) =>
             this.Calculator = calculator;
+
+        protected static Term GetHigherOrderTerm(Term lhs, Term rhs, Func<Term, Term, Term, Term> onCreate) =>
+            (lhs.HigherOrder, rhs.HigherOrder) switch
+            {
+                (TerminationTerm _, TerminationTerm _) => TerminationTerm.Instance,
+                (_, TerminationTerm _) => lhs.HigherOrder,
+                (TerminationTerm _, _) => rhs.HigherOrder,
+                _ => onCreate(lhs.HigherOrder, rhs.HigherOrder, UnspecifiedTerm.Instance)
+            };
 
         public override Term Reduce(ReduceContext context)
         {
@@ -28,8 +38,8 @@ namespace Favalon.Terms.Algebraic
     public abstract class AlgebraicTerm<T> : AlgebraicTerm
         where T : AlgebraicTerm
     {
-        protected AlgebraicTerm(Term lhs, Term rhs, Term higherOrder, AlgebraicCalculator calculator) :
-            base(lhs, rhs, higherOrder, calculator)
+        protected AlgebraicTerm(Term lhs, Term rhs, AlgebraicCalculator calculator) :
+            base(lhs, rhs, calculator)
         { }
 
         protected override bool OnEquals(EqualsContext context, Term? other) =>

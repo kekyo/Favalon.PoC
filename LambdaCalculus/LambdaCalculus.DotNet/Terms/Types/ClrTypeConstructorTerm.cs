@@ -1,5 +1,6 @@
 ﻿using Favalon.Terms.Contexts;
 using System;
+using System.Reflection;
 
 namespace Favalon.Terms.Types
 {
@@ -11,8 +12,7 @@ namespace Favalon.Terms.Types
             this.type = type;
 
         public override Term HigherOrder =>
-            // * -> * (TODO: make nested kind lambda from flatten generic type arguments: * -> * -> * ...)
-            LambdaTerm.Kind;
+            LambdaTerm.CreateKind(this.type.GetGenericArguments().Length);
 
         public override Term Infer(InferContext context) =>
             this;

@@ -1,20 +1,19 @@
-﻿using Favalon.Terms.Logical;
+﻿using Favalon.Terms;
+using Favalon.Terms.Logical;
 using Favalon.Terms.Operators;
 
 namespace Favalon
 {
     public static class EnvironmentExtension
     {
-        public static Environment BindBooleanTerms(this Environment environment)
-        {
-            environment.BindMutable("bool", BooleanTerm.Type);
-            environment.BindMutable("true", BooleanTerm.From(true));
-            environment.BindMutable("false", BooleanTerm.From(false));
+        public static Environment BindMutableBasisTerms(this Environment environment) =>
+            environment.
+                BindMutable("*", KindTerm.Instance).
+                BindMutable("bool", BooleanTerm.Type).
+                BindMutable("true", BooleanTerm.From(true)).
+                BindMutable("false", BooleanTerm.From(false));
 
-            return environment;
-        }
-
-        public static Environment BindTypeOperators(this Environment environment) =>
+        public static Environment BindMutableTypeOperators(this Environment environment) =>
             environment.
                 BindMutable("+", TypeSumOperatorTerm.Instance).
                 BindMutable("*", TypeProductOperatorTerm.Instance);

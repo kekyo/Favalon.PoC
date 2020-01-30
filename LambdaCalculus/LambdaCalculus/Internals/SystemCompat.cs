@@ -6,14 +6,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
-namespace System
-{
-    public struct Unit
-    {
-        public static readonly Unit Value = new Unit();
-    }
-}
-
 #if NET35
 namespace System
 {

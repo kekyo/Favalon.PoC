@@ -54,5 +54,8 @@ namespace Favalon.Terms.Types
             }
             return term;
         }
+
+        public static readonly ClrTypeTerm Void =
+            (ClrTypeTerm)From(typeof(void));
     }
 }

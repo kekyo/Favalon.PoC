@@ -9,14 +9,11 @@ namespace Favalon.Terms
         public readonly Term Lhs;
         public readonly Term Rhs;
 
-        protected BinaryTerm(Term lhs, Term rhs, Term higherOrder)
+        protected BinaryTerm(Term lhs, Term rhs)
         {
             this.Lhs = lhs;
             this.Rhs = rhs;
-            this.HigherOrder = higherOrder;
         }
-
-        public override sealed Term HigherOrder { get; }
 
         protected abstract Term OnCreate(Term lhs, Term rhs, Term higherOrder);
 
@@ -73,8 +70,8 @@ namespace Favalon.Terms
     public abstract class BinaryTerm<T> : BinaryTerm
         where T : BinaryTerm
     {
-        protected BinaryTerm(Term lhs, Term rhs, Term higherOrder) :
-            base(lhs, rhs, higherOrder)
+        protected BinaryTerm(Term lhs, Term rhs) :
+            base(lhs, rhs)
         { }
 
         protected override bool OnEquals(EqualsContext context, Term? other) =>

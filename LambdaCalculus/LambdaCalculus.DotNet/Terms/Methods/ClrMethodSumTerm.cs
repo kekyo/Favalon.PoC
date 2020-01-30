@@ -1,12 +1,13 @@
 ﻿using Favalon.Terms.Contexts;
+using Favalon.Terms.Types;
 using System;
 
-namespace Favalon.Terms.Types
+namespace Favalon.Terms.Methods
 {
     public sealed class ClrMethodSumTerm : TypeSumTerm
     {
         private ClrMethodSumTerm(Term lhs, Term rhs) :
-            base(lhs, rhs, LambdaTerm.Kind, ClrTypeCalculator.Instance)
+            base(lhs, rhs, ClrTypeCalculator.Instance)
         { }
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>

@@ -43,7 +43,7 @@ namespace Favalon.Terms
         { }
 
         public override Term HigherOrder =>
-            null!;
+            Instance;
 
         internal override bool ValidTerm =>
             false;
@@ -67,7 +67,7 @@ namespace Favalon.Terms
             false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            "?TERM";
+            "?";
 
         public static readonly TerminationTerm Instance =
             new TerminationTerm();
@@ -82,7 +82,7 @@ namespace Favalon.Terms
         { }
 
         public override Term HigherOrder =>
-            null!;
+            TerminationTerm.Instance;
 
         public override Term Infer(InferContext context) =>
             context.CreatePlaceholder(Instance);
@@ -103,7 +103,7 @@ namespace Favalon.Terms
             false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            "?";
+            "_";
 
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();
@@ -165,39 +165,25 @@ namespace Favalon.Terms
             $"'{this.Index}";
     }
 
-    public sealed class KindTerm : Term
+    public sealed class KindTerm : IdentityTerm<KindTerm>
     {
-        private static readonly int hashCode =
-           typeof(KindTerm).GetHashCode();
-
-        private KindTerm()
+        private KindTerm(string identity) :
+            base(identity, TerminationTerm.Instance)
         { }
 
-        public override Term HigherOrder =>
-            null!;
-
-        public override Term Infer(InferContext context) =>
-            this;
-
-        public override Term Fixup(FixupContext context) =>
-            this;
+        protected override Term OnCreate(string identity, Term higherOrder) =>
+            new KindTerm(identity);
 
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        protected override bool OnEquals(EqualsContext context, Term? other) =>
-            other is KindTerm;
-
-        public override int GetHashCode() =>
-            hashCode;
-
         protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
             false;
 
-        protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            "*";
-
         public static readonly KindTerm Instance =
-            new KindTerm();
+            new KindTerm("*");
+
+        public static KindTerm Create(string identity) =>
+            new KindTerm(identity);
     }
 }

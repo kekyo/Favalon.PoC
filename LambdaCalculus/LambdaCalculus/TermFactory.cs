@@ -17,12 +17,10 @@ namespace Favalon
 
         public static UnspecifiedTerm Unspecified() =>
             UnspecifiedTerm.Instance;
-        public static LambdaTerm UnspecifiedFunction() =>
-            LambdaTerm.Unspecified;
         public static KindTerm Kind() =>
             KindTerm.Instance;
-        public static LambdaTerm KindFunction() =>
-            LambdaTerm.Kind;
+        public static KindTerm Kind(string identity) =>
+            KindTerm.Create(identity);
 
         public static FreeVariableTerm Identity(string identity) =>
             FreeVariableTerm.Create(identity, UnspecifiedTerm.Instance);

@@ -1,6 +1,5 @@
 ﻿using Favalon.Terms.Algebraic;
 using Favalon.Terms.Contexts;
-using Favalon.Terms.Types;
 
 namespace Favalon.Terms.Operators
 {

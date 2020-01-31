@@ -7,7 +7,7 @@ namespace Favalon.Terms.Methods
     public sealed class ClrMethodSumTerm : TypeSumTerm
     {
         private ClrMethodSumTerm(Term lhs, Term rhs) :
-            base(lhs, rhs, ClrTypeCalculator.Instance)
+            base(lhs, rhs, LambdaTerm.Kind, ClrTypeCalculator.Instance)
         { }
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>

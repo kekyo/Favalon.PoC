@@ -5,8 +5,10 @@ namespace Favalon.Terms.Logical
     public sealed class NotTerm : UnaryTerm<NotTerm>
     {
         private NotTerm(Term argument, Term higherOrder) :
-            base(argument, higherOrder)
-        { }
+            base(argument) =>
+            this.HigherOrder = higherOrder;
+
+        public override Term HigherOrder { get; }
 
         protected override Term OnCreate(Term argument, Term higherOrder) =>
             new NotTerm(argument, higherOrder);

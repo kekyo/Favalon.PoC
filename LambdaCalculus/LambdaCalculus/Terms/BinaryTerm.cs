@@ -9,11 +9,14 @@ namespace Favalon.Terms
         public readonly Term Lhs;
         public readonly Term Rhs;
 
-        protected BinaryTerm(Term lhs, Term rhs)
+        protected BinaryTerm(Term lhs, Term rhs, Term higherOrder)
         {
             this.Lhs = lhs;
             this.Rhs = rhs;
+            this.HigherOrder = higherOrder;
         }
+
+        public override sealed Term HigherOrder { get; }
 
         protected abstract Term OnCreate(Term lhs, Term rhs, Term higherOrder);
 
@@ -21,7 +24,7 @@ namespace Favalon.Terms
         {
             var lhs = this.Lhs.Infer(context);
             var rhs = this.Rhs.Infer(context);
-            var higherOrder = context.ResolveHigherOrder(this);
+            var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
             context.Unify(lhs.HigherOrder, higherOrder);
             context.Unify(rhs.HigherOrder, higherOrder);
@@ -39,6 +42,20 @@ namespace Favalon.Terms
             var lhs = this.Lhs.Fixup(context);
             var rhs = this.Rhs.Fixup(context);
             var higherOrder = this.HigherOrder.Fixup(context);
+
+            return
+                this.Lhs.EqualsWithHigherOrder(lhs) &&
+                this.Rhs.EqualsWithHigherOrder(rhs) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    this.OnCreate(lhs, rhs, higherOrder);
+        }
+
+        public override Term Reduce(ReduceContext context)
+        {
+            var lhs = this.Lhs.Reduce(context);
+            var rhs = this.Rhs.Reduce(context);
+            var higherOrder = this.HigherOrder.Reduce(context);
 
             return
                 this.Lhs.EqualsWithHigherOrder(lhs) &&
@@ -70,8 +87,8 @@ namespace Favalon.Terms
     public abstract class BinaryTerm<T> : BinaryTerm
         where T : BinaryTerm
     {
-        protected BinaryTerm(Term lhs, Term rhs) :
-            base(lhs, rhs)
+        protected BinaryTerm(Term lhs, Term rhs, Term higherOrder) :
+            base(lhs, rhs, higherOrder)
         { }
 
         protected override bool OnEquals(EqualsContext context, Term? other) =>

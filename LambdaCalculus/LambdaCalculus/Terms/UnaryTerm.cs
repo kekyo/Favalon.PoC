@@ -6,20 +6,15 @@ namespace Favalon.Terms
     {
         public readonly Term Argument;
 
-        internal UnaryTerm(Term argument, Term higherOrder)
-        {
+        protected UnaryTerm(Term argument) =>
             this.Argument = argument;
-            this.HigherOrder = higherOrder;
-        }
-
-        public override sealed Term HigherOrder { get; }
 
         protected abstract Term OnCreate(Term argument, Term higherOrder);
 
         public override Term Infer(InferContext context)
         {
             var argument = this.Argument.Infer(context);
-            var higherOrder = context.ResolveHigherOrder(this);
+            var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
             context.Unify(argument.HigherOrder, higherOrder);
 
@@ -42,6 +37,18 @@ namespace Favalon.Terms
                     this.OnCreate(argument, higherOrder);
         }
 
+        public override Term Reduce(ReduceContext context)
+        {
+            var argument = this.Argument.Reduce(context);
+            var higherOrder = this.HigherOrder.Reduce(context);
+
+            return
+                this.Argument.EqualsWithHigherOrder(argument) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    this.OnCreate(argument, higherOrder);
+        }
+
         public void Deconstruct(out Term argument, out Term higherOrder)
         {
             argument = this.Argument;
@@ -52,8 +59,8 @@ namespace Favalon.Terms
     public abstract class UnaryTerm<T> : UnaryTerm
         where T : UnaryTerm
     {
-        protected UnaryTerm(Term argument, Term higherOrder) :
-            base(argument, higherOrder)
+        protected UnaryTerm(Term argument) :
+            base(argument)
         { }
 
         protected override sealed bool OnEquals(EqualsContext context, Term? other) =>

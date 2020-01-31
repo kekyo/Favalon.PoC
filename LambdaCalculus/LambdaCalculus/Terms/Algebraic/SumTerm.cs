@@ -6,10 +6,8 @@ namespace Favalon.Terms.Algebraic
     public class SumTerm : AlgebraicTerm<SumTerm>
     {
         protected SumTerm(Term lhs, Term rhs, Term higherOrder, AlgebraicCalculator calculator) :
-            base(lhs, rhs, calculator) =>
-            this.HigherOrder = higherOrder;
-
-        public override Term HigherOrder { get; }
+            base(lhs, rhs, higherOrder, calculator)
+        { }
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
             new SumTerm(lhs, rhs, higherOrder, this.Calculator);

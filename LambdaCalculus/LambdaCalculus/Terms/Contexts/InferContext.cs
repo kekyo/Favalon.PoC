@@ -26,10 +26,10 @@ namespace Favalon.Terms.Contexts
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
 
-        public Term ResolveHigherOrder(Term term) =>
+        public Term ResolveHigherOrder(Term higherOrder) =>
             higherOrderInferOnly ?
-                term.HigherOrder.Infer(this) :
-                base.InternalEnumerableReduce(term.HigherOrder).Last();
+                higherOrder.Infer(this) :
+                base.InternalEnumerableReduce(higherOrder).Last();
 
         /////////////////////////////////////////////////////////////////////////
         // Unify

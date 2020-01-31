@@ -9,7 +9,7 @@ namespace Favalon.Terms.Types
         { }
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
-            new TypeSumTerm(lhs, rhs, higherOrder, TypeCalculator.Instance);
+            new TypeSumTerm(lhs, rhs, higherOrder, (TypeCalculator)this.Calculator);
 
         public static new TypeSumTerm Create(Term lhs, Term rhs, Term higherOrder) =>
             new TypeSumTerm(lhs, rhs, higherOrder, TypeCalculator.Instance);

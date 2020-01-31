@@ -97,7 +97,7 @@ namespace Favalon.Terms
         public override Term Infer(InferContext context)
         {
             var argument = this.Argument.Infer(context);
-            var higherOrder = context.ResolveHigherOrder(this);
+            var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
             var function = this.Function switch
             {

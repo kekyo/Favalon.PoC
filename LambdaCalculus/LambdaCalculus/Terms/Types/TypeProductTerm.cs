@@ -9,7 +9,7 @@ namespace Favalon.Terms.Types
         { }
 
         protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
-            new TypeProductTerm(lhs, rhs, higherOrder, TypeCalculator.Instance);
+            new TypeProductTerm(lhs, rhs, higherOrder,(TypeCalculator)this.Calculator);
 
         public static new TypeProductTerm Create(Term lhs, Term rhs, Term higherOrder) =>
             new TypeProductTerm(lhs, rhs, higherOrder, TypeCalculator.Instance);

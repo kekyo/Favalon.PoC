@@ -123,7 +123,7 @@ namespace Favalon
             };
 
         public static TypeProductTerm ProductType(Term lhs, Term rhs) =>
-            TypeProductTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);
+            TypeProductTerm.Create(lhs, rhs);
         public static Term? ProductType(params Term[] terms) =>
             ProductType((IEnumerable<Term>)terms);
         public static Term? ProductType(IEnumerable<Term> terms) =>

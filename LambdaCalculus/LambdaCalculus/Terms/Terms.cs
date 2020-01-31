@@ -132,7 +132,7 @@ namespace Favalon.Terms
                 return this;
             }
 
-            var higherOrder = context.ResolveHigherOrder(this);
+            var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
             return
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?

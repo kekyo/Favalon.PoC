@@ -1,63 +1,21 @@
 ﻿using Favalon.Terms.Contexts;
-using System;
+using System.Linq;
 
 namespace Favalon.Terms.Algebraic
 {
-    public class ProductTerm : AlgebraicTerm<ProductTerm>
+    public sealed class ProductTerm : AlgebraicTerm<ProductTerm>
     {
-        protected ProductTerm(Term lhs, Term rhs, Term higherOrder, AlgebraicCalculator calculator) :
-            base(lhs, rhs, higherOrder, calculator)
+        private ProductTerm(Term[] terms, Term higherOrder) :
+            base(terms, higherOrder)
         { }
 
-        protected override Term OnCreate(Term lhs, Term rhs, Term higherOrder) =>
-            new ProductTerm(lhs, rhs, higherOrder, AlgebraicCalculator.Instance);
-
-        internal static T InternalReduce<T>(
-            ReduceContext context,
-            Term lhs,
-            Term rhs,
-            Term higherOrder,
-            Func<Term?, Term, T> applied,
-            AlgebraicCalculator calculator,
-            Func<Term, Term, Term, Term> onCreate)
-        {
-            var lhs_ = lhs.Reduce(context);
-            var rhs_ = rhs.Reduce(context);
-
-            // TODO: make product
-            if (calculator.Widening(lhs_, rhs_) is Term term1)
-            {
-                return applied(term1, rhs_);
-            }
-            if (calculator.Widening(rhs_, lhs_) is Term term2)
-            {
-                return applied(term2, rhs_);
-            }
-
-            var higherOrder_ = higherOrder.Reduce(context);
-
-            return
-                lhs.EqualsWithHigherOrder(lhs_) &&
-                rhs.EqualsWithHigherOrder(rhs_) &&
-                higherOrder.EqualsWithHigherOrder(higherOrder_) ?
-                    applied(null, rhs_) :
-                    applied(onCreate(lhs_, rhs_, higherOrder_), rhs_);
-        }
-
-        public override Term Reduce(ReduceContext context) =>
-            InternalReduce(
-                context,
-                this.Lhs,
-                this.Rhs,
-                this.HigherOrder,
-                (term, _) => term ?? this,
-                this.Calculator,
-                this.OnCreate);
+        protected override Term OnCreate(Term[] terms, Term higherOrder) =>
+            new ProductTerm(terms, higherOrder);
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            $"{this.Lhs.PrettyPrint(context)} * {this.Rhs.PrettyPrint(context)}";
+            Utilities.Join(" * ", this.Terms.Select(term => term.PrettyPrint(context)));
 
-        public static ProductTerm Create(Term lhs, Term rhs, Term higherOrder) =>
-            new ProductTerm(lhs, rhs, higherOrder, AlgebraicCalculator.Instance);
+        public static ProductTerm Create(Term[] terms, Term higherOrder) =>
+            new ProductTerm(terms, higherOrder);
     }
 }

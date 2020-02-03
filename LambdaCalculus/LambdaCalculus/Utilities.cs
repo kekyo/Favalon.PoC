@@ -41,6 +41,19 @@ namespace Favalon
             }
         }
 
+        public static IEnumerable<T> Collect<T>(this IEnumerable<T> enumerable, Func<T, T?> mapper)
+            where T: class
+        {
+            foreach (var value in enumerable)
+            {
+                var v = mapper(value);
+                if (v != null)
+                {
+                    yield return v;
+                }
+            }
+        }
+
         public static void Deconstruct<T>(this IEnumerable<T> @this, out T[]? arr)
         {
             if (@this is T[] a)

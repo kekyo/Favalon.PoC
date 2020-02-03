@@ -1,43 +1,83 @@
 ﻿using Favalon.Terms.Contexts;
+using System.Linq;
 
 namespace Favalon.Terms.Algebraic
 {
-    public abstract class AlgebraicTerm : BinaryTerm
+    public abstract class AlgebraicTerm : Term
     {
-        protected readonly AlgebraicCalculator Calculator;
+        public readonly Term[] Terms;
 
-        protected AlgebraicTerm(Term lhs, Term rhs, Term higherOrder, AlgebraicCalculator calculator) :
-            base(lhs, rhs, higherOrder) =>
-            this.Calculator = calculator;
-
-        public override Term Infer(InferContext context)
+        protected AlgebraicTerm(Term[] terms, Term higherOrder)
         {
-            var lhs = this.Lhs.Infer(context);
-            var rhs = this.Rhs.Infer(context);
+            this.Terms = terms;
+            this.HigherOrder = higherOrder;
+        }
+
+        public override Term HigherOrder { get; }
+
+        protected abstract Term OnCreate(Term[] terms, Term higherOrder);
+
+        public override sealed Term Infer(InferContext context)
+        {
+            var terms = this.Terms.Select(term => term.Infer(context)).ToArray();
             var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
-            context.Unify(lhs.HigherOrder, higherOrder);
-            context.Unify(rhs.HigherOrder, higherOrder);
+            foreach (var term in terms)
+            {
+                context.Unify(term.HigherOrder, higherOrder);
+            }
 
             return
-                this.Lhs.EqualsWithHigherOrder(lhs) &&
-                this.Rhs.EqualsWithHigherOrder(rhs) &&
+                this.Terms.Zip(terms, (t0, t1) => t0.EqualsWithHigherOrder(t1)).All(r => r) &&
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
                     this :
-                    this.OnCreate(lhs, rhs, higherOrder);
+                    this.OnCreate(terms, higherOrder);
+        }
+
+        public override sealed Term Fixup(FixupContext context)
+        {
+            var terms = this.Terms.Select(term => term.Fixup(context)).ToArray();
+            var higherOrder = this.HigherOrder.Fixup(context);
+
+            return
+                this.Terms.Zip(terms, (t0, t1) => t0.EqualsWithHigherOrder(t1)).All(r => r) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    this.OnCreate(terms, higherOrder);
+        }
+
+        public override sealed Term Reduce(ReduceContext context)
+        {
+            var terms = this.Terms.Select(term => term.Reduce(context)).ToArray();
+            var higherOrder = this.HigherOrder.Reduce(context);
+
+            return
+                this.Terms.Zip(terms, (t0, t1) => t0.EqualsWithHigherOrder(t1)).All(r => r) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    this.OnCreate(terms, higherOrder);
+        }
+
+        public void Deconstruct(out Term[] terms) =>
+            terms = this.Terms;
+
+        public void Deconstruct(out Term[] terms, out Term higherOrder)
+        {
+            terms = this.Terms;
+            higherOrder = this.HigherOrder;
         }
     }
 
     public abstract class AlgebraicTerm<T> : AlgebraicTerm
         where T : AlgebraicTerm
     {
-        protected AlgebraicTerm(Term lhs, Term rhs, Term higherOrder, AlgebraicCalculator calculator) :
-            base(lhs, rhs, higherOrder, calculator)
+        protected AlgebraicTerm(Term[] terms, Term higherOrder) :
+            base(terms, higherOrder)
         { }
 
         protected override bool OnEquals(EqualsContext context, Term? other) =>
             other is T term ?
-                this.Lhs.Equals(context, term.Lhs) && this.Rhs.Equals(context, term.Rhs) :
+                this.Terms.SequenceEqual(term.Terms) :
                 false;
     }
 }

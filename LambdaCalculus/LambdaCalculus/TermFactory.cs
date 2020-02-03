@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms;
+using Favalon.Terms.Algebraic;
 using Favalon.Terms.Logical;
 using Favalon.Terms.Types;
 using System;
@@ -53,39 +54,22 @@ namespace Favalon
         ///////////////////////////////////////////////////////////////////////////
         // Algebraic
 
-        public static Term Sum(Term lhs, Term rhs) =>
-            ApplyTerm.Create(
-                ApplyTerm.Create(
-                    FreeVariableTerm.Create("+", LambdaTerm.Unspecified2),
-                    lhs,
-                    UnspecifiedTerm.Instance),
-                rhs, UnspecifiedTerm.Instance);
-        public static Term? Sum(params Term[] terms) =>
-            Sum((IEnumerable<Term>)terms);
-        public static Term? Sum(IEnumerable<Term> terms) =>
-            terms.ToArray() switch
-            {
-                Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(Sum),
-                _ => null
-            };
+        public static SumTerm Sum(Term lhs, Term rhs) =>
+            SumTerm.Create(new[] { lhs, rhs }, UnspecifiedTerm.Instance);
+        public static SumTerm Sum(params Term[] terms) =>
+            SumTerm.Create(terms, UnspecifiedTerm.Instance);
+        public static SumTerm Sum(IEnumerable<Term> terms) =>
+            SumTerm.Create(terms.ToArray(), UnspecifiedTerm.Instance);
 
-        public static Term Product(Term lhs, Term rhs) =>
-            ApplyTerm.Create(
-                ApplyTerm.Create(
-                    FreeVariableTerm.Create("*", LambdaTerm.Unspecified2),
-                    lhs,
-                    UnspecifiedTerm.Instance),
-                rhs, UnspecifiedTerm.Instance);
-        public static Term? Product(params Term[] terms) =>
-            Product((IEnumerable<Term>)terms);
-        public static Term? Product(IEnumerable<Term> terms) =>
-            terms.ToArray() switch
-            {
-                Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(Product),
-                _ => null
-            };
+        public static ProductTerm Product(Term lhs, Term rhs) =>
+            ProductTerm.Create(new[] { lhs, rhs }, UnspecifiedTerm.Instance);
+        public static ProductTerm Product(params Term[] terms) =>
+            ProductTerm.Create(terms, UnspecifiedTerm.Instance);
+        public static ProductTerm Product(IEnumerable<Term> terms) =>
+            ProductTerm.Create(terms.ToArray(), UnspecifiedTerm.Instance);
+
+        public static WideningTerm Widening(Term lhs, Term rhs) =>
+            WideningTerm.Create(lhs, rhs, UnspecifiedTerm.Instance, AlgebraicCalculator.Instance);
 
         ///////////////////////////////////////////////////////////////////////////
         // Logical
@@ -110,28 +94,7 @@ namespace Favalon
         ///////////////////////////////////////////////////////////////////////////
         // Types
 
-        public static TypeSumTerm SumType(Term lhs, Term rhs) =>
-            TypeSumTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);
-        public static Term? SumType(params Term[] terms) =>
-            SumType((IEnumerable<Term>)terms);
-        public static Term? SumType(IEnumerable<Term> terms) =>
-            terms.ToArray() switch
-            {
-                Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(SumType),
-                _ => null
-            };
-
-        public static TypeProductTerm ProductType(Term lhs, Term rhs) =>
-            TypeProductTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);
-        public static Term? ProductType(params Term[] terms) =>
-            ProductType((IEnumerable<Term>)terms);
-        public static Term? ProductType(IEnumerable<Term> terms) =>
-            terms.ToArray() switch
-            {
-                Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(ProductType),
-                _ => null
-            };
+        public static WideningTerm WideningType(Term lhs, Term rhs) =>
+            WideningTerm.Create(lhs, rhs, UnspecifiedTerm.Instance, TypeCalculator.Instance);
     }
 }

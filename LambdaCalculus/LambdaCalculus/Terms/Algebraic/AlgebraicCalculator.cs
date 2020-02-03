@@ -12,10 +12,14 @@ namespace Favalon.Terms.Algebraic
         protected virtual Term Sum(IEnumerable<Term> terms) =>
             TermFactory.Sum(terms)!;
 
-        public virtual Term? Widening(Term to, Term from)
+        public virtual Term? Widening(Term? to, Term? from)
         {
             switch (to, from)
             {
+                case (null, _):
+                case (_, null):
+                    return null;
+
                 // int: int <-- int
                 // IComparable: IComparable <-- IComparable
                 // _[1]: _[1] <-- _[1]

@@ -1,6 +1,6 @@
-﻿using Favalon.Terms;
-using Favalon.Terms.Logical;
+﻿using Favalon.Terms.Logical;
 using Favalon.Terms.Operators;
+using Favalon.Terms.Types;
 
 namespace Favalon
 {

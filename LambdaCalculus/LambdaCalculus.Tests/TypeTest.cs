@@ -68,7 +68,7 @@ namespace Favalon
         {
             // let combined = System.Int32:* + System.String:*
             var term =
-                Bind(
+                BindMutable(
                     "combined",
                     Sum(
                         Identity("System.Int32"),
@@ -88,7 +88,7 @@ namespace Favalon
             // let combined = System.Int32:* + System.IFormattable:*
             // --> System.IFormattable:*
             var term =
-                Bind(
+                BindMutable(
                     "combined",
                     Sum(
                         Identity("System.Int32"),
@@ -106,7 +106,7 @@ namespace Favalon
         {
             // let combined = System.Int32:* * System.String:*
             var term =
-                Bind(
+                BindMutable(
                     "combined",
                     Product(
                         Identity("System.Int32"),

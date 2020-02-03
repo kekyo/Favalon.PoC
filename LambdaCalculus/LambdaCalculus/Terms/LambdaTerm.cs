@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms.Contexts;
+using Favalon.Terms.Types;
 using System.Linq;
 
 namespace Favalon.Terms
@@ -170,12 +171,13 @@ namespace Favalon.Terms
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Parameter.PrettyPrint(context)} -> {this.Body.PrettyPrint(context)}";
 
-        public static LambdaTerm From(Term parameter, Term body) =>
+        public static Term From(Term parameter, Term body) =>
             (parameter, body) switch
             {
-                (null, null) => Termination,
-                (Term _, null) => From(parameter, TerminationTerm.Instance),
-                (null, Term _) => From(TerminationTerm.Instance, body),
+                (null, null) => TerminationTerm.Instance,
+                (TerminationTerm _, TerminationTerm _) => TerminationTerm.Instance,
+                (Term _, null) => From(parameter, UnspecifiedTerm.Instance),
+                (null, Term _) => From(UnspecifiedTerm.Instance, body),
                 (UnspecifiedTerm _, UnspecifiedTerm _) => Unspecified,
                 (KindTerm _, KindTerm _) when
                     parameter.Equals(KindTerm.Instance) && body.Equals(KindTerm.Instance) => Kind,
@@ -189,10 +191,6 @@ namespace Favalon.Terms
         // _ -> _ -> _
         public static readonly LambdaTerm Unspecified2 =
             new LambdaTerm(UnspecifiedTerm.Instance, Unspecified);
-
-        // # -> #
-        internal static readonly LambdaTerm Termination =
-            new LambdaTerm(TerminationTerm.Instance, TerminationTerm.Instance);
 
         // * -> *
         public static readonly LambdaTerm Kind =

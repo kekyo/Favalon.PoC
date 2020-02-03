@@ -52,7 +52,7 @@ namespace Favalon
         public void BindConstantWithSideEffect(bool result)
         {
             var term =
-                Bind(
+                BindMutable(
                     "a",
                     Not(
                         Constant(result)));

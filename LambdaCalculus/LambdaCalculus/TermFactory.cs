@@ -33,16 +33,16 @@ namespace Favalon
             ApplyTerm.Create(function, argument, higherOrder);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
-            LambdaTerm.From(FreeVariableTerm.Create(parameter, UnspecifiedTerm.Instance), body);
+            (LambdaTerm)LambdaTerm.From(FreeVariableTerm.Create(parameter, UnspecifiedTerm.Instance), body);
         public static LambdaTerm Lambda(Term parameter, Term body) =>
-            LambdaTerm.From(parameter, body);
+            (LambdaTerm)LambdaTerm.From(parameter, body);
 
         ///////////////////////////////////////////////////////////////////////////
         // Bind
 
-        public static BindExpressionTerm Bind(string bound, Term body) =>
+        public static BindExpressionTerm BindMutable(string bound, Term body) =>
             BindExpressionTerm.Create(BoundIdentityTerm.Create(bound, UnspecifiedTerm.Instance), body);
-        public static BindExpressionTerm Bind(Term bound, Term body) =>
+        public static BindExpressionTerm BindMutable(Term bound, Term body) =>
             BindExpressionTerm.Create(bound, body);
 
         public static BindTerm Bind(string bound, Term body, Term continuation) =>
@@ -123,7 +123,7 @@ namespace Favalon
             };
 
         public static TypeProductTerm ProductType(Term lhs, Term rhs) =>
-            TypeProductTerm.Create(lhs, rhs);
+            TypeProductTerm.Create(lhs, rhs, UnspecifiedTerm.Instance);
         public static Term? ProductType(params Term[] terms) =>
             ProductType((IEnumerable<Term>)terms);
         public static Term? ProductType(IEnumerable<Term> terms) =>

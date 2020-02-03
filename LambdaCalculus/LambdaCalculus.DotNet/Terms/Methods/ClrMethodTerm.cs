@@ -14,21 +14,21 @@ namespace Favalon.Terms.Methods
         private ClrMethodTerm(MethodInfo method) =>
             this.method = method;
 
-        private static LambdaTerm GetMethodHigherOrder(MethodInfo method)
+        public override Term HigherOrder
         {
-            var parameters = method.GetParameters();
-            var returnTerm = ClrTypeTerm.From(method.ReturnType);
-            return parameters.Length switch
+            get
+            {
+                var parameters = method.GetParameters();
+                var returnTerm = ClrTypeTerm.From(method.ReturnType);
+                return parameters.Length switch
                 {
                     0 => LambdaTerm.From(ClrTypeTerm.Void, returnTerm),
                     _ => (LambdaTerm)parameters.Reverse().Aggregate(
                         returnTerm,
                         (term, p) => LambdaTerm.From(ClrTypeTerm.From(p.ParameterType), term)),
                 };
+            }
         }
-
-        public override Term HigherOrder =>
-            GetMethodHigherOrder(this.method);
 
         object IValueTerm.Value =>
             this.method;

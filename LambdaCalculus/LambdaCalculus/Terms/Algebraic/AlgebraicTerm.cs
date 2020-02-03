@@ -16,12 +16,8 @@ namespace Favalon.Terms.Algebraic
             var rhs = this.Rhs.Infer(context);
             var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
-            var calculatedHigherOrder = this.OnCreate(this.Lhs.HigherOrder, this.Rhs.HigherOrder, UnspecifiedTerm.Instance);
-            var calculatedHigherOrder_ = context.ResolveHigherOrder(calculatedHigherOrder);
-
             context.Unify(lhs.HigherOrder, higherOrder);
             context.Unify(rhs.HigherOrder, higherOrder);
-            context.Unify(calculatedHigherOrder_, higherOrder);
 
             return
                 this.Lhs.EqualsWithHigherOrder(lhs) &&

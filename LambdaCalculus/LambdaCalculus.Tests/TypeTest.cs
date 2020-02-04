@@ -83,16 +83,16 @@ namespace Favalon
         }
 
         [Test]
-        public void SumToCombinedTypeTerm()
+        public void SumToWidenTypeTerm()
         {
-            // let combined = System.Int32:* + System.IFormattable:*
+            // System.IFormattable :> (System.Int32:* + System.Double:*)
             // --> System.IFormattable:*
             var term =
                 WideningClrType(
                     Identity("System.IFormattable"),
                     Sum(
                         Identity("System.Int32"),
-                        Identity("System.IFormattable")));
+                        Identity("System.Double")));
 
             var environment = ClrEnvironmentFactory.Create();
 

@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms.Contexts;
+using System;
 using System.Linq;
 
 namespace Favalon.Terms.Algebraic
@@ -17,5 +18,13 @@ namespace Favalon.Terms.Algebraic
 
         public static ProductTerm Create(Term[] terms, Term higherOrder) =>
             new ProductTerm(terms, higherOrder);
+
+        public static Term? From(Term[] terms, Term higherOrder) =>
+            terms.Length switch
+            {
+                0 => null,
+                1 => terms[0],
+                _ => new ProductTerm(terms, higherOrder)
+            };
     }
 }

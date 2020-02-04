@@ -27,11 +27,11 @@ namespace Favalon.Terms.Algebraic
             var higherOrder_ = higherOrder.Reduce(context);
 
             return
-                lhs_.EqualsWithHigherOrder(lhs) &&
-                rhs_.EqualsWithHigherOrder(rhs) &&
-                higherOrder.EqualsWithHigherOrder(higherOrder) ?
+                lhs.EqualsWithHigherOrder(lhs_) &&
+                rhs.EqualsWithHigherOrder(rhs_) &&
+                higherOrder.EqualsWithHigherOrder(higherOrder_) ?
                     null :
-                    new WideningTerm(lhs, rhs, higherOrder, calculator);
+                    new WideningTerm(lhs_, rhs_, higherOrder_, calculator);
         }
 
         public override Term Reduce(ReduceContext context) =>

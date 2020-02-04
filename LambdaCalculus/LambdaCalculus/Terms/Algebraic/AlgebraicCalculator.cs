@@ -41,7 +41,7 @@ namespace Favalon.Terms.Algebraic
                         Select(rhsTerm => Widening(to, rhsTerm)).
                         ToArray();
                     return terms2.All(term => term != null) ?
-                        SumTerm.Create(terms2!, UnspecifiedTerm.Instance) :
+                        SumTerm.Create(terms2.Distinct().ToArray()!, UnspecifiedTerm.Instance) :
                         null;
 
                 // (int + double): (int + double) <-- int
@@ -58,7 +58,7 @@ namespace Favalon.Terms.Algebraic
                     if (terms3.Any(term => term != null))
                     {
                         return SumTerm.Create(
-                            terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).ToArray(),
+                            terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).Distinct().ToArray(),
                             UnspecifiedTerm.Instance);
                     }
                     // Couldn't narrow: (int + double) <-- string

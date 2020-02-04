@@ -88,8 +88,8 @@ namespace Favalon
             // let combined = System.Int32:* + System.IFormattable:*
             // --> System.IFormattable:*
             var term =
-                BindMutable(
-                    "combined",
+                WideningClrType(
+                    Identity("System.IFormattable"),
                     Sum(
                         Identity("System.Int32"),
                         Identity("System.IFormattable")));
@@ -192,12 +192,12 @@ namespace Favalon
                 }
             }
 
-            var to = SumClrType(toTypes.Select(CreateTermFromType))!;
-            var from = SumClrType(fromTypes.Select(CreateTermFromType))!;
+            var to = Sum(toTypes.Select(CreateTermFromType))!;
+            var from = Sum(fromTypes.Select(CreateTermFromType))!;
 
             var actual = ClrTypeCalculator.Instance.Widening(to, from);
 
-            var expected = SumClrType(expectedTypes.Select(CreateTermFromType));
+            var expected = Sum(expectedTypes.Select(CreateTermFromType));
 
             Assert.AreEqual(expected, actual);
         }
@@ -242,12 +242,12 @@ namespace Favalon
                 }
             }
 
-            var to = SumClrType(toTypes.Select(CreateTermFromType))!;
-            var from = SumClrType(fromTypes.Select(CreateTermFromType))!;
+            var to = Sum(toTypes.Select(CreateTermFromType))!;
+            var from = Sum(fromTypes.Select(CreateTermFromType))!;
 
             var actual = ClrTypeCalculator.Instance.Widening(to, from);
 
-            var expected = SumClrType(expectedTypes.Select(CreateTermFromType));
+            var expected = Sum(expectedTypes.Select(CreateTermFromType));
 
             Assert.AreEqual(expected, actual);
         }

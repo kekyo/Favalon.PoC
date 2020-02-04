@@ -94,7 +94,6 @@ namespace Favalon
 
         public static Environment BindMutableClrTypeOperators(this Environment environment) =>
             environment.
-                BindMutable("+", ClrTypeSumOperatorTerm.Instance).
-                BindMutable("*", ClrTypeProductOperatorTerm.Instance);
+                BindMutable(":>", WideningOperatorTerm.Create(KindTerm.Instance, ClrTypeCalculator.Instance));
     }
 }

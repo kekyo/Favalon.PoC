@@ -9,22 +9,15 @@ namespace Favalon.Terms.Algebraic
         protected AlgebraicCalculator()
         { }
 
-        protected virtual Term Sum(IEnumerable<Term> terms) =>
-            TermFactory.Sum(terms)!;
-
         public virtual Term? Widening(Term? to, Term? from)
         {
             switch (to, from)
             {
-                case (null, _):
-                case (_, null):
-                    return null;
-
                 // int: int <-- int
                 // IComparable: IComparable <-- IComparable
                 // _[1]: _[1] <-- _[1]
-                case (_, _) when to.Equals(from):
-                    return to;
+                case (Term toTerm, Term fromTerm) when toTerm.Equals(fromTerm):
+                    return toTerm;
 
                 // (int + double): (int + double) <-- (int + double)
                 // (int + double + string): (int + double + string) <-- (int + double)
@@ -42,13 +35,13 @@ namespace Favalon.Terms.Algebraic
                         null;
 
                 // null: int <-- (int + double)
-                case (_, SumTerm(Term[] fromTerms)):
+                case (Term _, SumTerm(Term[] fromTerms)):
                     Debug.Assert(fromTerms.Length >= 2);
                     var terms2 = fromTerms.
                         Select(rhsTerm => Widening(to, rhsTerm)).
                         ToArray();
                     return terms2.All(term => term != null) ?
-                        this.Sum(terms2!) :
+                        SumTerm.Create(terms2!, UnspecifiedTerm.Instance) :
                         null;
 
                 // (int + double): (int + double) <-- int
@@ -56,7 +49,7 @@ namespace Favalon.Terms.Algebraic
                 // (int + IComparable): (int + IComparable) <-- string
                 // (int + _): (int + _) <-- string
                 // (int + _[1]): (int + _[1]) <-- _[2]
-                case (SumTerm(Term[] toTerms), _):
+                case (SumTerm(Term[] toTerms), Term _):
                     Debug.Assert(toTerms.Length >= 2);
                     var terms3 = toTerms.
                         Select(lhsTerm => Widening(lhsTerm, from)).
@@ -64,9 +57,9 @@ namespace Favalon.Terms.Algebraic
                     // Requirements: 1 or any terms widened.
                     if (terms3.Any(term => term != null))
                     {
-                        return this.Sum(terms3.
-                            Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).
-                            ToArray());
+                        return SumTerm.Create(
+                            terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).ToArray(),
+                            UnspecifiedTerm.Instance);
                     }
                     // Couldn't narrow: (int + double) <-- string
                     else

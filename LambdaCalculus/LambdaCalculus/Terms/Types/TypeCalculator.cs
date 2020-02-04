@@ -1,5 +1,4 @@
 ﻿using Favalon.Terms.Algebraic;
-using System.Collections.Generic;
 
 namespace Favalon.Terms.Types
 {
@@ -7,9 +6,6 @@ namespace Favalon.Terms.Types
     {
         protected TypeCalculator()
         { }
-
-        protected override Term Sum(IEnumerable<Term> terms) =>
-            TermFactory.Sum(terms)!;
 
         public override Term? Widening(Term? to, Term? from)
         {

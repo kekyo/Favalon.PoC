@@ -24,14 +24,11 @@ namespace Favalon.Terms.Types
         private ClrTypeCalculator()
         { }
 
-        protected override Term Sum(IEnumerable<Term> terms) =>
-            ClrTermFactory.SumClrType(terms)!;
-
         private static bool IsAssignableFrom(Type to, Type from) =>
             to.IsAssignableFrom(from) ||
             (wideningPrimitives.TryGetValue(to, out var fromTypes) && fromTypes.Contains(from));
 
-        public override Term? Widening(Term to, Term from)
+        public override Term? Widening(Term? to, Term? from)
         {
             switch (to, from)
             {

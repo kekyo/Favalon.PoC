@@ -1,10 +1,9 @@
 ﻿using Favalon.Terms;
+using Favalon.Terms.Algebraic;
 using Favalon.Terms.Logical;
 using Favalon.Terms.Methods;
 using Favalon.Terms.Types;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Favalon
@@ -37,46 +36,13 @@ namespace Favalon
         public static Term ClrType<T>() =>
             ClrConstantTerm.From(typeof(T));
 
-        public static ClrTypeSumTerm SumClrType(Term lhs, Term rhs) =>
-            ClrTypeSumTerm.Create(lhs, rhs);
-        public static Term? SumClrType(params Term[] terms) =>
-            SumClrType((IEnumerable<Term>)terms);
-        public static Term? SumClrType(IEnumerable<Term> terms) =>
-            terms.ToArray() switch
-            {
-                Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(SumClrType),
-                _ => null
-            };
-
-        public static ClrTypeProductTerm ProductClrType(Term lhs, Term rhs) =>
-            ClrTypeProductTerm.Create(lhs, rhs);
-        public static Term? ProductClrType(params Term[] terms) =>
-            ProductClrType((IEnumerable<Term>)terms);
-        public static Term? ProductClrType(IEnumerable<Term> terms) =>
-            terms.ToArray() switch
-            {
-                Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(ProductClrType),
-                _ => null
-            };
+        public static WideningTerm WideningClrType(Term lhs, Term rhs) =>
+            WideningTerm.Create(lhs, rhs, UnspecifiedTerm.Instance, ClrTypeCalculator.Instance);
 
         ///////////////////////////////////////////////////////////////////////////
         // CLR Methods
 
         public static Term ClrMethod<T>(string name, params Type[] argumentTypes) =>
             ClrMethodTerm.From(typeof(T).GetMethod(name, argumentTypes));
-
-        public static ClrMethodSumTerm SumClrMethod(Term lhs, Term rhs) =>
-            ClrMethodSumTerm.Create(lhs, rhs);
-        public static Term? SumClrMethod(params Term[] terms) =>
-            SumClrMethod((IEnumerable<Term>)terms);
-        public static Term? SumClrMethod(IEnumerable<Term> terms) =>
-            terms.ToArray() switch
-            {
-                Term[] ts when ts.Length == 1 => ts[0],
-                Term[] ts when ts.Length >= 2 => ts.Aggregate(SumClrMethod),
-                _ => null
-            };
     }
 }

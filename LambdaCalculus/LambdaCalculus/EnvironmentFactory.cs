@@ -7,6 +7,6 @@
         public static Environment Create(int iterations = DefaultIterations) =>
             Environment.Pure(iterations).
             BindMutableBasisTerms().
-            BindMutableTypeOperators();
+            BindMutableAlgebraicOperators();
     }
 }

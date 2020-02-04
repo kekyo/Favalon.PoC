@@ -1,4 +1,5 @@
-﻿using Favalon.Terms.Logical;
+﻿using Favalon.Terms;
+using Favalon.Terms.Logical;
 using Favalon.Terms.Operators;
 using Favalon.Terms.Types;
 
@@ -13,9 +14,9 @@ namespace Favalon
                 BindMutable("true", BooleanTerm.From(true)).
                 BindMutable("false", BooleanTerm.From(false));
 
-        public static Environment BindMutableTypeOperators(this Environment environment) =>
+        public static Environment BindMutableAlgebraicOperators(this Environment environment) =>
             environment.
-                BindMutable("+", TypeSumOperatorTerm.Instance).
-                BindMutable("*", TypeProductOperatorTerm.Instance);
+                BindMutable("+", SumOperatorTerm.Create(UnspecifiedTerm.Instance)).
+                BindMutable("*", ProductOperatorTerm.Create(UnspecifiedTerm.Instance));
     }
 }

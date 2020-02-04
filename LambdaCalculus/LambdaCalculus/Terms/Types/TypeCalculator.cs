@@ -11,7 +11,7 @@ namespace Favalon.Terms.Types
         protected override Term Sum(IEnumerable<Term> terms) =>
             TermFactory.Sum(terms)!;
 
-        public override Term? Widening(Term to, Term from)
+        public override Term? Widening(Term? to, Term? from)
         {
             switch (to, from)
             {

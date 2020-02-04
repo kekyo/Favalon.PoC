@@ -32,11 +32,11 @@ namespace Favalon.Terms
     // It's only using in ApplyTerm.
     public interface IApplicableTerm
     {
-        Term InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint);
+        Term InferForApply(InferContext context, Term inferredArgumentHint, Term appliedHigherOrderHint);
 
-        Term FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint);
+        Term FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term appliedHigherOrderHint);
 
-        AppliedResult ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint);
+        AppliedResult ReduceForApply(ReduceContext context, Term argument, Term appliedHigherOrderHint);
     }
 
     public sealed class ApplyTerm : Term
@@ -71,12 +71,12 @@ namespace Favalon.Terms
         //    Term @this,
         //    Term[] terms,
         //    Term argument,
-        //    Term higherOrderHint)
+        //    Term appliedHigherOrderHint)
         //{
         //    // Strict infer procedure.
 
         //    var fittedMethods =
-        //        GetFittedAndOrderedMethods(terms, argument.HigherOrder, higherOrderHint).
+        //        GetFittedAndOrderedMethods(terms, argument.HigherOrder, appliedHigherOrderHint).
         //        ToArray();
 
         //    return fittedMethods.Length switch

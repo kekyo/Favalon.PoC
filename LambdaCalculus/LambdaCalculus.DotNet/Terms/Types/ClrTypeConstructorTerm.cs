@@ -17,19 +17,19 @@ namespace Favalon.Terms.Types
         public override Term Infer(InferContext context) =>
             this;
 
-        Term IApplicableTerm.InferForApply(InferContext context, Term argument, Term higherOrderHint) =>
+        Term IApplicableTerm.InferForApply(InferContext context, Term argument, Term appliedHigherOrderHint) =>
             this;
 
         public override Term Fixup(FixupContext context) =>
             this;
 
-        Term IApplicableTerm.FixupForApply(FixupContext context, Term argument, Term higherOrderHint) =>
+        Term IApplicableTerm.FixupForApply(FixupContext context, Term argument, Term appliedHigherOrderHint) =>
             this;
 
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
+        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term appliedHigherOrderHint)
         {
             var argument_ = argument.Reduce(context);
 

@@ -9,7 +9,7 @@ namespace Favalon.Terms.Operators
             base(ClrTypeCalculator.Instance)
         { }
 
-        protected override AppliedResult ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+        protected override AppliedResult ReduceForApply(ReduceContext context, Term argument, Term appliedHigherOrderHint) =>
             AppliedResult.Applied(
                 new ClrTypeSumOperatorClosureTerm(argument),
                 argument);

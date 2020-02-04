@@ -44,7 +44,7 @@ namespace Favalon.Terms
                     From(parameter, body);
         }
 
-        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
+        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term appliedHigherOrderHint)
         {
             // Strict infer procedure.
 
@@ -60,7 +60,7 @@ namespace Favalon.Terms
             // Calculate inferring with applied argument.
             var body = this.Body.Infer(newScope);
 
-            context.Unify(body.HigherOrder, higherOrderHint);
+            context.Unify(body.HigherOrder, appliedHigherOrderHint);
 
             return
                 this.Parameter.EqualsWithHigherOrder(parameter) &&
@@ -83,7 +83,7 @@ namespace Favalon.Terms
                     From(parameter, body);
         }
 
-        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint)
+        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term appliedHigherOrderHint)
         {
             // Strict fixup procedure.
 
@@ -117,7 +117,7 @@ namespace Favalon.Terms
                     From(parameter, body);
         }
 
-        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint)
+        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term appliedHigherOrderHint)
         {
             // The parameter and argument are out of inner scope.
             var parameter = this.Parameter.Reduce(context);
@@ -184,6 +184,11 @@ namespace Favalon.Terms
                 _ => new LambdaTerm(parameter, body)
             };
 
+        public static Term Repeat(Term term, int termCount) =>
+            Enumerable.
+                Range(0, termCount).
+                Aggregate(term, (agg, _) => From(term, agg));
+
         // _ -> _
         public static readonly LambdaTerm Unspecified =
             new LambdaTerm(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
@@ -199,20 +204,5 @@ namespace Favalon.Terms
         // * -> * -> *
         public static readonly LambdaTerm Kind2 =
             new LambdaTerm(KindTerm.Instance, Kind);
-
-        public static Term CreateUnspecified(int parameterCount) =>
-            Enumerable.
-                Range(0, parameterCount).
-                Aggregate((Term)UnspecifiedTerm.Instance, (agg, _) => From(UnspecifiedTerm.Instance, agg));
-
-        public static Term CreateKind(int parameterCount) =>
-            Enumerable.
-                Range(0, parameterCount).
-                Aggregate((Term)KindTerm.Instance, (agg, _) => From(KindTerm.Instance, agg));
-
-        public static Term CreateKind(string identity, int parameterCount) =>
-            Enumerable.
-                Range(0, parameterCount).
-                Aggregate((Term)KindTerm.Create(identity), (agg, _) => From(KindTerm.Create(identity), agg));
     }
 }

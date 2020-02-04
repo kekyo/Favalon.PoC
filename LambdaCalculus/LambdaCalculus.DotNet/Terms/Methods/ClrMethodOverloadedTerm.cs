@@ -26,21 +26,21 @@ namespace Favalon.Terms.Methods
             // Best effort infer procedure: cannot fixed.
             this;
 
-        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint) =>
-            ApplyTerm.AggregateForApply(this, this.Methods, inferredArgumentHint, higherOrderHint);
+        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term appliedHigherOrderHint) =>
+            ApplyTerm.AggregateForApply(this, this.Methods, inferredArgumentHint, appliedHigherOrderHint);
 
         public override Term Fixup(FixupContext context) =>
             // Best effort fixup procedure: cannot fixed.
             this;
 
-        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint) =>
-            ApplyTerm.AggregateForApply(this, this.Methods, fixuppedArgumentHint, higherOrderHint);
+        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term appliedHigherOrderHint) =>
+            ApplyTerm.AggregateForApply(this, this.Methods, fixuppedArgumentHint, appliedHigherOrderHint);
 
         public override Term Reduce(ReduceContext context) =>
             this;
 
-        Term? IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
-            ApplyTerm.ReduceForApply(this, this.Methods, context, argument, higherOrderHint);
+        Term? IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term appliedHigherOrderHint) =>
+            ApplyTerm.ReduceForApply(this, this.Methods, context, argument, appliedHigherOrderHint);
 
         public override bool Equals(Term? other) =>
             other is ClrMethodOverloadedTerm rhs ?

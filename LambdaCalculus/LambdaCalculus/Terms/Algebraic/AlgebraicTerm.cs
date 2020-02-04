@@ -1,4 +1,5 @@
 ﻿using Favalon.Terms.Contexts;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon.Terms.Algebraic
@@ -7,7 +8,7 @@ namespace Favalon.Terms.Algebraic
     {
         public readonly Term[] Terms;
 
-        protected AlgebraicTerm(Term[] terms, Term higherOrder)
+        private protected AlgebraicTerm(Term[] terms, Term higherOrder)
         {
             this.Terms = terms;
             this.HigherOrder = higherOrder;
@@ -58,12 +59,17 @@ namespace Favalon.Terms.Algebraic
                     this.OnCreate(terms, higherOrder);
         }
 
+        internal abstract IEnumerable<Term> InternalFlatten();
+
+        public Term[] Flatten() =>
+            this.InternalFlatten().ToArray();
+
         public void Deconstruct(out Term[] terms) =>
-            terms = this.Terms;
+            terms = this.Flatten();
 
         public void Deconstruct(out Term[] terms, out Term higherOrder)
         {
-            terms = this.Terms;
+            terms = this.Flatten();
             higherOrder = this.HigherOrder;
         }
     }
@@ -79,5 +85,11 @@ namespace Favalon.Terms.Algebraic
             other is T term ?
                 this.Terms.SequenceEqual(term.Terms) :
                 false;
+
+        internal override IEnumerable<Term> InternalFlatten() =>
+            this.Terms.SelectMany(term =>
+            term is T algebraic ?
+                algebraic.InternalFlatten() :
+                new[] { term });
     }
 }

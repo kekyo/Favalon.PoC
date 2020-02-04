@@ -36,14 +36,14 @@ namespace Favalon.Terms.Methods
         public override Term Infer(InferContext context) =>
             this;
 
-        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term higherOrderHint)
+        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term appliedHigherOrderHint)
         {
             context.Unify(
                 ((LambdaTerm)this.HigherOrder).Parameter,
                 inferredArgumentHint.HigherOrder);
             context.Unify(
                 ((LambdaTerm)this.HigherOrder).Body,
-                higherOrderHint);
+                appliedHigherOrderHint);
 
             return this;
         }
@@ -51,7 +51,7 @@ namespace Favalon.Terms.Methods
         public override Term Fixup(FixupContext context) =>
             this;
 
-        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term higherOrderHint) =>
+        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term appliedHigherOrderHint) =>
             this;
 
         public override Term Reduce(ReduceContext context) =>
@@ -60,7 +60,7 @@ namespace Favalon.Terms.Methods
         internal Term Invoke(IValueTerm argument) =>
             ClrConstantTerm.From(this.method.Invoke(null, new object[] { argument.Value }));
 
-        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term higherOrderHint) =>
+        AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term appliedHigherOrderHint) =>
             argument.Reduce(context) is Term argumentTerm ?
                 (argumentTerm is IValueTerm valueTerm ?
                     AppliedResult.Applied(this.Invoke(valueTerm), argumentTerm) :

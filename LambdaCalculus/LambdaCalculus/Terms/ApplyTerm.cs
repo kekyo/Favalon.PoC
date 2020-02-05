@@ -77,7 +77,7 @@ namespace Favalon.Terms
 
         //    var fittedMethods =
         //        GetFittedAndOrderedMethods(terms, argument.HigherOrder, appliedHigherOrderHint).
-        //        ToArray();
+        //        Memoize();
 
         //    return fittedMethods.Length switch
         //    {

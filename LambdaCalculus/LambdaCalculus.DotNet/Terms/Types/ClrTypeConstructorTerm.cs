@@ -12,7 +12,7 @@ namespace Favalon.Terms.Types
             this.type = type;
 
         public override Term HigherOrder =>
-            LambdaTerm.Repeat(KindTerm.Instance, this.type.GetGenericArguments().Length + 1);
+            LambdaTerm.Repeat(KindTerm.Instance, this.type.GetGenericArguments().Length + 1)!;
 
         public override Term Infer(InferContext context) =>
             this;

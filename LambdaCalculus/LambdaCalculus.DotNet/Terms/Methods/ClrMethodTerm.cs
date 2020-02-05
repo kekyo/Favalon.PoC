@@ -1,7 +1,5 @@
-﻿using Favalon.Terms.Algebraic;
-using Favalon.Terms.Contexts;
+﻿using Favalon.Terms.Contexts;
 using Favalon.Terms.Types;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 

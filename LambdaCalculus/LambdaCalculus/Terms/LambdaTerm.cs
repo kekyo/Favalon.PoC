@@ -1,5 +1,6 @@
 ﻿using Favalon.Terms.Contexts;
 using Favalon.Terms.Types;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon.Terms
@@ -184,10 +185,16 @@ namespace Favalon.Terms
                 _ => new LambdaTerm(parameter, body)
             };
 
-        public static Term Repeat(Term term, int termCount) =>
-            Enumerable.
-                Range(0, termCount).
-                Aggregate(term, (agg, _) => From(term, agg));
+        public static Term? From(IEnumerable<Term> terms) =>
+            terms.Memoize() switch
+            {
+                (_, 0) => null,
+                (Term[] ts, 1) => ts[0],
+                (Term[] ts, _) => ts.Reverse().Aggregate(ts.Last(), (agg, term) => From(term, agg))
+            };
+
+        public static Term? Repeat(Term term, int termCount) =>
+            From(Enumerable.Repeat(term, termCount).Memoize());
 
         // _ -> _
         public static readonly LambdaTerm Unspecified =

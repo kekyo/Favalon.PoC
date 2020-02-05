@@ -74,7 +74,7 @@ namespace Favalon.Terms
                 new[] { this.Rhs });
 
         public void Deconstruct(out Term[] terms) =>
-            terms = this.Flatten().ToArray();
+            terms = this.Flatten().Memoize();
 
         public void Deconstruct(out Term lhs, out Term rhs, out Term higherOrder)
         {

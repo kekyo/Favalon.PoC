@@ -20,7 +20,7 @@ namespace Favalon.Terms.Algebraic
 
         public override sealed Term Infer(InferContext context)
         {
-            var terms = this.Terms.Select(term => term.Infer(context)).ToArray();
+            var terms = this.Terms.Select(term => term.Infer(context)).Memoize();
             var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
             foreach (var term in terms)
@@ -37,7 +37,7 @@ namespace Favalon.Terms.Algebraic
 
         public override sealed Term Fixup(FixupContext context)
         {
-            var terms = this.Terms.Select(term => term.Fixup(context)).ToArray();
+            var terms = this.Terms.Select(term => term.Fixup(context)).Memoize();
             var higherOrder = this.HigherOrder.Fixup(context);
 
             return
@@ -49,7 +49,7 @@ namespace Favalon.Terms.Algebraic
 
         public override sealed Term Reduce(ReduceContext context)
         {
-            var terms = this.Terms.Select(term => term.Reduce(context)).ToArray();
+            var terms = this.Terms.Select(term => term.Reduce(context)).Memoize();
             var higherOrder = this.HigherOrder.Reduce(context);
 
             return
@@ -62,7 +62,7 @@ namespace Favalon.Terms.Algebraic
         internal abstract IEnumerable<Term> InternalFlatten();
 
         public Term[] Flatten() =>
-            this.InternalFlatten().ToArray();
+            this.InternalFlatten().Memoize();
 
         public void Deconstruct(out Term[] terms) =>
             terms = this.Flatten();

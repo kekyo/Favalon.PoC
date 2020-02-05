@@ -29,7 +29,7 @@ namespace Favalon.Terms.Algebraic
                 case (SumTerm(Term[] toTerms), SumTerm(Term[] fromTerms)):
                     var terms1 = fromTerms.
                         Select(rhsTerm => toTerms.Any(lhsTerm => Widening(lhsTerm, rhsTerm) != null)).
-                        ToArray();
+                        Memoize();
                     return terms1.All(term => term) ?
                         to :
                         null;
@@ -39,9 +39,9 @@ namespace Favalon.Terms.Algebraic
                     Debug.Assert(fromTerms.Length >= 2);
                     var terms2 = fromTerms.
                         Select(rhsTerm => Widening(to, rhsTerm)).
-                        ToArray();
+                        Memoize();
                     return terms2.All(term => term != null) ?
-                        SumTerm.From(terms2.Distinct().ToArray()!, UnspecifiedTerm.Instance) :
+                        SumTerm.From(terms2.Distinct().Memoize()!, UnspecifiedTerm.Instance) :
                         null;
 
                 // (int + double): (int + double) <-- int
@@ -53,12 +53,12 @@ namespace Favalon.Terms.Algebraic
                     Debug.Assert(toTerms.Length >= 2);
                     var terms3 = toTerms.
                         Select(lhsTerm => Widening(lhsTerm, from)).
-                        ToArray();
+                        Memoize();
                     // Requirements: 1 or any terms widened.
                     if (terms3.Any(term => term != null))
                     {
                         return SumTerm.From(
-                            terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).Distinct().ToArray(),
+                            terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).Distinct().Memoize(),
                             UnspecifiedTerm.Instance);
                     }
                     // Couldn't narrow: (int + double) <-- string

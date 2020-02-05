@@ -9,7 +9,7 @@ namespace Favalon
     {
         public static string Join(string separator, IEnumerable<string> values) =>
 #if NET35
-            string.Join(separator, values.ToArray());
+            string.Join(separator, values.Memoize());
 #else
             string.Join(separator, values);
 #endif
@@ -54,30 +54,14 @@ namespace Favalon
             }
         }
 
-        public static void Deconstruct<T>(this IEnumerable<T> @this, out T[]? arr)
-        {
-            if (@this is T[] a)
-            {
-                arr = a;
-            }
-            else
-            {
-                arr = default;
-            }
-        }
+        public static T[] Memoize<T>(this IEnumerable<T> enumerable) =>
+            enumerable as T[] ??
+            (enumerable is List<T> list ? list.ToArray() : enumerable.ToArray());
 
-        public static void Deconstruct<T>(this IEnumerable<T> @this, out T[]? arr, out int length)
+        public static void Deconstruct<T>(this T[] arr, out T[] a, out int length)
         {
-            if (@this is T[] a)
-            {
-                arr = a;
-                length = a.Length;
-            }
-            else
-            {
-                arr = default;
-                length = -1;
-            }
+            a = arr;
+            length = arr.Length;
         }
 
         public static void Deconstruct(this Term term, out bool? value)

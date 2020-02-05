@@ -19,7 +19,7 @@ namespace Favalon.Terms.Operators
             "+";
 
         public static SumOperatorTerm Create(Term higherOrder) =>
-            new SumOperatorTerm(LambdaTerm.Repeat(higherOrder, 3));
+            new SumOperatorTerm(LambdaTerm.Repeat(higherOrder, 3)!);
 
         private sealed class SumOperatorClosureTerm : ClosureTerm<SumOperatorClosureTerm>
         {

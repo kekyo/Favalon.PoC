@@ -1,10 +1,4 @@
-﻿using Favalon.Terms.Contexts;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
+﻿using System.Collections.Generic;
 
 #if NET35
 namespace System

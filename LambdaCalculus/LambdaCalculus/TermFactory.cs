@@ -59,14 +59,14 @@ namespace Favalon
         public static Term? Sum(params Term[] terms) =>
             SumTerm.From(terms, UnspecifiedTerm.Instance);
         public static Term? Sum(IEnumerable<Term> terms) =>
-            SumTerm.From(terms.ToArray(), UnspecifiedTerm.Instance);
+            SumTerm.From(terms.Memoize(), UnspecifiedTerm.Instance);
 
         public static ProductTerm Product(Term lhs, Term rhs) =>
             ProductTerm.Create(new[] { lhs, rhs }, UnspecifiedTerm.Instance);
         public static Term? Product(params Term[] terms) =>
             ProductTerm.From(terms, UnspecifiedTerm.Instance);
         public static Term? Product(IEnumerable<Term> terms) =>
-            ProductTerm.From(terms.ToArray(), UnspecifiedTerm.Instance);
+            ProductTerm.From(terms.Memoize(), UnspecifiedTerm.Instance);
 
         public static WideningTerm Widening(Term lhs, Term rhs) =>
             WideningTerm.Create(lhs, rhs, UnspecifiedTerm.Instance, AlgebraicCalculator.Instance);

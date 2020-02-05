@@ -19,7 +19,7 @@ namespace Favalon.Terms.Operators
             "*";
 
         public static ProductOperatorTerm Create(Term higherOrder) =>
-            new ProductOperatorTerm(LambdaTerm.Repeat(higherOrder, 3));
+            new ProductOperatorTerm(LambdaTerm.Repeat(higherOrder, 3)!);
 
         private sealed class ProductOperatorClosureTerm : ClosureTerm<ProductOperatorClosureTerm>
         {

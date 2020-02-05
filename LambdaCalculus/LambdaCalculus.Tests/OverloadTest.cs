@@ -34,7 +34,7 @@ namespace Favalon
         public void OverloadedMethods(int expected, object value)
         {
             var term =
-                WideningClrType(
+                Apply(
                     Sum(
                         typeof(Convert).GetMethods().
                         Where(method => (method.Name == "ToInt32") && (method.GetParameters().Length == 1)).

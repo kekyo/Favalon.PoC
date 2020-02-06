@@ -14,7 +14,7 @@ namespace Favalon
         Symbols,
     }
 
-    internal static class Utilities
+    internal static class ClrUtilities
     {
         private static readonly HashSet<Type> knownClsCompilant =
             new HashSet<Type>
@@ -203,49 +203,5 @@ namespace Favalon
                 HigherOrderDetails.Full => type.GetFullName(option == NameOptions.WithGenericParameters),
                 _ => type.GetName(option)
             };
-
-        public static string Join(string separator, IEnumerable<string> values) =>
-#if NET35
-            string.Join(separator, values.Memoize());
-#else
-            string.Join(separator, values);
-#endif
-
-        public static IEnumerable<T> Traverse<T>(this T? value, Func<T, T?> next, bool includeFirst = true)
-            where T : class
-        {
-            var current = value;
-
-            if (includeFirst)
-            {
-                while (current != null)
-                {
-                    yield return current;
-                    current = next(current);
-                }
-            }
-            else if (current != null)
-            {
-                while (true)
-                {
-                    current = next(current);
-                    if (current == null)
-                    {
-                        break;
-                    }
-                    yield return current;
-                }
-            }
-        }
-
-        public static T[] Memoize<T>(this IEnumerable<T> enumerable) =>
-            enumerable as T[] ??
-            (enumerable is List<T> list ? list.ToArray() : enumerable.ToArray());
-
-        public static void Deconstruct<T>(this T[] arr, out T[] a, out int length)
-        {
-            a = arr;
-            length = arr.Length;
-        }
     }
 }

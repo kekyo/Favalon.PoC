@@ -42,7 +42,7 @@ namespace Favalon.Terms.Types
         {
             if (!clrTypes.TryGetValue(type, out var term))
             {
-                if (Utilities.IsTypeConstructor(type))
+                if (ClrUtilities.IsTypeConstructor(type))
                 {
                     term = new ClrTypeConstructorTerm(type);
                 }

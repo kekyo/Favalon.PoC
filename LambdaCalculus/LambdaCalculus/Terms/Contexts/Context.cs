@@ -73,6 +73,21 @@ namespace Favalon.Terms.Contexts
             return null;
         }
 
+        private void applyBoundTerms(Dictionary<string, Term> boundTerms)
+        {
+            if (this.boundTerms != null)
+            {
+                foreach (var entry in boundTerms)
+                {
+                    this.boundTerms[entry.Key] = entry.Value;
+                }
+            }
+            else
+            {
+                this.boundTerms = boundTerms;
+            }
+        }
+
         /////////////////////////////////////////////////////////////////////////
         // Infer
 
@@ -85,11 +100,7 @@ namespace Favalon.Terms.Contexts
 
         private protected IEnumerable<Term> InternalEnumerableInfer(Term term, bool higherOrderInferOnly)
         {
-            var boundTerms =
-                this.boundTerms is Dictionary<string, Term> bt ?
-                    new Dictionary<string, Term>(bt) : // Copied, eliminate side effects by BindTerm
-                    new Dictionary<string, Term>();
-
+            var boundTerms = new Dictionary<string, Term>();
             var current = term;
             var iteration = 0;
             while (true)
@@ -116,17 +127,7 @@ namespace Favalon.Terms.Contexts
             if (!higherOrderInferOnly)
             {
                 // Applied bound terms if wasn't caused exceptions.
-                if (this.boundTerms != null)
-                {
-                    foreach (var entry in boundTerms)
-                    {
-                        this.boundTerms[entry.Key] = entry.Value;
-                    }
-                }
-                else
-                {
-                    this.boundTerms = boundTerms;
-                }
+                this.applyBoundTerms(boundTerms);
             }
         }
 
@@ -141,11 +142,7 @@ namespace Favalon.Terms.Contexts
 
         private protected IEnumerable<Term> InternalEnumerableReduce(Term term)
         {
-            var boundTerms =
-                this.boundTerms is Dictionary<string, Term> bt ?
-                    new Dictionary<string, Term>(bt) : // Copied, eliminate side effects by BindTerm
-                    new Dictionary<string, Term>();
-
+            var boundTerms = new Dictionary<string, Term>();
             var current = term;
             var iteration = 0;
             while (true)
@@ -175,17 +172,7 @@ namespace Favalon.Terms.Contexts
             }
 
             // Applied bound terms if wasn't caused exceptions.
-            if (this.boundTerms != null)
-            {
-                foreach (var entry in boundTerms)
-                {
-                    this.boundTerms[entry.Key] = entry.Value;
-                }
-            }
-            else
-            {
-                this.boundTerms = boundTerms;
-            }
+            this.applyBoundTerms(boundTerms);
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Favalon
             ApplyTerm.Create(function, argument, higherOrder);
 
         public static LambdaTerm Lambda(string parameter, Term body) =>
-            (LambdaTerm)LambdaTerm.From(FreeVariableTerm.Create(parameter, UnspecifiedTerm.Instance), body);
+            (LambdaTerm)LambdaTerm.From(BoundIdentityTerm.Create(parameter, UnspecifiedTerm.Instance), body);
         public static LambdaTerm Lambda(Term parameter, Term body) =>
             (LambdaTerm)LambdaTerm.From(parameter, body);
 

@@ -34,22 +34,7 @@ namespace Favalon.Terms.Methods
         public override Term Infer(InferContext context) =>
             this;
 
-        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term appliedHigherOrderHint)
-        {
-            context.Unify(
-                ((LambdaTerm)this.HigherOrder).Parameter,
-                inferredArgumentHint.HigherOrder);
-            context.Unify(
-                ((LambdaTerm)this.HigherOrder).Body,
-                appliedHigherOrderHint);
-
-            return this;
-        }
-
         public override Term Fixup(FixupContext context) =>
-            this;
-
-        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term appliedHigherOrderHint) =>
             this;
 
         public override Term Reduce(ReduceContext context) =>

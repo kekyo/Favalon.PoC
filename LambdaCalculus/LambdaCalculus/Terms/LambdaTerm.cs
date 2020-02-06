@@ -5,34 +5,47 @@ using System.Linq;
 
 namespace Favalon.Terms
 {
-    public sealed class LambdaTerm : HigherOrderLazyTerm, IApplicableTerm, IRightToLeftPrettyPrintingTerm
+    public sealed class LambdaTerm : Term, IApplicableTerm, IRightToLeftPrettyPrintingTerm
     {
         public readonly Term Parameter;
         public readonly Term Body;
 
-        private LambdaTerm(Term parameter, Term body)
+        private Term? higherOrder;
+
+        private LambdaTerm(Term parameter, Term body, Term? higherOrder)
         {
             this.Parameter = parameter;
             this.Body = body;
+            this.higherOrder = higherOrder;
+        }
+
+        public override Term HigherOrder
+        {
+            get
+            {
+                if (higherOrder == null)
+                {
+                    higherOrder = From(Parameter.HigherOrder, Body.HigherOrder);
+                }
+
+                return higherOrder;
+            }
         }
 
         internal override bool ValidTerm =>
             this.Parameter.ValidTerm && this.Body.ValidTerm;
 
-        protected override Term GetHigherOrder() =>
-            From(this.Parameter.HigherOrder, this.Body.HigherOrder);
-
         public override Term Infer(InferContext context)
         {
-            // Best effort infer procedure.
-
             var newScope = context.NewScope();
 
             var parameter = this.Parameter.Infer(newScope);
-            if (parameter is FreeVariableTerm identity)
+            if (parameter is BoundIdentityTerm identity)
             {
-                // Shadowed just parameter, will transfer parameter higherorder.
-                newScope.BindMutable(identity.Identity, parameter);
+                // Shadowed just parameter, will transfer parameter higher order.
+                newScope.BindMutable(
+                    identity.Identity,
+                    FreeVariableTerm.Create(identity.Identity, identity.HigherOrder));
             }
 
             // Calculate inferring with parameter identity.
@@ -45,49 +58,8 @@ namespace Favalon.Terms
                     From(parameter, body);
         }
 
-        Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term appliedHigherOrderHint)
-        {
-            // Strict infer procedure.
-
-            var newScope = context.NewScope();
-
-            var parameter = this.Parameter.Infer(newScope);
-            if (parameter is FreeVariableTerm identity)
-            {
-                // Applied argument.
-                newScope.BindMutable(identity.Identity, inferredArgumentHint);
-            }
-
-            // Calculate inferring with applied argument.
-            var body = this.Body.Infer(newScope);
-
-            context.Unify(body.HigherOrder, appliedHigherOrderHint);
-
-            return
-                this.Parameter.EqualsWithHigherOrder(parameter) &&
-                this.Body.EqualsWithHigherOrder(body) ?
-                    this :
-                    From(parameter, body);
-        }
-
         public override Term Fixup(FixupContext context)
         {
-            // Best effort fixup procedure.
-
-            var parameter = this.Parameter.Fixup(context);
-            var body = this.Body.Fixup(context);
-
-            return
-                this.Parameter.EqualsWithHigherOrder(parameter) &&
-                this.Body.EqualsWithHigherOrder(body) ?
-                    this :
-                    From(parameter, body);
-        }
-
-        Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term appliedHigherOrderHint)
-        {
-            // Strict fixup procedure.
-
             var parameter = this.Parameter.Fixup(context);
             var body = this.Body.Fixup(context);
 
@@ -103,10 +75,12 @@ namespace Favalon.Terms
             var newScope = context.NewScope();
 
             var parameter = this.Parameter.Reduce(context);
-            if (parameter is FreeVariableTerm identity)
+            if (parameter is BoundIdentityTerm identity)
             {
-                // Shadowed just parameter, will transfer parameter higherorder.
-                newScope.BindMutable(identity.Identity, identity);
+                // Shadowed just parameter, will transfer parameter higher order.
+                newScope.BindMutable(
+                    identity.Identity,
+                    FreeVariableTerm.Create(identity.Identity, identity.HigherOrder));
             }
 
             var body = this.Body.Reduce(newScope);
@@ -122,8 +96,7 @@ namespace Favalon.Terms
         {
             // The parameter and argument are out of inner scope.
             var parameter = this.Parameter.Reduce(context);
-
-            if (parameter is FreeVariableTerm identity)
+            if (parameter is BoundIdentityTerm identity)
             {
                 var reducedArgument = argument.Reduce(context);
 
@@ -172,18 +145,21 @@ namespace Favalon.Terms
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"{this.Parameter.PrettyPrint(context)} -> {this.Body.PrettyPrint(context)}";
 
-        public static Term From(Term parameter, Term body) =>
+        private static Term From(Term parameter, Term body, Term? higherOrder) =>
             (parameter, body) switch
             {
                 (null, null) => TerminationTerm.Instance,
                 (TerminationTerm _, TerminationTerm _) => TerminationTerm.Instance,
-                (Term _, null) => From(parameter, UnspecifiedTerm.Instance),
-                (null, Term _) => From(UnspecifiedTerm.Instance, body),
+                (Term _, null) => From(parameter, UnspecifiedTerm.Instance, higherOrder),
+                (null, Term _) => From(UnspecifiedTerm.Instance, body, higherOrder),
                 (UnspecifiedTerm _, UnspecifiedTerm _) => Unspecified,
                 (KindTerm _, KindTerm _) when
                     parameter.Equals(KindTerm.Instance) && body.Equals(KindTerm.Instance) => Kind,
-                _ => new LambdaTerm(parameter, body)
+                _ => new LambdaTerm(parameter, body, higherOrder)
             };
+
+        public static Term From(Term parameter, Term body) =>
+            From(parameter, body, null);
 
         public static Term? From(IEnumerable<Term> terms) =>
             terms.Memoize() switch
@@ -198,18 +174,18 @@ namespace Favalon.Terms
 
         // _ -> _
         public static readonly LambdaTerm Unspecified =
-            new LambdaTerm(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
+            new LambdaTerm(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance, null!);
 
         // _ -> _ -> _
         public static readonly LambdaTerm Unspecified2 =
-            new LambdaTerm(UnspecifiedTerm.Instance, Unspecified);
+            new LambdaTerm(UnspecifiedTerm.Instance, Unspecified, null!);
 
         // * -> *
         public static readonly LambdaTerm Kind =
-            new LambdaTerm(KindTerm.Instance, KindTerm.Instance);
+            new LambdaTerm(KindTerm.Instance, KindTerm.Instance, null!);
 
         // * -> * -> *
         public static readonly LambdaTerm Kind2 =
-            new LambdaTerm(KindTerm.Instance, Kind);
+            new LambdaTerm(KindTerm.Instance, Kind, null!);
     }
 }

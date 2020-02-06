@@ -32,10 +32,6 @@ namespace Favalon.Terms
     // It's only using in ApplyTerm.
     public interface IApplicableTerm
     {
-        Term InferForApply(InferContext context, Term inferredArgumentHint, Term appliedHigherOrderHint);
-
-        Term FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term appliedHigherOrderHint);
-
         AppliedResult ReduceForApply(ReduceContext context, Term argument, Term appliedHigherOrderHint);
     }
 
@@ -97,13 +93,8 @@ namespace Favalon.Terms
         public override Term Infer(InferContext context)
         {
             var argument = this.Argument.Infer(context);
+            var function = this.Function.Infer(context);
             var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
-
-            var function = this.Function switch
-            {
-                IApplicableTerm applicable => applicable.InferForApply(context, argument, higherOrder),
-                _ => this.Function.Infer(context)
-            };
 
             // (f:('1 -> '2) a:'1):'2
             context.Unify(
@@ -121,13 +112,8 @@ namespace Favalon.Terms
         public override Term Fixup(FixupContext context)
         {
             var argument = this.Argument.Fixup(context);
+            var function =  this.Function.Fixup(context);
             var higherOrder = this.HigherOrder.Fixup(context);
-
-            var function = this.Function switch
-            {
-                IApplicableTerm applicable => applicable.FixupForApply(context, argument, higherOrder),
-                _ => this.Function.Fixup(context)
-            };
 
             return
                 this.Function.EqualsWithHigherOrder(function) &&

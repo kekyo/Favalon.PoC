@@ -30,38 +30,7 @@ namespace Favalon.Terms.Operators
                         this.OnCreate(lhs, higherOrder);
             }
 
-            Term IApplicableTerm.InferForApply(InferContext context, Term inferredArgumentHint, Term appliedHigherOrderHint)
-            {
-                var lhs = this.Lhs.Infer(context);
-                var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
-                var higherOrderByArgument =
-                    LambdaTerm.From(
-                        inferredArgumentHint,
-                        appliedHigherOrderHint);
-
-                context.Unify(inferredArgumentHint.HigherOrder, lhs.HigherOrder);
-                context.Unify(higherOrderByArgument, higherOrder);
-
-                return
-                    this.Lhs.EqualsWithHigherOrder(lhs) &&
-                    this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
-                        this :
-                        this.OnCreate(lhs, higherOrder);
-            }
-
             public override Term Fixup(FixupContext context)
-            {
-                var lhs = this.Lhs.Fixup(context);
-                var higherOrder = this.HigherOrder.Fixup(context);
-
-                return
-                    this.Lhs.EqualsWithHigherOrder(lhs) &&
-                    this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
-                        this :
-                        this.OnCreate(lhs, higherOrder);
-            }
-
-            Term IApplicableTerm.FixupForApply(FixupContext context, Term fixuppedArgumentHint, Term appliedHigherOrderHint)
             {
                 var lhs = this.Lhs.Fixup(context);
                 var higherOrder = this.HigherOrder.Fixup(context);

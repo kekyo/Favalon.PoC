@@ -17,13 +17,7 @@ namespace Favalon.Terms.Types
         public override Term Infer(InferContext context) =>
             this;
 
-        Term IApplicableTerm.InferForApply(InferContext context, Term argument, Term appliedHigherOrderHint) =>
-            this;
-
         public override Term Fixup(FixupContext context) =>
-            this;
-
-        Term IApplicableTerm.FixupForApply(FixupContext context, Term argument, Term appliedHigherOrderHint) =>
             this;
 
         public override Term Reduce(ReduceContext context) =>
@@ -32,7 +26,6 @@ namespace Favalon.Terms.Types
         AppliedResult IApplicableTerm.ReduceForApply(ReduceContext context, Term argument, Term appliedHigherOrderHint)
         {
             var argument_ = argument.Reduce(context);
-
             if (argument_ is ClrTypeTerm typeTerm)
             {
                 var realType = type.MakeGenericType(typeTerm.Type);

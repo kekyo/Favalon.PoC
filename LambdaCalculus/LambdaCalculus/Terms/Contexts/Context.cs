@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Favalon.Terms.Types;
 
 namespace Favalon.Terms.Contexts
 {
@@ -13,6 +14,7 @@ namespace Favalon.Terms.Contexts
                 new PlaceholderTerm(current++, higherOrder);
         }
 
+        internal readonly TypeCalculator calculator;
         internal readonly PlaceholderIndexer indexer;
         internal readonly Context? parent;
 
@@ -20,15 +22,17 @@ namespace Favalon.Terms.Contexts
 
         public readonly int Iterations;
 
-        private protected Context(int iterations)
+        private protected Context(int iterations, TypeCalculator calculator)
         {
             indexer = new PlaceholderIndexer();
+            this.calculator = calculator;
             this.Iterations = iterations;
         }
 
         private protected Context(Context parent)
         {
             this.indexer = parent.indexer;
+            this.calculator = parent.calculator;
             this.parent = parent;
             this.Iterations = parent.Iterations;
         }
@@ -36,6 +40,7 @@ namespace Favalon.Terms.Contexts
         private protected Context(Context parent, Dictionary<string, Term> boundTerms)
         {
             this.indexer = parent.indexer;
+            this.calculator = parent.calculator;
             this.parent = parent;
             this.boundTerms = boundTerms;
             this.Iterations = parent.Iterations;

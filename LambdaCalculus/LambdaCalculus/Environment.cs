@@ -1,5 +1,6 @@
-﻿using Favalon.Terms.Contexts;
-using Favalon.Terms;
+﻿using Favalon.Terms;
+using Favalon.Terms.Contexts;
+using Favalon.Terms.Types;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
@@ -8,15 +9,21 @@ namespace Favalon
 {
     public sealed class Environment : Context
     {
-        private Environment(int iterations) :
-            base(iterations)
+        private Environment(int iterations, TypeCalculator calculator) :
+            base(iterations, calculator)
         { }
 
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
 
-        public static Environment Pure(int iterations = EnvironmentFactory.DefaultIterations) =>
-            new Environment(iterations);
+        public static Environment Pure(
+            int iterations = EnvironmentFactory.DefaultIterations) =>
+            new Environment(iterations, TypeCalculator.Instance);
+
+        public static Environment Pure(
+            TypeCalculator calculator,
+            int iterations = EnvironmentFactory.DefaultIterations) =>
+            new Environment(iterations, calculator);
 
         /////////////////////////////////////////////////////////////////////////
         // Binder

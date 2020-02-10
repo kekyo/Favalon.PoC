@@ -7,14 +7,14 @@ namespace Favalon.Terms.Types
         protected TypeCalculator()
         { }
 
-        public override Term? Widening(Term? to, Term? from)
+        public override Term? Widen(Term? to, Term? from)
         {
             switch (to, from)
             {
                 // int->object: int->object <-- object->int
                 case (LambdaTerm(Term toParameter, Term toBody), LambdaTerm(Term fromParameter, Term fromBody)):
-                    var parameterTerm = this.Widening(fromParameter, toParameter) is Term ? toParameter : null;   // TODO: Narrowing
-                    var bodyTerm = this.Widening(toBody, fromBody);
+                    var parameterTerm = this.Widen(fromParameter, toParameter) is Term ? toParameter : null;   // TODO: Narrowing
+                    var bodyTerm = this.Widen(toBody, fromBody);
                     return parameterTerm is Term pt && bodyTerm is Term bt ?
                         LambdaTerm.From(pt, bt) :
                         null;
@@ -29,7 +29,7 @@ namespace Favalon.Terms.Types
                     return placeholder;
 
                 default:
-                    if (base.Widening(to, from) is Term result)
+                    if (base.Widen(to, from) is Term result)
                     {
                         return result;
                     }

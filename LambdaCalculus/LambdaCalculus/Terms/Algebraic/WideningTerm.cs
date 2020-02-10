@@ -19,7 +19,7 @@ namespace Favalon.Terms.Algebraic
             var lhs_= lhs.Reduce(context);
             var rhs_ = rhs.Reduce(context);
 
-            if (calculator.Widening(lhs_, rhs_) is Term widen)
+            if (calculator.Widen(lhs_, rhs_) is Term widen)
             {
                 return widen;
             }

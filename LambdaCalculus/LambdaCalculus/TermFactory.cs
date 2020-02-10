@@ -94,6 +94,14 @@ namespace Favalon
         ///////////////////////////////////////////////////////////////////////////
         // Types
 
+
+        public static SumTypeTerm SumType(Term lhs, Term rhs) =>
+            SumTypeTerm.Create(new[] { lhs, rhs }, UnspecifiedTerm.Instance);
+        public static Term? SumType(params Term[] terms) =>
+            SumTypeTerm.From(terms, UnspecifiedTerm.Instance);
+        public static Term? SumType(IEnumerable<Term> terms) =>
+            SumTypeTerm.From(terms.Memoize(), UnspecifiedTerm.Instance);
+
         public static WideningTerm WideningType(Term lhs, Term rhs) =>
             WideningTerm.Create(lhs, rhs, UnspecifiedTerm.Instance, TypeCalculator.Instance);
     }

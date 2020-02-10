@@ -9,7 +9,7 @@ namespace Favalon.Terms.Algebraic
         protected AlgebraicCalculator()
         { }
 
-        public virtual Term? Widening(Term? to, Term? from)
+        public virtual Term? Widen(Term? to, Term? from)
         {
             switch (to, from)
             {
@@ -28,7 +28,7 @@ namespace Favalon.Terms.Algebraic
                 // (_[1] + _[2]): (_[1] + _[2]) <-- (_[2] + _[1])
                 case (SumTerm(Term[] toTerms), SumTerm(Term[] fromTerms)):
                     var terms1 = fromTerms.
-                        Select(rhsTerm => toTerms.Any(lhsTerm => Widening(lhsTerm, rhsTerm) != null)).
+                        Select(rhsTerm => toTerms.Any(lhsTerm => Widen(lhsTerm, rhsTerm) != null)).
                         Memoize();
                     return terms1.All(term => term) ?
                         to :
@@ -38,7 +38,7 @@ namespace Favalon.Terms.Algebraic
                 case (Term _, SumTerm(Term[] fromTerms)):
                     Debug.Assert(fromTerms.Length >= 2);
                     var terms2 = fromTerms.
-                        Select(rhsTerm => Widening(to, rhsTerm)).
+                        Select(rhsTerm => Widen(to, rhsTerm)).
                         Memoize();
                     return terms2.All(term => term != null) ?
                         SumTerm.From(terms2.Distinct().Memoize()!, UnspecifiedTerm.Instance) :
@@ -52,7 +52,7 @@ namespace Favalon.Terms.Algebraic
                 case (SumTerm(Term[] toTerms), Term _):
                     Debug.Assert(toTerms.Length >= 2);
                     var terms3 = toTerms.
-                        Select(lhsTerm => Widening(lhsTerm, from)).
+                        Select(lhsTerm => Widen(lhsTerm, from)).
                         Memoize();
                     // Requirements: 1 or any terms widened.
                     if (terms3.Any(term => term != null))
@@ -79,7 +79,7 @@ namespace Favalon.Terms.Algebraic
                 return 0;
             }
 
-            var widened = this.Widening(x, y);
+            var widened = this.Widen(x, y);
             return (widened is Term) ? -1 : 1;
         }
 

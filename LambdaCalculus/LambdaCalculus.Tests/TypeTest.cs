@@ -195,7 +195,7 @@ namespace Favalon
             var to = Sum(toTypes.Select(CreateTermFromType))!;
             var from = Sum(fromTypes.Select(CreateTermFromType))!;
 
-            var actual = ClrTypeCalculator.Instance.Widening(to, from);
+            var actual = ClrTypeCalculator.Instance.Widen(to, from);
 
             var expected = Sum(expectedTypes.Select(CreateTermFromType));
 
@@ -245,7 +245,7 @@ namespace Favalon
             var to = Sum(toTypes.Select(CreateTermFromType))!;
             var from = Sum(fromTypes.Select(CreateTermFromType))!;
 
-            var actual = ClrTypeCalculator.Instance.Widening(to, from);
+            var actual = ClrTypeCalculator.Instance.Widen(to, from);
 
             var expected = Sum(expectedTypes.Select(CreateTermFromType));
 
@@ -366,11 +366,11 @@ namespace Favalon
             var to = Constant(toType);
             var from = Constant(fromType);
 
-            var actual1 = ClrTypeCalculator.Instance.Widening(to, from);
+            var actual1 = ClrTypeCalculator.Instance.Widen(to, from);
 
             Assert.AreEqual(to, actual1);
 
-            var actual2 = ClrTypeCalculator.Instance.Widening(from, to);
+            var actual2 = ClrTypeCalculator.Instance.Widen(from, to);
 
             Assert.IsNull(actual2);
         }
@@ -386,11 +386,11 @@ namespace Favalon
             var to = Constant(typeof(char));
             var from = Constant(typeof(ushort));
 
-            var actual1 = ClrTypeCalculator.Instance.Widening(to, from);
+            var actual1 = ClrTypeCalculator.Instance.Widen(to, from);
 
             Assert.AreEqual(to, actual1);
 
-            var actual2 = ClrTypeCalculator.Instance.Widening(from, to);
+            var actual2 = ClrTypeCalculator.Instance.Widen(from, to);
 
             Assert.AreEqual(from, actual2);
         }

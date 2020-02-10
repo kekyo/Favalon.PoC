@@ -28,7 +28,7 @@ namespace Favalon.Terms.Types
             to.IsAssignableFrom(from) ||
             (wideningPrimitives.TryGetValue(to, out var fromTypes) && fromTypes.Contains(from));
 
-        public override Term? Widening(Term? to, Term? from)
+        public override Term? Widen(Term? to, Term? from)
         {
             switch (to, from)
             {
@@ -41,12 +41,12 @@ namespace Favalon.Terms.Types
                         null;
 
                 case (ClrMethodTerm toMethod, ClrMethodTerm fromMethod):
-                    return (this.Widening(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?
+                    return (this.Widen(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?
                         toMethod :
                         null;
 
                 default:
-                    return base.Widening(to, from);
+                    return base.Widen(to, from);
             }
         }
 

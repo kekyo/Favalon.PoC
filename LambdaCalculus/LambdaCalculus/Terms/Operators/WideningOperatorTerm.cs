@@ -21,7 +21,7 @@ namespace Favalon.Terms.Operators
             ":>";
 
         public static WideningOperatorTerm Create(Term higherOrder, AlgebraicCalculator calculator) =>
-            new WideningOperatorTerm(LambdaTerm.Repeat(higherOrder, 3), calculator);
+            new WideningOperatorTerm(LambdaTerm.Repeat(higherOrder, 3)!, calculator);
 
         private sealed class WideningOperatorClosureTerm : ClosureTerm<WideningOperatorClosureTerm>
         {

@@ -35,7 +35,7 @@ namespace Favalon
         {
             var term =
                 Apply(
-                    Sum(
+                    SumType(
                         typeof(Convert).GetMethods().
                         Where(method => (method.Name == "ToInt32") && (method.GetParameters().Length == 1)).
                         Select(Constant))!,

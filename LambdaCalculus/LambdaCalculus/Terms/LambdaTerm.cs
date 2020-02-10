@@ -43,9 +43,12 @@ namespace Favalon.Terms
             if (parameter is BoundIdentityTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higher order.
+                //newScope.BindMutable(
+                //    identity.Identity,
+                //    FreeVariableTerm.Create(identity.Identity, identity.HigherOrder));
                 newScope.BindMutable(
                     identity.Identity,
-                    FreeVariableTerm.Create(identity.Identity, identity.HigherOrder));
+                    identity);
             }
 
             // Calculate inferring with parameter identity.
@@ -78,9 +81,12 @@ namespace Favalon.Terms
             if (parameter is BoundIdentityTerm identity)
             {
                 // Shadowed just parameter, will transfer parameter higher order.
+                //newScope.BindMutable(
+                //    identity.Identity,
+                //    FreeVariableTerm.Create(identity.Identity, identity.HigherOrder));
                 newScope.BindMutable(
                     identity.Identity,
-                    FreeVariableTerm.Create(identity.Identity, identity.HigherOrder));
+                    identity);
             }
 
             var body = this.Body.Reduce(newScope);

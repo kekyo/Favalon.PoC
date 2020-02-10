@@ -64,6 +64,12 @@ namespace Favalon.Terms.Contexts
                 return true;
             }
 
+            // Unify higher orders.
+            if (!this.Unify(term1.HigherOrder, term2.HigherOrder))
+            {
+                return false;
+            }
+
             bool unified;
 
             if (term1 is PlaceholderTerm placeholder1)
@@ -85,9 +91,6 @@ namespace Favalon.Terms.Contexts
             {
                 unified = false;
             }
-
-            // Unify higher orders.
-            this.Unify(term1.HigherOrder, term2.HigherOrder);
 
             return unified;
         }

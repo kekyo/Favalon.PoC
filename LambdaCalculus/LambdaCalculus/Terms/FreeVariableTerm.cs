@@ -15,7 +15,8 @@ namespace Favalon.Terms
         {
             var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
-            if (context.LookupBoundTerm(this.Identity) is Term bound)
+            if (context.LookupBoundTerm(this.Identity) is Term bound &&
+                !bound.Equals(this))
             {
                 context.Unify(bound.HigherOrder, higherOrder);
 
@@ -30,10 +31,10 @@ namespace Favalon.Terms
 
         public override Term Reduce(ReduceContext context)
         {
-            if (context.LookupBoundTerm(this.Identity) is Term bound)
+            if (context.LookupBoundTerm(this.Identity) is Term bound &&
+                !bound.Equals(this))
             {
-                // Ignore repeating self references (will cause stack overflow)
-                return bound is IIdentityTerm ? bound : bound.Reduce(context);
+                return bound.Reduce(context);
             }
 
             var higherOrder = this.HigherOrder.Reduce(context);

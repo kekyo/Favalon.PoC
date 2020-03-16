@@ -29,7 +29,11 @@ namespace Favalet.Expressions
             this.HigherOrder = higherOrder;
         }
 
-        protected override Expression HigherOrder { get; }
+        public override Expression HigherOrder { get; }
+
+        public override bool Equals(Expression? rhs) =>
+            rhs is IdentityTerm identity &&
+                this.Identity.Equals(identity.Identity);
 
         public static IdentityTerm Create(string identity, Expression higherOrder) =>
             new IdentityTerm(identity, higherOrder);

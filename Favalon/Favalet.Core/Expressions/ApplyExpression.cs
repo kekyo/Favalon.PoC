@@ -32,7 +32,12 @@ namespace Favalet.Expressions
             this.HigherOrder = higherOrder;
         }
 
-        protected override Expression HigherOrder { get; }
+        public override Expression HigherOrder { get; }
+
+        public override bool Equals(Expression? rhs) =>
+            rhs is ApplyExpression apply &&
+                this.Function.Equals(apply.Function) &&
+                this.Argument.Equals(apply.Argument);
 
         public static ApplyExpression Create(
             Expression function, Expression argument, Expression higherOrder) =>

@@ -17,11 +17,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+// Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
+#pragma warning disable CS0659
+
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
 {
-    public abstract partial class Expression
+    public abstract partial class Expression :
+        IEquatable<Expression?>
     {
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -29,6 +34,14 @@ namespace Favalet.Expressions
         protected Expression()
         { }
 
-        protected abstract Expression HigherOrder { get; }
+        public abstract Expression HigherOrder { get; }
+
+        public abstract bool Equals(Expression? rhs);
+
+        public override sealed bool Equals(object obj) =>
+            this.Equals(obj as Expression);
+
+        bool IEquatable<Expression?>.Equals(Expression? other) =>
+            this.Equals(other);
     }
 }

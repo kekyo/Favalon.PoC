@@ -31,7 +31,11 @@ namespace Favalet.Expressions
             this.HigherOrder = higherOrder;
         }
 
-        protected override Expression HigherOrder { get; }
+        public override Expression HigherOrder { get; }
+
+        public override bool Equals(Expression? rhs) =>
+            rhs is ConstantTerm constant &&
+                this.Value.Equals(constant.Value);
 
         public static ConstantTerm Create(object value) =>
             new ConstantTerm(value, ExpressionFactory.Identity(value.GetType().GetFullName()));

@@ -35,7 +35,7 @@ namespace Favalet.Internal
         {
             '!'/* , '"' */, '#', '$', '%', '&' /* , ''' */, /* '(', ')', */
             '*', '+', ',', '-'/* , '.'*/, '/'/*, ':' */, ';', '<', '=', '>', '?',
-            '@', /* '[', */ '\\', /* ']', */ '^', '_', '`', /* '{', */ '|', /* '}', */ '~'
+            '@', /* '[', */ '\\', /* ']', */ '^' /*, '_' */, '`', /* '{', */ '|', /* '}', */ '~'
         };
 
         static StringUtilities()
@@ -91,6 +91,18 @@ namespace Favalet.Internal
         public static bool IsOperator(char ch) =>
             operatorChars.Contains(ch);
 
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static bool IsSingleQuote(char ch) =>
+            ch == '\'';
+
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static bool IsDoubleQuote(char ch) =>
+            ch == '"';
+
 #if NET35
         public static string Join(string separator, IEnumerable<string> values) =>
             string.Join(separator, values.ToArray());
@@ -104,11 +116,5 @@ namespace Favalet.Internal
         public static string Join(string separator, IEnumerable<string> values) =>
             string.Join(separator, values);
 #endif
-
-#if NET45 || NETSTANDARD1_0
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static string Append(this string lhs, string rhs) =>
-            lhs + rhs;
     }
 }

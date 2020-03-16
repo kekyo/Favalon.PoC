@@ -53,7 +53,10 @@ namespace Favalet.Tokens
         public override bool Equals(object obj) =>
             this.Equals(obj as ParenthesisToken);
 
-        public void Deconstruct(out ParenthesisPair parenthesis) =>
+        public void Deconstruct(out char symbol, out ParenthesisPair parenthesis)
+        {
+            symbol = this.Symbol;
             parenthesis = this.Pair;
+        }
     }
 }

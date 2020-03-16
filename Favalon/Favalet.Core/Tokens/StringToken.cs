@@ -21,27 +21,27 @@ using System;
 
 namespace Favalet.Tokens
 {
-    public sealed class IdentityToken :
-        ValueToken, IEquatable<IdentityToken?>
+    public sealed class StringToken :
+        ValueToken, IEquatable<StringToken?>
     {
-        public readonly string Identity;
+        public readonly string Value;
 
-        internal IdentityToken(string identity) =>
-            this.Identity = identity;
+        internal StringToken(string value) =>
+            this.Value = value;
 
         public override int GetHashCode() =>
-            this.Identity.GetHashCode();
+            this.Value.GetHashCode();
 
-        public bool Equals(IdentityToken? other) =>
-            other?.Identity.Equals(this.Identity) ?? false;
+        public bool Equals(StringToken? other) =>
+            other?.Value.Equals(this.Value) ?? false;
 
         public override bool Equals(object obj) =>
-            this.Equals(obj as IdentityToken);
+            this.Equals(obj as StringToken);
 
         public override string ToString() =>
-            this.Identity;
+            $"\"{this.Value}\"";
 
-        public void Deconstruct(out string identity) =>
-            identity = this.Identity;
+        public void Deconstruct(out string value) =>
+            value = this.Value;
     }
 }

@@ -37,29 +37,37 @@ namespace Favalet.LexRunners
             else if (char.IsDigit(ch))
             {
                 context.TokenBuffer.Append(ch);
-                return LexRunnerResult.Empty(NumericRunner.Instance);
+                return LexRunnerResult.Empty(
+                    NumericRunner.Instance);
+            }
+            else if (StringUtilities.IsDoubleQuote(ch))
+            {
+                return LexRunnerResult.Empty(
+                    StringRunner.Instance);
             }
             else if (StringUtilities.IsOpenParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
-                    Token.Open(ch));
+                    TokenFactory.Open(ch));
             }
             else if (StringUtilities.IsCloseParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
-                    Token.Close(ch));
+                    TokenFactory.Close(ch));
             }
             else if (StringUtilities.IsOperator(ch))
             {
                 context.TokenBuffer.Append(ch);
-                return LexRunnerResult.Empty(OperatorRunner.Instance);
+                return LexRunnerResult.Empty(
+                    OperatorRunner.Instance);
             }
             else if (!char.IsControl(ch))
             {
                 context.TokenBuffer.Append(ch);
-                return LexRunnerResult.Empty(IdentityRunner.Instance);
+                return LexRunnerResult.Empty(
+                    IdentityRunner.Instance);
             }
             else
             {

@@ -17,31 +17,21 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using System;
-
-namespace Favalet.Tokens
+namespace Favalet.Expressions
 {
-    public sealed class IdentityToken :
-        ValueToken, IEquatable<IdentityToken?>
+    public sealed class IdentityTerm : Term
     {
         public readonly string Identity;
 
-        internal IdentityToken(string identity) =>
+        private IdentityTerm(string identity, Expression higherOrder)
+        {
             this.Identity = identity;
+            this.HigherOrder = higherOrder;
+        }
 
-        public override int GetHashCode() =>
-            this.Identity.GetHashCode();
+        protected override Expression HigherOrder { get; }
 
-        public bool Equals(IdentityToken? other) =>
-            other?.Identity.Equals(this.Identity) ?? false;
-
-        public override bool Equals(object obj) =>
-            this.Equals(obj as IdentityToken);
-
-        public override string ToString() =>
-            this.Identity;
-
-        public void Deconstruct(out string identity) =>
-            identity = this.Identity;
+        public static IdentityTerm Create(string identity, Expression higherOrder) =>
+            new IdentityTerm(identity, higherOrder);
     }
 }

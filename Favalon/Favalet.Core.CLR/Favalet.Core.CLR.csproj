@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Properties\" />
+      <ProjectReference Include="..\Favalet.Core\Favalet.Core.csproj" />
     </ItemGroup>
 
 </Project>

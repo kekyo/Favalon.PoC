@@ -17,12 +17,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.LexRunners;
-using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Favalet.Tokens
 {
     public abstract partial class Token
     {
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        protected Token()
+        { }
     }
 }

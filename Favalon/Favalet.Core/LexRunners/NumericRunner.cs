@@ -32,39 +32,45 @@ namespace Favalet.LexRunners
         {
             var token = context.TokenBuffer.ToString();
             context.TokenBuffer.Clear();
-            return new NumericToken(token);
+            return TokenFactory.Numeric(token);
         }
 
         public override LexRunnerResult Run(LexRunnerContext context, char ch)
         {
             if (char.IsWhiteSpace(ch))
             {
-                var token = context.TokenBuffer.ToString();
-                context.TokenBuffer.Clear();
                 return LexRunnerResult.Create(
                     WaitingIgnoreSpaceRunner.Instance,
-                    new NumericToken(token),
+                    InternalFinish(context),
                     WhiteSpaceToken.Instance);
+            }
+            else if (StringUtilities.IsDoubleQuote(ch))
+            {
+                return LexRunnerResult.Create(
+                    StringRunner.Instance,
+                    InternalFinish(context));
             }
             else if (StringUtilities.IsOpenParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context),
-                    Token.Open(ch));
+                    TokenFactory.Open(ch));
             }
             else if (StringUtilities.IsCloseParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context),
-                    Token.Close(ch));
+                    TokenFactory.Close(ch));
             }
             else if (StringUtilities.IsOperator(ch))
             {
-                var token0 = InternalFinish(context);
+                var token = InternalFinish(context);
                 context.TokenBuffer.Append(ch);
-                return LexRunnerResult.Create(OperatorRunner.Instance, token0);
+                return LexRunnerResult.Create(
+                    OperatorRunner.Instance,
+                    token);
             }
             else if (char.IsDigit(ch))
             {

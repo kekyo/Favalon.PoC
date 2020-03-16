@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Favalet.Tokens
 {
-    partial class Token
+    public static class TokenFactory
     {
         public static IEnumerable<char> OperatorChars =>
             StringUtilities.operatorChars;
@@ -51,5 +51,8 @@ namespace Favalet.Tokens
 
         public static NumericToken Numeric(string value) =>
             new NumericToken(value);
+
+        public static StringToken String(string value) =>
+            new StringToken(value);
     }
 }

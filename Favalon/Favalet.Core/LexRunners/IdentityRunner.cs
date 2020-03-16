@@ -39,23 +39,30 @@ namespace Favalet.LexRunners
         {
             if (char.IsWhiteSpace(ch))
             {
-                var token = context.TokenBuffer.ToString();
-                context.TokenBuffer.Clear();
-                return LexRunnerResult.Create(WaitingIgnoreSpaceRunner.Instance, new IdentityToken(token), WhiteSpaceToken.Instance);
+                return LexRunnerResult.Create(
+                    WaitingIgnoreSpaceRunner.Instance,
+                    InternalFinish(context),
+                    WhiteSpaceToken.Instance);
+            }
+            else if (StringUtilities.IsDoubleQuote(ch))
+            {
+                return LexRunnerResult.Create(
+                    StringRunner.Instance,
+                    InternalFinish(context));
             }
             else if (StringUtilities.IsOpenParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context),
-                    Token.Open(ch));
+                    TokenFactory.Open(ch));
             }
             else if (StringUtilities.IsCloseParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
                     WaitingRunner.Instance,
                     InternalFinish(context),
-                    Token.Close(ch));
+                    TokenFactory.Close(ch));
             }
             else if (StringUtilities.IsOperator(ch))
             {

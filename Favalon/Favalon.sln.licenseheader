@@ -1,5 +1,4 @@
-﻿extensions: designer.cs generated.cs
-extensions: .cs .cpp .h
+﻿extensions: .cs .cpp .h
 ////////////////////////////////////////////////////////////////////////////
 //
 // Favalon - An Interactive Shell Based on a Typed Lambda Calculus.

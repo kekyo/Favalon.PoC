@@ -25,595 +25,778 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using static Favalet.Tokens.TokenFactory;
+
 namespace Favalet
 {
     [TestFixture]
     public sealed class LexerTest
     {
-        private static readonly Func<string, IEnumerable<Token>>[] LexerRunners =
+        private static readonly Func<string, Token[]>[] LexerRunners =
             new[]
             {
-                new Func<string, IEnumerable<Token>>(text => Lexer.EnumerableTokens(text)),
-                new Func<string, IEnumerable<Token>>(text => Lexer.EnumerableTokens(text.AsEnumerable())),
-                new Func<string, IEnumerable<Token>>(text => Lexer.EnumerableTokens(new StringReader(text))),
+                new Func<string, Token[]>(text => Lexer.EnumerableTokens(text).ToArray()),
+                new Func<string, Token[]>(text => Lexer.EnumerableTokens(text.AsEnumerable()).ToArray()),
+                new Func<string, Token[]>(text => Lexer.EnumerableTokens(new StringReader(text)).ToArray()),
             };
 
         ////////////////////////////////////////////////////
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableIdentityTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerableIdentityTokens(Func<string, Token[]> run)
         {
             var text = "abc def ghi";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("abc"),
-                    Token.WhiteSpace(),
-                    Token.Identity("def"),
-                    Token.WhiteSpace(),
-                    Token.Identity("ghi") },
+                    Identity("abc"),
+                    WhiteSpace(),
+                    Identity("def"),
+                    WhiteSpace(),
+                    Identity("ghi") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableIdentityTokensBeforeSpace(Func<string, IEnumerable<Token>> run)
+        public void EnumerableIdentityTokensBeforeSpace(Func<string, Token[]> run)
         {
             var text = "  abc def ghi";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("abc"),
-                    Token.WhiteSpace(),
-                    Token.Identity("def"),
-                    Token.WhiteSpace(),
-                    Token.Identity("ghi") },
+                    Identity("abc"),
+                    WhiteSpace(),
+                    Identity("def"),
+                    WhiteSpace(),
+                    Identity("ghi") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableIdentityTokensAfterSpace(Func<string, IEnumerable<Token>> run)
+        public void EnumerableIdentityTokensAfterSpace(Func<string, Token[]> run)
         {
             var text = "abc def ghi  ";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("abc"),
-                    Token.WhiteSpace(),
-                    Token.Identity("def"),
-                    Token.WhiteSpace(),
-                    Token.Identity("ghi"),
-                    Token.WhiteSpace() },
+                    Identity("abc"),
+                    WhiteSpace(),
+                    Identity("def"),
+                    WhiteSpace(),
+                    Identity("ghi"),
+                    WhiteSpace() },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableIdentityTokensLongSpace(Func<string, IEnumerable<Token>> run)
+        public void EnumerableIdentityTokensLongSpace(Func<string, Token[]> run)
         {
             var text = "abc      def      ghi";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("abc"),
-                    Token.WhiteSpace(),
-                    Token.Identity("def"),
-                    Token.WhiteSpace(),
-                    Token.Identity("ghi") },
+                    Identity("abc"),
+                    WhiteSpace(),
+                    Identity("def"),
+                    WhiteSpace(),
+                    Identity("ghi") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableIdentityTokensBeforeBrackets(Func<string, IEnumerable<Token>> run)
+        public void EnumerableIdentityTokensBeforeBrackets(Func<string, Token[]> run)
         {
             var text = "(abc def) ghi";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Open('('),
-                    Token.Identity("abc"),
-                    Token.WhiteSpace(),
-                    Token.Identity("def"),
-                    Token.Close(')'),
-                    Token.WhiteSpace(),
-                    Token.Identity("ghi") },
+                    Open('('),
+                    Identity("abc"),
+                    WhiteSpace(),
+                    Identity("def"),
+                    Close(')'),
+                    WhiteSpace(),
+                    Identity("ghi") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableIdentityTokensAfterBrackets(Func<string, IEnumerable<Token>> run)
+        public void EnumerableIdentityTokensAfterBrackets(Func<string, Token[]> run)
         {
             var text = "abc (def ghi)";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("abc"),
-                    Token.WhiteSpace(),
-                    Token.Open('('),
-                    Token.Identity("def"),
-                    Token.WhiteSpace(),
-                    Token.Identity("ghi"),
-                    Token.Close(')') },
+                    Identity("abc"),
+                    WhiteSpace(),
+                    Open('('),
+                    Identity("def"),
+                    WhiteSpace(),
+                    Identity("ghi"),
+                    Close(')') },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableIdentityTokensWithSpacingBrackets(Func<string, IEnumerable<Token>> run)
+        public void EnumerableIdentityTokensWithSpacingBrackets(Func<string, Token[]> run)
         {
             var text = "abc ( def ) ghi";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("abc"),
-                    Token.WhiteSpace(),
-                    Token.Open('('),
-                    Token.WhiteSpace(),
-                    Token.Identity("def"),
-                    Token.WhiteSpace(),
-                    Token.Close(')'),
-                    Token.WhiteSpace(),
-                    Token.Identity("ghi") },
+                    Identity("abc"),
+                    WhiteSpace(),
+                    Open('('),
+                    WhiteSpace(),
+                    Identity("def"),
+                    WhiteSpace(),
+                    Close(')'),
+                    WhiteSpace(),
+                    Identity("ghi") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableIdentityTokensWithNoSpacingBrackets(Func<string, IEnumerable<Token>> run)
+        public void EnumerableIdentityTokensWithNoSpacingBrackets(Func<string, Token[]> run)
         {
             var text = "abc(def)ghi";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("abc"),
-                    Token.Open('('),
-                    Token.Identity("def"),
-                    Token.Close(')'),
-                    Token.Identity("ghi") },
+                    Identity("abc"),
+                    Open('('),
+                    Identity("def"),
+                    Close(')'),
+                    Identity("ghi") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableIdentityTrailsNumericTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerableIdentityTrailsNumericTokens(Func<string, Token[]> run)
         {
             var text = "a12 d34 g56";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("a12"),
-                    Token.WhiteSpace(),
-                    Token.Identity("d34"),
-                    Token.WhiteSpace(),
-                    Token.Identity("g56") },
+                    Identity("a12"),
+                    WhiteSpace(),
+                    Identity("d34"),
+                    WhiteSpace(),
+                    Identity("g56") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableSignLikeOperatorAndIdentityTokens1(Func<string, IEnumerable<Token>> run)
+        public void EnumerableSignLikeOperatorAndIdentityTokens1(Func<string, Token[]> run)
         {
             var text = "+abc";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("+"),
-                    Token.Identity("abc") },
+                    Identity("+"),
+                    Identity("abc") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableSignLikeOperatorAndIdentityTokens2(Func<string, IEnumerable<Token>> run)
+        public void EnumerableSignLikeOperatorAndIdentityTokens2(Func<string, Token[]> run)
         {
             var text = "-abc";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("-"),
-                    Token.Identity("abc") },
+                    Identity("-"),
+                    Identity("abc") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableStrictOperatorAndIdentityTokens1(Func<string, IEnumerable<Token>> run)
+        public void EnumerableStrictOperatorAndIdentityTokens1(Func<string, Token[]> run)
         {
             var text = "++abc";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("++"),
-                    Token.Identity("abc") },
+                    Identity("++"),
+                    Identity("abc") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableStrictOperatorAndIdentityTokens2(Func<string, IEnumerable<Token>> run)
+        public void EnumerableStrictOperatorAndIdentityTokens2(Func<string, Token[]> run)
         {
             var text = "--abc";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("--"),
-                    Token.Identity("abc") },
+                    Identity("--"),
+                    Identity("abc") },
                 actual);
         }
 
         ///////////////////////////////////////////////
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableNumericTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerableNumericTokens(Func<string, Token[]> run)
         {
             var text = "123 456 789";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("456"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("789") },
+                    Numeric("123"),
+                    WhiteSpace(),
+                    Numeric("456"),
+                    WhiteSpace(),
+                    Numeric("789") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableCombinedIdentityAndNumericTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerableCombinedIdentityAndNumericTokens(Func<string, Token[]> run)
         {
             var text = "abc 456 def";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("abc"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("456"),
-                    Token.WhiteSpace(),
-                    Token.Identity("def") },
+                    Identity("abc"),
+                    WhiteSpace(),
+                    Numeric("456"),
+                    WhiteSpace(),
+                    Identity("def") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableNumericTokensBeforeBrackets(Func<string, IEnumerable<Token>> run)
+        public void EnumerableNumericTokensBeforeBrackets(Func<string, Token[]> run)
         {
             var text = "(123 456) 789";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Open('('),
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("456"),
-                    Token.Close(')'),
-                    Token.WhiteSpace(),
-                    Token.Numeric("789") },
+                    Open('('),
+                    Numeric("123"),
+                    WhiteSpace(),
+                    Numeric("456"),
+                    Close(')'),
+                    WhiteSpace(),
+                    Numeric("789") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableNumericTokensAfterBrackets(Func<string, IEnumerable<Token>> run)
+        public void EnumerableNumericTokensAfterBrackets(Func<string, Token[]> run)
         {
             var text = "123 (456 789)";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.Open('('),
-                    Token.Numeric("456"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("789"),
-                    Token.Close(')') },
+                    Numeric("123"),
+                    WhiteSpace(),
+                    Open('('),
+                    Numeric("456"),
+                    WhiteSpace(),
+                    Numeric("789"),
+                    Close(')') },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableNumericTokensWithSpacingBrackets(Func<string, IEnumerable<Token>> run)
+        public void EnumerableNumericTokensWithSpacingBrackets(Func<string, Token[]> run)
         {
             var text = "123 ( 456 ) 789";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.Open('('),
-                    Token.WhiteSpace(),
-                    Token.Numeric("456"),
-                    Token.WhiteSpace(),
-                    Token.Close(')'),
-                    Token.WhiteSpace(),
-                    Token.Numeric("789") },
+                    Numeric("123"),
+                    WhiteSpace(),
+                    Open('('),
+                    WhiteSpace(),
+                    Numeric("456"),
+                    WhiteSpace(),
+                    Close(')'),
+                    WhiteSpace(),
+                    Numeric("789") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableNumericTokensWithNoSpacingBrackets(Func<string, IEnumerable<Token>> run)
+        public void EnumerableNumericTokensWithNoSpacingBrackets(Func<string, Token[]> run)
         {
             var text = "123(456)789";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Numeric("123"),
-                    Token.Open('('),
-                    Token.Numeric("456"),
-                    Token.Close(')'),
-                    Token.Numeric("789") },
+                    Numeric("123"),
+                    Open('('),
+                    Numeric("456"),
+                    Close(')'),
+                    Numeric("789") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerablePlusSignNumericTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerableNumericTokensBeforeString(Func<string, Token[]> run)
+        {
+            var text = "\"abc def\" 123";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    String("abc def"),
+                    WhiteSpace(),
+                    Numeric("123") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableNumericTokensAfterString(Func<string, Token[]> run)
+        {
+            var text = "123 \"abc def\"";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    Numeric("123"),
+                    WhiteSpace(),
+                    String("abc def") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableNumericTokensSpacingStrings(Func<string, Token[]> run)
+        {
+            var text = "123 \"abc def\" 456";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    Numeric("123"),
+                    WhiteSpace(),
+                    String("abc def"),
+                    WhiteSpace(),
+                    Numeric("456") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableNumericTokensNoSpacingStrings(Func<string, Token[]> run)
+        {
+            var text = "123\"abc def\"456";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    Numeric("123"),
+                    String("abc def"),
+                    Numeric("456") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableIdentityTokensBeforeStringWithNoSpacing(Func<string, Token[]> run)
+        {
+            var text = "\"abc def\"abc";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    String("abc def"),
+                    Identity("abc") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableIdentityTokensAfterStringWithNoSpacing(Func<string, Token[]> run)
+        {
+            var text = "abc\"abc def\"";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    Identity("abc"),
+                    String("abc def") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableIdentityTokensNoSpacingStrings(Func<string, Token[]> run)
+        {
+            var text = "abc\"abc def\"def";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    Identity("abc"),
+                    String("abc def"),
+                    Identity("def") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableStringTokensNoSpacingOperators(Func<string, Token[]> run)
+        {
+            var text = "+\"abc def\"-";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    Identity("+"),
+                    String("abc def"),
+                    Identity("-") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableOperatorTokensNoSpacingStrings(Func<string, Token[]> run)
+        {
+            var text = "\"abc\"+\"def\"";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    String("abc"),
+                    Identity("+"),
+                    String("def") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableStringTokensNoSpacingBrackets(Func<string, Token[]> run)
+        {
+            var text = "(\"abc def\")";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    Open('('),
+                    String("abc def"),
+                    Close(')') },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableOpenBracketTokensNoSpacingStrings(Func<string, Token[]> run)
+        {
+            var text = "\"abc\"(\"def\"";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    String("abc"),
+                    Open('('),
+                    String("def") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableCloseBracketTokensNoSpacingStrings(Func<string, Token[]> run)
+        {
+            var text = "\"abc\")\"def\"";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    String("abc"),
+                    Close(')'),
+                    String("def") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerableContinuousStrings(Func<string, Token[]> run)
+        {
+            var text = "\"abc\"\"def\"";
+            var actual = run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    String("abc"),
+                    String("def") },
+                actual);
+        }
+
+        [TestCaseSource("LexerRunners")]
+        public void EnumerablePlusSignNumericTokens(Func<string, Token[]> run)
         {
             var text = "+123 +456 +789";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.PlusSign(),
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.PlusSign(),
-                    Token.Numeric("456"),
-                    Token.WhiteSpace(),
-                    Token.PlusSign(),
-                    Token.Numeric("789") },
+                    PlusSign(),
+                    Numeric("123"),
+                    WhiteSpace(),
+                    PlusSign(),
+                    Numeric("456"),
+                    WhiteSpace(),
+                    PlusSign(),
+                    Numeric("789") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableMinusSignNumericTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerableMinusSignNumericTokens(Func<string, Token[]> run)
         {
             var text = "-123 -456 -789";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.MinusSign(),
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.MinusSign(),
-                    Token.Numeric("456"),
-                    Token.WhiteSpace(),
-                    Token.MinusSign(),
-                    Token.Numeric("789") },
+                    MinusSign(),
+                    Numeric("123"),
+                    WhiteSpace(),
+                    MinusSign(),
+                    Numeric("456"),
+                    WhiteSpace(),
+                    MinusSign(),
+                    Numeric("789") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerablePlusOperatorNumericTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerablePlusOperatorNumericTokens(Func<string, Token[]> run)
         {
             var text = "+ 123 + 456 + 789";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("+"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.Identity("+"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("456"),
-                    Token.WhiteSpace(),
-                    Token.Identity("+"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("789") },
+                    Identity("+"),
+                    WhiteSpace(),
+                    Numeric("123"),
+                    WhiteSpace(),
+                    Identity("+"),
+                    WhiteSpace(),
+                    Numeric("456"),
+                    WhiteSpace(),
+                    Identity("+"),
+                    WhiteSpace(),
+                    Numeric("789") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableMinusOperatorNumericTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerableMinusOperatorNumericTokens(Func<string, Token[]> run)
         {
             var text = "- 123 - 456 - 789";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("-"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.Identity("-"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("456"),
-                    Token.WhiteSpace(),
-                    Token.Identity("-"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("789") },
+                    Identity("-"),
+                    WhiteSpace(),
+                    Numeric("123"),
+                    WhiteSpace(),
+                    Identity("-"),
+                    WhiteSpace(),
+                    Numeric("456"),
+                    WhiteSpace(),
+                    Identity("-"),
+                    WhiteSpace(),
+                    Numeric("789") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerablePlusOperatorWithSpaceAndNumericTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerablePlusOperatorWithSpaceAndNumericTokens(Func<string, Token[]> run)
         {
             var text = "123 + 456";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.Identity("+"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("456") },
+                    Numeric("123"),
+                    WhiteSpace(),
+                    Identity("+"),
+                    WhiteSpace(),
+                    Numeric("456") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableMinusOperatorWithSpaceAndNumericTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerableMinusOperatorWithSpaceAndNumericTokens(Func<string, Token[]> run)
         {
             var text = "123 - 456";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Numeric("123"),
-                    Token.WhiteSpace(),
-                    Token.Identity("-"),
-                    Token.WhiteSpace(),
-                    Token.Numeric("456") },
+                    Numeric("123"),
+                    WhiteSpace(),
+                    Identity("-"),
+                    WhiteSpace(),
+                    Numeric("456") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerablePlusOperatorSideBySideAndNumericTokens2(Func<string, IEnumerable<Token>> run)
+        public void EnumerablePlusOperatorSideBySideAndNumericTokens2(Func<string, Token[]> run)
         {
             var text = "123+456";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Numeric("123"),
-                    Token.PlusSign(),
-                    Token.Numeric("456") },
+                    Numeric("123"),
+                    PlusSign(),
+                    Numeric("456") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableMinusOperatorSideBySideAndNumericTokens(Func<string, IEnumerable<Token>> run)
+        public void EnumerableMinusOperatorSideBySideAndNumericTokens(Func<string, Token[]> run)
         {
             var text = "123-456";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Numeric("123"),
-                    Token.MinusSign(),
-                    Token.Numeric("456") },
+                    Numeric("123"),
+                    MinusSign(),
+                    Numeric("456") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableComplexNumericOperatorTokens1(Func<string, IEnumerable<Token>> run)
+        public void EnumerableComplexNumericOperatorTokens1(Func<string, Token[]> run)
         {
             var text = "-123*(+456+789)";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.MinusSign(),
-                    Token.Numeric("123"),
-                    Token.Identity("*"),
-                    Token.Open('('),
-                    Token.PlusSign(),
-                    Token.Numeric("456"),
-                    Token.PlusSign(),
-                    Token.Numeric("789"),
-                    Token.Close(')')
+                    MinusSign(),
+                    Numeric("123"),
+                    Identity("*"),
+                    Open('('),
+                    PlusSign(),
+                    Numeric("456"),
+                    PlusSign(),
+                    Numeric("789"),
+                    Close(')')
                 },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableComplexNumericOperatorTokens2(Func<string, IEnumerable<Token>> run)
+        public void EnumerableComplexNumericOperatorTokens2(Func<string, Token[]> run)
         {
             var text = "+123*(-456-789)";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.PlusSign(),
-                    Token.Numeric("123"),
-                    Token.Identity("*"),
-                    Token.Open('('),
-                    Token.MinusSign(),
-                    Token.Numeric("456"),
-                    Token.MinusSign(),
-                    Token.Numeric("789"),
-                    Token.Close(')')
+                    PlusSign(),
+                    Numeric("123"),
+                    Identity("*"),
+                    Open('('),
+                    MinusSign(),
+                    Numeric("456"),
+                    MinusSign(),
+                    Numeric("789"),
+                    Close(')')
                 },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableStrictOperatorAndNumericTokens1(Func<string, IEnumerable<Token>> run)
+        public void EnumerableStrictOperatorAndNumericTokens1(Func<string, Token[]> run)
         {
             var text = "++123";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("++"),
-                    Token.Numeric("123") },
+                    Identity("++"),
+                    Numeric("123") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableStrictOperatorAndNumericTokens2(Func<string, IEnumerable<Token>> run)
+        public void EnumerableStrictOperatorAndNumericTokens2(Func<string, Token[]> run)
         {
             var text = "--123";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("--"),
-                    Token.Numeric("123") },
+                    Identity("--"),
+                    Numeric("123") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableCombineIdentityAndNumericTokensWithOperator(Func<string, IEnumerable<Token>> run)
+        public void EnumerableCombineIdentityAndNumericTokensWithOperator(Func<string, Token[]> run)
         {
             var text = "abc+123";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Identity("abc"),
-                    Token.PlusSign(),
-                    Token.Numeric("123") },
+                    Identity("abc"),
+                    PlusSign(),
+                    Numeric("123") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void EnumerableCombineNumericAndIdentityTokensWithOperator(Func<string, IEnumerable<Token>> run)
+        public void EnumerableCombineNumericAndIdentityTokensWithOperator(Func<string, Token[]> run)
         {
             var text = "123+abc";
             var actual = run(text);
 
             Assert.AreEqual(
                 new Token[] {
-                    Token.Numeric("123"),
-                    Token.Identity("+"),
-                    Token.Identity("abc") },
+                    Numeric("123"),
+                    Identity("+"),
+                    Identity("abc") },
                 actual);
         }
 
         [TestCaseSource("LexerRunners")]
-        public void Operator1Detection(Func<string, IEnumerable<Token>> run)
+        public void Operator1Detection(Func<string, Token[]> run)
         {
-            foreach (var ch in Token.OperatorChars)
+            foreach (var ch in TokenFactory.OperatorChars)
             {
                 var text = $"123 {ch} abc";
                 var actual = run(text);
 
                 Assert.AreEqual(
                     new Token[] {
-                        Token.Numeric("123"),
-                        Token.WhiteSpace(),
-                        Token.Identity(ch.ToString()),
-                        Token.WhiteSpace(),
-                        Token.Identity("abc") },
+                        Numeric("123"),
+                        WhiteSpace(),
+                        Identity(ch.ToString()),
+                        WhiteSpace(),
+                        Identity("abc") },
                     actual);
             }
         }
 
         [TestCaseSource("LexerRunners")]
-        public void Operator2Detection(Func<string, IEnumerable<Token>> run)
+        public void Operator2Detection(Func<string, Token[]> run)
         {
             Parallel.ForEach(
-                Token.OperatorChars.
-                    SelectMany(ch1 => Token.OperatorChars.
+                TokenFactory.OperatorChars.
+                    SelectMany(ch1 => TokenFactory.OperatorChars.
                         Select(ch2 => (ch1, ch2))),
                 entry =>
                 {
@@ -622,22 +805,22 @@ namespace Favalet
 
                     Assert.AreEqual(
                         new Token[] {
-                            Token.Numeric("123"),
-                            Token.WhiteSpace(),
-                            Token.Identity($"{entry.ch1}{entry.ch2}"),
-                            Token.WhiteSpace(),
-                            Token.Identity("abc") },
+                            Numeric("123"),
+                            WhiteSpace(),
+                            Identity($"{entry.ch1}{entry.ch2}"),
+                            WhiteSpace(),
+                            Identity("abc") },
                         actual);
                 });
         }
 
         [TestCaseSource("LexerRunners")]
-        public void Operator3Detection(Func<string, IEnumerable<Token>> run)
+        public void Operator3Detection(Func<string, Token[]> run)
         {
             Parallel.ForEach(
-                Token.OperatorChars.
-                    SelectMany(ch1 => Token.OperatorChars.
-                        SelectMany(ch2 => Token.OperatorChars.
+                TokenFactory.OperatorChars.
+                    SelectMany(ch1 => TokenFactory.OperatorChars.
+                        SelectMany(ch2 => TokenFactory.OperatorChars.
                             Select(ch3 => (ch1, ch2, ch3)))),
                 entry =>
                 {
@@ -646,11 +829,11 @@ namespace Favalet
 
                     Assert.AreEqual(
                         new Token[] {
-                            Token.Numeric("123"),
-                            Token.WhiteSpace(),
-                            Token.Identity($"{entry.ch1}{entry.ch2}{entry.ch3}"),
-                            Token.WhiteSpace(),
-                            Token.Identity("abc") },
+                            Numeric("123"),
+                            WhiteSpace(),
+                            Identity($"{entry.ch1}{entry.ch2}{entry.ch3}"),
+                            WhiteSpace(),
+                            Identity("abc") },
                         actual);
                 });
         }

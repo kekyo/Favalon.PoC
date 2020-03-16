@@ -17,6 +17,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Favalet.Core\Favalet.Core.csproj" />
+        <ProjectReference Include="..\Favalet.Core.CLR\Favalet.Core.CLR.csproj" />
     </ItemGroup>
 
 </Project>

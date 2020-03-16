@@ -20,9 +20,9 @@
 using Favalet.Tokens;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using static Favalet.Tokens.TokenFactory;
@@ -32,17 +32,18 @@ namespace Favalet
     [TestFixture]
     public sealed class LexerTest
     {
-        private static readonly Func<string, Token[]>[] LexerRunners =
+        private static readonly Func<string, Token[]>[] Tokenizers =
             new[]
             {
                 new Func<string, Token[]>(text => Lexer.Tokenize(text).ToArray()),
                 new Func<string, Token[]>(text => Lexer.Tokenize(text.AsEnumerable()).ToArray()),
                 new Func<string, Token[]>(text => Lexer.Tokenize(new StringReader(text)).ToArray()),
+                new Func<string, Token[]>(text => Lexer.Tokenize(text.ToObservable()).ToEnumerable().ToArray()),
             };
 
         ////////////////////////////////////////////////////
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokens(Func<string, Token[]> run)
         {
             var text = "abc def ghi";
@@ -58,7 +59,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokensBeforeSpace(Func<string, Token[]> run)
         {
             var text = "  abc def ghi";
@@ -74,7 +75,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokensAfterSpace(Func<string, Token[]> run)
         {
             var text = "abc def ghi  ";
@@ -91,7 +92,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokensLongSpace(Func<string, Token[]> run)
         {
             var text = "abc      def      ghi";
@@ -107,7 +108,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokensBeforeBrackets(Func<string, Token[]> run)
         {
             var text = "(abc def) ghi";
@@ -125,7 +126,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokensAfterBrackets(Func<string, Token[]> run)
         {
             var text = "abc (def ghi)";
@@ -143,7 +144,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokensWithSpacingBrackets(Func<string, Token[]> run)
         {
             var text = "abc ( def ) ghi";
@@ -163,7 +164,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokensWithNoSpacingBrackets(Func<string, Token[]> run)
         {
             var text = "abc(def)ghi";
@@ -179,7 +180,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTrailsNumericTokens(Func<string, Token[]> run)
         {
             var text = "a12 d34 g56";
@@ -195,7 +196,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableSignLikeOperatorAndIdentityTokens1(Func<string, Token[]> run)
         {
             var text = "+abc";
@@ -208,7 +209,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableSignLikeOperatorAndIdentityTokens2(Func<string, Token[]> run)
         {
             var text = "-abc";
@@ -221,7 +222,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableStrictOperatorAndIdentityTokens1(Func<string, Token[]> run)
         {
             var text = "++abc";
@@ -234,7 +235,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableStrictOperatorAndIdentityTokens2(Func<string, Token[]> run)
         {
             var text = "--abc";
@@ -249,7 +250,7 @@ namespace Favalet
 
         ///////////////////////////////////////////////
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableNumericTokens(Func<string, Token[]> run)
         {
             var text = "123 456 789";
@@ -265,7 +266,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableCombinedIdentityAndNumericTokens(Func<string, Token[]> run)
         {
             var text = "abc 456 def";
@@ -281,7 +282,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableNumericTokensBeforeBrackets(Func<string, Token[]> run)
         {
             var text = "(123 456) 789";
@@ -299,7 +300,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableNumericTokensAfterBrackets(Func<string, Token[]> run)
         {
             var text = "123 (456 789)";
@@ -317,7 +318,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableNumericTokensWithSpacingBrackets(Func<string, Token[]> run)
         {
             var text = "123 ( 456 ) 789";
@@ -337,7 +338,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableNumericTokensWithNoSpacingBrackets(Func<string, Token[]> run)
         {
             var text = "123(456)789";
@@ -353,7 +354,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableNumericTokensBeforeString(Func<string, Token[]> run)
         {
             var text = "\"abc def\" 123";
@@ -367,7 +368,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableNumericTokensAfterString(Func<string, Token[]> run)
         {
             var text = "123 \"abc def\"";
@@ -381,7 +382,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableNumericTokensSpacingStrings(Func<string, Token[]> run)
         {
             var text = "123 \"abc def\" 456";
@@ -397,7 +398,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableNumericTokensNoSpacingStrings(Func<string, Token[]> run)
         {
             var text = "123\"abc def\"456";
@@ -411,7 +412,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokensBeforeStringWithNoSpacing(Func<string, Token[]> run)
         {
             var text = "\"abc def\"abc";
@@ -424,7 +425,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokensAfterStringWithNoSpacing(Func<string, Token[]> run)
         {
             var text = "abc\"abc def\"";
@@ -437,7 +438,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableIdentityTokensNoSpacingStrings(Func<string, Token[]> run)
         {
             var text = "abc\"abc def\"def";
@@ -451,7 +452,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableStringTokensNoSpacingOperators(Func<string, Token[]> run)
         {
             var text = "+\"abc def\"-";
@@ -465,7 +466,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableOperatorTokensNoSpacingStrings(Func<string, Token[]> run)
         {
             var text = "\"abc\"+\"def\"";
@@ -479,7 +480,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableStringTokensNoSpacingBrackets(Func<string, Token[]> run)
         {
             var text = "(\"abc def\")";
@@ -493,7 +494,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableOpenBracketTokensNoSpacingStrings(Func<string, Token[]> run)
         {
             var text = "\"abc\"(\"def\"";
@@ -507,7 +508,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableCloseBracketTokensNoSpacingStrings(Func<string, Token[]> run)
         {
             var text = "\"abc\")\"def\"";
@@ -521,7 +522,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableContinuousStrings(Func<string, Token[]> run)
         {
             var text = "\"abc\"\"def\"";
@@ -534,7 +535,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerablePlusSignNumericTokens(Func<string, Token[]> run)
         {
             var text = "+123 +456 +789";
@@ -553,7 +554,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableMinusSignNumericTokens(Func<string, Token[]> run)
         {
             var text = "-123 -456 -789";
@@ -572,7 +573,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerablePlusOperatorNumericTokens(Func<string, Token[]> run)
         {
             var text = "+ 123 + 456 + 789";
@@ -594,7 +595,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableMinusOperatorNumericTokens(Func<string, Token[]> run)
         {
             var text = "- 123 - 456 - 789";
@@ -616,7 +617,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerablePlusOperatorWithSpaceAndNumericTokens(Func<string, Token[]> run)
         {
             var text = "123 + 456";
@@ -632,7 +633,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableMinusOperatorWithSpaceAndNumericTokens(Func<string, Token[]> run)
         {
             var text = "123 - 456";
@@ -648,7 +649,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerablePlusOperatorSideBySideAndNumericTokens2(Func<string, Token[]> run)
         {
             var text = "123+456";
@@ -662,7 +663,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableMinusOperatorSideBySideAndNumericTokens(Func<string, Token[]> run)
         {
             var text = "123-456";
@@ -676,7 +677,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableComplexNumericOperatorTokens1(Func<string, Token[]> run)
         {
             var text = "-123*(+456+789)";
@@ -697,7 +698,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableComplexNumericOperatorTokens2(Func<string, Token[]> run)
         {
             var text = "+123*(-456-789)";
@@ -718,7 +719,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableStrictOperatorAndNumericTokens1(Func<string, Token[]> run)
         {
             var text = "++123";
@@ -731,7 +732,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableStrictOperatorAndNumericTokens2(Func<string, Token[]> run)
         {
             var text = "--123";
@@ -744,7 +745,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableCombineIdentityAndNumericTokensWithOperator(Func<string, Token[]> run)
         {
             var text = "abc+123";
@@ -758,7 +759,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void EnumerableCombineNumericAndIdentityTokensWithOperator(Func<string, Token[]> run)
         {
             var text = "123+abc";
@@ -772,7 +773,7 @@ namespace Favalet
                 actual);
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void Operator1Detection(Func<string, Token[]> run)
         {
             foreach (var ch in TokenFactory.OperatorChars)
@@ -791,7 +792,7 @@ namespace Favalet
             }
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void Operator2Detection(Func<string, Token[]> run)
         {
             Parallel.ForEach(
@@ -814,7 +815,7 @@ namespace Favalet
                 });
         }
 
-        [TestCaseSource("LexerRunners")]
+        [TestCaseSource("Tokenizers")]
         public void Operator3Detection(Func<string, Token[]> run)
         {
             Parallel.ForEach(

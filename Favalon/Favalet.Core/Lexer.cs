@@ -17,6 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Internal;
 using Favalet.LexRunners;
 using Favalet.Tokens;
 using System;
@@ -27,36 +28,6 @@ namespace Favalet
 {
     public static class Lexer
     {
-        public static IEnumerable<Token> Tokenize(string text)
-        {
-            var context = LexRunnerContext.Create();
-            var runner = WaitingIgnoreSpaceRunner.Instance;
-
-            for (var index = 0; index < text.Length; index++)
-            {
-                switch (runner.Run(context, text[index]))
-                {
-                    case LexRunnerResult(LexRunner next, Token token0, Token token1):
-                        yield return token0;
-                        yield return token1;
-                        runner = next;
-                        break;
-                    case LexRunnerResult(LexRunner next, Token token, _):
-                        yield return token;
-                        runner = next;
-                        break;
-                    case LexRunnerResult(LexRunner next, _, _):
-                        runner = next;
-                        break;
-                }
-            }
-
-            if (runner.Finish(context) is LexRunnerResult(_, Token finalToken, _))
-            {
-                yield return finalToken;
-            }
-        }
-
         public static IEnumerable<Token> Tokenize(IEnumerable<char> chars)
         {
             var runnerContext = LexRunnerContext.Create();
@@ -87,41 +58,11 @@ namespace Favalet
             }
         }
 
-        public static IEnumerable<Token> Tokenize(TextReader tr)
-        {
-            var context = LexRunnerContext.Create();
-            var runner = WaitingIgnoreSpaceRunner.Instance;
+        public static IEnumerable<Token> Tokenize(string text) =>
+            Tokenize(text.AsEnumerable());
 
-            while (true)
-            {
-                var inch = tr.Read();
-                if (inch < 0)
-                {
-                    break;
-                }
-
-                switch (runner.Run(context, (char)inch))
-                {
-                    case LexRunnerResult(LexRunner next, Token token0, Token token1):
-                        yield return token0;
-                        yield return token1;
-                        runner = next;
-                        break;
-                    case LexRunnerResult(LexRunner next, Token token, _):
-                        yield return token;
-                        runner = next;
-                        break;
-                    case LexRunnerResult(LexRunner next, _, _):
-                        runner = next;
-                        break;
-                }
-            }
-
-            if (runner.Finish(context) is LexRunnerResult(_, Token finalToken, _))
-            {
-                yield return finalToken;
-            }
-        }
+        public static IEnumerable<Token> Tokenize(TextReader tr) =>
+            Tokenize(tr.AsEnumerable());
 
 #if !NET35
         public static IObservable<Token> Tokenize(IObservable<char> observable) =>

@@ -17,152 +17,51 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Internal;
 using Favalet.LexRunners;
 using Favalet.Tokens;
 using System;
-using System.Collections.Generic;
 
 namespace Favalet
 {
-#if !NET35
-    internal sealed class ObservableLexer : IObserver<char>, IObservable<Token>
+    internal sealed class ObservableLexer : ObservableObserver<Token, char>
     {
-        private IDisposable? parentDisposer;
-        private readonly HashSet<IObserver<Token>> observers = new HashSet<IObserver<Token>>();
-
         private readonly LexRunnerContext context = LexRunnerContext.Create();
         private LexRunner runner = WaitingIgnoreSpaceRunner.Instance;
 
-        public ObservableLexer(IObservable<char> parent) =>
-            this.parentDisposer = parent.Subscribe(this);
+        public ObservableLexer(IObservable<char> parent) :
+            base(parent)
+        { }
 
-        public IDisposable Subscribe(IObserver<Token> observer)
+        protected override void OnValueReceived(char inch)
         {
-            lock (observers)
+            switch (runner.Run(context, inch))
             {
-                observers.Add(observer);
-                return new Disposer(this, observer);
+                case LexRunnerResult(LexRunner next, Token token0, Token token1):
+                    this.SendValues(token0, token1);
+                    runner = next;
+                    break;
+                case LexRunnerResult(LexRunner next, Token token, _):
+                    this.SendValues(token);
+                    runner = next;
+                    break;
+                case LexRunnerResult(LexRunner next, _, _):
+                    runner = next;
+                    break;
             }
         }
 
-        public void OnNext(char inch)
+        protected override void OnFinalize()
         {
-            lock (this)
+            // Contained final result
+            if (runner.Finish(context) is LexRunnerResult(_, Token finalToken, _))
             {
-                if (this.parentDisposer != null)
-                {
-                    switch (runner.Run(context, inch))
-                    {
-                        case LexRunnerResult(LexRunner next, Token token0, Token token1):
-                            lock (observers)
-                            {
-                                foreach (var observer in observers)
-                                {
-                                    observer.OnNext(token0);
-                                    observer.OnNext(token1);
-                                }
-                            }
-                            runner = next;
-                            break;
-                        case LexRunnerResult(LexRunner next, Token token, _):
-                            lock (observers)
-                            {
-                                foreach (var observer in observers)
-                                {
-                                    observer.OnNext(token);
-                                }
-                            }
-                            runner = next;
-                            break;
-                        case LexRunnerResult(LexRunner next, _, _):
-                            runner = next;
-                            break;
-                    }
-                }
+                this.SendAndFinish(finalToken);
             }
-        }
-
-        public void OnCompleted()
-        {
-            lock (this)
+            else
             {
-                if (this.parentDisposer is IDisposable parentDisposer)
-                {
-                    if (runner.Finish(context) is LexRunnerResult(_, Token finalToken, _))
-                    {
-                        lock (observers)
-                        {
-                            foreach (var observer in observers)
-                            {
-                                observer.OnNext(finalToken);
-                                observer.OnCompleted();
-                            }
-
-                            observers.Clear();
-                        }
-                    }
-                    else
-                    {
-                        lock (observers)
-                        {
-                            foreach (var observer in observers)
-                            {
-                                observer.OnCompleted();
-                            }
-
-                            observers.Clear();
-                        }
-                    }
-
-                    parentDisposer.Dispose();
-                    this.parentDisposer = null;
-                }
-            }
-        }
-
-        public void OnError(Exception error)
-        {
-            lock (this)
-            {
-                if (this.parentDisposer != null)
-                {
-                    lock (observers)
-                    {
-                        foreach (var observer in observers)
-                        {
-                            observer.OnError(error);
-                        }
-                    }
-                }
-            }
-        }
-
-        private sealed class Disposer : IDisposable
-        {
-            private ObservableLexer? parent;
-            private IObserver<Token>? observer;
-
-            public Disposer(ObservableLexer parent, IObserver<Token> observer)
-            {
-                this.parent = parent;
-                this.observer = observer;
-            }
-
-            public void Dispose()
-            {
-                if (this.parent is ObservableLexer parent &&
-                    this.observer is IObserver<Token> observer)
-                {
-                    lock (parent.observers)
-                    {
-                        parent.observers.Remove(observer);
-                    }
-
-                    this.parent = null;
-                    this.observer = null;
-                }
+                this.Finish();
             }
         }
     }
-#endif
 }

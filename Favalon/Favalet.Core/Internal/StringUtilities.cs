@@ -20,6 +20,7 @@
 using Favalet.Tokens;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -116,5 +117,29 @@ namespace Favalet.Internal
         public static string Join(string separator, IEnumerable<string> values) =>
             string.Join(separator, values);
 #endif
+
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static IEnumerable<char> AsEnumerable(this string text) =>
+#if NETSTANDARD1_0
+            text.Cast<char>();
+#else
+            (IEnumerable<char>)text;
+#endif
+
+        public static IEnumerable<char> AsEnumerable(this TextReader tr)
+        {
+            while (true)
+            {
+                var inch = tr.Read();
+                if (inch < 0)
+                {
+                    break;
+                }
+
+                yield return (char)inch;
+            }
+        }
     }
 }

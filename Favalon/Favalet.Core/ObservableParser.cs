@@ -18,49 +18,50 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions;
+using Favalet.Internal;
 using Favalet.ParseRunners;
 using Favalet.Tokens;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Favalet
 {
-    public static class Parser
+    internal sealed class ObservableParser : ObservableObserver<IExpression, Token>
     {
+        private readonly ParseRunnerContext context;
+        private ParseRunner runner = WaitingRunner.Instance;
 #if DEBUG
-        public static int BreakIndex = -1;
+        private int index = 0;
+        public int BreakIndex = -1;
 #endif
 
-        public static IEnumerable<IExpression> Parse(this IEnumerable<Token> tokens) =>
-            Parse(tokens, ExpressionFactory.Instance);
+        public ObservableParser(IObservable<Token> parent, IExpressionFactory factory) :
+            base(parent) =>
+            this.context = ParseRunnerContext.Create(factory);
 
-        public static IEnumerable<IExpression> Parse(
-            this IEnumerable<Token> tokens, IExpressionFactory factory)
+        protected override void OnValueReceived(Token token)
         {
-            var context = ParseRunnerContext.Create(factory);
-            var runner = WaitingRunner.Instance;
-
 #if DEBUG
-            var index = 0;
+            if (index == BreakIndex) Debugger.Break();
+            index++;
 #endif
-            foreach (var token in tokens)
-            {
-#if DEBUG
-                if (index == BreakIndex) Debugger.Break();
-                index++;
-#endif
-                runner = runner.Run(context, token);
+            runner = runner.Run(context, token);
 
-                Debug.WriteLine($"{index - 1}: '{token}': {context}");
+            Debug.WriteLine($"{index - 1}: '{token}': {context.Expression}");
 
-                context.SetLastToken(token);
-            }
+            context.SetLastToken(token);
+        }
 
+        protected override void OnFinalize()
+        {
             // Contained final result
             if (context.Expression is IExpression finalExpression)
             {
-                yield return finalExpression;
+                this.SendAndFinish(finalExpression);
+            }
+            else
+            {
+                this.Finish();
             }
         }
     }

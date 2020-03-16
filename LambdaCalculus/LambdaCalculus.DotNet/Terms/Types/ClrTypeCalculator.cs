@@ -1,29 +1,52 @@
-﻿using Favalon.Terms.Algebraic;
+﻿using Favalon.Terms.Methods;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace Favalon.Terms.Types
 {
-    public sealed class ClrTypeCalculator : AlgebraicCalculator
+    public sealed class ClrTypeCalculator : TypeCalculator
     {
+        private static readonly Dictionary<Type, HashSet<Type>> wideningPrimitives = new Dictionary<Type, HashSet<Type>>
+        {
+            { typeof(decimal), new HashSet<Type> { typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(char) } },
+            { typeof(double), new HashSet<Type> { typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(int), typeof(uint), typeof(float), typeof(char) } },
+            { typeof(float), new HashSet<Type> { typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(int), typeof(uint), typeof(char) } },
+            { typeof(long), new HashSet<Type> { typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(int), typeof(uint), typeof(char) } },
+            { typeof(ulong), new HashSet<Type> { typeof(byte), typeof(ushort), typeof(uint), typeof(char) } },
+            { typeof(int), new HashSet<Type> { typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(char) } },
+            { typeof(uint), new HashSet<Type> { typeof(byte), typeof(ushort), typeof(char) } },
+            { typeof(short), new HashSet<Type> { typeof(byte), typeof(sbyte) } },
+            { typeof(ushort), new HashSet<Type> { typeof(byte), typeof(char) } },
+            { typeof(char), new HashSet<Type> { typeof(byte), typeof(ushort) } },
+        };
+
         private ClrTypeCalculator()
         { }
 
-        protected override Term Sum(IEnumerable<Term> terms) =>
-            ClrTermFactory.SumType(terms)!;
+        private static bool IsAssignableFrom(Type to, Type from) =>
+            to.IsAssignableFrom(from) ||
+            (wideningPrimitives.TryGetValue(to, out var fromTypes) && fromTypes.Contains(from));
 
-        public override Term? Widening(Term lhs, Term rhs)
+        public override Term? Widen(Term? to, Term? from)
         {
-            switch ((lhs, rhs))
+            switch (to, from)
             {
                 // object: object <-- int
+                // double: double <-- int
                 // IComparable: IComparable <-- string
-                case (ClrTypeTerm to, ClrTypeTerm from):
-                    return to.Type.IsAssignableFrom(from.Type) ? to : null;
+                case (ClrTypeTerm toType, ClrTypeTerm fromType):
+                    return IsAssignableFrom(toType.Type, fromType.Type) ?
+                        to :
+                        null;
+
+                case (ClrMethodTerm toMethod, ClrMethodTerm fromMethod):
+                    return (this.Widen(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?
+                        toMethod :
+                        null;
 
                 default:
-                    return base.Widening(lhs, rhs);
+                    return base.Widen(to, from);
             }
         }
 

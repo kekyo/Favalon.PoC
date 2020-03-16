@@ -2,26 +2,28 @@
 
 namespace Favalon.Terms
 {
-    public abstract class IdentityTerm : HigherOrderHoldTerm
+    public interface IIdentityTerm
     {
-        public readonly string Identity;
+        string Identity { get; }
+    }
 
-        internal IdentityTerm(string identity, Term higherOrder) :
-            base(higherOrder) =>
+    public abstract class IdentityTerm : Term, IIdentityTerm
+    {
+        internal IdentityTerm(string identity, Term higherOrder)
+        {
             this.Identity = identity;
+            this.HigherOrder = higherOrder;
+        }
+
+        public override Term HigherOrder { get; }
+
+        public string Identity { get; }
 
         protected abstract Term OnCreate(string identity, Term higherOrder);
 
         public override Term Infer(InferContext context)
         {
-            var higherOrder = context.ResolveHigherOrder(this);
-
-            if (context.LookupBoundTerm(this.Identity) is Term bound)
-            {
-                context.Unify(bound.HigherOrder, higherOrder);
-
-                return this.OnCreate(this.Identity, higherOrder);
-            }
+            var higherOrder = this.HigherOrder.Infer(context);
 
             return
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
@@ -32,6 +34,16 @@ namespace Favalon.Terms
         public override Term Fixup(FixupContext context)
         {
             var higherOrder = this.HigherOrder.Fixup(context);
+
+            return
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    this.OnCreate(this.Identity, higherOrder);
+        }
+
+        public override Term Reduce(ReduceContext context)
+        {
+            var higherOrder = this.HigherOrder.Reduce(context);
 
             return
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?

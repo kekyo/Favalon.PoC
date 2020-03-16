@@ -1,6 +1,6 @@
-﻿using Favalon.Terms;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Favalon.Terms.Types;
 
 namespace Favalon.Terms.Contexts
 {
@@ -14,6 +14,7 @@ namespace Favalon.Terms.Contexts
                 new PlaceholderTerm(current++, higherOrder);
         }
 
+        internal readonly TypeCalculator calculator;
         internal readonly PlaceholderIndexer indexer;
         internal readonly Context? parent;
 
@@ -21,15 +22,17 @@ namespace Favalon.Terms.Contexts
 
         public readonly int Iterations;
 
-        private protected Context(int iterations)
+        private protected Context(int iterations, TypeCalculator calculator)
         {
             indexer = new PlaceholderIndexer();
+            this.calculator = calculator;
             this.Iterations = iterations;
         }
 
         private protected Context(Context parent)
         {
             this.indexer = parent.indexer;
+            this.calculator = parent.calculator;
             this.parent = parent;
             this.Iterations = parent.Iterations;
         }
@@ -37,6 +40,7 @@ namespace Favalon.Terms.Contexts
         private protected Context(Context parent, Dictionary<string, Term> boundTerms)
         {
             this.indexer = parent.indexer;
+            this.calculator = parent.calculator;
             this.parent = parent;
             this.boundTerms = boundTerms;
             this.Iterations = parent.Iterations;
@@ -45,7 +49,7 @@ namespace Favalon.Terms.Contexts
         /////////////////////////////////////////////////////////////////////////
         // Binder
 
-        public void BindTerm(string identity, Term term)
+        public void BindMutable(string identity, Term term)
         {
             if (boundTerms == null)
             {
@@ -74,6 +78,21 @@ namespace Favalon.Terms.Contexts
             return null;
         }
 
+        private void applyBoundTerms(Dictionary<string, Term> boundTerms)
+        {
+            if (this.boundTerms != null)
+            {
+                foreach (var entry in boundTerms)
+                {
+                    this.boundTerms[entry.Key] = entry.Value;
+                }
+            }
+            else
+            {
+                this.boundTerms = boundTerms;
+            }
+        }
+
         /////////////////////////////////////////////////////////////////////////
         // Infer
 
@@ -86,11 +105,7 @@ namespace Favalon.Terms.Contexts
 
         private protected IEnumerable<Term> InternalEnumerableInfer(Term term, bool higherOrderInferOnly)
         {
-            var boundTerms =
-                this.boundTerms is Dictionary<string, Term> bt ?
-                    new Dictionary<string, Term>(bt) : // Copied, eliminate side effects by BindTerm
-                    new Dictionary<string, Term>();
-
+            var boundTerms = new Dictionary<string, Term>();
             var current = term;
             var iteration = 0;
             while (true)
@@ -117,17 +132,7 @@ namespace Favalon.Terms.Contexts
             if (!higherOrderInferOnly)
             {
                 // Applied bound terms if wasn't caused exceptions.
-                if (this.boundTerms != null)
-                {
-                    foreach (var entry in boundTerms)
-                    {
-                        this.boundTerms[entry.Key] = entry.Value;
-                    }
-                }
-                else
-                {
-                    this.boundTerms = boundTerms;
-                }
+                this.applyBoundTerms(boundTerms);
             }
         }
 
@@ -142,11 +147,7 @@ namespace Favalon.Terms.Contexts
 
         private protected IEnumerable<Term> InternalEnumerableReduce(Term term)
         {
-            var boundTerms =
-                this.boundTerms is Dictionary<string, Term> bt ?
-                    new Dictionary<string, Term>(bt) : // Copied, eliminate side effects by BindTerm
-                    new Dictionary<string, Term>();
-
+            var boundTerms = new Dictionary<string, Term>();
             var current = term;
             var iteration = 0;
             while (true)
@@ -176,17 +177,7 @@ namespace Favalon.Terms.Contexts
             }
 
             // Applied bound terms if wasn't caused exceptions.
-            if (this.boundTerms != null)
-            {
-                foreach (var entry in boundTerms)
-                {
-                    this.boundTerms[entry.Key] = entry.Value;
-                }
-            }
-            else
-            {
-                this.boundTerms = boundTerms;
-            }
+            this.applyBoundTerms(boundTerms);
         }
     }
 }

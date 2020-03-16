@@ -14,11 +14,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Terms\Types\ClrMethodTerm.cs" />
+    <Compile Remove="Terms\Methods\ClrMethodOverloadedTerm.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Terms\Types\ClrMethodTerm.cs" />
+    <None Include="Terms\Methods\ClrMethodOverloadedTerm.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.108
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Favalet.Core", "Favalet.Core\Favalet.Core.csproj", "{CF25FF78-2FBC-4115-B522-9659E9613720}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Favalet.Core.Tests", "Favalet.Core.Tests\Favalet.Core.Tests.csproj", "{DA14E841-8929-4267-BBA4-4EBD23BD3835}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{320F9251-B3B7-4375-86B1-616AE4F2A3CB}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		Favalon.sln.licenseheader = Favalon.sln.licenseheader
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CF25FF78-2FBC-4115-B522-9659E9613720}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF25FF78-2FBC-4115-B522-9659E9613720}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF25FF78-2FBC-4115-B522-9659E9613720}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF25FF78-2FBC-4115-B522-9659E9613720}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA14E841-8929-4267-BBA4-4EBD23BD3835}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA14E841-8929-4267-BBA4-4EBD23BD3835}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA14E841-8929-4267-BBA4-4EBD23BD3835}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA14E841-8929-4267-BBA4-4EBD23BD3835}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C3395462-13F7-4DC7-9D7C-4CF9A12C8540}
+	EndGlobalSection
+EndGlobal

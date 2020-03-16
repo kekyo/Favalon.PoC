@@ -35,9 +35,9 @@ namespace Favalet
         private static readonly Func<string, Token[]>[] LexerRunners =
             new[]
             {
-                new Func<string, Token[]>(text => Lexer.EnumerableTokens(text).ToArray()),
-                new Func<string, Token[]>(text => Lexer.EnumerableTokens(text.AsEnumerable()).ToArray()),
-                new Func<string, Token[]>(text => Lexer.EnumerableTokens(new StringReader(text)).ToArray()),
+                new Func<string, Token[]>(text => Lexer.Tokenize(text).ToArray()),
+                new Func<string, Token[]>(text => Lexer.Tokenize(text.AsEnumerable()).ToArray()),
+                new Func<string, Token[]>(text => Lexer.Tokenize(new StringReader(text)).ToArray()),
             };
 
         ////////////////////////////////////////////////////

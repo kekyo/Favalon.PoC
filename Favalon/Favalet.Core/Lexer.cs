@@ -19,6 +19,7 @@
 
 using Favalet.LexRunners;
 using Favalet.Tokens;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -26,7 +27,7 @@ namespace Favalet
 {
     public static class Lexer
     {
-        public static IEnumerable<Token> EnumerableTokens(string text)
+        public static IEnumerable<Token> Tokenize(string text)
         {
             var context = LexRunnerContext.Create();
             var runner = WaitingIgnoreSpaceRunner.Instance;
@@ -56,7 +57,7 @@ namespace Favalet
             }
         }
 
-        public static IEnumerable<Token> EnumerableTokens(IEnumerable<char> chars)
+        public static IEnumerable<Token> Tokenize(IEnumerable<char> chars)
         {
             var runnerContext = LexRunnerContext.Create();
             var runner = WaitingIgnoreSpaceRunner.Instance;
@@ -86,7 +87,7 @@ namespace Favalet
             }
         }
 
-        public static IEnumerable<Token> EnumerableTokens(TextReader tr)
+        public static IEnumerable<Token> Tokenize(TextReader tr)
         {
             var context = LexRunnerContext.Create();
             var runner = WaitingIgnoreSpaceRunner.Instance;
@@ -121,5 +122,10 @@ namespace Favalet
                 yield return finalToken;
             }
         }
+
+#if !NET35
+        public static IObservable<Token> Tokenize(IObservable<char> observable) =>
+            new ObservableLexer(observable);
+#endif
     }
 }

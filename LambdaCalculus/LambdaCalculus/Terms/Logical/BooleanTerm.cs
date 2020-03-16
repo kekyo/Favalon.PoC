@@ -2,34 +2,72 @@
 
 namespace Favalon.Terms.Logical
 {
-    public sealed class BooleanTerm : ValueTerm<BooleanTerm>
+    public sealed class BooleanTerm : Term, IIdentityTerm, IValueTerm
     {
-        public new readonly bool Value;
+        public readonly bool Value;
 
-        private BooleanTerm(bool value, Term higherOrder) :
-            base(higherOrder) =>
+        private BooleanTerm(bool value, Term higherOrder)
+        {
             this.Value = value;
+            this.HigherOrder = higherOrder;
+        }
 
-        protected override object GetValue() =>
+        public override Term HigherOrder { get; }
+
+        object IValueTerm.Value =>
             this.Value;
 
-        protected override Term OnCreate(object value, Term higherOrder) =>
-            new BooleanTerm((bool)value, higherOrder);
-
-        public void Deconstruct(out bool value) =>
-            value = this.Value;
-
-        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+        public string Identity =>
             this.Value ? "true" : "false";
 
-        public static readonly Term Type =
-            TermFactory.Identity("bool");   // TODO: misunderstanding overrided bool terms.
+        public override Term Infer(InferContext context)
+        {
+            var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
-        public static BooleanTerm Create(bool value, Term higherOrder) =>
-            new BooleanTerm(value, higherOrder);
+            if (context.LookupBoundTerm(this.Identity) is Term bound)
+            {
+                context.Unify(bound.HigherOrder, higherOrder);
+                return From(Value, higherOrder);
+            }
+
+            return From(Value, higherOrder);
+        }
+
+        public override Term Fixup(FixupContext context)
+        {
+            var higherOrder = this.HigherOrder.Fixup(context);
+            return From(Value, higherOrder);
+        }
+
+        public override Term Reduce(ReduceContext context)
+        {
+            if (context.LookupBoundTerm(this.Identity) is Term bound)
+            {
+                // Ignore repeating self references (will cause stack overflow)
+                return bound is IIdentityTerm ? bound : bound.Reduce(context);
+            }
+
+            var higherOrder = this.HigherOrder.Reduce(context);
+            return From(Value, higherOrder);
+        }
+
+        protected override bool OnEquals(EqualsContext context, Term? other) =>
+            other is BooleanTerm rhs ? (Value == rhs.Value) : false;
+
+        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
+            false;
+
+        protected override string OnPrettyPrint(PrettyPrintContext context) =>
+            this.Identity;
+
+        public static BooleanTerm From(bool value, Term higherOrder) =>
+            higherOrder.Equals(Type) ? From(value) : new BooleanTerm(value, higherOrder);
 
         public static BooleanTerm From(bool value) =>
             value ? True : False;
+
+        public static readonly Term Type =
+            FreeVariableTerm.Create("bool", UnspecifiedTerm.Instance);
 
         public static readonly BooleanTerm True =
             new BooleanTerm(true, Type);

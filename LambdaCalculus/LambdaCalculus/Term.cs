@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 
 #pragma warning disable 659
+#pragma warning disable 661
 
 namespace Favalon
 {

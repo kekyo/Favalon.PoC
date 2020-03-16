@@ -13,12 +13,4 @@
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Terms\Types\MethodTerm.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Terms\Types\MethodTerm.cs" />
-  </ItemGroup>
-
 </Project>

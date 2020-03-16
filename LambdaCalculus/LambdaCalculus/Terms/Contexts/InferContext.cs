@@ -1,5 +1,4 @@
-﻿using Favalon.Terms;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalon.Terms.Contexts
@@ -27,10 +26,10 @@ namespace Favalon.Terms.Contexts
         public PlaceholderTerm CreatePlaceholder(Term higherOrder) =>
             indexer.Create(higherOrder);
 
-        public Term ResolveHigherOrder(Term term) =>
+        public Term ResolveHigherOrder(Term higherOrder) =>
             higherOrderInferOnly ?
-                term.HigherOrder.Infer(this) :
-                base.InternalEnumerableReduce(term.HigherOrder).Last();
+                higherOrder.Infer(this) :
+                base.InternalEnumerableReduce(higherOrder).Last();
 
         /////////////////////////////////////////////////////////////////////////
         // Unify
@@ -65,6 +64,12 @@ namespace Favalon.Terms.Contexts
                 return true;
             }
 
+            // Unify higher orders.
+            if (!this.Unify(term1.HigherOrder, term2.HigherOrder))
+            {
+                return false;
+            }
+
             bool unified;
 
             if (term1 is PlaceholderTerm placeholder1)
@@ -86,9 +91,6 @@ namespace Favalon.Terms.Contexts
             {
                 unified = false;
             }
-
-            // Unify higher orders.
-            this.Unify(term1.HigherOrder, term2.HigherOrder);
 
             return unified;
         }

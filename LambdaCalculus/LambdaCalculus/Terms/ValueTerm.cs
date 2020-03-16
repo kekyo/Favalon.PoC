@@ -2,7 +2,12 @@
 
 namespace Favalon.Terms
 {
-    public abstract class ValueTerm : Term
+    public interface IValueTerm
+    {
+        object Value { get; }
+    }
+
+    public abstract class ValueTerm : Term, IValueTerm
     {
         protected ValueTerm(Term higherOrder) =>
             this.HigherOrder = higherOrder;
@@ -18,7 +23,7 @@ namespace Favalon.Terms
 
         public override sealed Term Infer(InferContext context)
         {
-            var higherOrder = context.ResolveHigherOrder(this);
+            var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
             return
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?

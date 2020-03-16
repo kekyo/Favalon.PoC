@@ -24,7 +24,7 @@ namespace Favalon.Terms
         {
             var lhs = this.Lhs.Infer(context);
             var rhs = this.Rhs.Infer(context);
-            var higherOrder = context.ResolveHigherOrder(this);
+            var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
             context.Unify(lhs.HigherOrder, higherOrder);
             context.Unify(rhs.HigherOrder, higherOrder);
@@ -51,6 +51,20 @@ namespace Favalon.Terms
                     this.OnCreate(lhs, rhs, higherOrder);
         }
 
+        public override Term Reduce(ReduceContext context)
+        {
+            var lhs = this.Lhs.Reduce(context);
+            var rhs = this.Rhs.Reduce(context);
+            var higherOrder = this.HigherOrder.Reduce(context);
+
+            return
+                this.Lhs.EqualsWithHigherOrder(lhs) &&
+                this.Rhs.EqualsWithHigherOrder(rhs) &&
+                this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
+                    this :
+                    this.OnCreate(lhs, rhs, higherOrder);
+        }
+
         public IEnumerable<Term> Flatten() =>
             (this.Lhs is BinaryTerm lhs ?
                 lhs.Flatten() :
@@ -60,7 +74,7 @@ namespace Favalon.Terms
                 new[] { this.Rhs });
 
         public void Deconstruct(out Term[] terms) =>
-            terms = this.Flatten().ToArray();
+            terms = this.Flatten().Memoize();
 
         public void Deconstruct(out Term lhs, out Term rhs, out Term higherOrder)
         {

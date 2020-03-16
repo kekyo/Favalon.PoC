@@ -1,19 +1,9 @@
 ﻿using Favalon.Terms.Contexts;
-//using Favalon.Terms.Types;
-using System;
 
 #pragma warning disable 659
 
 namespace Favalon.Terms
 {
-    public abstract class HigherOrderHoldTerm : Term
-    {
-        protected HigherOrderHoldTerm(Term higherOrder) =>
-            this.HigherOrder = higherOrder;
-
-        public override sealed Term HigherOrder { get; }
-    }
-
     public abstract class HigherOrderLazyTerm : Term
     {
         private Term? higherOrder;
@@ -53,7 +43,7 @@ namespace Favalon.Terms
         { }
 
         public override Term HigherOrder =>
-            null!;
+            Instance;
 
         internal override bool ValidTerm =>
             false;
@@ -77,7 +67,7 @@ namespace Favalon.Terms
             false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            "?TERM";
+            "#";
 
         public static readonly TerminationTerm Instance =
             new TerminationTerm();
@@ -92,7 +82,7 @@ namespace Favalon.Terms
         { }
 
         public override Term HigherOrder =>
-            null!;
+            TerminationTerm.Instance;
 
         public override Term Infer(InferContext context) =>
             context.CreatePlaceholder(Instance);
@@ -113,22 +103,26 @@ namespace Favalon.Terms
             false;
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            "?";
+            "_";
 
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();
     }
 
-    public sealed class PlaceholderTerm : HigherOrderHoldTerm
+    public sealed class PlaceholderTerm : Term
     {
         private static readonly int hashCode =
             typeof(PlaceholderTerm).GetHashCode();
 
         public readonly int Index;
 
-        internal PlaceholderTerm(int index, Term higherOrder) :
-            base(higherOrder) =>
+        internal PlaceholderTerm(int index, Term higherOrder)
+        {
             this.Index = index;
+            this.HigherOrder = higherOrder;
+        }
+
+        public override Term HigherOrder { get; }
 
         public override Term Infer(InferContext context)
         {
@@ -138,7 +132,7 @@ namespace Favalon.Terms
                 return this;
             }
 
-            var higherOrder = context.ResolveHigherOrder(this);
+            var higherOrder = context.ResolveHigherOrder(this.HigherOrder);
 
             return
                 this.HigherOrder.EqualsWithHigherOrder(higherOrder) ?
@@ -169,41 +163,5 @@ namespace Favalon.Terms
 
         protected override string OnPrettyPrint(PrettyPrintContext context) =>
             $"'{this.Index}";
-    }
-
-    public sealed class KindTerm : Term
-    {
-        private static readonly int hashCode =
-           typeof(KindTerm).GetHashCode();
-
-        private KindTerm()
-        { }
-
-        public override Term HigherOrder =>
-            null!;
-
-        public override Term Infer(InferContext context) =>
-            this;
-
-        public override Term Fixup(FixupContext context) =>
-            this;
-
-        public override Term Reduce(ReduceContext context) =>
-            this;
-
-        protected override bool OnEquals(EqualsContext context, Term? other) =>
-            other is KindTerm;
-
-        public override int GetHashCode() =>
-            hashCode;
-
-        protected override bool IsIncludeHigherOrderInPrettyPrinting(HigherOrderDetails higherOrderDetail) =>
-            false;
-
-        protected override string OnPrettyPrint(PrettyPrintContext context) =>
-            "*";
-
-        public static readonly KindTerm Instance =
-            new KindTerm();
     }
 }

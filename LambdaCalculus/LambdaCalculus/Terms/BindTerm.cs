@@ -23,7 +23,7 @@ namespace Favalon.Terms
 
             if (bound is IdentityTerm(string identity))
             {
-                context.BindTerm(identity, body);
+                context.BindMutable(identity, body);
             }
 
             context.Unify(bound.HigherOrder, body.HigherOrder);
@@ -55,7 +55,7 @@ namespace Favalon.Terms
             var bound = this.Bound.Reduce(context);
             if (bound is IdentityTerm(string identity))
             {
-                context.BindTerm(identity, body);
+                context.BindMutable(identity, body);
                 return body;
             }
 

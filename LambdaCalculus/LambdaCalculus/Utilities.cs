@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalon.Terms;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,7 +9,7 @@ namespace Favalon
     {
         public static string Join(string separator, IEnumerable<string> values) =>
 #if NET35
-            string.Join(separator, values.ToArray());
+            string.Join(separator, values.Memoize());
 #else
             string.Join(separator, values);
 #endif
@@ -40,30 +41,45 @@ namespace Favalon
             }
         }
 
-        public static void Deconstruct<T>(this IEnumerable<T> @this, out T[]? arr)
+        public static IEnumerable<T> Collect<T>(this IEnumerable<T> enumerable, Func<T, T?> mapper)
+            where T: class
         {
-            if (@this is T[] a)
+            foreach (var value in enumerable)
             {
-                arr = a;
-            }
-            else
-            {
-                arr = default;
+                var v = mapper(value);
+                if (v != null)
+                {
+                    yield return v;
+                }
             }
         }
 
-        public static void Deconstruct<T>(this IEnumerable<T> @this, out T[]? arr, out int length)
+        public static T[] Memoize<T>(this IEnumerable<T> enumerable) =>
+            enumerable as T[] ??
+            (enumerable is List<T> list ? list.ToArray() : enumerable.ToArray());
+
+        public static void Deconstruct<T>(this T[] arr, out T[] a, out int length)
         {
-            if (@this is T[] a)
+            a = arr;
+            length = arr.Length;
+        }
+
+        public static void Deconstruct(this Term term, out bool? value)
+        {
+            if (term is IdentityTerm identity)
             {
-                arr = a;
-                length = a.Length;
+                if (identity.Identity == "true")
+                {
+                    value = true;
+                    return;
+                }
+                else if (identity.Identity == "false")
+                {
+                    value = false;
+                    return;
+                }
             }
-            else
-            {
-                arr = default;
-                length = -1;
-            }
+            value = null;
         }
     }
 }

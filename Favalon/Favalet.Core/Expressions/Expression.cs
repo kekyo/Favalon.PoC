@@ -25,8 +25,12 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
 {
-    public abstract partial class Expression :
-        IEquatable<Expression?>
+    public interface IExpression : IEquatable<IExpression?>
+    {
+        IExpression HigherOrder { get; }
+    }
+
+    public abstract partial class Expression : IExpression
     {
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -34,14 +38,20 @@ namespace Favalet.Expressions
         protected Expression()
         { }
 
-        public abstract Expression HigherOrder { get; }
+        public abstract IExpression HigherOrder { get; }
 
-        public abstract bool Equals(Expression? rhs);
+        public abstract bool Equals(IExpression? rhs);
 
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public override sealed bool Equals(object obj) =>
-            this.Equals(obj as Expression);
+            this.Equals(obj as IExpression);
 
-        bool IEquatable<Expression?>.Equals(Expression? other) =>
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             this.Equals(other);
     }
 }

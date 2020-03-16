@@ -27,10 +27,10 @@ namespace Favalet.Expressions
         private CLRExpressionFactory()
         { }
 
-        Expression IExpressionFactory.Numeric(string value) =>
+        IExpression IExpressionFactory.Numeric(string value) =>
             FromNumeric(value);
 
-        Expression IExpressionFactory.String(string value) =>
+        IExpression IExpressionFactory.String(string value) =>
             ConstantTerm.Create(value);
 
         public static new readonly IExpressionFactory Instance =

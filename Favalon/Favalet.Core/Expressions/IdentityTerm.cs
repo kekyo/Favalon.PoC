@@ -19,23 +19,31 @@
 
 namespace Favalet.Expressions
 {
-    public sealed class IdentityTerm : Term
+    public interface IIdentityTerm : ITerm
+    {
+        public string Identity { get; }
+    }
+
+    public sealed class IdentityTerm : Term, IIdentityTerm
     {
         public readonly string Identity;
 
-        private IdentityTerm(string identity, Expression higherOrder)
+        private IdentityTerm(string identity, IExpression higherOrder)
         {
             this.Identity = identity;
             this.HigherOrder = higherOrder;
         }
 
-        public override Expression HigherOrder { get; }
+        public override IExpression HigherOrder { get; }
 
-        public override bool Equals(Expression? rhs) =>
-            rhs is IdentityTerm identity &&
+        string IIdentityTerm.Identity =>
+            this.Identity;
+
+        public override bool Equals(IExpression? rhs) =>
+            rhs is IIdentityTerm identity &&
                 this.Identity.Equals(identity.Identity);
 
-        public static IdentityTerm Create(string identity, Expression higherOrder) =>
+        public static IdentityTerm Create(string identity, IExpression higherOrder) =>
             new IdentityTerm(identity, higherOrder);
     }
 }

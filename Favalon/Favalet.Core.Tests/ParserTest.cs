@@ -30,23 +30,23 @@ namespace Favalet
     [TestFixture]
     public sealed class ParserTest
     {
-        private static readonly Func<string, Expression[]>[] ParserRunners =
+        private static readonly Func<string, IExpression[]>[] ParserRunners =
             new[]
             {
-                new Func<string, Expression[]>(text =>
+                new Func<string, IExpression[]>(text =>
                 Lexer.EnumerableTokens(text).Parse(CLRExpressionFactory.Instance).ToArray()),
             };
 
         ////////////////////////////////////////////////////
 
         [TestCaseSource("ParserRunners")]
-        public void ParseIdentityTokens(Func<string, Expression[]> run)
+        public void ParseIdentityTokens(Func<string, IExpression[]> run)
         {
             var text = "echo \"abc def ghi\" | wc";
             var actual = run(text);
 
             Assert.AreEqual(
-                new Expression[]
+                new IExpression[]
                 {
                     Apply(
                         Apply(

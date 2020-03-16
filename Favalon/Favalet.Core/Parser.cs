@@ -32,10 +32,10 @@ namespace Favalet
         public static int BreakIndex = -1;
 #endif
 
-        public static IEnumerable<Expression> Parse(this IEnumerable<Token> tokens) =>
+        public static IEnumerable<IExpression> Parse(this IEnumerable<Token> tokens) =>
             Parse(tokens, ExpressionFactory.Instance);
 
-        public static IEnumerable<Expression> Parse(
+        public static IEnumerable<IExpression> Parse(
             this IEnumerable<Token> tokens, IExpressionFactory factory)
         {
             var context = ParseRunnerContext.Create(factory);
@@ -58,7 +58,7 @@ namespace Favalet
             }
 
             // Contains final result
-            if (context.Expression is Expression finalExpression)
+            if (context.Expression is IExpression finalExpression)
             {
                 yield return finalExpression;
             }

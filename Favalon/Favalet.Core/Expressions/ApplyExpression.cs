@@ -19,28 +19,40 @@
 
 namespace Favalet.Expressions
 {
-    public sealed class ApplyExpression : Expression
+    public interface IApplyExpression : IExpression
     {
-        public readonly Expression Function;
-        public readonly Expression Argument;
+        IExpression Function { get; }
+        IExpression Argument { get; }
+    }
+
+    public sealed class ApplyExpression : Expression, IApplyExpression
+    {
+        public readonly IExpression Function;
+        public readonly IExpression Argument;
 
         private ApplyExpression(
-            Expression function, Expression argument, Expression higherOrder)
+            IExpression function, IExpression argument, IExpression higherOrder)
         {
             this.Function = function;
             this.Argument = argument;
             this.HigherOrder = higherOrder;
         }
 
-        public override Expression HigherOrder { get; }
+        public override IExpression HigherOrder { get; }
 
-        public override bool Equals(Expression? rhs) =>
-            rhs is ApplyExpression apply &&
+        IExpression IApplyExpression.Function =>
+            this.Function;
+
+        IExpression IApplyExpression.Argument =>
+            this.Argument;
+
+        public override bool Equals(IExpression? rhs) =>
+            rhs is IApplyExpression apply &&
                 this.Function.Equals(apply.Function) &&
                 this.Argument.Equals(apply.Argument);
 
         public static ApplyExpression Create(
-            Expression function, Expression argument, Expression higherOrder) =>
+            IExpression function, IExpression argument, IExpression higherOrder) =>
             new ApplyExpression(function, argument, higherOrder);
     }
 }

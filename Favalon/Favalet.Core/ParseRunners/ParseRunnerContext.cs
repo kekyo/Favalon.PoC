@@ -31,11 +31,11 @@ namespace Favalet.ParseRunners
         private ParseRunnerContext(IExpressionFactory factory) =>
             this.Factory = factory;
 
-        public Expression? Expression { get; private set; }
+        public IExpression? Expression { get; private set; }
 
         public Token? LastToken { get; private set; }
 
-        public void Combine(Expression expression)
+        public void Combine(IExpression expression)
         {
             if (this.Expression != null)
             {

@@ -17,14 +17,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Favalet.Expressions
 {
-    public abstract class Term : Expression
+    public interface ITerm : IExpression
+    {
+    }
+
+    public abstract class Term : Expression, ITerm
     {
         protected Term()
         { }

@@ -21,9 +21,9 @@ namespace Favalet.Expressions
 {
     public interface IExpressionFactory
     {
-        Expression Identity(string identity);
-        Expression Numeric(string value);
-        Expression String(string value);
-        Expression Apply(Expression function, Expression argument);
+        IExpression Identity(string identity);
+        IExpression Numeric(string value);
+        IExpression String(string value);
+        IExpression Apply(IExpression function, IExpression argument);
     }
 }

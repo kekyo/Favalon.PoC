@@ -35,22 +35,22 @@ namespace Favalet.Expressions
         public static IdentityTerm Identity(string identity) =>
             IdentityTerm.Create(identity, unspecified);
 
-        public static ApplyExpression Apply(Expression function, Expression argument) =>
+        public static ApplyExpression Apply(IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument, unspecified);
 
         public static readonly IExpressionFactory Instance =
             new ExpressionFactory();
 
-        Expression IExpressionFactory.Numeric(string value) =>
+        IExpression IExpressionFactory.Numeric(string value) =>
             throw new NotImplementedException();
 
-        Expression IExpressionFactory.String(string value) =>
+        IExpression IExpressionFactory.String(string value) =>
             throw new NotImplementedException();
 
-        Expression IExpressionFactory.Identity(string identity) =>
+        IExpression IExpressionFactory.Identity(string identity) =>
             IdentityTerm.Create(identity, unspecified);
 
-        Expression IExpressionFactory.Apply(Expression function, Expression argument) =>
+        IExpression IExpressionFactory.Apply(IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument, unspecified);
     }
 }

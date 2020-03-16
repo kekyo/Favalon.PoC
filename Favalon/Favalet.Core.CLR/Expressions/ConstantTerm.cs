@@ -21,20 +21,28 @@ using Favalet.Internal;
 
 namespace Favalet.Expressions
 {
-    public sealed class ConstantTerm : Term
+    public interface IConstantTerm : ITerm
+    {
+        public object Value { get; }
+    }
+
+    public sealed class ConstantTerm : Term, IConstantTerm
     {
         public readonly object Value;
 
-        private ConstantTerm(object value, Expression higherOrder)
+        private ConstantTerm(object value, IExpression higherOrder)
         {
             this.Value = value;
             this.HigherOrder = higherOrder;
         }
 
-        public override Expression HigherOrder { get; }
+        public override IExpression HigherOrder { get; }
 
-        public override bool Equals(Expression? rhs) =>
-            rhs is ConstantTerm constant &&
+        object IConstantTerm.Value =>
+            this.Value;
+
+        public override bool Equals(IExpression? rhs) =>
+            rhs is IConstantTerm constant &&
                 this.Value.Equals(constant.Value);
 
         public static ConstantTerm Create(object value) =>

@@ -17,19 +17,15 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Internal;
-using Favalet.LexRunners;
+using Favalet.Lexers.Runners;
 using Favalet.Tokens;
 using System;
 
-namespace Favalet
+namespace Favalet.Lexers
 {
-    internal sealed class ObservableLexer : ObservableObserver<Token, char>
+    internal sealed class ObservableCharLexer : ObservableLexer<char>
     {
-        private readonly LexRunnerContext context = LexRunnerContext.Create();
-        private LexRunner runner = WaitingIgnoreSpaceRunner.Instance;
-
-        public ObservableLexer(IObservable<char> parent) :
+        public ObservableCharLexer(IObservable<char> parent) :
             base(parent)
         { }
 
@@ -48,19 +44,6 @@ namespace Favalet
                 case LexRunnerResult(LexRunner next, _, _):
                     runner = next;
                     break;
-            }
-        }
-
-        protected override void OnFinalize()
-        {
-            // Contained final result
-            if (runner.Finish(context) is LexRunnerResult(_, Token finalToken, _))
-            {
-                this.SendAndFinish(finalToken);
-            }
-            else
-            {
-                this.Finish();
             }
         }
     }

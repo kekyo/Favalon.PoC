@@ -18,9 +18,13 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions;
+using Favalet.Lexers;
+using Favalet.Parsers;
 using NUnit.Framework;
 using System;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 using static Favalet.Expressions.ExpressionFactory;
 using static Favalet.Expressions.CLRExpressionFactory;
@@ -33,13 +37,20 @@ namespace Favalet
         private static IExpression[] Run(string text) =>
             Lexer.Tokenize(text).Parse(CLRExpressionFactory.Instance).ToArray();
 
+        private static readonly Func<string, ValueTask<IExpression[]>>[] Parsers =
+            new[]
+            {
+                new Func<string, ValueTask<IExpression[]>>(text => new ValueTask<IExpression[]>(Lexer.Tokenize(text).Parse(CLRExpressionFactory.Instance).ToArray())),
+                new Func<string, ValueTask<IExpression[]>>(async text => await Lexer.Tokenize(text.ToObservable()).Parse(CLRExpressionFactory.Instance).ToArray()),
+            };
+
         ////////////////////////////////////////////////////
 
-        [Test]
-        public void ParseArticleSampleCode()
+        [TestCaseSource("Parsers")]
+        public async Task ParseArticleSampleCode(Func<string, ValueTask<IExpression[]>> run)
         {
             var text = "echo \"abc def ghi\" | wc";
-            var actual = Run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new IExpression[]

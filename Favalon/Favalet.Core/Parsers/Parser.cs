@@ -18,13 +18,13 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions;
-using Favalet.ParseRunners;
+using Favalet.Parsers.Runners;
 using Favalet.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Favalet
+namespace Favalet.Parsers
 {
     public static class Parser
     {
@@ -63,5 +63,14 @@ namespace Favalet
                 yield return finalExpression;
             }
         }
+
+#if !NET35
+        public static IObservable<IExpression> Parse(this IObservable<Token> tokens) =>
+            new ObservableParser(tokens, ExpressionFactory.Instance);
+
+        public static IObservable<IExpression> Parse(
+            this IObservable<Token> tokens, IExpressionFactory factory) =>
+            new ObservableParser(tokens, factory);
+#endif
     }
 }

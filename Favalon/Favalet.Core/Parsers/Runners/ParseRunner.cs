@@ -1,6 +1,6 @@
 ﻿using Favalet.Tokens;
 
-namespace Favalet.ParseRunners
+namespace Favalet.Parsers.Runners
 {
     internal abstract class ParseRunner
     {

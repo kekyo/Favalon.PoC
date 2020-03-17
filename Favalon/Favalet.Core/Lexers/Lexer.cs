@@ -18,20 +18,20 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Internal;
-using Favalet.LexRunners;
+using Favalet.Lexers.Runners;
 using Favalet.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Favalet
+namespace Favalet.Lexers
 {
     public static class Lexer
     {
         public static IEnumerable<Token> Tokenize(IEnumerable<char> chars)
         {
             var runnerContext = LexRunnerContext.Create();
-            var runner = WaitingIgnoreSpaceRunner.Instance;
+            var runner = WaitingRunner.Instance;
 
             foreach (var ch in chars)
             {
@@ -58,6 +58,39 @@ namespace Favalet
             }
         }
 
+        public static IEnumerable<Token> Tokenize(IEnumerable<string> lines)
+        {
+            var runnerContext = LexRunnerContext.Create();
+            var runner = WaitingRunner.Instance;
+
+            foreach (var line in lines)
+            {
+                for (var index = 0; index < line.Length; index++)
+                {
+                    switch (runner.Run(runnerContext, line[index]))
+                    {
+                        case LexRunnerResult(LexRunner next, Token token0, Token token1):
+                            yield return token0;
+                            yield return token1;
+                            runner = next;
+                            break;
+                        case LexRunnerResult(LexRunner next, Token token, _):
+                            yield return token;
+                            runner = next;
+                            break;
+                        case LexRunnerResult(LexRunner next, _, _):
+                            runner = next;
+                            break;
+                    }
+                }
+            }
+
+            if (runner.Finish(runnerContext) is LexRunnerResult(_, Token finalToken, _))
+            {
+                yield return finalToken;
+            }
+        }
+
         public static IEnumerable<Token> Tokenize(string text) =>
             Tokenize(text.AsEnumerable());
 
@@ -66,7 +99,10 @@ namespace Favalet
 
 #if !NET35
         public static IObservable<Token> Tokenize(IObservable<char> observable) =>
-            new ObservableLexer(observable);
+            new ObservableCharLexer(observable);
+
+        public static IObservable<Token> Tokenize(IObservable<string> observable) =>
+            new ObservableStringLexer(observable);
 #endif
     }
 }

@@ -21,7 +21,7 @@ using Favalet.Expressions;
 using Favalet.Tokens;
 using System.Diagnostics;
 
-namespace Favalet.ParseRunners
+namespace Favalet.Parsers.Runners
 {
     internal sealed class ParseRunnerContext
     {

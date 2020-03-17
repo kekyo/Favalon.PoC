@@ -17,25 +17,33 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using System.Runtime.CompilerServices;
-using System.Text;
+using Favalet.Internal;
+using Favalet.Lexers.Runners;
+using Favalet.Tokens;
+using System;
 
-namespace Favalet.LexRunners
+namespace Favalet.Lexers
 {
-    internal sealed class LexRunnerContext
+    internal abstract class ObservableLexer<TConsume> : ObservableObserver<Token, TConsume>
     {
-        public readonly StringBuilder TokenBuffer;
+        protected readonly LexRunnerContext context = LexRunnerContext.Create();
+        protected LexRunner runner = WaitingRunner.Instance;
 
-#if NET45 || NETSTANDARD1_0
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        private LexRunnerContext(StringBuilder tokenBuffer) =>
-            this.TokenBuffer = tokenBuffer;
+        protected ObservableLexer(IObservable<TConsume> parent) :
+            base(parent)
+        { }
 
-#if NET45 || NETSTANDARD1_0
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static LexRunnerContext Create() =>
-            new LexRunnerContext(new StringBuilder());
+        protected override sealed void OnFinalize()
+        {
+            // Contained final result
+            if (runner.Finish(context) is LexRunnerResult(_, Token finalToken, _))
+            {
+                this.SendAndFinish(finalToken);
+            }
+            else
+            {
+                this.Finish();
+            }
+        }
     }
 }

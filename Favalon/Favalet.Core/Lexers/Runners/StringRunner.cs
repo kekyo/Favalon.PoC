@@ -21,7 +21,7 @@ using Favalet.Internal;
 using Favalet.Tokens;
 using System;
 
-namespace Favalet.LexRunners
+namespace Favalet.Lexers.Runners
 {
     internal sealed class StringRunner : LexRunner
     {

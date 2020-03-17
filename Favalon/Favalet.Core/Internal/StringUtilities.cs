@@ -128,17 +128,17 @@ namespace Favalet.Internal
             (IEnumerable<char>)text;
 #endif
 
-        public static IEnumerable<char> AsEnumerable(this TextReader tr)
+        public static IEnumerable<string> AsEnumerable(this TextReader tr)
         {
             while (true)
             {
-                var inch = tr.Read();
-                if (inch < 0)
+                var line = tr.ReadLine();
+                if (line == null)
                 {
                     break;
                 }
 
-                yield return (char)inch;
+                yield return line;
             }
         }
     }

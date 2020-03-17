@@ -21,11 +21,11 @@ using Favalet.Tokens;
 using System;
 using System.Diagnostics;
 
-namespace Favalet.ParseRunners
+namespace Favalet.Parsers.Runners
 {
-    internal sealed class WaitingRunner : ParseRunner
+    internal sealed class ApplyingRunner : ParseRunner
     {
-        private WaitingRunner()
+        private ApplyingRunner()
         { }
 
         public override ParseRunner Run(ParseRunnerContext context, Token token)
@@ -35,27 +35,36 @@ namespace Favalet.ParseRunners
                 // 123
                 case NumericToken numeric:
                     context.Combine(context.Factory.Numeric(numeric.Value));
-                    return ApplyingRunner.Instance;
+                    return this;
 
-                // -
                 case NumericalSignToken numericSign:
-                    context.SetPreSignToken(numericSign);
-                    return NumericalSignedRunner.Instance;
+                    // "abc -" / "123 -" ==> binary op or signed
+                    if (context.LastToken is WhiteSpaceToken)
+                    {
+                        context.SetPreSignToken(numericSign);
+                        return NumericalSignedRunner.Instance;
+                    }
+                    // "abc-" / "123-" / "(abc)-" ==> binary op
+                    else
+                    {
+                        context.Combine(context.Factory.Identity(numericSign.Symbol.ToString()));
+                        return this;
+                    }
 
                 // "ABC"
                 case StringToken str:
                     context.Combine(context.Factory.String(str.Value));
-                    return ApplyingRunner.Instance;
+                    return this;
 
                 // abc
                 case IdentityToken identity:
                     context.Combine(context.Factory.Identity(identity.Identity));
-                    return ApplyingRunner.Instance;
+                    return this;
 
-                // "&"
+                // &
                 case SymbolToken symbol:
                     context.Combine(context.Factory.Identity(symbol.Symbol.ToString()));
-                    return ApplyingRunner.Instance;
+                    return this;
 
                 case WhiteSpaceToken _:
                     return this;
@@ -65,6 +74,6 @@ namespace Favalet.ParseRunners
             }
         }
 
-        public static readonly ParseRunner Instance = new WaitingRunner();
+        public static readonly ParseRunner Instance = new ApplyingRunner();
     }
 }

@@ -21,7 +21,7 @@ using Favalet.Tokens;
 using System;
 using System.Diagnostics;
 
-namespace Favalet.ParseRunners
+namespace Favalet.Parsers.Runners
 {
     internal sealed class NumericalSignedRunner : ParseRunner
     {

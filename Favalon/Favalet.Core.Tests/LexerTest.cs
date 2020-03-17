@@ -17,6 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Lexers;
 using Favalet.Tokens;
 using NUnit.Framework;
 using System;
@@ -32,22 +33,22 @@ namespace Favalet
     [TestFixture]
     public sealed class LexerTest
     {
-        private static readonly Func<string, Token[]>[] Tokenizers =
+        private static readonly Func<string, ValueTask<Token[]>>[] Tokenizers =
             new[]
             {
-                new Func<string, Token[]>(text => Lexer.Tokenize(text).ToArray()),
-                new Func<string, Token[]>(text => Lexer.Tokenize(text.AsEnumerable()).ToArray()),
-                new Func<string, Token[]>(text => Lexer.Tokenize(new StringReader(text)).ToArray()),
-                new Func<string, Token[]>(text => Lexer.Tokenize(text.ToObservable()).ToEnumerable().ToArray()),
+                new Func<string, ValueTask<Token[]>>(text => new ValueTask<Token[]>(Lexer.Tokenize(text).ToArray())),
+                new Func<string, ValueTask<Token[]>>(text => new ValueTask<Token[]>(Lexer.Tokenize(text.AsEnumerable()).ToArray())),
+                new Func<string, ValueTask<Token[]>>(text => new ValueTask<Token[]>(Lexer.Tokenize(new StringReader(text)).ToArray())),
+                new Func<string, ValueTask<Token[]>>(async text => await Lexer.Tokenize(text.ToObservable()).ToArray()),
             };
 
         ////////////////////////////////////////////////////
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokens(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "abc def ghi";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -60,13 +61,14 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokensBeforeSpace(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokensBeforeSpace(Func<string, ValueTask<Token[]>> run)
         {
             var text = "  abc def ghi";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
+                    WhiteSpace(),
                     Identity("abc"),
                     WhiteSpace(),
                     Identity("def"),
@@ -76,10 +78,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokensAfterSpace(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokensAfterSpace(Func<string, ValueTask<Token[]>> run)
         {
             var text = "abc def ghi  ";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -93,10 +95,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokensLongSpace(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokensLongSpace(Func<string, ValueTask<Token[]>> run)
         {
             var text = "abc      def      ghi";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -109,10 +111,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokensBeforeBrackets(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokensBeforeBrackets(Func<string, ValueTask<Token[]>> run)
         {
             var text = "(abc def) ghi";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -127,10 +129,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokensAfterBrackets(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokensAfterBrackets(Func<string, ValueTask<Token[]>> run)
         {
             var text = "abc (def ghi)";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -145,10 +147,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokensWithSpacingBrackets(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokensWithSpacingBrackets(Func<string, ValueTask<Token[]>> run)
         {
             var text = "abc ( def ) ghi";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -165,10 +167,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokensWithNoSpacingBrackets(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokensWithNoSpacingBrackets(Func<string, ValueTask<Token[]>> run)
         {
             var text = "abc(def)ghi";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -181,10 +183,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTrailsNumericTokens(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTrailsNumericTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "a12 d34 g56";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -197,10 +199,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableSignLikeOperatorAndIdentityTokens1(Func<string, Token[]> run)
+        public async Task EnumerableSignLikeOperatorAndIdentityTokens1(Func<string, ValueTask<Token[]>> run)
         {
             var text = "+abc";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -210,10 +212,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableSignLikeOperatorAndIdentityTokens2(Func<string, Token[]> run)
+        public async Task EnumerableSignLikeOperatorAndIdentityTokens2(Func<string, ValueTask<Token[]>> run)
         {
             var text = "-abc";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -223,10 +225,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableStrictOperatorAndIdentityTokens1(Func<string, Token[]> run)
+        public async Task EnumerableStrictOperatorAndIdentityTokens1(Func<string, ValueTask<Token[]>> run)
         {
             var text = "++abc";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -236,10 +238,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableStrictOperatorAndIdentityTokens2(Func<string, Token[]> run)
+        public async Task EnumerableStrictOperatorAndIdentityTokens2(Func<string, ValueTask<Token[]>> run)
         {
             var text = "--abc";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -251,10 +253,10 @@ namespace Favalet
         ///////////////////////////////////////////////
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableNumericTokens(Func<string, Token[]> run)
+        public async Task EnumerableNumericTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123 456 789";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -267,10 +269,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableCombinedIdentityAndNumericTokens(Func<string, Token[]> run)
+        public async Task EnumerableCombinedIdentityAndNumericTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "abc 456 def";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -283,10 +285,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableNumericTokensBeforeBrackets(Func<string, Token[]> run)
+        public async Task EnumerableNumericTokensBeforeBrackets(Func<string, ValueTask<Token[]>> run)
         {
             var text = "(123 456) 789";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -301,10 +303,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableNumericTokensAfterBrackets(Func<string, Token[]> run)
+        public async Task EnumerableNumericTokensAfterBrackets(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123 (456 789)";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -319,10 +321,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableNumericTokensWithSpacingBrackets(Func<string, Token[]> run)
+        public async Task EnumerableNumericTokensWithSpacingBrackets(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123 ( 456 ) 789";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -339,10 +341,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableNumericTokensWithNoSpacingBrackets(Func<string, Token[]> run)
+        public async Task EnumerableNumericTokensWithNoSpacingBrackets(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123(456)789";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -355,10 +357,62 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableNumericTokensBeforeString(Func<string, Token[]> run)
+        public async Task EnumerableStringToken(Func<string, ValueTask<Token[]>> run)
+        {
+            var text = "\"abc def\"";
+            var actual = await run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    String("abc def") },
+                actual);
+        }
+
+        [TestCaseSource("Tokenizers")]
+        public async Task EnumerableStringTokenBeforeSpacing(Func<string, ValueTask<Token[]>> run)
+        {
+            var text = " \"abc def\"";
+            var actual = await run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    WhiteSpace(),
+                    String("abc def") },
+                actual);
+        }
+
+        [TestCaseSource("Tokenizers")]
+        public async Task EnumerableStringTokenAfterSpacing(Func<string, ValueTask<Token[]>> run)
+        {
+            var text = "\"abc def\" ";
+            var actual = await run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    String("abc def"),
+                    WhiteSpace() },
+                actual);
+        }
+
+        [TestCaseSource("Tokenizers")]
+        public async Task EnumerableStringTokenBothSpacing(Func<string, ValueTask<Token[]>> run)
+        {
+            var text = " \"abc def\" ";
+            var actual = await run(text);
+
+            Assert.AreEqual(
+                new Token[] {
+                    WhiteSpace(),
+                    String("abc def"),
+                    WhiteSpace() },
+                actual);
+        }
+
+        [TestCaseSource("Tokenizers")]
+        public async Task EnumerableNumericTokensBeforeString(Func<string, ValueTask<Token[]>> run)
         {
             var text = "\"abc def\" 123";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -369,10 +423,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableNumericTokensAfterString(Func<string, Token[]> run)
+        public async Task EnumerableNumericTokensAfterString(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123 \"abc def\"";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -383,10 +437,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableNumericTokensSpacingStrings(Func<string, Token[]> run)
+        public async Task EnumerableNumericTokensSpacingStrings(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123 \"abc def\" 456";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -399,10 +453,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableNumericTokensNoSpacingStrings(Func<string, Token[]> run)
+        public async Task EnumerableNumericTokensNoSpacingStrings(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123\"abc def\"456";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -413,10 +467,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokensBeforeStringWithNoSpacing(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokensBeforeStringWithNoSpacing(Func<string, ValueTask<Token[]>> run)
         {
             var text = "\"abc def\"abc";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -426,10 +480,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokensAfterStringWithNoSpacing(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokensAfterStringWithNoSpacing(Func<string, ValueTask<Token[]>> run)
         {
             var text = "abc\"abc def\"";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -439,10 +493,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableIdentityTokensNoSpacingStrings(Func<string, Token[]> run)
+        public async Task EnumerableIdentityTokensNoSpacingStrings(Func<string, ValueTask<Token[]>> run)
         {
             var text = "abc\"abc def\"def";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -453,10 +507,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableStringTokensNoSpacingOperators(Func<string, Token[]> run)
+        public async Task EnumerableStringTokensNoSpacingOperators(Func<string, ValueTask<Token[]>> run)
         {
             var text = "+\"abc def\"-";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -467,10 +521,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableOperatorTokensNoSpacingStrings(Func<string, Token[]> run)
+        public async Task EnumerableOperatorTokensNoSpacingStrings(Func<string, ValueTask<Token[]>> run)
         {
             var text = "\"abc\"+\"def\"";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -481,10 +535,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableStringTokensNoSpacingBrackets(Func<string, Token[]> run)
+        public async Task EnumerableStringTokensNoSpacingBrackets(Func<string, ValueTask<Token[]>> run)
         {
             var text = "(\"abc def\")";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -495,10 +549,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableOpenBracketTokensNoSpacingStrings(Func<string, Token[]> run)
+        public async Task EnumerableOpenBracketTokensNoSpacingStrings(Func<string, ValueTask<Token[]>> run)
         {
             var text = "\"abc\"(\"def\"";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -509,10 +563,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableCloseBracketTokensNoSpacingStrings(Func<string, Token[]> run)
+        public async Task EnumerableCloseBracketTokensNoSpacingStrings(Func<string, ValueTask<Token[]>> run)
         {
             var text = "\"abc\")\"def\"";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -523,10 +577,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableContinuousStrings(Func<string, Token[]> run)
+        public async Task EnumerableContinuousStrings(Func<string, ValueTask<Token[]>> run)
         {
             var text = "\"abc\"\"def\"";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -536,10 +590,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerablePlusSignNumericTokens(Func<string, Token[]> run)
+        public async Task EnumerablePlusSignNumericTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "+123 +456 +789";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -555,10 +609,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableMinusSignNumericTokens(Func<string, Token[]> run)
+        public async Task EnumerableMinusSignNumericTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "-123 -456 -789";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -574,10 +628,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerablePlusOperatorNumericTokens(Func<string, Token[]> run)
+        public async Task EnumerablePlusOperatorNumericTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "+ 123 + 456 + 789";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -596,10 +650,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableMinusOperatorNumericTokens(Func<string, Token[]> run)
+        public async Task EnumerableMinusOperatorNumericTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "- 123 - 456 - 789";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -618,10 +672,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerablePlusOperatorWithSpaceAndNumericTokens(Func<string, Token[]> run)
+        public async Task EnumerablePlusOperatorWithSpaceAndNumericTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123 + 456";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -634,10 +688,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableMinusOperatorWithSpaceAndNumericTokens(Func<string, Token[]> run)
+        public async Task EnumerableMinusOperatorWithSpaceAndNumericTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123 - 456";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -650,10 +704,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerablePlusOperatorSideBySideAndNumericTokens2(Func<string, Token[]> run)
+        public async Task EnumerablePlusOperatorSideBySideAndNumericTokens2(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123+456";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -664,10 +718,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableMinusOperatorSideBySideAndNumericTokens(Func<string, Token[]> run)
+        public async Task EnumerableMinusOperatorSideBySideAndNumericTokens(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123-456";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -678,10 +732,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableComplexNumericOperatorTokens1(Func<string, Token[]> run)
+        public async Task EnumerableComplexNumericOperatorTokens1(Func<string, ValueTask<Token[]>> run)
         {
             var text = "-123*(+456+789)";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -699,10 +753,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableComplexNumericOperatorTokens2(Func<string, Token[]> run)
+        public async Task EnumerableComplexNumericOperatorTokens2(Func<string, ValueTask<Token[]>> run)
         {
             var text = "+123*(-456-789)";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -720,10 +774,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableStrictOperatorAndNumericTokens1(Func<string, Token[]> run)
+        public async Task EnumerableStrictOperatorAndNumericTokens1(Func<string, ValueTask<Token[]>> run)
         {
             var text = "++123";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -733,10 +787,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableStrictOperatorAndNumericTokens2(Func<string, Token[]> run)
+        public async Task EnumerableStrictOperatorAndNumericTokens2(Func<string, ValueTask<Token[]>> run)
         {
             var text = "--123";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -746,10 +800,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableCombineIdentityAndNumericTokensWithOperator(Func<string, Token[]> run)
+        public async Task EnumerableCombineIdentityAndNumericTokensWithOperator(Func<string, ValueTask<Token[]>> run)
         {
             var text = "abc+123";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -760,10 +814,10 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void EnumerableCombineNumericAndIdentityTokensWithOperator(Func<string, Token[]> run)
+        public async Task EnumerableCombineNumericAndIdentityTokensWithOperator(Func<string, ValueTask<Token[]>> run)
         {
             var text = "123+abc";
-            var actual = run(text);
+            var actual = await run(text);
 
             Assert.AreEqual(
                 new Token[] {
@@ -774,12 +828,12 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void Operator1Detection(Func<string, Token[]> run)
+        public async Task Operator1Detection(Func<string, ValueTask<Token[]>> run)
         {
             foreach (var ch in TokenFactory.OperatorChars)
             {
                 var text = $"123 {ch} abc";
-                var actual = run(text);
+                var actual = await run(text);
 
                 Assert.AreEqual(
                     new Token[] {
@@ -793,16 +847,16 @@ namespace Favalet
         }
 
         [TestCaseSource("Tokenizers")]
-        public void Operator2Detection(Func<string, Token[]> run)
+        public async Task Operator2Detection(Func<string, ValueTask<Token[]>> run)
         {
-            Parallel.ForEach(
+            await Task.WhenAll(
                 TokenFactory.OperatorChars.
                     SelectMany(ch1 => TokenFactory.OperatorChars.
-                        Select(ch2 => (ch1, ch2))),
-                entry =>
+                        Select(ch2 => (ch1, ch2))).
+                Select(async entry =>
                 {
                     var text = $"123 {entry.ch1}{entry.ch2} abc";
-                    var actual = run(text);
+                    var actual = await run(text);
 
                     Assert.AreEqual(
                         new Token[] {
@@ -812,31 +866,31 @@ namespace Favalet
                             WhiteSpace(),
                             Identity("abc") },
                         actual);
-                });
+                }));
         }
 
         [TestCaseSource("Tokenizers")]
-        public void Operator3Detection(Func<string, Token[]> run)
+        public async Task Operator3Detection(Func<string, ValueTask<Token[]>> run)
         {
-            Parallel.ForEach(
+            await Task.WhenAll(
                 TokenFactory.OperatorChars.
                     SelectMany(ch1 => TokenFactory.OperatorChars.
                         SelectMany(ch2 => TokenFactory.OperatorChars.
-                            Select(ch3 => (ch1, ch2, ch3)))),
-                entry =>
-                {
-                    var text = $"123 {entry.ch1}{entry.ch2}{entry.ch3} abc";
-                    var actual = run(text);
+                            Select(ch3 => (ch1, ch2, ch3)))).
+                    Select(async entry =>
+                    {
+                        var text = $"123 {entry.ch1}{entry.ch2}{entry.ch3} abc";
+                        var actual = await run(text);
 
-                    Assert.AreEqual(
-                        new Token[] {
-                            Numeric("123"),
-                            WhiteSpace(),
-                            Identity($"{entry.ch1}{entry.ch2}{entry.ch3}"),
-                            WhiteSpace(),
-                            Identity("abc") },
-                        actual);
-                });
+                        Assert.AreEqual(
+                            new Token[] {
+                                Numeric("123"),
+                                WhiteSpace(),
+                                Identity($"{entry.ch1}{entry.ch2}{entry.ch3}"),
+                                WhiteSpace(),
+                                Identity("abc") },
+                            actual);
+                    }));
         }
     }
 }

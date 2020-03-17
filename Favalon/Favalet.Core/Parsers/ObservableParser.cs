@@ -19,12 +19,12 @@
 
 using Favalet.Expressions;
 using Favalet.Internal;
-using Favalet.ParseRunners;
+using Favalet.Parsers.Runners;
 using Favalet.Tokens;
 using System;
 using System.Diagnostics;
 
-namespace Favalet
+namespace Favalet.Parsers
 {
     internal sealed class ObservableParser : ObservableObserver<IExpression, Token>
     {
@@ -32,7 +32,6 @@ namespace Favalet
         private ParseRunner runner = WaitingRunner.Instance;
 #if DEBUG
         private int index = 0;
-        public int BreakIndex = -1;
 #endif
 
         public ObservableParser(IObservable<Token> parent, IExpressionFactory factory) :
@@ -42,7 +41,7 @@ namespace Favalet
         protected override void OnValueReceived(Token token)
         {
 #if DEBUG
-            if (index == BreakIndex) Debugger.Break();
+            if (index == Parser.BreakIndex) Debugger.Break();
             index++;
 #endif
             runner = runner.Run(context, token);

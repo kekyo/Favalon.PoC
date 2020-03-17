@@ -17,16 +17,25 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-namespace Favalet.LexRunners
+using System.Runtime.CompilerServices;
+using System.Text;
+
+namespace Favalet.Lexers.Runners
 {
-    internal abstract class LexRunner
+    internal sealed class LexRunnerContext
     {
-        protected LexRunner()
-        { }
+        public readonly StringBuilder TokenBuffer;
 
-        public abstract LexRunnerResult Run(LexRunnerContext context, char ch);
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        private LexRunnerContext(StringBuilder tokenBuffer) =>
+            this.TokenBuffer = tokenBuffer;
 
-        public virtual LexRunnerResult Finish(LexRunnerContext context) =>
-            LexRunnerResult.Empty(this);
+#if NET45 || NETSTANDARD1_0
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static LexRunnerContext Create() =>
+            new LexRunnerContext(new StringBuilder());
     }
 }

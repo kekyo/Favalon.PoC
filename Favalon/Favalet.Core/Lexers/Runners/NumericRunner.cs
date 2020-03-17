@@ -21,12 +21,19 @@ using Favalet.Internal;
 using Favalet.Tokens;
 using System;
 
-namespace Favalet.LexRunners
+namespace Favalet.Lexers.Runners
 {
-    internal sealed class WaitingRunner : LexRunner
+    internal sealed class NumericRunner : LexRunner
     {
-        private WaitingRunner()
+        private NumericRunner()
         { }
+
+        private static NumericToken InternalFinish(LexRunnerContext context)
+        {
+            var token = context.TokenBuffer.ToString();
+            context.TokenBuffer.Clear();
+            return TokenFactory.Numeric(token);
+        }
 
         public override LexRunnerResult Run(LexRunnerContext context, char ch)
         {
@@ -34,40 +41,41 @@ namespace Favalet.LexRunners
             {
                 return LexRunnerResult.Create(
                     WaitingIgnoreSpaceRunner.Instance,
+                    InternalFinish(context),
                     WhiteSpaceToken.Instance);
-            }
-            else if (char.IsDigit(ch))
-            {
-                context.TokenBuffer.Append(ch);
-                return LexRunnerResult.Empty(
-                    NumericRunner.Instance);
             }
             else if (StringUtilities.IsDoubleQuote(ch))
             {
-                return LexRunnerResult.Empty(
-                    StringRunner.Instance);
+                return LexRunnerResult.Create(
+                    StringRunner.Instance,
+                    InternalFinish(context));
             }
             else if (StringUtilities.IsOpenParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
-                    this,
+                    WaitingRunner.Instance,
+                    InternalFinish(context),
                     TokenFactory.Open(ch));
             }
             else if (StringUtilities.IsCloseParenthesis(ch) is ParenthesisPair)
             {
                 return LexRunnerResult.Create(
-                    this,
+                    WaitingRunner.Instance,
+                    InternalFinish(context),
                     TokenFactory.Close(ch));
             }
             else if (StringUtilities.IsOperator(ch))
             {
+                var token = InternalFinish(context);
                 context.TokenBuffer.Append(ch);
-                return LexRunnerResult.Empty(OperatorRunner.Instance);
+                return LexRunnerResult.Create(
+                    OperatorRunner.Instance,
+                    token);
             }
-            else if (!char.IsControl(ch))
+            else if (char.IsDigit(ch))
             {
                 context.TokenBuffer.Append(ch);
-                return LexRunnerResult.Empty(IdentityRunner.Instance);
+                return LexRunnerResult.Empty(this);
             }
             else
             {
@@ -75,6 +83,9 @@ namespace Favalet.LexRunners
             }
         }
 
-        public static readonly LexRunner Instance = new WaitingRunner();
+        public override LexRunnerResult Finish(LexRunnerContext context) =>
+            LexRunnerResult.Create(WaitingRunner.Instance, InternalFinish(context));
+
+        public static readonly LexRunner Instance = new NumericRunner();
     }
 }

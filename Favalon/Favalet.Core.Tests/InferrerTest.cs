@@ -32,38 +32,38 @@ using static Favalet.Expressions.CLRExpressionFactory;
 namespace Favalet
 {
     [TestFixture]
-    public sealed class ParserTest
+    public sealed class InferrerTest
     {
-        private static IExpression[] Run(string text) =>
-            Lexer.Tokenize(text).Parse(CLRExpressionFactory.Instance).ToArray();
+        private static TypeEnvironment Create() =>
+            TypeEnvironment.Create(CLRExpressionFactory.Instance, 100).
+            MutableBindTypes(typeof(object).Assembly);
 
-        private static readonly Func<string, ValueTask<IExpression[]>>[] Parsers =
+        private static readonly Func<string, TypeEnvironment, ValueTask<IExpression[]>>[] Parsers =
             new[]
             {
-                new Func<string, ValueTask<IExpression[]>>(text =>
-                    new ValueTask<IExpression[]>(Lexer.Tokenize(text).Parse(CLRExpressionFactory.Instance).ToArray())),
-                new Func<string, ValueTask<IExpression[]>>(async text =>
-                    await Lexer.Tokenize(text.ToObservable()).Parse(CLRExpressionFactory.Instance).ToArray()),
+                new Func<string, TypeEnvironment, ValueTask<IExpression[]>>((text, environment) =>
+                    new ValueTask<IExpression[]>(
+                        environment.Infer(Lexer.Tokenize(text).Parse(CLRExpressionFactory.Instance)).
+                        ToArray())),
+                //new Func<string, TypeEnvironment, ValueTask<IExpression[]>>(async (text, environment) =>
+                //    await environment.Infer(Lexer.Tokenize(text.ToObservable()).Parse(CLRExpressionFactory.Instance)).ToArray()),
             };
 
         ////////////////////////////////////////////////////
 
         [TestCaseSource("Parsers")]
-        public async Task ParseArticleSampleCode(Func<string, ValueTask<IExpression[]>> run)
+        public async Task InferStaticMethod(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
         {
-            var text = "echo \"abc def ghi\" | wc";
-            var actual = await run(text);
+            var text = "System.Int32.Parse \"123\"";
+            var environment = Create();
+            var actual = await run(text, environment);
 
             Assert.AreEqual(
                 new IExpression[]
                 {
                     Apply(
-                        Apply(
-                            Apply(
-                                Identity("echo"),
-                                Constant("abc def ghi")),
-                            Identity("|")),
-                        Identity("wc")),
+                        Method<int>("Parse", typeof(string)),
+                        Constant("123")),
                 },
                 actual);
         }

@@ -36,10 +36,14 @@ namespace Favalet
         private static readonly Func<string, ValueTask<Token[]>>[] Tokenizers =
             new[]
             {
-                new Func<string, ValueTask<Token[]>>(text => new ValueTask<Token[]>(Lexer.Tokenize(text).ToArray())),
-                new Func<string, ValueTask<Token[]>>(text => new ValueTask<Token[]>(Lexer.Tokenize(text.AsEnumerable()).ToArray())),
-                new Func<string, ValueTask<Token[]>>(text => new ValueTask<Token[]>(Lexer.Tokenize(new StringReader(text)).ToArray())),
-                new Func<string, ValueTask<Token[]>>(async text => await Lexer.Tokenize(text.ToObservable()).ToArray()),
+                new Func<string, ValueTask<Token[]>>(text =>
+                    new ValueTask<Token[]>(Lexer.Tokenize(text).ToArray())),
+                new Func<string, ValueTask<Token[]>>(text =>
+                    new ValueTask<Token[]>(Lexer.Tokenize(text.AsEnumerable()).ToArray())),
+                new Func<string, ValueTask<Token[]>>(text =>
+                    new ValueTask<Token[]>(Lexer.Tokenize(new StringReader(text)).ToArray())),
+                new Func<string, ValueTask<Token[]>>(async text =>
+                    await Lexer.Tokenize(text.ToObservable()).ToArray()),
             };
 
         ////////////////////////////////////////////////////

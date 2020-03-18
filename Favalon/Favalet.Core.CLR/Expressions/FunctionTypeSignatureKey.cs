@@ -17,34 +17,34 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using System;
+using System.Linq;
+
 namespace Favalet.Expressions
 {
-    public interface IConstantTerm : ITerm
+    internal sealed class FunctionTypeSignatureKey :
+        IEquatable<FunctionTypeSignatureKey?>
     {
-        object Value { get; }
-    }
+        public readonly Type Result;
+        public readonly Type[] Parameters;
 
-    public sealed class ConstantTerm : Term, IConstantTerm
-    {
-        public readonly object Value;
+        public FunctionTypeSignatureKey(Type result, Type[] parameters)
+        {
+            this.Result = result;
+            this.Parameters = parameters;
+        }
 
-        private ConstantTerm(object value) =>
-            this.Value = value;
+        public bool Equals(FunctionTypeSignatureKey? other) =>
+            other is FunctionTypeSignatureKey rhs &&
+            this.Result.Equals(rhs.Result) &&
+            this.Parameters.SequenceEqual(rhs.Parameters);
 
-        public override IExpression HigherOrder =>
-            TypeTerm.From(this.Value.GetType());
-
-        object IConstantTerm.Value =>
-            this.Value;
-
-        public override bool Equals(IExpression? rhs) =>
-            rhs is IConstantTerm constant &&
-                this.Value.Equals(constant.Value);
+        public override bool Equals(object obj) =>
+            this.Equals(obj as FunctionTypeSignatureKey);
 
         public override int GetHashCode() =>
-            this.Value.GetHashCode();
-
-        public static IConstantTerm From(object value) =>
-            new ConstantTerm(value);
+            this.Parameters.Aggregate(
+                this.Result.GetHashCode(),
+                (agg, t) => agg ^ t.GetHashCode());
     }
 }

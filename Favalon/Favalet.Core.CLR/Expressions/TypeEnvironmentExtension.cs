@@ -17,25 +17,30 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using System.Runtime.CompilerServices;
-using System.Text;
+using System;
+using System.Reflection;
 
-namespace Favalet.Lexers.Runners
+namespace Favalet.Expressions
 {
-    internal sealed class LexRunnerContext
+    public static class TypeEnvironmentExtension
     {
-        public readonly StringBuilder TokenBuffer;
+        public static TTypeEnvironment MutableBindType<TTypeEnvironment>(
+            this TTypeEnvironment environment, Type type)
+            where TTypeEnvironment : ITypeEnvironment
+        {
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        private LexRunnerContext(StringBuilder tokenBuffer) =>
-            this.TokenBuffer = tokenBuffer;
+            return environment;
+        }
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static LexRunnerContext Create() =>
-            new LexRunnerContext(new StringBuilder());
+        public static TTypeEnvironment MutableBindTypes<TTypeEnvironment>(
+            this TTypeEnvironment environment, Assembly assembly)
+            where TTypeEnvironment : ITypeEnvironment
+        {
+            foreach (var type in assembly.GetTypes())
+            {
+                MutableBindType(environment, type);
+            }
+            return environment;
+        }
     }
 }

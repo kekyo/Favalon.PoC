@@ -31,39 +31,49 @@ namespace Favalet.Expressions
             FromNumeric(value);
 
         IExpression IExpressionFactory.String(string value) =>
-            ConstantTerm.Create(value);
+            ConstantTerm.From(value);
 
         public static new readonly IExpressionFactory Instance =
             new CLRExpressionFactory();
 
-        public static ConstantTerm Constant(object value) =>
-            ConstantTerm.Create(value);
+        public static TypeTerm Type(Type type) =>
+            TypeTerm.From(type);
+        public static TypeTerm Type<T>() =>
+            TypeTerm.From(typeof(T));
 
-        public static ConstantTerm FromNumeric(string value)
+        public static MethodTerm Method(Type type, string name, params Type[] parameters) =>
+            MethodTerm.From(type, name, parameters);
+        public static MethodTerm Method<T>(string name, params Type[] parameters) =>
+            MethodTerm.From(typeof(T), name, parameters);
+
+        public static IExpression Constant(object value) =>
+            ConstantTerm.From(value);
+
+        public static IConstantTerm FromNumeric(string value)
         {
             if (byte.TryParse(value, out var byteValue))
             {
-                return ConstantTerm.Create(byteValue);
+                return ConstantTerm.From(byteValue);
             }
             else if (short.TryParse(value, out var shortValue))
             {
-                return ConstantTerm.Create(shortValue);
+                return ConstantTerm.From(shortValue);
             }
             else if (int.TryParse(value, out var intValue))
             {
-                return ConstantTerm.Create(intValue);
+                return ConstantTerm.From(intValue);
             }
             else if (long.TryParse(value, out var longValue))
             {
-                return ConstantTerm.Create(longValue);
+                return ConstantTerm.From(longValue);
             }
             else if (float.TryParse(value, out var floatValue))
             {
-                return ConstantTerm.Create(floatValue);
+                return ConstantTerm.From(floatValue);
             }
             else if (double.TryParse(value, out var doubleValue))
             {
-                return ConstantTerm.Create(doubleValue);
+                return ConstantTerm.From(doubleValue);
             }
             else
             {

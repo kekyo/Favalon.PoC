@@ -23,7 +23,7 @@ namespace Favalet.Tokens
 {
     public abstract partial class Token
     {
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         protected Token()

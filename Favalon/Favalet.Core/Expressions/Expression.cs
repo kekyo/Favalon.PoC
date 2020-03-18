@@ -32,7 +32,7 @@ namespace Favalet.Expressions
 
     public abstract partial class Expression : IExpression
     {
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         protected Expression()
@@ -42,13 +42,13 @@ namespace Favalet.Expressions
 
         public abstract bool Equals(IExpression? rhs);
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public override sealed bool Equals(object obj) =>
             this.Equals(obj as IExpression);
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>

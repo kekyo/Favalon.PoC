@@ -17,9 +17,23 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Expressions.Contexts;
+
 namespace Favalet.Expressions
 {
-    public interface IApplyExpression : IExpression
+    public enum TryCallResultContains
+    {
+        CalledResult,
+        InterpretedArgument
+    }
+
+    public interface ICallableExpression : IExpression
+    {
+        TryCallResultContains TryCall(
+            IReduceContext context, IExpression argument, out IExpression result);
+    }
+
+    public interface IApplyExpression : IInferrableExpression, IReducibleExpression
     {
         IExpression Function { get; }
         IExpression Argument { get; }
@@ -45,6 +59,65 @@ namespace Favalet.Expressions
 
         IExpression IApplyExpression.Argument =>
             this.Argument;
+
+        public IExpression Infer(IInferContext context)
+        {
+            var higherOrder = this.HigherOrder.InferIfRequired(context);
+            var argument = this.Argument.InferIfRequired(context);
+            var function = this.Function.InferIfRequired(context);
+
+            //context.Unify();
+
+            if (this.Function.Equals(function) &&
+                this.Argument.Equals(argument) &&
+                this.HigherOrder.Equals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new ApplyExpression(function, argument, higherOrder);
+            }
+        }
+
+        public IExpression Reduce(IReduceContext context)
+        {
+            IExpression higherOrder;
+            IExpression argument;
+            IExpression function;
+
+            if (this.Function is ICallableExpression cf)
+            {
+                if (cf.TryCall(context, this.Argument, out var result) ==
+                    TryCallResultContains.CalledResult)
+                {
+                    return result;
+                }
+                else
+                {
+                    higherOrder = this.HigherOrder.ReduceIfRequired(context);
+                    argument = result;
+                    function = this.Function.ReduceIfRequired(context);
+                }
+            }
+            else
+            {
+                higherOrder = this.HigherOrder.ReduceIfRequired(context);
+                argument = this.Argument.ReduceIfRequired(context);
+                function = this.Function.ReduceIfRequired(context);
+            }
+
+            if (this.Function.Equals(function) &&
+                this.Argument.Equals(argument) &&
+                this.HigherOrder.Equals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new ApplyExpression(function, argument, higherOrder);
+            }
+        }
 
         public override bool Equals(IExpression? rhs) =>
             rhs is IApplyExpression apply &&

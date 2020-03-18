@@ -63,7 +63,7 @@ namespace Favalet.Internal
             closeParenthesis.Add('}', new ParenthesisPair('{', '}'));
         }
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static NumericalSignes? IsNumericSign(char ch) =>
@@ -74,31 +74,31 @@ namespace Favalet.Internal
                 _ => null
             };
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static ParenthesisPair? IsOpenParenthesis(char ch) =>
             openParenthesis.TryGetValue(ch, out var p) ? (ParenthesisPair?)p : null;
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static ParenthesisPair? IsCloseParenthesis(char ch) =>
             closeParenthesis.TryGetValue(ch, out var p) ? (ParenthesisPair?)p : null;
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static bool IsOperator(char ch) =>
             operatorChars.Contains(ch);
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static bool IsSingleQuote(char ch) =>
             ch == '\'';
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static bool IsDoubleQuote(char ch) =>
@@ -111,14 +111,14 @@ namespace Favalet.Internal
         public static void Clear(this StringBuilder sb) =>
             sb.Length = 0;
 #else
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static string Join(string separator, IEnumerable<string> values) =>
             string.Join(separator, values);
 #endif
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static IEnumerable<char> AsEnumerable(this string text) =>

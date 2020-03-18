@@ -27,10 +27,19 @@ namespace Favalet.Expressions
         { }
 
         private static readonly IdentityTerm unspecified =
-            IdentityTerm.Create("_", null!);
+            IdentityTerm.Create("_", UndefinedTerm.Instance);
+
+        private static readonly IdentityTerm ceil =
+            IdentityTerm.Create("#", UndefinedTerm.Instance);
+
+        private static readonly IdentityTerm typeKind =
+            IdentityTerm.Create("*", ceil);
 
         public static IdentityTerm Unspecified() =>
             unspecified;
+
+        public static IdentityTerm KindType() =>
+            typeKind;
 
         public static IdentityTerm Identity(string identity) =>
             IdentityTerm.Create(identity, unspecified);

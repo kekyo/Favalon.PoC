@@ -17,25 +17,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using System.Runtime.CompilerServices;
-using System.Text;
+using Favalet.Expressions.Contexts;
 
-namespace Favalet.Lexers.Runners
+namespace Favalet.Expressions
 {
-    internal sealed class LexRunnerContext
+    public static class ExpressionExtension
     {
-        public readonly StringBuilder TokenBuffer;
+        public static IExpression InferIfRequired(this IExpression expression, IInferContext context) =>
+            expression is IInferrableExpression i ? i.Infer(context) : expression;
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        private LexRunnerContext(StringBuilder tokenBuffer) =>
-            this.TokenBuffer = tokenBuffer;
-
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static LexRunnerContext Create() =>
-            new LexRunnerContext(new StringBuilder());
+        public static IExpression ReduceIfRequired(this IExpression expression, IReduceContext context) =>
+            expression is IReducibleExpression r ? r.Reduce(context) : expression;
     }
 }

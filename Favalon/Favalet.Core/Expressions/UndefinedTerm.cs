@@ -17,25 +17,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using System.Runtime.CompilerServices;
-using System.Text;
-
-namespace Favalet.Lexers.Runners
+namespace Favalet.Expressions
 {
-    internal sealed class LexRunnerContext
+    internal sealed class UndefinedTerm : Term
     {
-        public readonly StringBuilder TokenBuffer;
+        private UndefinedTerm()
+        { }
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        private LexRunnerContext(StringBuilder tokenBuffer) =>
-            this.TokenBuffer = tokenBuffer;
+        public override IExpression HigherOrder =>
+            this;
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static LexRunnerContext Create() =>
-            new LexRunnerContext(new StringBuilder());
+        public override bool Equals(IExpression? rhs) =>
+            rhs is UndefinedTerm;
+
+        public static readonly UndefinedTerm Instance =
+            new UndefinedTerm();
     }
 }

@@ -17,11 +17,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Expressions.Contexts;
+
 namespace Favalet.Expressions
 {
-    public interface IIdentityTerm : ITerm
+    public interface IIdentityTerm : ITerm, IInferrableExpression
     {
-        public string Identity { get; }
+        string Identity { get; }
     }
 
     public sealed class IdentityTerm : Term, IIdentityTerm
@@ -36,12 +38,35 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
 
+        public IExpression Infer(IInferContext context)
+        {
+            if (context.Lookup(this) is IExpression expression)
+            {
+                return expression.InferIfRequired(context);
+            }
+            else
+            {
+                var higherOrder = this.HigherOrder.InferIfRequired(context);
+                if (this.HigherOrder.Equals(higherOrder))
+                {
+                    return this;
+                }
+                else
+                {
+                    return new IdentityTerm(this.Identity, higherOrder);
+                }
+            }
+        }
+
         string IIdentityTerm.Identity =>
             this.Identity;
 
         public override bool Equals(IExpression? rhs) =>
             rhs is IIdentityTerm identity &&
                 this.Identity.Equals(identity.Identity);
+
+        public override int GetHashCode() =>
+            this.Identity.GetHashCode();
 
         public static IdentityTerm Create(string identity, IExpression higherOrder) =>
             new IdentityTerm(identity, higherOrder);

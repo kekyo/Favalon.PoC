@@ -28,7 +28,7 @@ namespace Favalet.Lexers.Runners
         public readonly Token? Token0;
         public readonly Token? Token1;
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         private LexRunnerResult(LexRunner next, Token? token0, Token? token1)
@@ -38,25 +38,25 @@ namespace Favalet.Lexers.Runners
             this.Token1 = token1;
         }
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static LexRunnerResult Empty(LexRunner next) =>
             new LexRunnerResult(next, null, null);
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static LexRunnerResult Create(LexRunner next, Token? token0) =>
             new LexRunnerResult(next, token0, null);
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static LexRunnerResult Create(LexRunner next, Token? token0, Token? token1) =>
             new LexRunnerResult(next, token0, token1);
 
-#if NET45 || NETSTANDARD1_0
+#if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public void Deconstruct(out LexRunner next, out Token? token0, out Token? token1)

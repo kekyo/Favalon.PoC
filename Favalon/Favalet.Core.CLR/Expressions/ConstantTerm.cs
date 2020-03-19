@@ -17,6 +17,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Contexts;
+
 namespace Favalet.Expressions
 {
     public interface IConstantTerm : ITerm
@@ -43,6 +45,14 @@ namespace Favalet.Expressions
 
         public override int GetHashCode() =>
             this.Value.GetHashCode();
+
+        public override string FormatString(IFormatStringContext context) =>
+            this.Value switch
+            {
+                string str => $"\"{str}\"",
+                char ch => $"'{ch}'",
+                _ => this.Value.ToString()
+            };
 
         public static IConstantTerm From(object value) =>
             new ConstantTerm(value);

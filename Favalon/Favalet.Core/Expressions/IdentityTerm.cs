@@ -68,6 +68,9 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Identity.GetHashCode();
 
+        public override string FormatString(IFormatStringContext context) =>
+            context.Format(this, this.Identity);
+
         public static IdentityTerm Create(string identity, IExpression higherOrder) =>
             new IdentityTerm(identity, higherOrder);
     }

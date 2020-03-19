@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Internal;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -64,6 +65,9 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? rhs) =>
             rhs is MethodTerm method &&
                 this.Method.Equals(method.Method);
+
+        public override string FormatString(IFormatStringContext context) =>
+            context.Format(this, this.Method.GetFullName());
 
         public static MethodTerm From(MethodInfo method) =>
             new MethodTerm(method);

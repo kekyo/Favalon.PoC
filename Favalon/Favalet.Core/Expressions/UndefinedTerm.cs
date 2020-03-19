@@ -17,6 +17,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Contexts;
+
 namespace Favalet.Expressions
 {
     internal sealed class UndefinedTerm : Term
@@ -29,6 +31,9 @@ namespace Favalet.Expressions
 
         public override bool Equals(IExpression? rhs) =>
             rhs is UndefinedTerm;
+
+        public override string FormatString(IFormatStringContext context) =>
+            "!!UNDEF";
 
         public static readonly UndefinedTerm Instance =
             new UndefinedTerm();

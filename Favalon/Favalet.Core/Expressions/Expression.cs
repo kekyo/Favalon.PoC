@@ -20,21 +20,20 @@
 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 #pragma warning disable CS0659
 
+using Favalet.Contexts;
 using System;
-using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
 {
     public interface IExpression : IEquatable<IExpression?>
     {
         IExpression HigherOrder { get; }
+
+        string FormatString(IFormatStringContext context);
     }
 
     public abstract partial class Expression : IExpression
     {
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         protected Expression()
         { }
 
@@ -42,16 +41,15 @@ namespace Favalet.Expressions
 
         public abstract bool Equals(IExpression? rhs);
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         public override sealed bool Equals(object obj) =>
             this.Equals(obj as IExpression);
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             this.Equals(other);
+
+        public abstract string FormatString(IFormatStringContext context);
+
+        public sealed override string ToString() =>
+            this.FormatString(NodeLabelledFormatStringContext.Instance);
     }
 }

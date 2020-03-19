@@ -17,6 +17,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Contexts;
+using Favalet.Internal;
 using System;
 using System.Collections.Generic;
 
@@ -42,6 +44,9 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? rhs) =>
             rhs is TypeTerm type &&
                 this.Type.Equals(type.Type);
+
+        public override string FormatString(IFormatStringContext context) =>
+            context.Format(this, this.Type.GetFullName());
 
         public static FunctionTypeTerm FromFunction(Type result, params Type[] parameters)
         {

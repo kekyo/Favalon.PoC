@@ -124,6 +124,9 @@ namespace Favalet.Expressions
                 this.Function.Equals(apply.Function) &&
                 this.Argument.Equals(apply.Argument);
 
+        public override string FormatString(IFormatStringContext context) =>
+            context.Format(this, this.Function, this.Argument);
+
         public static ApplyExpression Create(
             IExpression function, IExpression argument, IExpression higherOrder) =>
             new ApplyExpression(function, argument, higherOrder);

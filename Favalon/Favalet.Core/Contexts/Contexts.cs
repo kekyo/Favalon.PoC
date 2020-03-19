@@ -41,4 +41,9 @@ namespace Favalet.Contexts
     {
         IExpression Reduce(IReduceContext context);
     }
+
+    public interface IFormatStringContext
+    {
+        string Format(IExpression expression, params object[] args);
+    }
 }

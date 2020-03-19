@@ -17,17 +17,53 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Internal;
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace Favalet.Expressions
 {
     public static class TypeEnvironmentExtension
     {
+        public static TTypeEnvironment MutableBindConstructor<TTypeEnvironment>(
+            this TTypeEnvironment environment, ConstructorInfo constructor)
+            where TTypeEnvironment : ITypeEnvironment
+        {
+            var identity = constructor.DeclaringType.GetFullName(false);
+            environment.MutableBind(identity, MethodTerm.From(constructor));
+
+            return environment;
+        }
+
+        public static TTypeEnvironment MutableBindMethod<TTypeEnvironment>(
+            this TTypeEnvironment environment, MethodInfo method)
+            where TTypeEnvironment : ITypeEnvironment
+        {
+            var identity = method.GetFullName(false);
+            environment.MutableBind(identity, MethodTerm.From(method));
+
+            return environment;
+        }
+
         public static TTypeEnvironment MutableBindType<TTypeEnvironment>(
             this TTypeEnvironment environment, Type type)
             where TTypeEnvironment : ITypeEnvironment
         {
+            var identity = type.GetFullName(false);
+            environment.MutableBind(identity, TypeTerm.From(type));
+
+            foreach (var constructor in type.GetDeclaredConstructors().
+                Where(c => c.IsPublic && !c.IsPrivate && !c.IsStatic))
+            {
+                MutableBindConstructor(environment, constructor);
+            }
+
+            foreach (var method in type.GetDeclaredMethods().
+                Where(m => m.IsPublic && !m.IsPrivate))
+            {
+                MutableBindMethod(environment, method);
+            }
 
             return environment;
         }
@@ -36,7 +72,8 @@ namespace Favalet.Expressions
             this TTypeEnvironment environment, Assembly assembly)
             where TTypeEnvironment : ITypeEnvironment
         {
-            foreach (var type in assembly.GetTypes())
+            foreach (var type in assembly.GetTypes().
+                Where(t => t.IsPublic() && (t.IsClass() || t.IsValueType() || t.IsInterface())))
             {
                 MutableBindType(environment, type);
             }

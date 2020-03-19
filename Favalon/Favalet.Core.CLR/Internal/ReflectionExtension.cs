@@ -31,6 +31,12 @@ namespace System.Reflection
         public static bool IsPrimitive(this Type type) =>
             type.GetTypeInfo().IsPrimitive;
 
+        public static bool IsClass(this Type type) =>
+            type.GetTypeInfo().IsClass;
+
+        public static bool IsInterface(this Type type) =>
+            type.GetTypeInfo().IsInterface;
+
         public static bool IsValueType(this Type type) =>
             type.GetTypeInfo().IsValueType;
 
@@ -81,6 +87,12 @@ namespace System.Reflection
 
         public static bool IsPrimitive(this Type type) =>
             type.IsPrimitive;
+
+        public static bool IsClass(this Type type) =>
+            type.IsClass;
+
+        public static bool IsInterface(this Type type) =>
+            type.IsInterface;
 
         public static bool IsValueType(this Type type) =>
             type.IsValueType;

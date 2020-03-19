@@ -27,9 +27,6 @@ namespace Favalet.Expressions
     public abstract class TypeTerm :
         Term, IConstantTerm
     {
-        private static readonly Dictionary<FunctionTypeSignatureKey, FunctionTypeTerm> functionTypes =
-            new Dictionary<FunctionTypeSignatureKey, FunctionTypeTerm>();
-
         private static readonly Dictionary<Type, ConcreteTypeTerm> concreteTypes =
             new Dictionary<Type, ConcreteTypeTerm>();
 
@@ -47,21 +44,6 @@ namespace Favalet.Expressions
 
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, this.Type.GetFullName());
-
-        public static FunctionTypeTerm FromFunction(Type result, params Type[] parameters)
-        {
-            lock (functionTypes)
-            {
-                var key = new FunctionTypeSignatureKey(result, parameters);
-                if (!functionTypes.TryGetValue(key, out var term))
-                {
-                    term = new FunctionTypeTerm(
-                        typeof(Func<,>).MakeGenericType(parameters[0], result));
-                    functionTypes.Add(key, term);
-                }
-                return term;
-            }
-        }
 
         public static TypeTerm From(Type type)
         {
@@ -87,15 +69,5 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder =>
             ExpressionFactory.KindType();
-    }
-
-    public sealed class FunctionTypeTerm : TypeTerm
-    {
-        internal FunctionTypeTerm(Type type) :
-            base(type)
-        { }
-
-        public override IExpression HigherOrder =>
-            ExpressionFactory.KindType();  // TODO:
     }
 }

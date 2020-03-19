@@ -17,33 +17,40 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Expressions;
 
-namespace Favalet.Contexts
+// Non-nullable field is uninitialized. Consider declaring as nullable.
+#pragma warning disable CS8618
+
+namespace System
 {
-    public interface IInferContext
+#if NET35
+    internal sealed class Lazy<T>
     {
-        IExpression? Lookup(IIdentityTerm identity);
+        private Func<T>? generator;
+        private T value;
 
-        void Unify(IExpression to, IExpression from);
-    }
+        public Lazy(Func<T> generator) =>
+            this.generator = generator;
 
-    public interface IInferrableExpression : IExpression
-    {
-        IExpression Infer(IInferContext context);
-    }
+        public T Value
+        {
+            get
+            {
+                if (this.generator != null)
+                {
+                    lock (this)
+                    {
+                        if (this.generator != null)
+                        {
+                            this.value = this.generator();
+                            this.generator = null;
+                        }
+                    }
+                }
 
-    public interface IReduceContext
-    {
+                return value;
+            }
+        }
     }
-
-    public interface IReducibleExpression : IExpression
-    {
-        IExpression Reduce(IReduceContext context);
-    }
-
-    public interface IFormatStringContext
-    {
-        string Format(IExpression expression, params object[] args);
-    }
+#endif
 }

@@ -24,23 +24,37 @@ using System.Diagnostics;
 
 namespace Favalet.Expressions
 {
-    public interface ITypeEnvironment
+    public interface ITypeEnvironment : ITypeContext
     {
+        // TODO: bind attributes
+        ITypeEnvironment MutableBind(string identity, IExpression expression);
+
         IExpression Infer(IExpression expression);
 
         IEnumerable<IExpression> Infer(IEnumerable<IExpression> expressions);
     }
 
-    public sealed class TypeEnvironment :
-        ITypeEnvironment, IInferContext, IReduceContext
+    public sealed class TypeEnvironment : ITypeEnvironment
     {
         public readonly IExpressionFactory Factory;
         public readonly int MaxIterationCount;
+
+        private readonly Dictionary<string, IExpression> boundExpressions =
+            new Dictionary<string, IExpression>();
 
         private TypeEnvironment(IExpressionFactory factory, int maxIterationCount)
         {
             this.Factory = factory;
             this.MaxIterationCount = maxIterationCount;
+        }
+
+        public IExpression? Lookup(IIdentityTerm identity) =>
+            this.boundExpressions.TryGetValue(identity.Identity, out var expression) ? expression : null;
+
+        public ITypeEnvironment MutableBind(string identity, IExpression expression)
+        {
+            boundExpressions[identity] = expression;
+            return this;
         }
 
         public IExpression Infer(IExpression expression)
@@ -49,10 +63,12 @@ namespace Favalet.Expressions
 
             if (expression is IInferrableExpression inferrable)
             {
-                var current = inferrable.Infer(this);
+                var context = new InferContext(this);
+
+                var current = inferrable.Infer(context);
                 for (var index = 1; index < this.MaxIterationCount; index++)
                 {
-                    var inferred = current.InferIfRequired(this);
+                    var inferred = current.InferIfRequired(context);
                     if (current.Equals(inferred))
                     {
                         Debug.WriteLine($"Infer [F]: {current}");
@@ -136,17 +152,6 @@ namespace Favalet.Expressions
 
         //}
 #endif
-
-        public IExpression? Lookup(IIdentityTerm identity)
-        {
-            // TODO:
-            return default;
-        }
-
-        public void Unify(IExpression to, IExpression from)
-        {
-            // TODO:
-        }
 
         public static TypeEnvironment Create(int maxIterationCount = 10000) =>
             new TypeEnvironment(ExpressionFactory.Instance, maxIterationCount);

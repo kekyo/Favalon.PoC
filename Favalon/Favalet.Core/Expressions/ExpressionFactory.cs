@@ -47,6 +47,9 @@ namespace Favalet.Expressions
         public static ApplyExpression Apply(IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument, unspecified);
 
+        public static FunctionDeclarationTerm FunctionDeclaration(IExpression parameter, IExpression result) =>
+            FunctionDeclarationTerm.Create(parameter, result, unspecified);
+
         public static readonly IExpressionFactory Instance =
             new ExpressionFactory();
 

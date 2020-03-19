@@ -28,15 +28,23 @@ namespace Favalet.Expressions
     public sealed class MethodTerm :
         Term, IConstantTerm, ICallableExpression
     {
-        public readonly MethodInfo Method;
+        private static readonly FunctionDeclarationTerm kind =
+            FunctionDeclarationTerm.Create(ExpressionFactory.KindType(), ExpressionFactory.KindType());
 
-        private MethodTerm(MethodInfo method) =>
+        public readonly MethodBase Method;
+
+        private MethodTerm(MethodBase method)
+        {
             this.Method = method;
 
-        public override IExpression HigherOrder =>
-            TypeTerm.FromFunction(
-                this.Method.ReturnType,
-                this.Method.GetParameters().Select(p => p.ParameterType).ToArray());
+
+            this.HigherOrder = FunctionDeclarationTerm.Create(
+                TypeTerm.From(this.Method is MethodInfo m ? m.ReturnType : this.Method.DeclaringType),
+                TypeTerm.From(this.Method.GetParameters().Select(p => p.ParameterType).Last() /* TODO: unit */),
+                );
+        }
+
+        public override IExpression HigherOrder { get; }
 
         object IConstantTerm.Value =>
             this.Method;
@@ -69,7 +77,7 @@ namespace Favalet.Expressions
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, this.Method.GetFullName());
 
-        public static MethodTerm From(MethodInfo method) =>
+        public static MethodTerm From(MethodBase method) =>
             new MethodTerm(method);
         public static MethodTerm From(Type type, string name, params Type[] parameters) =>
             new MethodTerm(type.GetMethod(name, parameters));

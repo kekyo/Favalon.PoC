@@ -17,7 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Expressions.Contexts;
+using Favalet.Contexts;
 
 namespace Favalet.Expressions
 {

@@ -17,7 +17,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-namespace Favalet.Expressions.Contexts
+using Favalet.Expressions;
+
+namespace Favalet.Contexts
 {
     public interface IInferContext
     {

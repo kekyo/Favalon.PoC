@@ -17,7 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Expressions.Contexts;
+using Favalet.Contexts;
 using System;
 using System.Linq;
 using System.Reflection;

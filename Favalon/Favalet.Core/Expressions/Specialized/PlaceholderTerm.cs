@@ -39,6 +39,8 @@ namespace Favalet.Expressions.Specialized
 
         public IExpression Infer(IInferContext context)
         {
+            // TODO: replace by unified information
+
             // Special case: will not infer Unspecified higherOrder.
             //   Maybe it makes infinity digging.
             if (this.HigherOrder is UnspecifiedTerm)

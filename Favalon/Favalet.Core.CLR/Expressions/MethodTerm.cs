@@ -25,28 +25,13 @@ using System.Reflection;
 
 namespace Favalet.Expressions
 {
-    public sealed class MethodTerm :
+    public abstract class MethodTerm :
         Expression, IConstantTerm, ICallableExpression
     {
         public readonly MethodBase Method;
-        private readonly Lazy<IExpression> higherOrder;
 
-        private MethodTerm(MethodBase method)
-        {
+        private protected MethodTerm(MethodBase method) =>
             this.Method = method;
-
-            // It couldn't require higher order informations when calls method.
-            this.higherOrder = Lazy.Create(() =>
-                // TODO: multiple arguments
-                // TODO: nothing arguments
-                // TODO: void returns
-                FunctionDeclaredExpression.From(
-                    TypeTerm.From(this.Method.GetParameters().Select(p => p.ParameterType).Last()),
-                    TypeTerm.From(this.Method is MethodInfo m ? m.ReturnType : this.Method.DeclaringType)));
-        }
-
-        public override IExpression HigherOrder =>
-            this.higherOrder.Value;
 
         object IConstantTerm.Value =>
             this.Method;
@@ -72,7 +57,7 @@ namespace Favalet.Expressions
             }
         }
 
-        public override bool Equals(IExpression? rhs) =>
+        public override sealed bool Equals(IExpression? rhs) =>
             rhs is MethodTerm method &&
                 this.Method.Equals(method.Method);
 
@@ -82,16 +67,58 @@ namespace Favalet.Expressions
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, this.Method.GetFullName());
 
-        public static MethodTerm From(Type type, params Type[] parameters) =>
-            new MethodTerm(type.GetDeclaredConstructor(parameters));
+        public static ConstructorTerm From(Type type, params Type[] parameters) =>
+            new ConstructorTerm(type.GetDeclaredConstructor(parameters));
 
-        public static MethodTerm From(Type type, string name, params Type[] parameters) =>
-            new MethodTerm(type.GetDeclaredMethod(name, parameters));
+        public static ConcreteMethodTerm From(Type type, string name, params Type[] parameters) =>
+            new ConcreteMethodTerm(type.GetDeclaredMethod(name, parameters));
 
         public static MethodTerm From(MethodBase method) =>
             // TODO: instance method
             // TODO: multiple arguments
             // TODO: generic method
-            new MethodTerm(method);
+            method switch
+            {
+                ConstructorInfo c => new ConstructorTerm(c),
+                MethodInfo m => new ConcreteMethodTerm(m),
+                _ => throw new ArgumentException()
+            };
+    }
+
+    public sealed class ConstructorTerm : MethodTerm
+    {
+        private readonly Lazy<IExpression> higherOrder;
+
+        internal ConstructorTerm(ConstructorInfo constructor) :
+            base(constructor) =>
+            // It couldn't require higher order informations when calls method.
+            this.higherOrder = Lazy.Create(() =>
+                // TODO: multiple arguments
+                // TODO: nothing arguments
+                // TODO: void returns
+                FunctionDeclaredExpression.From(
+                    TypeTerm.From(constructor.GetParameters().Select(p => p.ParameterType).Last()),
+                    TypeTerm.From(constructor.DeclaringType)));
+
+        public override IExpression HigherOrder =>
+            this.higherOrder.Value;
+    }
+
+    public sealed class ConcreteMethodTerm : MethodTerm
+    {
+        private readonly Lazy<IExpression> higherOrder;
+
+        internal ConcreteMethodTerm(MethodInfo method) :
+            base(method) =>
+            // It couldn't require higher order informations when calls method.
+            this.higherOrder = Lazy.Create(() =>
+                // TODO: multiple arguments
+                // TODO: nothing arguments
+                FunctionDeclaredExpression.From(
+                    TypeTerm.From(method.GetParameters().Select(p => p.ParameterType).Last()),
+                    TypeTerm.From(method.ReturnType)));
+
+        public override IExpression HigherOrder =>
+            this.higherOrder.Value;
     }
 }

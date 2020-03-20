@@ -24,7 +24,8 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
 {
-    public interface IIdentityTerm : ITerm, IInferrableExpression
+    public interface IIdentityTerm :
+        ITerm, IInferrableExpression
     {
         string Identity { get; }
     }
@@ -41,32 +42,29 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
 
+        string IIdentityTerm.Identity =>
+            this.Identity;
+
         public IExpression Infer(IInferContext context)
         {
-            if (context.Lookup(this) is BoundInformations[] bounds &&
-                bounds.Length >= 1)
+            if (context.Lookup(this) is BoundInformations[] bounds && (bounds.Length >= 1))
             {
                 // TODO: bound attributes
                 return SumExpression.From(
                     bounds.Select(bound => bound.Expression).Memoize(), true).
                     InferIfRequired(context);
             }
+
+            var higherOrder = this.HigherOrder.InferIfRequired(context);
+            if (this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
             else
             {
-                var higherOrder = this.HigherOrder.InferIfRequired(context);
-                if (this.HigherOrder.ExactEquals(higherOrder))
-                {
-                    return this;
-                }
-                else
-                {
-                    return new IdentityTerm(this.Identity, higherOrder);
-                }
+                return new IdentityTerm(this.Identity, higherOrder);
             }
         }
-
-        string IIdentityTerm.Identity =>
-            this.Identity;
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -17,15 +17,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-namespace Favalet.Expressions
+namespace Favalet.Contexts
 {
-    public interface ITerm : IExpression
+    public interface IReduceContext : IScopedTypeContext<IReduceContext>
     {
     }
 
-    public abstract class Term : Expression, ITerm
+    internal sealed class ReduceContext :
+        TypeContext<IReduceContext>, IReduceContext
     {
-        protected Term()
+        public ReduceContext(ITypeContext parent) :
+            base(parent)
         { }
+
+        public IReduceContext CreateDerivedScope() =>
+            new ReduceContext(this);
     }
 }

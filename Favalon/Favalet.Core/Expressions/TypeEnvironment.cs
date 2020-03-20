@@ -24,38 +24,30 @@ using System.Diagnostics;
 
 namespace Favalet.Expressions
 {
-    public interface ITypeEnvironment : ITypeContext
+    public interface ITypeEnvironment : ITypeContext<ITypeEnvironment>
     {
-        // TODO: bind attributes
-        ITypeEnvironment MutableBind(string identity, IExpression expression);
-
         IExpression Infer(IExpression expression);
 
         IEnumerable<IExpression> Infer(IEnumerable<IExpression> expressions);
     }
 
-    public sealed class TypeEnvironment : ITypeEnvironment
+    public sealed class TypeEnvironment :
+        TypeContext<ITypeEnvironment>, ITypeEnvironment, IRootTypeContext
     {
         public readonly IExpressionFactory Factory;
         public readonly int MaxIterationCount;
 
-        private readonly Dictionary<string, IExpression> boundExpressions =
-            new Dictionary<string, IExpression>();
+        private int placeholderIndex;
 
-        private TypeEnvironment(IExpressionFactory factory, int maxIterationCount)
+        private TypeEnvironment(IExpressionFactory factory, int maxIterationCount) :
+            base(null)
         {
             this.Factory = factory;
             this.MaxIterationCount = maxIterationCount;
         }
 
-        public IExpression? Lookup(IIdentityTerm identity) =>
-            this.boundExpressions.TryGetValue(identity.Identity, out var expression) ? expression : null;
-
-        public ITypeEnvironment MutableBind(string identity, IExpression expression)
-        {
-            boundExpressions[identity] = expression;
-            return this;
-        }
+        int IRootTypeContext.CreatePlaceholderIndex() =>
+            placeholderIndex++;
 
         public IExpression Infer(IExpression expression)
         {
@@ -63,7 +55,7 @@ namespace Favalet.Expressions
 
             if (expression is IInferrableExpression inferrable)
             {
-                var context = new InferContext(this);
+                var context = new InferContext(this, this);
 
                 var current = inferrable.Infer(context);
                 for (var index = 1; index < this.MaxIterationCount; index++)
@@ -112,10 +104,12 @@ namespace Favalet.Expressions
 
             if (expression is IReducibleExpression reducible)
             {
-                var current = reducible.Reduce(this);
+                var context = new ReduceContext(this);
+
+                var current = reducible.Reduce(context);
                 for (var index = 1; index < this.MaxIterationCount; index++)
                 {
-                    var reduced = current.ReduceIfRequired(this);
+                    var reduced = current.ReduceIfRequired(context);
                     if (current.Equals(reduced))
                     {
                         Debug.WriteLine($"Reduce [F]: {current}");

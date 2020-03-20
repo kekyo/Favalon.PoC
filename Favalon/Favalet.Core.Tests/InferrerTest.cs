@@ -46,7 +46,7 @@ namespace Favalet
                         environment.Infer(Lexer.Tokenize(text).Parse(CLRExpressionFactory.Instance)).
                         ToArray())),
                 //new Func<string, TypeEnvironment, ValueTask<IExpression[]>>(async (text, environment) =>
-                //    await environment.Infer(Lexer.Tokenize(text.ToObservable()).Parse(CLRExpressionFactory.Instance)).ToArray()),
+                //    await environment.Infer(Lexer.Tokenize(text.ToObservable()).Parse(CLRExpressionFactory.Instance)).Memoize()),
             };
 
         ////////////////////////////////////////////////////

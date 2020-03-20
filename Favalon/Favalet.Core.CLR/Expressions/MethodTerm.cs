@@ -26,25 +26,27 @@ using System.Reflection;
 namespace Favalet.Expressions
 {
     public sealed class MethodTerm :
-        Term, IConstantTerm, ICallableExpression
+        Expression, IConstantTerm, ICallableExpression
     {
-        private static readonly FunctionDeclarationTerm kind =
-            FunctionDeclarationTerm.Create(ExpressionFactory.KindType(), ExpressionFactory.KindType());
-
         public readonly MethodBase Method;
+        private readonly Lazy<IExpression> higherOrder;
 
         private MethodTerm(MethodBase method)
         {
             this.Method = method;
 
-
-            this.HigherOrder = FunctionDeclarationTerm.Create(
-                TypeTerm.From(this.Method is MethodInfo m ? m.ReturnType : this.Method.DeclaringType),
-                TypeTerm.From(this.Method.GetParameters().Select(p => p.ParameterType).Last() /* TODO: unit */),
-                );
+            // It couldn't require higher order informations when calls method.
+            this.higherOrder = Lazy.Create(() =>
+                // TODO: multiple arguments
+                // TODO: nothing arguments
+                // TODO: void returns
+                FunctionDeclaredExpression.From(
+                    TypeTerm.From(this.Method.GetParameters().Select(p => p.ParameterType).Last()),
+                    TypeTerm.From(this.Method is MethodInfo m ? m.ReturnType : this.Method.DeclaringType)));
         }
 
-        public override IExpression HigherOrder { get; }
+        public override IExpression HigherOrder =>
+            this.higherOrder.Value;
 
         object IConstantTerm.Value =>
             this.Method;
@@ -55,9 +57,9 @@ namespace Favalet.Expressions
             var reducedArgument = argument.ReduceIfRequired(context);
             if (reducedArgument is IConstantTerm constantArgument)
             {
-                // TODO: this (arg0)
+                // TODO: this (arg0, instance method)
                 // TODO: multiple arguments
-                // TODO: void
+                // TODO: void returns
                 var calledResult = this.Method.Invoke(null, new object[] { constantArgument.Value });
 
                 result = ConstantTerm.From(calledResult);
@@ -74,12 +76,19 @@ namespace Favalet.Expressions
             rhs is MethodTerm method &&
                 this.Method.Equals(method.Method);
 
+        public override int GetHashCode() =>
+            this.Method.GetHashCode();
+
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, this.Method.GetFullName());
 
-        public static MethodTerm From(MethodBase method) =>
-            new MethodTerm(method);
         public static MethodTerm From(Type type, string name, params Type[] parameters) =>
             new MethodTerm(type.GetMethod(name, parameters));
+
+        public static MethodTerm From(MethodBase method) =>
+            // TODO: instance method
+            // TODO: multiple arguments
+            // TODO: generic method
+            new MethodTerm(method);
     }
 }

@@ -50,6 +50,6 @@ namespace Favalet.Expressions
         public abstract string FormatString(IFormatStringContext context);
 
         public sealed override string ToString() =>
-            this.FormatString(NodeLabelledFormatStringContext.Instance);
+            this.FormatString(NamedNodeFormatStringContext.Create());
     }
 }

@@ -48,7 +48,7 @@ namespace Favalet.Internal
                     (CharUnicodeInfo.GetUnicodeCategory((char)value) == UnicodeCategory.OpenPunctuation) &&
                     (CharUnicodeInfo.GetUnicodeCategory((char)(value + 1)) == UnicodeCategory.ClosePunctuation)).
                 Select(value => (char)value).
-                ToArray();
+                Memoize();
 
             openParenthesis = parenthesis.ToDictionary(
                 ch => ch,
@@ -106,7 +106,7 @@ namespace Favalet.Internal
 
 #if NET35
         public static string Join(string separator, IEnumerable<string> values) =>
-            string.Join(separator, values.ToArray());
+            string.Join(separator, values.Memoize());
 
         public static void Clear(this StringBuilder sb) =>
             sb.Length = 0;

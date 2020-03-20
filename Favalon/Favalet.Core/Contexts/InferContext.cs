@@ -18,46 +18,42 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions;
+using Favalet.Expressions.Specialized;
 
 namespace Favalet.Contexts
 {
-    public interface IInferContext : ITypeContext
+    public enum ExpressionVariances
     {
-        void Unify(IExpression to, IExpression from);
-
-        IInferContext NewScope();
+        Equal,
+        Widen,
+        Narrow,
     }
 
-    internal sealed class InferContext : IInferContext
+    public interface IInferContext : IScopedTypeContext<IInferContext>
     {
-        private sealed class BoundPair
+        IIdentityTerm CreatePlaceholder(IExpression higherOrder);
+
+        void Unify(IExpression to, IExpression from, ExpressionVariances variance);
+    }
+
+    internal sealed class InferContext :
+        TypeContext<IInferContext>, IInferContext
+    {
+        private readonly IRootTypeContext rootContext;
+
+        public InferContext(ITypeContext parent, IRootTypeContext rootContext) :
+            base(parent) =>
+            this.rootContext = rootContext;
+
+        public IInferContext CreateDerivedScope() =>
+            new InferContext(this, rootContext);
+
+        public IIdentityTerm CreatePlaceholder(IExpression higherOrder) =>
+            PlaceholderTerm.Create(this.rootContext.CreatePlaceholderIndex(), higherOrder);
+
+        public void Unify(IExpression to, IExpression from, ExpressionVariances variance)
         {
-            public readonly string Identity;
-            public readonly IExpression Expression;
-
-            public BoundPair(string identity, IExpression expression)
-            {
-                this.Identity = identity;
-                this.Expression = expression;
-            }
-        }
-
-        private readonly ITypeContext parent;
-        private BoundPair? boundPair;
-
-        public InferContext(ITypeContext parent) =>
-            this.parent = parent;
-
-        public IExpression? Lookup(IIdentityTerm identity) =>
-            (boundPair?.Identity.Equals(identity) ?? false) ?
-                boundPair!.Expression :
-                parent.Lookup(identity);
-
-        public IInferContext NewScope() =>
-            new InferContext(this);
-
-        public void Unify(IExpression to, IExpression from)
-        {
+            // TODO:
         }
     }
 }

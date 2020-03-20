@@ -17,6 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Expressions.Specialized;
 using System;
 
 namespace Favalet.Expressions
@@ -26,29 +27,29 @@ namespace Favalet.Expressions
         protected ExpressionFactory()
         { }
 
-        private static readonly IdentityTerm unspecified =
-            IdentityTerm.Create("_", UndefinedTerm.Instance);
+        internal static readonly IdentityTerm fourthType =
+            IdentityTerm.Create("#", TerminationTerm.Instance);
 
-        private static readonly IdentityTerm ceil =
-            IdentityTerm.Create("#", UndefinedTerm.Instance);
+        internal static readonly IdentityTerm kindType =
+            IdentityTerm.Create("*", fourthType);
 
-        private static readonly IdentityTerm typeKind =
-            IdentityTerm.Create("*", ceil);
+        public static UnspecifiedTerm Unspecified() =>
+            UnspecifiedTerm.Instance;
 
-        public static IdentityTerm Unspecified() =>
-            unspecified;
+        public static IdentityTerm FourthType() =>
+            fourthType;
 
         public static IdentityTerm KindType() =>
-            typeKind;
+            kindType;
 
         public static IdentityTerm Identity(string identity) =>
-            IdentityTerm.Create(identity, unspecified);
+            IdentityTerm.Create(identity, UnspecifiedTerm.Instance);
 
         public static ApplyExpression Apply(IExpression function, IExpression argument) =>
-            ApplyExpression.Create(function, argument, unspecified);
+            ApplyExpression.Create(function, argument, UnspecifiedTerm.Instance);
 
-        public static FunctionDeclarationTerm FunctionDeclaration(IExpression parameter, IExpression result) =>
-            FunctionDeclarationTerm.Create(parameter, result, unspecified);
+        public static IExpression FunctionDeclaration(IExpression parameter, IExpression result) =>
+            FunctionDeclaredExpression.From(parameter, result);
 
         public static readonly IExpressionFactory Instance =
             new ExpressionFactory();
@@ -60,9 +61,9 @@ namespace Favalet.Expressions
             throw new NotImplementedException();
 
         IExpression IExpressionFactory.Identity(string identity) =>
-            IdentityTerm.Create(identity, unspecified);
+            IdentityTerm.Create(identity, UnspecifiedTerm.Instance);
 
         IExpression IExpressionFactory.Apply(IExpression function, IExpression argument) =>
-            ApplyExpression.Create(function, argument, unspecified);
+            ApplyExpression.Create(function, argument, UnspecifiedTerm.Instance);
     }
 }

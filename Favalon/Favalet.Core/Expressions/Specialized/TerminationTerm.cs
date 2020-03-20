@@ -19,23 +19,23 @@
 
 using Favalet.Contexts;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Specialized
 {
-    internal sealed class UndefinedTerm : Term
+    internal sealed class TerminationTerm : Expression
     {
-        private UndefinedTerm()
+        private TerminationTerm()
         { }
 
         public override IExpression HigherOrder =>
             this;
 
         public override bool Equals(IExpression? rhs) =>
-            rhs is UndefinedTerm;
+            rhs is TerminationTerm;
 
         public override string FormatString(IFormatStringContext context) =>
-            "!!UNDEF";
+            "!!TERM";
 
-        public static readonly UndefinedTerm Instance =
-            new UndefinedTerm();
+        public static readonly IExpression Instance =
+            new TerminationTerm();
     }
 }

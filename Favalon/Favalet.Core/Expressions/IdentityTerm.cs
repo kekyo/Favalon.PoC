@@ -18,6 +18,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Algebraic;
+using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -26,7 +28,7 @@ namespace Favalet.Expressions
         string Identity { get; }
     }
 
-    public sealed class IdentityTerm : Term, IIdentityTerm
+    public sealed class IdentityTerm : Expression, IIdentityTerm
     {
         public readonly string Identity;
 
@@ -40,9 +42,12 @@ namespace Favalet.Expressions
 
         public IExpression Infer(IInferContext context)
         {
-            if (context.Lookup(this) is IExpression expression)
+            if (context.Lookup(this) is BoundInformations[] bounds)
             {
-                return expression.InferIfRequired(context);
+                // TODO: bound attributes
+                return SumExpression.From(
+                    bounds.Select(bound => bound.Expression).Memoize(), true).
+                    InferIfRequired(context);
             }
             else
             {

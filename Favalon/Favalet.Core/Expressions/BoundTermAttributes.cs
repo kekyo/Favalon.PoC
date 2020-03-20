@@ -17,32 +17,26 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Expressions;
+using System;
 
-namespace Favalet.Contexts
+namespace Favalet.Expressions
 {
-    public interface ITypeContext
+    [Flags]
+    public enum BoundTermAttributes
     {
-        IExpression? Lookup(IIdentityTerm identity);
+        Prefix = 0x00,
+        Infix = 0x01,
+        LeftToRight = 0x00,
+        RightToLeft = 0x02,
     }
 
-    public interface IInferrableExpression : IExpression
+    public enum BoundTermPrecedences
     {
-        IExpression Infer(IInferContext context);
-    }
-
-    public interface IReduceContext : ITypeContext
-    {
-        public IReduceContext NewScope();
-    }
-
-    public interface IReducibleExpression : IExpression
-    {
-        IExpression Reduce(IReduceContext context);
-    }
-
-    public interface IFormatStringContext
-    {
-        string Format(IExpression expression, params object[] args);
+        Lowest = 0,
+        Method = 100,
+        Function = 1000,
+        Morphism = 3000,
+        ArithmericAddition = 5000,
+        ArithmericMultiplication = 6000,
     }
 }

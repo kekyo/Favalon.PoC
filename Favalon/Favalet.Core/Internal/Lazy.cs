@@ -21,8 +21,19 @@
 // Non-nullable field is uninitialized. Consider declaring as nullable.
 #pragma warning disable CS8618
 
+using System.Runtime.CompilerServices;
+
 namespace System
 {
+    internal static class Lazy
+    {
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static Lazy<T> Create<T>(Func<T> generator) =>
+            new Lazy<T>(generator);
+    }
+
 #if NET35
     internal sealed class Lazy<T>
     {

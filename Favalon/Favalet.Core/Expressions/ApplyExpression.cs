@@ -66,7 +66,10 @@ namespace Favalet.Expressions
             var argument = this.Argument.InferIfRequired(context);
             var function = this.Function.InferIfRequired(context);
 
-            //context.Unify();
+            context.Unify(
+                FunctionDeclaredExpression.From(argument.HigherOrder, higherOrder),
+                function.HigherOrder,
+                ExpressionVariances.Equal);
 
             if (this.Function.Equals(function) &&
                 this.Argument.Equals(argument) &&
@@ -123,6 +126,9 @@ namespace Favalet.Expressions
             rhs is IApplyExpression apply &&
                 this.Function.Equals(apply.Function) &&
                 this.Argument.Equals(apply.Argument);
+
+        public override int GetHashCode() =>
+            this.Function.GetHashCode() ^ this.Argument.GetHashCode();
 
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, this.Function, this.Argument);

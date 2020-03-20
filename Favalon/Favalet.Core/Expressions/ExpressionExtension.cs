@@ -21,11 +21,25 @@ using Favalet.Contexts;
 
 namespace Favalet.Expressions
 {
+    public interface IInferrableExpression : IExpression
+    {
+        IExpression Infer(IInferContext context);
+    }
+
+    public interface IReducibleExpression : IExpression
+    {
+        IExpression Reduce(IReduceContext context);
+    }
+
     public static class ExpressionExtension
     {
+        public static IExpression InferIfRequired(this IInferrableExpression expression, IInferContext context) =>
+            expression.Infer(context);
         public static IExpression InferIfRequired(this IExpression expression, IInferContext context) =>
             expression is IInferrableExpression i ? i.Infer(context) : expression;
 
+        public static IExpression ReduceIfRequired(this IReducibleExpression expression, IReduceContext context) =>
+            expression.Reduce(context);
         public static IExpression ReduceIfRequired(this IExpression expression, IReduceContext context) =>
             expression is IReducibleExpression r ? r.Reduce(context) : expression;
     }

@@ -18,16 +18,12 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Collections.Generic;
 
 namespace Favalet.Expressions
 {
     public sealed class CLRExpressionFactory :
         ExpressionFactory, IExpressionFactory
     {
-        private static readonly Dictionary<FunctionTypeSignatureKey, FunctionDeclarationTerm> functionTypes =
-            new Dictionary<FunctionTypeSignatureKey, FunctionDeclarationTerm>();
-
         private CLRExpressionFactory()
         { }
 

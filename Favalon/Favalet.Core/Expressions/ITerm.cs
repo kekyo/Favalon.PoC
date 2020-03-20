@@ -17,34 +17,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using System;
-using System.Linq;
-
 namespace Favalet.Expressions
 {
-    internal sealed class FunctionTypeSignatureKey :
-        IEquatable<FunctionTypeSignatureKey?>
+    public interface ITerm : IExpression
     {
-        public readonly Type Result;
-        public readonly Type[] Parameters;
-
-        public FunctionTypeSignatureKey(Type result, Type[] parameters)
-        {
-            this.Result = result;
-            this.Parameters = parameters;
-        }
-
-        public bool Equals(FunctionTypeSignatureKey? other) =>
-            other is FunctionTypeSignatureKey rhs &&
-            this.Result.Equals(rhs.Result) &&
-            this.Parameters.SequenceEqual(rhs.Parameters);
-
-        public override bool Equals(object obj) =>
-            this.Equals(obj as FunctionTypeSignatureKey);
-
-        public override int GetHashCode() =>
-            this.Parameters.Aggregate(
-                this.Result.GetHashCode(),
-                (agg, t) => agg ^ t.GetHashCode());
     }
 }

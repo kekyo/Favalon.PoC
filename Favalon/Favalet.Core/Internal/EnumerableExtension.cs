@@ -18,14 +18,41 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace System.Linq
 {
     internal static class EnumerableExtension
     {
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static T[] Memoize<T>(this IEnumerable<T> enumerable) =>
             enumerable as T[] ??
             (enumerable is List<T> list ? list.ToArray() : enumerable.ToArray());
+
+        public static IEnumerable<U> Collect<T, U>(this IEnumerable<T> enumerable, Func<T, U> selector)
+            where U : class
+        {
+            foreach (var value in enumerable)
+            {
+                if (selector(value) is U result)
+                {
+                    yield return result;
+                }
+            }
+        }
+
+        public static IEnumerable<T> Traverse<T>(this T value, Func<T, T?> next)
+            where T : class
+        {
+            T? current = value;
+            while (current != null)
+            {
+                yield return current;
+                current = next(current);
+            }
+        }
 
 #if NET35
         public static IEnumerable<TResult> Zip<TFirst, TSecond, TResult>(

@@ -18,45 +18,27 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
-using System;
-using System.Reflection;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Specialized
 {
-    public sealed class ConstantTerm : Expression, IConstantTerm
+    public sealed class UnspecifiedTerm : Expression, IInferrableExpression
     {
-        public readonly object Value;
-
-        private ConstantTerm(object value) =>
-            this.Value = value;
+        private UnspecifiedTerm()
+        { }
 
         public override IExpression HigherOrder =>
-            TypeTerm.From(this.Value.GetType());
+            TerminationTerm.Instance;
 
-        object IConstantTerm.Value =>
-            this.Value;
+        public IExpression Infer(IInferContext context) =>
+            context.CreatePlaceholder(Instance);
 
         public override bool Equals(IExpression? rhs) =>
-            rhs is IConstantTerm constant &&
-                this.Value.Equals(constant.Value);
-
-        public override int GetHashCode() =>
-            this.Value.GetHashCode();
+            rhs is UnspecifiedTerm;
 
         public override string FormatString(IFormatStringContext context) =>
-            this.Value switch
-            {
-                string str => $"\"{str}\"",
-                char ch => $"'{ch}'",
-                _ => this.Value.ToString()
-            };
+            "_";
 
-        public static IConstantTerm From(object value) =>
-            value switch
-            {
-                Type type => TypeTerm.From(type),
-                MethodBase method => MethodTerm.From(method),
-                _ => new ConstantTerm(value)
-            };
+        public static readonly UnspecifiedTerm Instance =
+            new UnspecifiedTerm();
     }
 }

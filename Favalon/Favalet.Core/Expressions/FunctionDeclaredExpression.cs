@@ -18,39 +18,39 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using System;
 
 namespace Favalet.Expressions
 {
-    public interface IFunctionDeclarationTerm :
+    public interface IFunctionDeclaredExpression :
         ITerm, IInferrableExpression, IReducibleExpression
     {
         IExpression Parameter { get; }
         IExpression Result { get; }
     }
 
-    public sealed class FunctionDeclarationTerm :
-        Term, IFunctionDeclarationTerm
+    public sealed class FunctionDeclaredExpression :
+        Expression, IFunctionDeclaredExpression
     {
         public readonly IExpression Parameter;
         public readonly IExpression Result;
         private readonly Lazy<IExpression> higherOrder;
 
-        private FunctionDeclarationTerm(
-            IExpression parameter, IExpression result)
+        private FunctionDeclaredExpression(
+            IExpression parameter, IExpression result, Func<IExpression> higherOrder)
         {
             this.Parameter = parameter;
             this.Result = result;
-            this.higherOrder = new Lazy<IExpression>(() =>
-                From(this.Parameter.HigherOrder, this.Result.HigherOrder));
+            this.higherOrder = Lazy.Create(higherOrder);
         }
 
         public override IExpression HigherOrder =>
             this.higherOrder.Value;
 
-        IExpression IFunctionDeclarationTerm.Parameter =>
+        IExpression IFunctionDeclaredExpression.Parameter =>
             this.Parameter;
-        IExpression IFunctionDeclarationTerm.Result =>
+        IExpression IFunctionDeclaredExpression.Result =>
             this.Result;
 
         public IExpression Infer(IInferContext context)
@@ -67,7 +67,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new FunctionDeclarationTerm(parameter, result, higherOrder);
+                return new FunctionDeclaredExpression(parameter, result, () => higherOrder);
             }
         }
 
@@ -85,12 +85,12 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new FunctionDeclarationTerm(parameter, result, higherOrder);
+                return new FunctionDeclaredExpression(parameter, result, () => higherOrder);
             }
         }
 
         public override bool Equals(IExpression? rhs) =>
-            rhs is IFunctionDeclarationTerm functionDeclaration &&
+            rhs is IFunctionDeclaredExpression functionDeclaration &&
             this.Parameter.Equals(functionDeclaration.Parameter) &&
             this.Result.Equals(functionDeclaration.Result);
 
@@ -100,13 +100,38 @@ namespace Favalet.Expressions
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, this.Parameter, this.Result);
 
-        public static readonly FunctionDeclarationTerm Kind =
-            new FunctionDeclarationTerm(ExpressionFactory.KindType(), ExpressionFactory.KindType());
+        private static FunctionDeclaredExpression Create(
+            IExpression parameter, IExpression result, IExpression higherOrder) =>
+            new FunctionDeclaredExpression(
+                parameter, result, () => higherOrder);
 
-        public static FunctionDeclarationTerm From(IExpression parameter, IExpression result) =>
+        private static FunctionDeclaredExpression Create(
+            IExpression parameter, IExpression result) =>
+            new FunctionDeclaredExpression(
+                parameter, result, () => From(parameter.HigherOrder, result.HigherOrder));
+
+        public static readonly FunctionDeclaredExpression Unspecified =
+            Create(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance, TerminationTerm.Instance);
+
+        public static readonly FunctionDeclaredExpression FourthType =
+            Create(ExpressionFactory.fourthType, ExpressionFactory.fourthType, TerminationTerm.Instance);
+
+        public static readonly FunctionDeclaredExpression KindType =
+            Create(ExpressionFactory.kindType, ExpressionFactory.kindType, FourthType);
+
+        public static IExpression From(IExpression parameter, IExpression result) =>
             (parameter, result) switch
             {
-                ()
+                (TerminationTerm _, TerminationTerm _) => TerminationTerm.Instance,
+                (_, TerminationTerm _) => TerminationTerm.Instance,
+                (TerminationTerm _, _) => TerminationTerm.Instance,
+                (IIdentityTerm pid, IIdentityTerm rid) when
+                    pid.Equals(UnspecifiedTerm.Instance) && rid.Equals(UnspecifiedTerm.Instance) => Unspecified,
+                (IIdentityTerm pid, IIdentityTerm rid) when
+                    pid.Equals(ExpressionFactory.fourthType) && rid.Equals(ExpressionFactory.fourthType) => FourthType,
+                (IIdentityTerm pid, IIdentityTerm rid) when
+                    pid.Equals(ExpressionFactory.kindType) && rid.Equals(ExpressionFactory.kindType) => KindType,
+                _ => Create(parameter, result)
             };
     }
 }

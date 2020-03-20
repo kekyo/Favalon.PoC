@@ -17,36 +17,36 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using System.Linq;
+using System.Collections.Generic;
 using Favalet.Expressions;
-using Favalet.Internal;
 
 namespace Favalet.Contexts
 {
-    public sealed class NodeLabelledFormatStringContext : IFormatStringContext
+    public interface IFormatStringContext
     {
-        private NodeLabelledFormatStringContext()
+        string GetPlaceholderIndexString(int index);
+
+        string Format(IExpression expression, params object[] args);
+    }
+
+    public abstract class FormatStringContext : IFormatStringContext
+    {
+        private readonly Dictionary<int, int> relativeIndexes =
+            new Dictionary<int, int>();
+
+        protected FormatStringContext()
         { }
 
-        public string Format(IExpression expression, params object[] args)
+        public string GetPlaceholderIndexString(int index)
         {
-            var name = expression.GetType().Name;
-            if (name.EndsWith("Expression"))
+            if (!relativeIndexes.TryGetValue(index, out var relativeIndex))
             {
-                name = name.Substring(0, name.Length - "Expression".Length);
+                relativeIndex = relativeIndexes.Count;
+                relativeIndexes.Add(index, relativeIndex);
             }
-            else if (name.EndsWith("Term"))
-            {
-                name = name.Substring(0, name.Length - "Term".Length);
-            }
-
-            var argsFormatted = StringUtilities.Join(
-                ",",
-                args.Select(arg => arg is IExpression expr ? expr.FormatString(this) : arg.ToString()));
-            return $"{name}({argsFormatted})";
+            return relativeIndex.ToString();
         }
 
-        public static readonly NodeLabelledFormatStringContext Instance =
-            new NodeLabelledFormatStringContext();
+        public abstract string Format(IExpression expression, params object[] args);
     }
 }

@@ -25,10 +25,10 @@ using System.Collections.Generic;
 namespace Favalet.Expressions
 {
     public abstract class TypeTerm :
-        Term, IConstantTerm
+        Expression, IConstantTerm
     {
-        private static readonly Dictionary<Type, ConcreteTypeTerm> concreteTypes =
-            new Dictionary<Type, ConcreteTypeTerm>();
+        private static readonly Dictionary<Type, TypeTerm> types =
+            new Dictionary<Type, TypeTerm>();
 
         public readonly Type Type;
 
@@ -42,19 +42,23 @@ namespace Favalet.Expressions
             rhs is TypeTerm type &&
                 this.Type.Equals(type.Type);
 
+        public override int GetHashCode() =>
+            this.Type.GetHashCode();
+
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, this.Type.GetFullName());
 
         public static TypeTerm From(Type type)
         {
             // TODO: detect delegates
+            // TODO: detect generics
 
-            lock (concreteTypes)
+            lock (types)
             {
-                if (!concreteTypes.TryGetValue(type, out var term))
+                if (!types.TryGetValue(type, out var term))
                 {
                     term = new ConcreteTypeTerm(type);
-                    concreteTypes.Add(type, term);
+                    types.Add(type, term);
                 }
                 return term;
             }

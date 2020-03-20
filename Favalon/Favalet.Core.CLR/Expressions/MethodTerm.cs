@@ -82,8 +82,11 @@ namespace Favalet.Expressions
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, this.Method.GetFullName());
 
+        public static MethodTerm From(Type type, params Type[] parameters) =>
+            new MethodTerm(type.GetDeclaredConstructor(parameters));
+
         public static MethodTerm From(Type type, string name, params Type[] parameters) =>
-            new MethodTerm(type.GetMethod(name, parameters));
+            new MethodTerm(type.GetDeclaredMethod(name, parameters));
 
         public static MethodTerm From(MethodBase method) =>
             // TODO: instance method

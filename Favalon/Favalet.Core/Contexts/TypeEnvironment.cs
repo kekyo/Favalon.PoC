@@ -18,11 +18,12 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Favalet.Expressions
+namespace Favalet.Contexts
 {
     public interface ITypeEnvironment : ITypeContext
     {
@@ -61,7 +62,7 @@ namespace Favalet.Expressions
                 for (var index = 1; index < this.MaxIterationCount; index++)
                 {
                     var inferred = current.InferIfRequired(context);
-                    if (current.Equals(inferred))
+                    if (current.ExactEquals(inferred))
                     {
                         Debug.WriteLine($"Infer [F]: {current}");
                         return current;
@@ -110,7 +111,7 @@ namespace Favalet.Expressions
                 for (var index = 1; index < this.MaxIterationCount; index++)
                 {
                     var reduced = current.ReduceIfRequired(context);
-                    if (current.Equals(reduced))
+                    if (current.ExactEquals(reduced))
                     {
                         Debug.WriteLine($"Reduce [F]: {current}");
                         return current;

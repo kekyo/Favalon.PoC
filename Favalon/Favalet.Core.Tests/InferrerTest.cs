@@ -17,6 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Contexts;
 using Favalet.Expressions;
 using Favalet.Lexers;
 using Favalet.Parsers;
@@ -36,7 +37,9 @@ namespace Favalet
     {
         private static TypeEnvironment Create() =>
             TypeEnvironment.Create(CLRExpressionFactory.Instance, 100).
-            MutableBindTypes(typeof(object).Assembly);
+            MutableBindTypes(typeof(object).Assembly).
+            MutableBindTypes(typeof(Uri).Assembly).
+            MutableBindTypes(typeof(Enumerable).Assembly);
 
         private static readonly Func<string, TypeEnvironment, ValueTask<IExpression[]>>[] Parsers =
             new[]
@@ -52,7 +55,7 @@ namespace Favalet
         ////////////////////////////////////////////////////
 
         [TestCaseSource("Parsers")]
-        public async Task InferStaticMethod(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
+        public async Task LookupStaticMethod(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
         {
             var text = "System.Int32.Parse \"123\"";
             var environment = Create();
@@ -64,6 +67,38 @@ namespace Favalet
                     Apply(
                         Method<int>("Parse", typeof(string)),
                         Constant("123")),
+                },
+                actual);
+        }
+
+        [TestCaseSource("Parsers")]
+        public async Task LookupType(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
+        {
+            var text = "System.Int32";
+            var environment = Create();
+            var actual = await run(text, environment);
+
+            Assert.AreEqual(
+                new IExpression[]
+                {
+                    Type<int>()
+                },
+                actual);
+        }
+
+        [TestCaseSource("Parsers")]
+        public async Task LookupConstructor(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
+        {
+            var text = "System.Uri \"https://example.com/\"";
+            var environment = Create();
+            var actual = await run(text, environment);
+
+            Assert.AreEqual(
+                new IExpression[]
+                {
+                    Apply(
+                        Constructor<Uri>(typeof(string)),
+                        Constant("https://example.com/")),
                 },
                 actual);
         }

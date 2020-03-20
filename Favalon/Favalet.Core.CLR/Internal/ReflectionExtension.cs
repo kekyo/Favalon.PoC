@@ -17,8 +17,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace System.Reflection
 {
@@ -55,8 +58,20 @@ namespace System.Reflection
         public static Assembly GetAssembly(this Type type) =>
             type.GetTypeInfo().Assembly;
 
-        public static MethodInfo GetMethod(this Type type, string name, params Type[] argumentTypes) =>
-            type.GetRuntimeMethod(name, argumentTypes);
+        private static T SelectMethod<T>(this IEnumerable<T> methods, bool excludeStatic, Type[] argumentTypes)
+            where T : MethodBase =>
+            methods.First(method =>
+                (!excludeStatic || (excludeStatic && !method.IsStatic)) &&
+                method.GetParameters() is ParameterInfo[] ps &&
+                (ps.Length == argumentTypes.Length) &&
+                ps.Zip(argumentTypes, (p, t) => (p.ParameterType, t)).
+                All(entry => entry.ParameterType.IsConvertibleFrom(entry.t)));  // TODO: maybe mistakes from order dependant.
+
+        public static MethodInfo GetDeclaredMethod(this Type type, string name, params Type[] argumentTypes) =>
+            type.GetTypeInfo().GetDeclaredMethods(name).SelectMethod(false, argumentTypes);
+
+        public static ConstructorInfo GetDeclaredConstructor(this Type type, params Type[] argumentTypes) =>
+            type.GetTypeInfo().DeclaredConstructors.SelectMethod(true, argumentTypes);
 
         public static IEnumerable<Type> GetTypes(this Assembly assembly) =>
             assembly.DefinedTypes.Select(typeInfo => typeInfo.AsType());
@@ -106,14 +121,20 @@ namespace System.Reflection
         public static Assembly GetAssembly(this Type type) =>
             type.Assembly;
 
+        public static MethodInfo GetDeclaredMethod(this Type type, string name, params Type[] argumentTypes) =>
+            type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly, null, argumentTypes, null);
+
+        public static ConstructorInfo GetDeclaredConstructor(this Type type, params Type[] argumentTypes) =>
+            type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly, null, argumentTypes, null);
+
         public static ConstructorInfo[] GetDeclaredConstructors(this Type type) =>
-            type.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
         public static MethodInfo[] GetDeclaredMethods(this Type type) =>
-            type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
 
         public static PropertyInfo[] GetDeclaredProperties(this Type type) =>
-            type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
 
         public static MemberInfo AsMemberInfo(this Type type) =>
             type;

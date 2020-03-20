@@ -41,6 +41,10 @@ namespace Favalet.Expressions
         public static TypeTerm Type<T>() =>
             TypeTerm.From(typeof(T));
 
+        public static MethodTerm Constructor(Type type, params Type[] parameters) =>
+            MethodTerm.From(type, parameters);
+        public static MethodTerm Constructor<T>(params Type[] parameters) =>
+            MethodTerm.From(typeof(T), parameters);
         public static MethodTerm Method(Type type, string name, params Type[] parameters) =>
             MethodTerm.From(type, name, parameters);
         public static MethodTerm Method<T>(string name, params Type[] parameters) =>

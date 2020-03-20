@@ -17,12 +17,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Expressions;
 using Favalet.Internal;
 using System;
 using System.Linq;
 using System.Reflection;
 
-namespace Favalet.Expressions
+namespace Favalet.Contexts
 {
     public static class TypeEnvironmentExtension
     {
@@ -30,7 +31,7 @@ namespace Favalet.Expressions
             this TTypeEnvironment environment, ConstructorInfo constructor)
             where TTypeEnvironment : ITypeEnvironment
         {
-            var identity = constructor.DeclaringType.GetFullName(false);
+            var identity = constructor.GetFullName(false);
             environment.MutableBind(identity, MethodTerm.From(constructor));
 
             return environment;

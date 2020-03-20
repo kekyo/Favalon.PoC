@@ -41,12 +41,62 @@ namespace Favalet.Internal
                 typeof(bool), typeof(byte), typeof(short), typeof(int), typeof(long),
                 typeof(float), typeof(double),
             };
+
         private static readonly HashSet<Type> knownInteger =
             new HashSet<Type>
             {
                 typeof(byte), typeof(short), typeof(int), typeof(long),
                 typeof(sbyte), typeof(ushort), typeof(uint), typeof(ulong),
             };
+
+        private static readonly HashSet<(Type, Type)> primitiveConvertibles =
+            new HashSet<(Type, Type)>
+            {
+                (typeof(char), typeof(ushort)),
+                (typeof(char), typeof(int)),
+                (typeof(char), typeof(uint)),
+                (typeof(char), typeof(long)),
+                (typeof(char), typeof(ulong)),
+                (typeof(char), typeof(float)),
+                (typeof(char), typeof(double)),
+                (typeof(byte), typeof(char)),
+                (typeof(byte), typeof(short)),
+                (typeof(byte), typeof(ushort)),
+                (typeof(byte), typeof(int)),
+                (typeof(byte), typeof(uint)),
+                (typeof(byte), typeof(long)),
+                (typeof(byte), typeof(ulong)),
+                (typeof(byte), typeof(float)),
+                (typeof(byte), typeof(double)),
+                (typeof(sbyte), typeof(short)),
+                (typeof(sbyte), typeof(int)),
+                (typeof(sbyte), typeof(long)),
+                (typeof(sbyte), typeof(float)),
+                (typeof(sbyte), typeof(double)),
+                (typeof(short), typeof(int)),
+                (typeof(short), typeof(long)),
+                (typeof(short), typeof(float)),
+                (typeof(short), typeof(double)),
+                (typeof(ushort), typeof(int)),
+                (typeof(ushort), typeof(uint)),
+                (typeof(ushort), typeof(long)),
+                (typeof(ushort), typeof(ulong)),
+                (typeof(ushort), typeof(float)),
+                (typeof(ushort), typeof(double)),
+                (typeof(int), typeof(long)),
+                (typeof(int), typeof(float)),
+                (typeof(int), typeof(double)),
+                (typeof(uint), typeof(long)),
+                (typeof(uint), typeof(ulong)),
+                (typeof(uint), typeof(float)),
+                (typeof(uint), typeof(double)),
+                (typeof(long), typeof(float)),
+                (typeof(long), typeof(double)),
+                (typeof(ulong), typeof(float)),
+                (typeof(ulong), typeof(double)),
+                (typeof(float), typeof(double)),
+            };
+
         private static readonly Dictionary<Type, int> sizeOf =
             new Dictionary<Type, int>
             {
@@ -180,9 +230,10 @@ namespace Favalet.Internal
                 return type!.Name;
             }
 
-            var parentNames = member.DeclaringType?.GetFullName(withGenericParameters).Append(".") ??
-                type?.Namespace.Append(".") ??
+            var parentNames = member.DeclaringType?.GetFullName(withGenericParameters) ??
+                type?.Namespace ??
                 string.Empty;
+            var dot = parentNames.Length >= 1 ? "." : string.Empty;
             var name = member.Name.IndexOf('`') switch
             {
                 -1 => member.Name,
@@ -195,27 +246,53 @@ namespace Favalet.Internal
                     var gta = StringUtilities.Join(
                         ",",
                         type!.GetGenericArguments().Select(ga => GetFullName(ga, withGenericParameters)));
-                    return $"{parentNames}{name}<{gta}>";
+                    return $"{parentNames}{dot}{name}<{gta}>";
+
+                case (_, ConstructorInfo constructor) when withGenericParameters && constructor.DeclaringType.IsGenericType():
+                    var gca = StringUtilities.Join(
+                        ",",
+                        constructor.DeclaringType.GetGenericArguments().Select(ga => GetFullName(ga, withGenericParameters)));
+                    return $"{parentNames}<{gca}>";
+
+                case (_, ConstructorInfo _):
+                    return $"{parentNames}";
 
                 case (_, MethodInfo method) when withGenericParameters && method.IsGenericMethod:
                     var gma = StringUtilities.Join(
                         ",",
                         method.GetGenericArguments().Select(ga => GetFullName(ga, withGenericParameters)));
-                    return $"{parentNames}{name}<{gma}>";
+                    return $"{parentNames}{dot}{name}<{gma}>";
 
                 default:
-                    return $"{parentNames}{name}";
+                    return $"{parentNames}{dot}{name}";
             }
         }
 
         public static string GetFullName(this Type type, bool withGenericParameters = true) =>
             type.AsMemberInfo().GetFullName(withGenericParameters);
 
+        public static bool IsConvertibleFrom(this Type type, Type from)
+        {
+            if (type.Equals(from))
+            {
+                return true;
+            }
+
+            if (type.IsPrimitive() && from.IsPrimitive())
+            {
+                return primitiveConvertibles.Contains((from, type));
+            }
+            else
+            {
+                return type.IsAssignableFrom(from);
+            }
+        }
+
         public static (Type, Type[]) GetDelegateSignature(Type delegateType)
         {
-            Debug.Assert(typeof(Delegate).IsAssignableFrom(delegateType));
+            Debug.Assert(typeof(Delegate).IsConvertibleFrom(delegateType));
 
-            var invoke = delegateType.GetMethod("Invoke");
+            var invoke = delegateType.GetDeclaredMethod("Invoke");
 
             var parameters = invoke.GetParameters();
             return parameters.Length >= 1 ?

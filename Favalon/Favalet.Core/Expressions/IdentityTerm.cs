@@ -43,7 +43,8 @@ namespace Favalet.Expressions
 
         public IExpression Infer(IInferContext context)
         {
-            if (context.Lookup(this) is BoundInformations[] bounds)
+            if (context.Lookup(this) is BoundInformations[] bounds &&
+                bounds.Length >= 1)
             {
                 // TODO: bound attributes
                 return SumExpression.From(

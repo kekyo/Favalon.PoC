@@ -17,29 +17,39 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Favalet.Expressions.Specialized
+namespace Favalet.Expressions
 {
-    internal sealed class TerminationTerm : Expression
+    public sealed class ExactEqualityComparer : IEqualityComparer<IExpression>
     {
-        private TerminationTerm()
+        private ExactEqualityComparer()
         { }
 
-        public override IExpression HigherOrder =>
-            this;
+        public bool Equals(IExpression x, IExpression y)
+        {
+            if (object.ReferenceEquals(x, y))
+            {
+                return true;
+            }
+
+            return (x, y) switch
+            {
+                (_, TerminationTerm _) => false,
+                (TerminationTerm _, _) => false,
+                _ => x.Equals(y) && this.Equals(x.HigherOrder, y.HigherOrder),
+            };
+        }
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public override bool Equals(IExpression? rhs) =>
-            rhs is TerminationTerm;
+        public int GetHashCode(IExpression? obj) =>
+            obj!.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            "!!TERM";
-
-        public static readonly IExpression Instance =
-            new TerminationTerm();
+        public static readonly ExactEqualityComparer Instance =
+            new ExactEqualityComparer();
     }
 }

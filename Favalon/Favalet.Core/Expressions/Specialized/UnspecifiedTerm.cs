@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
 {
@@ -32,6 +33,9 @@ namespace Favalet.Expressions.Specialized
         public IExpression Infer(IInferContext context) =>
             context.CreatePlaceholder(Instance);
 
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public override bool Equals(IExpression? rhs) =>
             rhs is UnspecifiedTerm;
 

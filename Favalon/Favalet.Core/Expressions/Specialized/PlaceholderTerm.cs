@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
 {
@@ -46,7 +47,7 @@ namespace Favalet.Expressions.Specialized
             }
 
             var higherOrder = this.HigherOrder.InferIfRequired(context);
-            if (this.HigherOrder.Equals(higherOrder))
+            if (this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
             }
@@ -56,10 +57,16 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public override bool Equals(IExpression? rhs) =>
             rhs is PlaceholderTerm placeholder &&
             this.Index.Equals(placeholder.Index);
 
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public override int GetHashCode() =>
             this.Index.GetHashCode();
 

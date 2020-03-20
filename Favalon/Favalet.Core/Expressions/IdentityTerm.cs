@@ -20,6 +20,7 @@
 using Favalet.Contexts;
 using Favalet.Expressions.Algebraic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
 {
@@ -52,7 +53,7 @@ namespace Favalet.Expressions
             else
             {
                 var higherOrder = this.HigherOrder.InferIfRequired(context);
-                if (this.HigherOrder.Equals(higherOrder))
+                if (this.HigherOrder.ExactEquals(higherOrder))
                 {
                     return this;
                 }
@@ -66,10 +67,16 @@ namespace Favalet.Expressions
         string IIdentityTerm.Identity =>
             this.Identity;
 
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public override bool Equals(IExpression? rhs) =>
             rhs is IIdentityTerm identity &&
                 this.Identity.Equals(identity.Identity);
 
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public override int GetHashCode() =>
             this.Identity.GetHashCode();
 

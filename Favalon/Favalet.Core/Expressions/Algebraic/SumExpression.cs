@@ -59,7 +59,8 @@ namespace Favalet.Expressions.Algebraic
                 Select(expression => expression.InferIfRequired(context)).
                 Memoize();
 
-            if (this.Expressions.SequenceEqual(expressions))
+            if (this.Expressions.SequenceEqual(
+                expressions, ExactEqualityComparer.Instance))
             {
                 return this;
             }
@@ -75,7 +76,8 @@ namespace Favalet.Expressions.Algebraic
                 Select(expression => expression.ReduceIfRequired(context)).
                 Memoize();
 
-            if (this.Expressions.SequenceEqual(expressions))
+            if (this.Expressions.SequenceEqual(
+                expressions, ExactEqualityComparer.Instance))
             {
                 return this;
             }

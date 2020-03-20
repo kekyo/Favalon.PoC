@@ -20,6 +20,7 @@
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
 {
@@ -59,9 +60,9 @@ namespace Favalet.Expressions
             var result = this.Result.InferIfRequired(context);
             var higherOrder = this.HigherOrder.InferIfRequired(context);
 
-            if (this.Parameter.Equals(parameter) &&
-                this.Result.Equals(result) &&
-                this.HigherOrder.Equals(higherOrder))
+            if (this.Parameter.ExactEquals(parameter) &&
+                this.Result.ExactEquals(result) &&
+                this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
             }
@@ -77,9 +78,9 @@ namespace Favalet.Expressions
             var result = this.Result.ReduceIfRequired(context);
             var higherOrder = this.HigherOrder.ReduceIfRequired(context);
 
-            if (this.Parameter.Equals(parameter) &&
-                this.Result.Equals(result) &&
-                this.HigherOrder.Equals(higherOrder))
+            if (this.Parameter.ExactEquals(parameter) &&
+                this.Result.ExactEquals(result) &&
+                this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
             }
@@ -100,11 +101,17 @@ namespace Favalet.Expressions
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, this.Parameter, this.Result);
 
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         private static FunctionDeclaredExpression Create(
             IExpression parameter, IExpression result, IExpression higherOrder) =>
             new FunctionDeclaredExpression(
                 parameter, result, () => higherOrder);
 
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         private static FunctionDeclaredExpression Create(
             IExpression parameter, IExpression result) =>
             new FunctionDeclaredExpression(

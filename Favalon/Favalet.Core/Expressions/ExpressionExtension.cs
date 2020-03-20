@@ -42,5 +42,8 @@ namespace Favalet.Expressions
             expression.Reduce(context);
         public static IExpression ReduceIfRequired(this IExpression expression, IReduceContext context) =>
             expression is IReducibleExpression r ? r.Reduce(context) : expression;
+
+        public static bool ExactEquals(this IExpression expression, IExpression rhs) =>
+            ExactEqualityComparer.Instance.Equals(expression, rhs);
     }
 }

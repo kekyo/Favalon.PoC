@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
 {
@@ -71,9 +72,9 @@ namespace Favalet.Expressions
                 function.HigherOrder,
                 ExpressionVariances.Equal);
 
-            if (this.Function.Equals(function) &&
-                this.Argument.Equals(argument) &&
-                this.HigherOrder.Equals(higherOrder))
+            if (this.Function.ExactEquals(function) &&
+                this.Argument.ExactEquals(argument) &&
+                this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
             }
@@ -110,9 +111,9 @@ namespace Favalet.Expressions
                 function = this.Function.ReduceIfRequired(context);
             }
 
-            if (this.Function.Equals(function) &&
-                this.Argument.Equals(argument) &&
-                this.HigherOrder.Equals(higherOrder))
+            if (this.Function.ExactEquals(function) &&
+                this.Argument.ExactEquals(argument) &&
+                this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
             }

@@ -67,11 +67,14 @@ namespace Favalet.Expressions
 
     public sealed class ConcreteTypeTerm : TypeTerm
     {
+        private static readonly IExpression higherOrder =
+            ExpressionFactory.KindType();
+
         internal ConcreteTypeTerm(Type type) :
             base(type)
         { }
 
         public override IExpression HigherOrder =>
-            ExpressionFactory.KindType();
+            higherOrder;
     }
 }

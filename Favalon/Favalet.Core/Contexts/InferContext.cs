@@ -36,12 +36,11 @@ namespace Favalet.Contexts
         void Unify(IExpression to, IExpression from, ExpressionVariances variance);
     }
 
-    internal sealed class InferContext :
-        TypeContext<IInferContext>, IInferContext
+    internal sealed class InferContext : TypeContext, IInferContext
     {
         private readonly IRootTypeContext rootContext;
 
-        public InferContext(ITypeContext parent, IRootTypeContext rootContext) :
+        private InferContext(ITypeContext parent, IRootTypeContext rootContext) :
             base(parent) =>
             this.rootContext = rootContext;
 
@@ -55,5 +54,8 @@ namespace Favalet.Contexts
         {
             // TODO:
         }
+
+        public static InferContext Create(ITypeContext parent, IRootTypeContext rootContext) =>
+            new InferContext(parent, rootContext);
     }
 }

@@ -25,26 +25,22 @@ namespace Favalet.Contexts
 {
     public interface ITypeContext
     {
-        BoundInformations[] Lookup(IIdentityTerm identity);
-    }
-
-    public interface ITypeContext<TContext> : ITypeContext
-        where TContext : ITypeContext
-    {
-        TContext MutableBind(
+        void MutableBind(
             string identity,
             IExpression expression,
             BoundTermAttributes attributes = BoundTermAttributes.Prefix | BoundTermAttributes.LeftToRight,
             BoundTermPrecedences precedence = BoundTermPrecedences.Function);
+
+        BoundInformations[] Lookup(IIdentityTerm identity);
     }
 
-    public interface IScopedTypeContext<TContext> : ITypeContext<TContext>
+    public interface IScopedTypeContext<TContext> : ITypeContext
         where TContext : ITypeContext
     {
         TContext CreateDerivedScope();
     }
-    
-    public interface IRootTypeContext : ITypeContext
+
+    internal interface IRootTypeContext : ITypeContext
     {
         int CreatePlaceholderIndex();
     }
@@ -54,8 +50,7 @@ namespace Favalet.Contexts
         IEnumerable<(int, BoundInformations)> RecursiveLookup(IIdentityTerm identity, int distance);
     }
 
-    public abstract class TypeContext<TContext> : ITypeContext<TContext>, IInternalTypeContext
-        where TContext : ITypeContext
+    public abstract class TypeContext : ITypeContext, IInternalTypeContext
     {
         private readonly ITypeContext? parent;
         private Dictionary<string, Dictionary<IExpression, BoundInformations>>? bounds;
@@ -63,7 +58,7 @@ namespace Favalet.Contexts
         private protected TypeContext(ITypeContext? parent) =>
             this.parent = parent;
 
-        public TContext MutableBind(
+        public void MutableBind(
             string identity,
             IExpression expression,
             BoundTermAttributes attributes,
@@ -82,8 +77,6 @@ namespace Favalet.Contexts
 
             overloads[expression.HigherOrder] =
                 new BoundInformations(expression, attributes, precedence);
-
-            return (TContext)(ITypeContext)this;
         }
 
         public BoundInformations[] Lookup(IIdentityTerm identity) =>

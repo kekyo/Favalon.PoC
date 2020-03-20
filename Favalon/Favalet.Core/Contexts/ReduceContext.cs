@@ -23,14 +23,16 @@ namespace Favalet.Contexts
     {
     }
 
-    internal sealed class ReduceContext :
-        TypeContext<IReduceContext>, IReduceContext
+    internal sealed class ReduceContext : TypeContext, IReduceContext
     {
-        public ReduceContext(ITypeContext parent) :
+        private ReduceContext(ITypeContext parent) :
             base(parent)
         { }
 
         public IReduceContext CreateDerivedScope() =>
             new ReduceContext(this);
+
+        public static ReduceContext Create(ITypeContext parent) =>
+            new ReduceContext(parent);
     }
 }

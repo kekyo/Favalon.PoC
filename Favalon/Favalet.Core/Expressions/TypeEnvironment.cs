@@ -24,7 +24,7 @@ using System.Diagnostics;
 
 namespace Favalet.Expressions
 {
-    public interface ITypeEnvironment : ITypeContext<ITypeEnvironment>
+    public interface ITypeEnvironment : ITypeContext
     {
         IExpression Infer(IExpression expression);
 
@@ -32,7 +32,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class TypeEnvironment :
-        TypeContext<ITypeEnvironment>, ITypeEnvironment, IRootTypeContext
+        TypeContext, ITypeEnvironment, IRootTypeContext
     {
         public readonly IExpressionFactory Factory;
         public readonly int MaxIterationCount;
@@ -55,7 +55,7 @@ namespace Favalet.Expressions
 
             if (expression is IInferrableExpression inferrable)
             {
-                var context = new InferContext(this, this);
+                var context = InferContext.Create(this, this);
 
                 var current = inferrable.Infer(context);
                 for (var index = 1; index < this.MaxIterationCount; index++)
@@ -104,7 +104,7 @@ namespace Favalet.Expressions
 
             if (expression is IReducibleExpression reducible)
             {
-                var context = new ReduceContext(this);
+                var context = ReduceContext.Create(this);
 
                 var current = reducible.Reduce(context);
                 for (var index = 1; index < this.MaxIterationCount; index++)

@@ -36,7 +36,7 @@ namespace Favalet.Tokens
         public override bool Equals(object obj) =>
             this.Equals(obj as WhiteSpaceToken);
 
-        public override string ToString() =>
+        protected override string FormatString() =>
             string.Empty;
 
         internal static readonly WhiteSpaceToken Instance =

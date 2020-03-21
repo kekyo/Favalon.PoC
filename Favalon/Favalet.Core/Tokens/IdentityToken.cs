@@ -38,7 +38,7 @@ namespace Favalet.Tokens
         public override bool Equals(object obj) =>
             this.Equals(obj as IdentityToken);
 
-        public override string ToString() =>
+        protected override string FormatString() =>
             this.Identity;
 
         public void Deconstruct(out string identity) =>

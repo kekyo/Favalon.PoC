@@ -42,7 +42,8 @@ namespace Favalet.Contexts
 
     internal interface IRootTypeContext : ITypeContext
     {
-        int CreatePlaceholderIndex();
+        ITypeContextFeatures Features { get; }
+        int DrawNextPlaceholderIndex();
     }
 
     internal interface IInternalTypeContext

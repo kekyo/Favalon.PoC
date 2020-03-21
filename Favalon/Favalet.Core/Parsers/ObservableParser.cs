@@ -17,6 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Contexts;
 using Favalet.Expressions;
 using Favalet.Internal;
 using Favalet.Parsers.Runners;
@@ -34,9 +35,9 @@ namespace Favalet.Parsers
         private int index = 0;
 #endif
 
-        public ObservableParser(IObservable<Token> parent, IExpressionFactory factory) :
+        public ObservableParser(IObservable<Token> parent, ITypeContextFeatures features) :
             base(parent) =>
-            this.context = ParseRunnerContext.Create(factory);
+            this.context = ParseRunnerContext.Create(features);
 
         protected override void OnValueReceived(Token token)
         {

@@ -21,21 +21,8 @@ using System;
 
 namespace Favalet.Expressions
 {
-    public sealed class CLRExpressionFactory :
-        ExpressionFactory, IExpressionFactory
+    public static class CLRExpressionFactory
     {
-        private CLRExpressionFactory()
-        { }
-
-        IExpression IExpressionFactory.Numeric(string value) =>
-            FromNumeric(value);
-
-        IExpression IExpressionFactory.String(string value) =>
-            ConstantTerm.From(value);
-
-        public static new readonly IExpressionFactory Instance =
-            new CLRExpressionFactory();
-
         public static TypeTerm Type(Type type) =>
             TypeTerm.From(type);
         public static TypeTerm Type<T>() =>

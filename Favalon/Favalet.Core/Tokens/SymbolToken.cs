@@ -17,8 +17,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using System;
-
 namespace Favalet.Tokens
 {
     public abstract class SymbolToken :
@@ -29,7 +27,7 @@ namespace Favalet.Tokens
 
         public abstract char Symbol { get; }
 
-        public override string ToString() =>
+        protected override string FormatString() =>
             this.Symbol.ToString();
 
         public void Deconstruct(out char symbol) =>

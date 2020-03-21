@@ -34,16 +34,13 @@ namespace Favalet
     [TestFixture]
     public sealed class ParserTest
     {
-        private static IExpression[] Run(string text) =>
-            Lexer.Tokenize(text).Parse(CLRExpressionFactory.Instance).ToArray();
-
         private static readonly Func<string, ValueTask<IExpression[]>>[] Parsers =
             new[]
             {
                 new Func<string, ValueTask<IExpression[]>>(text =>
-                    new ValueTask<IExpression[]>(Lexer.Tokenize(text).Parse(CLRExpressionFactory.Instance).ToArray())),
+                    new ValueTask<IExpression[]>(Lexer.Tokenize(text).Parse(CLRTypeContextFeatures.Instance).ToArray())),
                 new Func<string, ValueTask<IExpression[]>>(async text =>
-                    await Lexer.Tokenize(text.ToObservable()).Parse(CLRExpressionFactory.Instance).ToArray()),
+                    await Lexer.Tokenize(text.ToObservable()).Parse(CLRTypeContextFeatures.Instance).ToArray()),
             };
 
         ////////////////////////////////////////////////////

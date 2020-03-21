@@ -36,7 +36,7 @@ namespace Favalet
     public sealed class InferrerTest
     {
         private static TypeEnvironment Create() =>
-            TypeEnvironment.Create(CLRExpressionFactory.Instance, 100).
+            TypeEnvironment.Create(CLRTypeContextFeatures.Instance, 100).
             MutableBindTypes(typeof(object).Assembly).
             MutableBindTypes(typeof(Uri).Assembly).
             MutableBindTypes(typeof(Enumerable).Assembly);
@@ -46,10 +46,10 @@ namespace Favalet
             {
                 new Func<string, TypeEnvironment, ValueTask<IExpression[]>>((text, environment) =>
                     new ValueTask<IExpression[]>(
-                        environment.Infer(Lexer.Tokenize(text).Parse(CLRExpressionFactory.Instance)).
+                        environment.Infer(Lexer.Tokenize(text).Parse(environment.Features)).
                         ToArray())),
                 //new Func<string, TypeEnvironment, ValueTask<IExpression[]>>(async (text, environment) =>
-                //    await environment.Infer(Lexer.Tokenize(text.ToObservable()).Parse(CLRExpressionFactory.Instance)).Memoize()),
+                //    await environment.Infer(Lexer.Tokenize(text.ToObservable()).Parse(environment.Features)).Memoize()),
             };
 
         ////////////////////////////////////////////////////

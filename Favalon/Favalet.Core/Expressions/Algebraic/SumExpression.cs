@@ -21,6 +21,7 @@ using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -28,6 +29,15 @@ namespace Favalet.Expressions.Algebraic
         IExpression, IInferrableExpression, IReducibleExpression
     {
         IExpression[] Expressions { get; }
+    }
+
+    public static class SumExpressionExtension
+    {
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static void Deconstruct(this ISumExpression sum, out IExpression[] expressions) =>
+            expressions = sum.Expressions;
     }
 
     public sealed class SumExpression :

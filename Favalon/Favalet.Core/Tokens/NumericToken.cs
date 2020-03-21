@@ -38,7 +38,7 @@ namespace Favalet.Tokens
         public override bool Equals(object obj) =>
             this.Equals(obj as NumericToken);
 
-        public override string ToString() =>
+        protected override string FormatString() =>
             this.Value;
 
         public void Deconstruct(out string value) =>

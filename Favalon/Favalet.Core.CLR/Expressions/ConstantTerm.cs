@@ -63,7 +63,49 @@ namespace Favalet.Expressions
             {
                 Type type => TypeTerm.From(type),
                 MethodBase method => MethodTerm.From(method),
+                string str when str.Length == 1 => new SingleCharConstantTerm(str[0], ExpressionFactory.Unspecified()),
                 _ => new ConstantTerm(value)
             };
+    }
+
+    public sealed class SingleCharConstantTerm :
+        Expression, IConstantTerm, IInferrableExpression
+    {
+        public readonly char Value;
+
+        internal SingleCharConstantTerm(char value, IExpression higherOrder)
+        {
+            this.Value = value;
+            this.HigherOrder = higherOrder;
+        }
+
+        public override IExpression HigherOrder { get; }
+
+        object IConstantTerm.Value =>
+            this.Value;
+
+        public override bool Equals(IExpression? rhs) =>
+            rhs is IConstantTerm constant &&
+                this.Value.Equals(constant.Value);
+
+        public override int GetHashCode() =>
+            this.Value.GetHashCode();
+
+        public IExpression Infer(IInferContext context)
+        {
+            var higherOrder = this.HigherOrder.InferIfRequired(context);
+
+            if (this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new SingleCharConstantTerm(this.Value, higherOrder);
+            }
+        }
+
+        public override string FormatString(IFormatStringContext context) =>
+            $"\"{this.Value}\"";
     }
 }

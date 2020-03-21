@@ -17,6 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Contexts;
 using Favalet.Expressions;
 using Favalet.Tokens;
 using System.Diagnostics;
@@ -25,11 +26,11 @@ namespace Favalet.Parsers.Runners
 {
     internal sealed class ParseRunnerContext
     {
-        public readonly IExpressionFactory Factory;
+        public readonly ITypeContextFeatures Features;
         private NumericalSignToken? preSignToken;
 
-        private ParseRunnerContext(IExpressionFactory factory) =>
-            this.Factory = factory;
+        private ParseRunnerContext(ITypeContextFeatures features) =>
+            this.Features = features;
 
         public IExpression? Expression { get; private set; }
 
@@ -39,7 +40,7 @@ namespace Favalet.Parsers.Runners
         {
             if (this.Expression != null)
             {
-                this.Expression = this.Factory.Apply(this.Expression, expression);
+                this.Expression = this.Features.Apply(this.Expression, expression);
             }
             else
             {
@@ -65,7 +66,7 @@ namespace Favalet.Parsers.Runners
             return preSignToken!;
         }
 
-        public static ParseRunnerContext Create(IExpressionFactory factory) =>
-            new ParseRunnerContext(factory);
+        public static ParseRunnerContext Create(ITypeContextFeatures features) =>
+            new ParseRunnerContext(features);
     }
 }

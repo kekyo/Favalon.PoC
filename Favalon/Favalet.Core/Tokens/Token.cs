@@ -28,5 +28,18 @@ namespace Favalet.Tokens
 #endif
         protected Token()
         { }
+
+        protected abstract string FormatString();
+
+        public sealed override string ToString()
+        {
+            var name = this.GetType().Name;
+            if (name.EndsWith("Token"))
+            {
+                name = name.Substring(0, name.Length - "Token".Length);
+            }
+
+            return $"{name}({this.FormatString()})";
+        }
     }
 }

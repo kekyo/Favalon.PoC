@@ -32,6 +32,21 @@ namespace Favalet.Expressions
         IExpression Result { get; }
     }
 
+    public static class FunctionDeclaredExpressionExtension
+    {
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static void Deconstruct(
+            this IFunctionDeclaredExpression expression,
+            out IExpression parameter,
+            out IExpression result)
+        {
+            parameter = expression.Parameter;
+            result = expression.Result;
+        }
+    }
+
     public sealed class FunctionDeclaredExpression :
         Expression, IFunctionDeclaredExpression
     {

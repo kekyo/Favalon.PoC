@@ -17,6 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Contexts;
 using Favalet.Expressions;
 using Favalet.Parsers.Runners;
 using Favalet.Tokens;
@@ -33,12 +34,12 @@ namespace Favalet.Parsers
 #endif
 
         public static IEnumerable<IExpression> Parse(this IEnumerable<Token> tokens) =>
-            Parse(tokens, ExpressionFactory.Instance);
+            Parse(tokens, TypeContextFeatures.Instance);
 
         public static IEnumerable<IExpression> Parse(
-            this IEnumerable<Token> tokens, IExpressionFactory factory)
+            this IEnumerable<Token> tokens, ITypeContextFeatures features)
         {
-            var context = ParseRunnerContext.Create(factory);
+            var context = ParseRunnerContext.Create(features);
             var runner = WaitingRunner.Instance;
 
 #if DEBUG
@@ -52,7 +53,7 @@ namespace Favalet.Parsers
 #endif
                 runner = runner.Run(context, token);
 
-                Debug.WriteLine($"{index - 1}: '{token}': {context}");
+                Debug.WriteLine($"Parse [{index - 1}]: '{token}', {context.Expression}");
 
                 context.SetLastToken(token);
             }
@@ -66,11 +67,11 @@ namespace Favalet.Parsers
 
 #if !NET35
         public static IObservable<IExpression> Parse(this IObservable<Token> tokens) =>
-            new ObservableParser(tokens, ExpressionFactory.Instance);
+            new ObservableParser(tokens, TypeContextFeatures.Instance);
 
         public static IObservable<IExpression> Parse(
-            this IObservable<Token> tokens, IExpressionFactory factory) =>
-            new ObservableParser(tokens, factory);
+            this IObservable<Token> tokens, ITypeContextFeatures features) =>
+            new ObservableParser(tokens, features);
 #endif
     }
 }

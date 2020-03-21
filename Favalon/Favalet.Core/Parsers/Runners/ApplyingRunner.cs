@@ -34,7 +34,7 @@ namespace Favalet.Parsers.Runners
             {
                 // 123
                 case NumericToken numeric:
-                    context.Combine(context.Factory.Numeric(numeric.Value));
+                    context.Combine(context.Features.Numeric(numeric.Value));
                     return this;
 
                 case NumericalSignToken numericSign:
@@ -47,23 +47,23 @@ namespace Favalet.Parsers.Runners
                     // "abc-" / "123-" / "(abc)-" ==> binary op
                     else
                     {
-                        context.Combine(context.Factory.Identity(numericSign.Symbol.ToString()));
+                        context.Combine(context.Features.Identity(numericSign.Symbol.ToString()));
                         return this;
                     }
 
                 // "ABC"
                 case StringToken str:
-                    context.Combine(context.Factory.String(str.Value));
+                    context.Combine(context.Features.String(str.Value));
                     return this;
 
                 // abc
                 case IdentityToken identity:
-                    context.Combine(context.Factory.Identity(identity.Identity));
+                    context.Combine(context.Features.Identity(identity.Identity));
                     return this;
 
                 // &
                 case SymbolToken symbol:
-                    context.Combine(context.Factory.Identity(symbol.Symbol.ToString()));
+                    context.Combine(context.Features.Identity(symbol.Symbol.ToString()));
                     return this;
 
                 case WhiteSpaceToken _:

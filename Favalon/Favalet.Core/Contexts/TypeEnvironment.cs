@@ -35,19 +35,22 @@ namespace Favalet.Contexts
     public sealed class TypeEnvironment :
         TypeContext, ITypeEnvironment, IRootTypeContext
     {
-        public readonly IExpressionFactory Factory;
+        public readonly ITypeContextFeatures Features;
         public readonly int MaxIterationCount;
 
         private int placeholderIndex;
 
-        private TypeEnvironment(IExpressionFactory factory, int maxIterationCount) :
+        private TypeEnvironment(ITypeContextFeatures features, int maxIterationCount) :
             base(null)
         {
-            this.Factory = factory;
+            this.Features = features;
             this.MaxIterationCount = maxIterationCount;
         }
 
-        int IRootTypeContext.CreatePlaceholderIndex() =>
+        ITypeContextFeatures IRootTypeContext.Features =>
+            this.Features;
+
+        int IRootTypeContext.DrawNextPlaceholderIndex() =>
             placeholderIndex++;
 
         public IExpression Infer(IExpression expression)
@@ -56,7 +59,7 @@ namespace Favalet.Contexts
 
             if (expression is IInferrableExpression inferrable)
             {
-                var context = InferContext.Create(this, this);
+                var context = InferContext.Create(this);
 
                 var current = inferrable.Infer(context);
                 for (var index = 1; index < this.MaxIterationCount; index++)
@@ -149,9 +152,9 @@ namespace Favalet.Contexts
 #endif
 
         public static TypeEnvironment Create(int maxIterationCount = 10000) =>
-            new TypeEnvironment(ExpressionFactory.Instance, maxIterationCount);
+            new TypeEnvironment(TypeContextFeatures.Instance, maxIterationCount);
 
-        public static TypeEnvironment Create(IExpressionFactory factory, int maxIterationCount = 10000) =>
-            new TypeEnvironment(factory, maxIterationCount);
+        public static TypeEnvironment Create(ITypeContextFeatures features, int maxIterationCount = 10000) =>
+            new TypeEnvironment(features, maxIterationCount);
     }
 }

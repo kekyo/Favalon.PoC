@@ -32,6 +32,9 @@ namespace Favalet.Lexers.Runners
         {
             var token = context.TokenBuffer.ToString();
             context.TokenBuffer.Clear();
+
+            // TODO: interpret escape sequences.
+
             return new StringToken(token);
         }
 

@@ -34,7 +34,7 @@ namespace Favalet.Parsers.Runners
             {
                 // 123
                 case NumericToken numeric:
-                    context.Combine(context.Factory.Numeric(numeric.Value));
+                    context.Combine(context.Features.Numeric(numeric.Value));
                     return ApplyingRunner.Instance;
 
                 // -
@@ -44,17 +44,17 @@ namespace Favalet.Parsers.Runners
 
                 // "ABC"
                 case StringToken str:
-                    context.Combine(context.Factory.String(str.Value));
+                    context.Combine(context.Features.String(str.Value));
                     return ApplyingRunner.Instance;
 
                 // abc
                 case IdentityToken identity:
-                    context.Combine(context.Factory.Identity(identity.Identity));
+                    context.Combine(context.Features.Identity(identity.Identity));
                     return ApplyingRunner.Instance;
 
                 // "&"
                 case SymbolToken symbol:
-                    context.Combine(context.Factory.Identity(symbol.Symbol.ToString()));
+                    context.Combine(context.Features.Identity(symbol.Symbol.ToString()));
                     return ApplyingRunner.Instance;
 
                 case WhiteSpaceToken _:

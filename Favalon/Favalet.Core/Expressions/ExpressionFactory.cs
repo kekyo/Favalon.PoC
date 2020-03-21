@@ -18,15 +18,11 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions.Specialized;
-using System;
 
 namespace Favalet.Expressions
 {
-    public class ExpressionFactory : IExpressionFactory
+    public static class ExpressionFactory
     {
-        protected ExpressionFactory()
-        { }
-
         internal static readonly IdentityTerm fourthType =
             IdentityTerm.Create("#", TerminationTerm.Instance);
 
@@ -50,20 +46,5 @@ namespace Favalet.Expressions
 
         public static IExpression FunctionDeclaration(IExpression parameter, IExpression result) =>
             FunctionDeclaredExpression.From(parameter, result);
-
-        public static readonly IExpressionFactory Instance =
-            new ExpressionFactory();
-
-        IExpression IExpressionFactory.Numeric(string value) =>
-            throw new NotImplementedException();
-
-        IExpression IExpressionFactory.String(string value) =>
-            throw new NotImplementedException();
-
-        IExpression IExpressionFactory.Identity(string identity) =>
-            IdentityTerm.Create(identity, UnspecifiedTerm.Instance);
-
-        IExpression IExpressionFactory.Apply(IExpression function, IExpression argument) =>
-            ApplyExpression.Create(function, argument, UnspecifiedTerm.Instance);
     }
 }

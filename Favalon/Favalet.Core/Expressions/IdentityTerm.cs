@@ -24,13 +24,13 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
 {
-    public interface IIdentityTerm :
-        ITerm, IInferrableExpression
+    public interface IIdentityTerm : ITerm, IInferrableExpression
     {
         string Identity { get; }
     }
 
-    public sealed class IdentityTerm : Expression, IIdentityTerm
+    public sealed class IdentityTerm :
+        Expression, IIdentityTerm, IReducibleExpression
     {
         public readonly string Identity;
 
@@ -47,15 +47,14 @@ namespace Favalet.Expressions
 
         public IExpression Infer(IInferContext context)
         {
-            if (context.Lookup(this) is BoundInformations[] bounds && (bounds.Length >= 1))
-            {
-                // TODO: bound attributes
-                return SumExpression.From(
-                    bounds.Select(bound => bound.Expression).Memoize(), true).
-                    InferIfRequired(context);
-            }
+            var bounds = context.Lookup(this);
 
-            var higherOrder = this.HigherOrder.InferIfRequired(context);
+            var higherOrder = (bounds.Length >= 1) ?
+                // TODO: bound attributes
+                SumExpression.From(bounds.Select(bound => bound.Expression.HigherOrder).Memoize(), true).
+                    InferIfRequired(context) :
+                this.HigherOrder.InferIfRequired(context);
+
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
@@ -63,6 +62,29 @@ namespace Favalet.Expressions
             else
             {
                 return new IdentityTerm(this.Identity, higherOrder);
+            }
+        }
+
+        public IExpression Reduce(IReduceContext context)
+        {
+            var bounds = context.Lookup(this);
+            if (bounds.Length >= 1)
+            {
+                // TODO: bound attributes
+                return SumExpression.From(bounds.Select(bound => bound.Expression).Memoize(), true).
+                    ReduceIfRequired(context);
+            }
+            else
+            {
+                var higherOrder = this.HigherOrder.ReduceIfRequired(context);
+                if (this.HigherOrder.ExactEquals(higherOrder))
+                {
+                    return this;
+                }
+                else
+                {
+                    return new IdentityTerm(this.Identity, higherOrder);
+                }
             }
         }
 

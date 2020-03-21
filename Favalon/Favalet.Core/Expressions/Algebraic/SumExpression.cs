@@ -19,7 +19,7 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using System;
+using Favalet.Internal;
 using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
@@ -34,14 +34,16 @@ namespace Favalet.Expressions.Algebraic
         Expression, ISumExpression
     {
         public readonly IExpression[] Expressions;
-        private readonly Lazy<IExpression> higherOrder;
+        private readonly ValueLazy<SumExpression, IExpression> higherOrder;
 
         private SumExpression(IExpression[] expressions)
         {
             this.Expressions = expressions;
 
-            this.higherOrder = Lazy.Create(() =>
-                From(this.Expressions.
+            this.higherOrder = ValueLazy.Create(
+                this,
+                @this =>
+                From(@this.Expressions.
                     Select(expression => expression.HigherOrder).
                     Memoize(),
                     false));

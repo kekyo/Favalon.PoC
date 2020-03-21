@@ -27,6 +27,8 @@ namespace Favalet.Contexts
         string GetPlaceholderIndexString(int index);
 
         string Format(IExpression expression, params object[] args);
+
+        IFormatStringContext SuppressRecursive();
     }
 
     public abstract class FormatStringContext : IFormatStringContext
@@ -34,8 +36,11 @@ namespace Favalet.Contexts
         private readonly Dictionary<int, int> relativeIndexes =
             new Dictionary<int, int>();
 
-        protected FormatStringContext()
-        { }
+        protected FormatStringContext() =>
+            this.relativeIndexes = new Dictionary<int, int>();
+
+        protected FormatStringContext(FormatStringContext parent) =>
+            this.relativeIndexes = parent.relativeIndexes;
 
         public string GetPlaceholderIndexString(int index)
         {
@@ -48,5 +53,7 @@ namespace Favalet.Contexts
         }
 
         public abstract string Format(IExpression expression, params object[] args);
+
+        public abstract IFormatStringContext SuppressRecursive();
     }
 }

@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Internal;
 using System;
 using System.Reflection;
 
@@ -26,12 +27,18 @@ namespace Favalet.Expressions
     public sealed class ConstantTerm : Expression, IConstantTerm
     {
         public readonly object Value;
+        private readonly ValueLazy<ConstantTerm, TypeTerm> higherOrder;
 
-        private ConstantTerm(object value) =>
+        private ConstantTerm(object value)
+        {
             this.Value = value;
+            this.higherOrder = ValueLazy.Create(
+                this,
+                @this => TypeTerm.From(@this.Value.GetType()));
+        }
 
         public override IExpression HigherOrder =>
-            TypeTerm.From(this.Value.GetType());
+            this.higherOrder.Value;
 
         object IConstantTerm.Value =>
             this.Value;
@@ -48,7 +55,7 @@ namespace Favalet.Expressions
             {
                 string str => $"\"{str}\"",
                 char ch => $"'{ch}'",
-                _ => this.Value.ToString()
+                _ => $"{this.Value}:{this.HigherOrder.FormatString(context.SuppressRecursive())}"
             };
 
         public static IConstantTerm From(object value) =>

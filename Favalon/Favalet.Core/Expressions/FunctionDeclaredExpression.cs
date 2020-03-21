@@ -19,6 +19,7 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
+using Favalet.Internal;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -36,14 +37,14 @@ namespace Favalet.Expressions
     {
         public readonly IExpression Parameter;
         public readonly IExpression Result;
-        private readonly Lazy<IExpression> higherOrder;
+        private readonly ValueLazy<IExpression> higherOrder;
 
         private FunctionDeclaredExpression(
             IExpression parameter, IExpression result, Func<IExpression> higherOrder)
         {
             this.Parameter = parameter;
             this.Result = result;
-            this.higherOrder = Lazy.Create(higherOrder);
+            this.higherOrder = ValueLazy.Create(higherOrder);
         }
 
         public override IExpression HigherOrder =>

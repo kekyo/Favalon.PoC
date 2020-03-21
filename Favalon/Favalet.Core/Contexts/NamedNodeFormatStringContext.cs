@@ -19,14 +19,21 @@
 
 using System.Linq;
 using Favalet.Expressions;
+using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 
 namespace Favalet.Contexts
 {
     public sealed class NamedNodeFormatStringContext : FormatStringContext
     {
-        private NamedNodeFormatStringContext()
-        { }
+        private readonly bool recursiveHigherOrder;
+
+        private NamedNodeFormatStringContext(bool recursiveHigherOrder) =>
+            this.recursiveHigherOrder = recursiveHigherOrder;
+
+        private NamedNodeFormatStringContext(NamedNodeFormatStringContext parent, bool recursiveHigherOrder) :
+            base(parent) =>
+            this.recursiveHigherOrder = recursiveHigherOrder;
 
         public override string Format(IExpression expression, params object[] args)
         {
@@ -42,11 +49,26 @@ namespace Favalet.Contexts
 
             var argsFormatted = StringUtilities.Join(
                 ",",
-                args.Select(arg => arg is IExpression expr ? expr.FormatString(this) : arg.ToString()));
-            return $"{name}({argsFormatted})";
+                args.Select(arg => arg is IExpression ae ? ae.FormatString(this) : arg.ToString()));
+
+            if (this.recursiveHigherOrder)
+            {
+                var higherOrder = expression.HigherOrder.
+                    FormatString(expression.HigherOrder is PlaceholderTerm ?
+                        this :
+                        this.SuppressRecursive());
+                return $"{name}({argsFormatted}):{higherOrder}";
+            }
+            else
+            {
+                return $"{name}({argsFormatted})";
+            }
         }
 
+        public override IFormatStringContext SuppressRecursive() =>
+            new NamedNodeFormatStringContext(this, false);
+
         public static NamedNodeFormatStringContext Create() =>
-            new NamedNodeFormatStringContext();
+            new NamedNodeFormatStringContext(true);
     }
 }

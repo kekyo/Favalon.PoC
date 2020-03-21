@@ -27,13 +27,13 @@ namespace Favalet.Expressions
         private CLRTypeContextFeatures()
         { }
 
-        public override IExpression Numeric(string value) =>
+        public override IExpression CreateNumeric(string value) =>
             CLRExpressionFactory.FromNumeric(value);
 
-        public override IExpression String(string value) =>
+        public override IExpression CreateString(string value) =>
             ConstantTerm.From(value);
 
-        public override IExpression? Widen(IExpression to, IExpression from)
+        public override IExpression? Widen(IExpression? to, IExpression? from)
         {
             switch (to, from)
             {

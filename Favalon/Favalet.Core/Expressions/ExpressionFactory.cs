@@ -23,20 +23,16 @@ namespace Favalet.Expressions
 {
     public static class ExpressionFactory
     {
-        internal static readonly IdentityTerm fourthType =
-            IdentityTerm.Create("#", TerminationTerm.Instance);
-
-        internal static readonly IdentityTerm kindType =
-            IdentityTerm.Create("*", fourthType);
-
         public static UnspecifiedTerm Unspecified() =>
             UnspecifiedTerm.Instance;
 
-        public static IdentityTerm FourthType() =>
-            fourthType;
+        public static FourthTerm Fourth() =>
+            FourthTerm.Instance;
 
-        public static IdentityTerm KindType() =>
-            kindType;
+        public static KindTerm KindType() =>
+            KindTerm.KindType;
+        public static KindTerm Kind(string identity) =>
+            KindTerm.Create(identity);
 
         public static IdentityTerm Identity(string identity) =>
             IdentityTerm.Create(identity, UnspecifiedTerm.Instance);

@@ -69,8 +69,7 @@ namespace Favalet.Expressions
 
             context.Unify(
                 FunctionDeclaredExpression.From(argument.HigherOrder, higherOrder),
-                function.HigherOrder,
-                ExpressionVariances.Invariance);
+                function.HigherOrder);
 
             if (this.Function.ExactEquals(function) &&
                 this.Argument.ExactEquals(argument) &&

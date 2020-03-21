@@ -22,28 +22,27 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
 {
-    public sealed class UnspecifiedTerm :
-        Expression, ITerm, IInferrableExpression
+    public sealed class FourthTerm : Expression, IIdentityTerm
     {
-        private UnspecifiedTerm()
+        private FourthTerm()
         { }
 
         public override IExpression HigherOrder =>
             TerminationTerm.Instance;
 
-        public IExpression Infer(IInferContext context) =>
-            context.CreatePlaceholder(Instance);
+        string IIdentityTerm.Identity =>
+            "#";
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public override bool Equals(IExpression? rhs) =>
-            rhs is UnspecifiedTerm;
+            rhs is FourthTerm;
 
         public override string FormatString(IFormatStringContext context) =>
-            "_";
+            "#";
 
-        public static readonly UnspecifiedTerm Instance =
-            new UnspecifiedTerm();
+        public static readonly FourthTerm Instance =
+            new FourthTerm();
     }
 }

@@ -22,10 +22,17 @@ using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
 {
-    // TODO: what make public safer doing that?
-    internal static class AlgebraicCalculator
+    public interface IAlgebraicCalculator
     {
-        public static IExpression? Widen(IExpression? to, IExpression? from)
+        IExpression? Widen(IExpression to, IExpression from);
+    }
+
+    public class AlgebraicCalculator : IAlgebraicCalculator
+    {
+        protected AlgebraicCalculator()
+        { }
+
+        public virtual IExpression? Widen(IExpression? to, IExpression? from)
         {
             switch (to, from)
             {
@@ -44,7 +51,7 @@ namespace Favalet.Expressions.Algebraic
                 // (_[1] + _[2]): (_[1] + _[2]) <-- (_[2] + _[1])
                 case (ISumExpression(IExpression[] toTerms), ISumExpression(IExpression[] fromTerms)):
                     var terms1 = fromTerms.
-                        Select(rhsTerm => toTerms.Any(lhsTerm => Widen(lhsTerm, rhsTerm) != null)).
+                        Select(rhsTerm => toTerms.Any(lhsTerm => this.Widen(lhsTerm, rhsTerm) != null)).
                         Memoize();
                     return terms1.All(term => term) ?
                         to :
@@ -54,10 +61,10 @@ namespace Favalet.Expressions.Algebraic
                 case (IExpression _, ISumExpression(IExpression[] fromTerms)):
                     Debug.Assert(fromTerms.Length >= 2);
                     var terms2 = fromTerms.
-                        Select(rhsTerm => Widen(to, rhsTerm)).
+                        Select(rhsTerm => this.Widen(to, rhsTerm)).
                         Memoize();
                     return terms2.All(term => term != null) ?
-                        SumExpression.From(terms2.Distinct().Memoize()!, false) :
+                        SumExpression.From(terms2.Distinct().Memoize()!, true) :
                         null;
 
                 // (int + double): (int + double) <-- int
@@ -68,14 +75,16 @@ namespace Favalet.Expressions.Algebraic
                 case (ISumExpression(IExpression[] toTerms), IExpression _):
                     Debug.Assert(toTerms.Length >= 2);
                     var terms3 = toTerms.
-                        Select(lhsTerm => Widen(lhsTerm, from)).
+                        Select(lhsTerm => this.Widen(lhsTerm, from)).
                         Memoize();
                     // Requirements: 1 or any terms widened.
                     if (terms3.Any(term => term != null))
                     {
+                        //return SumExpression.From(
+                        //    terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).Distinct().Memoize(),
+                        //    true);
                         return SumExpression.From(
-                            terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).Distinct().Memoize(),
-                            false);
+                            terms3.Where(term => term != null).Distinct().Memoize()!, true);
                     }
                     // Couldn't narrow: (int + double) <-- string
                     else
@@ -87,5 +96,8 @@ namespace Favalet.Expressions.Algebraic
                     return null;
             }
         }
+
+        public static readonly AlgebraicCalculator Instance =
+            new AlgebraicCalculator();
     }
 }

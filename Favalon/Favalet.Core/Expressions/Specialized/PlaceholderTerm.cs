@@ -22,7 +22,13 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
 {
-    public sealed class PlaceholderTerm : Expression, IIdentityTerm
+    public interface IPlaceholderTerm : IIdentityTerm
+    {
+        int Index { get; }
+    }
+
+    public sealed class PlaceholderTerm :
+        Expression, IPlaceholderTerm, IInferrableExpression
     {
         public readonly int Index;
 
@@ -37,9 +43,16 @@ namespace Favalet.Expressions.Specialized
         string IIdentityTerm.Identity =>
             $"'{this.Index}";
 
+        int IPlaceholderTerm.Index =>
+            this.Index;
+
         public IExpression Infer(IInferContext context)
         {
             // TODO: replace by unified information
+            if (context.Resolve(this) is IExpression resolved)
+            {
+                return resolved.InferIfRequired(context);
+            }
 
             // Special case: will not infer Unspecified higherOrder.
             //   Maybe it makes infinity digging.
@@ -63,7 +76,7 @@ namespace Favalet.Expressions.Specialized
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public override bool Equals(IExpression? rhs) =>
-            rhs is PlaceholderTerm placeholder &&
+            rhs is IPlaceholderTerm placeholder &&
             this.Index.Equals(placeholder.Index);
 
 #if !NET35 && !NET40

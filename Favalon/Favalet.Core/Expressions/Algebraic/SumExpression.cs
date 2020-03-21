@@ -52,11 +52,10 @@ namespace Favalet.Expressions.Algebraic
 
             this.higherOrder = ValueLazy.Create(
                 this,
-                @this =>
-                From(@this.Expressions.
+                @this => From(@this.Expressions.
                     Select(expression => expression.HigherOrder).
                     Memoize(),
-                    false));
+                    false) ?? TerminationTerm.Instance);
         }
 
         public override IExpression HigherOrder =>
@@ -109,15 +108,14 @@ namespace Favalet.Expressions.Algebraic
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, (object[])this.Expressions);
 
-        public static IExpression From(IExpression[] expressions, bool canSuppress) =>
+        public static IExpression? From(IExpression[] expressions, bool canSuppress) =>
             expressions.Length switch
             {
-                0 => TerminationTerm.Instance,
-                1 when canSuppress =>
-                    expressions[0],
+                0 => null,
+                1 when canSuppress && !(expressions[0] is TerminationTerm) => expressions[0],
                 _ when expressions.All(expression => !(expression is TerminationTerm)) =>
                     new SumExpression(expressions),
-                _ => TerminationTerm.Instance
+                _ => null
             };
     }
 }

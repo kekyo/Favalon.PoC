@@ -22,46 +22,43 @@ using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Favalet.Contexts
 {
-    public enum ExpressionVariances
-    {
-        Invariance,
-        Covariance,
-        Contravariance
-    }
-
     public interface IInferContext : IScopedTypeContext<IInferContext>
     {
-        IIdentityTerm CreatePlaceholder(IExpression higherOrder);
+        IPlaceholderTerm CreatePlaceholder(IExpression higherOrder);
 
-        bool Unify(IExpression to, IExpression from, ExpressionVariances variant);
+        bool Unify(IExpression to, IExpression from);
+
+        IExpression? Resolve(IPlaceholderTerm placeholder);
     }
 
     internal sealed class InferContext : TypeContext, IInferContext
     {
-        private struct Description
+        private struct PlaceholderDescription
         {
             public readonly IExpression Expression;
-            public readonly ExpressionVariances Variance;
+            public readonly bool IsForward;
 
-            public Description(IExpression expression, ExpressionVariances variance)
+            public PlaceholderDescription(IExpression expression, bool isForward)
             {
                 this.Expression = expression;
-                this.Variance = variance;
+                this.IsForward = isForward;
             }
+
+            public override string ToString() =>
+                this.IsForward ? $"{this.Expression} <== rhs" : $"lhs <== {this.Expression}";
         }
 
         private readonly IRootTypeContext rootContext;
-        private readonly Dictionary<int, Description> descriptions;
+        private readonly Dictionary<int, PlaceholderDescription> descriptions;
 
         private InferContext(IRootTypeContext rootContext) :
             base(rootContext)
         {
             this.rootContext = rootContext;
-            this.descriptions = new Dictionary<int, Description>();
+            this.descriptions = new Dictionary<int, PlaceholderDescription>();
         }
 
         private InferContext(InferContext parent) :
@@ -74,81 +71,68 @@ namespace Favalet.Contexts
         public IInferContext CreateDerivedScope() =>
             new InferContext(this);
 
-        public IIdentityTerm CreatePlaceholder(IExpression higherOrder) =>
+        public IPlaceholderTerm CreatePlaceholder(IExpression higherOrder) =>
             PlaceholderTerm.Create(this.rootContext.DrawNextPlaceholderIndex(), higherOrder);
 
-        private bool UnifyPlaceholder(PlaceholderTerm placeholder, IExpression from, ExpressionVariances variance)
+        private bool UnifyPlaceholder(IPlaceholderTerm placeholder, IExpression from, bool isForward)
         {
             if (this.descriptions.TryGetValue(placeholder.Index, out var description))
             {
-                switch ((description.Variance, variance))
-                {
-                    case (ExpressionVariances.Contravariance, _):
-                    case (ExpressionVariances.Covariance, _):
-                    case (_, ExpressionVariances.Contravariance):
-                    case (_, ExpressionVariances.Covariance):
-                        throw new NotImplementedException();
-                    default:
-                        return this.Unify(description.Expression, from, variance);
-                };
+                // Covariance correction
+                //   true, true : forward
+                //   true, false : backward
+                //   false, true : backward
+                //   false, false : forward
+                return (description.IsForward ^ isForward) ?
+                    this.Unify(from, description.Expression) :   // backward
+                    this.Unify(description.Expression, from);    // forward
             }
             else
             {
-                this.descriptions.Add(
-                    placeholder.Index, new Description(from, variance));
+                this.descriptions.Add(placeholder.Index, new PlaceholderDescription(from, isForward));
                 return true;
             }
         }
 
-        public bool Unify(IExpression to, IExpression from, ExpressionVariances variance)
+        public bool Unify(IExpression to, IExpression from)
         {
-            switch (variance)
+            if (to.ExactEquals(from))
             {
-                case ExpressionVariances.Covariance:
-                    if (this.rootContext.Features.Widen(to, from) is IExpression widen1)
-                    {
-                        return true;
-                    }
-                    break;
-                case ExpressionVariances.Contravariance:
-                    if (this.rootContext.Features.Widen(from, to) is IExpression widen2)
-                    {
-                        return true;
-                    }
-                    break;
-                default:
-                    if (to.ExactEquals(from))
-                    {
-                        return true;
-                    }
-                    break;
+                return true;
             }
 
             if (to is IFunctionDeclaredExpression(IExpression tp, IExpression tr) &&
                 from is IFunctionDeclaredExpression(IExpression fp, IExpression fr))
             {
-                var pr = this.Unify(tp, fp, variance);
-                var rr = this.Unify(tr, fr, variance);
+                var pr = this.Unify(tp, fp);
+                var rr = this.Unify(tr, fr);
                 return pr && rr;
             }
 
-            if (to is PlaceholderTerm tph)
+            if (to is IPlaceholderTerm tph)
             {
-                return this.UnifyPlaceholder(tph, from, variance);
+                return this.UnifyPlaceholder(tph, from, true);
             }
-            if (from is PlaceholderTerm fph)
+            if (from is IPlaceholderTerm fph)
             {
-                var inverted = variance switch
-                {
-                    ExpressionVariances.Covariance => ExpressionVariances.Contravariance,
-                    ExpressionVariances.Contravariance => ExpressionVariances.Covariance,
-                    _ => variance
-                };
-                return this.UnifyPlaceholder(fph, to, inverted);
+                return this.UnifyPlaceholder(fph, to, false);
+            }
+
+            if (this.rootContext.Features.Widen(to, from) is IExpression widen1)
+            {
+                return this.Unify(widen1, from);
+            }
+            if (this.rootContext.Features.Widen(from, to) is IExpression widen2)
+            {
+                return this.Unify(widen2, to);
             }
 
             return false;
         }
+
+        public IExpression? Resolve(IPlaceholderTerm placeholder) =>
+            this.descriptions.TryGetValue(placeholder.Index, out var description) ?
+                description.Expression : null;
 
         public static InferContext Create(IRootTypeContext rootContext) =>
             new InferContext(rootContext);

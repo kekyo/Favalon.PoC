@@ -24,59 +24,57 @@ using System;
 
 namespace Favalet.Contexts
 {
-    public interface ITypeContextFeatures
+    public interface ITypeContextFeatures : IAlgebraicCalculator
     {
-        IExpression Identity(string identity);
-        IExpression Numeric(string value);
-        IExpression String(string value);
-        IExpression Apply(IExpression function, IExpression argument);
-
-        IExpression? Widen(IExpression to, IExpression from);
+        IExpression CreateIdentity(string identity);
+        IExpression CreateNumeric(string value);
+        IExpression CreateString(string value);
+        IExpression CreateApply(IExpression function, IExpression argument);
     }
 
-    public class TypeContextFeatures : ITypeContextFeatures
+    public class TypeContextFeatures : AlgebraicCalculator, ITypeContextFeatures
     {
         protected TypeContextFeatures()
         { }
 
-        public virtual IExpression Numeric(string value) =>
+        public virtual IExpression CreateNumeric(string value) =>
             throw new NotImplementedException();
 
-        public virtual IExpression String(string value) =>
+        public virtual IExpression CreateString(string value) =>
             throw new NotImplementedException();
 
-        public virtual IExpression Identity(string identity) =>
+        public virtual IExpression CreateIdentity(string identity) =>
             IdentityTerm.Create(identity, UnspecifiedTerm.Instance);
 
-        public virtual IExpression Apply(IExpression function, IExpression argument) =>
+        public virtual IExpression CreateApply(IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument, UnspecifiedTerm.Instance);
 
-        public virtual IExpression? Widen(IExpression to, IExpression from)
+        public override IExpression? Widen(IExpression? to, IExpression? from)
         {
             switch (to, from)
             {
                 // int->object: int->object <-- object->int
-                case (IFunctionDeclaredExpression(IExpression toParameter, IExpression toBody),
-                      IFunctionDeclaredExpression(IExpression fromParameter, IExpression fromBody)):
-                    var parameterTerm = this.Widen(fromParameter, toParameter) is IExpression ? toParameter : null;
-                    var bodyTerm = this.Widen(toBody, fromBody);
-                    return parameterTerm is IExpression pt && bodyTerm is IExpression bt ?
-                        FunctionDeclaredExpression.From(pt, bt) :
+                case (IFunctionDeclaredExpression(IExpression toParameter, IExpression toResult),
+                      IFunctionDeclaredExpression(IExpression fromParameter, IExpression fromResult)):
+                    var parameter = this.Widen(toParameter, fromParameter) is IExpression ? toParameter : null;
+                    var result = this.Widen(fromResult, toResult);
+                    return parameter is IExpression pr && result is IExpression rr ?
+                        FunctionDeclaredExpression.From(pr, rr) :
                         null;
 
-                // _[1]: _[1] <-- _[2]
-                //case (PlaceholderTerm placeholder, PlaceholderTerm _):
-                //    return placeholder;
+                // _[2]: _[1] <-- _[2]
+                //case (PlaceholderTerm _, PlaceholderTerm _):
+                //    return from;
 
-                // _: _ <-- int
-                // _: _ <-- (int + double)
-                case (PlaceholderTerm placeholder, _):
-                    return placeholder;
+                // int: _ <-- int
+                // (int + double): _ <-- (int + double)
+                case (PlaceholderTerm _, _):
+                    return from;
 
                 default:
-                    if (AlgebraicCalculator.Widen(to, from) is IExpression result)
+                    if (base.Widen(to, from) is IExpression widen)
                     {
-                        return result;
+                        return widen;
                     }
                     // null: int <-- _   [TODO: maybe?]
                     //else if (from is PlaceholderTerm placeholder)
@@ -90,7 +88,7 @@ namespace Favalet.Contexts
             }
         }
 
-        public static readonly TypeContextFeatures Instance =
+        public static new readonly TypeContextFeatures Instance =
             new TypeContextFeatures();
     }
 }

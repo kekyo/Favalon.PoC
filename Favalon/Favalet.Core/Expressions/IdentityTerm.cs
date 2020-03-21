@@ -19,18 +19,19 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Algebraic;
+using Favalet.Expressions.Specialized;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
 {
-    public interface IIdentityTerm : ITerm, IInferrableExpression
+    public interface IIdentityTerm : ITerm
     {
         string Identity { get; }
     }
 
     public sealed class IdentityTerm :
-        Expression, IIdentityTerm, IReducibleExpression
+        Expression, IIdentityTerm, IInferrableExpression, IReducibleExpression
     {
         public readonly string Identity;
 
@@ -51,8 +52,8 @@ namespace Favalet.Expressions
 
             var higherOrder = (bounds.Length >= 1) ?
                 // TODO: bound attributes
-                SumExpression.From(bounds.Select(bound => bound.Expression.HigherOrder).Memoize(), true).
-                    InferIfRequired(context) :
+                (SumExpression.From(bounds.Select(bound => bound.Expression.HigherOrder).Memoize(), true)?.
+                    InferIfRequired(context) ?? TerminationTerm.Instance) :
                 this.HigherOrder.InferIfRequired(context);
 
             if (this.HigherOrder.ExactEquals(higherOrder))
@@ -71,8 +72,8 @@ namespace Favalet.Expressions
             if (bounds.Length >= 1)
             {
                 // TODO: bound attributes
-                return SumExpression.From(bounds.Select(bound => bound.Expression).Memoize(), true).
-                    ReduceIfRequired(context);
+                return SumExpression.From(bounds.Select(bound => bound.Expression).Memoize(), true)?.
+                    ReduceIfRequired(context) ?? TerminationTerm.Instance;
             }
             else
             {

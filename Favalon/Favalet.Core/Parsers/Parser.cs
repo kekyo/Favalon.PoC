@@ -53,7 +53,7 @@ namespace Favalet.Parsers
 #endif
                 runner = runner.Run(context, token);
 
-                Debug.WriteLine($"Parse [{index - 1}]: '{token}', {context.Expression}");
+                Debug.WriteLine($"Parse [{index - 1}]: Token={token}, Expression={context.Expression}");
 
                 context.SetLastToken(token);
             }
@@ -61,6 +61,8 @@ namespace Favalet.Parsers
             // Contained final result
             if (context.Expression is IExpression finalExpression)
             {
+                Debug.WriteLine($"Parse [F]: Expression={finalExpression}");
+
                 yield return finalExpression;
             }
         }

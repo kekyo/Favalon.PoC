@@ -40,7 +40,7 @@ namespace Favalet.Parsers.Runners
         {
             if (this.Expression != null)
             {
-                this.Expression = this.Features.Apply(this.Expression, expression);
+                this.Expression = this.Features.CreateApply(this.Expression, expression);
             }
             else
             {

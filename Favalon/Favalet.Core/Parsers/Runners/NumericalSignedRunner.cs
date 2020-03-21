@@ -36,24 +36,24 @@ namespace Favalet.Parsers.Runners
             {
                 // "-123"
                 case NumericToken numeric:
-                    context.Combine(context.Features.Numeric(sign + numeric.Value));
+                    context.Combine(context.Features.CreateNumeric(sign + numeric.Value));
                     return ApplyingRunner.Instance;
 
                 // "-abc"
                 case IdentityToken identity:
-                    context.Combine(context.Features.Identity(sign));
-                    context.Combine(context.Features.Identity(identity.Identity));
+                    context.Combine(context.Features.CreateIdentity(sign));
+                    context.Combine(context.Features.CreateIdentity(identity.Identity));
                     return ApplyingRunner.Instance;
 
                 // "-("
                 case SymbolToken symbol:
-                    context.Combine(context.Features.Identity(sign));
-                    context.Combine(context.Features.Identity(symbol.Symbol.ToString()));
+                    context.Combine(context.Features.CreateIdentity(sign));
+                    context.Combine(context.Features.CreateIdentity(symbol.Symbol.ToString()));
                     return ApplyingRunner.Instance;
 
                 // "- ..."
                 case WhiteSpaceToken _:
-                    context.Combine(context.Features.Identity(sign));
+                    context.Combine(context.Features.CreateIdentity(sign));
                     return ApplyingRunner.Instance;
 
                 default:

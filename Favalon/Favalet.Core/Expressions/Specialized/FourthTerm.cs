@@ -40,7 +40,7 @@ namespace Favalet.Expressions.Specialized
             rhs is FourthTerm;
 
         public override string FormatString(IFormatStringContext context) =>
-            "#";
+            context.UseSimpleLabel ? "#" : context.Format(this);
 
         public static readonly FourthTerm Instance =
             new FourthTerm();

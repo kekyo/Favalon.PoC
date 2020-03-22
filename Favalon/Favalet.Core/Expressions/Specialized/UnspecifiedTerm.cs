@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
-using System;
 using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
@@ -45,7 +44,7 @@ namespace Favalet.Expressions.Specialized
             rhs is UnspecifiedTerm;
 
         public override string FormatString(IFormatStringContext context) =>
-            "_";
+            context.UseSimpleLabel ? "_" : context.Format(this);
 
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();

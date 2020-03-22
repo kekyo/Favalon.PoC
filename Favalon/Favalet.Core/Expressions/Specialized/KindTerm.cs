@@ -42,7 +42,7 @@ namespace Favalet.Expressions.Specialized
             rhs is KindTerm kindType && this.Identity.Equals(kindType.Identity);
 
         public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, this.Identity);
+            context.UseSimpleLabel ? this.Identity : context.Format(this, this.Identity);
 
         public static readonly KindTerm KindType =
             new KindTerm("*");

@@ -39,7 +39,7 @@ namespace Favalet.Expressions.Algebraic
                 // int: int <-- int
                 // IComparable: IComparable <-- IComparable
                 // _[1]: _[1] <-- _[1]
-                case (IExpression toExpression, IExpression fromExpression) when toExpression.Equals(fromExpression):
+                case (IExpression toExpression, IExpression fromExpression) when toExpression.ExactEquals(fromExpression):
                     return toExpression;
 
                 // (int + double): (int + double) <-- (int + double)
@@ -64,7 +64,7 @@ namespace Favalet.Expressions.Algebraic
                         Select(rhsExpression => this.Widen(to, rhsExpression)).
                         Memoize();
                     return expressions2.All(expression => expression != null) ?
-                        SumExpression.From(expressions2.Distinct().Memoize()!, true) :
+                        SumExpression.From(expressions2!, false) :
                         null;
 
                 // (int + double): (int + double) <-- int
@@ -84,7 +84,7 @@ namespace Favalet.Expressions.Algebraic
                         //    terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).Distinct().Memoize(),
                         //    true);
                         return SumExpression.From(
-                            expressions3.Where(expression => expression != null).Distinct().Memoize()!, true);
+                            expressions3.Where(expression => expression != null)!, false);
                     }
                     // Couldn't narrow: (int + double) <-- string
                     else

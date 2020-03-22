@@ -56,12 +56,14 @@ namespace Favalet.Expressions
             if (context.Lookup(this) is BoundInformation[] bounds && (bounds.Length >= 1))
             {
                 // TODO: bound attributes
-                context.Unify(
-                    SumExpression.From(
-                        bounds.Select(bound => bound.Expression.HigherOrder).Distinct().Memoize(),
-                        true)!.
-                    InferIfRequired(context)!,
-                    HigherOrder);
+
+                var inferred = context.CalculateSum(
+                    bounds.Select(bound => bound.Expression)).
+                    InferIfRequired(context);
+
+                context.Unify(inferred.HigherOrder, higherOrder);
+
+                return inferred;
             }
 
             if (this.HigherOrder.ExactEquals(higherOrder))
@@ -93,7 +95,7 @@ namespace Favalet.Expressions
             if (bounds.Length >= 1)
             {
                 // TODO: bound attributes
-                return SumExpression.From(bounds.Select(bound => bound.Expression).Memoize(), true)?.
+                return SumExpression.From(bounds.Select(bound => bound.Expression), false)?.
                     ReduceIfRequired(context) ?? TerminationTerm.Instance;
             }
             else
@@ -124,7 +126,7 @@ namespace Favalet.Expressions
             this.Identity.GetHashCode();
 
         public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, this.Identity);
+            context.UseSimpleLabel ? this.Identity : context.Format(this, this.Identity);
 
         public static IdentityTerm Create(string identity, IExpression higherOrder) =>
             new IdentityTerm(identity, higherOrder);

@@ -63,19 +63,21 @@ namespace Favalet.Contexts
 
                 var current = inferrable.Infer(context);
                 current = current.FixupIfRequired(context);
+
                 for (var index = 1; index < this.MaxIterationCount; index++)
                 {
                     var inferred = current.InferIfRequired(context);
-                    inferred = inferred.FixupIfRequired(context);
-                    if (current.ExactEquals(inferred))
+                    var fixuped = inferred.FixupIfRequired(context);
+
+                    if (current.ExactEquals(fixuped))
                     {
-                        Debug.WriteLine($"Infer [F]: {current}");
-                        return current;
+                        Debug.WriteLine($"Infer [F]: {fixuped}");
+                        return fixuped;
                     }
                     else
                     {
-                        Debug.WriteLine($"Infer [{index}]: {inferred}");
-                        current = inferred;
+                        Debug.WriteLine($"Infer [{index}]: {fixuped}");
+                        current = fixuped;
                     }
                 }
 
@@ -113,13 +115,15 @@ namespace Favalet.Contexts
                 var context = ReduceContext.Create(this);
 
                 var current = reducible.Reduce(context);
+
                 for (var index = 1; index < this.MaxIterationCount; index++)
                 {
                     var reduced = current.ReduceIfRequired(context);
+
                     if (current.ExactEquals(reduced))
                     {
-                        Debug.WriteLine($"Reduce [F]: {current}");
-                        return current;
+                        Debug.WriteLine($"Reduce [F]: {reduced}");
+                        return reduced;
                     }
                     else
                     {

@@ -151,11 +151,8 @@ namespace Favalet.Expressions
         public static readonly FunctionDeclaredExpression Unspecified =
             Create(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance, TerminationTerm.Instance);
 
-        public static readonly FunctionDeclaredExpression Fourth =
-            Create(FourthTerm.Instance, FourthTerm.Instance, TerminationTerm.Instance);
-
         public static readonly FunctionDeclaredExpression KindType =
-            Create(KindTerm.KindType, KindTerm.KindType, Fourth);
+            Create(KindTerm.KindType, KindTerm.KindType, FourthTerm.Instance);
 
         public static IExpression From(IExpression parameter, IExpression result) =>
             (parameter, result) switch
@@ -163,10 +160,8 @@ namespace Favalet.Expressions
                 (TerminationTerm _, TerminationTerm _) => TerminationTerm.Instance,
                 (_, TerminationTerm _) => TerminationTerm.Instance,
                 (TerminationTerm _, _) => TerminationTerm.Instance,
-                (IIdentityTerm pid, IIdentityTerm rid) when
-                    pid.Equals(UnspecifiedTerm.Instance) && rid.Equals(UnspecifiedTerm.Instance) => Unspecified,
-                (IIdentityTerm pid, IIdentityTerm rid) when
-                    pid.Equals(FourthTerm.Instance) && rid.Equals(FourthTerm.Instance) => Fourth,
+                (UnspecifiedTerm _, UnspecifiedTerm _)  => Unspecified,
+                (FourthTerm _, FourthTerm _) => FourthTerm.Instance,
                 (IIdentityTerm pid, IIdentityTerm rid) when
                     pid.Equals(KindTerm.KindType) && rid.Equals(KindTerm.KindType) => KindType,
                 _ => Create(parameter, result, UnspecifiedTerm.Instance)

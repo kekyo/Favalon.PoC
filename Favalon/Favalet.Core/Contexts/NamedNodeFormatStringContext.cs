@@ -28,8 +28,8 @@ namespace Favalet.Contexts
     {
         private readonly bool recursiveHigherOrder;
 
-        private NamedNodeFormatStringContext(bool recursiveHigherOrder, bool useRelativeIndex) :
-            base(useRelativeIndex) =>
+        private NamedNodeFormatStringContext(FormatStringOptions options, bool recursiveHigherOrder) :
+            base(options) =>
             this.recursiveHigherOrder = recursiveHigherOrder;
 
         private NamedNodeFormatStringContext(NamedNodeFormatStringContext parent, bool recursiveHigherOrder) :
@@ -52,10 +52,11 @@ namespace Favalet.Contexts
                 ",",
                 args.Select(arg => arg is IExpression ae ? ae.FormatString(this) : arg.ToString()));
 
-            if (this.recursiveHigherOrder)
+            if (this.recursiveHigherOrder &&
+                !(expression.HigherOrder is TerminationTerm))
             {
                 var higherOrder = expression.HigherOrder.
-                    FormatString(expression.HigherOrder is PlaceholderTerm ?
+                    FormatString(expression.HigherOrder is IPlaceholderTerm ?
                         this :
                         this.SuppressRecursive());
                 return $"{name}({argsFormatted}):{higherOrder}";
@@ -69,7 +70,7 @@ namespace Favalet.Contexts
         public override IFormatStringContext SuppressRecursive() =>
             new NamedNodeFormatStringContext(this, false);
 
-        public static NamedNodeFormatStringContext Create(bool useRelativeIndex) =>
-            new NamedNodeFormatStringContext(true, useRelativeIndex);
+        public static NamedNodeFormatStringContext Create(FormatStringOptions options) =>
+            new NamedNodeFormatStringContext(options, true);
     }
 }

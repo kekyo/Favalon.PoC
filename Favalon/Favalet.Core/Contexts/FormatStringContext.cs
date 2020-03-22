@@ -17,13 +17,27 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Favalet.Expressions;
+using Favalet.Internal;
 
 namespace Favalet.Contexts
 {
+    [Flags]
+    public enum FormatStringOptions
+    {
+        Default = 0x00,
+        UseRelativeIndex = 0x01,
+        UseSimpleLabels = 0x02
+    }
+
     public interface IFormatStringContext
     {
+        bool UseSimpleLabel { get; }
+
         string GetPlaceholderIndexString(int index);
 
         string Format(IExpression expression, params object[] args);
@@ -33,13 +47,28 @@ namespace Favalet.Contexts
 
     public abstract class FormatStringContext : IFormatStringContext
     {
+        private static readonly char[] alphabets =
+            Enumerable.Range('a', 'z' - 'a' + 1).Select(i => (char)i).ToArray();
+
         private readonly Dictionary<int, int>? relativeIndexes;
 
-        protected FormatStringContext(bool useRelativeIndex) =>
-            this.relativeIndexes = useRelativeIndex ? new Dictionary<int, int>() : null;
+        protected FormatStringContext(FormatStringOptions options)
+        {
+            this.UseSimpleLabel =
+                (options & FormatStringOptions.UseSimpleLabels) == FormatStringOptions.UseSimpleLabels;
+            if ((options & FormatStringOptions.UseRelativeIndex) == FormatStringOptions.UseRelativeIndex)
+            {
+                this.relativeIndexes = new Dictionary<int, int>();
+            }
+        }
 
-        protected FormatStringContext(FormatStringContext parent) =>
+        protected FormatStringContext(FormatStringContext parent)
+        {
+            this.UseSimpleLabel = parent.UseSimpleLabel;
             this.relativeIndexes = parent.relativeIndexes;
+        }
+
+        public bool UseSimpleLabel { get; }
 
         public string GetPlaceholderIndexString(int index)
         {
@@ -50,7 +79,21 @@ namespace Favalet.Contexts
                     relativeIndex = relativeIndexes.Count;
                     relativeIndexes.Add(index, relativeIndex);
                 }
-                return relativeIndex.ToString();
+
+                var sb = new StringBuilder();
+                while (true)
+                {
+                    var i = relativeIndex % alphabets.Length;
+                    var ch = alphabets[i];
+                    sb.Insert(0, ch);
+
+                    if (relativeIndex == 0)
+                    {
+                        return sb.ToString();
+                    }
+
+                    relativeIndex = relativeIndex / alphabets.Length;
+                }
             }
             else
             {

@@ -22,12 +22,15 @@ using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalet.Contexts
 {
     public interface IInferContext : IScopedTypeContext<IInferContext>
     {
         IPlaceholderTerm CreatePlaceholder(IExpression higherOrder);
+
+        IExpression CalculateSum(IEnumerable<IExpression> expressions);
 
         bool Unify(IExpression to, IExpression from);
     }
@@ -77,6 +80,11 @@ namespace Favalet.Contexts
         public IPlaceholderTerm CreatePlaceholder(IExpression higherOrder) =>
             PlaceholderTerm.Create(this.rootContext.DrawNextPlaceholderIndex(), higherOrder);
 
+        public IExpression CalculateSum(IEnumerable<IExpression> expressions) =>
+            SumExpression.From(
+                expressions.Where(expression => !(expression is TerminationTerm)),
+                false)!;
+
         private bool UnifyPlaceholder(IPlaceholderTerm placeholder, IExpression from, bool isForward)
         {
             if (this.descriptions.TryGetValue(placeholder.Index, out var description))
@@ -86,9 +94,14 @@ namespace Favalet.Contexts
                 //   true, false : backward
                 //   false, true : backward
                 //   false, false : forward
-                return (description.IsForward ^ isForward) ?
-                    this.Unify(from, description.Expression) :   // backward
-                    this.Unify(description.Expression, from);    // forward
+
+                var combinedForward = !(description.IsForward ^ isForward);
+                var combinedExpression = this.CalculateSum(new[] { description.Expression, from });
+                this.descriptions[placeholder.Index] = new PlaceholderDescription(combinedExpression, combinedForward);
+
+                return combinedForward ?
+                    this.Unify(description.Expression, from) :   // forward
+                    this.Unify(from, description.Expression);    // backward
             }
             else
             {
@@ -112,6 +125,17 @@ namespace Favalet.Contexts
                 return pr && rr;
             }
 
+            if (to is ISumExpression(IExpression[] tss))
+            {
+                var results = tss.Select(ts => this.Unify(ts, from)).Memoize();
+                return results.Any();
+            }
+            if (from is ISumExpression(IExpression[] fss))
+            {
+                var results = fss.Select(fs => this.Unify(to, fs)).Memoize();
+                return results.Any();
+            }
+
             if (to is IPlaceholderTerm tph)
             {
                 return this.UnifyPlaceholder(tph, from, true);
@@ -121,21 +145,41 @@ namespace Favalet.Contexts
                 return this.UnifyPlaceholder(fph, to, false);
             }
 
-            if (this.rootContext.Features.Widen(to, from) is IExpression widen1)
-            {
-                return this.Unify(widen1, from);
-            }
-            if (this.rootContext.Features.Widen(from, to) is IExpression widen2)
-            {
-                return this.Unify(widen2, to);
-            }
+            //if (this.rootContext.Features.Widen(to, from) is IExpression widen1)
+            //{
+            //    return this.Unify(widen1, from);
+            //}
+            //if (this.rootContext.Features.Widen(from, to) is IExpression widen2)
+            //{
+            //    return this.Unify(widen2, to);
+            //}
 
             return false;
         }
 
-        public IExpression? Resolve(IPlaceholderTerm placeholder) =>
-            this.descriptions.TryGetValue(placeholder.Index, out var description) ?
-                description.Expression : null;
+        public IExpression? Resolve(IPlaceholderTerm placeholder)
+        {
+            var current = placeholder;
+            while (true)
+            {
+                if (this.descriptions.TryGetValue(current.Index, out var description))
+                {
+                    if (description.Expression is IPlaceholderTerm p)
+                    {
+                        current = p;
+                    }
+                    else
+                    {
+                        return description.Expression;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+        }
 
         public static InferContext Create(IRootTypeContext rootContext) =>
             new InferContext(rootContext);

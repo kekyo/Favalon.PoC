@@ -62,14 +62,14 @@ namespace Favalet.Contexts
                         FunctionDeclaredExpression.From(pr, rr) :
                         null;
 
-                // _[2]: _[1] <-- _[2]
+                // _[1]: _[1] <-- _[2]
                 //case (PlaceholderTerm _, PlaceholderTerm _):
-                //    return from;
+                //    return to;
 
-                // int: _ <-- int
-                // (int + double): _ <-- (int + double)
+                // _: _ <-- int
+                // _: _ <-- (int + double)
                 case (PlaceholderTerm _, _):
-                    return from;
+                    return to;
 
                 default:
                     if (base.Widen(to, from) is IExpression widen)

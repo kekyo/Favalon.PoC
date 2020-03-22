@@ -31,9 +31,12 @@ namespace Favalet.Expressions
         IExpression HigherOrder { get; }
 
         string FormatString(IFormatStringContext context);
+
+        string StrictString { get; }
+        string ReadableString { get; }
     }
 
-    [DebuggerDisplay("{StrictPrint}")]
+    [DebuggerDisplay("{DebuggableString}")]
     public abstract partial class Expression : IExpression
     {
         protected Expression()
@@ -51,12 +54,24 @@ namespace Favalet.Expressions
 
         public abstract string FormatString(IFormatStringContext context);
 
-        public string StrictPrint =>
-            this.FormatString(NamedNodeFormatStringContext.Create(false));
-        public string ReadablePrint =>
-            this.FormatString(NamedNodeFormatStringContext.Create(true));
+        public string StrictString =>
+            this.FormatString(
+                NamedNodeFormatStringContext.Create(
+                    FormatStringOptions.Default));
+
+        public string ReadableString =>
+            this.FormatString(
+                NamedNodeFormatStringContext.Create(
+                    FormatStringOptions.UseRelativeIndex | FormatStringOptions.UseSimpleLabels));
+
+        public string DebuggableString =>
+            this.FormatString(
+                NamedNodeFormatStringContext.Create(
+                    FormatStringOptions.UseSimpleLabels));
 
         public sealed override string ToString() =>
-            this.FormatString(NamedNodeFormatStringContext.Create(true));
+            this.FormatString(
+                NamedNodeFormatStringContext.Create(
+                    FormatStringOptions.UseRelativeIndex));
     }
 }

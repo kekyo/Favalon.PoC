@@ -48,7 +48,9 @@ namespace Favalet.Expressions
             this.Type.GetHashCode();
 
         public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, this.Type.GetFullName());
+            context.UseSimpleLabel ?
+                this.Type.GetFullName() :
+                context.Format(this, this.Type.GetFullName());
 
         public static TypeTerm From(Type type)
         {

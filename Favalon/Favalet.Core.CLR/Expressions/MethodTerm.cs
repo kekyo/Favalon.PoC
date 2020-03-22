@@ -67,7 +67,9 @@ namespace Favalet.Expressions
             this.Method.GetHashCode();
 
         public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, this.Method.GetFullName());
+            context.UseSimpleLabel ?
+                $"{this.Method.GetFullName()}()" :
+                context.Format(this, this.Method.GetFullName());
 
         public static ConstructorTerm From(Type type, params Type[] parameters) =>
             new ConstructorTerm(type.GetDeclaredConstructor(parameters));

@@ -19,6 +19,8 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -51,20 +53,21 @@ namespace Favalet.Expressions.Algebraic
 
         public override IExpression HigherOrder { get; }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression[] ISumExpression.Expressions =>
             this.Expressions;
 
         public IExpression Infer(IInferContext context)
         {
+            var higherOrder = this.HigherOrder.InferIfRequired(context);
             var expressions = this.Expressions.
                 Select(expression => expression.InferIfRequired(context)).
                 Memoize();
-            var higherOrder = this.HigherOrder.InferIfRequired(context);
 
-            if (From(expressions.Select(expression => expression.HigherOrder).Distinct().Memoize(), true) is IExpression ehs)
-            {
-                context.Unify(ehs, higherOrder);
-            }
+            var expressionHigherOrders = context.CalculateSum(
+                expressions.Select(expression => expression.HigherOrder));
+
+            context.Unify(expressionHigherOrders, higherOrder);
 
             if (this.HigherOrder.ExactEquals(higherOrder) &&
                 this.Expressions.ExactSequenceEqual(expressions))
@@ -126,12 +129,23 @@ namespace Favalet.Expressions.Algebraic
         public static SumExpression Create(IExpression[] expressions, IExpression higherOrder) =>
             new SumExpression(expressions, higherOrder);
 
-        public static IExpression? From(IExpression[] expressions, bool canSuppress) =>
-            expressions.Length switch
+        public static IExpression? From(IEnumerable<IExpression> expressions, bool isStrict)
+        {
+            // It digs only first depth.
+            var exs = isStrict ?
+                expressions.
+                    Memoize() :
+                expressions.
+                    SelectMany(expression => (expression is ISumExpression(IExpression[] ses)) ? ses : new[] { expression }).
+                    Distinct().
+                    Memoize();
+
+            return exs.Length switch
             {
-                0 when canSuppress => null,
-                1 when canSuppress => expressions[0],
-                _ => new SumExpression(expressions, UnspecifiedTerm.Instance)
+                0 when !isStrict => null,
+                1 when !isStrict => exs[0],
+                _ => new SumExpression(exs, UnspecifiedTerm.Instance)
             };
+        }
     }
 }

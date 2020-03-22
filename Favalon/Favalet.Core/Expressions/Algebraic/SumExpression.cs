@@ -19,7 +19,6 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using Favalet.Internal;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -40,26 +39,17 @@ namespace Favalet.Expressions.Algebraic
             expressions = sum.Expressions;
     }
 
-    public sealed class SumExpression :
-        Expression, ISumExpression
+    public sealed class SumExpression : Expression, ISumExpression
     {
         public readonly IExpression[] Expressions;
-        private readonly ValueLazy<SumExpression, IExpression> higherOrder;
 
-        private SumExpression(IExpression[] expressions)
+        private SumExpression(IExpression[] expressions, IExpression higherOrder)
         {
             this.Expressions = expressions;
-
-            this.higherOrder = ValueLazy.Create(
-                this,
-                @this => From(@this.Expressions.
-                    Select(expression => expression.HigherOrder).
-                    Memoize(),
-                    false) ?? TerminationTerm.Instance);
+            this.HigherOrder = higherOrder;
         }
 
-        public override IExpression HigherOrder =>
-            this.higherOrder.Value;
+        public override IExpression HigherOrder { get; }
 
         IExpression[] ISumExpression.Expressions =>
             this.Expressions;
@@ -69,15 +59,39 @@ namespace Favalet.Expressions.Algebraic
             var expressions = this.Expressions.
                 Select(expression => expression.InferIfRequired(context)).
                 Memoize();
+            var higherOrder = this.HigherOrder.InferIfRequired(context);
 
-            if (this.Expressions.SequenceEqual(
-                expressions, ExactEqualityComparer.Instance))
+            if (From(expressions.Select(expression => expression.HigherOrder).Distinct().Memoize(), true) is IExpression ehs)
+            {
+                context.Unify(ehs, higherOrder);
+            }
+
+            if (this.HigherOrder.ExactEquals(higherOrder) &&
+                this.Expressions.ExactSequenceEqual(expressions))
             {
                 return this;
             }
             else
             {
-                return new SumExpression(expressions);
+                return new SumExpression(expressions, higherOrder);
+            }
+        }
+
+        public IExpression Fixup(IFixupContext context)
+        {
+            var expressions = this.Expressions.
+                Select(expression => expression.FixupIfRequired(context)).
+                Memoize();
+            var higherOrder = this.HigherOrder.FixupIfRequired(context);
+
+            if (this.HigherOrder.ExactEquals(higherOrder) &&
+                this.Expressions.ExactSequenceEqual(expressions))
+            {
+                return this;
+            }
+            else
+            {
+                return new SumExpression(expressions, higherOrder);
             }
         }
 
@@ -86,20 +100,21 @@ namespace Favalet.Expressions.Algebraic
             var expressions = this.Expressions.
                 Select(expression => expression.ReduceIfRequired(context)).
                 Memoize();
+            var higherOrder = this.HigherOrder.ReduceIfRequired(context);
 
-            if (this.Expressions.SequenceEqual(
-                expressions, ExactEqualityComparer.Instance))
+            if (this.HigherOrder.ExactEquals(higherOrder) &&
+                this.Expressions.ExactSequenceEqual(expressions))
             {
                 return this;
             }
             else
             {
-                return new SumExpression(expressions);
+                return new SumExpression(expressions, higherOrder);
             }
         }
 
         public override bool Equals(IExpression? rhs) =>
-            rhs is SumExpression sum &&
+            rhs is ISumExpression sum &&
                 this.Expressions.SequenceEqual(sum.Expressions);
 
         public override int GetHashCode() =>
@@ -108,14 +123,15 @@ namespace Favalet.Expressions.Algebraic
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, (object[])this.Expressions);
 
+        public static SumExpression Create(IExpression[] expressions, IExpression higherOrder) =>
+            new SumExpression(expressions, higherOrder);
+
         public static IExpression? From(IExpression[] expressions, bool canSuppress) =>
             expressions.Length switch
             {
-                0 => null,
-                1 when canSuppress && !(expressions[0] is TerminationTerm) => expressions[0],
-                _ when expressions.All(expression => !(expression is TerminationTerm)) =>
-                    new SumExpression(expressions),
-                _ => null
+                0 when canSuppress => null,
+                1 when canSuppress => expressions[0],
+                _ => new SumExpression(expressions, UnspecifiedTerm.Instance)
             };
     }
 }

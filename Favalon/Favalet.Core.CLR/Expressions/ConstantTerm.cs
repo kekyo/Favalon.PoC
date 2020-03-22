@@ -18,8 +18,11 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Algebraic;
+using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Favalet.Expressions
@@ -40,6 +43,7 @@ namespace Favalet.Expressions
         public override IExpression HigherOrder =>
             this.higherOrder.Value;
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IConstantTerm.Value =>
             this.Value;
 
@@ -54,7 +58,6 @@ namespace Favalet.Expressions
             this.Value switch
             {
                 string str => $"\"{str}\"",
-                char ch => $"'{ch}'",
                 _ => $"{this.Value}:{this.HigherOrder.FormatString(context.SuppressRecursive())}"
             };
 
@@ -63,7 +66,8 @@ namespace Favalet.Expressions
             {
                 Type type => TypeTerm.From(type),
                 MethodBase method => MethodTerm.From(method),
-                string str when str.Length == 1 => new SingleCharConstantTerm(str[0], ExpressionFactory.Unspecified()),
+                char ch => new SingleCharConstantTerm(ch, UnspecifiedTerm.Instance),
+                string str when str.Length == 1 => new SingleCharConstantTerm(str[0], UnspecifiedTerm.Instance),
                 _ => new ConstantTerm(value)
             };
     }
@@ -71,6 +75,10 @@ namespace Favalet.Expressions
     public sealed class SingleCharConstantTerm :
         Expression, IConstantTerm, IInferrableExpression
     {
+        private static readonly IExpression charTerm = TypeTerm.From(typeof(char));
+        private static readonly IExpression higherOrder =
+            SumExpression.Create(new[] { charTerm, TypeTerm.From(typeof(string)) }, KindTerm.KindType);
+
         public readonly char Value;
 
         internal SingleCharConstantTerm(char value, IExpression higherOrder)
@@ -81,19 +89,17 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IConstantTerm.Value =>
-            this.Value;
-
-        public override bool Equals(IExpression? rhs) =>
-            rhs is IConstantTerm constant &&
-                this.Value.Equals(constant.Value);
-
-        public override int GetHashCode() =>
-            this.Value.GetHashCode();
+            this.HigherOrder.Equals(charTerm) ? (object)this.Value : this.Value.ToString();
 
         public IExpression Infer(IInferContext context)
         {
             var higherOrder = this.HigherOrder.InferIfRequired(context);
+
+            context.Unify(
+                SingleCharConstantTerm.higherOrder,
+                higherOrder);
 
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
@@ -104,6 +110,26 @@ namespace Favalet.Expressions
                 return new SingleCharConstantTerm(this.Value, higherOrder);
             }
         }
+
+        public IExpression Fixup(IFixupContext context)
+        {
+            var higherOrder = this.HigherOrder.FixupIfRequired(context);
+            if (this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new SingleCharConstantTerm(this.Value, higherOrder);
+            }
+        }
+
+        public override bool Equals(IExpression? rhs) =>
+            rhs is IConstantTerm constant &&
+                this.Value.Equals(constant.Value);
+
+        public override int GetHashCode() =>
+            this.Value.GetHashCode();
 
         public override string FormatString(IFormatStringContext context) =>
             $"\"{this.Value}\"";

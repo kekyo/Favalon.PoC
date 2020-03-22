@@ -21,6 +21,7 @@ using Favalet.Contexts;
 using Favalet.Internal;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Favalet.Expressions
 {
@@ -32,6 +33,7 @@ namespace Favalet.Expressions
 
         public readonly Type Type;
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IConstantTerm.Value =>
             this.Type;
 

@@ -19,8 +19,8 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using Favalet.Internal;
-using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
@@ -52,21 +52,22 @@ namespace Favalet.Expressions
     {
         public readonly IExpression Parameter;
         public readonly IExpression Result;
-        private readonly ValueLazy<IExpression> higherOrder;
 
         private FunctionDeclaredExpression(
-            IExpression parameter, IExpression result, Func<IExpression> higherOrder)
+            IExpression parameter, IExpression result, IExpression higherOrder)
         {
             this.Parameter = parameter;
             this.Result = result;
-            this.higherOrder = ValueLazy.Create(higherOrder);
+            this.HigherOrder = higherOrder;
         }
 
-        public override IExpression HigherOrder =>
-            this.higherOrder.Value;
+        public override IExpression HigherOrder { get; }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IFunctionDeclaredExpression.Parameter =>
             this.Parameter;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IFunctionDeclaredExpression.Result =>
             this.Result;
 
@@ -76,6 +77,10 @@ namespace Favalet.Expressions
             var result = this.Result.InferIfRequired(context);
             var higherOrder = this.HigherOrder.InferIfRequired(context);
 
+            context.Unify(
+                From(parameter.HigherOrder, result.HigherOrder),
+                higherOrder);
+
             if (this.Parameter.ExactEquals(parameter) &&
                 this.Result.ExactEquals(result) &&
                 this.HigherOrder.ExactEquals(higherOrder))
@@ -84,7 +89,25 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new FunctionDeclaredExpression(parameter, result, () => higherOrder);
+                return new FunctionDeclaredExpression(parameter, result, higherOrder);
+            }
+        }
+
+        public IExpression Fixup(IFixupContext context)
+        {
+            var parameter = this.Parameter.FixupIfRequired(context);
+            var result = this.Result.FixupIfRequired(context);
+            var higherOrder = this.HigherOrder.FixupIfRequired(context);
+
+            if (this.Parameter.ExactEquals(parameter) &&
+                this.Result.ExactEquals(result) &&
+                this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new FunctionDeclaredExpression(parameter, result, higherOrder);
             }
         }
 
@@ -102,7 +125,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new FunctionDeclaredExpression(parameter, result, () => higherOrder);
+                return new FunctionDeclaredExpression(parameter, result, higherOrder);
             }
         }
 
@@ -123,15 +146,7 @@ namespace Favalet.Expressions
         private static FunctionDeclaredExpression Create(
             IExpression parameter, IExpression result, IExpression higherOrder) =>
             new FunctionDeclaredExpression(
-                parameter, result, () => higherOrder);
-
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        private static FunctionDeclaredExpression Create(
-            IExpression parameter, IExpression result) =>
-            new FunctionDeclaredExpression(
-                parameter, result, () => From(parameter.HigherOrder, result.HigherOrder));
+                parameter, result, higherOrder);
 
         public static readonly FunctionDeclaredExpression Unspecified =
             Create(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance, TerminationTerm.Instance);
@@ -154,7 +169,7 @@ namespace Favalet.Expressions
                     pid.Equals(FourthTerm.Instance) && rid.Equals(FourthTerm.Instance) => Fourth,
                 (IIdentityTerm pid, IIdentityTerm rid) when
                     pid.Equals(KindTerm.KindType) && rid.Equals(KindTerm.KindType) => KindType,
-                _ => Create(parameter, result)
+                _ => Create(parameter, result, UnspecifiedTerm.Instance)
             };
     }
 }

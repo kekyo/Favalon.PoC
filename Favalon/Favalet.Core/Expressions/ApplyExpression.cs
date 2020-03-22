@@ -18,7 +18,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
-using System.Runtime.CompilerServices;
+using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Favalet.Expressions
 {
@@ -55,9 +56,11 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IApplyExpression.Function =>
             this.Function;
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IApplyExpression.Argument =>
             this.Argument;
 
@@ -70,6 +73,24 @@ namespace Favalet.Expressions
             context.Unify(
                 FunctionDeclaredExpression.From(argument.HigherOrder, higherOrder),
                 function.HigherOrder);
+
+            if (this.Function.ExactEquals(function) &&
+                this.Argument.ExactEquals(argument) &&
+                this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new ApplyExpression(function, argument, higherOrder);
+            }
+        }
+
+        public IExpression Fixup(IFixupContext context)
+        {
+            var higherOrder = this.HigherOrder.FixupIfRequired(context);
+            var argument = this.Argument.FixupIfRequired(context);
+            var function = this.Function.FixupIfRequired(context);
 
             if (this.Function.ExactEquals(function) &&
                 this.Argument.ExactEquals(argument) &&

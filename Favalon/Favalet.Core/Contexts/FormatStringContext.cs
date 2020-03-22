@@ -33,23 +33,29 @@ namespace Favalet.Contexts
 
     public abstract class FormatStringContext : IFormatStringContext
     {
-        private readonly Dictionary<int, int> relativeIndexes =
-            new Dictionary<int, int>();
+        private readonly Dictionary<int, int>? relativeIndexes;
 
-        protected FormatStringContext() =>
-            this.relativeIndexes = new Dictionary<int, int>();
+        protected FormatStringContext(bool useRelativeIndex) =>
+            this.relativeIndexes = useRelativeIndex ? new Dictionary<int, int>() : null;
 
         protected FormatStringContext(FormatStringContext parent) =>
             this.relativeIndexes = parent.relativeIndexes;
 
         public string GetPlaceholderIndexString(int index)
         {
-            if (!relativeIndexes.TryGetValue(index, out var relativeIndex))
+            if (this.relativeIndexes is Dictionary<int, int> relativeIndexes)
             {
-                relativeIndex = relativeIndexes.Count;
-                relativeIndexes.Add(index, relativeIndex);
+                if (!relativeIndexes.TryGetValue(index, out var relativeIndex))
+                {
+                    relativeIndex = relativeIndexes.Count;
+                    relativeIndexes.Add(index, relativeIndex);
+                }
+                return relativeIndex.ToString();
             }
-            return relativeIndex.ToString();
+            else
+            {
+                return index.ToString();
+            }
         }
 
         public abstract string Format(IExpression expression, params object[] args);

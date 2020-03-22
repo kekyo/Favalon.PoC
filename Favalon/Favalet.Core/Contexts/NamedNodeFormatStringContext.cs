@@ -28,7 +28,8 @@ namespace Favalet.Contexts
     {
         private readonly bool recursiveHigherOrder;
 
-        private NamedNodeFormatStringContext(bool recursiveHigherOrder) =>
+        private NamedNodeFormatStringContext(bool recursiveHigherOrder, bool useRelativeIndex) :
+            base(useRelativeIndex) =>
             this.recursiveHigherOrder = recursiveHigherOrder;
 
         private NamedNodeFormatStringContext(NamedNodeFormatStringContext parent, bool recursiveHigherOrder) :
@@ -68,7 +69,7 @@ namespace Favalet.Contexts
         public override IFormatStringContext SuppressRecursive() =>
             new NamedNodeFormatStringContext(this, false);
 
-        public static NamedNodeFormatStringContext Create() =>
-            new NamedNodeFormatStringContext(true);
+        public static NamedNodeFormatStringContext Create(bool useRelativeIndex) =>
+            new NamedNodeFormatStringContext(true, useRelativeIndex);
     }
 }

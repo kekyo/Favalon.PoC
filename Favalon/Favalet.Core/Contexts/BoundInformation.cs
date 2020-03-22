@@ -21,13 +21,13 @@ using Favalet.Expressions;
 
 namespace Favalet.Contexts
 {
-    public struct BoundInformations
+    public struct BoundInformation
     {
         public readonly IExpression Expression;
         public readonly BoundTermAttributes Attributes;
         public readonly BoundTermPrecedences Precedence;
 
-        public BoundInformations(
+        public BoundInformation(
             IExpression expression,
             BoundTermAttributes attributes,
             BoundTermPrecedences precedence)

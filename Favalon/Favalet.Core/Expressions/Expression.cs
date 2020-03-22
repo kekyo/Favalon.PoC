@@ -22,6 +22,7 @@
 
 using Favalet.Contexts;
 using System;
+using System.Diagnostics;
 
 namespace Favalet.Expressions
 {
@@ -32,6 +33,7 @@ namespace Favalet.Expressions
         string FormatString(IFormatStringContext context);
     }
 
+    [DebuggerDisplay("{StrictPrint}")]
     public abstract partial class Expression : IExpression
     {
         protected Expression()
@@ -49,7 +51,12 @@ namespace Favalet.Expressions
 
         public abstract string FormatString(IFormatStringContext context);
 
+        public string StrictPrint =>
+            this.FormatString(NamedNodeFormatStringContext.Create(false));
+        public string ReadablePrint =>
+            this.FormatString(NamedNodeFormatStringContext.Create(true));
+
         public sealed override string ToString() =>
-            this.FormatString(NamedNodeFormatStringContext.Create());
+            this.FormatString(NamedNodeFormatStringContext.Create(true));
     }
 }

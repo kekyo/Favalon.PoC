@@ -17,7 +17,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Contexts;
 using Favalet.Expressions;
 using System;
 using System.Collections.Generic;
@@ -47,6 +46,7 @@ namespace Favalet.Contexts
             this.MaxIterationCount = maxIterationCount;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         ITypeContextFeatures IRootTypeContext.Features =>
             this.Features;
 
@@ -62,9 +62,11 @@ namespace Favalet.Contexts
                 var context = InferContext.Create(this);
 
                 var current = inferrable.Infer(context);
+                current = current.FixupIfRequired(context);
                 for (var index = 1; index < this.MaxIterationCount; index++)
                 {
                     var inferred = current.InferIfRequired(context);
+                    inferred = inferred.FixupIfRequired(context);
                     if (current.ExactEquals(inferred))
                     {
                         Debug.WriteLine($"Infer [F]: {current}");

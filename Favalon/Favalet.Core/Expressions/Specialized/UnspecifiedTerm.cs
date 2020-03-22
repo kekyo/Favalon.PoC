@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
@@ -33,6 +34,9 @@ namespace Favalet.Expressions.Specialized
 
         public IExpression Infer(IInferContext context) =>
             context.CreatePlaceholder(Instance);
+
+        IExpression IInferrableExpression.Fixup(IFixupContext context) =>
+            this;
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

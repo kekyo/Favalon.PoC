@@ -18,12 +18,15 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalet.Expressions
 {
     public interface IInferrableExpression : IExpression
     {
         IExpression Infer(IInferContext context);
+        IExpression Fixup(IFixupContext context);
     }
 
     public interface IReducibleExpression : IExpression
@@ -42,6 +45,15 @@ namespace Favalet.Expressions
             IInferContext context) =>
             expression is IInferrableExpression i ? i.Infer(context) : expression;
 
+        public static IExpression FixupIfRequired(
+            this IInferrableExpression expression,
+            IFixupContext context) =>
+            expression.Fixup(context);
+        public static IExpression FixupIfRequired(
+            this IExpression expression,
+            IFixupContext context) =>
+            expression is IInferrableExpression i ? i.Fixup(context) : expression;
+
         public static IExpression ReduceIfRequired(
             this IReducibleExpression expression,
             IReduceContext context) =>
@@ -55,5 +67,9 @@ namespace Favalet.Expressions
             this IExpression expression,
             IExpression rhs) =>
             ExactEqualityComparer.Instance.Equals(expression, rhs);
+        public static bool ExactSequenceEqual(
+            this IEnumerable<IExpression> expressions,
+            IEnumerable<IExpression> rhss) =>
+            expressions.SequenceEqual(rhss, ExactEqualityComparer.Instance);
     }
 }

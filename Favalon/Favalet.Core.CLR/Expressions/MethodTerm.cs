@@ -20,6 +20,7 @@
 using Favalet.Contexts;
 using Favalet.Internal;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -33,6 +34,7 @@ namespace Favalet.Expressions
         private protected MethodTerm(MethodBase method) =>
             this.Method = method;
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IConstantTerm.Value =>
             this.Method;
 

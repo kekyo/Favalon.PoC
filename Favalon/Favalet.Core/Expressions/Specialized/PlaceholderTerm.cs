@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
@@ -40,20 +41,16 @@ namespace Favalet.Expressions.Specialized
 
         public override IExpression HigherOrder { get; }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IIdentityTerm.Identity =>
             $"'{this.Index}";
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         int IPlaceholderTerm.Index =>
             this.Index;
 
         public IExpression Infer(IInferContext context)
         {
-            // TODO: replace by unified information
-            if (context.Resolve(this) is IExpression resolved)
-            {
-                return resolved.InferIfRequired(context);
-            }
-
             // Special case: will not infer Unspecified higherOrder.
             //   Maybe it makes infinity digging.
             if (this.HigherOrder is UnspecifiedTerm)
@@ -62,6 +59,24 @@ namespace Favalet.Expressions.Specialized
             }
 
             var higherOrder = this.HigherOrder.InferIfRequired(context);
+            if (this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new PlaceholderTerm(this.Index, higherOrder);
+            }
+        }
+
+        public IExpression Fixup(IFixupContext context)
+        {
+            if (context.Resolve(this) is IExpression resolved)
+            {
+                return resolved.FixupIfRequired(context);
+            }
+
+            var higherOrder = this.HigherOrder.FixupIfRequired(context);
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;

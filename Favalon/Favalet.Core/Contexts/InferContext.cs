@@ -30,11 +30,14 @@ namespace Favalet.Contexts
         IPlaceholderTerm CreatePlaceholder(IExpression higherOrder);
 
         bool Unify(IExpression to, IExpression from);
+    }
 
+    public interface IFixupContext
+    {
         IExpression? Resolve(IPlaceholderTerm placeholder);
     }
 
-    internal sealed class InferContext : TypeContext, IInferContext
+    internal sealed class InferContext : TypeContext, IInferContext, IFixupContext
     {
         private struct PlaceholderDescription
         {

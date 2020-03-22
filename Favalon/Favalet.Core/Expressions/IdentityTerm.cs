@@ -20,6 +20,8 @@
 using Favalet.Contexts;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -43,19 +45,38 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IIdentityTerm.Identity =>
             this.Identity;
 
         public IExpression Infer(IInferContext context)
         {
-            var bounds = context.Lookup(this);
+            var higherOrder = this.HigherOrder.InferIfRequired(context);
 
-            var higherOrder = (bounds.Length >= 1) ?
+            if (context.Lookup(this) is BoundInformation[] bounds && (bounds.Length >= 1))
+            {
                 // TODO: bound attributes
-                (SumExpression.From(bounds.Select(bound => bound.Expression.HigherOrder).Memoize(), true)?.
-                    InferIfRequired(context) ?? TerminationTerm.Instance) :
-                this.HigherOrder.InferIfRequired(context);
+                context.Unify(
+                    SumExpression.From(
+                        bounds.Select(bound => bound.Expression.HigherOrder).Distinct().Memoize(),
+                        true)!.
+                    InferIfRequired(context)!,
+                    HigherOrder);
+            }
 
+            if (this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new IdentityTerm(this.Identity, higherOrder);
+            }
+        }
+
+        public IExpression Fixup(IFixupContext context)
+        {
+            var higherOrder = this.HigherOrder.FixupIfRequired(context);
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;

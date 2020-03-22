@@ -31,7 +31,7 @@ namespace Favalet.Contexts
             BoundTermAttributes attributes = BoundTermAttributes.Prefix | BoundTermAttributes.LeftToRight,
             BoundTermPrecedences precedence = BoundTermPrecedences.Function);
 
-        BoundInformations[] Lookup(IIdentityTerm identity);
+        BoundInformation[] Lookup(IIdentityTerm identity);
     }
 
     public interface IScopedTypeContext<TContext> : ITypeContext
@@ -48,13 +48,13 @@ namespace Favalet.Contexts
 
     internal interface IInternalTypeContext
     {
-        IEnumerable<(int, BoundInformations)> RecursiveLookup(IIdentityTerm identity, int distance);
+        IEnumerable<(int, BoundInformation)> RecursiveLookup(IIdentityTerm identity, int distance);
     }
 
     public abstract class TypeContext : ITypeContext, IInternalTypeContext
     {
         private readonly ITypeContext? parent;
-        private Dictionary<string, Dictionary<IExpression, BoundInformations>>? bounds;
+        private Dictionary<string, Dictionary<IExpression, BoundInformation>>? bounds;
 
         private protected TypeContext(ITypeContext? parent) =>
             this.parent = parent;
@@ -67,31 +67,31 @@ namespace Favalet.Contexts
         {
             if (this.bounds == null)
             {
-                this.bounds = new Dictionary<string, Dictionary<IExpression, BoundInformations>>();
+                this.bounds = new Dictionary<string, Dictionary<IExpression, BoundInformation>>();
             }
 
             if (!this.bounds.TryGetValue(identity, out var overloads))
             {
-                overloads = new Dictionary<IExpression, BoundInformations>();
+                overloads = new Dictionary<IExpression, BoundInformation>();
                 this.bounds.Add(identity, overloads);
             }
 
             overloads[expression.HigherOrder] =
-                new BoundInformations(expression, attributes, precedence);
+                new BoundInformation(expression, attributes, precedence);
         }
 
-        public BoundInformations[] Lookup(IIdentityTerm identity) =>
+        public BoundInformation[] Lookup(IIdentityTerm identity) =>
             ((IInternalTypeContext)this).RecursiveLookup(identity, 0).
             GroupBy(result => result.Item2.Expression.HigherOrder).
             Select(g => g.OrderBy(result => result.Item1).First()).
             Select(result => result.Item2).
             Memoize();
 
-        IEnumerable<(int, BoundInformations)> IInternalTypeContext.RecursiveLookup(IIdentityTerm identity, int distance)
+        IEnumerable<(int, BoundInformation)> IInternalTypeContext.RecursiveLookup(IIdentityTerm identity, int distance)
         {
-            var collected = Enumerable.Empty<(int, BoundInformations)>();
+            var collected = Enumerable.Empty<(int, BoundInformation)>();
 
-            if (this.bounds is Dictionary<string, Dictionary<IExpression, BoundInformations>> bounds)
+            if (this.bounds is Dictionary<string, Dictionary<IExpression, BoundInformation>> bounds)
             {
                 if (bounds.TryGetValue(identity.Identity, out var overloads))
                 {

@@ -26,7 +26,7 @@ using System.Runtime.CompilerServices;
 namespace Favalet.Expressions
 {
     public interface IFunctionDeclaredExpression :
-        ITerm, IInferrableExpression, IReducibleExpression
+        IInferrableExpression, IReducibleExpression
     {
         IExpression Parameter { get; }
         IExpression Result { get; }

@@ -22,16 +22,14 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
 {
-    public sealed class FourthTerm : Expression, IIdentityTerm
+    public sealed class FourthTerm :
+        Expression, ITerm
     {
         private FourthTerm()
         { }
 
         public override IExpression HigherOrder =>
             TerminationTerm.Instance;
-
-        string IIdentityTerm.Identity =>
-            "#";
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -22,7 +22,8 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
 {
-    public sealed class KindTerm : Expression, IIdentityTerm
+    public sealed class KindTerm :
+        Expression, ITerm
     {
         public readonly string Identity;
 
@@ -31,9 +32,6 @@ namespace Favalet.Expressions.Specialized
 
         public override IExpression HigherOrder =>
             FourthTerm.Instance;
-
-        string IIdentityTerm.Identity =>
-            this.Identity;
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

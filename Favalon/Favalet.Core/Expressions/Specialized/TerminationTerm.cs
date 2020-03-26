@@ -22,7 +22,8 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
 {
-    internal sealed class TerminationTerm : Expression
+    internal sealed class TerminationTerm :
+        Expression
     {
         private TerminationTerm()
         { }

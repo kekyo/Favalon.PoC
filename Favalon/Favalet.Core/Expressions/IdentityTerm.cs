@@ -27,13 +27,14 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions
 {
-    public interface IIdentityTerm : ITerm
+    public interface IIdentityTerm :
+        ITerm, IInferrableExpression, IReducibleExpression
     {
         string Identity { get; }
     }
 
     public sealed class IdentityTerm :
-        Expression, IIdentityTerm, IInferrableExpression, IReducibleExpression
+        Expression, IIdentityTerm
     {
         public readonly string Identity;
 

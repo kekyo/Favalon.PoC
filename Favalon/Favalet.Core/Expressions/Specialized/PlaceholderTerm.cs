@@ -23,13 +23,14 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
 {
-    public interface IPlaceholderTerm : IIdentityTerm
+    public interface IPlaceholderTerm :
+        ITerm, IInferrableExpression, IReducibleExpression
     {
         int Index { get; }
     }
 
     public sealed class PlaceholderTerm :
-        Expression, IPlaceholderTerm, IInferrableExpression
+        Expression, IPlaceholderTerm
     {
         public readonly int Index;
 
@@ -40,10 +41,6 @@ namespace Favalet.Expressions.Specialized
         }
 
         public override IExpression HigherOrder { get; }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IIdentityTerm.Identity =>
-            $"'{this.Index}";
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         int IPlaceholderTerm.Index =>
@@ -77,6 +74,19 @@ namespace Favalet.Expressions.Specialized
             }
 
             var higherOrder = this.HigherOrder.FixupIfRequired(context);
+            if (this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new PlaceholderTerm(this.Index, higherOrder);
+            }
+        }
+
+        public IExpression Reduce(IReduceContext context)
+        {
+            var higherOrder = this.HigherOrder.ReduceIfRequired(context);
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;

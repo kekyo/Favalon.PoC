@@ -96,12 +96,26 @@ namespace Favalet.Contexts
                 //   false, false : forward
 
                 var combinedForward = !(description.IsForward ^ isForward);
-                var combinedExpression = this.CalculateSum(new[] { description.Expression, from });
-                this.descriptions[placeholder.Index] = new PlaceholderDescription(combinedExpression, combinedForward);
 
-                return combinedForward ?
+                var result = combinedForward ?
                     this.Unify(description.Expression, from) :   // forward
                     this.Unify(from, description.Expression);    // backward
+
+                if (result)
+                {
+                    this.descriptions[placeholder.Index] =
+                        combinedForward ?
+                            new PlaceholderDescription(description.Expression, combinedForward) :
+                            new PlaceholderDescription(from, combinedForward);
+                }
+                else
+                {
+                    var combinedExpression = this.CalculateSum(new[] { description.Expression, from });
+                    this.descriptions[placeholder.Index] =
+                        new PlaceholderDescription(combinedExpression, combinedForward);
+                }
+
+                return true;
             }
             else
             {

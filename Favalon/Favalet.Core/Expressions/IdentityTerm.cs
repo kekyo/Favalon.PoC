@@ -20,7 +20,6 @@
 using Favalet.Contexts;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -28,13 +27,13 @@ using System.Runtime.CompilerServices;
 namespace Favalet.Expressions
 {
     public interface IIdentityTerm :
-        ITerm, IInferrableExpression, IReducibleExpression
+        ITerm
     {
         string Identity { get; }
     }
 
     public sealed class IdentityTerm :
-        Expression, IIdentityTerm
+        Expression, IIdentityTerm, IInferrableExpression, IReducibleExpression
     {
         public readonly string Identity;
 
@@ -58,11 +57,10 @@ namespace Favalet.Expressions
             {
                 // TODO: bound attributes
 
-                var inferred = context.CalculateSum(
-                    bounds.Select(bound => bound.Expression)).
-                    InferIfRequired(context);
+                var overloads = OverloadTerm.From(bounds.Select(bound => bound.Expression))!;
+                var inferred = overloads.InferIfRequired(context);
 
-                context.Unify(inferred.HigherOrder, higherOrder);
+                context.Unify(higherOrder, inferred.HigherOrder);
 
                 return inferred;
             }

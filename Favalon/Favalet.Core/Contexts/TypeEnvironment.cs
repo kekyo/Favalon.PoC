@@ -31,6 +31,13 @@ namespace Favalet.Contexts
         IEnumerable<IExpression> Infer(IEnumerable<IExpression> expressions);
     }
 
+    internal interface IRootTypeContext : ITypeContext
+    {
+        ITypeContextFeatures Features { get; }
+
+        int DrawNextPlaceholderIndex();
+    }
+
     public sealed class TypeEnvironment :
         TypeContext, ITypeEnvironment, IRootTypeContext
     {

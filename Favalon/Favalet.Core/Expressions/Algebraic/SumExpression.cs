@@ -27,7 +27,7 @@ using System.Runtime.CompilerServices;
 namespace Favalet.Expressions.Algebraic
 {
     public interface ISumExpression :
-        IExpression, IInferrableExpression, IReducibleExpression
+        IExpression
     {
         IExpression[] Expressions { get; }
     }
@@ -41,7 +41,8 @@ namespace Favalet.Expressions.Algebraic
             expressions = sum.Expressions;
     }
 
-    public sealed class SumExpression : Expression, ISumExpression
+    public sealed class SumExpression :
+        Expression, ISumExpression, IInferrableExpression, IReducibleExpression
     {
         public readonly IExpression[] Expressions;
 
@@ -64,10 +65,11 @@ namespace Favalet.Expressions.Algebraic
                 Select(expression => expression.InferIfRequired(context)).
                 Memoize();
 
-            var expressionHigherOrders = context.CalculateSum(
-                expressions.Select(expression => expression.HigherOrder));
+            var expressionHigherOrders = From(
+                expressions.Select(expression => expression.HigherOrder),
+                false)!;
 
-            context.Unify(expressionHigherOrders, higherOrder);
+            context.Unify(higherOrder, expressionHigherOrders);
 
             if (this.HigherOrder.ExactEquals(higherOrder) &&
                 this.Expressions.ExactSequenceEqual(expressions))
@@ -82,10 +84,10 @@ namespace Favalet.Expressions.Algebraic
 
         public IExpression Fixup(IFixupContext context)
         {
+            var higherOrder = this.HigherOrder.FixupIfRequired(context);
             var expressions = this.Expressions.
                 Select(expression => expression.FixupIfRequired(context)).
                 Memoize();
-            var higherOrder = this.HigherOrder.FixupIfRequired(context);
 
             if (this.HigherOrder.ExactEquals(higherOrder) &&
                 this.Expressions.ExactSequenceEqual(expressions))
@@ -100,10 +102,10 @@ namespace Favalet.Expressions.Algebraic
 
         public IExpression Reduce(IReduceContext context)
         {
+            var higherOrder = this.HigherOrder.ReduceIfRequired(context);
             var expressions = this.Expressions.
                 Select(expression => expression.ReduceIfRequired(context)).
                 Memoize();
-            var higherOrder = this.HigherOrder.ReduceIfRequired(context);
 
             if (this.HigherOrder.ExactEquals(higherOrder) &&
                 this.Expressions.ExactSequenceEqual(expressions))
@@ -129,22 +131,19 @@ namespace Favalet.Expressions.Algebraic
         public static SumExpression Create(IExpression[] expressions, IExpression higherOrder) =>
             new SumExpression(expressions, higherOrder);
 
-        public static IExpression? From(IEnumerable<IExpression> expressions, bool isStrict)
+        public static IExpression? From(
+            IEnumerable<IExpression> expressions, bool isStrict)
         {
             // It digs only first depth.
-            var exs = isStrict ?
-                expressions.
-                    Memoize() :
-                expressions.
-                    SelectMany(expression => (expression is ISumExpression(IExpression[] ses)) ? ses : new[] { expression }).
-                    Distinct().
-                    Memoize();
+            var ses = expressions.
+                SelectMany(expression => (expression is SumExpression(IExpression[] ses)) ? ses : new[] { expression });
+            var ses2 = (isStrict ? ses : ses.Distinct()).Memoize();
 
-            return exs.Length switch
+            return ses2.Length switch
             {
-                0 when !isStrict => null,
-                1 when !isStrict => exs[0],
-                _ => new SumExpression(exs, UnspecifiedTerm.Instance)
+                0 => null,
+                1 when !isStrict => ses2[0],
+                _ => new SumExpression(ses2, UnspecifiedTerm.Instance)
             };
         }
     }

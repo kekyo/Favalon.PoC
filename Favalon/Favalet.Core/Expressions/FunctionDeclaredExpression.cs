@@ -73,13 +73,13 @@ namespace Favalet.Expressions
 
         public IExpression Infer(IInferContext context)
         {
+            var higherOrder = this.HigherOrder.InferIfRequired(context);
             var parameter = this.Parameter.InferIfRequired(context);
             var result = this.Result.InferIfRequired(context);
-            var higherOrder = this.HigherOrder.InferIfRequired(context);
 
             context.Unify(
-                From(parameter.HigherOrder, result.HigherOrder),
-                higherOrder);
+                higherOrder,
+                From(parameter.HigherOrder, result.HigherOrder));
 
             if (this.Parameter.ExactEquals(parameter) &&
                 this.Result.ExactEquals(result) &&

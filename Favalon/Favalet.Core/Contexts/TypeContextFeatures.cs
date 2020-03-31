@@ -56,8 +56,8 @@ namespace Favalet.Contexts
                 // int->object: int->object <-- object->int
                 case (IFunctionDeclaredExpression(IExpression toParameter, IExpression toResult),
                       IFunctionDeclaredExpression(IExpression fromParameter, IExpression fromResult)):
-                    var parameter = this.Widen(toParameter, fromParameter) is IExpression ? toParameter : null;
-                    var result = this.Widen(fromResult, toResult);
+                    var parameter = this.Widen(fromParameter, toParameter) is IExpression ? toParameter : null;
+                    var result = this.Widen(toResult, fromResult);
                     return parameter is IExpression pr && result is IExpression rr ?
                         FunctionDeclaredExpression.From(pr, rr) :
                         null;

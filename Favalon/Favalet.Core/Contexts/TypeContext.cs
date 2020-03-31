@@ -40,12 +40,6 @@ namespace Favalet.Contexts
         TContext CreateDerivedScope();
     }
 
-    internal interface IRootTypeContext : ITypeContext
-    {
-        ITypeContextFeatures Features { get; }
-        int DrawNextPlaceholderIndex();
-    }
-
     internal interface IInternalTypeContext
     {
         IEnumerable<(int, BoundInformation)> RecursiveLookup(IIdentityTerm identity, int distance);

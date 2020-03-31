@@ -30,31 +30,38 @@ namespace Favalet.Contexts
     {
         IPlaceholderTerm CreatePlaceholder(IExpression higherOrder);
 
-        IExpression CalculateSum(IEnumerable<IExpression> expressions);
-
         bool Unify(IExpression to, IExpression from);
     }
 
     public interface IFixupContext
     {
+        ITypeContextFeatures Features { get; }
+
         IExpression? Resolve(IPlaceholderTerm placeholder);
     }
 
-    internal sealed class InferContext : TypeContext, IInferContext, IFixupContext
+    internal sealed class InferContext :
+        TypeContext, IInferContext, IFixupContext
     {
+        private enum Directions
+        {
+            Forward,
+            Reverse
+        }
+
         private struct PlaceholderDescription
         {
             public readonly IExpression Expression;
-            public readonly bool IsForward;
+            public readonly Directions Direction;
 
-            public PlaceholderDescription(IExpression expression, bool isForward)
+            public PlaceholderDescription(IExpression expression, Directions direction)
             {
                 this.Expression = expression;
-                this.IsForward = isForward;
+                this.Direction = direction;
             }
 
             public override string ToString() =>
-                this.IsForward ? $"{this.Expression} <== rhs" : $"lhs <== {this.Expression}";
+                $"{this.Expression},{this.Direction}";
         }
 
         private readonly IRootTypeContext rootContext;
@@ -74,52 +81,51 @@ namespace Favalet.Contexts
             this.descriptions = parent.descriptions;
         }
 
+        ITypeContextFeatures IFixupContext.Features =>
+            this.rootContext.Features;
+
         public IInferContext CreateDerivedScope() =>
             new InferContext(this);
 
         public IPlaceholderTerm CreatePlaceholder(IExpression higherOrder) =>
             PlaceholderTerm.Create(this.rootContext.DrawNextPlaceholderIndex(), higherOrder);
 
-        public IExpression CalculateSum(IEnumerable<IExpression> expressions) =>
-            SumExpression.From(
-                expressions.Where(expression => !(expression is TerminationTerm)),
-                false)!;
+        private static Directions CorrectVariance(Directions a, Directions b) =>
+            (a, b) switch
+            {
+                (Directions.Forward, Directions.Forward) => Directions.Forward,
+                (Directions.Forward, Directions.Reverse) => Directions.Reverse,
+                (Directions.Reverse, Directions.Forward) => Directions.Reverse,
+                _ => Directions.Forward
+            };
 
-        private bool UnifyPlaceholder(IPlaceholderTerm placeholder, IExpression from, bool isForward)
+        private bool UnifyPlaceholder(IPlaceholderTerm placeholder, IExpression from, Directions direction)
         {
             if (this.descriptions.TryGetValue(placeholder.Index, out var description))
             {
-                // Covariance correction
-                //   true, true : forward
-                //   true, false : backward
-                //   false, true : backward
-                //   false, false : forward
+                var combinedDirection = CorrectVariance(description.Direction, direction);
 
-                var combinedForward = !(description.IsForward ^ isForward);
+                var result = combinedDirection == Directions.Forward ?
+                    rootContext.Features.Widen(description.Expression, from) :  // forward
+                    rootContext.Features.Widen(from, description.Expression);   // backward
 
-                var result = combinedForward ?
-                    this.Unify(description.Expression, from) :   // forward
-                    this.Unify(from, description.Expression);    // backward
-
-                if (result)
+                if (result is IExpression)
                 {
                     this.descriptions[placeholder.Index] =
-                        combinedForward ?
-                            new PlaceholderDescription(description.Expression, combinedForward) :
-                            new PlaceholderDescription(from, combinedForward);
+                        new PlaceholderDescription(result, combinedDirection);
                 }
                 else
                 {
-                    var combinedExpression = this.CalculateSum(new[] { description.Expression, from });
+                    var combinedExpression = OverloadTerm.From(new[] { description.Expression, from });
                     this.descriptions[placeholder.Index] =
-                        new PlaceholderDescription(combinedExpression, combinedForward);
+                        new PlaceholderDescription(combinedExpression!, combinedDirection);
                 }
 
                 return true;
             }
             else
             {
-                this.descriptions.Add(placeholder.Index, new PlaceholderDescription(from, isForward));
+                this.descriptions.Add(placeholder.Index, new PlaceholderDescription(from, direction));
                 return true;
             }
         }
@@ -152,11 +158,11 @@ namespace Favalet.Contexts
 
             if (to is IPlaceholderTerm tph)
             {
-                return this.UnifyPlaceholder(tph, from, true);
+                return this.UnifyPlaceholder(tph, from, Directions.Forward);
             }
             if (from is IPlaceholderTerm fph)
             {
-                return this.UnifyPlaceholder(fph, to, false);
+                return this.UnifyPlaceholder(fph, to, Directions.Reverse);
             }
 
             //if (this.rootContext.Features.Widen(to, from) is IExpression widen1)

@@ -30,7 +30,7 @@ namespace Favalet.Expressions
     public sealed class ConstantTerm : Expression, IConstantTerm
     {
         public readonly object Value;
-        private readonly ValueLazy<ConstantTerm, TypeTerm> higherOrder;
+        private readonly ValueLazy<ConstantTerm, ITerm> higherOrder;
 
         private ConstantTerm(object value)
         {
@@ -61,7 +61,7 @@ namespace Favalet.Expressions
                 _ => $"{this.Value}:{this.HigherOrder.FormatString(context.SuppressRecursive())}"
             };
 
-        public static IConstantTerm From(object value) =>
+        public static ITerm From(object value) =>
             value switch
             {
                 Type type => TypeTerm.From(type),

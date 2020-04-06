@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
 using System.Collections.Generic;
@@ -28,8 +29,11 @@ namespace Favalet.Expressions
     public abstract class TypeTerm :
         Expression, IConstantTerm
     {
-        private static readonly Dictionary<Type, TypeTerm> types =
-            new Dictionary<Type, TypeTerm>();
+        private static readonly Dictionary<Type, ITerm> types =
+            new Dictionary<Type, ITerm>
+            {
+                { typeof(Type), KindTerm.KindType }
+            };
 
         public readonly Type Type;
 
@@ -52,7 +56,7 @@ namespace Favalet.Expressions
                 this.Type.GetFullName() :
                 context.Format(this, this.Type.GetFullName());
 
-        public static TypeTerm From(Type type)
+        public static ITerm From(Type type)
         {
             // TODO: detect delegates
             // TODO: detect generics
@@ -72,7 +76,7 @@ namespace Favalet.Expressions
     public sealed class ConcreteTypeTerm : TypeTerm
     {
         private static readonly IExpression higherOrder =
-            ExpressionFactory.KindType();
+            KindTerm.KindType;
 
         internal ConcreteTypeTerm(Type type) :
             base(type)

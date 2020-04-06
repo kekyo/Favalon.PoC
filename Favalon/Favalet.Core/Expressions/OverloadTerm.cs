@@ -62,6 +62,8 @@ namespace Favalet.Expressions
             }
             else
             {
+                Debug.Assert(overloads.Length >= 1);
+
                 return From(overloads, higherOrder)!;
             }
         }
@@ -80,7 +82,17 @@ namespace Favalet.Expressions
                 Distinct().
                 Memoize();
 
-            Debug.Assert(valids.Length >= 1);
+            if (valids.Length == 0)
+            {
+                if (this.HigherOrder.ExactEquals(higherOrder))
+                {
+                    return this;
+                }
+                else
+                {
+                    return From(this.Overloads, higherOrder)!;
+                }
+            }
 
             var validOverloads = valids.Select(entry => entry.overload).Memoize();
             var validHigherOrders = valids.Select(entry => entry.higherOrder).Memoize();
@@ -113,6 +125,8 @@ namespace Favalet.Expressions
             }
             else
             {
+                Debug.Assert(overloads.Length >= 1);
+
                 return From(overloads, higherOrder)!;
             }
         }

@@ -99,83 +99,92 @@ namespace Favalet.Contexts
                 _ => Directions.Forward
             };
 
-        private bool UnifyPlaceholder(IPlaceholderTerm placeholder, IExpression from, Directions direction)
+        private IExpression? InternalUnifyPlaceholder(
+            IPlaceholderTerm placeholder, IExpression from, Directions direction)
         {
             if (this.descriptions.TryGetValue(placeholder.Index, out var description))
             {
                 var combinedDirection = CorrectVariance(description.Direction, direction);
 
                 var result = combinedDirection == Directions.Forward ?
-                    rootContext.Features.Widen(description.Expression, from) :  // forward
-                    rootContext.Features.Widen(from, description.Expression);   // backward
+                    this.InternalUnify(description.Expression, from) :  // forward
+                    this.InternalUnify(from, description.Expression);   // backward
 
                 if (result is IExpression)
                 {
                     this.descriptions[placeholder.Index] =
                         new PlaceholderDescription(result, combinedDirection);
+                    return result;
                 }
                 else
                 {
                     var combinedExpression = OverloadTerm.From(new[] { description.Expression, from });
                     this.descriptions[placeholder.Index] =
                         new PlaceholderDescription(combinedExpression!, combinedDirection);
+                    return combinedExpression;
                 }
-
-                return true;
             }
             else
             {
                 this.descriptions.Add(placeholder.Index, new PlaceholderDescription(from, direction));
-                return true;
+                return from;
             }
         }
 
-        public bool Unify(IExpression to, IExpression from)
+        private IExpression? InternalUnify(IExpression to, IExpression from)
         {
             if (to.ExactEquals(from))
             {
-                return true;
+                return to;
             }
 
             if (to is IFunctionDeclaredExpression(IExpression tp, IExpression tr) &&
                 from is IFunctionDeclaredExpression(IExpression fp, IExpression fr))
             {
-                var pr = this.Unify(tp, fp);
-                var rr = this.Unify(tr, fr);
-                return pr && rr;
+                var pr = this.InternalUnify(tp, fp);
+                var rr = this.InternalUnify(tr, fr);
+
+                if (pr != null && rr != null)
+                {
+                    return FunctionDeclaredExpression.From(pr, rr);
+                }
+                else
+                {
+                    return null;
+                }
             }
 
             if (to is ISumExpression(IExpression[] tss))
             {
-                var results = tss.Select(ts => this.Unify(ts, from)).Memoize();
-                return results.Any();
+                var results = tss.
+                    Select(ts => this.InternalUnify(ts, from)).
+                    Where(result => result != null).
+                    Memoize();
+                return OverloadTerm.From(results!);
             }
             if (from is ISumExpression(IExpression[] fss))
             {
-                var results = fss.Select(fs => this.Unify(to, fs)).Memoize();
-                return results.Any();
+                var results = fss.
+                    Select(fs => this.InternalUnify(to, fs)).
+                    Where(result => result != null).
+                    Memoize();
+                return OverloadTerm.From(results!);
             }
 
             if (to is IPlaceholderTerm tph)
             {
-                return this.UnifyPlaceholder(tph, from, Directions.Forward);
+                return this.InternalUnifyPlaceholder(tph, from, Directions.Forward);
             }
             if (from is IPlaceholderTerm fph)
             {
-                return this.UnifyPlaceholder(fph, to, Directions.Reverse);
+                return this.InternalUnifyPlaceholder(fph, to, Directions.Reverse);
             }
 
-            //if (this.rootContext.Features.Widen(to, from) is IExpression widen1)
-            //{
-            //    return this.Unify(widen1, from);
-            //}
-            //if (this.rootContext.Features.Widen(from, to) is IExpression widen2)
-            //{
-            //    return this.Unify(widen2, to);
-            //}
-
-            return false;
+            return null;
         }
+
+        public bool Unify(IExpression to, IExpression from) =>
+            this.InternalUnify(to, from) is IExpression;
 
         public IExpression? Resolve(IPlaceholderTerm placeholder)
         {

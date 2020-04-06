@@ -62,7 +62,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new OverloadTerm(overloads, higherOrder);
+                return From(overloads, higherOrder)!;
             }
         }
 
@@ -80,7 +80,6 @@ namespace Favalet.Expressions
                 Distinct().
                 Memoize();
 
-            // TODO:
             Debug.Assert(valids.Length >= 1);
 
             var validOverloads = valids.Select(entry => entry.overload).Memoize();
@@ -95,7 +94,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new OverloadTerm(validOverloads, validHigherOrder);
+                return From(validOverloads, validHigherOrder)!;
             }
         }
 
@@ -114,7 +113,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new OverloadTerm(overloads, higherOrder);
+                return From(overloads, higherOrder)!;
             }
         }
 
@@ -128,7 +127,8 @@ namespace Favalet.Expressions
         public override string FormatString(IFormatStringContext context) =>
             context.Format(this, (object[])this.Overloads);
 
-        public static IExpression? From(IEnumerable<IExpression> overloads)
+        private static IExpression? From(
+            IEnumerable<IExpression> overloads, IExpression higherOrder)
         {
             // It digs only first depth.
             var oes = overloads.
@@ -140,8 +140,11 @@ namespace Favalet.Expressions
             {
                 0 => null,
                 1 => oes[0],
-                _ => new OverloadTerm(oes, UnspecifiedTerm.Instance)
+                _ => new OverloadTerm(oes, higherOrder)
             };
         }
+
+        public static IExpression? From(IEnumerable<IExpression> overloads) =>
+            From(overloads, UnspecifiedTerm.Instance);
     }
 }

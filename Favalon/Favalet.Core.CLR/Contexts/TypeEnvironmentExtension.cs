@@ -55,15 +55,15 @@ namespace Favalet.Contexts
             environment.MutableBind(identity, TypeTerm.From(type));
 
             foreach (var constructor in type.GetDeclaredConstructors().
-                Where(c => c.IsPublic && !c.IsPrivate && !c.IsStatic
-                    && (c.GetParameters().Length == 1)))  // TODO: multiple/nothing arguments
+                Where(c => c.IsPublic && !c.IsPrivate && !c.IsStatic &&
+                    (c.GetParameters().Length == 1)))  // TODO: multiple/nothing arguments
             {
                 MutableBindConstructor(environment, constructor);
             }
 
             foreach (var method in type.GetDeclaredMethods().
-                Where(m => m.IsPublic && !m.IsPrivate
-                    && (m.GetParameters().Length == 1)))  // TODO: multiple/nothing arguments
+                Where(m => m.IsPublic && !m.IsPrivate &&
+                    (m.GetParameters().Length == 1)))  // TODO: multiple/nothing arguments
             {
                 MutableBindMethod(environment, method);
             }

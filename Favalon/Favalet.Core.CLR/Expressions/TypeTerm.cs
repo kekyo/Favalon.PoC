@@ -27,19 +27,12 @@ using System.Diagnostics;
 namespace Favalet.Expressions
 {
     public abstract class TypeTerm :
-        Expression, IConstantTerm
+        Expression, ITerm
     {
         private static readonly Dictionary<Type, ITerm> types =
-            new Dictionary<Type, ITerm>
-            {
-                { typeof(Type), KindTerm.KindType }
-            };
+            new Dictionary<Type, ITerm>();
 
         public readonly Type Type;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        object IConstantTerm.Value =>
-            this.Type;
 
         private protected TypeTerm(Type type) =>
             this.Type = type;
@@ -73,16 +66,14 @@ namespace Favalet.Expressions
         }
     }
 
-    public sealed class ConcreteTypeTerm : TypeTerm
+    public sealed class ConcreteTypeTerm :
+        TypeTerm
     {
-        private static readonly IExpression higherOrder =
-            KindTerm.KindType;
-
         internal ConcreteTypeTerm(Type type) :
             base(type)
         { }
 
         public override IExpression HigherOrder =>
-            higherOrder;
+            ExpressionFactory.kindType;
     }
 }

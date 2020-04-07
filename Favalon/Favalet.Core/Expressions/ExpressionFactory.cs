@@ -29,10 +29,13 @@ namespace Favalet.Expressions
         public static FourthTerm Fourth() =>
             FourthTerm.Instance;
 
-        public static KindTerm KindType() =>
-            KindTerm.KindType;
-        public static KindTerm Kind(string identity) =>
-            KindTerm.Create(identity);
+        internal static readonly IdentityTerm kindType =
+            IdentityTerm.Create("*", FourthTerm.Instance);
+
+        public static IdentityTerm KindType() =>
+            kindType;
+        public static IdentityTerm Kind(string identity) =>
+            IdentityTerm.Create(identity, FourthTerm.Instance);
 
         public static IdentityTerm Identity(string identity) =>
             IdentityTerm.Create(identity, UnspecifiedTerm.Instance);

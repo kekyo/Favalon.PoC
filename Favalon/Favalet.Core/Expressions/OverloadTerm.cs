@@ -79,7 +79,6 @@ namespace Favalet.Expressions
             var valids = overloads.
                 Select(overload => (overload, higherOrder: context.Features.Widen(higherOrder, overload.HigherOrder)!)).
                 Where(entry => entry.higherOrder != null).
-                Distinct().
                 Memoize();
 
             if (valids.Length == 0)
@@ -94,8 +93,14 @@ namespace Favalet.Expressions
                 }
             }
 
-            var validOverloads = valids.Select(entry => entry.overload).Memoize();
-            var validHigherOrders = valids.Select(entry => entry.higherOrder).Memoize();
+            var validOverloads = valids.
+                Select(entry => entry.overload).
+                Distinct().
+                Memoize();
+            var validHigherOrders = valids.
+                Select(entry => entry.higherOrder).
+                Distinct().
+                Memoize();
 
             var validHigherOrder = From(validHigherOrders)!;
 

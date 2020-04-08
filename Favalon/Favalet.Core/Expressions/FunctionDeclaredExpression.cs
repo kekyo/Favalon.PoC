@@ -152,7 +152,7 @@ namespace Favalet.Expressions
             Create(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance, TerminationTerm.Instance);
 
         public static readonly FunctionDeclaredExpression KindType =
-            Create(KindTerm.KindType, KindTerm.KindType, FourthTerm.Instance);
+            Create(ExpressionFactory.kindType, ExpressionFactory.kindType, FourthTerm.Instance);
 
         public static IExpression From(IExpression parameter, IExpression result) =>
             (parameter, result) switch
@@ -163,7 +163,7 @@ namespace Favalet.Expressions
                 (UnspecifiedTerm _, UnspecifiedTerm _)  => Unspecified,
                 (FourthTerm _, FourthTerm _) => FourthTerm.Instance,
                 (IIdentityTerm pid, IIdentityTerm rid) when
-                    pid.Equals(KindTerm.KindType) && rid.Equals(KindTerm.KindType) => KindType,
+                    pid.Equals(ExpressionFactory.kindType) && rid.Equals(ExpressionFactory.kindType) => KindType,
                 _ => Create(parameter, result, UnspecifiedTerm.Instance)
             };
     }

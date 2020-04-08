@@ -27,10 +27,11 @@ using System.Reflection;
 
 namespace Favalet.Expressions
 {
-    public sealed class ConstantTerm : Expression, IConstantTerm
+    public sealed class ConstantTerm :
+        Expression, IConstantTerm
     {
         public readonly object Value;
-        private readonly ValueLazy<ConstantTerm, TypeTerm> higherOrder;
+        private readonly ValueLazy<ConstantTerm, ITerm> higherOrder;
 
         private ConstantTerm(object value)
         {
@@ -61,11 +62,9 @@ namespace Favalet.Expressions
                 _ => $"{this.Value}:{this.HigherOrder.FormatString(context.SuppressRecursive())}"
             };
 
-        public static IConstantTerm From(object value) =>
+        public static ITerm From(object value) =>
             value switch
             {
-                Type type => TypeTerm.From(type),
-                MethodBase method => MethodTerm.From(method),
                 char ch => new SingleCharConstantTerm(ch, UnspecifiedTerm.Instance),
                 string str when str.Length == 1 => new SingleCharConstantTerm(str[0], UnspecifiedTerm.Instance),
                 _ => new ConstantTerm(value)
@@ -77,7 +76,7 @@ namespace Favalet.Expressions
     {
         private static readonly IExpression charTerm = TypeTerm.From(typeof(char));
         private static readonly IExpression higherOrder =
-            SumExpression.Create(new[] { charTerm, TypeTerm.From(typeof(string)) }, KindTerm.KindType);
+            SumExpression.Create(new[] { charTerm, TypeTerm.From(typeof(string)) }, ExpressionFactory.kindType);
 
         public readonly char Value;
 

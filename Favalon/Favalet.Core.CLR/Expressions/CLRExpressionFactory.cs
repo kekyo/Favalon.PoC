@@ -23,9 +23,9 @@ namespace Favalet.Expressions
 {
     public static class CLRExpressionFactory
     {
-        public static TypeTerm Type(Type type) =>
+        public static ITerm Type(Type type) =>
             TypeTerm.From(type);
-        public static TypeTerm Type<T>() =>
+        public static ITerm Type<T>() =>
             TypeTerm.From(typeof(T));
 
         public static MethodTerm Constructor(Type type, params Type[] parameters) =>
@@ -40,7 +40,7 @@ namespace Favalet.Expressions
         public static IExpression Constant(object value) =>
             ConstantTerm.From(value);
 
-        public static IConstantTerm FromNumeric(string value)
+        public static ITerm FromNumeric(string value)
         {
             if (byte.TryParse(value, out var byteValue))
             {

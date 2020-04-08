@@ -27,16 +27,12 @@ using System.Reflection;
 namespace Favalet.Expressions
 {
     public abstract class MethodTerm :
-        Expression, IConstantTerm, ICallableExpression
+        Expression, ICallableExpression
     {
         public readonly MethodBase Method;
 
         private protected MethodTerm(MethodBase method) =>
             this.Method = method;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        object IConstantTerm.Value =>
-            this.Method;
 
         public TryCallResultContains TryCall(
             IReduceContext context, IExpression argument, out IExpression result)

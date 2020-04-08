@@ -52,18 +52,19 @@ namespace Favalet.Contexts
             where TTypeEnvironment : ITypeEnvironment
         {
             var identity = type.GetFullName(false);
-            environment.MutableBind(identity, TypeTerm.From(type));
+            environment.MutableBind(identity, TypeTerm.From(type));      // T
+            environment.MutableBind(identity, ConstantTerm.From(type));  // typeof(T)
 
             foreach (var constructor in type.GetDeclaredConstructors().
-                Where(c => c.IsPublic && !c.IsPrivate && !c.IsStatic
-                    && (c.GetParameters().Length == 1)))  // TODO: multiple/nothing arguments
+                Where(c => c.IsPublic && !c.IsPrivate && !c.IsStatic &&
+                    (c.GetParameters().Length == 1)))  // TODO: multiple/nothing arguments
             {
                 MutableBindConstructor(environment, constructor);
             }
 
             foreach (var method in type.GetDeclaredMethods().
-                Where(m => m.IsPublic && !m.IsPrivate
-                    && (m.GetParameters().Length == 1)))  // TODO: multiple/nothing arguments
+                Where(m => m.IsPublic && !m.IsPrivate &&
+                    (m.GetParameters().Length == 1)))  // TODO: multiple/nothing arguments
             {
                 MutableBindMethod(environment, method);
             }

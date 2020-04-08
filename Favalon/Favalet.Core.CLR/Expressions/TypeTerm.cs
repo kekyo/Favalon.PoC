@@ -21,21 +21,17 @@ using Favalet.Contexts;
 using Favalet.Internal;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Reflection;
 
 namespace Favalet.Expressions
 {
     public abstract class TypeTerm :
-        Expression, IConstantTerm
+        Expression, ITerm
     {
-        private static readonly Dictionary<Type, TypeTerm> types =
-            new Dictionary<Type, TypeTerm>();
+        private static readonly Dictionary<Type, ITerm> types =
+            new Dictionary<Type, ITerm>();
 
         public readonly Type Type;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        object IConstantTerm.Value =>
-            this.Type;
 
         private protected TypeTerm(Type type) =>
             this.Type = type;
@@ -48,11 +44,9 @@ namespace Favalet.Expressions
             this.Type.GetHashCode();
 
         public override string FormatString(IFormatStringContext context) =>
-            context.UseSimpleLabel ?
-                this.Type.GetFullName() :
-                context.Format(this, this.Type.GetFullName());
+            context.Format(this, this.Type.GetFullName());
 
-        public static TypeTerm From(Type type)
+        public static ITerm From(Type type)
         {
             // TODO: detect delegates
             // TODO: detect generics
@@ -61,7 +55,15 @@ namespace Favalet.Expressions
             {
                 if (!types.TryGetValue(type, out var term))
                 {
-                    term = new ConcreteTypeTerm(type);
+                    // Special case: Force replacing RuntimeType to Type
+                    if (typeof(Type).IsAssignableFrom(type))
+                    {
+                        term = new ConcreteTypeTerm(typeof(Type));
+                    }
+                    else
+                    {
+                        term = new ConcreteTypeTerm(type);
+                    }
                     types.Add(type, term);
                 }
                 return term;
@@ -69,16 +71,14 @@ namespace Favalet.Expressions
         }
     }
 
-    public sealed class ConcreteTypeTerm : TypeTerm
+    public sealed class ConcreteTypeTerm :
+        TypeTerm
     {
-        private static readonly IExpression higherOrder =
-            ExpressionFactory.KindType();
-
         internal ConcreteTypeTerm(Type type) :
             base(type)
         { }
 
         public override IExpression HigherOrder =>
-            higherOrder;
+            ExpressionFactory.kindType;
     }
 }

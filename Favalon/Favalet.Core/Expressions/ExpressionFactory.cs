@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions.Specialized;
+using System.Collections.Generic;
 
 namespace Favalet.Expressions
 {
@@ -29,10 +30,13 @@ namespace Favalet.Expressions
         public static FourthTerm Fourth() =>
             FourthTerm.Instance;
 
-        public static KindTerm KindType() =>
-            KindTerm.KindType;
-        public static KindTerm Kind(string identity) =>
-            KindTerm.Create(identity);
+        internal static readonly IdentityTerm kindType =
+            IdentityTerm.Create("*", FourthTerm.Instance);
+
+        public static IdentityTerm KindType() =>
+            kindType;
+        public static IdentityTerm Kind(string identity) =>
+            IdentityTerm.Create(identity, FourthTerm.Instance);
 
         public static IdentityTerm Identity(string identity) =>
             IdentityTerm.Create(identity, UnspecifiedTerm.Instance);
@@ -42,5 +46,8 @@ namespace Favalet.Expressions
 
         public static IExpression FunctionDeclaration(IExpression parameter, IExpression result) =>
             FunctionDeclaredExpression.From(parameter, result);
+
+        public static IExpression? Overload(params IExpression[] overloads) =>
+            OverloadTerm.From(overloads);
     }
 }

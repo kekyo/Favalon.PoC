@@ -81,7 +81,9 @@ namespace Favalet
             Assert.AreEqual(
                 new IExpression[]
                 {
-                    Type<int>()
+                    Overload(
+                        Type<int>(),
+                        Constant(typeof(int)))!
                 },
                 actual);
         }
@@ -99,6 +101,24 @@ namespace Favalet
                     Apply(
                         Constructor<Uri>(typeof(string)),
                         Constant("https://example.com/")),
+                },
+                actual);
+        }
+
+        [TestCaseSource("Parsers")]
+        public async Task LookupMethod(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
+        {
+            // Activator.CreateInstance(typeof(int))
+            var text = "System.Activator.CreateInstance System.Int32";
+            var environment = Create();
+            var actual = await run(text, environment);
+
+            Assert.AreEqual(
+                new IExpression[]
+                {
+                    Apply(
+                        Method(typeof(Activator), "CreateInstance", typeof(Type)),
+                        Constant(typeof(int))),
                 },
                 actual);
         }

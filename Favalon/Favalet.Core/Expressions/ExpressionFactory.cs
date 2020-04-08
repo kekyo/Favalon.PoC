@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions.Specialized;
+using System.Collections.Generic;
 
 namespace Favalet.Expressions
 {
@@ -45,5 +46,8 @@ namespace Favalet.Expressions
 
         public static IExpression FunctionDeclaration(IExpression parameter, IExpression result) =>
             FunctionDeclaredExpression.From(parameter, result);
+
+        public static IExpression? Overload(params IExpression[] overloads) =>
+            OverloadTerm.From(overloads);
     }
 }

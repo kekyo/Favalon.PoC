@@ -73,12 +73,12 @@ namespace Favalet.Expressions
             var higherOrder = this.HigherOrder.FixupIfRequired(context);
             var overloads = this.Overloads.
                 Select(overload => overload.FixupIfRequired(context)).
-                Distinct().
-                Memoize();
+                Distinct();
 
             var valids = overloads.
                 Select(overload => (overload, higherOrder: context.Features.Widen(higherOrder, overload.HigherOrder)!)).
                 Where(entry => entry.higherOrder != null).
+                Distinct().
                 Memoize();
 
             if (valids.Length == 0)
@@ -95,11 +95,11 @@ namespace Favalet.Expressions
 
             var validOverloads = valids.
                 Select(entry => entry.overload).
-                Distinct().
+                OrderBy(overload => overload.GetHashCode()).
                 Memoize();
             var validHigherOrders = valids.
                 Select(entry => entry.higherOrder).
-                Distinct().
+                OrderBy(overload => overload.GetHashCode()).
                 Memoize();
 
             var validHigherOrder = From(validHigherOrders)!;
@@ -153,6 +153,7 @@ namespace Favalet.Expressions
             var oes = overloads.
                 SelectMany(overload => (overload is OverloadTerm(IExpression[] oes)) ? oes : new[] { overload }).
                 Distinct().
+                OrderBy(overload => overload.GetHashCode()).   // Make stable
                 Memoize();
 
             return oes.Length switch

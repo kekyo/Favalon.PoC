@@ -18,11 +18,10 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
-using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Reflection;
 
 namespace Favalet.Expressions
 {
@@ -45,9 +44,7 @@ namespace Favalet.Expressions
             this.Type.GetHashCode();
 
         public override string FormatString(IFormatStringContext context) =>
-            context.UseSimpleLabel ?
-                this.Type.GetFullName() :
-                context.Format(this, this.Type.GetFullName());
+            context.Format(this, this.Type.GetFullName());
 
         public static ITerm From(Type type)
         {
@@ -58,7 +55,15 @@ namespace Favalet.Expressions
             {
                 if (!types.TryGetValue(type, out var term))
                 {
-                    term = new ConcreteTypeTerm(type);
+                    // Special case: Force replacing RuntimeType to Type
+                    if (typeof(Type).IsAssignableFrom(type))
+                    {
+                        term = new ConcreteTypeTerm(typeof(Type));
+                    }
+                    else
+                    {
+                        term = new ConcreteTypeTerm(type);
+                    }
                     types.Add(type, term);
                 }
                 return term;

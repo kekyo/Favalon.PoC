@@ -81,7 +81,9 @@ namespace Favalet
             Assert.AreEqual(
                 new IExpression[]
                 {
-                    Type<int>()
+                    Overload(
+                        Type<int>(),
+                        Constant(typeof(int)))!
                 },
                 actual);
         }
@@ -116,7 +118,7 @@ namespace Favalet
                 {
                     Apply(
                         Method(typeof(Activator), "CreateInstance", typeof(Type)),
-                        Type<int>()),
+                        Constant(typeof(int))),
                 },
                 actual);
         }

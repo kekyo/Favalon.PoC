@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ using System.Reflection;
 namespace Favalet.Expressions
 {
     public abstract class TypeTerm :
-        Expression, ITerm
+        Expression, ITypeTerm
     {
         private static readonly Dictionary<Type, ITerm> types =
             new Dictionary<Type, ITerm>();
@@ -35,6 +36,12 @@ namespace Favalet.Expressions
 
         private protected TypeTerm(Type type) =>
             this.Type = type;
+
+        public bool IsConvertibleFrom(TypeTerm? from) =>
+            from is TypeTerm && this.Type.IsConvertibleFrom(from.Type);
+
+        bool ITypeTerm.IsConvertibleFrom(ITypeTerm from) =>
+            this.IsConvertibleFrom(from as TypeTerm);
 
         public override bool Equals(IExpression? rhs) =>
             rhs is TypeTerm type &&

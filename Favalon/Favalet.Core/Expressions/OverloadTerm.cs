@@ -27,7 +27,7 @@ using System.Linq;
 namespace Favalet.Expressions
 {
     public sealed class OverloadTerm :
-        Expression, ISumExpression, IInferrableExpression, IReducibleExpression
+        Expression, ITerm, ISumExpression, IInferrableExpression, IReducibleExpression
     {
         public readonly IExpression[] Overloads;
 
@@ -76,7 +76,7 @@ namespace Favalet.Expressions
                 Distinct();
 
             var valids = overloads.
-                Select(overload => (overload, higherOrder: context.Features.Widen(higherOrder, overload.HigherOrder)!)).
+                Select(overload => (overload, higherOrder: context.Widen(higherOrder, overload.HigherOrder)!)).
                 Where(entry => entry.higherOrder != null).
                 Distinct().
                 Memoize();

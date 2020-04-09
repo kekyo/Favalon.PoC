@@ -17,10 +17,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Specialized
 {
-    public interface IConstantTerm : ITerm
+    public interface ITypeTerm : ITerm
     {
-        object Value { get; }
+        bool IsConvertibleFrom(ITypeTerm from);
     }
 }

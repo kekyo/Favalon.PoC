@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
 using System.Diagnostics;

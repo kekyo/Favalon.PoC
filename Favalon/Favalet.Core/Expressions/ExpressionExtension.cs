@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -41,18 +42,36 @@ namespace Favalet.Expressions
             IInferContext context) =>
             expression.Infer(context);
         public static IExpression InferIfRequired(
+            this PlaceholderTerm placeholder,
+            IInferContext context,
+            int diggingPlaceholders = 1) =>
+            placeholder.Infer(context, diggingPlaceholders);
+        public static IExpression InferIfRequired(
             this IExpression expression,
-            IInferContext context) =>
-            expression is IInferrableExpression i ? i.Infer(context) : expression;
+            IInferContext context,
+            int diggingPlaceholders = 1) =>
+            expression is IInferrableExpression i ?
+                i.Infer(context) :
+                expression is PlaceholderTerm p ?
+                    p.Infer(context, diggingPlaceholders) :
+                    expression;
 
         public static IExpression FixupIfRequired(
             this IInferrableExpression expression,
             IFixupContext context) =>
             expression.Fixup(context);
         public static IExpression FixupIfRequired(
+            this PlaceholderTerm placeholder,
+            IFixupContext context) =>
+            placeholder.Fixup(context);
+        public static IExpression FixupIfRequired(
             this IExpression expression,
             IFixupContext context) =>
-            expression is IInferrableExpression i ? i.Fixup(context) : expression;
+            expression is IInferrableExpression i ?
+                i.Fixup(context) :
+                expression is PlaceholderTerm p ?
+                    p.Fixup(context) :
+                    expression;
 
         public static IExpression ReduceIfRequired(
             this IReducibleExpression expression,
@@ -61,7 +80,9 @@ namespace Favalet.Expressions
         public static IExpression ReduceIfRequired(
             this IExpression expression,
             IReduceContext context) =>
-            expression is IReducibleExpression r ? r.Reduce(context) : expression;
+            expression is IReducibleExpression r ?
+                r.Reduce(context) :
+                expression;
 
         public static bool ExactEquals(
             this IExpression expression,

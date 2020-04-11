@@ -47,12 +47,12 @@ namespace Favalet.Expressions
         {
             var higherOrder = this.HigherOrder.InferIfRequired(context);
             var overloads = this.Overloads.
-                Select(overload => overload.InferIfRequired(context)).
+                Select(overload => overload.InferIfRequired(context, 2)).
                 Distinct().
                 Memoize();
 
-            var overloadHigherOrders =
-                From(overloads.Select(overload => overload.HigherOrder),
+            var overloadHigherOrders = From(
+                overloads.Select(overload => overload.HigherOrder),
                 () => context.CreatePlaceholder(UnspecifiedTerm.Instance))!;
 
             context.Unify(higherOrder, overloadHigherOrders);
@@ -75,7 +75,8 @@ namespace Favalet.Expressions
             var higherOrder = this.HigherOrder.FixupIfRequired(context);
             var overloads = this.Overloads.
                 Select(overload => overload.FixupIfRequired(context)).
-                Distinct();
+                Distinct().
+                Memoize();
 
             var valids = overloads.
                 Select(overload => (overload, higherOrder: context.Widen(higherOrder, overload.HigherOrder)!)).

@@ -24,13 +24,13 @@ using System.Runtime.CompilerServices;
 namespace Favalet.Expressions.Specialized
 {
     public interface IPlaceholderTerm :
-        ITerm, IInferrableExpression, IReducibleExpression
+        ITerm
     {
         int Index { get; }
     }
 
     public sealed class PlaceholderTerm :
-        Expression, IPlaceholderTerm
+        Expression, IPlaceholderTerm, IReducibleExpression
     {
         public readonly int Index;
 
@@ -46,16 +46,19 @@ namespace Favalet.Expressions.Specialized
         int IPlaceholderTerm.Index =>
             this.Index;
 
-        public IExpression Infer(IInferContext context)
+        internal IExpression Infer(
+            IInferContext context,
+            int diggingPlaceholders = 1)
         {
-            // Special case: will not infer Unspecified higherOrder.
-            //   Maybe it makes infinity digging.
-            if (this.HigherOrder is UnspecifiedTerm)
+            if (diggingPlaceholders <= 0)
             {
                 return this;
             }
 
-            var higherOrder = this.HigherOrder.InferIfRequired(context);
+            var higherOrder = this.HigherOrder.InferIfRequired(
+                context,
+                diggingPlaceholders - 1);
+
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
@@ -66,7 +69,7 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        public IExpression Fixup(IFixupContext context)
+        internal IExpression Fixup(IFixupContext context)
         {
             if (context.Resolve(this) is IExpression resolved)
             {

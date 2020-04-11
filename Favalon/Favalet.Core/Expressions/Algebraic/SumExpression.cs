@@ -19,6 +19,7 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -62,13 +63,13 @@ namespace Favalet.Expressions.Algebraic
         {
             var higherOrder = this.HigherOrder.InferIfRequired(context);
             var expressions = this.Expressions.
-                Select(expression => expression.InferIfRequired(context)).
+                Select(expression => expression.InferIfRequired(context, 2)).
                 Memoize();
 
             var expressionHigherOrders = From(
                 expressions.Select(expression => expression.HigherOrder),
-                false)!.
-                InferIfRequired(context);
+                () => context.CreatePlaceholder(UnspecifiedTerm.Instance),
+                false)!;
 
             context.Unify(higherOrder, expressionHigherOrders);
 
@@ -79,7 +80,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return new SumExpression(expressions, higherOrder);
+                return From(expressions, () => higherOrder, true)!;
             }
         }
 
@@ -97,7 +98,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return new SumExpression(expressions, higherOrder);
+                return From(expressions, () => higherOrder, true)!;
             }
         }
 
@@ -115,7 +116,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return new SumExpression(expressions, higherOrder);
+                return From(expressions, () => higherOrder, true)!;
             }
         }
 
@@ -132,8 +133,10 @@ namespace Favalet.Expressions.Algebraic
         public static SumExpression Create(IExpression[] expressions, IExpression higherOrder) =>
             new SumExpression(expressions, higherOrder);
 
-        public static IExpression? From(
-            IEnumerable<IExpression> expressions, bool isStrict)
+        private static IExpression? From(
+            IEnumerable<IExpression> expressions,
+            Func<IExpression> higherOrder,
+            bool isStrict)
         {
             // It digs only first depth.
             var ses = expressions.
@@ -144,8 +147,12 @@ namespace Favalet.Expressions.Algebraic
             {
                 0 => null,
                 1 when !isStrict => ses2[0],
-                _ => new SumExpression(ses2, UnspecifiedTerm.Instance)
+                _ => new SumExpression(ses2, higherOrder())
             };
         }
+
+        public static IExpression? From(
+            IEnumerable<IExpression> expressions, bool isStrict) =>
+            From(expressions, () => UnspecifiedTerm.Instance, isStrict);
     }
 }

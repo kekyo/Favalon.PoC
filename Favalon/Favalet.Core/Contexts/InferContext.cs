@@ -43,35 +43,14 @@ namespace Favalet.Contexts
     internal sealed class InferContext :
         TypeContext, IInferContext, IFixupContext
     {
-        private enum Directions
-        {
-            Forward,
-            Reverse
-        }
-
-        private struct PlaceholderDescription
-        {
-            public readonly IExpression Expression;
-            public readonly Directions Direction;
-
-            public PlaceholderDescription(IExpression expression, Directions direction)
-            {
-                this.Expression = expression;
-                this.Direction = direction;
-            }
-
-            public override string ToString() =>
-                $"{this.Expression},{this.Direction}";
-        }
-
         private readonly IRootTypeContext rootContext;
-        private readonly Dictionary<int, PlaceholderDescription> descriptions;
+        private readonly Dictionary<int, IExpression> descriptions;
 
         private InferContext(IRootTypeContext rootContext) :
             base(rootContext)
         {
             this.rootContext = rootContext;
-            this.descriptions = new Dictionary<int, PlaceholderDescription>();
+            this.descriptions = new Dictionary<int, IExpression>();
         }
 
         private InferContext(InferContext parent) :
@@ -87,41 +66,31 @@ namespace Favalet.Contexts
         public IPlaceholderTerm CreatePlaceholder(IExpression higherOrder) =>
             PlaceholderTerm.Create(this.rootContext.DrawNextPlaceholderIndex(), higherOrder);
 
-        private static Directions CorrectVariance(Directions a, Directions b) =>
-            (a, b) switch
-            {
-                (Directions.Forward, Directions.Forward) => Directions.Forward,
-                (Directions.Forward, Directions.Reverse) => Directions.Reverse,
-                (Directions.Reverse, Directions.Forward) => Directions.Reverse,
-                _ => Directions.Forward
-            };
-
         private IExpression? InternalUnifyPlaceholder(
-            IPlaceholderTerm placeholder, IExpression from, Directions direction, bool isWiden)
+            IPlaceholderTerm placeholder,
+            IExpression from,
+            bool isForward,
+            bool isWiden)
         {
             Debug.Assert(
                 from is PlaceholderTerm ||
                 !(from.HigherOrder is UnspecifiedTerm));
 
-            if (this.descriptions.TryGetValue(placeholder.Index, out var description))
+            if (this.descriptions.TryGetValue(placeholder.Index, out var lastCombined))
             {
-                var combinedDirection = CorrectVariance(description.Direction, direction);
-
-                var result = true ? // combinedDirection == Directions.Forward ?
-                    this.InternalUnify(description.Expression, from, isWiden) :  // forward
-                    this.InternalUnify(from, description.Expression, isWiden);   // backward
+                var result = isForward ?
+                    this.InternalUnify(lastCombined, from, isWiden) :  // forward
+                    this.InternalUnify(from, lastCombined, isWiden);   // backward
 
                 if (result is IExpression)
                 {
-                    this.descriptions[placeholder.Index] =
-                        new PlaceholderDescription(result, combinedDirection);
+                    this.descriptions[placeholder.Index] = result;
                     return result;
                 }
                 else if (!isWiden)
                 {
-                    var combinedExpression = OverloadTerm.From(new[] { description.Expression, from });
-                    this.descriptions[placeholder.Index] =
-                        new PlaceholderDescription(combinedExpression!, combinedDirection);
+                    var combinedExpression = OverloadTerm.From(new[] { lastCombined, from });
+                    this.descriptions[placeholder.Index] = combinedExpression!;
                     return combinedExpression;
                 }
                 else
@@ -131,7 +100,7 @@ namespace Favalet.Contexts
             }
             else
             {
-                this.descriptions.Add(placeholder.Index, new PlaceholderDescription(from, direction));
+                this.descriptions.Add(placeholder.Index, from);
                 return from;
             }
         }
@@ -218,11 +187,11 @@ namespace Favalet.Contexts
 
             if (to is IPlaceholderTerm tph)
             {
-                return this.InternalUnifyPlaceholder(tph, from, Directions.Forward, isWiden);
+                return this.InternalUnifyPlaceholder(tph, from, true, isWiden);
             }
             if (from is IPlaceholderTerm fph)
             {
-                return this.InternalUnifyPlaceholder(fph, to, Directions.Reverse, isWiden);
+                return this.InternalUnifyPlaceholder(fph, to, false, isWiden);
             }
 
             return isWiden ?
@@ -240,15 +209,15 @@ namespace Favalet.Contexts
             var current = placeholder;
             while (true)
             {
-                if (this.descriptions.TryGetValue(current.Index, out var description))
+                if (this.descriptions.TryGetValue(current.Index, out var combined))
                 {
-                    if (description.Expression is IPlaceholderTerm p)
+                    if (combined is IPlaceholderTerm p)
                     {
                         current = p;
                     }
                     else
                     {
-                        return description.Expression;
+                        return combined;
                     }
                 }
                 else

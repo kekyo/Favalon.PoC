@@ -67,7 +67,8 @@ namespace Favalet.Expressions.Algebraic
 
             var expressionHigherOrders = From(
                 expressions.Select(expression => expression.HigherOrder),
-                false)!;
+                false)!.
+                InferIfRequired(context);
 
             context.Unify(higherOrder, expressionHigherOrders);
 

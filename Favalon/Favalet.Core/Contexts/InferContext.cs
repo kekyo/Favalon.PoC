@@ -21,6 +21,7 @@ using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Favalet.Contexts
@@ -98,11 +99,15 @@ namespace Favalet.Contexts
         private IExpression? InternalUnifyPlaceholder(
             IPlaceholderTerm placeholder, IExpression from, Directions direction, bool isWiden)
         {
+            Debug.Assert(
+                from is PlaceholderTerm ||
+                !(from.HigherOrder is UnspecifiedTerm));
+
             if (this.descriptions.TryGetValue(placeholder.Index, out var description))
             {
                 var combinedDirection = CorrectVariance(description.Direction, direction);
 
-                var result = combinedDirection == Directions.Forward ?
+                var result = true ? // combinedDirection == Directions.Forward ?
                     this.InternalUnify(description.Expression, from, isWiden) :  // forward
                     this.InternalUnify(from, description.Expression, isWiden);   // backward
 

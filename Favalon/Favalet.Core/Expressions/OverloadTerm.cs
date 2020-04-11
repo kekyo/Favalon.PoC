@@ -20,6 +20,7 @@
 using Favalet.Contexts;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -50,8 +51,9 @@ namespace Favalet.Expressions
                 Distinct().
                 Memoize();
 
-            var overloadHigherOrders = From(
-                overloads.Select(overload => overload.HigherOrder))!;
+            var overloadHigherOrders =
+                From(overloads.Select(overload => overload.HigherOrder),
+                () => context.CreatePlaceholder(UnspecifiedTerm.Instance))!;
 
             context.Unify(higherOrder, overloadHigherOrders);
 
@@ -64,7 +66,7 @@ namespace Favalet.Expressions
             {
                 Debug.Assert(overloads.Length >= 1);
 
-                return From(overloads, higherOrder)!;
+                return From(overloads, () => higherOrder)!;
             }
         }
 
@@ -89,7 +91,7 @@ namespace Favalet.Expressions
                 }
                 else
                 {
-                    return From(this.Overloads, higherOrder)!;
+                    return From(this.Overloads, () => higherOrder)!;
                 }
             }
 
@@ -111,7 +113,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return From(validOverloads, validHigherOrder)!;
+                return From(validOverloads, () => validHigherOrder)!;
             }
         }
 
@@ -132,7 +134,7 @@ namespace Favalet.Expressions
             {
                 Debug.Assert(overloads.Length >= 1);
 
-                return From(overloads, higherOrder)!;
+                return From(overloads, () => higherOrder)!;
             }
         }
 
@@ -147,11 +149,12 @@ namespace Favalet.Expressions
             context.Format(this, (object[])this.Overloads);
 
         private static IExpression? From(
-            IEnumerable<IExpression> overloads, IExpression higherOrder)
+            IEnumerable<IExpression> overloads, Func<IExpression> higherOrder)
         {
             // It digs only first depth.
             var oes = overloads.
                 SelectMany(overload => (overload is OverloadTerm(IExpression[] oes)) ? oes : new[] { overload }).
+                Where(overload => !(overload is TerminationTerm)).  // Suppress termination
                 Distinct().
                 OrderBy(overload => overload.GetHashCode()).   // Make stable
                 Memoize();
@@ -160,11 +163,11 @@ namespace Favalet.Expressions
             {
                 0 => null,
                 1 => oes[0],
-                _ => new OverloadTerm(oes, higherOrder)
+                _ => new OverloadTerm(oes, higherOrder())
             };
         }
 
         public static IExpression? From(IEnumerable<IExpression> overloads) =>
-            From(overloads, UnspecifiedTerm.Instance);
+            From(overloads, () => UnspecifiedTerm.Instance);
     }
 }

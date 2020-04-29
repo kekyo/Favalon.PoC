@@ -82,7 +82,7 @@ namespace Favalet.Contexts
                 from is PlaceholderTerm ||
                 !(from.HigherOrder is UnspecifiedTerm));
 
-            Debug.Assert(placeholder.Index != breakIndex);
+            //Debug.Assert(placeholder.Index != breakIndex);
 
             Debug.WriteLine($"UnifyPlaceholder [{recursiveCount}]: Placeholder={placeholder}, From={from}, IsForward={isForward}, Overloadable={overloadable}, IsWiden={isWiden}");
 
@@ -275,10 +275,35 @@ namespace Favalet.Contexts
             return final;
         }
 
-        public void Unify(IExpression to, IExpression from) =>
+        public void Unify(IExpression to, IExpression from)
+        {
+            Debug.WriteLine("");
+            Debug.WriteLine("Begin unify ====================================================");
             this.InternalUnify(to, from, true, false);
-        public IExpression? Widen(IExpression to, IExpression from) =>
-            this.InternalUnify(to, from, true, true);
+
+            Debug.WriteLine("Descriptions ====================================================");
+            foreach (var entry in this.descriptions)
+            {
+                Debug.WriteLine($"{entry.Key}: {entry.Value}");
+            }
+
+            Debug.WriteLine("End unify ====================================================");
+        }
+        public IExpression? Widen(IExpression to, IExpression from)
+        {
+            Debug.WriteLine("");
+            Debug.WriteLine("Begin unify ====================================================");
+            var result = this.InternalUnify(to, from, true, true);
+
+            Debug.WriteLine("Descriptions ====================================================");
+            foreach (var entry in this.descriptions)
+            {
+                Debug.WriteLine($"{entry.Key}: {entry.Value}");
+            }
+
+            Debug.WriteLine("End unify ====================================================");
+            return result;
+        }
 
         public IExpression? Resolve(IPlaceholderTerm placeholder)
         {

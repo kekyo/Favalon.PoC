@@ -72,6 +72,6 @@ namespace Favalet.Expressions
         public sealed override string ToString() =>
             this.FormatString(
                 NamedNodeFormatStringContext.Create(
-                    FormatStringOptions.UseRelativeIndex));
+                    FormatStringOptions.Default));
     }
 }

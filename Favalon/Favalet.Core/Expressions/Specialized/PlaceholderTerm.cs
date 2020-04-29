@@ -113,8 +113,8 @@ namespace Favalet.Expressions.Specialized
         public override int GetHashCode() =>
             this.Index.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            $"'{context.GetPlaceholderIndexString(this.Index)}";
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.ForceText, $"'{context.GetPlaceholderIndexString(this.Index)}");
 
         internal static PlaceholderTerm Create(int index, IExpression higherOrder) =>
             new PlaceholderTerm(index, higherOrder);

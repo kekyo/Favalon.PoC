@@ -146,8 +146,8 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Overloads.Aggregate(0, (agg, e) => agg ^ e.GetHashCode());
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, (object[])this.Overloads);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.Standard, this.Overloads);
 
         private static IExpression? From(
             IEnumerable<IExpression> overloads, Func<IExpression> higherOrder)

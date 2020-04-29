@@ -37,8 +37,8 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? rhs) =>
             rhs is TerminationTerm;
 
-        public override string FormatString(IFormatStringContext context) =>
-            "!!TERM";
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.ForceText | FormatOptions.SuppressHigherOrder, "!!TERM");
 
         public static readonly IExpression Instance =
             new TerminationTerm();

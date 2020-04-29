@@ -127,8 +127,8 @@ namespace Favalet.Expressions.Algebraic
         public override int GetHashCode() =>
             this.Expressions.Aggregate(0, (agg, e) => agg ^ e.GetHashCode());
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, (object[])this.Expressions);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.Standard, this.Expressions);
 
         public static SumExpression Create(IExpression[] expressions, IExpression higherOrder) =>
             new SumExpression(expressions, higherOrder);

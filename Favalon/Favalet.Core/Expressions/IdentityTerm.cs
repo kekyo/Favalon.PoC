@@ -125,8 +125,8 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Identity.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.UseSimpleLabel ? this.Identity : context.Format(this, this.Identity);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.Standard, this.Identity);
 
         public static IdentityTerm Create(string identity, IExpression higherOrder) =>
             new IdentityTerm(identity, higherOrder);

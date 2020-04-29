@@ -43,8 +43,8 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? rhs) =>
             rhs is UnspecifiedTerm;
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.UseSimpleLabel ? "_" : context.Format(this);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.ForceText, "_");
 
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();

@@ -55,12 +55,17 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Value.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            this.Value switch
-            {
-                string str => $"\"{str}\"",
-                _ => $"{this.Value}:{this.HigherOrder.FormatString(context.SuppressRecursive())}"
-            };
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(
+                this,
+                (this.Value.GetType().IsPrimitive() || (this.Value is string)) ?
+                    FormatOptions.ForceText | FormatOptions.SuppressHigherOrder :
+                    FormatOptions.Standard,
+                this.Value switch
+                {
+                    string str => $"\"{str}\"",
+                    _ => this.Value.ToString()
+                });
 
         public static ITerm From(object value) =>
             value switch
@@ -130,7 +135,10 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Value.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            $"\"{this.Value}\"";
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(
+                this,
+                FormatOptions.ForceText | FormatOptions.SuppressHigherOrder,
+                $"\"{this.Value}\"");
     }
 }

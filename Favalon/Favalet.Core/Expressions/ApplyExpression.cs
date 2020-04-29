@@ -154,8 +154,8 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, this.Function, this.Argument);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.Standard, this.Function, this.Argument);
 
         public static ApplyExpression Create(
             IExpression function, IExpression argument, IExpression higherOrder) =>

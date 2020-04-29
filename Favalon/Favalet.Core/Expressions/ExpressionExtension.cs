@@ -21,6 +21,9 @@ using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace Favalet.Expressions
 {
@@ -92,5 +95,46 @@ namespace Favalet.Expressions
             this IEnumerable<IExpression> expressions,
             IEnumerable<IExpression> rhss) =>
             expressions.SequenceEqual(rhss, ExactEqualityComparer.Instance);
+
+        public static void WriteTo(
+            this IExpression expression,
+            XmlWriter writer)
+        {
+            var node = expression.Format(FormatXmlContext.Create());
+            node.WriteTo(writer);
+        }
+
+        public static XNode FormatXml(
+            this IExpression expression) =>
+            expression.Format(FormatXmlContext.Create());
+
+        public static string FormatXmlString(
+            this IExpression expression,
+            bool readable = true)
+        {
+            var node = expression.Format(FormatXmlContext.Create());
+            if (node is XText text)
+            {
+                return text.Value;
+            }
+            else
+            {
+                var sb = new StringBuilder();
+                using (var writer = XmlWriter.Create(
+                    sb,
+                    new XmlWriterSettings
+                    {
+                        OmitXmlDeclaration = readable,
+                        Indent = readable,
+                        IndentChars = "  ",
+                        NewLineChars = readable ? "\r\n" : string.Empty
+                    }))
+                {
+                    node.WriteTo(writer);
+                    writer.Flush();
+                }
+                return sb.ToString();
+            }
+        }
     }
 }

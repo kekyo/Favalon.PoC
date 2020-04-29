@@ -22,7 +22,6 @@
 
 using Favalet.Contexts;
 using System;
-using System.Diagnostics;
 
 namespace Favalet.Expressions
 {
@@ -30,13 +29,11 @@ namespace Favalet.Expressions
     {
         IExpression HigherOrder { get; }
 
-        string FormatString(IFormatStringContext context);
+        T Format<T>(IFormatContext<T> context);
 
-        string StrictString { get; }
-        string ReadableString { get; }
+        string ReadableXml { get; }
     }
 
-    [DebuggerDisplay("{DebuggableString}")]
     public abstract partial class Expression : IExpression
     {
         protected Expression()
@@ -52,26 +49,12 @@ namespace Favalet.Expressions
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             this.Equals(other);
 
-        public abstract string FormatString(IFormatStringContext context);
+        public abstract T Format<T>(IFormatContext<T> context);
 
-        public string StrictString =>
-            this.FormatString(
-                NamedNodeFormatStringContext.Create(
-                    FormatStringOptions.Default));
+        public string ReadableXml =>
+            this.FormatXmlString(true);
 
-        public string ReadableString =>
-            this.FormatString(
-                NamedNodeFormatStringContext.Create(
-                    FormatStringOptions.UseRelativeIndex | FormatStringOptions.UseSimpleLabels));
-
-        public string DebuggableString =>
-            this.FormatString(
-                NamedNodeFormatStringContext.Create(
-                    FormatStringOptions.UseSimpleLabels));
-
-        public sealed override string ToString() =>
-            this.FormatString(
-                NamedNodeFormatStringContext.Create(
-                    FormatStringOptions.UseRelativeIndex));
+        public override string ToString() =>
+            ReadableXml;
     }
 }

@@ -140,8 +140,8 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^ this.Result.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, this.Parameter, this.Result);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.Standard, this.Parameter, this.Result);
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

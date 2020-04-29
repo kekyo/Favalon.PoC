@@ -63,11 +63,6 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Method.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.UseSimpleLabel ?
-                $"{this.Method.GetFullName()}()" :
-                context.Format(this, this.Method.GetFullName());
-
         public static ConstructorTerm From(Type type, params Type[] parameters) =>
             ConstructorTerm.From(type.GetDeclaredConstructor(parameters));
 
@@ -123,6 +118,12 @@ namespace Favalet.Expressions
             }
         }
 
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(
+                this,
+                FormatOptions.SuppressHigherOrder,
+                $"{this.Method.GetFullName()}({this.Method.GetParameters()[0].ParameterType.GetFullName()})");
+
         internal static ConstructorTerm From(ConstructorInfo constructor) =>
             // TODO: multiple arguments
             // TODO: nothing arguments
@@ -168,6 +169,12 @@ namespace Favalet.Expressions
                 return new ConcreteMethodTerm((MethodInfo)this.Method, higherOrder);
             }
         }
+
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(
+                this,
+                FormatOptions.SuppressHigherOrder,
+                $"{this.Method.GetFullName()}({this.Method.GetParameters()[0].ParameterType.GetFullName()}):{((MethodInfo)this.Method).ReturnType.GetFullName()}");
 
         internal static ConcreteMethodTerm From(MethodInfo method) =>
             // TODO: multiple arguments

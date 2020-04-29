@@ -37,8 +37,8 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? rhs) =>
             rhs is FourthTerm;
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.UseSimpleLabel ? "#" : context.Format(this);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.ForceText | FormatOptions.SuppressHigherOrder, "#");
 
         public static readonly FourthTerm Instance =
             new FourthTerm();

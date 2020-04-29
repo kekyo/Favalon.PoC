@@ -29,8 +29,8 @@ namespace Favalet.Expressions
     public abstract class TypeTerm :
         Expression, ITypeTerm
     {
-        private static readonly Dictionary<Type, ITerm> types =
-            new Dictionary<Type, ITerm>();
+        private static readonly Dictionary<Type, TypeTerm> types =
+            new Dictionary<Type, TypeTerm>();
 
         public readonly Type Type;
 
@@ -50,7 +50,7 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Type.GetHashCode();
 
-        public static ITerm From(Type type)
+        public static TypeTerm From(Type type)
         {
             // TODO: detect delegates
             // TODO: detect generics

@@ -31,7 +31,7 @@ namespace Favalet.Expressions
         Expression, IConstantTerm
     {
         public readonly object Value;
-        private readonly ValueLazy<ConstantTerm, ITerm> higherOrder;
+        private readonly ValueLazy<ConstantTerm, TypeTerm> higherOrder;
 
         private ConstantTerm(object value)
         {
@@ -72,6 +72,8 @@ namespace Favalet.Expressions
             {
                 char ch => new SingleCharConstantTerm(ch, UnspecifiedTerm.Instance),
                 string str when str.Length == 1 => new SingleCharConstantTerm(str[0], UnspecifiedTerm.Instance),
+                Type type => TypeTerm.From(type),
+                MethodBase method => MethodTerm.From(method),
                 _ => new ConstantTerm(value)
             };
     }

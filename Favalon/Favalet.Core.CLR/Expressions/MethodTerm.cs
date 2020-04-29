@@ -28,7 +28,7 @@ using System.Reflection;
 namespace Favalet.Expressions
 {
     public abstract class MethodTerm :
-        Expression, ICallableExpression
+        Expression, ITerm, ICallableExpression
     {
         public readonly MethodBase Method;
 
@@ -173,7 +173,7 @@ namespace Favalet.Expressions
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(
                 this,
-                FormatOptions.SuppressHigherOrder,
+                FormatOptions.Standard,
                 $"{this.Method.GetFullName()}({this.Method.GetParameters()[0].ParameterType.GetFullName()}):{((MethodInfo)this.Method).ReturnType.GetFullName()}");
 
         internal static ConcreteMethodTerm From(MethodInfo method) =>

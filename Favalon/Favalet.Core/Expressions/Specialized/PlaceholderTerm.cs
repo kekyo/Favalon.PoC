@@ -24,13 +24,13 @@ using System.Runtime.CompilerServices;
 namespace Favalet.Expressions.Specialized
 {
     public interface IPlaceholderTerm :
-        ITerm, IInferrableExpression, IReducibleExpression
+        ITerm
     {
         int Index { get; }
     }
 
     public sealed class PlaceholderTerm :
-        Expression, IPlaceholderTerm
+        Expression, IPlaceholderTerm, IInferrableExpression, IReducibleExpression
     {
         public readonly int Index;
 
@@ -48,14 +48,8 @@ namespace Favalet.Expressions.Specialized
 
         public IExpression Infer(IInferContext context)
         {
-            // Special case: will not infer Unspecified higherOrder.
-            //   Maybe it makes infinity digging.
-            if (this.HigherOrder is UnspecifiedTerm)
-            {
-                return this;
-            }
-
             var higherOrder = this.HigherOrder.InferIfRequired(context);
+
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
@@ -68,7 +62,7 @@ namespace Favalet.Expressions.Specialized
 
         public IExpression Fixup(IFixupContext context)
         {
-            if (context.Resolve(this) is IExpression resolved)
+            if (context.LookupPlaceholder(this) is IExpression resolved)
             {
                 return resolved.FixupIfRequired(context);
             }
@@ -110,10 +104,26 @@ namespace Favalet.Expressions.Specialized
         public override int GetHashCode() =>
             this.Index.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            $"'{context.GetPlaceholderIndexString(this.Index)}";
+        public override T Format<T>(IFormatContext<T> context) =>
+//            context.Format(this, FormatOptions.ForceText, $"'{context.GetPlaceholderIndexString(this.Index)}");
+            context.Format(this, FormatOptions.ForceText, $"'{this.Index}");
 
-        internal static PlaceholderTerm Create(int index, IExpression higherOrder) =>
-            new PlaceholderTerm(index, higherOrder);
+        internal static PlaceholderTerm Create(InferContext context, int currentOrder)
+        {
+            var index = context.DrawNextPlaceholderIndex();
+
+            if (currentOrder <= 2)
+            {
+                return new PlaceholderTerm(
+                    index,
+                    Create(context, currentOrder + 1));
+            }
+            else
+            {
+                return new PlaceholderTerm(
+                    index,
+                    TerminationTerm.Instance);
+            }
+        }
     }
 }

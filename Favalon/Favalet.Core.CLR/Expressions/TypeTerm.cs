@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ using System.Reflection;
 namespace Favalet.Expressions
 {
     public abstract class TypeTerm :
-        Expression, ITerm
+        Expression, ITypeTerm
     {
         private static readonly Dictionary<Type, ITerm> types =
             new Dictionary<Type, ITerm>();
@@ -36,15 +37,18 @@ namespace Favalet.Expressions
         private protected TypeTerm(Type type) =>
             this.Type = type;
 
+        public bool IsConvertibleFrom(TypeTerm? from) =>
+            from is TypeTerm && this.Type.IsConvertibleFrom(from.Type);
+
+        bool ITypeTerm.IsConvertibleFrom(ITypeTerm from) =>
+            this.IsConvertibleFrom(from as TypeTerm);
+
         public override bool Equals(IExpression? rhs) =>
             rhs is TypeTerm type &&
                 this.Type.Equals(type.Type);
 
         public override int GetHashCode() =>
             this.Type.GetHashCode();
-
-        public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, this.Type.GetFullName());
 
         public static ITerm From(Type type)
         {
@@ -58,12 +62,13 @@ namespace Favalet.Expressions
                     // Special case: Force replacing RuntimeType to Type
                     if (typeof(Type).IsAssignableFrom(type))
                     {
-                        term = new ConcreteTypeTerm(typeof(Type));
+                        term = ExpressionFactory.kindType;
                     }
                     else
                     {
                         term = new ConcreteTypeTerm(type);
                     }
+
                     types.Add(type, term);
                 }
                 return term;
@@ -80,5 +85,11 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder =>
             ExpressionFactory.kindType;
+
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(
+                this,
+                FormatOptions.SuppressHigherOrder,
+                this.Type.GetFullName());
     }
 }

@@ -17,30 +17,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Contexts;
-using System.Runtime.CompilerServices;
-
 namespace Favalet.Expressions.Specialized
 {
-    public sealed class FourthTerm :
-        Expression, ITerm
+    public interface IConstantTerm : ITerm
     {
-        private FourthTerm()
-        { }
-
-        public override IExpression HigherOrder =>
-            TerminationTerm.Instance;
-
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public override bool Equals(IExpression? rhs) =>
-            rhs is FourthTerm;
-
-        public override T Format<T>(IFormatContext<T> context) =>
-            context.Format(this, FormatOptions.ForceText | FormatOptions.SuppressHigherOrder, "#");
-
-        public static readonly FourthTerm Instance =
-            new FourthTerm();
+        object Value { get; }
     }
 }

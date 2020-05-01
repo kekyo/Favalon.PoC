@@ -31,18 +31,14 @@ namespace Favalet.Expressions
         Expression, IConstantTerm
     {
         public readonly object Value;
-        private readonly ValueLazy<ConstantTerm, ITerm> higherOrder;
 
         private ConstantTerm(object value)
         {
             this.Value = value;
-            this.higherOrder = ValueLazy.Create(
-                this,
-                @this => TypeTerm.From(@this.Value.GetType()));
+            this.HigherOrder = TypeTerm.From(value.GetType());
         }
 
-        public override IExpression HigherOrder =>
-            this.higherOrder.Value;
+        public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IConstantTerm.Value =>
@@ -55,18 +51,25 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Value.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            this.Value switch
-            {
-                string str => $"\"{str}\"",
-                _ => $"{this.Value}:{this.HigherOrder.FormatString(context.SuppressRecursive())}"
-            };
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(
+                this,
+                (this.Value.GetType().IsPrimitive() || (this.Value is string)) ?
+                    FormatOptions.ForceText | FormatOptions.SuppressHigherOrder :
+                    FormatOptions.Standard,
+                this.Value switch
+                {
+                    string str => $"\"{str}\"",
+                    _ => this.Value.ToString()
+                });
 
         public static ITerm From(object value) =>
             value switch
             {
                 char ch => new SingleCharConstantTerm(ch, UnspecifiedTerm.Instance),
                 string str when str.Length == 1 => new SingleCharConstantTerm(str[0], UnspecifiedTerm.Instance),
+                Type type => TypeTerm.From(type),
+                MethodBase method => MethodTerm.From(method),
                 _ => new ConstantTerm(value)
             };
     }
@@ -76,7 +79,7 @@ namespace Favalet.Expressions
     {
         private static readonly IExpression charTerm = TypeTerm.From(typeof(char));
         private static readonly IExpression higherOrder =
-            SumExpression.Create(new[] { charTerm, TypeTerm.From(typeof(string)) }, ExpressionFactory.kindType);
+            OrExpression.From(new[] { charTerm, TypeTerm.From(typeof(string)) })!;
 
         public readonly char Value;
 
@@ -130,7 +133,10 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Value.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            $"\"{this.Value}\"";
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(
+                this,
+                FormatOptions.ForceText | FormatOptions.SuppressHigherOrder,
+                $"\"{this.Value}\"");
     }
 }

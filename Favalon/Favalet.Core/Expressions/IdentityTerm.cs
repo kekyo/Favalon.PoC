@@ -53,11 +53,12 @@ namespace Favalet.Expressions
         {
             var higherOrder = this.HigherOrder.InferIfRequired(context);
 
-            if (context.Lookup(this) is BoundInformation[] bounds && (bounds.Length >= 1))
+            if (context.LookupBoundInformations(this) is BoundInformation[] bounds && (bounds.Length >= 1))
             {
                 // TODO: bound attributes
 
-                var overloads = OverloadTerm.From(bounds.Select(bound => bound.Expression))!;
+                var overloads = OverloadTerm.From(
+                    bounds.Select(bound => bound.Expression))!;
                 var inferred = overloads.InferIfRequired(context);
 
                 context.Unify(higherOrder, inferred.HigherOrder);
@@ -90,11 +91,11 @@ namespace Favalet.Expressions
 
         public IExpression Reduce(IReduceContext context)
         {
-            var bounds = context.Lookup(this);
+            var bounds = context.LookupBoundInformations(this);
             if (bounds.Length >= 1)
             {
                 // TODO: bound attributes
-                return SumExpression.From(bounds.Select(bound => bound.Expression), false)?.
+                return OrExpression.From(bounds.Select(bound => bound.Expression))?.
                     ReduceIfRequired(context) ?? TerminationTerm.Instance;
             }
             else
@@ -124,8 +125,8 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Identity.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.UseSimpleLabel ? this.Identity : context.Format(this, this.Identity);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.Standard, this.Identity);
 
         public static IdentityTerm Create(string identity, IExpression higherOrder) =>
             new IdentityTerm(identity, higherOrder);

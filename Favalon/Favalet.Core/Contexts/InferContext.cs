@@ -20,58 +20,37 @@
 using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Favalet.Contexts
 {
     public interface IInferContext : IScopedTypeContext<IInferContext>
     {
-        IPlaceholderTerm CreatePlaceholder(IExpression higherOrder);
+        IPlaceholderTerm CreatePlaceholder();
 
-        bool Unify(IExpression to, IExpression from);
+        void Unify(IExpression to, IExpression from);
     }
 
     public interface IFixupContext
     {
-        ITypeContextFeatures Features { get; }
+        IExpression? Widen(IExpression to, IExpression from);
 
-        IExpression? Resolve(IPlaceholderTerm placeholder);
+        IExpression? LookupPlaceholder(IPlaceholderTerm placeholder);
     }
 
     internal sealed class InferContext :
         TypeContext, IInferContext, IFixupContext
     {
-        private enum Directions
-        {
-            Forward,
-            Reverse
-        }
-
-        private struct PlaceholderDescription
-        {
-            public readonly IExpression Expression;
-            public readonly Directions Direction;
-
-            public PlaceholderDescription(IExpression expression, Directions direction)
-            {
-                this.Expression = expression;
-                this.Direction = direction;
-            }
-
-            public override string ToString() =>
-                $"{this.Expression},{this.Direction}";
-        }
-
         private readonly IRootTypeContext rootContext;
-        private readonly Dictionary<int, PlaceholderDescription> descriptions;
+        private readonly Dictionary<int, IExpression> descriptions;
 
         private InferContext(IRootTypeContext rootContext) :
             base(rootContext)
         {
             this.rootContext = rootContext;
-            this.descriptions = new Dictionary<int, PlaceholderDescription>();
+            this.descriptions = new Dictionary<int, IExpression>();
         }
 
         private InferContext(InferContext parent) :
@@ -81,68 +60,69 @@ namespace Favalet.Contexts
             this.descriptions = parent.descriptions;
         }
 
-        ITypeContextFeatures IFixupContext.Features =>
-            this.rootContext.Features;
-
         public IInferContext CreateDerivedScope() =>
             new InferContext(this);
 
-        public IPlaceholderTerm CreatePlaceholder(IExpression higherOrder) =>
-            PlaceholderTerm.Create(this.rootContext.DrawNextPlaceholderIndex(), higherOrder);
+        public IPlaceholderTerm CreatePlaceholder() =>
+            PlaceholderTerm.Create(this, 1);
 
-        private static Directions CorrectVariance(Directions a, Directions b) =>
-            (a, b) switch
-            {
-                (Directions.Forward, Directions.Forward) => Directions.Forward,
-                (Directions.Forward, Directions.Reverse) => Directions.Reverse,
-                (Directions.Reverse, Directions.Forward) => Directions.Reverse,
-                _ => Directions.Forward
-            };
+        internal bool IsInferring =>
+            this.rootContext.IsInferring;
 
-        private IExpression? InternalUnifyPlaceholder(
-            IPlaceholderTerm placeholder, IExpression from, Directions direction)
+        internal int DrawNextPlaceholderIndex() =>
+            this.rootContext.DrawNextPlaceholderIndex();
+
+        private IExpression? Substitute(
+            IPlaceholderTerm placeholder,
+            IExpression from,
+            bool isForward)
         {
-            if (this.descriptions.TryGetValue(placeholder.Index, out var description))
+            if (this.descriptions.TryGetValue(placeholder.Index, out var lastCombined))
             {
-                var combinedDirection = CorrectVariance(description.Direction, direction);
-
-                var result = combinedDirection == Directions.Forward ?
-                    this.InternalUnify(description.Expression, from) :  // forward
-                    this.InternalUnify(from, description.Expression);   // backward
+                var result = isForward ?
+                    this.Solve(lastCombined, from) :  // forward
+                    this.Solve(from, lastCombined);   // backward
 
                 if (result is IExpression)
                 {
-                    this.descriptions[placeholder.Index] =
-                        new PlaceholderDescription(result, combinedDirection);
+                    this.descriptions[placeholder.Index] = result;
                     return result;
                 }
                 else
                 {
-                    var combinedExpression = OverloadTerm.From(new[] { description.Expression, from });
-                    this.descriptions[placeholder.Index] =
-                        new PlaceholderDescription(combinedExpression!, combinedDirection);
-                    return combinedExpression;
+                    var combinedExpression = OverloadTerm.From(new[] { lastCombined, from });
+                    this.descriptions[placeholder.Index] = combinedExpression!;
+                    return null;
                 }
             }
             else
             {
-                this.descriptions.Add(placeholder.Index, new PlaceholderDescription(from, direction));
+                this.descriptions.Add(placeholder.Index, from);
                 return from;
             }
         }
 
-        private IExpression? InternalUnify(IExpression to, IExpression from)
+        private IExpression? Solve(IExpression to, IExpression from)
         {
-            if (to.ExactEquals(from))
+            // int: int <-- int
+            // IComparable: IComparable <-- IComparable
+            // _[1]: _[1] <-- _[1]
+            if (to.ShallowEquals(from))
             {
                 return to;
             }
 
+            if (to is UnspecifiedTerm || from is UnspecifiedTerm)
+            {
+                return null;
+            }
+
+            // int->object: int->object <-- object->int
             if (to is IFunctionDeclaredExpression(IExpression tp, IExpression tr) &&
                 from is IFunctionDeclaredExpression(IExpression fp, IExpression fr))
             {
-                var pr = this.InternalUnify(tp, fp);
-                var rr = this.InternalUnify(tr, fr);
+                var pr = this.Solve(fp, tp);
+                var rr = this.Solve(tr, fr);
 
                 if (pr != null && rr != null)
                 {
@@ -154,52 +134,90 @@ namespace Favalet.Contexts
                 }
             }
 
-            if (to is ISumExpression(IExpression[] tss))
+            // (int | double): (int | double) <-- (int | double)
+            // (int | double | string): (int | double | string) <-- (int | double)
+            // (int | IComparable): (int | IComparable) <-- (int | string)
+            // null: (int | double) <-- (int | double | string)
+            // null: (int | IServiceProvider) <-- (int | double)
+            // (int | _): (int | _) <-- (int | string)
+            // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
+            if (to is IOrExpression(IExpression[] tss1) &&
+                from is IOrExpression(IExpression[] fss1))
             {
-                var results = tss.
-                    Select(ts => this.InternalUnify(ts, from)).
-                    Where(result => result != null).
+                var results = fss1.
+                    Select(fs => tss1.Any(ts => this.Solve(ts, fs) != null)).
                     Memoize();
-                return OverloadTerm.From(results!);
+                return results.All(r => r) ?
+                    to : null;
             }
-            if (from is ISumExpression(IExpression[] fss))
+
+            // (int | double): (int | double) <-- int
+            // (int | IServiceProvider): (int | IServiceProvider) <-- int
+            // (int | IComparable): (int | IComparable) <-- string
+            // (int | _): (int | _) <-- string
+            // (int | _[1]): (int | _[1]) <-- _[2]
+            if (to is IOrExpression(IExpression[] tss2))
             {
-                var results = fss.
-                    Select(fs => this.InternalUnify(to, fs)).
-                    Where(result => result != null).
+                var results = tss2.
+                    Select(ts => this.Solve(ts, from)).
                     Memoize();
-                return OverloadTerm.From(results!);
+                return results.Any(r => r != null) ?
+                    OverloadTerm.From(results.Where(r => r != null)!) : null;
+            }
+
+            // null: int <-- (int | double)
+            if (from is IOrExpression(IExpression[] fss2))
+            {
+                var results = fss2.
+                    Select(fs => this.Solve(to, fs)).
+                    Memoize();
+                return results.All(r => r != null) ?
+                    OverloadTerm.From(results!) : null;
+            }
+
+            // object: object <-- int
+            // double: double <-- int
+            // IComparable: IComparable <-- string
+            if (to is ITypeTerm toType &&
+                from is ITypeTerm fromType)
+            {
+                return toType.IsConvertibleFrom(fromType) ?
+                    to :
+                    null;
             }
 
             if (to is IPlaceholderTerm tph)
             {
-                return this.InternalUnifyPlaceholder(tph, from, Directions.Forward);
+                return this.Substitute(tph, from, true);
             }
             if (from is IPlaceholderTerm fph)
             {
-                return this.InternalUnifyPlaceholder(fph, to, Directions.Reverse);
+                return this.Substitute(fph, to, false);
             }
 
             return null;
         }
 
-        public bool Unify(IExpression to, IExpression from) =>
-            this.InternalUnify(to, from) is IExpression;
+        public void Unify(IExpression to, IExpression from) =>
+            this.Solve(to, from);
 
-        public IExpression? Resolve(IPlaceholderTerm placeholder)
+        public IExpression? Widen(IExpression to, IExpression from) =>
+            this.Solve(to, from);
+
+        public IExpression? LookupPlaceholder(IPlaceholderTerm placeholder)
         {
             var current = placeholder;
             while (true)
             {
-                if (this.descriptions.TryGetValue(current.Index, out var description))
+                if (this.descriptions.TryGetValue(current.Index, out var combined))
                 {
-                    if (description.Expression is IPlaceholderTerm p)
+                    if (combined is IPlaceholderTerm p)
                     {
                         current = p;
                     }
                     else
                     {
-                        return description.Expression;
+                        return combined;
                     }
                 }
                 else

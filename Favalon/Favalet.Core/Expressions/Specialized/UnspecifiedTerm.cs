@@ -32,7 +32,7 @@ namespace Favalet.Expressions.Specialized
             TerminationTerm.Instance;
 
         public IExpression Infer(IInferContext context) =>
-            context.CreatePlaceholder(Instance);
+            context.CreatePlaceholder();
 
         IExpression IInferrableExpression.Fixup(IFixupContext context) =>
             this;
@@ -41,10 +41,10 @@ namespace Favalet.Expressions.Specialized
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public override bool Equals(IExpression? rhs) =>
-            rhs is UnspecifiedTerm;
+            false;
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.UseSimpleLabel ? "_" : context.Format(this);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.ForceText, "_");
 
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();

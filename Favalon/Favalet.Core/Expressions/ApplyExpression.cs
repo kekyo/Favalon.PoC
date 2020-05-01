@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 
@@ -70,9 +71,10 @@ namespace Favalet.Expressions
             var argument = this.Argument.InferIfRequired(context);
             var function = this.Function.InferIfRequired(context);
 
-            context.Unify(
-                FunctionDeclaredExpression.From(argument.HigherOrder, higherOrder),
-                function.HigherOrder);
+            var functionDeclaration = FunctionDeclaredExpression.From(
+                argument.HigherOrder, higherOrder);
+
+            context.Unify(functionDeclaration, function.HigherOrder);
 
             if (this.Function.ExactEquals(function) &&
                 this.Argument.ExactEquals(argument) &&
@@ -151,8 +153,8 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, this.Function, this.Argument);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.Standard, this.Function, this.Argument);
 
         public static ApplyExpression Create(
             IExpression function, IExpression argument, IExpression higherOrder) =>

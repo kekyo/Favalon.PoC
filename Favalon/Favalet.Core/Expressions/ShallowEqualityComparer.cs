@@ -17,10 +17,36 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Expressions.Specialized;
+using System.Collections.Generic;
+
 namespace Favalet.Expressions
 {
-    public interface IConstantTerm : ITerm
+    public sealed class ShallowEqualityComparer : IEqualityComparer<IExpression>
     {
-        object Value { get; }
+        private ShallowEqualityComparer()
+        { }
+
+        public bool Equals(IExpression x, IExpression y)
+        {
+            if (object.ReferenceEquals(x, y))
+            {
+                return true;
+            }
+
+            return (x, y) switch
+            {
+                (TerminationTerm _, TerminationTerm _) => true,
+                (_, TerminationTerm _) => false,
+                (TerminationTerm _, _) => false,
+                _ => x.Equals(y),
+            };
+        }
+
+        public int GetHashCode(IExpression? obj) =>
+            obj!.GetHashCode();
+
+        public static readonly ShallowEqualityComparer Instance =
+            new ShallowEqualityComparer();
     }
 }

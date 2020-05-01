@@ -17,6 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 
@@ -47,7 +48,9 @@ namespace Favalet.Expressions
         public static IExpression FunctionDeclaration(IExpression parameter, IExpression result) =>
             FunctionDeclaredExpression.From(parameter, result);
 
-        public static IExpression? Overload(params IExpression[] overloads) =>
-            OverloadTerm.From(overloads);
+        public static IExpression? Or(params IExpression[] operands) =>
+            OrExpression.From(operands);
+        public static IExpression? And(params IExpression[] operands) =>
+            AndExpression.From(operands);
     }
 }

@@ -72,5 +72,16 @@ namespace System.Linq
             }
         }
 #endif
+
+#if !NETSTANDARD2_0 && !NETSTANDARD2_1
+        public static IEnumerable<T> Append<T>(this IEnumerable<T> enumerable, T appendValue)
+        {
+            foreach (var value in enumerable)
+            {
+                yield return value;
+            }
+            yield return appendValue;
+        }
+#endif
     }
 }

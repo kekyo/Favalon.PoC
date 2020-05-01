@@ -28,7 +28,7 @@ using System.Reflection;
 namespace Favalet.Expressions
 {
     public abstract class MethodTerm :
-        Expression, ICallableExpression
+        Expression, ITerm, ICallableExpression
     {
         public readonly MethodBase Method;
 
@@ -63,16 +63,11 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Method.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.UseSimpleLabel ?
-                $"{this.Method.GetFullName()}()" :
-                context.Format(this, this.Method.GetFullName());
-
         public static ConstructorTerm From(Type type, params Type[] parameters) =>
-            new ConstructorTerm(type.GetDeclaredConstructor(parameters));
+            ConstructorTerm.From(type.GetDeclaredConstructor(parameters));
 
         public static ConcreteMethodTerm From(Type type, string name, params Type[] parameters) =>
-            new ConcreteMethodTerm(type.GetDeclaredMethod(name, parameters));
+            ConcreteMethodTerm.From(type.GetDeclaredMethod(name, parameters));
 
         public static MethodTerm From(MethodBase method) =>
             // TODO: instance method
@@ -80,50 +75,112 @@ namespace Favalet.Expressions
             // TODO: generic method
             method switch
             {
-                ConstructorInfo c => new ConstructorTerm(c),
-                MethodInfo m => new ConcreteMethodTerm(m),
+                ConstructorInfo c => ConstructorTerm.From(c),
+                MethodInfo m => ConcreteMethodTerm.From(m),
                 _ => throw new ArgumentException()
             };
     }
 
-    public sealed class ConstructorTerm : MethodTerm
+    public sealed class ConstructorTerm :
+        MethodTerm, IInferrableExpression
     {
-        private readonly ValueLazy<ConstructorInfo, IExpression> higherOrder;
-
-        internal ConstructorTerm(ConstructorInfo constructor) :
+        private ConstructorTerm(ConstructorInfo constructor, IExpression higherOrder) :
             base(constructor) =>
-            // It couldn't require higher order informations when calls method.
-            this.higherOrder = ValueLazy.Create(
-                constructor,
-                @constructor =>
-                // TODO: multiple arguments
-                // TODO: nothing arguments
-                // TODO: void returns
-                FunctionDeclaredExpression.From(
-                    TypeTerm.From(@constructor.GetParameters().Select(p => p.ParameterType).Last()),
-                    TypeTerm.From(@constructor.DeclaringType)));
+            this.HigherOrder = higherOrder;
 
-        public override IExpression HigherOrder =>
-            this.higherOrder.Value;
+        public override IExpression HigherOrder { get; }
+
+        public IExpression Infer(IInferContext context)
+        {
+            var higherOrder = this.HigherOrder.InferIfRequired(context);
+
+            if (this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new ConstructorTerm((ConstructorInfo)this.Method, higherOrder);
+            }
+        }
+
+        public IExpression Fixup(IFixupContext context)
+        {
+            var higherOrder = this.HigherOrder.FixupIfRequired(context);
+
+            if (this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new ConstructorTerm((ConstructorInfo)this.Method, higherOrder);
+            }
+        }
+
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(
+                this,
+                FormatOptions.SuppressHigherOrder,
+                $"{this.Method.GetFullName()}({this.Method.GetParameters()[0].ParameterType.GetFullName()})");
+
+        internal static ConstructorTerm From(ConstructorInfo constructor) =>
+            // TODO: multiple arguments
+            // TODO: nothing arguments
+            // TODO: void returns
+            new ConstructorTerm(constructor, FunctionDeclaredExpression.From(
+                TypeTerm.From(@constructor.GetParameters().Select(p => p.ParameterType).Last()),
+                TypeTerm.From(@constructor.DeclaringType)));
     }
 
-    public sealed class ConcreteMethodTerm : MethodTerm
+    public sealed class ConcreteMethodTerm :
+        MethodTerm, IInferrableExpression
     {
-        private readonly ValueLazy<MethodInfo, IExpression> higherOrder;
-
-        internal ConcreteMethodTerm(MethodInfo method) :
+        private ConcreteMethodTerm(MethodInfo method, IExpression higherOrder) :
             base(method) =>
-            // It couldn't require higher order informations when calls method.
-            this.higherOrder = ValueLazy.Create(
-                method,
-                @method =>
-                // TODO: multiple arguments
-                // TODO: nothing arguments
-                FunctionDeclaredExpression.From(
-                    TypeTerm.From(@method.GetParameters().Select(p => p.ParameterType).Last()),
-                    TypeTerm.From(@method.ReturnType)));
+            this.HigherOrder = higherOrder;
 
-        public override IExpression HigherOrder =>
-            this.higherOrder.Value;
+        public override IExpression HigherOrder { get; }
+
+        public IExpression Infer(IInferContext context)
+        {
+            var higherOrder = this.HigherOrder.InferIfRequired(context);
+
+            if (this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new ConcreteMethodTerm((MethodInfo)this.Method, higherOrder);
+            }
+        }
+
+        public IExpression Fixup(IFixupContext context)
+        {
+            var higherOrder = this.HigherOrder.FixupIfRequired(context);
+
+            if (this.HigherOrder.ExactEquals(higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new ConcreteMethodTerm((MethodInfo)this.Method, higherOrder);
+            }
+        }
+
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(
+                this,
+                FormatOptions.Standard,
+                $"{this.Method.GetFullName()}({this.Method.GetParameters()[0].ParameterType.GetFullName()}):{((MethodInfo)this.Method).ReturnType.GetFullName()}");
+
+        internal static ConcreteMethodTerm From(MethodInfo method) =>
+            // TODO: multiple arguments
+            // TODO: nothing arguments
+            new ConcreteMethodTerm(method, FunctionDeclaredExpression.From(
+                TypeTerm.From(@method.GetParameters().Select(p => p.ParameterType).Last()),
+                TypeTerm.From(@method.ReturnType)));
     }
 }

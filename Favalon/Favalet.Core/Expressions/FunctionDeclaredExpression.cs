@@ -19,7 +19,6 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -77,9 +76,9 @@ namespace Favalet.Expressions
             var parameter = this.Parameter.InferIfRequired(context);
             var result = this.Result.InferIfRequired(context);
 
-            context.Unify(
-                higherOrder,
-                From(parameter.HigherOrder, result.HigherOrder));
+            var functionDeclared = From(parameter.HigherOrder, result.HigherOrder);
+
+            context.Unify(higherOrder, functionDeclared);
 
             if (this.Parameter.ExactEquals(parameter) &&
                 this.Result.ExactEquals(result) &&
@@ -89,7 +88,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new FunctionDeclaredExpression(parameter, result, higherOrder);
+                return From(parameter, result, higherOrder);
             }
         }
 
@@ -107,7 +106,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new FunctionDeclaredExpression(parameter, result, higherOrder);
+                return From(parameter, result, higherOrder);
             }
         }
 
@@ -125,7 +124,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new FunctionDeclaredExpression(parameter, result, higherOrder);
+                return From(parameter, result, higherOrder);
             }
         }
 
@@ -137,8 +136,8 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^ this.Result.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, this.Parameter, this.Result);
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(this, FormatOptions.Standard, this.Parameter, this.Result);
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -154,7 +153,8 @@ namespace Favalet.Expressions
         public static readonly FunctionDeclaredExpression KindType =
             Create(ExpressionFactory.kindType, ExpressionFactory.kindType, FourthTerm.Instance);
 
-        public static IExpression From(IExpression parameter, IExpression result) =>
+        private static IExpression From(
+            IExpression parameter, IExpression result, IExpression higherOrder) =>
             (parameter, result) switch
             {
                 (TerminationTerm _, TerminationTerm _) => TerminationTerm.Instance,
@@ -164,7 +164,10 @@ namespace Favalet.Expressions
                 (FourthTerm _, FourthTerm _) => FourthTerm.Instance,
                 (IIdentityTerm pid, IIdentityTerm rid) when
                     pid.Equals(ExpressionFactory.kindType) && rid.Equals(ExpressionFactory.kindType) => KindType,
-                _ => Create(parameter, result, UnspecifiedTerm.Instance)
+                _ => Create(parameter, result, higherOrder)
             };
+
+        public static IExpression From(IExpression parameter, IExpression result) =>
+            From(parameter, result, UnspecifiedTerm.Instance);
     }
 }

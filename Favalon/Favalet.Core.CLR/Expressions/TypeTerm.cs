@@ -50,9 +50,6 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Type.GetHashCode();
 
-        public override string FormatString(IFormatStringContext context) =>
-            context.Format(this, this.Type.GetFullName());
-
         public static ITerm From(Type type)
         {
             // TODO: detect delegates
@@ -65,12 +62,13 @@ namespace Favalet.Expressions
                     // Special case: Force replacing RuntimeType to Type
                     if (typeof(Type).IsAssignableFrom(type))
                     {
-                        term = new ConcreteTypeTerm(typeof(Type));
+                        term = ExpressionFactory.kindType;
                     }
                     else
                     {
                         term = new ConcreteTypeTerm(type);
                     }
+
                     types.Add(type, term);
                 }
                 return term;
@@ -87,5 +85,11 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder =>
             ExpressionFactory.kindType;
+
+        public override T Format<T>(IFormatContext<T> context) =>
+            context.Format(
+                this,
+                FormatOptions.SuppressHigherOrder,
+                this.Type.GetFullName());
     }
 }

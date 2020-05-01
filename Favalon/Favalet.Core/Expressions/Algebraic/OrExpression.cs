@@ -17,30 +17,27 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Contexts;
-using System.Runtime.CompilerServices;
+using Favalet.Expressions.Specialized;
+using System.Collections.Generic;
 
-namespace Favalet.Expressions.Specialized
+namespace Favalet.Expressions.Algebraic
 {
-    public sealed class FourthTerm :
-        Expression, ITerm
+    public interface IOrExpression :
+        IOperatorExpression
     {
-        private FourthTerm()
+    }
+
+    public sealed class OrExpression :
+        OperatorExpression<IOrExpression>, IOrExpression
+    {
+        private OrExpression(IExpression[] operands, IExpression higherOrder) : 
+            base(operands, higherOrder)
         { }
 
-        public override IExpression HigherOrder =>
-            TerminationTerm.Instance;
+        protected override IOrExpression Create(IExpression[] operands, IExpression higherOrder) =>
+            new OrExpression(operands, higherOrder);
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public override bool Equals(IExpression? rhs) =>
-            rhs is FourthTerm;
-
-        public override T Format<T>(IFormatContext<T> context) =>
-            context.Format(this, FormatOptions.ForceText | FormatOptions.SuppressHigherOrder, "#");
-
-        public static readonly FourthTerm Instance =
-            new FourthTerm();
+        public static IExpression? From(IEnumerable<IExpression> operands) =>
+            From(operands, ops => new OrExpression(ops, UnspecifiedTerm.Instance));
     }
 }

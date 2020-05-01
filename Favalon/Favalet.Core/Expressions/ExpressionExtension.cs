@@ -18,8 +18,12 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace Favalet.Expressions
 {
@@ -43,7 +47,9 @@ namespace Favalet.Expressions
         public static IExpression InferIfRequired(
             this IExpression expression,
             IInferContext context) =>
-            expression is IInferrableExpression i ? i.Infer(context) : expression;
+            expression is IInferrableExpression i ?
+                i.Infer(context) :
+                expression;
 
         public static IExpression FixupIfRequired(
             this IInferrableExpression expression,
@@ -52,7 +58,9 @@ namespace Favalet.Expressions
         public static IExpression FixupIfRequired(
             this IExpression expression,
             IFixupContext context) =>
-            expression is IInferrableExpression i ? i.Fixup(context) : expression;
+            expression is IInferrableExpression i ?
+                i.Fixup(context) :
+                expression;
 
         public static IExpression ReduceIfRequired(
             this IReducibleExpression expression,
@@ -61,7 +69,18 @@ namespace Favalet.Expressions
         public static IExpression ReduceIfRequired(
             this IExpression expression,
             IReduceContext context) =>
-            expression is IReducibleExpression r ? r.Reduce(context) : expression;
+            expression is IReducibleExpression r ?
+                r.Reduce(context) :
+                expression;
+
+        public static bool ShallowEquals(
+            this IExpression expression,
+            IExpression rhs) =>
+            ShallowEqualityComparer.Instance.Equals(expression, rhs);
+        public static bool ShallowSequenceEqual(
+            this IEnumerable<IExpression> expressions,
+            IEnumerable<IExpression> rhss) =>
+            expressions.SequenceEqual(rhss, ShallowEqualityComparer.Instance);
 
         public static bool ExactEquals(
             this IExpression expression,
@@ -71,5 +90,46 @@ namespace Favalet.Expressions
             this IEnumerable<IExpression> expressions,
             IEnumerable<IExpression> rhss) =>
             expressions.SequenceEqual(rhss, ExactEqualityComparer.Instance);
+
+        public static void WriteTo(
+            this IExpression expression,
+            XmlWriter writer)
+        {
+            var node = expression.Format(FormatXmlContext.Create());
+            node.WriteTo(writer);
+        }
+
+        public static XNode FormatXml(
+            this IExpression expression) =>
+            expression.Format(FormatXmlContext.Create());
+
+        public static string FormatXmlString(
+            this IExpression expression,
+            bool readable = true)
+        {
+            var node = expression.Format(FormatXmlContext.Create());
+            if (node is XText text)
+            {
+                return text.Value;
+            }
+            else
+            {
+                var sb = new StringBuilder();
+                using (var writer = XmlWriter.Create(
+                    sb,
+                    new XmlWriterSettings
+                    {
+                        OmitXmlDeclaration = readable,
+                        Indent = readable,
+                        IndentChars = "  ",
+                        NewLineChars = readable ? "\r\n" : string.Empty
+                    }))
+                {
+                    node.WriteTo(writer);
+                    writer.Flush();
+                }
+                return sb.ToString();
+            }
+        }
     }
 }

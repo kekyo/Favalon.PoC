@@ -81,9 +81,7 @@ namespace Favalet
             Assert.AreEqual(
                 new IExpression[]
                 {
-                    Overload(
-                        Type<int>(),
-                        Constant(typeof(int)))!
+                    Type<int>()
                 },
                 actual);
         }
@@ -106,7 +104,7 @@ namespace Favalet
         }
 
         [TestCaseSource("Parsers")]
-        public async Task LookupMethod(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
+        public async Task LookupStaticOverloadedMethod(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
         {
             // Activator.CreateInstance(typeof(int))
             var text = "System.Activator.CreateInstance System.Int32";

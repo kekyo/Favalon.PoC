@@ -17,30 +17,36 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Contexts;
-using System.Runtime.CompilerServices;
+using Favalet.Expressions.Specialized;
+using System.Collections.Generic;
 
-namespace Favalet.Expressions.Specialized
+namespace Favalet.Expressions
 {
-    public sealed class FourthTerm :
-        Expression, ITerm
+    public sealed class ShallowEqualityComparer : IEqualityComparer<IExpression>
     {
-        private FourthTerm()
+        private ShallowEqualityComparer()
         { }
 
-        public override IExpression HigherOrder =>
-            TerminationTerm.Instance;
+        public bool Equals(IExpression x, IExpression y)
+        {
+            if (object.ReferenceEquals(x, y))
+            {
+                return true;
+            }
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public override bool Equals(IExpression? rhs) =>
-            rhs is FourthTerm;
+            return (x, y) switch
+            {
+                (TerminationTerm _, TerminationTerm _) => true,
+                (_, TerminationTerm _) => false,
+                (TerminationTerm _, _) => false,
+                _ => x.Equals(y),
+            };
+        }
 
-        public override T Format<T>(IFormatContext<T> context) =>
-            context.Format(this, FormatOptions.ForceText | FormatOptions.SuppressHigherOrder, "#");
+        public int GetHashCode(IExpression? obj) =>
+            obj!.GetHashCode();
 
-        public static readonly FourthTerm Instance =
-            new FourthTerm();
+        public static readonly ShallowEqualityComparer Instance =
+            new ShallowEqualityComparer();
     }
 }

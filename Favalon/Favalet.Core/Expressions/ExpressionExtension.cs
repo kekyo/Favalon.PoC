@@ -45,36 +45,22 @@ namespace Favalet.Expressions
             IInferContext context) =>
             expression.Infer(context);
         public static IExpression InferIfRequired(
-            this PlaceholderTerm placeholder,
-            IInferContext context,
-            int diggingPlaceholders = 1) =>
-            placeholder.Infer(context, diggingPlaceholders);
-        public static IExpression InferIfRequired(
             this IExpression expression,
-            IInferContext context,
-            int diggingPlaceholders = 1) =>
+            IInferContext context) =>
             expression is IInferrableExpression i ?
                 i.Infer(context) :
-                expression is PlaceholderTerm p ?
-                    p.Infer(context, diggingPlaceholders) :
-                    expression;
+                expression;
 
         public static IExpression FixupIfRequired(
             this IInferrableExpression expression,
             IFixupContext context) =>
             expression.Fixup(context);
         public static IExpression FixupIfRequired(
-            this PlaceholderTerm placeholder,
-            IFixupContext context) =>
-            placeholder.Fixup(context);
-        public static IExpression FixupIfRequired(
             this IExpression expression,
             IFixupContext context) =>
             expression is IInferrableExpression i ?
                 i.Fixup(context) :
-                expression is PlaceholderTerm p ?
-                    p.Fixup(context) :
-                    expression;
+                expression;
 
         public static IExpression ReduceIfRequired(
             this IReducibleExpression expression,
@@ -86,6 +72,15 @@ namespace Favalet.Expressions
             expression is IReducibleExpression r ?
                 r.Reduce(context) :
                 expression;
+
+        public static bool ShallowEquals(
+            this IExpression expression,
+            IExpression rhs) =>
+            ShallowEqualityComparer.Instance.Equals(expression, rhs);
+        public static bool ShallowSequenceEqual(
+            this IEnumerable<IExpression> expressions,
+            IEnumerable<IExpression> rhss) =>
+            expressions.SequenceEqual(rhss, ShallowEqualityComparer.Instance);
 
         public static bool ExactEquals(
             this IExpression expression,

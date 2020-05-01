@@ -30,7 +30,7 @@ namespace Favalet.Expressions.Specialized
     }
 
     public sealed class PlaceholderTerm :
-        Expression, IPlaceholderTerm, IReducibleExpression
+        Expression, IPlaceholderTerm, IInferrableExpression, IReducibleExpression
     {
         public readonly int Index;
 
@@ -46,18 +46,9 @@ namespace Favalet.Expressions.Specialized
         int IPlaceholderTerm.Index =>
             this.Index;
 
-        internal IExpression Infer(
-            IInferContext context,
-            int diggingPlaceholders = 1)
+        public IExpression Infer(IInferContext context)
         {
-            if (diggingPlaceholders <= 0)
-            {
-                return this;
-            }
-
-            var higherOrder = this.HigherOrder.InferIfRequired(
-                context,
-                diggingPlaceholders - 1);
+            var higherOrder = this.HigherOrder.InferIfRequired(context);
 
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
@@ -69,9 +60,9 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        internal IExpression Fixup(IFixupContext context)
+        public IExpression Fixup(IFixupContext context)
         {
-            if (context.Resolve(this) is IExpression resolved)
+            if (context.LookupPlaceholder(this) is IExpression resolved)
             {
                 return resolved.FixupIfRequired(context);
             }
@@ -116,7 +107,22 @@ namespace Favalet.Expressions.Specialized
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.ForceText, $"'{context.GetPlaceholderIndexString(this.Index)}");
 
-        internal static PlaceholderTerm Create(int index, IExpression higherOrder) =>
-            new PlaceholderTerm(index, higherOrder);
+        internal static PlaceholderTerm Create(InferContext context, int currentOrder)
+        {
+            var index = context.DrawNextPlaceholderIndex();
+
+            if (currentOrder <= 2)
+            {
+                return new PlaceholderTerm(
+                    index,
+                    Create(context, currentOrder + 1));
+            }
+            else
+            {
+                return new PlaceholderTerm(
+                    index,
+                    TerminationTerm.Instance);
+            }
+        }
     }
 }

@@ -31,7 +31,7 @@ namespace Favalet.Contexts
             BoundTermAttributes attributes = BoundTermAttributes.Prefix | BoundTermAttributes.LeftToRight,
             BoundTermPrecedences precedence = BoundTermPrecedences.Function);
 
-        BoundInformation[] Lookup(IIdentityTerm identity);
+        BoundInformation[] LookupBoundInformations(IIdentityTerm identity);
     }
 
     public interface IScopedTypeContext<TContext> : ITypeContext
@@ -42,7 +42,7 @@ namespace Favalet.Contexts
 
     internal interface IInternalTypeContext
     {
-        IEnumerable<(int, BoundInformation)> RecursiveLookup(IIdentityTerm identity, int distance);
+        IEnumerable<(int, BoundInformation)> RecursiveLookupBoundInformations(IIdentityTerm identity, int distance);
     }
 
     public abstract class TypeContext : ITypeContext, IInternalTypeContext
@@ -74,14 +74,14 @@ namespace Favalet.Contexts
                 new BoundInformation(expression, attributes, precedence);
         }
 
-        public BoundInformation[] Lookup(IIdentityTerm identity) =>
-            ((IInternalTypeContext)this).RecursiveLookup(identity, 0).
+        public BoundInformation[] LookupBoundInformations(IIdentityTerm identity) =>
+            ((IInternalTypeContext)this).RecursiveLookupBoundInformations(identity, 0).
             GroupBy(result => result.Item2.Expression.HigherOrder).
             Select(g => g.OrderBy(result => result.Item1).First()).
             Select(result => result.Item2).
             Memoize();
 
-        IEnumerable<(int, BoundInformation)> IInternalTypeContext.RecursiveLookup(IIdentityTerm identity, int distance)
+        IEnumerable<(int, BoundInformation)> IInternalTypeContext.RecursiveLookupBoundInformations(IIdentityTerm identity, int distance)
         {
             var collected = Enumerable.Empty<(int, BoundInformation)>();
 
@@ -95,7 +95,7 @@ namespace Favalet.Contexts
 
             if (this.parent is IInternalTypeContext parent)
             {
-                collected = collected.Concat(parent.RecursiveLookup(identity, distance + 1));
+                collected = collected.Concat(parent.RecursiveLookupBoundInformations(identity, distance + 1));
             }
 
             return collected;

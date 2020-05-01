@@ -28,7 +28,7 @@ namespace Favalet.Contexts
 {
     public interface IInferContext : IScopedTypeContext<IInferContext>
     {
-        IPlaceholderTerm CreatePlaceholder(IExpression higherOrder);
+        IPlaceholderTerm CreatePlaceholder();
 
         void Unify(IExpression to, IExpression from);
     }
@@ -37,7 +37,7 @@ namespace Favalet.Contexts
     {
         IExpression? Widen(IExpression to, IExpression from);
 
-        IExpression? Resolve(IPlaceholderTerm placeholder);
+        IExpression? LookupPlaceholder(IPlaceholderTerm placeholder);
     }
 
     internal sealed class InferContext :
@@ -63,10 +63,16 @@ namespace Favalet.Contexts
         public IInferContext CreateDerivedScope() =>
             new InferContext(this);
 
-        public IPlaceholderTerm CreatePlaceholder(IExpression higherOrder) =>
-            PlaceholderTerm.Create(this.rootContext.DrawNextPlaceholderIndex(), higherOrder);
+        public IPlaceholderTerm CreatePlaceholder() =>
+            PlaceholderTerm.Create(this, 1);
 
-        private IExpression? InternalUnifyPlaceholder(
+        internal bool IsInferring =>
+            this.rootContext.IsInferring;
+
+        internal int DrawNextPlaceholderIndex() =>
+            this.rootContext.DrawNextPlaceholderIndex();
+
+        private IExpression? Substitute(
             IPlaceholderTerm placeholder,
             IExpression from,
             bool isForward,
@@ -79,8 +85,8 @@ namespace Favalet.Contexts
             if (this.descriptions.TryGetValue(placeholder.Index, out var lastCombined))
             {
                 var result = isForward ?
-                    this.InternalUnify(lastCombined, from, isWiden) :  // forward
-                    this.InternalUnify(from, lastCombined, isWiden);   // backward
+                    this.Solve(lastCombined, from, isWiden) :  // forward
+                    this.Solve(from, lastCombined, isWiden);   // backward
 
                 if (result is IExpression)
                 {
@@ -105,12 +111,12 @@ namespace Favalet.Contexts
             }
         }
 
-        private IExpression? InternalUnify(IExpression to, IExpression from, bool isWiden)
+        private IExpression? Solve(IExpression to, IExpression from, bool isWiden)
         {
             // int: int <-- int
             // IComparable: IComparable <-- IComparable
             // _[1]: _[1] <-- _[1]
-            if (to.ExactEquals(from))
+            if (to.ShallowEquals(from))
             {
                 return to;
             }
@@ -119,8 +125,8 @@ namespace Favalet.Contexts
             if (to is IFunctionDeclaredExpression(IExpression tp, IExpression tr) &&
                 from is IFunctionDeclaredExpression(IExpression fp, IExpression fr))
             {
-                var pr = this.InternalUnify(fp, tp, isWiden);
-                var rr = this.InternalUnify(tr, fr, isWiden);
+                var pr = this.Solve(fp, tp, isWiden);
+                var rr = this.Solve(tr, fr, isWiden);
 
                 if (pr != null && rr != null)
                 {
@@ -143,7 +149,7 @@ namespace Favalet.Contexts
                 from is ISumExpression(IExpression[] fss1))
             {
                 var unified = fss1.
-                    Select(fs => tss1.Any(ts => this.InternalUnify(ts, fs, isWiden) != null)).
+                    Select(fs => tss1.Any(ts => this.Solve(ts, fs, isWiden) != null)).
                     Memoize();
                 return unified.All(w => w) ?
                     to :
@@ -158,7 +164,7 @@ namespace Favalet.Contexts
             if (to is ISumExpression(IExpression[] tss2))
             {
                 var results = tss2.
-                    Select(ts => this.InternalUnify(ts, from, isWiden)).
+                    Select(ts => this.Solve(ts, from, isWiden)).
                     Where(result => result != null).
                     Memoize();
                 return OverloadTerm.From(results!);
@@ -168,7 +174,7 @@ namespace Favalet.Contexts
             if (from is ISumExpression(IExpression[] fss2))
             {
                 var results = fss2.
-                    Select(fs => this.InternalUnify(to, fs, isWiden)).
+                    Select(fs => this.Solve(to, fs, isWiden)).
                     Where(result => result != null).
                     Memoize();
                 return OverloadTerm.From(results!);
@@ -187,11 +193,11 @@ namespace Favalet.Contexts
 
             if (to is IPlaceholderTerm tph)
             {
-                return this.InternalUnifyPlaceholder(tph, from, true, isWiden);
+                return this.Substitute(tph, from, true, isWiden);
             }
             if (from is IPlaceholderTerm fph)
             {
-                return this.InternalUnifyPlaceholder(fph, to, false, isWiden);
+                return this.Substitute(fph, to, false, isWiden);
             }
 
             return isWiden ?
@@ -200,11 +206,12 @@ namespace Favalet.Contexts
         }
 
         public void Unify(IExpression to, IExpression from) =>
-            this.InternalUnify(to, from, false);
-        public IExpression? Widen(IExpression to, IExpression from) =>
-            this.InternalUnify(to, from, true);
+            this.Solve(to, from, false);
 
-        public IExpression? Resolve(IPlaceholderTerm placeholder)
+        public IExpression? Widen(IExpression to, IExpression from) =>
+            this.Solve(to, from, true);
+
+        public IExpression? LookupPlaceholder(IPlaceholderTerm placeholder)
         {
             var current = placeholder;
             while (true)

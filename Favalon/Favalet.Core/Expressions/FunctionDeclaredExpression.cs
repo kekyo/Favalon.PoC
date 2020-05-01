@@ -75,12 +75,12 @@ namespace Favalet.Expressions
         public IExpression Infer(IInferContext context)
         {
             var higherOrder = this.HigherOrder.InferIfRequired(context);
-            var parameter = this.Parameter.InferIfRequired(context, 2);
-            var result = this.Result.InferIfRequired(context, 2);
+            var parameter = this.Parameter.InferIfRequired(context);
+            var result = this.Result.InferIfRequired(context);
 
             var functionDeclared = From(
                 parameter.HigherOrder, result.HigherOrder,
-                () => context.CreatePlaceholder(UnspecifiedTerm.Instance));
+                context.CreatePlaceholder);
 
             context.Unify(higherOrder, functionDeclared);
 

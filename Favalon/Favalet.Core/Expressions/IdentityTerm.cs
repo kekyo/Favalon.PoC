@@ -53,13 +53,13 @@ namespace Favalet.Expressions
         {
             var higherOrder = this.HigherOrder.InferIfRequired(context);
 
-            if (context.Lookup(this) is BoundInformation[] bounds && (bounds.Length >= 1))
+            if (context.LookupBoundInformations(this) is BoundInformation[] bounds && (bounds.Length >= 1))
             {
                 // TODO: bound attributes
 
                 var overloads = OverloadTerm.From(
                     bounds.Select(bound => bound.Expression))!;
-                var inferred = overloads.InferIfRequired(context, 2);
+                var inferred = overloads.InferIfRequired(context);
 
                 context.Unify(higherOrder, inferred.HigherOrder);
 
@@ -91,7 +91,7 @@ namespace Favalet.Expressions
 
         public IExpression Reduce(IReduceContext context)
         {
-            var bounds = context.Lookup(this);
+            var bounds = context.LookupBoundInformations(this);
             if (bounds.Length >= 1)
             {
                 // TODO: bound attributes

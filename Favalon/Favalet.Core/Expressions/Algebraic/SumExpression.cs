@@ -63,12 +63,12 @@ namespace Favalet.Expressions.Algebraic
         {
             var higherOrder = this.HigherOrder.InferIfRequired(context);
             var expressions = this.Expressions.
-                Select(expression => expression.InferIfRequired(context, 2)).
+                Select(expression => expression.InferIfRequired(context)).
                 Memoize();
 
             var expressionHigherOrders = From(
                 expressions.Select(expression => expression.HigherOrder),
-                () => context.CreatePlaceholder(UnspecifiedTerm.Instance),
+                context.CreatePlaceholder,
                 false)!;
 
             context.Unify(higherOrder, expressionHigherOrders);

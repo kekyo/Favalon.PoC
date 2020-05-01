@@ -35,16 +35,19 @@ namespace Favalet.Contexts
     {
         ITypeContextFeatures Features { get; }
 
+        bool IsInferring { get; }
+
         int DrawNextPlaceholderIndex();
     }
 
     public sealed class TypeEnvironment :
         TypeContext, ITypeEnvironment, IRootTypeContext
     {
+        private int placeholderIndex;
+        private bool isInferring;
+
         public readonly ITypeContextFeatures Features;
         public readonly int MaxIterationCount;
-
-        private int placeholderIndex;
 
         private TypeEnvironment(ITypeContextFeatures features, int maxIterationCount) :
             base(null)
@@ -57,6 +60,9 @@ namespace Favalet.Contexts
         ITypeContextFeatures IRootTypeContext.Features =>
             this.Features;
 
+        bool IRootTypeContext.IsInferring =>
+            this.isInferring;
+
         int IRootTypeContext.DrawNextPlaceholderIndex() =>
             placeholderIndex++;
 
@@ -64,37 +70,46 @@ namespace Favalet.Contexts
         {
             Debug.WriteLine($"Infer [0]: {expression}");
 
-            if (expression is IInferrableExpression inferrable)
+            this.isInferring = true;
+
+            try
             {
-                var context = InferContext.Create(this);
-
-                var current = inferrable.Infer(context);
-                current = current.FixupIfRequired(context);
-
-                for (var index = 1; index < this.MaxIterationCount; index++)
+                if (expression is IInferrableExpression inferrable)
                 {
-                    var inferred = current.InferIfRequired(context);
-                    var fixuped = inferred.FixupIfRequired(context);
+                    var context = InferContext.Create(this);
 
-                    if (current.ExactEquals(fixuped))
+                    var current = inferrable.Infer(context);
+                    current = current.FixupIfRequired(context);
+
+                    for (var index = 1; index < this.MaxIterationCount; index++)
                     {
-                        Debug.WriteLine($"Infer [F]: {fixuped}");
-                        return fixuped;
+                        var inferred = current.InferIfRequired(context);
+                        var fixuped = inferred.FixupIfRequired(context);
+
+                        if (current.ExactEquals(fixuped))
+                        {
+                            Debug.WriteLine($"Infer [F]: {fixuped}");
+                            return fixuped;
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"Infer [{index}]: {fixuped}");
+                            current = fixuped;
+                        }
                     }
-                    else
-                    {
-                        Debug.WriteLine($"Infer [{index}]: {fixuped}");
-                        current = fixuped;
-                    }
+
+                    // Cannot finish inferring.
+                    throw new InvalidOperationException(
+                        $"Cannot finish inferring: {expression}");
                 }
-
-                // Cannot finish inferring.
-                throw new InvalidOperationException(
-                    $"Cannot finish inferring: {expression}");
+                else
+                {
+                    return expression;
+                }
             }
-            else
+            finally
             {
-                return expression;
+                this.isInferring = false;
             }
         }
 

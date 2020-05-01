@@ -72,8 +72,7 @@ namespace Favalet.Expressions
             var function = this.Function.InferIfRequired(context);
 
             var functionDeclaration = FunctionDeclaredExpression.From(
-                argument.HigherOrder, higherOrder,
-                context.CreatePlaceholder);
+                argument.HigherOrder, higherOrder);
 
             context.Unify(functionDeclaration, function.HigherOrder);
 

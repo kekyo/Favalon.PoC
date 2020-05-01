@@ -19,8 +19,6 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -78,9 +76,7 @@ namespace Favalet.Expressions
             var parameter = this.Parameter.InferIfRequired(context);
             var result = this.Result.InferIfRequired(context);
 
-            var functionDeclared = From(
-                parameter.HigherOrder, result.HigherOrder,
-                context.CreatePlaceholder);
+            var functionDeclared = From(parameter.HigherOrder, result.HigherOrder);
 
             context.Unify(higherOrder, functionDeclared);
 
@@ -92,7 +88,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return From(parameter, result, () => higherOrder);
+                return From(parameter, result, higherOrder);
             }
         }
 
@@ -110,7 +106,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return From(parameter, result, () => higherOrder);
+                return From(parameter, result, higherOrder);
             }
         }
 
@@ -128,7 +124,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return From(parameter, result, () => higherOrder);
+                return From(parameter, result, higherOrder);
             }
         }
 
@@ -157,10 +153,8 @@ namespace Favalet.Expressions
         public static readonly FunctionDeclaredExpression KindType =
             Create(ExpressionFactory.kindType, ExpressionFactory.kindType, FourthTerm.Instance);
 
-        internal static IExpression From(
-            IExpression parameter,
-            IExpression result,
-            Func<IExpression> higherOrder) =>
+        private static IExpression From(
+            IExpression parameter, IExpression result, IExpression higherOrder) =>
             (parameter, result) switch
             {
                 (TerminationTerm _, TerminationTerm _) => TerminationTerm.Instance,
@@ -170,10 +164,10 @@ namespace Favalet.Expressions
                 (FourthTerm _, FourthTerm _) => FourthTerm.Instance,
                 (IIdentityTerm pid, IIdentityTerm rid) when
                     pid.Equals(ExpressionFactory.kindType) && rid.Equals(ExpressionFactory.kindType) => KindType,
-                _ => Create(parameter, result, higherOrder())
+                _ => Create(parameter, result, higherOrder)
             };
 
         public static IExpression From(IExpression parameter, IExpression result) =>
-            From(parameter, result, () => UnspecifiedTerm.Instance);
+            From(parameter, result, UnspecifiedTerm.Instance);
     }
 }

@@ -59,18 +59,19 @@ namespace Favalet.Expressions.Algebraic
 
         protected static IExpression? From(
             IEnumerable<IExpression> operands,
-            Func<IExpression[], TOperator> creator)
+            Func<IExpression[], TOperator> creator,
+            bool isStrict = true)
         {
             // It digs only first depth.
             var ops = operands.
-                SelectMany(operand =>
-                    operand is TOperator(IExpression[] operands) ?
-                        operands : new[] { operand }).
+                SelectMany(operand => operand is TOperator(IExpression[] operands) ?
+                    operands : new[] { operand }).
                 Memoize();
 
             return ops.Length switch
             {
                 0 => null,
+                1 when !isStrict => ops[0],
                 _ => creator(ops)
             };
         }
@@ -86,6 +87,7 @@ namespace Favalet.Expressions.Algebraic
             var higherOrder = this.HigherOrder.InferIfRequired(context);
             var operands = this.Operands.
                 Select(operand => operand.InferIfRequired(context)).
+                Distinct(ExactEqualityComparer.Instance).
                 Memoize();
 
             var operandHigherOrders = this.From(
@@ -104,11 +106,12 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public IExpression Fixup(IFixupContext context)
+        public virtual IExpression Fixup(IFixupContext context)
         {
             var higherOrder = this.HigherOrder.FixupIfRequired(context);
             var operands = this.Operands.
                 Select(operand => operand.FixupIfRequired(context)).
+                Distinct(ExactEqualityComparer.Instance).
                 Memoize();
 
             if (this.HigherOrder.ExactEquals(higherOrder) &&
@@ -122,11 +125,12 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public IExpression Reduce(IReduceContext context)
+        public virtual IExpression Reduce(IReduceContext context)
         {
             var higherOrder = this.HigherOrder.ReduceIfRequired(context);
             var operands = this.Operands.
                 Select(operand => operand.ReduceIfRequired(context)).
+                Distinct(ExactEqualityComparer.Instance).
                 Memoize();
 
             if (this.HigherOrder.ExactEquals(higherOrder) &&
@@ -143,12 +147,12 @@ namespace Favalet.Expressions.Algebraic
         public override sealed int GetHashCode() =>
             this.Operands.Aggregate(0, (agg, e) => agg ^ e.GetHashCode());
 
-        public override bool Equals(IExpression? rhs) =>
+        public override sealed bool Equals(IExpression? rhs) =>
             rhs is TOperator oper &&
                 this.Operands.SequenceEqual(oper.Operands, ShallowEqualityComparer.Instance);
 
         public override sealed T Format<T>(IFormatContext<T> context) =>
-            context.Format(this, FormatOptions.Standard, this.Operands);
+            context.Format(this, FormatOptions.SuppressHigherOrder, this.Operands);
     }
 
     public static class OperatorExpressionExtension

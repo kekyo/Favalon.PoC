@@ -77,10 +77,6 @@ namespace Favalet.Contexts
             IExpression from,
             bool isForward)
         {
-            Debug.Assert(
-                from is PlaceholderTerm ||
-                !(from.HigherOrder is UnspecifiedTerm));
-
             if (this.descriptions.TryGetValue(placeholder.Index, out var lastCombined))
             {
                 var result = isForward ?
@@ -94,7 +90,7 @@ namespace Favalet.Contexts
                 }
                 else
                 {
-                    var combinedExpression = OrExpression.From(new[] { lastCombined, from });
+                    var combinedExpression = OverloadTerm.From(new[] { lastCombined, from });
                     this.descriptions[placeholder.Index] = combinedExpression!;
                     return null;
                 }
@@ -138,13 +134,13 @@ namespace Favalet.Contexts
                 }
             }
 
-            // (int + double): (int + double) <-- (int + double)
-            // (int + double + string): (int + double + string) <-- (int + double)
-            // (int + IComparable): (int + IComparable) <-- (int + string)
-            // null: (int + double) <-- (int + double + string)
-            // null: (int + IServiceProvider) <-- (int + double)
-            // (int + _): (int + _) <-- (int + string)
-            // (_[1] + _[2]): (_[1] + _[2]) <-- (_[2] + _[1])
+            // (int | double): (int | double) <-- (int | double)
+            // (int | double | string): (int | double | string) <-- (int | double)
+            // (int | IComparable): (int | IComparable) <-- (int | string)
+            // null: (int | double) <-- (int | double | string)
+            // null: (int | IServiceProvider) <-- (int | double)
+            // (int | _): (int | _) <-- (int | string)
+            // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
             if (to is IOrExpression(IExpression[] tss1) &&
                 from is IOrExpression(IExpression[] fss1))
             {
@@ -155,28 +151,28 @@ namespace Favalet.Contexts
                     to : null;
             }
 
-            // (int + double): (int + double) <-- int
-            // (int + IServiceProvider): (int + IServiceProvider) <-- int
-            // (int + IComparable): (int + IComparable) <-- string
-            // (int + _): (int + _) <-- string
-            // (int + _[1]): (int + _[1]) <-- _[2]
+            // (int | double): (int | double) <-- int
+            // (int | IServiceProvider): (int | IServiceProvider) <-- int
+            // (int | IComparable): (int | IComparable) <-- string
+            // (int | _): (int | _) <-- string
+            // (int | _[1]): (int | _[1]) <-- _[2]
             if (to is IOrExpression(IExpression[] tss2))
             {
                 var results = tss2.
                     Select(ts => this.Solve(ts, from)).
                     Memoize();
                 return results.Any(r => r != null) ?
-                    OrExpression.From(results!) : null;
+                    OverloadTerm.From(results.Where(r => r != null)!) : null;
             }
 
-            // null: int <-- (int + double)
+            // null: int <-- (int | double)
             if (from is IOrExpression(IExpression[] fss2))
             {
                 var results = fss2.
                     Select(fs => this.Solve(to, fs)).
                     Memoize();
                 return results.All(r => r != null) ?
-                    OrExpression.From(results!) : null;
+                    OverloadTerm.From(results!) : null;
             }
 
             // object: object <-- int

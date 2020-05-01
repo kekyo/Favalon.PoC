@@ -81,9 +81,7 @@ namespace Favalet
             Assert.AreEqual(
                 new IExpression[]
                 {
-                    Or(
-                        Type<int>(),
-                        Constant(typeof(int)))!
+                    Type<int>()
                 },
                 actual);
         }

@@ -57,7 +57,7 @@ namespace Favalet.Expressions
             {
                 // TODO: bound attributes
 
-                var overloads = OrExpression.From(
+                var overloads = OverloadTerm.From(
                     bounds.Select(bound => bound.Expression))!;
                 var inferred = overloads.InferIfRequired(context);
 

@@ -105,7 +105,8 @@ namespace Favalet.Expressions.Specialized
             this.Index.GetHashCode();
 
         public override T Format<T>(IFormatContext<T> context) =>
-            context.Format(this, FormatOptions.ForceText, $"'{context.GetPlaceholderIndexString(this.Index)}");
+//            context.Format(this, FormatOptions.ForceText, $"'{context.GetPlaceholderIndexString(this.Index)}");
+            context.Format(this, FormatOptions.ForceText, $"'{this.Index}");
 
         internal static PlaceholderTerm Create(InferContext context, int currentOrder)
         {

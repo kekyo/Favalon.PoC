@@ -121,6 +121,11 @@ namespace Favalet.Contexts
                 return to;
             }
 
+            if (to is UnspecifiedTerm || from is UnspecifiedTerm)
+            {
+                return null;
+            }
+
             // int->object: int->object <-- object->int
             if (to is IFunctionDeclaredExpression(IExpression tp, IExpression tr) &&
                 from is IFunctionDeclaredExpression(IExpression fp, IExpression fr))

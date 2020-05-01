@@ -78,23 +78,24 @@ namespace Favalet.Contexts
                 {
                     var context = InferContext.Create(this);
 
-                    var current = inferrable.Infer(context);
-                    current = current.FixupIfRequired(context);
+                    var inferred = inferrable.Infer(context);
+                    var fixupped = inferred.FixupIfRequired(context);
+                    var current = fixupped;
 
                     for (var index = 1; index < this.MaxIterationCount; index++)
                     {
-                        var inferred = current.InferIfRequired(context);
-                        var fixuped = inferred.FixupIfRequired(context);
+                        inferred = current.InferIfRequired(context);
+                        fixupped = inferred.FixupIfRequired(context);
 
-                        if (current.ExactEquals(fixuped))
+                        if (current.ExactEquals(fixupped))
                         {
-                            Debug.WriteLine($"Infer [F]: {fixuped}");
-                            return fixuped;
+                            Debug.WriteLine($"Infer [F]: {fixupped}");
+                            return fixupped;
                         }
                         else
                         {
-                            Debug.WriteLine($"Infer [{index}]: {fixuped}");
-                            current = fixuped;
+                            Debug.WriteLine($"Infer [{index}]: {fixupped}");
+                            current = fixupped;
                         }
                     }
 

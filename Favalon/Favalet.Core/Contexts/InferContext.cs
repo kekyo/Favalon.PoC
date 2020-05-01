@@ -75,8 +75,7 @@ namespace Favalet.Contexts
         private IExpression? Substitute(
             IPlaceholderTerm placeholder,
             IExpression from,
-            bool isForward,
-            bool isWiden)
+            bool isForward)
         {
             Debug.Assert(
                 from is PlaceholderTerm ||
@@ -85,22 +84,18 @@ namespace Favalet.Contexts
             if (this.descriptions.TryGetValue(placeholder.Index, out var lastCombined))
             {
                 var result = isForward ?
-                    this.Solve(lastCombined, from, isWiden) :  // forward
-                    this.Solve(from, lastCombined, isWiden);   // backward
+                    this.Solve(lastCombined, from) :  // forward
+                    this.Solve(from, lastCombined);   // backward
 
                 if (result is IExpression)
                 {
                     this.descriptions[placeholder.Index] = result;
                     return result;
                 }
-                else if (!isWiden)
-                {
-                    var combinedExpression = OverloadTerm.From(new[] { lastCombined, from });
-                    this.descriptions[placeholder.Index] = combinedExpression!;
-                    return combinedExpression;
-                }
                 else
                 {
+                    var combinedExpression = OrExpression.From(new[] { lastCombined, from });
+                    this.descriptions[placeholder.Index] = combinedExpression!;
                     return null;
                 }
             }
@@ -111,7 +106,7 @@ namespace Favalet.Contexts
             }
         }
 
-        private IExpression? Solve(IExpression to, IExpression from, bool isWiden)
+        private IExpression? Solve(IExpression to, IExpression from)
         {
             // int: int <-- int
             // IComparable: IComparable <-- IComparable
@@ -130,8 +125,8 @@ namespace Favalet.Contexts
             if (to is IFunctionDeclaredExpression(IExpression tp, IExpression tr) &&
                 from is IFunctionDeclaredExpression(IExpression fp, IExpression fr))
             {
-                var pr = this.Solve(fp, tp, isWiden);
-                var rr = this.Solve(tr, fr, isWiden);
+                var pr = this.Solve(fp, tp);
+                var rr = this.Solve(tr, fr);
 
                 if (pr != null && rr != null)
                 {
@@ -150,15 +145,14 @@ namespace Favalet.Contexts
             // null: (int + IServiceProvider) <-- (int + double)
             // (int + _): (int + _) <-- (int + string)
             // (_[1] + _[2]): (_[1] + _[2]) <-- (_[2] + _[1])
-            if (to is ISumExpression(IExpression[] tss1) &&
-                from is ISumExpression(IExpression[] fss1))
+            if (to is IOrExpression(IExpression[] tss1) &&
+                from is IOrExpression(IExpression[] fss1))
             {
-                var unified = fss1.
-                    Select(fs => tss1.Any(ts => this.Solve(ts, fs, isWiden) != null)).
+                var results = fss1.
+                    Select(fs => tss1.Any(ts => this.Solve(ts, fs) != null)).
                     Memoize();
-                return unified.All(w => w) ?
-                    to :
-                    null;
+                return results.All(r => r) ?
+                    to : null;
             }
 
             // (int + double): (int + double) <-- int
@@ -166,23 +160,23 @@ namespace Favalet.Contexts
             // (int + IComparable): (int + IComparable) <-- string
             // (int + _): (int + _) <-- string
             // (int + _[1]): (int + _[1]) <-- _[2]
-            if (to is ISumExpression(IExpression[] tss2))
+            if (to is IOrExpression(IExpression[] tss2))
             {
                 var results = tss2.
-                    Select(ts => this.Solve(ts, from, isWiden)).
-                    Where(result => result != null).
+                    Select(ts => this.Solve(ts, from)).
                     Memoize();
-                return OverloadTerm.From(results!);
+                return results.Any(r => r != null) ?
+                    OrExpression.From(results!) : null;
             }
 
             // null: int <-- (int + double)
-            if (from is ISumExpression(IExpression[] fss2))
+            if (from is IOrExpression(IExpression[] fss2))
             {
                 var results = fss2.
-                    Select(fs => this.Solve(to, fs, isWiden)).
-                    Where(result => result != null).
+                    Select(fs => this.Solve(to, fs)).
                     Memoize();
-                return OverloadTerm.From(results!);
+                return results.All(r => r != null) ?
+                    OrExpression.From(results!) : null;
             }
 
             // object: object <-- int
@@ -198,23 +192,21 @@ namespace Favalet.Contexts
 
             if (to is IPlaceholderTerm tph)
             {
-                return this.Substitute(tph, from, true, isWiden);
+                return this.Substitute(tph, from, true);
             }
             if (from is IPlaceholderTerm fph)
             {
-                return this.Substitute(fph, to, false, isWiden);
+                return this.Substitute(fph, to, false);
             }
 
-            return isWiden ?
-                null :
-                OverloadTerm.From(new[] { to, from });
+            return null;
         }
 
         public void Unify(IExpression to, IExpression from) =>
-            this.Solve(to, from, false);
+            this.Solve(to, from);
 
         public IExpression? Widen(IExpression to, IExpression from) =>
-            this.Solve(to, from, true);
+            this.Solve(to, from);
 
         public IExpression? LookupPlaceholder(IPlaceholderTerm placeholder)
         {

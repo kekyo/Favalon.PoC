@@ -29,8 +29,8 @@ namespace Favalet.Expressions
     public abstract class TypeTerm :
         Expression, ITypeTerm
     {
-        private static readonly Dictionary<Type, TypeTerm> types =
-            new Dictionary<Type, TypeTerm>();
+        private static readonly Dictionary<Type, ITerm> types =
+            new Dictionary<Type, ITerm>();
 
         public readonly Type Type;
 
@@ -50,7 +50,7 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Type.GetHashCode();
 
-        public static TypeTerm From(Type type)
+        public static ITerm From(Type type)
         {
             // TODO: detect delegates
             // TODO: detect generics
@@ -62,12 +62,13 @@ namespace Favalet.Expressions
                     // Special case: Force replacing RuntimeType to Type
                     if (typeof(Type).IsAssignableFrom(type))
                     {
-                        term = new ConcreteTypeTerm(typeof(Type));
+                        term = ExpressionFactory.kindType;
                     }
                     else
                     {
                         term = new ConcreteTypeTerm(type);
                     }
+
                     types.Add(type, term);
                 }
                 return term;

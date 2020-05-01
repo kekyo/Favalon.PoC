@@ -31,18 +31,14 @@ namespace Favalet.Expressions
         Expression, IConstantTerm
     {
         public readonly object Value;
-        private readonly ValueLazy<ConstantTerm, TypeTerm> higherOrder;
 
         private ConstantTerm(object value)
         {
             this.Value = value;
-            this.higherOrder = ValueLazy.Create(
-                this,
-                @this => TypeTerm.From(@this.Value.GetType()));
+            this.HigherOrder = TypeTerm.From(value.GetType());
         }
 
-        public override IExpression HigherOrder =>
-            this.higherOrder.Value;
+        public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IConstantTerm.Value =>
@@ -72,6 +68,8 @@ namespace Favalet.Expressions
             {
                 char ch => new SingleCharConstantTerm(ch, UnspecifiedTerm.Instance),
                 string str when str.Length == 1 => new SingleCharConstantTerm(str[0], UnspecifiedTerm.Instance),
+                Type type => TypeTerm.From(type),
+                MethodBase method => MethodTerm.From(method),
                 _ => new ConstantTerm(value)
             };
     }
@@ -81,7 +79,7 @@ namespace Favalet.Expressions
     {
         private static readonly IExpression charTerm = TypeTerm.From(typeof(char));
         private static readonly IExpression higherOrder =
-            SumExpression.Create(new[] { charTerm, TypeTerm.From(typeof(string)) }, ExpressionFactory.kindType);
+            OrExpression.From(new[] { charTerm, TypeTerm.From(typeof(string)) })!;
 
         public readonly char Value;
 

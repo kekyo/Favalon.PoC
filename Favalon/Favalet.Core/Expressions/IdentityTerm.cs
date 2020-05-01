@@ -57,7 +57,7 @@ namespace Favalet.Expressions
             {
                 // TODO: bound attributes
 
-                var overloads = OverloadTerm.From(
+                var overloads = OrExpression.From(
                     bounds.Select(bound => bound.Expression))!;
                 var inferred = overloads.InferIfRequired(context);
 
@@ -95,7 +95,7 @@ namespace Favalet.Expressions
             if (bounds.Length >= 1)
             {
                 // TODO: bound attributes
-                return SumExpression.From(bounds.Select(bound => bound.Expression), false)?.
+                return OrExpression.From(bounds.Select(bound => bound.Expression))?.
                     ReduceIfRequired(context) ?? TerminationTerm.Instance;
             }
             else

@@ -22,6 +22,7 @@
 
 using Favalet.Contexts;
 using System;
+using System.Xml.Linq;
 
 namespace Favalet.Expressions
 {
@@ -31,7 +32,7 @@ namespace Favalet.Expressions
 
         T Format<T>(IFormatContext<T> context);
 
-        string ReadableXml { get; }
+        XNode Xml { get; }
     }
 
     public abstract partial class Expression : IExpression
@@ -51,10 +52,10 @@ namespace Favalet.Expressions
 
         public abstract T Format<T>(IFormatContext<T> context);
 
-        public string ReadableXml =>
-            this.FormatXmlString(true);
+        public XNode Xml =>
+            this.Format(FormatXmlContext.Create());
 
         public override string ToString() =>
-            ReadableXml;
+            this.FormatXmlString(true);
     }
 }

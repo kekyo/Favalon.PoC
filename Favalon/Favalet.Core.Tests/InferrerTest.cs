@@ -81,7 +81,7 @@ namespace Favalet
             Assert.AreEqual(
                 new IExpression[]
                 {
-                    Overload(
+                    Or(
                         Type<int>(),
                         Constant(typeof(int)))!
                 },

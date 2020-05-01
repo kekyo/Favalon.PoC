@@ -53,7 +53,6 @@ namespace Favalet.Contexts
         {
             var identity = type.GetFullName(false);
             environment.MutableBind(identity, TypeTerm.From(type));
-            environment.MutableBind(identity, ConstantTerm.From(type));
 
             foreach (var constructor in type.GetDeclaredConstructors().
                 Where(c => c.IsPublic && !c.IsPrivate && !c.IsStatic &&

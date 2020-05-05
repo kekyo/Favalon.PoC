@@ -28,8 +28,8 @@ namespace Favalet.Contexts
         void MutableBind(
             string identity,
             IExpression expression,
-            BoundTermAttributes attributes = BoundTermAttributes.Prefix | BoundTermAttributes.LeftToRight,
-            BoundTermPrecedences precedence = BoundTermPrecedences.Function);
+            BoundTermAttributes attributes = BoundTermAttributes.None,
+            BoundTermPrecedences precedence = BoundTermPrecedences.Default);
 
         BoundInformation[] LookupBoundInformations(IIdentityTerm identity);
     }

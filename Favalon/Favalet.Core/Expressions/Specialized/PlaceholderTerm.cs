@@ -18,19 +18,12 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
 {
-    public interface IPlaceholderTerm :
-        ITerm
-    {
-        int Index { get; }
-    }
-
     public sealed class PlaceholderTerm :
-        Expression, IPlaceholderTerm, IInferrableExpression, IReducibleExpression
+        Expression, ITerm, IInferrableExpression, IReducibleExpression
     {
         public readonly int Index;
 
@@ -41,10 +34,6 @@ namespace Favalet.Expressions.Specialized
         }
 
         public override IExpression HigherOrder { get; }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        int IPlaceholderTerm.Index =>
-            this.Index;
 
         public IExpression Infer(IInferContext context)
         {
@@ -95,7 +84,7 @@ namespace Favalet.Expressions.Specialized
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public override bool Equals(IExpression? rhs) =>
-            rhs is IPlaceholderTerm placeholder &&
+            rhs is PlaceholderTerm placeholder &&
             this.Index.Equals(placeholder.Index);
 
 #if !NET35 && !NET40
@@ -108,7 +97,7 @@ namespace Favalet.Expressions.Specialized
 //            context.Format(this, FormatOptions.ForceText, $"'{context.GetPlaceholderIndexString(this.Index)}");
             context.Format(this, FormatOptions.ForceText, $"'{this.Index}");
 
-        internal static PlaceholderTerm Create(InferContext context, int currentOrder)
+        internal static PlaceholderTerm Create(IInternalInferContext context, int currentOrder)
         {
             var index = context.DrawNextPlaceholderIndex();
 

@@ -24,19 +24,19 @@ namespace Favalet.Expressions
     [Flags]
     public enum BoundTermAttributes
     {
-        Prefix = 0x00,
+        None = 0x00,
         Infix = 0x01,
-        LeftToRight = 0x00,
         RightToLeft = 0x02,
     }
 
-    public enum BoundTermPrecedences
+    public enum BoundTermPrecedences : int
     {
         Lowest = 0,
         Method = 100,
-        Function = 1000,
+        Default = 1000,
         Morphism = 3000,
         ArithmericAddition = 5000,
         ArithmericMultiplication = 6000,
+        Value = 10000
     }
 }

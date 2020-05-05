@@ -35,7 +35,7 @@ namespace Favalet.Expressions.Specialized
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public override bool Equals(IExpression? rhs) =>
-            rhs is TerminationTerm;
+            false;
 
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.ForceText | FormatOptions.SuppressHigherOrder, "!!TERM");

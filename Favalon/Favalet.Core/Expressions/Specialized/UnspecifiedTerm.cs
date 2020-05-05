@@ -32,7 +32,9 @@ namespace Favalet.Expressions.Specialized
             TerminationTerm.Instance;
 
         public IExpression Infer(IInferContext context) =>
-            context.CreatePlaceholder();
+            context is IInternalInferContext c ?
+                (IExpression)c.CreatePlaceholder() :
+                this;
 
         IExpression IInferrableExpression.Fixup(IFixupContext context) =>
             this;

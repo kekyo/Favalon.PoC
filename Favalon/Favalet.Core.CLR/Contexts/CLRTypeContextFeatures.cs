@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
-using Favalet.Internal;
 
 namespace Favalet.Expressions
 {
@@ -33,26 +32,23 @@ namespace Favalet.Expressions
         public override IExpression CreateString(string value) =>
             ConstantTerm.From(value);
 
-        public override IExpression? Widen(IExpression? to, IExpression? from)
+        protected override IExpression? WidenCore(
+            IExpression to,
+            IExpression from,
+            IInferContext context)
         {
-            switch (to, from)
+            // object: object <-- int
+            // double: double <-- int
+            // IComparable: IComparable <-- string
+            if (to is TypeTerm toType &&
+                from is TypeTerm fromType)
             {
-                // object: object <-- int
-                // double: double <-- int
-                // IComparable: IComparable <-- string
-                case (TypeTerm toType, TypeTerm fromType):
-                    return toType.Type.IsConvertibleFrom(fromType.Type) ?
-                        to :
-                        null;
-
-                case (MethodTerm toMethod, MethodTerm fromMethod):
-                    return (this.Widen(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?
-                        toMethod :
-                        null;
-
-                default:
-                    return base.Widen(to, from);
+                return toType.IsConvertibleFrom(fromType) ?
+                    to :
+                    null;
             }
+
+            return base.WidenCore(to, from, context);
         }
 
         public static new readonly CLRTypeContextFeatures Instance =

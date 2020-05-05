@@ -27,6 +27,28 @@ namespace Favalet.Contexts
 {
     public static class TypeEnvironmentExtension
     {
+        private static readonly (string, ITerm)[] defaults = new []
+        {
+            ("false", ConstantTerm.From(false)),
+            ("true", ConstantTerm.From(true)),
+        };
+
+        public static TTypeEnvironment MutableBindDefaults<TTypeEnvironment>(
+            this TTypeEnvironment environment)
+            where TTypeEnvironment : ITypeEnvironment
+        {
+            environment.MutableBindTypes(typeof(object).GetAssembly());
+            environment.MutableBindTypes(typeof(Uri).GetAssembly());
+            environment.MutableBindTypes(typeof(Enumerable).GetAssembly());
+
+            foreach (var entry in defaults)
+            {
+                environment.MutableBind(entry.Item1, entry.Item2);
+            }
+
+            return environment;
+        }
+
         public static TTypeEnvironment MutableBindConstructor<TTypeEnvironment>(
             this TTypeEnvironment environment, ConstructorInfo constructor)
             where TTypeEnvironment : ITypeEnvironment

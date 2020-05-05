@@ -37,9 +37,7 @@ namespace Favalet
     {
         private static TypeEnvironment Create() =>
             TypeEnvironment.Create(CLRTypeContextFeatures.Instance, 100).
-            MutableBindTypes(typeof(object).Assembly).
-            MutableBindTypes(typeof(Uri).Assembly).
-            MutableBindTypes(typeof(Enumerable).Assembly);
+            MutableBindDefaults();
 
         private static readonly Func<string, TypeEnvironment, ValueTask<IExpression[]>>[] Parsers =
             new[]
@@ -117,6 +115,24 @@ namespace Favalet
                     Apply(
                         Method(typeof(Activator), "CreateInstance", typeof(Type)),
                         Constant(typeof(int))),
+                },
+                actual);
+        }
+
+        [TestCaseSource("Parsers")]
+        public async Task LookupManyStaticOverloadedMethod(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
+        {
+            // Convert.ToString(123)
+            var text = "System.Convert.ToString 123";
+            var environment = Create();
+            var actual = await run(text, environment);
+
+            Assert.AreEqual(
+                new IExpression[]
+                {
+                    Apply(
+                        Method(typeof(Convert), "ToString", typeof(int)),
+                        Constant(123)),
                 },
                 actual);
         }

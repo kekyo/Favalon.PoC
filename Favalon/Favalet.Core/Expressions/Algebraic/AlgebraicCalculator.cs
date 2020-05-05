@@ -17,87 +17,123 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Expressions.Specialized;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface IAlgebraicCalculator
+    public interface IAlgebraicCalculator<TContext>
     {
-        IExpression? Widen(IExpression to, IExpression from);
+        IExpression? Widen(
+            IExpression? to,
+            IExpression? from,
+            TContext context);
     }
 
-    public class AlgebraicCalculator : IAlgebraicCalculator
+    public class AlgebraicCalculator<TContext> : IAlgebraicCalculator<TContext>
     {
         protected AlgebraicCalculator()
         { }
 
-        public virtual IExpression? Widen(IExpression? to, IExpression? from)
+        public IExpression? Widen(
+            IExpression? to,
+            IExpression? from,
+            TContext context)
         {
-            switch (to, from)
+            if (to == null || from == null)
             {
-                // int: int <-- int
-                // IComparable: IComparable <-- IComparable
-                // _[1]: _[1] <-- _[1]
-                case (IExpression toExpression, IExpression fromExpression) when toExpression.ExactEquals(fromExpression):
-                    return toExpression;
-
-                // (int | double): (int | double) <-- (int | double)
-                // (int | double | string): (int | double | string) <-- (int | double)
-                // (int | IComparable): (int | IComparable) <-- (int | string)
-                // null: (int | double) <-- (int | double | string)
-                // null: (int | IServiceProvider) <-- (int | double)
-                // (int | _): (int | _) <-- (int | string)
-                // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
-                case (IOrExpression(IExpression[] toExpressions), IOrExpression(IExpression[] fromExpressions)):
-                    var widened1 = fromExpressions.
-                        Select(rhsExpression => toExpressions.Any(lhsExpression => this.Widen(lhsExpression, rhsExpression) != null)).
-                        Memoize();
-                    return widened1.All(w => w) ?
-                        to :
-                        null;
-
-                // null: int <-- (int | double)
-                case (IExpression _, IOrExpression(IExpression[] fromExpressions) or):
-                    Debug.Assert(fromExpressions.Length >= 2);
-                    var expressions2 = fromExpressions.
-                        Select(rhsExpression => this.Widen(to, rhsExpression)).
-                        Memoize();
-                    return expressions2.All(expression => expression != null) ?
-                        or.From(expressions2!) :
-                        null;
-
-                // (int | double): (int | double) <-- int
-                // (int | IServiceProvider): (int | IServiceProvider) <-- int
-                // (int | IComparable): (int | IComparable) <-- string
-                // (int | _): (int | _) <-- string
-                // (int | _[1]): (int | _[1]) <-- _[2]
-                case (IOrExpression(IExpression[] toExpressions) or, IExpression _):
-                    Debug.Assert(toExpressions.Length >= 2);
-                    var expressions3 = toExpressions.
-                        Select(lhsExpression => this.Widen(lhsExpression, from)).
-                        Memoize();
-                    // Requirements: 1 or any terms widened.
-                    if (expressions3.Any(expression => expression != null))
-                    {
-                        //return SumExpression.From(
-                        //    terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).Distinct().Memoize(),
-                        //    true);
-                        return or.From(
-                            expressions3.Where(expression => expression != null)!);
-                    }
-                    // Couldn't widen: (int | double) <-- string
-                    else
-                    {
-                        return null;
-                    }
-
-                default:
-                    return null;
+                return null;
             }
+
+            if (to is TerminationTerm || from is TerminationTerm)
+            {
+                return null;
+            }
+            if (to is UnspecifiedTerm || from is UnspecifiedTerm)
+            {
+                return null;
+            }
+
+            return this.WidenCore(to, from, context);
         }
 
-        public static readonly AlgebraicCalculator Instance =
-            new AlgebraicCalculator();
+        protected virtual IExpression? OrFrom(IEnumerable<IExpression> operands) =>
+            OrExpression.From(operands);
+
+        protected virtual IExpression? WidenCore(
+            IExpression to,
+            IExpression from,
+            TContext context)
+        {
+            if (to == null || from == null)
+            {
+                return null;
+            }
+
+            // int: int <-- int
+            // IComparable: IComparable <-- IComparable
+            // _[1]: _[1] <-- _[1]
+            if (to.ShallowEquals(from))
+            {
+                return to;
+            }
+
+            // (int | double): (int | double) <-- (int | double)
+            // (int | double | string): (int | double | string) <-- (int | double)
+            // (int | IComparable): (int | IComparable) <-- (int | string)
+            // null: (int | double) <-- (int | double | string)
+            // null: (int | IServiceProvider) <-- (int | double)
+            // (int | _): (int | _) <-- (int | string)
+            // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
+            if (to is IOrExpression(IExpression[] tss1) &&
+                from is IOrExpression(IExpression[] fss1))
+            {
+                var results = fss1.
+                    Select(fs => tss1.Any(ts => this.Widen(ts, fs, context) != null)).
+                    Memoize();
+                return results.All(r => r) ?
+                    to : null;
+            }
+
+            // (int | double): (int | double) <-- int
+            // (int | IServiceProvider): (int | IServiceProvider) <-- int
+            // (int | IComparable): (int | IComparable) <-- string
+            // (int | _): (int | _) <-- string
+            // (int | _[1]): (int | _[1]) <-- _[2]
+            if (to is IOrExpression(IExpression[] tss2))
+            {
+                var results = tss2.
+                    Select(ts => this.Widen(ts, from, context)).
+                    Memoize();
+                return results.Any(r => r != null) ?
+                    OrFrom(results.Where(r => r != null)!) : null;
+            }
+
+            // null: int <-- (int | double)
+            if (from is IOrExpression(IExpression[] fss2))
+            {
+                var results = fss2.
+                    Select(fs => this.Widen(to, fs, context)).
+                    Memoize();
+                return results.All(r => r != null) ?
+                    OrFrom(results!) : null;
+            }
+
+            return null;
+        }
+
+        public static readonly AlgebraicCalculator<TContext> Instance =
+            new AlgebraicCalculator<TContext>();
+    }
+
+    public static class AlgebraicCalculatorExtension
+    {
+        public static IExpression? Widen(
+            this IAlgebraicCalculator<bool> calculator,
+            IExpression? to,
+            IExpression? from) =>
+            calculator.Widen(to, from, false);
     }
 }

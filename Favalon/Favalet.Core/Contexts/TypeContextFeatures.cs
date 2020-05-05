@@ -21,10 +21,13 @@ using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Favalet.Contexts
 {
-    public interface ITypeContextFeatures : IAlgebraicCalculator
+    public interface ITypeContextFeatures :
+        IAlgebraicCalculator<IInferContext>
     {
         IExpression CreateIdentity(string identity);
         IExpression CreateNumeric(string value);
@@ -32,7 +35,8 @@ namespace Favalet.Contexts
         IExpression CreateApply(IExpression function, IExpression argument);
     }
 
-    public class TypeContextFeatures : AlgebraicCalculator, ITypeContextFeatures
+    public class TypeContextFeatures :
+        AlgebraicCalculator<IInferContext>, ITypeContextFeatures
     {
         protected TypeContextFeatures()
         { }
@@ -49,43 +53,49 @@ namespace Favalet.Contexts
         public virtual IExpression CreateApply(IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument, UnspecifiedTerm.Instance);
 
-        public override IExpression? Widen(IExpression? to, IExpression? from)
+        protected override sealed IExpression? OrFrom(IEnumerable<IExpression> operands) =>
+            OverloadTerm.From(operands);
+
+        protected override IExpression? WidenCore(
+            IExpression to,
+            IExpression from,
+            IInferContext context)
         {
-            switch (to, from)
+            // int->object: int->object <-- object->int
+            if (to is IFunctionDeclaredExpression(IExpression tp, IExpression tr) &&
+                from is IFunctionDeclaredExpression(IExpression fp, IExpression fr))
             {
-                // int->object: int->object <-- object->int
-                case (IFunctionDeclaredExpression(IExpression toParameter, IExpression toResult),
-                      IFunctionDeclaredExpression(IExpression fromParameter, IExpression fromResult)):
-                    var parameter = this.Widen(fromParameter, toParameter) is IExpression ? toParameter : null;
-                    var result = this.Widen(toResult, fromResult);
-                    return parameter is IExpression pr && result is IExpression rr ?
-                        FunctionDeclaredExpression.From(pr, rr) :
-                        null;
+                var pr = this.Widen(fp, tp, context);
+                var rr = this.Widen(tr, fr, context);
 
-                // _[1]: _[1] <-- _[2]
-                //case (PlaceholderTerm _, PlaceholderTerm _):
-                //    return to;
-
-                // _: _ <-- int
-                // _: _ <-- (int + double)
-                case (PlaceholderTerm _, _):
-                    return to;
-
-                default:
-                    if (base.Widen(to, from) is IExpression widen)
-                    {
-                        return widen;
-                    }
-                    // null: int <-- _   [TODO: maybe?]
-                    //else if (from is PlaceholderTerm placeholder)
-                    //{
-                    //    return null;
-                    //}
-                    else
-                    {
-                        return null;
-                    }
+                if (pr != null && rr != null)
+                {
+                    return FunctionDeclaredExpression.From(pr, rr);
+                }
+                else
+                {
+                    return null;
+                }
             }
+
+            if (base.WidenCore(to, from, context) is IExpression result)
+            {
+                return result;
+            }
+
+            if (context is IInternalInferContext c)
+            {
+                if (to is PlaceholderTerm tph)
+                {
+                    return c.Substitute(tph, from, true);
+                }
+                if (from is PlaceholderTerm fph)
+                {
+                    return c.Substitute(fph, to, false);
+                }
+            }
+
+            return null;
         }
 
         public static new readonly TypeContextFeatures Instance =

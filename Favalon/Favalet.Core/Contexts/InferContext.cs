@@ -18,18 +18,13 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions;
-using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace Favalet.Contexts
 {
     public interface IInferContext : IScopedTypeContext<IInferContext>
     {
-        IPlaceholderTerm CreatePlaceholder();
-
         void Unify(IExpression to, IExpression from);
     }
 
@@ -37,11 +32,23 @@ namespace Favalet.Contexts
     {
         IExpression? Widen(IExpression to, IExpression from);
 
-        IExpression? LookupPlaceholder(IPlaceholderTerm placeholder);
+        IExpression? LookupPlaceholder(PlaceholderTerm placeholder);
+    }
+
+    internal interface IInternalInferContext : IInferContext
+    {
+        PlaceholderTerm CreatePlaceholder();
+
+        int DrawNextPlaceholderIndex();
+
+        IExpression? Substitute(
+            PlaceholderTerm placeholder,
+            IExpression from,
+            bool isForward);
     }
 
     internal sealed class InferContext :
-        TypeContext, IInferContext, IFixupContext
+        TypeContext, IInternalInferContext, IFixupContext
     {
         private readonly IRootTypeContext rootContext;
         private readonly Dictionary<int, IExpression> descriptions;
@@ -63,25 +70,22 @@ namespace Favalet.Contexts
         public IInferContext CreateDerivedScope() =>
             new InferContext(this);
 
-        public IPlaceholderTerm CreatePlaceholder() =>
+        PlaceholderTerm IInternalInferContext.CreatePlaceholder() =>
             PlaceholderTerm.Create(this, 1);
 
-        internal bool IsInferring =>
-            this.rootContext.IsInferring;
-
-        internal int DrawNextPlaceholderIndex() =>
+        int IInternalInferContext.DrawNextPlaceholderIndex() =>
             this.rootContext.DrawNextPlaceholderIndex();
 
-        private IExpression? Substitute(
-            IPlaceholderTerm placeholder,
+        IExpression? IInternalInferContext.Substitute(
+            PlaceholderTerm placeholder,
             IExpression from,
             bool isForward)
         {
             if (this.descriptions.TryGetValue(placeholder.Index, out var lastCombined))
             {
                 var result = isForward ?
-                    this.Solve(lastCombined, from) :  // forward
-                    this.Solve(from, lastCombined);   // backward
+                    this.rootContext.Features.Widen(lastCombined, from, this) :  // forward
+                    this.rootContext.Features.Widen(from, lastCombined, this);   // backward
 
                 if (result is IExpression)
                 {
@@ -102,116 +106,20 @@ namespace Favalet.Contexts
             }
         }
 
-        private IExpression? Solve(IExpression to, IExpression from)
-        {
-            // int: int <-- int
-            // IComparable: IComparable <-- IComparable
-            // _[1]: _[1] <-- _[1]
-            if (to.ShallowEquals(from))
-            {
-                return to;
-            }
-
-            if (to is UnspecifiedTerm || from is UnspecifiedTerm)
-            {
-                return null;
-            }
-
-            // int->object: int->object <-- object->int
-            if (to is IFunctionDeclaredExpression(IExpression tp, IExpression tr) &&
-                from is IFunctionDeclaredExpression(IExpression fp, IExpression fr))
-            {
-                var pr = this.Solve(fp, tp);
-                var rr = this.Solve(tr, fr);
-
-                if (pr != null && rr != null)
-                {
-                    return FunctionDeclaredExpression.From(pr, rr);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            // (int | double): (int | double) <-- (int | double)
-            // (int | double | string): (int | double | string) <-- (int | double)
-            // (int | IComparable): (int | IComparable) <-- (int | string)
-            // null: (int | double) <-- (int | double | string)
-            // null: (int | IServiceProvider) <-- (int | double)
-            // (int | _): (int | _) <-- (int | string)
-            // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
-            if (to is IOrExpression(IExpression[] tss1) &&
-                from is IOrExpression(IExpression[] fss1))
-            {
-                var results = fss1.
-                    Select(fs => tss1.Any(ts => this.Solve(ts, fs) != null)).
-                    Memoize();
-                return results.All(r => r) ?
-                    to : null;
-            }
-
-            // (int | double): (int | double) <-- int
-            // (int | IServiceProvider): (int | IServiceProvider) <-- int
-            // (int | IComparable): (int | IComparable) <-- string
-            // (int | _): (int | _) <-- string
-            // (int | _[1]): (int | _[1]) <-- _[2]
-            if (to is IOrExpression(IExpression[] tss2))
-            {
-                var results = tss2.
-                    Select(ts => this.Solve(ts, from)).
-                    Memoize();
-                return results.Any(r => r != null) ?
-                    OverloadTerm.From(results.Where(r => r != null)!) : null;
-            }
-
-            // null: int <-- (int | double)
-            if (from is IOrExpression(IExpression[] fss2))
-            {
-                var results = fss2.
-                    Select(fs => this.Solve(to, fs)).
-                    Memoize();
-                return results.All(r => r != null) ?
-                    OverloadTerm.From(results!) : null;
-            }
-
-            // object: object <-- int
-            // double: double <-- int
-            // IComparable: IComparable <-- string
-            if (to is ITypeTerm toType &&
-                from is ITypeTerm fromType)
-            {
-                return toType.IsConvertibleFrom(fromType) ?
-                    to :
-                    null;
-            }
-
-            if (to is IPlaceholderTerm tph)
-            {
-                return this.Substitute(tph, from, true);
-            }
-            if (from is IPlaceholderTerm fph)
-            {
-                return this.Substitute(fph, to, false);
-            }
-
-            return null;
-        }
-
         public void Unify(IExpression to, IExpression from) =>
-            this.Solve(to, from);
+            this.rootContext.Features.Widen(to, from, this);
 
         public IExpression? Widen(IExpression to, IExpression from) =>
-            this.Solve(to, from);
+            this.rootContext.Features.Widen(to, from, this);
 
-        public IExpression? LookupPlaceholder(IPlaceholderTerm placeholder)
+        public IExpression? LookupPlaceholder(PlaceholderTerm placeholder)
         {
             var current = placeholder;
             while (true)
             {
                 if (this.descriptions.TryGetValue(current.Index, out var combined))
                 {
-                    if (combined is IPlaceholderTerm p)
+                    if (combined is PlaceholderTerm p)
                     {
                         current = p;
                     }

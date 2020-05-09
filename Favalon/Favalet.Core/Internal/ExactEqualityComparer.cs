@@ -17,12 +17,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 
-namespace Favalet.Expressions
+namespace Favalet.Internals
 {
-    public sealed class ExactEqualityComparer : IEqualityComparer<IExpression>
+    internal sealed class ExactEqualityComparer : IEqualityComparer<IExpression>
     {
         private ExactEqualityComparer()
         { }

@@ -19,6 +19,7 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Algebraic;
+using Favalet.Internals;
 using System.Collections.Generic;
 using System.Linq;
 

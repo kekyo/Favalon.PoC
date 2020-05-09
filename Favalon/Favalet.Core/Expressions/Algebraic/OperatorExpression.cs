@@ -19,6 +19,7 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
+using Favalet.Internals;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

@@ -41,7 +41,7 @@ namespace Favalet.Expressions.Specialized
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public override bool Equals(IExpression? rhs) =>
-            false;
+            rhs is UnspecifiedTerm;
 
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.ForceText, "_");

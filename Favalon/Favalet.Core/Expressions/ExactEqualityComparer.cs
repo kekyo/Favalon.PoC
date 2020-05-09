@@ -36,9 +36,10 @@ namespace Favalet.Expressions
 
             return (x, y) switch
             {
-                (TerminationTerm _, TerminationTerm _) => true,
                 (_, TerminationTerm _) => false,
                 (TerminationTerm _, _) => false,
+                (_, UnspecifiedTerm _) => false,
+                (UnspecifiedTerm _, _) => false,
                 _ => x.Equals(y) && this.Equals(x.HigherOrder, y.HigherOrder),
             };
         }

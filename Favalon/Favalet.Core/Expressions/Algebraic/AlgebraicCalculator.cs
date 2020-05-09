@@ -67,11 +67,6 @@ namespace Favalet.Expressions.Algebraic
             IExpression from,
             TContext context)
         {
-            if (to == null || from == null)
-            {
-                return null;
-            }
-
             // int: int <-- int
             // IComparable: IComparable <-- IComparable
             // _[1]: _[1] <-- _[1]

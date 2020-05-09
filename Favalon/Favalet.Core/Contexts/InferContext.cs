@@ -110,7 +110,7 @@ namespace Favalet.Contexts
             this.rootContext.Features.Widen(to, from, this);
 
         public IExpression? Widen(IExpression to, IExpression from) =>
-            this.rootContext.Features.Widen(to, from, this);
+            this.rootContext.Features.Widen(to, from, null);
 
         public IExpression? LookupPlaceholder(PlaceholderTerm placeholder)
         {

@@ -35,7 +35,7 @@ namespace Favalet.Expressions
         protected override IExpression? WidenCore(
             IExpression to,
             IExpression from,
-            IInferContext context)
+            IInferContext? context)
         {
             // object: object <-- int
             // double: double <-- int

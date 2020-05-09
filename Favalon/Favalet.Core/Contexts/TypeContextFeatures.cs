@@ -27,7 +27,7 @@ using System.Diagnostics;
 namespace Favalet.Contexts
 {
     public interface ITypeContextFeatures :
-        IAlgebraicCalculator<IInferContext>
+        IAlgebraicCalculator<IInferContext?>
     {
         IExpression CreateIdentity(string identity);
         IExpression CreateNumeric(string value);
@@ -36,7 +36,7 @@ namespace Favalet.Contexts
     }
 
     public class TypeContextFeatures :
-        AlgebraicCalculator<IInferContext>, ITypeContextFeatures
+        AlgebraicCalculator<IInferContext?>, ITypeContextFeatures
     {
         protected TypeContextFeatures()
         { }
@@ -59,7 +59,7 @@ namespace Favalet.Contexts
         protected override IExpression? WidenCore(
             IExpression to,
             IExpression from,
-            IInferContext context)
+            IInferContext? context)
         {
             // int->object: int->object <-- object->int
             if (to is IFunctionDeclaredExpression(IExpression tp, IExpression tr) &&

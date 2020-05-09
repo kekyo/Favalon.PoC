@@ -94,9 +94,9 @@ namespace Favalet.Expressions
 
         public IExpression Fixup(IFixupContext context)
         {
+            var higherOrder = this.HigherOrder.FixupIfRequired(context);
             var parameter = this.Parameter.FixupIfRequired(context);
             var result = this.Result.FixupIfRequired(context);
-            var higherOrder = this.HigherOrder.FixupIfRequired(context);
 
             if (this.Parameter.ExactEquals(parameter) &&
                 this.Result.ExactEquals(result) &&
@@ -112,9 +112,9 @@ namespace Favalet.Expressions
 
         public IExpression Reduce(IReduceContext context)
         {
+            var higherOrder = this.HigherOrder.ReduceIfRequired(context);
             var parameter = this.Parameter.ReduceIfRequired(context);
             var result = this.Result.ReduceIfRequired(context);
-            var higherOrder = this.HigherOrder.ReduceIfRequired(context);
 
             if (this.Parameter.ExactEquals(parameter) &&
                 this.Result.ExactEquals(result) &&

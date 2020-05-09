@@ -39,7 +39,7 @@ namespace Favalet.Expressions.Specialized
             var higherOrder = this.HigherOrder.FixupIfRequired(context);
             var overloads = this.Operands.
                 Select(operand => operand.FixupIfRequired(context)).
-                Distinct(ExactEqualityComparer.Instance).
+                Distinct(ShallowEqualityComparer.Instance).
                 Memoize();
 
             var valids = overloads.

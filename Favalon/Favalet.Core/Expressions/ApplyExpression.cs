@@ -71,10 +71,10 @@ namespace Favalet.Expressions
             var argument = this.Argument.InferIfRequired(context);
             var function = this.Function.InferIfRequired(context);
 
-            var functionDeclaration = FunctionDeclaredExpression.From(
+            var functionDeclared = FunctionDeclaredExpression.From(
                 argument.HigherOrder, higherOrder);
 
-            context.Unify(functionDeclaration, function.HigherOrder);
+            context.Unify(functionDeclared, function.HigherOrder);
 
             if (this.Function.ExactEquals(function) &&
                 this.Argument.ExactEquals(argument) &&

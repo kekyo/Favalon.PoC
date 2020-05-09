@@ -63,11 +63,11 @@ namespace Favalet.Expressions.Specialized
 
             var validOverloads = valids.
                 Select(entry => entry.overload).
-                OrderBy(overload => overload.GetHashCode()).   // make stable
+                OrderBy(overload => overload, context.ExpressionComparer).   // make stable
                 Memoize();
             var validHigherOrders = valids.
                 Select(entry => entry.higherOrder).
-                OrderBy(overload => overload.GetHashCode()).   // make stable
+                OrderBy(overload => overload, context.ExpressionComparer).   // make stable
                 Memoize();
 
             var validHigherOrder = From(validHigherOrders)!;

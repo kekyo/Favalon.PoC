@@ -19,6 +19,7 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
+using Favalet.Internal;
 using Favalet.Internals;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ using System.Runtime.CompilerServices;
 namespace Favalet.Expressions.Algebraic
 {
     public interface IOperatorExpression :
-        IExpression
+        IExpression, IExpressionComparable
     {
         IExpression[] Operands { get; }
 
@@ -160,6 +161,12 @@ namespace Favalet.Expressions.Algebraic
 
         public override sealed T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.SuppressHigherOrder, this.Operands);
+
+        public virtual int CompareTo(IExpression rhs, IComparer<IExpression> comparer) =>
+            rhs is IOperatorExpression op ?
+                Operands.Zip(op.Operands, (lhs, rhs) => comparer.Compare(lhs, rhs)).
+                FirstOrDefault(r => r != 0) :
+            1;
     }
 
     public static class OperatorExpressionExtension

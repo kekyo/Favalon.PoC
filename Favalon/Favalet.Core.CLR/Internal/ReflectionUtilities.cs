@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Favalet.Internal
 {
@@ -155,7 +156,19 @@ namespace Favalet.Internal
 #endif
 
         public static int SizeOf(this Type type) =>
-            sizeOf[type];
+#if NETSTANDARD1_0
+            sizeOf.TryGetValue(type, out var size) ?
+                size :
+                type.IsValueType() ?
+                    Buffer.ByteLength(Array.CreateInstance(type, 1)) :
+                    -1;
+#else
+            sizeOf.TryGetValue(type, out var size) ?
+                size :
+                type.IsValueType() ?
+                    Marshal.SizeOf(type) :
+                    -1;
+#endif
 
         public static bool IsClsCompliant(this Type type) =>
             knownClsCompilant.Contains(type);

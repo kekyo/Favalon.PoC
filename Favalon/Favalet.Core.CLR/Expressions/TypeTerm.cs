@@ -50,6 +50,9 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Type.GetHashCode();
 
+        public void Deconstruct(out Type type) =>
+            type = this.Type;
+
         public static ITerm From(Type type)
         {
             // TODO: detect delegates

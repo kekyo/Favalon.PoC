@@ -52,5 +52,8 @@ namespace Favalet.Expressions
             OrExpression.From(operands);
         public static IExpression? And(params IExpression[] operands) =>
             AndExpression.From(operands);
+
+        public static IExpression? Overload(params IExpression[] expressions) =>
+            OverloadTerm.From(expressions);
     }
 }

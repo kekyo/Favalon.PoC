@@ -133,7 +133,12 @@ namespace Favalet
                 new IExpression[]
                 {
                     Apply(
-                        Method(typeof(Convert), "ToString", typeof(int)),
+                        Overload(
+                            Method(typeof(Convert), "ToString", typeof(object)),
+                            Method(typeof(Convert), "ToString", typeof(double)),
+                            Method(typeof(Convert), "ToString", typeof(float)),
+                            Method(typeof(Convert), "ToString", typeof(long)),
+                            Method(typeof(Convert), "ToString", typeof(int)))!,
                         Constant(123)),
                 },
                 actual);

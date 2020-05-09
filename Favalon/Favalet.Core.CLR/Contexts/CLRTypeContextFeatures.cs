@@ -19,6 +19,7 @@
 
 using Favalet.Contexts;
 using Favalet.Internal;
+using System.Collections.Generic;
 
 namespace Favalet.Expressions
 {
@@ -26,6 +27,9 @@ namespace Favalet.Expressions
     {
         private CLRTypeContextFeatures()
         { }
+
+        public override IComparer<IExpression> ExpressionComparer =>
+            ExpressionTypeNarrowingComparer.Instance;
 
         public override IExpression CreateNumeric(string value) =>
             CLRExpressionFactory.FromNumeric(value);

@@ -28,15 +28,17 @@ namespace Favalet.Contexts
 {
     public interface IInferContext : IScopedTypeContext<IInferContext>
     {
-        IPlaceholderTerm CreatePlaceholder();
+        IComparer<IExpression> ExpressionComparer { get; }
 
+        IPlaceholderTerm CreatePlaceholder();
         void Unify(IExpression to, IExpression from);
     }
 
     public interface IFixupContext
     {
-        IExpression? Widen(IExpression to, IExpression from);
+        IComparer<IExpression> ExpressionComparer { get; }
 
+        IExpression? Widen(IExpression to, IExpression from);
         IExpression? LookupPlaceholder(IPlaceholderTerm placeholder);
     }
 
@@ -60,17 +62,17 @@ namespace Favalet.Contexts
             this.descriptions = parent.descriptions;
         }
 
+        public IComparer<IExpression> ExpressionComparer =>
+            this.rootContext.Features.ExpressionComparer;
+
         public IInferContext CreateDerivedScope() =>
             new InferContext(this);
 
-        public IPlaceholderTerm CreatePlaceholder() =>
-            PlaceholderTerm.Create(this, 1);
-
-        internal bool IsInferring =>
-            this.rootContext.IsInferring;
-
         internal int DrawNextPlaceholderIndex() =>
             this.rootContext.DrawNextPlaceholderIndex();
+
+        public IPlaceholderTerm CreatePlaceholder() =>
+            PlaceholderTerm.Create(this, 1);
 
         private IExpression? Substitute(
             IPlaceholderTerm placeholder,
@@ -179,14 +181,13 @@ namespace Favalet.Contexts
             // double: double <-- int
             // IComparable: IComparable <-- string
 
-            // TODO:
-            //if (to is ITypeTerm toType &&
-            //    from is ITypeTerm fromType)
-            //{
-            //    return toType.IsConvertibleFrom(fromType) ?
-            //        to :
-            //        null;
-            //}
+            if (to is ITypeTerm toType &&
+                from is ITypeTerm fromType)
+            {
+                return toType.IsConvertibleFrom(fromType) ?
+                    to :
+                    null;
+            }
 
             if (to is IPlaceholderTerm tph)
             {

@@ -178,13 +178,15 @@ namespace Favalet.Contexts
             // object: object <-- int
             // double: double <-- int
             // IComparable: IComparable <-- string
-            if (to is ITypeTerm toType &&
-                from is ITypeTerm fromType)
-            {
-                return toType.IsConvertibleFrom(fromType) ?
-                    to :
-                    null;
-            }
+
+            // TODO:
+            //if (to is ITypeTerm toType &&
+            //    from is ITypeTerm fromType)
+            //{
+            //    return toType.IsConvertibleFrom(fromType) ?
+            //        to :
+            //        null;
+            //}
 
             if (to is IPlaceholderTerm tph)
             {

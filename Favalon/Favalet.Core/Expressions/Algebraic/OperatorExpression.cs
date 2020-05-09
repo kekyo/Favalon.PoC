@@ -63,10 +63,16 @@ namespace Favalet.Expressions.Algebraic
             bool isStrict = true)
         {
             // It digs only first depth.
-            var ops = operands.
-                SelectMany(operand => operand is TOperator(IExpression[] operands) ?
-                    operands : new[] { operand }).
-                Memoize();
+            var ops = isStrict ?
+                operands.
+                    SelectMany(operand => operand is TOperator(IExpression[] operands) ?
+                        operands : new[] { operand }).
+                    Memoize() :
+                operands.
+                    SelectMany(operand => operand is TOperator(IExpression[] operands) ?
+                        operands : new[] { operand }).
+                    Distinct().     // Exact expression type equality
+                    Memoize();
 
             return ops.Length switch
             {

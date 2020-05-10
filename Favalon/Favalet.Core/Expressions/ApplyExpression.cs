@@ -19,6 +19,8 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
+using Favalet.Internal;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 
@@ -42,7 +44,8 @@ namespace Favalet.Expressions
         IExpression Argument { get; }
     }
 
-    public sealed class ApplyExpression : Expression, IApplyExpression
+    public sealed class ApplyExpression :
+        Expression, IApplyExpression, IExpressionComparable
     {
         public readonly IExpression Function;
         public readonly IExpression Argument;
@@ -155,6 +158,14 @@ namespace Favalet.Expressions
 
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.Standard, this.Function, this.Argument);
+
+        int IExpressionComparable.CompareTo(
+            IExpression rhs, IComparer<IExpression> comparer) =>
+            rhs is IApplyExpression ra ?
+                ((comparer.Compare(this.Function, ra.Function) is int p && p != 0) ?
+                    p :
+                    comparer.Compare(this.Argument, ra.Argument)) :
+                -1;
 
         public static ApplyExpression Create(
             IExpression function, IExpression argument, IExpression higherOrder) =>

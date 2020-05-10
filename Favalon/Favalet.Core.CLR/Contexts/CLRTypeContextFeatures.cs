@@ -28,9 +28,6 @@ namespace Favalet.Expressions
         private CLRTypeContextFeatures()
         { }
 
-        public override IComparer<IExpression> ExpressionComparer =>
-            ExpressionTypeNarrowingComparer.Instance;
-
         public override IExpression CreateNumeric(string value) =>
             CLRExpressionFactory.FromNumeric(value);
 

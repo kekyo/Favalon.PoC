@@ -27,7 +27,7 @@ using System.Reflection;
 namespace Favalet.Expressions
 {
     public abstract class TypeTerm :
-        Expression, ITypeTerm
+        Expression, ITypeTerm, IExpressionComparable
     {
         private static readonly Dictionary<Type, ITerm> types =
             new Dictionary<Type, ITerm>();
@@ -49,6 +49,12 @@ namespace Favalet.Expressions
 
         public override int GetHashCode() =>
             this.Type.GetHashCode();
+
+        int IExpressionComparable.CompareTo(
+            IExpression rhs, IComparer<IExpression> comparer) =>
+            rhs is TypeTerm rt ?
+                ReflectionUtilities.Compare(this.Type, rt.Type) :
+                -1;
 
         public void Deconstruct(out Type type) =>
             type = this.Type;

@@ -19,6 +19,8 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
+using Favalet.Internal;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -47,7 +49,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class FunctionDeclaredExpression :
-        Expression, IFunctionDeclaredExpression
+        Expression, IFunctionDeclaredExpression, IExpressionComparable
     {
         public readonly IExpression Parameter;
         public readonly IExpression Result;
@@ -138,6 +140,14 @@ namespace Favalet.Expressions
 
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.Standard, this.Parameter, this.Result);
+
+        int IExpressionComparable.CompareTo(
+            IExpression rhs, IComparer<IExpression> comparer) =>
+            rhs is IFunctionDeclaredExpression rfd ?
+                ((comparer.Compare(this.Parameter, rfd.Parameter) is int p && p != 0) ?
+                    p :
+                    comparer.Compare(this.Result, rfd.Result)) :
+                -1;
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

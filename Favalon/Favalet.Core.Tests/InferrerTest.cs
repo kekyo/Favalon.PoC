@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 
 using static Favalet.Expressions.ExpressionFactory;
 using static Favalet.Expressions.CLRExpressionFactory;
+using Favalet.Internal;
 
 namespace Favalet
 {
@@ -129,16 +130,21 @@ namespace Favalet
             var environment = Create();
             var actual = await run(text, environment);
 
+            var methods = new[]
+                {
+                    Method(typeof(Convert), "ToString", typeof(int)),
+                    Method(typeof(Convert), "ToString", typeof(long)),
+                    Method(typeof(Convert), "ToString", typeof(object)),
+                    Method(typeof(Convert), "ToString", typeof(float)),
+                    Method(typeof(Convert), "ToString", typeof(double)),
+                }.OrderBy(m => m, ExpressionOrdinalComparer.Instance).
+                ToArray();
+
             Assert.AreEqual(
                 new IExpression[]
                 {
                     Apply(
-                        Overload(
-                            Method(typeof(Convert), "ToString", typeof(object)),
-                            Method(typeof(Convert), "ToString", typeof(double)),
-                            Method(typeof(Convert), "ToString", typeof(float)),
-                            Method(typeof(Convert), "ToString", typeof(long)),
-                            Method(typeof(Convert), "ToString", typeof(int)))!,
+                        Overload(methods)!,
                         Constant(123)),
                 },
                 actual);

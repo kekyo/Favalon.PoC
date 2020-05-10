@@ -312,5 +312,196 @@ namespace Favalet.Internal
                 (invoke.ReturnType, parameters.Select(parameter => parameter.ParameterType).Memoize()) :
                 (invoke.ReturnType, EmptyTypes);
         }
+
+        public static int Compare(Type tx, Type ty)
+        {
+            if (tx.Equals(ty))
+            {
+                return 0;
+            }
+
+            if (ty.IsConvertibleFrom(tx))
+            {
+                return 1;
+            }
+            if (tx.IsConvertibleFrom(ty))
+            {
+                return -1;
+            }
+
+            if (tx.IsInteger() && ty.IsInteger())
+            {
+                var txs = tx.SizeOf();
+                var tys = ty.SizeOf();
+                if (txs < tys)
+                {
+                    return -1;
+                }
+                if (txs > tys)
+                {
+                    return 1;
+                }
+
+                var txct = tx.IsClsCompliant();
+                var tyct = ty.IsClsCompliant();
+                if (txct && !tyct)
+                {
+                    return -1;
+                }
+                if (!txct && tyct)
+                {
+                    return 1;
+                }
+            }
+
+            if (tx.IsInteger())
+            {
+                return -1;
+            }
+            if (ty.IsInteger())
+            {
+                return -1;
+            }
+
+            if (tx.IsPrimitive())
+            {
+                return -1;
+            }
+            if (ty.IsPrimitive())
+            {
+                return -1;
+            }
+
+            if (tx.IsValueType() && ty.IsValueType())
+            {
+                var txs = tx.SizeOf();
+                var tys = ty.SizeOf();
+                if (txs < tys)
+                {
+                    return -1;
+                }
+                if (txs > tys)
+                {
+                    return 1;
+                }
+            }
+
+            if (tx.IsGenericType() && ty.IsGenericType())
+            {
+                if (!tx.IsGenericParameter && ty.IsGenericParameter)
+                {
+                    return -1;
+                }
+                if (tx.IsGenericParameter && !ty.IsGenericParameter)
+                {
+                    return 1;
+                }
+                if (!tx.IsGenericParameter && !ty.IsGenericParameter)
+                {
+                    var txgps = tx.GetGenericArguments();
+                    var tygps = ty.GetGenericArguments();
+                    if (txgps.Length < tygps.Length)
+                    {
+                        return -1;
+                    }
+                    if (txgps.Length > tygps.Length)
+                    {
+                        return 1;
+                    }
+
+                    if (txgps.
+                        Zip(tygps, (x, y) => Compare(x, y)).
+                        FirstOrDefault(r => r != 0) is int r2 && r2 != 0)
+                    {
+                        return r2;
+                    }
+                }
+            }
+
+            // TODO: array
+
+            if (tx.DeclaringType is Type txt &&
+                ty.DeclaringType is Type tyt &&
+                Compare(txt, tyt) is int r && r != 0)
+            {
+                return r;
+            }
+
+            // Not compatible types.
+            return tx.FullName.CompareTo(ty.FullName);
+        }
+
+        public static int Compare(MethodBase mx, MethodBase my)
+        {
+            if (mx.Equals(my))
+            {
+                return 0;
+            }
+
+            if (mx.DeclaringType is Type mxt &&
+                my.DeclaringType is Type myt &&
+                Compare(mxt, myt) is int r && r != 0)
+            {
+                return r;
+            }
+
+            if (!mx.IsGenericMethod && my.IsGenericMethod)
+            {
+                return -1;
+            }
+            if (mx.IsGenericMethod && !my.IsGenericMethod)
+            {
+                return 1;
+            }
+            if (!mx.IsGenericMethod && !my.IsGenericMethod)
+            {
+                var txgps = mx.GetGenericArguments();
+                var tygps = my.GetGenericArguments();
+                if (txgps.Length < tygps.Length)
+                {
+                    return -1;
+                }
+                if (txgps.Length > tygps.Length)
+                {
+                    return 1;
+                }
+
+                if (txgps.
+                    Zip(tygps, (x, y) => Compare(x, y)).
+                    FirstOrDefault(r => r != 0) is int r4 && r4 != 0)
+                {
+                    return r4;
+                }
+            }
+
+            var mxps = mx.GetParameters().Select(p => p.ParameterType).Memoize();
+            var myps = my.GetParameters().Select(p => p.ParameterType).Memoize();
+
+            if (mxps.Length < myps.Length)
+            {
+                return -1;
+            }
+            if (mxps.Length > myps.Length)
+            {
+                return 1;
+            }
+
+            if (mxps.
+                Zip(myps, (x, y) => Compare(x, y)).
+                FirstOrDefault(r => r != 0) is int r2 && r2 != 0)
+            {
+                return r2;
+            }
+
+            var mxrt = mx is MethodInfo mxi ? mxi.ReturnType : mx.DeclaringType;
+            var myrt = my is MethodInfo myi ? myi.ReturnType : my.DeclaringType;
+            if (Compare(mxrt, myrt) is int r3 && r3 != 0)
+            {
+                return r3;
+            }
+
+            // Not compatible methods.
+            return mx.Name.CompareTo(my.Name);
+        }
     }
 }

@@ -21,6 +21,7 @@ using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -28,7 +29,7 @@ using System.Reflection;
 namespace Favalet.Expressions
 {
     public abstract class MethodTerm :
-        Expression, ITerm, ICallableExpression
+        Expression, ITerm, ICallableExpression, IExpressionComparable
     {
         public readonly MethodBase Method;
 
@@ -62,6 +63,15 @@ namespace Favalet.Expressions
 
         public override int GetHashCode() =>
             this.Method.GetHashCode();
+
+        int IExpressionComparable.CompareTo(
+            IExpression rhs, IComparer<IExpression> comparer) =>
+            rhs is MethodTerm rm ?
+                ReflectionUtilities.Compare(this.Method, rm.Method) :
+                -1;
+
+        public void Deconstruct(out MethodBase method) =>
+            method = this.Method;
 
         public static ConstructorTerm From(Type type, params Type[] parameters) =>
             ConstructorTerm.From(type.GetDeclaredConstructor(parameters));
@@ -124,6 +134,9 @@ namespace Favalet.Expressions
                 FormatOptions.SuppressHigherOrder,
                 $"{this.Method.GetFullName()}({this.Method.GetParameters()[0].ParameterType.GetFullName()})");
 
+        public void Deconstruct(out ConstructorInfo constructor) =>
+            constructor = (ConstructorInfo)this.Method;
+
         internal static ConstructorTerm From(ConstructorInfo constructor) =>
             // TODO: multiple arguments
             // TODO: nothing arguments
@@ -175,6 +188,9 @@ namespace Favalet.Expressions
                 this,
                 FormatOptions.Standard,
                 $"{this.Method.GetFullName()}({this.Method.GetParameters()[0].ParameterType.GetFullName()}):{((MethodInfo)this.Method).ReturnType.GetFullName()}");
+
+        public void Deconstruct(out MethodInfo method) =>
+            method = (MethodInfo)this.Method;
 
         internal static ConcreteMethodTerm From(MethodInfo method) =>
             // TODO: multiple arguments

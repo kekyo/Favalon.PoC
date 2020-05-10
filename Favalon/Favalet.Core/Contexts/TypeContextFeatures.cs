@@ -20,16 +20,12 @@
 using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
-using Favalet.Internal;
 using System;
-using System.Collections.Generic;
 
 namespace Favalet.Contexts
 {
     public interface ITypeContextFeatures : IAlgebraicCalculator
     {
-        IComparer<IExpression> ExpressionComparer { get; }
-
         IExpression CreateIdentity(string identity);
         IExpression CreateNumeric(string value);
         IExpression CreateString(string value);
@@ -40,9 +36,6 @@ namespace Favalet.Contexts
     {
         protected TypeContextFeatures()
         { }
-
-        public virtual IComparer<IExpression> ExpressionComparer =>
-            ExpressionOrdinalComparer.Instance;
 
         public virtual IExpression CreateNumeric(string value) =>
             throw new NotImplementedException();

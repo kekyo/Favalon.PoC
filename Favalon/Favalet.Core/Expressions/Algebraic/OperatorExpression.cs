@@ -30,7 +30,7 @@ using System.Runtime.CompilerServices;
 namespace Favalet.Expressions.Algebraic
 {
     public interface IOperatorExpression :
-        IExpression, IExpressionComparable
+        IExpression
     {
         IExpression[] Operands { get; }
 
@@ -38,7 +38,7 @@ namespace Favalet.Expressions.Algebraic
     }
 
     public abstract class OperatorExpression<TOperator> :
-        Expression, IOperatorExpression, IInferrableExpression, IReducibleExpression
+        Expression, IOperatorExpression, IInferrableExpression, IReducibleExpression, IExpressionComparable
         where TOperator : class, IOperatorExpression
     {
         public readonly IExpression[] Operands;
@@ -166,7 +166,7 @@ namespace Favalet.Expressions.Algebraic
             rhs is IOperatorExpression op ?
                 Operands.Zip(op.Operands, (lhs, rhs) => comparer.Compare(lhs, rhs)).
                 FirstOrDefault(r => r != 0) :
-            1;
+            -1;
     }
 
     public static class OperatorExpressionExtension

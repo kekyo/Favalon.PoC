@@ -38,7 +38,7 @@ namespace Favalet.Expressions.Algebraic
     }
 
     public abstract class OperatorExpression<TOperator> :
-        Expression, IOperatorExpression, IInferrableExpression, IReducibleExpression, IExpressionComparable
+        Expression, IOperatorExpression, IInferrableExpression, IReducibleExpression, IComparable<IExpression>
         where TOperator : class, IOperatorExpression
     {
         public readonly IExpression[] Operands;
@@ -162,9 +162,9 @@ namespace Favalet.Expressions.Algebraic
         public override sealed T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.SuppressHigherOrder, this.Operands);
 
-        public virtual int CompareTo(IExpression rhs, IComparer<IExpression> comparer) =>
+        int IComparable<IExpression>.CompareTo(IExpression rhs) =>
             rhs is IOperatorExpression op ?
-                Operands.Zip(op.Operands, (lhs, rhs) => comparer.Compare(lhs, rhs)).
+                this.Operands.Zip(op.Operands, ExpressionComparer.Compare).
                 FirstOrDefault(r => r != 0) :
             -1;
     }

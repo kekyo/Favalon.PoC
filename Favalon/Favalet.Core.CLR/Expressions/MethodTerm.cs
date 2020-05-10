@@ -29,7 +29,7 @@ using System.Reflection;
 namespace Favalet.Expressions
 {
     public abstract class MethodTerm :
-        Expression, ITerm, ICallableExpression, IExpressionComparable
+        Expression, ITerm, ICallableExpression, IComparable<IExpression>
     {
         public readonly MethodBase Method;
 
@@ -64,8 +64,7 @@ namespace Favalet.Expressions
         public override int GetHashCode() =>
             this.Method.GetHashCode();
 
-        int IExpressionComparable.CompareTo(
-            IExpression rhs, IComparer<IExpression> comparer) =>
+        int IComparable<IExpression>.CompareTo(IExpression rhs) =>
             rhs is MethodTerm rm ?
                 ReflectionUtilities.Compare(this.Method, rm.Method) :
                 -1;

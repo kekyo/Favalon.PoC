@@ -137,7 +137,7 @@ namespace Favalet
                     Method(typeof(Convert), "ToString", typeof(object)),
                     Method(typeof(Convert), "ToString", typeof(float)),
                     Method(typeof(Convert), "ToString", typeof(double)),
-                }.OrderBy(m => m, ExpressionOrdinalComparer.Instance).
+                }.OrderBy(m => m, ExpressionComparer.Instance).
                 ToArray();
 
             Assert.AreEqual(

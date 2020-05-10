@@ -23,20 +23,23 @@ using System.Collections.Generic;
 
 namespace Favalet.Internal
 {
-    public sealed class ExpressionOrdinalComparer : IComparer<IExpression>
+    public sealed class ExpressionComparer : IComparer<IExpression>
     {
-        private ExpressionOrdinalComparer()
+        private ExpressionComparer()
         { }
 
-        public int Compare(IExpression x, IExpression y) =>
+        int IComparer<IExpression>.Compare(IExpression x, IExpression y) =>
+            Compare(x, y);
+
+        public static int Compare(IExpression x, IExpression y) =>
             (x, y) switch
             {
-                (IExpressionComparable cx, _) => cx.CompareTo(y, this),
-                (_, IExpressionComparable cy) => 0 - cy.CompareTo(x, this),
+                (IComparable<IExpression> cx, _) => cx.CompareTo(y),
+                (_, IComparable<IExpression> cy) => 0 - cy.CompareTo(x),
                 _ => x.GetHashCode().CompareTo(y.GetHashCode())
             };
 
-        public static readonly ExpressionOrdinalComparer Instance =
-            new ExpressionOrdinalComparer();
+        public static readonly IComparer<IExpression> Instance =
+            new ExpressionComparer();
     }
 }

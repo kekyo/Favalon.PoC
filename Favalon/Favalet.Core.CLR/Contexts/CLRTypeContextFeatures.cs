@@ -18,7 +18,6 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
-using Favalet.Expressions.Specialized;
 using System;
 
 namespace Favalet.Expressions
@@ -43,7 +42,7 @@ namespace Favalet.Expressions
                 // object: object <-- int
                 // double: double <-- int
                 // IComparable: IComparable <-- string
-                case (ITypeTerm toType, ITypeTerm fromType):
+                case (TypeTerm toType, TypeTerm fromType):
                     return toType.IsConvertibleFrom(fromType) ?
                         to :
                         null;

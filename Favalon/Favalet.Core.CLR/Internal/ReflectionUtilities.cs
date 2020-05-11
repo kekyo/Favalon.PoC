@@ -17,7 +17,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -176,9 +175,12 @@ namespace Favalet.Internal
         public static bool IsInteger(this Type type) =>
             knownInteger.Contains(type);
 
-        public static bool IsTypeConstructor(Type type) =>
+        public static bool IsTypeConstructor(this Type type) =>
             type.IsGenericTypeDefinition() && (type.GetGenericArguments().Length == 1);
 
+        public static bool TryGetOperatorSymbol(this MethodInfo method, out string symbol) =>
+            operatorSymbols.TryGetValue(method.Name, out symbol) && method.IsStatic && method.IsSpecialName;
+        
         public static string GetName(this MemberInfo member, NameOptions option = NameOptions.WithGenericParameters)
         {
             var type = member.AsType();
@@ -195,7 +197,8 @@ namespace Favalet.Internal
 
             if (member is MethodInfo method1 && method1.IsSpecialName)
             {
-                if (option == NameOptions.Symbols &&
+                if (method1.IsStatic &&
+                    option == NameOptions.Symbols &&
                     operatorSymbols.TryGetValue(name, out var symbol))
                 {
                     name = symbol;

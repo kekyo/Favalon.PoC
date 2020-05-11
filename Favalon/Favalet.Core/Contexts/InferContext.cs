@@ -99,22 +99,15 @@ namespace Favalet.Contexts
 
         private IExpression? Solve(IExpression to, IExpression from)
         {
-            // int: int <-- int
-            // IComparable: IComparable <-- IComparable
-            // _[1]: _[1] <-- _[1]
-            if (to.ShallowEquals(from))
+            // object: object <-- int
+            // double: double <-- int
+            // IComparable: IComparable <-- string
+            if (to is ITypeTerm toType &&
+                from is ITypeTerm fromType)
             {
-                return to;
-            }
-
-            if (to is TerminationTerm || from is TerminationTerm)
-            {
-                return null;
-            }
-
-            if (to is UnspecifiedTerm || from is UnspecifiedTerm)
-            {
-                return null;
+                return toType.IsConvertibleFrom(fromType) ?
+                    to :
+                    null;
             }
 
             // int->object: int->object <-- object->int
@@ -132,6 +125,24 @@ namespace Favalet.Contexts
                 {
                     return null;
                 }
+            }
+
+            // int: int <-- int
+            // IComparable: IComparable <-- IComparable
+            // _[1]: _[1] <-- _[1]
+            if (to.ShallowEquals(from))
+            {
+                return to;
+            }
+
+            if (to is TerminationTerm || from is TerminationTerm)
+            {
+                return null;
+            }
+
+            if (to is UnspecifiedTerm || from is UnspecifiedTerm)
+            {
+                return null;
             }
 
             // (int | double): (int | double) <-- (int | double)
@@ -173,17 +184,6 @@ namespace Favalet.Contexts
                     Memoize();
                 return results.All(r => r != null) ?
                     OverloadTerm.From(results!) : null;
-            }
-
-            // object: object <-- int
-            // double: double <-- int
-            // IComparable: IComparable <-- string
-            if (to is ITypeTerm toType &&
-                from is ITypeTerm fromType)
-            {
-                return toType.IsConvertibleFrom(fromType) ?
-                    to :
-                    null;
             }
 
             if (to is IPlaceholderTerm tph)

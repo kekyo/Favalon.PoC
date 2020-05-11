@@ -56,7 +56,7 @@ namespace Favalet.Contexts
                 // int->object: int->object <-- object->int
                 case (IFunctionDeclaredExpression(IExpression toParameter, IExpression toResult),
                       IFunctionDeclaredExpression(IExpression fromParameter, IExpression fromResult)):
-                    var parameter = this.Widen(fromParameter, toParameter) is IExpression ? toParameter : null;
+                    var parameter = this.Widen(fromParameter, toParameter); // is IExpression ? toParameter : null;
                     var result = this.Widen(toResult, fromResult);
                     return parameter is IExpression pr && result is IExpression rr ?
                         FunctionDeclaredExpression.From(pr, rr) :
@@ -68,8 +68,8 @@ namespace Favalet.Contexts
 
                 // _: _ <-- int
                 // _: _ <-- (int + double)
-                case (PlaceholderTerm _, _):
-                    return to;
+                //case (PlaceholderTerm _, _):
+                //    return to;
 
                 default:
                     if (base.Widen(to, from) is IExpression widen)

@@ -46,10 +46,10 @@ namespace Favalet.Expressions
                         to :
                         null;
 
-                case (MethodTerm toMethod, MethodTerm fromMethod):
-                    return (this.Widen(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?
-                        toMethod :
-                        null;
+                //case (MethodTerm toMethod, MethodTerm fromMethod):
+                //    return (this.Widen(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?
+                //        toMethod :
+                //        null;
 
                 default:
                     return base.Widen(to, from);

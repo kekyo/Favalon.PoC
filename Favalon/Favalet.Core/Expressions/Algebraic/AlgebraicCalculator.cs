@@ -17,6 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Expressions.Specialized;
 using System.Diagnostics;
 using System.Linq;
 
@@ -39,8 +40,18 @@ namespace Favalet.Expressions.Algebraic
                 // int: int <-- int
                 // IComparable: IComparable <-- IComparable
                 // _[1]: _[1] <-- _[1]
-                case (IExpression toExpression, IExpression fromExpression) when toExpression.ExactEquals(fromExpression):
+                case (IExpression toExpression, IExpression fromExpression) when toExpression.ShallowEquals(fromExpression):
                     return toExpression;
+
+                case (TerminationTerm _, _):
+                    return null;
+                case (_, TerminationTerm _):
+                    return null;
+
+                case (UnspecifiedTerm _, _):
+                    return null;
+                case (_, UnspecifiedTerm _):
+                    return null;
 
                 // (int | double): (int | double) <-- (int | double)
                 // (int | double | string): (int | double | string) <-- (int | double)
@@ -55,16 +66,6 @@ namespace Favalet.Expressions.Algebraic
                         Memoize();
                     return widened1.All(w => w) ?
                         to :
-                        null;
-
-                // null: int <-- (int | double)
-                case (IExpression _, IOrExpression(IExpression[] fromExpressions) or):
-                    Debug.Assert(fromExpressions.Length >= 2);
-                    var expressions2 = fromExpressions.
-                        Select(rhsExpression => this.Widen(to, rhsExpression)).
-                        Memoize();
-                    return expressions2.All(expression => expression != null) ?
-                        or.From(expressions2!) :
                         null;
 
                 // (int | double): (int | double) <-- int
@@ -91,6 +92,16 @@ namespace Favalet.Expressions.Algebraic
                     {
                         return null;
                     }
+
+                // null: int <-- (int | double)
+                case (IExpression _, IOrExpression(IExpression[] fromExpressions) or):
+                    Debug.Assert(fromExpressions.Length >= 2);
+                    var expressions2 = fromExpressions.
+                        Select(rhsExpression => this.Widen(to, rhsExpression)).
+                        Memoize();
+                    return expressions2.All(expression => expression != null) ?
+                        or.From(expressions2!) :
+                        null;
 
                 default:
                     return null;

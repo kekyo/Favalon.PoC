@@ -19,8 +19,7 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using Favalet.Internal;
-using System.Collections.Generic;
+using System;
 
 namespace Favalet.Expressions
 {
@@ -35,7 +34,9 @@ namespace Favalet.Expressions
         public override IExpression CreateString(string value) =>
             ConstantTerm.From(value);
 
-        public override IExpression? Widen(IExpression to, IExpression from)
+        public override IExpression? Widen(
+            IExpression to, IExpression from,
+            Func<IExpression, IExpression, IExpression?> widen)
         {
             switch (to, from)
             {
@@ -48,12 +49,12 @@ namespace Favalet.Expressions
                         null;
 
                 //case (MethodTerm toMethod, MethodTerm fromMethod):
-                //    return (this.Widen(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?
+                //    return (widen(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?
                 //        toMethod :
                 //        null;
 
                 default:
-                    return base.Widen(to, from);
+                    return base.Widen(to, from, widen);
             }
         }
 

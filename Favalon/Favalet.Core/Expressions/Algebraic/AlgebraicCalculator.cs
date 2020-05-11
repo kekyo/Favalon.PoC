@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions.Specialized;
+using System;
 using System.Diagnostics;
 using System.Linq;
 
@@ -25,7 +26,11 @@ namespace Favalet.Expressions.Algebraic
 {
     public interface IAlgebraicCalculator
     {
-        IExpression? Widen(IExpression to, IExpression from);
+        IExpression? Widen(
+            IExpression to, IExpression from);
+        IExpression? Widen(
+            IExpression to, IExpression from,
+            Func<IExpression, IExpression, IExpression?> widen);
     }
 
     public class AlgebraicCalculator : IAlgebraicCalculator
@@ -33,7 +38,12 @@ namespace Favalet.Expressions.Algebraic
         protected AlgebraicCalculator()
         { }
 
-        public virtual IExpression? Widen(IExpression to, IExpression from)
+        public IExpression? Widen(IExpression to, IExpression from) =>
+            this.Widen(to, from, this.Widen);
+
+        public virtual IExpression? Widen(
+            IExpression to, IExpression from,
+            Func<IExpression, IExpression, IExpression?> widen)
         {
             switch (to, from)
             {
@@ -62,7 +72,7 @@ namespace Favalet.Expressions.Algebraic
                 // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
                 case (IOrExpression(IExpression[] toExpressions), IOrExpression(IExpression[] fromExpressions)):
                     var widened1 = fromExpressions.
-                        Select(rhsExpression => toExpressions.Any(lhsExpression => this.Widen(lhsExpression, rhsExpression) != null)).
+                        Select(rhsExpression => toExpressions.Any(lhsExpression => widen(lhsExpression, rhsExpression) != null)).
                         Memoize();
                     return widened1.All(w => w) ?
                         to :
@@ -76,7 +86,7 @@ namespace Favalet.Expressions.Algebraic
                 case (IOrExpression(IExpression[] toExpressions) or, IExpression _):
                     Debug.Assert(toExpressions.Length >= 2);
                     var expressions3 = toExpressions.
-                        Select(lhsExpression => this.Widen(lhsExpression, from)).
+                        Select(lhsExpression => widen(lhsExpression, from)).
                         Memoize();
                     // Requirements: 1 or any terms widened.
                     if (expressions3.Any(expression => expression != null))
@@ -97,7 +107,7 @@ namespace Favalet.Expressions.Algebraic
                 case (IExpression _, IOrExpression(IExpression[] fromExpressions) or):
                     Debug.Assert(fromExpressions.Length >= 2);
                     var expressions2 = fromExpressions.
-                        Select(rhsExpression => this.Widen(to, rhsExpression)).
+                        Select(rhsExpression => widen(to, rhsExpression)).
                         Memoize();
                     return expressions2.All(expression => expression != null) ?
                         or.From(expressions2!) :

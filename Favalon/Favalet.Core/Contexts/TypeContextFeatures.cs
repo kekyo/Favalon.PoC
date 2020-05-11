@@ -32,7 +32,8 @@ namespace Favalet.Contexts
         IExpression CreateApply(IExpression function, IExpression argument);
     }
 
-    public class TypeContextFeatures : AlgebraicCalculator, ITypeContextFeatures
+    public class TypeContextFeatures :
+        AlgebraicCalculator, ITypeContextFeatures
     {
         protected TypeContextFeatures()
         { }
@@ -49,15 +50,17 @@ namespace Favalet.Contexts
         public virtual IExpression CreateApply(IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument, UnspecifiedTerm.Instance);
 
-        public override IExpression? Widen(IExpression to, IExpression from)
+        public override IExpression? Widen(
+            IExpression to, IExpression from,
+            Func<IExpression, IExpression, IExpression?> widen)
         {
             switch (to, from)
             {
                 // int->object: int->object <-- object->int
                 case (IFunctionDeclaredExpression(IExpression toParameter, IExpression toResult),
                       IFunctionDeclaredExpression(IExpression fromParameter, IExpression fromResult)):
-                    var parameter = this.Widen(fromParameter, toParameter); // is IExpression ? toParameter : null;
-                    var result = this.Widen(toResult, fromResult);
+                    var parameter = widen(fromParameter, toParameter); // is IExpression ? toParameter : null;
+                    var result = widen(toResult, fromResult);
                     return parameter is IExpression pr && result is IExpression rr ?
                         FunctionDeclaredExpression.From(pr, rr) :
                         null;
@@ -72,9 +75,9 @@ namespace Favalet.Contexts
                 //    return to;
 
                 default:
-                    if (base.Widen(to, from) is IExpression widen)
+                    if (base.Widen(to, from, widen) is IExpression widened)
                     {
-                        return widen;
+                        return widened;
                     }
                     // null: int <-- _   [TODO: maybe?]
                     //else if (from is PlaceholderTerm placeholder)

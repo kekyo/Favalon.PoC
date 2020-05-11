@@ -18,11 +18,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions;
-using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace Favalet.Contexts
 {
@@ -99,91 +96,9 @@ namespace Favalet.Contexts
 
         private IExpression? Solve(IExpression to, IExpression from)
         {
-            // object: object <-- int
-            // double: double <-- int
-            // IComparable: IComparable <-- string
-            if (to is ITypeTerm toType &&
-                from is ITypeTerm fromType)
+            if (this.rootContext.Features.Widen(to, from, this.Solve) is IExpression widened)
             {
-                return toType.IsConvertibleFrom(fromType) ?
-                    to :
-                    null;
-            }
-
-            // int->object: int->object <-- object->int
-            if (to is IFunctionDeclaredExpression(IExpression tp, IExpression tr) &&
-                from is IFunctionDeclaredExpression(IExpression fp, IExpression fr))
-            {
-                var pr = this.Solve(fp, tp);
-                var rr = this.Solve(tr, fr);
-
-                if (pr != null && rr != null)
-                {
-                    return FunctionDeclaredExpression.From(pr, rr);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            // int: int <-- int
-            // IComparable: IComparable <-- IComparable
-            // _[1]: _[1] <-- _[1]
-            if (to.ShallowEquals(from))
-            {
-                return to;
-            }
-
-            if (to is TerminationTerm || from is TerminationTerm)
-            {
-                return null;
-            }
-
-            if (to is UnspecifiedTerm || from is UnspecifiedTerm)
-            {
-                return null;
-            }
-
-            // (int | double): (int | double) <-- (int | double)
-            // (int | double | string): (int | double | string) <-- (int | double)
-            // (int | IComparable): (int | IComparable) <-- (int | string)
-            // null: (int | double) <-- (int | double | string)
-            // null: (int | IServiceProvider) <-- (int | double)
-            // (int | _): (int | _) <-- (int | string)
-            // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
-            if (to is IOrExpression(IExpression[] tss1) &&
-                from is IOrExpression(IExpression[] fss1))
-            {
-                var results = fss1.
-                    Select(fs => tss1.Any(ts => this.Solve(ts, fs) != null)).
-                    Memoize();
-                return results.All(r => r) ?
-                    to : null;
-            }
-
-            // (int | double): (int | double) <-- int
-            // (int | IServiceProvider): (int | IServiceProvider) <-- int
-            // (int | IComparable): (int | IComparable) <-- string
-            // (int | _): (int | _) <-- string
-            // (int | _[1]): (int | _[1]) <-- _[2]
-            if (to is IOrExpression(IExpression[] tss2))
-            {
-                var results = tss2.
-                    Select(ts => this.Solve(ts, from)).
-                    Memoize();
-                return results.Any(r => r != null) ?
-                    OverloadTerm.From(results.Where(r => r != null)!) : null;
-            }
-
-            // null: int <-- (int | double)
-            if (from is IOrExpression(IExpression[] fss2))
-            {
-                var results = fss2.
-                    Select(fs => this.Solve(to, fs)).
-                    Memoize();
-                return results.All(r => r != null) ?
-                    OverloadTerm.From(results!) : null;
+                return widened;
             }
 
             if (to is IPlaceholderTerm tph)

@@ -28,7 +28,7 @@ namespace Favalet.Internals
         private ExactEqualityComparer()
         { }
 
-        public bool Equals(IExpression x, IExpression y)
+        public static bool Equals(IExpression x, IExpression y)
         {
             if (object.ReferenceEquals(x, y))
             {
@@ -41,14 +41,17 @@ namespace Favalet.Internals
                 (TerminationTerm _, _) => false,
                 (_, UnspecifiedTerm _) => false,
                 (UnspecifiedTerm _, _) => false,
-                _ => x.Equals(y) && this.Equals(x.HigherOrder, y.HigherOrder),
+                _ => x.Equals(y) && Equals(x.HigherOrder, y.HigherOrder),
             };
         }
+
+        bool IEqualityComparer<IExpression>.Equals(IExpression x, IExpression y) =>
+            Equals(x, y);
 
         public int GetHashCode(IExpression? obj) =>
             obj!.GetHashCode();
 
-        public static readonly ExactEqualityComparer Instance =
+        public static readonly IEqualityComparer<IExpression> Instance =
             new ExactEqualityComparer();
     }
 }

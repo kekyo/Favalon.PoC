@@ -107,6 +107,11 @@ namespace Favalet.Contexts
                 return to;
             }
 
+            if (to is TerminationTerm || from is TerminationTerm)
+            {
+                return null;
+            }
+
             if (to is UnspecifiedTerm || from is UnspecifiedTerm)
             {
                 return null;

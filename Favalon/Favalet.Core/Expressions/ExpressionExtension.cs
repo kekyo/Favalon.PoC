@@ -76,7 +76,7 @@ namespace Favalet.Expressions
         public static bool ShallowEquals(
             this IExpression expression,
             IExpression rhs) =>
-            ShallowEqualityComparer.Instance.Equals(expression, rhs);
+            ShallowEqualityComparer.Equals(expression, rhs);
         public static bool ShallowSequenceEqual(
             this IEnumerable<IExpression> expressions,
             IEnumerable<IExpression> rhss) =>
@@ -85,7 +85,7 @@ namespace Favalet.Expressions
         public static bool ExactEquals(
             this IExpression expression,
             IExpression rhs) =>
-            ExactEqualityComparer.Instance.Equals(expression, rhs);
+            ExactEqualityComparer.Equals(expression, rhs);
         public static bool ExactSequenceEqual(
             this IEnumerable<IExpression> expressions,
             IEnumerable<IExpression> rhss) =>

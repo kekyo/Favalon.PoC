@@ -28,7 +28,7 @@ namespace Favalet.Internals
         private ShallowEqualityComparer()
         { }
 
-        public bool Equals(IExpression x, IExpression y)
+        public static bool Equals(IExpression x, IExpression y)
         {
             if (object.ReferenceEquals(x, y))
             {
@@ -45,10 +45,13 @@ namespace Favalet.Internals
             };
         }
 
+        bool IEqualityComparer<IExpression>.Equals(IExpression x, IExpression y) =>
+            Equals(x, y);
+
         public int GetHashCode(IExpression? obj) =>
             obj!.GetHashCode();
 
-        public static readonly ShallowEqualityComparer Instance =
+        public static readonly IEqualityComparer<IExpression> Instance =
             new ShallowEqualityComparer();
     }
 }

@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System.Collections.Generic;
 
@@ -34,15 +35,15 @@ namespace Favalet.Expressions
         public override IExpression CreateString(string value) =>
             ConstantTerm.From(value);
 
-        public override IExpression? Widen(IExpression? to, IExpression? from)
+        public override IExpression? Widen(IExpression to, IExpression from)
         {
             switch (to, from)
             {
                 // object: object <-- int
                 // double: double <-- int
                 // IComparable: IComparable <-- string
-                case (TypeTerm toType, TypeTerm fromType):
-                    return toType.Type.IsConvertibleFrom(fromType.Type) ?
+                case (ITypeTerm toType, ITypeTerm fromType):
+                    return toType.IsConvertibleFrom(fromType) ?
                         to :
                         null;
 

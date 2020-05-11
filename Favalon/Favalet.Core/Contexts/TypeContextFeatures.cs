@@ -49,7 +49,7 @@ namespace Favalet.Contexts
         public virtual IExpression CreateApply(IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument, UnspecifiedTerm.Instance);
 
-        public override IExpression? Widen(IExpression? to, IExpression? from)
+        public override IExpression? Widen(IExpression to, IExpression from)
         {
             switch (to, from)
             {

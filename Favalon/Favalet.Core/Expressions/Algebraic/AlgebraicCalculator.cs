@@ -33,7 +33,7 @@ namespace Favalet.Expressions.Algebraic
         protected AlgebraicCalculator()
         { }
 
-        public virtual IExpression? Widen(IExpression? to, IExpression? from)
+        public virtual IExpression? Widen(IExpression to, IExpression from)
         {
             switch (to, from)
             {

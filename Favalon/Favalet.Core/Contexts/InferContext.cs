@@ -202,7 +202,7 @@ namespace Favalet.Contexts
             this.Solve(to, from);
 
         public IExpression? Widen(IExpression to, IExpression from) =>
-            this.Solve(to, from);
+            this.rootContext.Features.Widen(to, from);
 
         public IExpression? LookupPlaceholder(IPlaceholderTerm placeholder)
         {

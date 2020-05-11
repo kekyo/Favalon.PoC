@@ -71,6 +71,8 @@ namespace Favalet.Expressions.Algebraic
                 // (int | _): (int | _) <-- (int | string)
                 // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
                 case (IOrExpression(IExpression[] toExpressions), IOrExpression(IExpression[] fromExpressions)):
+                    Debug.Assert(toExpressions.Length >= 2);
+                    Debug.Assert(fromExpressions.Length >= 2);
                     var widened1 = fromExpressions.
                         Select(rhsExpression => toExpressions.Any(lhsExpression => widen(lhsExpression, rhsExpression) != null)).
                         Memoize();

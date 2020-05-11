@@ -123,7 +123,7 @@ namespace Favalet
         }
 
         [TestCaseSource("Parsers")]
-        public async Task LookupManyStaticOverloadedMethod(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
+        public async Task LookupManyStaticOverloadedMethod1(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
         {
             // Convert.ToString(123)
             var text = "System.Convert.ToString 123";
@@ -146,6 +146,31 @@ namespace Favalet
                     Apply(
                         Overload(methods)!,
                         Constant(123)),
+                },
+                actual);
+        }
+
+       // [TestCaseSource("Parsers")]
+        public async Task LookupManyStaticOverloadedMethod2(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
+        {
+            // Convert.ToString(123)
+            var text = "System.Convert.ToInt32 \"123\"";
+            var environment = Create();
+            var actual = await run(text, environment);
+
+            var methods = new[]
+                {
+                    Method(typeof(Convert), "ToInt32", typeof(string)),
+                    Method(typeof(Convert), "ToInt32", typeof(object)),
+                }.OrderBy(m => m, ExpressionComparer.Instance).
+                ToArray();
+
+            Assert.AreEqual(
+                new IExpression[]
+                {
+                    Apply(
+                        Overload(methods)!,
+                        Constant("123")),
                 },
                 actual);
         }

@@ -34,7 +34,7 @@ namespace Favalet.Expressions.Algebraic
     {
         IExpression[] Operands { get; }
 
-        IExpression From(IEnumerable<IExpression> operands);
+        IExpression? From(IEnumerable<IExpression> operands);
     }
 
     public abstract class OperatorExpression<TOperator> :
@@ -55,14 +55,10 @@ namespace Favalet.Expressions.Algebraic
         IExpression[] IOperatorExpression.Operands =>
             this.Operands;
 
-        protected abstract TOperator Create(
-            IExpression[] operands,
-            IExpression higherOrder);
-
         protected static IExpression? From(
             IEnumerable<IExpression> operands,
             Func<IExpression[], TOperator> creator,
-            bool isStrict = true)
+            bool isStrict)
         {
             // It digs only first depth.
             var ops = isStrict ?
@@ -84,11 +80,11 @@ namespace Favalet.Expressions.Algebraic
             };
         }
 
-        private IExpression From(IEnumerable<IExpression> operands) =>
-            From(operands, ops => Create(ops, UnspecifiedTerm.Instance))!;
+        protected abstract IExpression? From(
+            IEnumerable<IExpression> operands, IExpression higherOrder);
 
-        IExpression IOperatorExpression.From(IEnumerable<IExpression> operands) =>
-            From(operands, ops => Create(ops, UnspecifiedTerm.Instance))!;
+        IExpression? IOperatorExpression.From(IEnumerable<IExpression> operands) =>
+            From(operands, UnspecifiedTerm.Instance);
 
         public IExpression Infer(IInferContext context)
         {
@@ -99,7 +95,8 @@ namespace Favalet.Expressions.Algebraic
                 Memoize();
 
             var operandHigherOrders = this.From(
-                operands.Select(operand => operand.HigherOrder));
+                operands.Select(operand => operand.HigherOrder),
+                UnspecifiedTerm.Instance)!;
 
             context.Unify(higherOrder, operandHigherOrders);
 
@@ -110,7 +107,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return From(operands, ops => this.Create(ops, higherOrder))!;
+                return From(operands, higherOrder)!;
             }
         }
 
@@ -129,7 +126,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return From(operands, ops => this.Create(ops, higherOrder))!;
+                return From(operands, higherOrder)!;
             }
         }
 
@@ -148,7 +145,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return From(operands, ops => this.Create(ops, higherOrder))!;
+                return From(operands, higherOrder)!;
             }
         }
 

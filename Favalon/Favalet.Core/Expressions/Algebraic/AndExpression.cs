@@ -34,10 +34,12 @@ namespace Favalet.Expressions.Algebraic
             base(operands, higherOrder)
         { }
 
-        protected override IAndExpression Create(IExpression[] operands, IExpression higherOrder) =>
-            new AndExpression(operands, higherOrder);
+        protected override IExpression? From(
+            IEnumerable<IExpression> operands,
+            IExpression higherOrder) =>
+            From(operands, ops => new AndExpression(ops, higherOrder), true);
 
         public static IExpression? From(IEnumerable<IExpression> operands) =>
-            From(operands, ops => new AndExpression(ops, UnspecifiedTerm.Instance));
+            From(operands, ops => new AndExpression(ops, UnspecifiedTerm.Instance), true);
     }
 }

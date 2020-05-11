@@ -33,8 +33,10 @@ namespace Favalet.Expressions.Specialized
             base(operands, higherOrder)
         { }
 
-        protected override IOrExpression Create(IExpression[] operands, IExpression higherOrder) =>
-            new OverloadTerm(operands, higherOrder);
+        protected override IExpression? From(
+            IEnumerable<IExpression> operands,
+            IExpression higherOrder) =>
+            From(operands, ops => new OverloadTerm(ops, higherOrder), false);
 
         public override IExpression Fixup(IFixupContext context)
         {

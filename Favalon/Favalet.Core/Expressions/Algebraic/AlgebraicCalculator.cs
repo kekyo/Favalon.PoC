@@ -53,16 +53,6 @@ namespace Favalet.Expressions.Algebraic
                 case (IExpression toExpression, IExpression fromExpression) when toExpression.ShallowEquals(fromExpression):
                     return toExpression;
 
-                case (TerminationTerm _, _):
-                    return null;
-                case (_, TerminationTerm _):
-                    return null;
-
-                case (UnspecifiedTerm _, _):
-                    return null;
-                case (_, UnspecifiedTerm _):
-                    return null;
-
                 // (int | double): (int | double) <-- (int | double)
                 // (int | double | string): (int | double | string) <-- (int | double)
                 // (int | IComparable): (int | IComparable) <-- (int | string)

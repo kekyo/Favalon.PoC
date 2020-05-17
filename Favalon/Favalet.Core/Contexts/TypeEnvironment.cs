@@ -18,6 +18,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions;
+using Favalet.Expressions.Comparer;
+using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -77,7 +79,7 @@ namespace Favalet.Contexts
                     inferred = current.InferIfRequired(context);
                     fixupped = inferred.FixupIfRequired(context);
 
-                    if (current.ExactEquals(fixupped))
+                    if (ExactEqualityComparer.Equals(current, fixupped))
                     {
                         Debug.WriteLine($"Infer [F]: {fixupped}");
                         return fixupped;
@@ -128,7 +130,7 @@ namespace Favalet.Contexts
                 {
                     var reduced = current.ReduceIfRequired(context);
 
-                    if (current.ExactEquals(reduced))
+                    if (ExactEqualityComparer.Equals(current, reduced))
                     {
                         Debug.WriteLine($"Reduce [F]: {reduced}");
                         return reduced;

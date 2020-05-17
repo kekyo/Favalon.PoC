@@ -17,31 +17,30 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Contexts;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
-namespace Favalet.Expressions.Specialized
+namespace Favalet.Expressions.Comparer
 {
-    internal sealed class TerminationTerm :
-        Expression
+    public sealed class ExpressionComparer : IComparer<IExpression>
     {
-        private TerminationTerm()
+        private ExpressionComparer()
         { }
 
-        public override IExpression HigherOrder =>
-            this;
+        int IComparer<IExpression>.Compare(IExpression x, IExpression y) =>
+            Compare(x, y);
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
-            false;
+        public static int Compare(IExpression x, IExpression y)
+        {
+            switch (x, y)
+            {
+                case (IComparable<IExpression> cx, _): return cx.CompareTo(y);
+                case (_, IComparable<IExpression> cy): return 0 - cy.CompareTo(x);
+                default: return x.GetHashCode().CompareTo(y.GetHashCode());
+            };
+        }
 
-        public override T Format<T>(IFormatContext<T> context) =>
-            context.Format(this, FormatOptions.ForceText | FormatOptions.SuppressHigherOrder, "!!TERM");
-
-        public static readonly IExpression Instance =
-            new TerminationTerm();
+        public static readonly IComparer<IExpression> Instance =
+            new ExpressionComparer();
     }
 }

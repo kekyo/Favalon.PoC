@@ -17,32 +17,27 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
+using System.Diagnostics;
 
-namespace Favalet.Internals
+namespace Favalet.Expressions.Comparer
 {
-    internal sealed class ExactEqualityComparer : IEqualityComparer<IExpression>
+    public sealed class ExactEqualityComparer : IEqualityComparer<IExpression>
     {
         private ExactEqualityComparer()
         { }
 
         public static bool Equals(IExpression x, IExpression y)
         {
-            if (object.ReferenceEquals(x, y))
+            var r =
+                object.ReferenceEquals(x, y) ||
+                (x.Equals(y, Instance) && Equals(x.HigherOrder, y.HigherOrder));
+            if (!r)
             {
-                return true;
+                Debug.WriteLine("false");
             }
-
-            return (x, y) switch
-            {
-                (_, TerminationTerm _) => false,
-                (TerminationTerm _, _) => false,
-                (_, UnspecifiedTerm _) => false,
-                (UnspecifiedTerm _, _) => false,
-                _ => x.Equals(y) && Equals(x.HigherOrder, y.HigherOrder),
-            };
+            return r;
         }
 
         bool IEqualityComparer<IExpression>.Equals(IExpression x, IExpression y) =>

@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Comparer;
 using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
@@ -149,23 +150,33 @@ namespace Favalet.Expressions
             }
         }
 
-        public override bool Equals(IExpression? rhs) =>
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
             rhs is IApplyExpression apply &&
-                this.Function.Equals(apply.Function) &&
-                this.Argument.Equals(apply.Argument);
+                comparer.Equals(this.Function, apply.Function) &&
+                comparer.Equals(this.Argument, apply.Argument);
 
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
 
+        int IComparable<IExpression>.CompareTo(IExpression rhs)
+        {
+            if (rhs is IApplyExpression ae)
+            {
+                if (ExpressionComparer.Compare(this.Function, ae.Function) is int rf && rf != 0)
+                {
+                    return rf;
+                }
+                if (ExpressionComparer.Compare(this.Argument, ae.Argument) is int ra && ra != 0)
+                {
+                    return ra;
+                }
+                return 0;
+            }
+            return this.GetHashCode().CompareTo(rhs.GetHashCode());
+        }
+
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.Standard, this.Function, this.Argument);
-
-        int IComparable<IExpression>.CompareTo(IExpression rhs) =>
-            rhs is IApplyExpression ra ?
-                ((ExpressionComparer.Compare(this.Function, ra.Function) is int p && p != 0) ?
-                    p :
-                    ExpressionComparer.Compare(this.Argument, ra.Argument)) :
-                -1;
 
         public static ApplyExpression Create(
             IExpression function, IExpression argument, IExpression higherOrder) =>

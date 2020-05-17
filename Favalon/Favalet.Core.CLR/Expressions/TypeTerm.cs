@@ -39,7 +39,7 @@ namespace Favalet.Expressions
         public bool IsConvertibleFrom(TypeTerm? from) =>
             from is TypeTerm && this.Type.IsConvertibleFrom(from.Type);
 
-        public override bool Equals(IExpression? rhs) =>
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
             rhs is TypeTerm type &&
                 this.Type.Equals(type.Type);
 
@@ -49,7 +49,7 @@ namespace Favalet.Expressions
         int IComparable<IExpression>.CompareTo(IExpression rhs) =>
             rhs is TypeTerm rt ?
                 ReflectionUtilities.Compare(this.Type, rt.Type) :
-                -1;
+                this.GetHashCode().CompareTo(rhs.GetHashCode());
 
         public void Deconstruct(out Type type) =>
             type = this.Type;

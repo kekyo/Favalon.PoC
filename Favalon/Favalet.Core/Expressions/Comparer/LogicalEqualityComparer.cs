@@ -17,34 +17,27 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 
-namespace Favalet.Internals
+namespace Favalet.Expressions.Comparer
 {
-    internal sealed class ShallowEqualityComparer : IEqualityComparer<IExpression>
+    public sealed class LogicalEqualityComparer : IEqualityComparer<IExpression>
     {
-        private ShallowEqualityComparer()
+        private LogicalEqualityComparer()
         { }
 
-        public static bool Equals(IExpression x, IExpression y)
-        {
-            if (object.ReferenceEquals(x, y))
-            {
-                return true;
-            }
-
-            return (x, y) switch
+        public static bool Equals(IExpression x, IExpression y) =>
+            (x, y) switch
             {
                 (_, TerminationTerm _) => false,
                 (TerminationTerm _, _) => false,
                 (_, UnspecifiedTerm _) => false,
                 (UnspecifiedTerm _, _) => false,
-                _ => x.Equals(y),
+                _ => object.ReferenceEquals(x, y) ||
+                    (x.Equals(y, Instance) && Equals(x.HigherOrder, y.HigherOrder)),
             };
-        }
-
+ 
         bool IEqualityComparer<IExpression>.Equals(IExpression x, IExpression y) =>
             Equals(x, y);
 
@@ -52,6 +45,6 @@ namespace Favalet.Internals
             obj!.GetHashCode();
 
         public static readonly IEqualityComparer<IExpression> Instance =
-            new ShallowEqualityComparer();
+            new LogicalEqualityComparer();
     }
 }

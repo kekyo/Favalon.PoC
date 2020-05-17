@@ -19,9 +19,9 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Algebraic;
-using Favalet.Internal;
-using Favalet.Internals;
+using Favalet.Expressions.Comparer;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Favalet.Expressions.Specialized
@@ -31,19 +31,27 @@ namespace Favalet.Expressions.Specialized
     {
         private OverloadTerm(IExpression[] operands, IExpression higherOrder) : 
             base(operands, higherOrder)
-        { }
+        {
+#if DEBUG
+            var r = operands.OrderBy(oper => oper, ExpressionComparer.Instance).Memoize();
+            var r2 = r.OrderBy(oper => oper, ExpressionComparer.Instance).Memoize();
+            Debug.Assert(operands.SequenceEqual(r, ExactEqualityComparer.Instance));
+#endif
+        }
 
         protected override IExpression? From(
             IEnumerable<IExpression> operands,
             IExpression higherOrder) =>
-            From(operands, ops => new OverloadTerm(ops, higherOrder), false);
+            InternalFrom(
+                operands.OrderBy(oper => oper, ExpressionComparer.Instance).Memoize(),
+                higherOrder);
 
         public override IExpression Fixup(IFixupContext context)
         {
             var higherOrder = this.HigherOrder.FixupIfRequired(context);
             var overloads = this.Operands.
                 Select(operand => operand.FixupIfRequired(context)).
-                Distinct(ExactEqualityComparer.Instance).
+                Distinct(LogicalEqualityComparer.Instance).
                 Memoize();
 
             var valids = overloads.
@@ -60,7 +68,7 @@ namespace Favalet.Expressions.Specialized
                 }
                 else
                 {
-                    return From(this.Operands, ops => new OverloadTerm(ops, higherOrder), false)!;
+                    return InternalFrom(this.Operands, higherOrder)!;
                 }
             }
 
@@ -73,7 +81,7 @@ namespace Favalet.Expressions.Specialized
                 OrderBy(overload => overload, ExpressionComparer.Instance).   // make stable
                 Memoize();
 
-            var validHigherOrder = From(validHigherOrders)!;
+            var validHigherOrder = InternalFrom(validHigherOrders, UnspecifiedTerm.Instance)!;
 
             if (this.HigherOrder.ExactEquals(validHigherOrder) &&
                 this.Operands.ExactSequenceEqual(validOverloads))
@@ -82,11 +90,17 @@ namespace Favalet.Expressions.Specialized
             }
             else
             {
-                return From(validOverloads, ops => new OverloadTerm(ops, validHigherOrder), false)!;
+                return InternalFrom(validOverloads, validHigherOrder)!;
             }
         }
 
+        private static IExpression? InternalFrom(IEnumerable<IExpression> operands, IExpression higherOrder) =>
+            From(
+                operands,
+                ops => new OverloadTerm(ops.OrderBy(oper => oper, ExpressionComparer.Instance).Memoize(), higherOrder),
+                false);
+
         internal static IExpression? From(IEnumerable<IExpression> operands) =>
-            From(operands, ops => new OverloadTerm(ops, UnspecifiedTerm.Instance), false);
+            InternalFrom(operands, UnspecifiedTerm.Instance);
     }
 }

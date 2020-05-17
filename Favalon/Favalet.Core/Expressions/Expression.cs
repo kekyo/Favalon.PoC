@@ -21,34 +21,39 @@
 #pragma warning disable CS0659
 
 using Favalet.Contexts;
+using Favalet.Expressions.Comparer;
 using System;
+using System.Collections.Generic;
 using System.Xml.Linq;
 
 namespace Favalet.Expressions
 {
-    public interface IExpression : IEquatable<IExpression?>
+    public interface IExpression
     {
         IExpression HigherOrder { get; }
+
+        bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer);
 
         T Format<T>(IFormatContext<T> context);
 
         XNode Xml { get; }
     }
 
-    public abstract partial class Expression : IExpression
+    public abstract partial class Expression :
+        IExpression, IEquatable<IExpression?>
     {
         protected Expression()
         { }
 
         public abstract IExpression HigherOrder { get; }
 
-        public abstract bool Equals(IExpression? rhs);
+        public abstract bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer);
 
         public override sealed bool Equals(object obj) =>
-            this.Equals(obj as IExpression);
+            this.Equals(obj as IExpression, ShallowEqualityComparer.Instance);
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
-            this.Equals(other);
+        public bool Equals(IExpression? other) =>
+            this.Equals(other, ShallowEqualityComparer.Instance);
 
         public abstract T Format<T>(IFormatContext<T> context);
 

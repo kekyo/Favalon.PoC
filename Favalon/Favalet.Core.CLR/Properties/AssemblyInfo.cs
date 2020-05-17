@@ -17,29 +17,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Expressions;
-using System;
-using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
-namespace Favalet.Internal
-{
-    public sealed class ExpressionComparer : IComparer<IExpression>
-    {
-        private ExpressionComparer()
-        { }
-
-        int IComparer<IExpression>.Compare(IExpression x, IExpression y) =>
-            Compare(x, y);
-
-        public static int Compare(IExpression x, IExpression y) =>
-            (x, y) switch
-            {
-                (IComparable<IExpression> cx, _) => cx.CompareTo(y),
-                (_, IComparable<IExpression> cy) => 0 - cy.CompareTo(x),
-                _ => x.GetHashCode().CompareTo(y.GetHashCode())
-            };
-
-        public static readonly IComparer<IExpression> Instance =
-            new ExpressionComparer();
-    }
-}
+[assembly: InternalsVisibleTo("Favalet.Core.Tests")]

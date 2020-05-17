@@ -20,6 +20,8 @@
 using Favalet.Contexts;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -33,7 +35,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class IdentityTerm :
-        Expression, IIdentityTerm, IInferrableExpression, IReducibleExpression
+        Expression, IIdentityTerm, IInferrableExpression, IReducibleExpression, IComparable<IExpression>
     {
         public readonly string Identity;
 
@@ -115,7 +117,7 @@ namespace Favalet.Expressions
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public override bool Equals(IExpression? rhs) =>
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
             rhs is IIdentityTerm identity &&
                 this.Identity.Equals(identity.Identity);
 
@@ -124,6 +126,11 @@ namespace Favalet.Expressions
 #endif
         public override int GetHashCode() =>
             this.Identity.GetHashCode();
+
+        int IComparable<IExpression>.CompareTo(IExpression rhs) =>
+            rhs is IIdentityTerm it ?
+                this.Identity.CompareTo(it.Identity) :
+                this.GetHashCode().CompareTo(rhs.GetHashCode());
 
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.Standard, this.Identity);

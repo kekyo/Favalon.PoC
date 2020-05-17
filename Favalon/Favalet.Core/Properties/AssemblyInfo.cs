@@ -20,3 +20,4 @@
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Favalet.Core.CLR")]
+[assembly: InternalsVisibleTo("Favalet.Core.Tests")]

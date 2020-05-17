@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Specialized
@@ -40,8 +41,8 @@ namespace Favalet.Expressions.Specialized
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public override bool Equals(IExpression? rhs) =>
-            rhs is UnspecifiedTerm;
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
+            false;
 
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.ForceText, "_");

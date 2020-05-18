@@ -32,6 +32,11 @@ namespace Favalet.Expressions.Comparer
 
         public static int Compare(IExpression x, IExpression y)
         {
+            if (object.ReferenceEquals(x, y))
+            {
+                return 0;
+            }
+
             switch (x, y)
             {
                 case (IComparable<IExpression> cx, _): return cx.CompareTo(y);

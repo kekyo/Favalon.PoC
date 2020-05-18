@@ -36,6 +36,7 @@ namespace Favalet.Expressions.Specialized
             var r = operands.OrderBy(oper => oper, ExpressionComparer.Instance).Memoize();
             var r2 = r.OrderBy(oper => oper, ExpressionComparer.Instance).Memoize();
             Debug.Assert(operands.SequenceEqual(r, ExactEqualityComparer.Instance));
+            Debug.Assert(operands.SequenceEqual(r2, ExactEqualityComparer.Instance));
 #endif
         }
 

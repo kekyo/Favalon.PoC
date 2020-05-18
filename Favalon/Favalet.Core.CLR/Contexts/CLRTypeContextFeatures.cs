@@ -19,6 +19,7 @@
 
 using Favalet.Contexts;
 using System;
+using System.Collections.Generic;
 
 namespace Favalet.Expressions
 {
@@ -35,6 +36,7 @@ namespace Favalet.Expressions
 
         public override IExpression? Widen(
             IExpression to, IExpression from,
+            Func<IEnumerable<IExpression>, IExpression?> createOr,
             Func<IExpression, IExpression, IExpression?> widen)
         {
             switch (to, from)
@@ -53,7 +55,7 @@ namespace Favalet.Expressions
                 //        null;
 
                 default:
-                    return base.Widen(to, from, widen);
+                    return base.Widen(to, from, createOr, widen);
             }
         }
 

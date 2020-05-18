@@ -21,6 +21,7 @@ using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System;
+using System.Collections.Generic;
 
 namespace Favalet.Contexts
 {
@@ -50,8 +51,12 @@ namespace Favalet.Contexts
         public virtual IExpression CreateApply(IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument, UnspecifiedTerm.Instance);
 
+        public override IExpression? Widen(IExpression to, IExpression from) =>
+            this.Widen(to, from, OverloadTerm.From, this.Widen);
+
         public override IExpression? Widen(
             IExpression to, IExpression from,
+            Func<IEnumerable<IExpression>, IExpression?> createOr,
             Func<IExpression, IExpression, IExpression?> widen)
         {
             switch (to, from)
@@ -75,7 +80,7 @@ namespace Favalet.Contexts
                 //    return to;
 
                 default:
-                    if (base.Widen(to, from, widen) is IExpression widened)
+                    if (base.Widen(to, from, createOr, widen) is IExpression widened)
                     {
                         return widened;
                     }

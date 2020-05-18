@@ -96,7 +96,11 @@ namespace Favalet.Contexts
 
         private IExpression? Solve(IExpression to, IExpression from)
         {
-            if (this.rootContext.Features.Widen(to, from, this.Solve) is IExpression widened)
+            if (this.rootContext.Features.Widen(
+                to,
+                from,
+                exs => OverloadTerm.From(exs)?.InferIfRequired(this),
+                this.Solve) is IExpression widened)
             {
                 return widened;
             }

@@ -32,8 +32,6 @@ namespace Favalet.Expressions.Algebraic
         IExpression
     {
         IExpression[] Operands { get; }
-
-        IExpression? From(IEnumerable<IExpression> operands);
     }
 
     public abstract class OperatorExpression<TOperator> :
@@ -81,9 +79,6 @@ namespace Favalet.Expressions.Algebraic
 
         protected abstract IExpression? From(
             IEnumerable<IExpression> operands, IExpression higherOrder);
-
-        IExpression? IOperatorExpression.From(IEnumerable<IExpression> operands) =>
-            From(operands, UnspecifiedTerm.Instance);
 
         public IExpression Infer(IInferContext context)
         {

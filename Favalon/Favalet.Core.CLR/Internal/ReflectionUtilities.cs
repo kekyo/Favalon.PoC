@@ -36,39 +36,24 @@ namespace Favalet.Internal
 
     internal static class ReflectionUtilities
     {
-        private static readonly HashSet<Type> knownClsCompilant =
+        private static readonly HashSet<Type> firstClassTypes =
             new HashSet<Type>
             {
                 typeof(bool), typeof(byte), typeof(short), typeof(int), typeof(long),
-                typeof(float), typeof(double),
+                typeof(float), typeof(double)
             };
 
-        private static readonly HashSet<Type> knownInteger =
+        private static readonly HashSet<Type> integerTypes =
             new HashSet<Type>
             {
                 typeof(byte), typeof(short), typeof(int), typeof(long),
                 typeof(sbyte), typeof(ushort), typeof(uint), typeof(ulong),
             };
 
-        private static readonly HashSet<(Type, Type)> primitiveConvertibles =
+        private static readonly HashSet<(Type, Type)> predefinedConvertibles =
             // From, To
             new HashSet<(Type, Type)>
             {
-                (typeof(bool), typeof(byte)),
-                (typeof(bool), typeof(sbyte)),
-                (typeof(bool), typeof(short)),
-                (typeof(bool), typeof(ushort)),
-                (typeof(bool), typeof(int)),
-                (typeof(bool), typeof(uint)),
-                (typeof(bool), typeof(long)),
-                (typeof(bool), typeof(ulong)),
-                (typeof(char), typeof(ushort)),
-                (typeof(char), typeof(int)),
-                (typeof(char), typeof(uint)),
-                (typeof(char), typeof(long)),
-                (typeof(char), typeof(ulong)),
-                (typeof(char), typeof(float)),
-                (typeof(char), typeof(double)),
                 (typeof(byte), typeof(char)),
                 (typeof(byte), typeof(short)),
                 (typeof(byte), typeof(ushort)),
@@ -78,33 +63,51 @@ namespace Favalet.Internal
                 (typeof(byte), typeof(ulong)),
                 (typeof(byte), typeof(float)),
                 (typeof(byte), typeof(double)),
+                (typeof(byte), typeof(char)),
+
                 (typeof(sbyte), typeof(short)),
                 (typeof(sbyte), typeof(int)),
                 (typeof(sbyte), typeof(long)),
                 (typeof(sbyte), typeof(float)),
                 (typeof(sbyte), typeof(double)),
+
                 (typeof(short), typeof(int)),
                 (typeof(short), typeof(long)),
                 (typeof(short), typeof(float)),
                 (typeof(short), typeof(double)),
+
                 (typeof(ushort), typeof(int)),
                 (typeof(ushort), typeof(uint)),
                 (typeof(ushort), typeof(long)),
                 (typeof(ushort), typeof(ulong)),
                 (typeof(ushort), typeof(float)),
                 (typeof(ushort), typeof(double)),
+                (typeof(ushort), typeof(char)),
+
                 (typeof(int), typeof(long)),
                 (typeof(int), typeof(float)),
                 (typeof(int), typeof(double)),
+
                 (typeof(uint), typeof(long)),
                 (typeof(uint), typeof(ulong)),
                 (typeof(uint), typeof(float)),
                 (typeof(uint), typeof(double)),
+
                 (typeof(long), typeof(float)),
                 (typeof(long), typeof(double)),
+
                 (typeof(ulong), typeof(float)),
                 (typeof(ulong), typeof(double)),
+
                 (typeof(float), typeof(double)),
+
+                (typeof(char), typeof(ushort)),
+                (typeof(char), typeof(int)),
+                (typeof(char), typeof(uint)),
+                (typeof(char), typeof(long)),
+                (typeof(char), typeof(ulong)),
+                (typeof(char), typeof(float)),
+                (typeof(char), typeof(double)),
             };
 
         private static readonly Dictionary<Type, int?> sizeOf =
@@ -167,7 +170,7 @@ namespace Favalet.Internal
             new Dictionary<Type, (Type, Type[])>();
 
         public static readonly Type[] EmptyTypes =
-#if NET35 || NETSTANDARD1_0
+#if NET35 || NETSTANDARD1_1
             new Type[0];
 #else
             Type.EmptyTypes;
@@ -199,13 +202,6 @@ namespace Favalet.Internal
         public static int? SizeOf(this Type type) =>
             sizeOf.GetOrAdd(type, t =>
             {
-#if NETSTANDARD1_0
-                // Warning: netstandard1.0 can't get size of value type except non-primitive types.
-                if (type.IsPrimitive())
-                {
-                    return Buffer.ByteLength(Array.CreateInstance(t, 1));
-                }
-#else
                 if (t.IsValueType())
                 {
                     try
@@ -216,15 +212,14 @@ namespace Favalet.Internal
                     {
                     }
                 }
-#endif
                 return null;
             });
 
-        public static bool IsClsCompliant(this Type type) =>
-            knownClsCompilant.Contains(type);
+        public static bool IsFirstClass(this Type type) =>
+            firstClassTypes.Contains(type);
 
         public static bool IsInteger(this Type type) =>
-            knownInteger.Contains(type);
+            integerTypes.Contains(type);
 
         public static bool IsTypeConstructor(this Type type) =>
             type.IsGenericTypeDefinition() && (type.GetGenericArguments().Length == 1);
@@ -249,10 +244,12 @@ namespace Favalet.Internal
             if (member is MethodInfo method1 && method1.IsSpecialName)
             {
                 if (method1.IsStatic &&
-                    option == NameOptions.Symbols &&
-                    operatorSymbols.TryGetValue(name, out var symbol))
+                    option == NameOptions.Symbols)
                 {
-                    name = symbol;
+                    if (operatorSymbols.TryGetValue(name, out var symbol))
+                    {
+                        name = symbol;
+                    }
                 }
                 else if (method1.DeclaringType is Type type2 &&
                     type2.GetDeclaredProperties().FirstOrDefault(p =>
@@ -347,7 +344,7 @@ namespace Favalet.Internal
 
             if (type.IsPrimitive() && from.IsPrimitive())
             {
-                return primitiveConvertibles.Contains((from, type));
+                return predefinedConvertibles.Contains((from, type));
             }
             else
             {
@@ -385,24 +382,13 @@ namespace Favalet.Internal
                     return r;
                 }
 
-                // (int, object): object <-- int     (narrow)
-                if (ty.IsConvertibleFrom(tx))
+                var txfc = tx.IsFirstClass();
+                var tyfc = ty.IsFirstClass();
+                if (txfc && !tyfc)
                 {
                     return -1;
                 }
-                // (int, object): int <-- object     (narrow)
-                if (tx.IsConvertibleFrom(ty))
-                {
-                    return 1;
-                }
-
-                var txct = tx.IsClsCompliant();
-                var tyct = ty.IsClsCompliant();
-                if (txct && !tyct)
-                {
-                    return -1;
-                }
-                if (!txct && tyct)
+                if (!txfc && tyfc)
                 {
                     return 1;
                 }
@@ -511,6 +497,15 @@ namespace Favalet.Internal
                 }
 
                 // TODO: array
+
+                if (ty.IsAssignableFrom(tx))
+                {
+                    return -1;
+                }
+                if (tx.IsAssignableFrom(ty))
+                {
+                    return 1;
+                }
 
                 // Not compatible types.
                 return tx.GetFullName().CompareTo(ty.GetFullName());

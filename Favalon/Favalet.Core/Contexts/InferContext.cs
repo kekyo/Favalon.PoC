@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions;
+using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 
@@ -31,7 +32,7 @@ namespace Favalet.Contexts
 
     public interface IFixupContext
     {
-        IExpression? Widen(IExpression to, IExpression from);
+        WidenedResult Widen(IExpression to, IExpression from);
         IExpression? LookupPlaceholder(IPlaceholderTerm placeholder);
     }
 
@@ -64,7 +65,7 @@ namespace Favalet.Contexts
         public IPlaceholderTerm CreatePlaceholder() =>
             PlaceholderTerm.Create(this, 1);
 
-        private IExpression? Substitute(
+        private WidenedResult Substitute(
             IPlaceholderTerm placeholder,
             IExpression from,
             bool isForward)
@@ -75,32 +76,33 @@ namespace Favalet.Contexts
                     this.Solve(lastCombined, from) :  // forward
                     this.Solve(from, lastCombined);   // backward
 
-                if (result is IExpression)
+                if (result.Expression is IExpression)
                 {
-                    this.descriptions[placeholder.Index] = result;
+                    this.descriptions[placeholder.Index] = result.Expression;
                     return result;
                 }
                 else
                 {
                     var combinedExpression = OverloadTerm.From(new[] { lastCombined, from });
                     this.descriptions[placeholder.Index] = combinedExpression!;
-                    return null;
+                    return WidenedResult.Nothing();
                 }
             }
             else
             {
                 this.descriptions.Add(placeholder.Index, from);
-                return from;
+                return WidenedResult.Success(from);
             }
         }
 
-        private IExpression? Solve(IExpression to, IExpression from)
+        private WidenedResult Solve(IExpression to, IExpression from)
         {
             if (this.rootContext.Features.Widen(
                 to,
                 from,
                 exs => OverloadTerm.From(exs)?.InferIfRequired(this),
-                this.Solve) is IExpression widened)
+                this.Solve) is WidenedResult widened &&
+                widened.Expression != null)
             {
                 return widened;
             }
@@ -114,13 +116,13 @@ namespace Favalet.Contexts
                 return this.Substitute(fph, to, false);
             }
 
-            return null;
+            return WidenedResult.Nothing();
         }
 
         public void Unify(IExpression to, IExpression from) =>
             this.Solve(to, from);
 
-        public IExpression? Widen(IExpression to, IExpression from) =>
+        public WidenedResult Widen(IExpression to, IExpression from) =>
             this.rootContext.Features.Widen(to, from);
 
         public IExpression? LookupPlaceholder(IPlaceholderTerm placeholder)

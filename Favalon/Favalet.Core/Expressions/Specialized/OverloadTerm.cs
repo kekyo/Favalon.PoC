@@ -55,8 +55,9 @@ namespace Favalet.Expressions.Specialized
                 Distinct(LogicalEqualityComparer.Instance).
                 Memoize();
 
+            // TODO: WidenedResult
             var valids = overloads.
-                Select(overload => (overload, higherOrder: context.Widen(higherOrder, overload.HigherOrder)!)).
+                Select(overload => (overload, higherOrder: context.Widen(higherOrder, overload.HigherOrder).Expression!)).
                 Where(entry => entry.higherOrder != null).
                 Distinct().
                 Memoize();

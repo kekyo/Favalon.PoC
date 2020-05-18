@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Algebraic;
 using System;
 using System.Collections.Generic;
 
@@ -34,10 +35,10 @@ namespace Favalet.Expressions
         public override IExpression CreateString(string value) =>
             ConstantTerm.From(value);
 
-        public override IExpression? Widen(
+        public override WidenedResult Widen(
             IExpression to, IExpression from,
             Func<IEnumerable<IExpression>, IExpression?> createOr,
-            Func<IExpression, IExpression, IExpression?> widen)
+            Func<IExpression, IExpression, WidenedResult> widen)
         {
             switch (to, from)
             {
@@ -46,8 +47,8 @@ namespace Favalet.Expressions
                 // IComparable: IComparable <-- string
                 case (TypeTerm toType, TypeTerm fromType):
                     return toType.IsConvertibleFrom(fromType) ?
-                        to :
-                        null;
+                        WidenedResult.Success(to) :
+                        WidenedResult.Nothing();
 
                 //case (MethodTerm toMethod, MethodTerm fromMethod):
                 //    return (widen(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?

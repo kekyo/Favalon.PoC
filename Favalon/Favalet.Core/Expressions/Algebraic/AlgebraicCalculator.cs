@@ -24,14 +24,33 @@ using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
 {
+    public struct WidenedResult
+    {
+        public readonly IExpression? Expression;
+        public readonly bool IsFailureUnexpectedExpression;
+        
+        private WidenedResult(IExpression? expression, bool isFailureUnexpectedExpression)
+        {
+            this.Expression = expression;
+            this.IsFailureUnexpectedExpression = isFailureUnexpectedExpression;
+        }
+
+        public static WidenedResult Success(IExpression expression) =>
+            new WidenedResult(expression, false);
+        public static WidenedResult Nothing() =>
+            new WidenedResult(null, false);
+        public static WidenedResult Unexpected() =>
+            new WidenedResult(null, true);
+    }
+
     public interface IAlgebraicCalculator
     {
-        IExpression? Widen(
+        WidenedResult Widen(
             IExpression to, IExpression from);
-        IExpression? Widen(
+        WidenedResult Widen(
             IExpression to, IExpression from,
             Func<IEnumerable<IExpression>, IExpression?> createOr,
-            Func<IExpression, IExpression, IExpression?> widen);
+            Func<IExpression, IExpression, WidenedResult> widen);
     }
 
     public class AlgebraicCalculator : IAlgebraicCalculator
@@ -39,13 +58,13 @@ namespace Favalet.Expressions.Algebraic
         protected AlgebraicCalculator()
         { }
 
-        public virtual IExpression? Widen(IExpression to, IExpression from) =>
+        public virtual WidenedResult Widen(IExpression to, IExpression from) =>
             this.Widen(to, from, OrExpression.From, this.Widen);
 
-        public virtual IExpression? Widen(
+        public virtual WidenedResult Widen(
             IExpression to, IExpression from,
             Func<IEnumerable<IExpression>, IExpression?> createOr,
-            Func<IExpression, IExpression, IExpression?> widen)
+            Func<IExpression, IExpression, WidenedResult> widen)
         {
             switch (to, from)
             {
@@ -53,7 +72,7 @@ namespace Favalet.Expressions.Algebraic
                 // IComparable: IComparable <-- IComparable
                 // _[1]: _[1] <-- _[1]
                 case (IExpression toExpression, IExpression fromExpression) when toExpression.ShallowEquals(fromExpression):
-                    return toExpression;
+                    return WidenedResult.Success(toExpression);
 
                 // (int | double): (int | double) <-- (int | double)
                 // (int | double | string): (int | double | string) <-- (int | double)
@@ -66,11 +85,11 @@ namespace Favalet.Expressions.Algebraic
                     Debug.Assert(toExpressions.Length >= 2);
                     Debug.Assert(fromExpressions.Length >= 2);
                     var widened1 = fromExpressions.
-                        Select(rhsExpression => toExpressions.Any(lhsExpression => widen(lhsExpression, rhsExpression) != null)).
+                        Select(rhsExpression => toExpressions.Any(lhsExpression => widen(lhsExpression, rhsExpression).Expression != null)).
                         Memoize();
                     return widened1.All(w => w) ?
-                        to :
-                        null;
+                        WidenedResult.Success(to) :
+                        WidenedResult.Nothing();
 
                 // (int | double): (int | double) <-- int
                 // (int | IServiceProvider): (int | IServiceProvider) <-- int
@@ -80,7 +99,7 @@ namespace Favalet.Expressions.Algebraic
                 case (IOrExpression(IExpression[] toExpressions), IExpression _):
                     Debug.Assert(toExpressions.Length >= 2);
                     var expressions3 = toExpressions.
-                        Select(lhsExpression => widen(lhsExpression, from)).
+                        Select(lhsExpression => widen(lhsExpression, from).Expression).
                         Memoize();
                     // Requirements: 1 or any terms widened.
                     if (expressions3.Any(expression => expression != null))
@@ -89,26 +108,30 @@ namespace Favalet.Expressions.Algebraic
                         //    terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).Distinct().Memoize(),
                         //    true);
                         return createOr(
-                            expressions3.Where(expression => expression != null)!);
+                            expressions3.Where(expression => expression != null)!) is IExpression ex1 ?
+                                WidenedResult.Success(ex1) :
+                                WidenedResult.Nothing();
                     }
                     // Couldn't widen: (int | double) <-- string
                     else
                     {
-                        return null;
+                        return WidenedResult.Nothing();
                     }
 
                 // null: int <-- (int | double)
                 case (IExpression _, IOrExpression(IExpression[] fromExpressions)):
                     Debug.Assert(fromExpressions.Length >= 2);
                     var expressions2 = fromExpressions.
-                        Select(rhsExpression => widen(to, rhsExpression)).
+                        Select(rhsExpression => widen(to, rhsExpression).Expression).
                         Memoize();
                     return expressions2.All(expression => expression != null) ?
-                        createOr(expressions2!) :
-                        null;
+                        (createOr(expressions2!) is IExpression ex2 ?
+                            WidenedResult.Success(ex2) :
+                            WidenedResult.Nothing()) :
+                        WidenedResult.Nothing();
 
                 default:
-                    return null;
+                    return WidenedResult.Nothing();
             }
         }
 

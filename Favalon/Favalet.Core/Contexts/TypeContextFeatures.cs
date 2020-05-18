@@ -51,24 +51,24 @@ namespace Favalet.Contexts
         public virtual IExpression CreateApply(IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument, UnspecifiedTerm.Instance);
 
-        public override IExpression? Widen(IExpression to, IExpression from) =>
+        public override WidenedResult Widen(IExpression to, IExpression from) =>
             this.Widen(to, from, OverloadTerm.From, this.Widen);
 
-        public override IExpression? Widen(
+        public override WidenedResult Widen(
             IExpression to, IExpression from,
             Func<IEnumerable<IExpression>, IExpression?> createOr,
-            Func<IExpression, IExpression, IExpression?> widen)
+            Func<IExpression, IExpression, WidenedResult> widen)
         {
             switch (to, from)
             {
                 // int->object: int->object <-- object->int
                 case (IFunctionDeclaredExpression(IExpression toParameter, IExpression toResult),
                       IFunctionDeclaredExpression(IExpression fromParameter, IExpression fromResult)):
-                    var parameter = widen(fromParameter, toParameter); // is IExpression ? toParameter : null;
-                    var result = widen(toResult, fromResult);
+                    var parameter = widen(fromParameter, toParameter).Expression; // is IExpression ? toParameter : null;
+                    var result = widen(toResult, fromResult).Expression;
                     return parameter is IExpression pr && result is IExpression rr ?
-                        FunctionDeclaredExpression.From(pr, rr) :
-                        null;
+                        WidenedResult.Success(FunctionDeclaredExpression.From(pr, rr)) :
+                        WidenedResult.Nothing();
 
                 // _[1]: _[1] <-- _[2]
                 //case (PlaceholderTerm _, PlaceholderTerm _):
@@ -80,19 +80,7 @@ namespace Favalet.Contexts
                 //    return to;
 
                 default:
-                    if (base.Widen(to, from, createOr, widen) is IExpression widened)
-                    {
-                        return widened;
-                    }
-                    // null: int <-- _   [TODO: maybe?]
-                    //else if (from is PlaceholderTerm placeholder)
-                    //{
-                    //    return null;
-                    //}
-                    else
-                    {
-                        return null;
-                    }
+                    return base.Widen(to, from, createOr, widen);
             }
         }
 

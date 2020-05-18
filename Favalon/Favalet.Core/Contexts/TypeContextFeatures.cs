@@ -64,11 +64,15 @@ namespace Favalet.Contexts
                 // int->object: int->object <-- object->int
                 case (IFunctionDeclaredExpression(IExpression toParameter, IExpression toResult),
                       IFunctionDeclaredExpression(IExpression fromParameter, IExpression fromResult)):
-                    var parameter = widen(fromParameter, toParameter).Expression; // is IExpression ? toParameter : null;
-                    var result = widen(toResult, fromResult).Expression;
-                    return parameter is IExpression pr && result is IExpression rr ?
+                    var pw = widen(fromParameter, toParameter); // is IExpression ? toParameter : null;
+                    var rw = widen(toResult, fromResult);
+                    if (pw.IsUnexpected || rw.IsUnexpected)
+                    {
+                        return WidenedResult.Unexpected;
+                    }
+                    return pw.Expression is IExpression pr && rw.Expression is IExpression rr ?
                         WidenedResult.Success(FunctionDeclaredExpression.From(pr, rr)) :
-                        WidenedResult.Nothing();
+                        WidenedResult.Empty;
 
                 // _[1]: _[1] <-- _[2]
                 //case (PlaceholderTerm _, PlaceholderTerm _):

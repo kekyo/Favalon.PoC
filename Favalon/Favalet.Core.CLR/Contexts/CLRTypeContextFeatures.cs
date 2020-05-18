@@ -48,7 +48,7 @@ namespace Favalet.Expressions
                 case (TypeTerm toType, TypeTerm fromType):
                     return toType.IsConvertibleFrom(fromType) ?
                         WidenedResult.Success(to) :
-                        WidenedResult.Nothing();
+                        WidenedResult.Empty;
 
                 //case (MethodTerm toMethod, MethodTerm fromMethod):
                 //    return (widen(toMethod.HigherOrder, fromMethod.HigherOrder) != null) ?

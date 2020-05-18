@@ -56,13 +56,22 @@ namespace Favalet.Expressions.Specialized
                 Memoize();
 
             // TODO: WidenedResult
-            var valids = overloads.
-                Select(overload => (overload, higherOrder: context.Widen(higherOrder, overload.HigherOrder).Expression!)).
-                Where(entry => entry.higherOrder != null).
-                Distinct().
+            var widened = overloads.
+                Select(overload => (overload, widened: context.Widen(higherOrder, overload.HigherOrder))).
+                Where(entry => entry.widened.Expression != null).
                 Memoize();
 
-            if (valids.Length == 0)
+            if (widened.Any(entry => entry.widened.IsUnexpected))
+            {
+                return this;
+            }
+
+            var valid = widened.
+                Where(entry => entry.overload != null).
+                Select(entry => (entry.overload, expression: entry.widened.Expression!)).
+                Distinct().
+                Memoize();
+            if (valid.Length == 0)
             {
                 if (this.HigherOrder.ExactEquals(higherOrder))
                 {
@@ -74,13 +83,13 @@ namespace Favalet.Expressions.Specialized
                 }
             }
 
-            var validOverloads = valids.
+            var validOverloads = valid.
                 Select(entry => entry.overload).
                 OrderBy(overload => overload, ExpressionComparer.Instance).   // make stable
                 Memoize();
-            var validHigherOrders = valids.
-                Select(entry => entry.higherOrder).
-                OrderBy(overload => overload, ExpressionComparer.Instance).   // make stable
+            var validHigherOrders = valid.
+                Select(entry => entry.expression.HigherOrder).
+                OrderBy(higherOrder => higherOrder, ExpressionComparer.Instance).   // make stable
                 Memoize();
 
             var validHigherOrder = InternalFrom(validHigherOrders, UnspecifiedTerm.Instance)!;

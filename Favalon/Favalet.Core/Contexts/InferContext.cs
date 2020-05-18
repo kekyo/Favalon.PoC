@@ -85,7 +85,7 @@ namespace Favalet.Contexts
                 {
                     var combinedExpression = OverloadTerm.From(new[] { lastCombined, from });
                     this.descriptions[placeholder.Index] = combinedExpression!;
-                    return WidenedResult.Nothing();
+                    return WidenedResult.Empty;
                 }
             }
             else
@@ -116,7 +116,7 @@ namespace Favalet.Contexts
                 return this.Substitute(fph, to, false);
             }
 
-            return WidenedResult.Nothing();
+            return WidenedResult.Empty;
         }
 
         public void Unify(IExpression to, IExpression from) =>

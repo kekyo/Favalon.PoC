@@ -24,25 +24,6 @@ using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public struct WidenedResult
-    {
-        public readonly IExpression? Expression;
-        public readonly bool IsFailureUnexpectedExpression;
-        
-        private WidenedResult(IExpression? expression, bool isFailureUnexpectedExpression)
-        {
-            this.Expression = expression;
-            this.IsFailureUnexpectedExpression = isFailureUnexpectedExpression;
-        }
-
-        public static WidenedResult Success(IExpression expression) =>
-            new WidenedResult(expression, false);
-        public static WidenedResult Nothing() =>
-            new WidenedResult(null, false);
-        public static WidenedResult Unexpected() =>
-            new WidenedResult(null, true);
-    }
-
     public interface IAlgebraicCalculator
     {
         WidenedResult Widen(
@@ -85,11 +66,19 @@ namespace Favalet.Expressions.Algebraic
                     Debug.Assert(toExpressions.Length >= 2);
                     Debug.Assert(fromExpressions.Length >= 2);
                     var widened1 = fromExpressions.
-                        Select(rhsExpression => toExpressions.Any(lhsExpression => widen(lhsExpression, rhsExpression).Expression != null)).
+                        Select(rhsExpression =>
+                            WidenedResult.Combine(toExpressions.Select(lhsExpression => widen(lhsExpression, rhsExpression)))).
                         Memoize();
-                    return widened1.All(w => w) ?
-                        WidenedResult.Success(to) :
-                        WidenedResult.Nothing();
+                    if (widened1.Any(r => r.IsUnexpected))
+                    {
+                        return WidenedResult.Unexpected;
+                    }
+                    else
+                    {
+                        return widened1.All(r => r.Expressions != null) ?
+                            WidenedResult.Success(to) :
+                            WidenedResult.Empty;
+                    }
 
                 // (int | double): (int | double) <-- int
                 // (int | IServiceProvider): (int | IServiceProvider) <-- int
@@ -98,40 +87,48 @@ namespace Favalet.Expressions.Algebraic
                 // (int | _[1]): (int | _[1]) <-- _[2]
                 case (IOrExpression(IExpression[] toExpressions), IExpression _):
                     Debug.Assert(toExpressions.Length >= 2);
-                    var expressions3 = toExpressions.
-                        Select(lhsExpression => widen(lhsExpression, from).Expression).
+                    var widened3 = toExpressions.
+                        Select(lhsExpression => widen(lhsExpression, from)).
                         Memoize();
+                    if (widened3.Any(widened => widened.IsUnexpected))
+                    {
+                        return WidenedResult.Unexpected;
+                    }
                     // Requirements: 1 or any terms widened.
-                    if (expressions3.Any(expression => expression != null))
+                    else if (widened3.Any(widened => widened.Expression != null))
                     {
                         //return SumExpression.From(
                         //    terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).Distinct().Memoize(),
                         //    true);
                         return createOr(
-                            expressions3.Where(expression => expression != null)!) is IExpression ex1 ?
+                            widened3.Collect(widened => widened.Expression!)) is IExpression ex1 ?
                                 WidenedResult.Success(ex1) :
-                                WidenedResult.Nothing();
+                                WidenedResult.Empty;
                     }
                     // Couldn't widen: (int | double) <-- string
                     else
                     {
-                        return WidenedResult.Nothing();
+                        return WidenedResult.Empty;
                     }
 
                 // null: int <-- (int | double)
                 case (IExpression _, IOrExpression(IExpression[] fromExpressions)):
                     Debug.Assert(fromExpressions.Length >= 2);
-                    var expressions2 = fromExpressions.
-                        Select(rhsExpression => widen(to, rhsExpression).Expression).
+                    var widened2 = fromExpressions.
+                        Select(rhsExpression => widen(to, rhsExpression)).
                         Memoize();
-                    return expressions2.All(expression => expression != null) ?
-                        (createOr(expressions2!) is IExpression ex2 ?
+                    if (widened2.Any(widened => widened.IsUnexpected))
+                    {
+                        return WidenedResult.Unexpected;
+                    }
+                    return widened2.All(widened => widened.Expression != null) ?
+                        (createOr(widened2.Select(widened => widened.Expression!)) is IExpression ex2 ?
                             WidenedResult.Success(ex2) :
-                            WidenedResult.Nothing()) :
-                        WidenedResult.Nothing();
+                            WidenedResult.Empty) :
+                        WidenedResult.Empty;
 
                 default:
-                    return WidenedResult.Nothing();
+                    return WidenedResult.Empty;
             }
         }
 

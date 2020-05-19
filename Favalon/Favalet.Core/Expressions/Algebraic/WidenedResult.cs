@@ -17,6 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using Favalet.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -36,6 +37,14 @@ namespace Favalet.Expressions.Algebraic
             this.Expression = expression;
             this.IsUnexpected = isUnexpected;
         }
+
+        public override string ToString() =>
+            (this.Expression, this.IsUnexpected) switch
+            {
+                (_, true) => "Unexpected",
+                (null, _) => "Empty",
+                _ => this.Expression!.ToString()
+            };
 
         public static WidenedResult Success(IExpression expression) =>
             new WidenedResult(expression, false);
@@ -70,5 +79,13 @@ namespace Favalet.Expressions.Algebraic
             this.Expressions = expressions;
             this.IsUnexpected = isUnexpected;
         }
+
+        public override string ToString() =>
+            (this.Expressions, this.IsUnexpected) switch
+            {
+                (_, true) => "Unexpected",
+                (null, _) => "Empty",
+                _ => StringUtilities.Join(",", this.Expressions!.Select(ex => ex?.ToString() ?? "(null)"))
+            };
     }
 }

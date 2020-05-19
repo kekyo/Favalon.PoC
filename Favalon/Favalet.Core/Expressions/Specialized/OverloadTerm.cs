@@ -49,6 +49,7 @@ namespace Favalet.Expressions.Specialized
 
         public override IExpression Fixup(IFixupContext context)
         {
+            
             var higherOrder = this.HigherOrder.FixupIfRequired(context);
             var overloads = this.Operands.
                 Select(operand => operand.FixupIfRequired(context)).
@@ -58,28 +59,36 @@ namespace Favalet.Expressions.Specialized
             // TODO: WidenedResult
             var widened = overloads.
                 Select(overload => (overload, widened: context.Widen(higherOrder, overload.HigherOrder))).
-                Where(entry => entry.widened.Expression != null).
                 Memoize();
 
             if (widened.Any(entry => entry.widened.IsUnexpected))
             {
-                return this;
-            }
-
-            var valid = widened.
-                Where(entry => entry.overload != null).
-                Select(entry => (entry.overload, expression: entry.widened.Expression!)).
-                Distinct().
-                Memoize();
-            if (valid.Length == 0)
-            {
-                if (this.HigherOrder.ExactEquals(higherOrder))
+                if (this.HigherOrder.ExactEquals(higherOrder) &&
+                    this.Operands.ExactSequenceEqual(overloads))
                 {
                     return this;
                 }
                 else
                 {
-                    return InternalFrom(this.Operands, higherOrder)!;
+                    return InternalFrom(overloads, higherOrder)!;
+                }
+            }
+
+            var valid = widened.
+                Where(entry => entry.widened.Expression != null).
+                Select(entry => (entry.overload, expression: entry.widened.Expression!)).
+                Distinct().
+                Memoize();
+            if (valid.Length == 0)
+            {
+                if (this.HigherOrder.ExactEquals(higherOrder) &&
+                    this.Operands.ExactSequenceEqual(overloads))
+                {
+                    return this;
+                }
+                else
+                {
+                    return InternalFrom(overloads, higherOrder)!;
                 }
             }
 

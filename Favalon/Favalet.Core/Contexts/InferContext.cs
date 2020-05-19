@@ -122,8 +122,27 @@ namespace Favalet.Contexts
         public void Unify(IExpression to, IExpression from) =>
             this.Solve(to, from);
 
-        public WidenedResult Widen(IExpression to, IExpression from) =>
-            this.rootContext.Features.Widen(to, from);
+        public WidenedResult Widen(IExpression to, IExpression from)
+        {
+            if (to is TerminationTerm || from is TerminationTerm)
+            {
+                return WidenedResult.Unexpected;
+            }
+            if (to is UnspecifiedTerm || from is UnspecifiedTerm)
+            {
+                return WidenedResult.Unexpected;
+            }
+            if (to is IPlaceholderTerm || from is IPlaceholderTerm)
+            {
+                return WidenedResult.Unexpected;
+            }
+
+            return this.rootContext.Features.Widen(
+                to,
+                from,
+                exs => OverloadTerm.From(exs),
+                this.Widen);
+        }
 
         public IExpression? LookupPlaceholder(IPlaceholderTerm placeholder)
         {

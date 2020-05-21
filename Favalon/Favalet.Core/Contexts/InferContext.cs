@@ -21,6 +21,7 @@ using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Favalet.Contexts
 {

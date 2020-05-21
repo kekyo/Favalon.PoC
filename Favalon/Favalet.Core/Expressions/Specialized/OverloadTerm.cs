@@ -49,14 +49,12 @@ namespace Favalet.Expressions.Specialized
 
         public override IExpression Fixup(IFixupContext context)
         {
-            
             var higherOrder = this.HigherOrder.FixupIfRequired(context);
             var overloads = this.Operands.
                 Select(operand => operand.FixupIfRequired(context)).
-                Distinct(LogicalEqualityComparer.Instance).
+                Distinct(ExactEqualityComparer.Instance).
                 Memoize();
 
-            // TODO: WidenedResult
             var widened = overloads.
                 Select(overload => (overload, widened: context.Widen(higherOrder, overload.HigherOrder))).
                 Memoize();

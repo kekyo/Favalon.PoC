@@ -30,7 +30,7 @@ namespace Favalet.Expressions.Algebraic
     public sealed class AndExpression :
         OperatorExpression<IAndExpression>, IAndExpression
     {
-        private AndExpression(IExpression[] operands, IExpression higherOrder) : 
+        private AndExpression(IExpression[] operands, IExpression higherOrder) :
             base(operands, higherOrder)
         { }
 

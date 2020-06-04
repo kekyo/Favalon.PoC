@@ -40,7 +40,7 @@ namespace Favalet.Expressions.Algebraic
         { }
 
         public virtual WidenedResult Widen(IExpression to, IExpression from) =>
-            this.Widen(to, from, OrExpression.From, this.Widen);
+            this.Widen(to, from, AndExpression.From, this.Widen);
 
         public virtual WidenedResult Widen(
             IExpression to, IExpression from,
@@ -55,14 +55,14 @@ namespace Favalet.Expressions.Algebraic
                 case (IExpression toExpression, IExpression fromExpression) when toExpression.ShallowEquals(fromExpression):
                     return WidenedResult.Success(toExpression);
 
-                // (int | double): (int | double) <-- (int | double)
-                // (int | double | string): (int | double | string) <-- (int | double)
-                // (int | IComparable): (int | IComparable) <-- (int | string)
-                // null: (int | double) <-- (int | double | string)
-                // null: (int | IServiceProvider) <-- (int | double)
-                // (int | _): (int | _) <-- (int | string)
-                // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
-                case (IOrExpression(IExpression[] toExpressions), IOrExpression(IExpression[] fromExpressions)):
+                // (int & double): (int & double) <-- (int & double)
+                // (int & double & string): (int & double & string) <-- (int & double)
+                // (int & IComparable): (int & IComparable) <-- (int & string)
+                // null: (int & double) <-- (int & double & string)
+                // null: (int & IServiceProvider) <-- (int & double)
+                // (int & _): (int & _) <-- (int & string)
+                // (_[1] & _[2]): (_[1] & _[2]) <-- (_[2] & _[1])
+                case (IAndExpression(IExpression[] toExpressions), IAndExpression(IExpression[] fromExpressions)):
                     Debug.Assert(toExpressions.Length >= 2);
                     Debug.Assert(fromExpressions.Length >= 2);
                     var widened1 = fromExpressions.
@@ -80,12 +80,12 @@ namespace Favalet.Expressions.Algebraic
                             WidenedResult.Empty;
                     }
 
-                // (int | double): (int | double) <-- int
-                // (int | IServiceProvider): (int | IServiceProvider) <-- int
-                // (int | IComparable): (int | IComparable) <-- string
-                // (int | _): (int | _) <-- string
-                // (int | _[1]): (int | _[1]) <-- _[2]
-                case (IOrExpression(IExpression[] toExpressions), IExpression _):
+                // (int & double): (int & double) <-- int
+                // (int & IServiceProvider): (int & IServiceProvider) <-- int
+                // (int & IComparable): (int & IComparable) <-- string
+                // (int & _): (int & _) <-- string
+                // (int & _[1]): (int & _[1]) <-- _[2]
+                case (IAndExpression(IExpression[] toExpressions), IExpression _):
                     Debug.Assert(toExpressions.Length >= 2);
                     var widened3 = toExpressions.
                         Select(lhsExpression => widen(lhsExpression, from)).
@@ -105,14 +105,14 @@ namespace Favalet.Expressions.Algebraic
                                 WidenedResult.Success(ex1) :
                                 WidenedResult.Empty;
                     }
-                    // Couldn't widen: (int | double) <-- string
+                    // Couldn't widen: (int & double) <-- string
                     else
                     {
                         return WidenedResult.Empty;
                     }
 
-                // null: int <-- (int | double)
-                case (IExpression _, IOrExpression(IExpression[] fromExpressions)):
+                // null: int <-- (int & double)
+                case (IExpression _, IAndExpression(IExpression[] fromExpressions)):
                     Debug.Assert(fromExpressions.Length >= 2);
                     var widened2 = fromExpressions.
                         Select(rhsExpression => widen(to, rhsExpression)).

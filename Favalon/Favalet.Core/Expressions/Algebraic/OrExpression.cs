@@ -30,7 +30,7 @@ namespace Favalet.Expressions.Algebraic
     public sealed class OrExpression :
         OperatorExpression<IOrExpression>, IOrExpression
     {
-        private OrExpression(IExpression[] operands, IExpression higherOrder) : 
+        private OrExpression(IExpression[] operands, IExpression higherOrder) :
             base(operands, higherOrder)
         { }
 

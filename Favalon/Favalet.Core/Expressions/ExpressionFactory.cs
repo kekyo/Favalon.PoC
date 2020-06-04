@@ -49,9 +49,9 @@ namespace Favalet.Expressions
             FunctionDeclaredExpression.From(parameter, result);
 
         public static IExpression? Or(params IExpression[] operands) =>
-            OrExpression.From(operands);
-        public static IExpression? And(params IExpression[] operands) =>
             AndExpression.From(operands);
+        public static IExpression? And(params IExpression[] operands) =>
+            OrExpression.From(operands);
 
         public static IExpression? Overload(params IExpression[] expressions) =>
             OverloadTerm.From(expressions);

@@ -79,7 +79,7 @@ namespace Favalet.Contexts
                 //    return to;
 
                 // _: _ <-- int
-                // _: _ <-- (int + double)
+                // _: _ <-- (int & double)
                 //case (PlaceholderTerm _, _):
                 //    return to;
 

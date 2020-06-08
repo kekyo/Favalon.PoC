@@ -97,7 +97,7 @@ namespace Favalet.Expressions
             if (bounds.Length >= 1)
             {
                 // TODO: bound attributes
-                return AndExpression.From(bounds.Select(bound => bound.Expression))?.
+                return AndExpression_.From(bounds.Select(bound => bound.Expression))?.
                     ReduceIfRequired(context) ?? TerminationTerm.Instance;
             }
             else

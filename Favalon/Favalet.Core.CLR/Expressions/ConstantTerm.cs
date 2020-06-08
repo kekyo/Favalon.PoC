@@ -79,7 +79,7 @@ namespace Favalet.Expressions
     {
         private static readonly IExpression charTerm = TypeTerm.From(typeof(char));
         private static readonly IExpression higherOrder =
-            AndExpression.From(new[] { charTerm, TypeTerm.From(typeof(string)) })!;
+            AndExpression_.From(new[] { charTerm, TypeTerm.From(typeof(string)) })!;
 
         public readonly char Value;
 

@@ -27,7 +27,7 @@ using System.Linq;
 namespace Favalet.Expressions.Specialized
 {
     public sealed class OverloadTerm :
-        OperatorExpression<IOrExpression>, IOrExpression
+        OperatorExpression_<IOrExpression_>, IOrExpression_
     {
         private OverloadTerm(IExpression[] operands, IExpression higherOrder) : 
             base(operands, higherOrder)

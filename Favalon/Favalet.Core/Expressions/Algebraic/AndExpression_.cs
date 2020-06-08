@@ -22,24 +22,24 @@ using System.Collections.Generic;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface IAndExpression :
-        IOperatorExpression
+    public interface IAndExpression_ :
+        IOperatorExpression_
     {
     }
 
-    public sealed class AndExpression :
-        OperatorExpression<IAndExpression>, IAndExpression
+    public sealed class AndExpression_ :
+        OperatorExpression_<IAndExpression_>, IAndExpression_
     {
-        private AndExpression(IExpression[] operands, IExpression higherOrder) :
+        private AndExpression_(IExpression[] operands, IExpression higherOrder) :
             base(operands, higherOrder)
         { }
 
         protected override IExpression? From(
             IEnumerable<IExpression> operands,
             IExpression higherOrder) =>
-            From(operands, ops => new AndExpression(ops, higherOrder), true);
+            From(operands, ops => new AndExpression_(ops, higherOrder), true);
 
         public static IExpression? From(IEnumerable<IExpression> operands) =>
-            From(operands, ops => new AndExpression(ops, UnspecifiedTerm.Instance), true);
+            From(operands, ops => new AndExpression_(ops, UnspecifiedTerm.Instance), true);
     }
 }

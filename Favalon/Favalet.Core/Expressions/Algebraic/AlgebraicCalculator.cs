@@ -40,7 +40,7 @@ namespace Favalet.Expressions.Algebraic
         { }
 
         public virtual WidenedResult Widen(IExpression to, IExpression from) =>
-            this.Widen(to, from, AndExpression.From, this.Widen);
+            this.Widen(to, from, AndExpression_.From, this.Widen);
 
         public virtual WidenedResult Widen(
             IExpression to, IExpression from,
@@ -62,7 +62,7 @@ namespace Favalet.Expressions.Algebraic
                 // null: (int & IServiceProvider) <-- (int & double)
                 // (int & _): (int & _) <-- (int & string)
                 // (_[1] & _[2]): (_[1] & _[2]) <-- (_[2] & _[1])
-                case (IAndExpression(IExpression[] toExpressions), IAndExpression(IExpression[] fromExpressions)):
+                case (IAndExpression_(IExpression[] toExpressions), IAndExpression_(IExpression[] fromExpressions)):
                     Debug.Assert(toExpressions.Length >= 2);
                     Debug.Assert(fromExpressions.Length >= 2);
                     var widened1 = fromExpressions.
@@ -85,7 +85,7 @@ namespace Favalet.Expressions.Algebraic
                 // (int & IComparable): (int & IComparable) <-- string
                 // (int & _): (int & _) <-- string
                 // (int & _[1]): (int & _[1]) <-- _[2]
-                case (IAndExpression(IExpression[] toExpressions), IExpression _):
+                case (IAndExpression_(IExpression[] toExpressions), IExpression _):
                     Debug.Assert(toExpressions.Length >= 2);
                     var widened3 = toExpressions.
                         Select(lhsExpression => widen(lhsExpression, from)).
@@ -112,7 +112,7 @@ namespace Favalet.Expressions.Algebraic
                     }
 
                 // null: int <-- (int & double)
-                case (IExpression _, IAndExpression(IExpression[] fromExpressions)):
+                case (IExpression _, IAndExpression_(IExpression[] fromExpressions)):
                     Debug.Assert(fromExpressions.Length >= 2);
                     var widened2 = fromExpressions.
                         Select(rhsExpression => widen(to, rhsExpression)).

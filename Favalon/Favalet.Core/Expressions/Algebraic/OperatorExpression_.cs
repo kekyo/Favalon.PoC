@@ -28,19 +28,19 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface IOperatorExpression :
+    public interface IOperatorExpression_ :
         IExpression
     {
         IExpression[] Operands { get; }
     }
 
-    public abstract class OperatorExpression<TOperator> :
-        Expression, IOperatorExpression, IInferrableExpression, IReducibleExpression, IComparable<IExpression>
-        where TOperator : class, IOperatorExpression
+    public abstract class OperatorExpression_<TOperator> :
+        Expression, IOperatorExpression_, IInferrableExpression, IReducibleExpression, IComparable<IExpression>
+        where TOperator : class, IOperatorExpression_
     {
         public readonly IExpression[] Operands;
 
-        protected OperatorExpression(IExpression[] expressions, IExpression higherOrder)
+        protected OperatorExpression_(IExpression[] expressions, IExpression higherOrder)
         {
             this.Operands = expressions;
             this.HigherOrder = higherOrder;
@@ -49,7 +49,7 @@ namespace Favalet.Expressions.Algebraic
         public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression[] IOperatorExpression.Operands =>
+        IExpression[] IOperatorExpression_.Operands =>
             this.Operands;
 
         protected static IExpression? From(
@@ -170,7 +170,7 @@ namespace Favalet.Expressions.Algebraic
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static void Deconstruct(this IOperatorExpression oper, out IExpression[] operands) =>
+        public static void Deconstruct(this IOperatorExpression_ oper, out IExpression[] operands) =>
             operands = oper.Operands;
     }
 }

@@ -48,12 +48,15 @@ namespace Favalet.Expressions
         public static IExpression FunctionDeclaration(IExpression parameter, IExpression result) =>
             FunctionDeclaredExpression.From(parameter, result);
 
-        public static IExpression? Or(params IExpression[] operands) =>
-            AndExpression.From(operands);
-        public static IExpression? And(params IExpression[] operands) =>
-            OrExpression.From(operands);
+        public static IExpression? Set(params IExpression[] expressions) =>
+            SetExpression.From(expressions);
 
-        public static IExpression? Overload(params IExpression[] expressions) =>
-            OverloadTerm.From(expressions);
+        //public static IExpression? Or(params IExpression[] operands) =>
+        //    AndExpression_.From(operands);
+        //public static IExpression? And(params IExpression[] operands) =>
+        //    OrExpression_.From(operands);
+
+        //public static IExpression? Overload(params IExpression[] expressions) =>
+        //    OverloadTerm.From(expressions);
     }
 }

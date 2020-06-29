@@ -18,7 +18,11 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Comparer;
 using Favalet.Expressions.Specialized;
+using Favalet.Internal;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 
@@ -42,7 +46,8 @@ namespace Favalet.Expressions
         IExpression Argument { get; }
     }
 
-    public sealed class ApplyExpression : Expression, IApplyExpression
+    public sealed class ApplyExpression :
+        Expression, IApplyExpression, IComparable<IExpression>
     {
         public readonly IExpression Function;
         public readonly IExpression Argument;
@@ -145,13 +150,30 @@ namespace Favalet.Expressions
             }
         }
 
-        public override bool Equals(IExpression? rhs) =>
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
             rhs is IApplyExpression apply &&
-                this.Function.Equals(apply.Function) &&
-                this.Argument.Equals(apply.Argument);
+                comparer.Equals(this.Function, apply.Function) &&
+                comparer.Equals(this.Argument, apply.Argument);
 
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
+
+        int IComparable<IExpression>.CompareTo(IExpression rhs)
+        {
+            if (rhs is IApplyExpression ae)
+            {
+                if (ExpressionComparer.Compare(this.Function, ae.Function) is int rf && rf != 0)
+                {
+                    return rf;
+                }
+                if (ExpressionComparer.Compare(this.Argument, ae.Argument) is int ra && ra != 0)
+                {
+                    return ra;
+                }
+                return 0;
+            }
+            return this.GetHashCode().CompareTo(rhs.GetHashCode());
+        }
 
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.Standard, this.Function, this.Argument);

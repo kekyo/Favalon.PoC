@@ -19,6 +19,7 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions;
+using Favalet.Expressions.Comparer;
 using Favalet.Lexers;
 using Favalet.Parsers;
 using NUnit.Framework;
@@ -29,6 +30,7 @@ using System.Threading.Tasks;
 
 using static Favalet.Expressions.ExpressionFactory;
 using static Favalet.Expressions.CLRExpressionFactory;
+using Favalet.Internal;
 
 namespace Favalet
 {
@@ -120,5 +122,93 @@ namespace Favalet
                 },
                 actual);
         }
+
+        [TestCaseSource("Parsers")]
+        public async Task LookupManyStaticOverloadedMethod1(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
+        {
+            // Convert.ToString(123)
+            var text = "System.Convert.ToString 123";
+            var environment = Create();
+            var actual = await run(text, environment);
+
+            var methods = new[]
+                {
+                    Method(typeof(Convert), "ToString", typeof(int)),
+                    Method(typeof(Convert), "ToString", typeof(long)),
+                    Method(typeof(Convert), "ToString", typeof(object)),
+                    Method(typeof(Convert), "ToString", typeof(float)),
+                    Method(typeof(Convert), "ToString", typeof(double)),
+                }.OrderBy(m => m, ExpressionComparer.Instance).
+                ToArray();
+
+            Assert.AreEqual(
+                new IExpression[]
+                {
+                    Apply(
+                        Overload(methods)!,
+                        Constant(123)),
+                },
+                actual);
+        }
+
+        [TestCaseSource("Parsers")]
+        public async Task LookupManyStaticOverloadedMethod2(Func<string, TypeEnvironment, ValueTask<IExpression[]>> run)
+        {
+            // Convert.ToString(123)
+            var text = "System.Convert.ToInt32 \"123\"";
+            var environment = Create();
+            var actual = await run(text, environment);
+
+            var methods = new[]
+                {
+                    Method(typeof(Convert), "ToInt32", typeof(string)),
+                    Method(typeof(Convert), "ToInt32", typeof(object)),
+                }.OrderBy(m => m, ExpressionComparer.Instance).
+                ToArray();
+
+            Assert.AreEqual(
+                new IExpression[]
+                {
+                    Apply(
+                        Overload(methods)!,
+                        Constant("123")),
+                },
+                actual);
+        }
+
+        //[Test]
+        //public void ExpressionComparerTest()
+        //{
+        //    var b = Method(typeof(Convert), "ToInt32", typeof(byte));
+        //    var o = Method(typeof(Convert), "ToInt32", typeof(object));
+
+        //    var r = ReflectionUtilities.Compare(b.Method, o.Method);
+        //    var rr = ReflectionUtilities.Compare(o.Method, b.Method);
+
+        //    var r1 = ((IComparable<IExpression>)(b)).CompareTo(o);
+        //    var rr1 = ((IComparable<IExpression>)(o)).CompareTo(b);
+
+        //    var a2 = new[] { b, o };
+        //    Array.Sort(a2, (i0, i1) => ((IComparable<IExpression>)(i0)).CompareTo(i1));
+
+        //    var a3 = new[] { o, b };
+        //    Array.Sort(a3, (i0, i1) => ((IComparable<IExpression>)(i0)).CompareTo(i1));
+
+        //    var aa = new[] { 1, 3, 5, 4, 2 };
+        //    Array.Sort(aa, (i0, i1) => (i0, i1) switch
+        //        {
+        //            _ when i0 < i1 => -1,
+        //            _ when i0 > i1 => 1,
+        //            _ => 0
+        //        });
+
+
+        //    var expected =
+        //        new IExpression[]
+        //        {
+        //            Method(typeof(Convert), "ToInt32", typeof(byte)),
+        //            Method(typeof(Convert), "ToInt32", typeof(object)),
+        //        }.OrderBy(m => m, ExpressionComparer.Instance).ToArray();
+        //}
     }
 }

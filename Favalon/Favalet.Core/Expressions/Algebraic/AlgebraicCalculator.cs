@@ -17,6 +17,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -24,7 +26,12 @@ namespace Favalet.Expressions.Algebraic
 {
     public interface IAlgebraicCalculator
     {
-        IExpression? Widen(IExpression to, IExpression from);
+        WidenedResult Widen(
+            IExpression to, IExpression from);
+        WidenedResult Widen(
+            IExpression to, IExpression from,
+            Func<IEnumerable<IExpression>, IExpression?> createOr,
+            Func<IExpression, IExpression, WidenedResult> widen);
     }
 
     public class AlgebraicCalculator : IAlgebraicCalculator
@@ -32,68 +39,96 @@ namespace Favalet.Expressions.Algebraic
         protected AlgebraicCalculator()
         { }
 
-        public virtual IExpression? Widen(IExpression? to, IExpression? from)
+        public virtual WidenedResult Widen(IExpression to, IExpression from) =>
+            this.Widen(to, from, AndExpression_.From, this.Widen);
+
+        public virtual WidenedResult Widen(
+            IExpression to, IExpression from,
+            Func<IEnumerable<IExpression>, IExpression?> createOr,
+            Func<IExpression, IExpression, WidenedResult> widen)
         {
             switch (to, from)
             {
                 // int: int <-- int
                 // IComparable: IComparable <-- IComparable
                 // _[1]: _[1] <-- _[1]
-                case (IExpression toExpression, IExpression fromExpression) when toExpression.ExactEquals(fromExpression):
-                    return toExpression;
+                case (IExpression toExpression, IExpression fromExpression) when toExpression.ShallowEquals(fromExpression):
+                    return WidenedResult.Success(toExpression);
 
-                // (int | double): (int | double) <-- (int | double)
-                // (int | double | string): (int | double | string) <-- (int | double)
-                // (int | IComparable): (int | IComparable) <-- (int | string)
-                // null: (int | double) <-- (int | double | string)
-                // null: (int | IServiceProvider) <-- (int | double)
-                // (int | _): (int | _) <-- (int | string)
-                // (_[1] | _[2]): (_[1] | _[2]) <-- (_[2] | _[1])
-                case (IOrExpression(IExpression[] toExpressions), IOrExpression(IExpression[] fromExpressions)):
-                    var widened1 = fromExpressions.
-                        Select(rhsExpression => toExpressions.Any(lhsExpression => this.Widen(lhsExpression, rhsExpression) != null)).
-                        Memoize();
-                    return widened1.All(w => w) ?
-                        to :
-                        null;
-
-                // null: int <-- (int | double)
-                case (IExpression _, IOrExpression(IExpression[] fromExpressions) or):
-                    Debug.Assert(fromExpressions.Length >= 2);
-                    var expressions2 = fromExpressions.
-                        Select(rhsExpression => this.Widen(to, rhsExpression)).
-                        Memoize();
-                    return expressions2.All(expression => expression != null) ?
-                        or.From(expressions2!) :
-                        null;
-
-                // (int | double): (int | double) <-- int
-                // (int | IServiceProvider): (int | IServiceProvider) <-- int
-                // (int | IComparable): (int | IComparable) <-- string
-                // (int | _): (int | _) <-- string
-                // (int | _[1]): (int | _[1]) <-- _[2]
-                case (IOrExpression(IExpression[] toExpressions) or, IExpression _):
+                // (int & double): (int & double) <-- (int & double)
+                // (int & double & string): (int & double & string) <-- (int & double)
+                // (int & IComparable): (int & IComparable) <-- (int & string)
+                // null: (int & double) <-- (int & double & string)
+                // null: (int & IServiceProvider) <-- (int & double)
+                // (int & _): (int & _) <-- (int & string)
+                // (_[1] & _[2]): (_[1] & _[2]) <-- (_[2] & _[1])
+                case (IAndExpression_(IExpression[] toExpressions), IAndExpression_(IExpression[] fromExpressions)):
                     Debug.Assert(toExpressions.Length >= 2);
-                    var expressions3 = toExpressions.
-                        Select(lhsExpression => this.Widen(lhsExpression, from)).
+                    Debug.Assert(fromExpressions.Length >= 2);
+                    var widened1 = fromExpressions.
+                        Select(rhsExpression =>
+                            WidenedResult.Combine(toExpressions.Select(lhsExpression => widen(lhsExpression, rhsExpression)))).
                         Memoize();
+                    if (widened1.Any(r => r.IsUnexpected))
+                    {
+                        return WidenedResult.Unexpected;
+                    }
+                    else
+                    {
+                        return widened1.All(r => r.Expressions != null) ?
+                            WidenedResult.Success(to) :
+                            WidenedResult.Empty;
+                    }
+
+                // (int & double): (int & double) <-- int
+                // (int & IServiceProvider): (int & IServiceProvider) <-- int
+                // (int & IComparable): (int & IComparable) <-- string
+                // (int & _): (int & _) <-- string
+                // (int & _[1]): (int & _[1]) <-- _[2]
+                case (IAndExpression_(IExpression[] toExpressions), IExpression _):
+                    Debug.Assert(toExpressions.Length >= 2);
+                    var widened3 = toExpressions.
+                        Select(lhsExpression => widen(lhsExpression, from)).
+                        Memoize();
+                    if (widened3.Any(widened => widened.IsUnexpected))
+                    {
+                        return WidenedResult.Unexpected;
+                    }
                     // Requirements: 1 or any terms widened.
-                    if (expressions3.Any(expression => expression != null))
+                    else if (widened3.Any(widened => widened.Expression != null))
                     {
                         //return SumExpression.From(
                         //    terms3.Zip(toTerms, (term, lhsTerm) => term ?? lhsTerm).Distinct().Memoize(),
                         //    true);
-                        return or.From(
-                            expressions3.Where(expression => expression != null)!);
+                        return createOr(
+                            widened3.Collect(widened => widened.Expression!)) is IExpression ex1 ?
+                                WidenedResult.Success(ex1) :
+                                WidenedResult.Empty;
                     }
-                    // Couldn't widen: (int | double) <-- string
+                    // Couldn't widen: (int & double) <-- string
                     else
                     {
-                        return null;
+                        return WidenedResult.Empty;
                     }
 
+                // null: int <-- (int & double)
+                case (IExpression _, IAndExpression_(IExpression[] fromExpressions)):
+                    Debug.Assert(fromExpressions.Length >= 2);
+                    var widened2 = fromExpressions.
+                        Select(rhsExpression => widen(to, rhsExpression)).
+                        Memoize();
+                    if (widened2.Any(widened => widened.IsUnexpected))
+                    {
+                        return WidenedResult.Unexpected;
+                    }
+                    return widened2.All(widened => widened.Expression != null) ?
+                        (createOr(widened2.Select(widened => widened.Expression!)) is IExpression ex2 ?
+                            WidenedResult.Success(ex2) :
+                            WidenedResult.Empty) :
+                        WidenedResult.Empty;
+
                 default:
-                    return null;
+                    return WidenedResult.Empty;
             }
         }
 

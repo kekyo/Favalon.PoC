@@ -21,6 +21,7 @@ using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System;
+using System.Collections.Generic;
 
 namespace Favalet.Contexts
 {
@@ -32,7 +33,8 @@ namespace Favalet.Contexts
         IExpression CreateApply(IExpression function, IExpression argument);
     }
 
-    public class TypeContextFeatures : AlgebraicCalculator, ITypeContextFeatures
+    public class TypeContextFeatures :
+        AlgebraicCalculator, ITypeContextFeatures
     {
         protected TypeContextFeatures()
         { }
@@ -49,42 +51,40 @@ namespace Favalet.Contexts
         public virtual IExpression CreateApply(IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument, UnspecifiedTerm.Instance);
 
-        public override IExpression? Widen(IExpression? to, IExpression? from)
+        public override WidenedResult Widen(IExpression to, IExpression from) =>
+            this.Widen(to, from, OverloadTerm.From, this.Widen);
+
+        public override WidenedResult Widen(
+            IExpression to, IExpression from,
+            Func<IEnumerable<IExpression>, IExpression?> createOr,
+            Func<IExpression, IExpression, WidenedResult> widen)
         {
             switch (to, from)
             {
                 // int->object: int->object <-- object->int
                 case (IFunctionDeclaredExpression(IExpression toParameter, IExpression toResult),
                       IFunctionDeclaredExpression(IExpression fromParameter, IExpression fromResult)):
-                    var parameter = this.Widen(fromParameter, toParameter) is IExpression ? toParameter : null;
-                    var result = this.Widen(toResult, fromResult);
-                    return parameter is IExpression pr && result is IExpression rr ?
-                        FunctionDeclaredExpression.From(pr, rr) :
-                        null;
+                    var pw = widen(fromParameter, toParameter); // is IExpression ? toParameter : null;
+                    var rw = widen(toResult, fromResult);
+                    if (pw.IsUnexpected || rw.IsUnexpected)
+                    {
+                        return WidenedResult.Unexpected;
+                    }
+                    return pw.Expression is IExpression pr && rw.Expression is IExpression rr ?
+                        WidenedResult.Success(FunctionDeclaredExpression.From(pr, rr)) :
+                        WidenedResult.Empty;
 
                 // _[1]: _[1] <-- _[2]
                 //case (PlaceholderTerm _, PlaceholderTerm _):
                 //    return to;
 
                 // _: _ <-- int
-                // _: _ <-- (int + double)
-                case (PlaceholderTerm _, _):
-                    return to;
+                // _: _ <-- (int & double)
+                //case (PlaceholderTerm _, _):
+                //    return to;
 
                 default:
-                    if (base.Widen(to, from) is IExpression widen)
-                    {
-                        return widen;
-                    }
-                    // null: int <-- _   [TODO: maybe?]
-                    //else if (from is PlaceholderTerm placeholder)
-                    //{
-                    //    return null;
-                    //}
-                    else
-                    {
-                        return null;
-                    }
+                    return base.Widen(to, from, createOr, widen);
             }
         }
 

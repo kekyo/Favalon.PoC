@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Comparer;
 using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
@@ -27,21 +28,19 @@ using System.Runtime.CompilerServices;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface IOperatorExpression :
+    public interface IOperatorExpression_ :
         IExpression
     {
         IExpression[] Operands { get; }
-
-        IExpression From(IEnumerable<IExpression> operands);
     }
 
-    public abstract class OperatorExpression<TOperator> :
-        Expression, IOperatorExpression, IInferrableExpression, IReducibleExpression
-        where TOperator : class, IOperatorExpression
+    public abstract class OperatorExpression_<TOperator> :
+        Expression, IOperatorExpression_, IInferrableExpression, IReducibleExpression, IComparable<IExpression>
+        where TOperator : class, IOperatorExpression_
     {
         public readonly IExpression[] Operands;
 
-        protected OperatorExpression(IExpression[] expressions, IExpression higherOrder)
+        protected OperatorExpression_(IExpression[] expressions, IExpression higherOrder)
         {
             this.Operands = expressions;
             this.HigherOrder = higherOrder;
@@ -50,23 +49,25 @@ namespace Favalet.Expressions.Algebraic
         public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression[] IOperatorExpression.Operands =>
+        IExpression[] IOperatorExpression_.Operands =>
             this.Operands;
-
-        protected abstract TOperator Create(
-            IExpression[] operands,
-            IExpression higherOrder);
 
         protected static IExpression? From(
             IEnumerable<IExpression> operands,
             Func<IExpression[], TOperator> creator,
-            bool isStrict = true)
+            bool isStrict)
         {
             // It digs only first depth.
-            var ops = operands.
-                SelectMany(operand => operand is TOperator(IExpression[] operands) ?
-                    operands : new[] { operand }).
-                Memoize();
+            var ops = isStrict ?
+                operands.
+                    SelectMany(operand => operand is TOperator(IExpression[] operands) ?
+                        operands : new[] { operand }).
+                    Memoize() :
+                operands.
+                    SelectMany(operand => operand is TOperator(IExpression[] operands) ?
+                        operands : new[] { operand }).
+                    Distinct(ExactEqualityComparer.Instance).
+                    Memoize();
 
             return ops.Length switch
             {
@@ -76,22 +77,20 @@ namespace Favalet.Expressions.Algebraic
             };
         }
 
-        private IExpression From(IEnumerable<IExpression> operands) =>
-            From(operands, ops => Create(ops, UnspecifiedTerm.Instance))!;
-
-        IExpression IOperatorExpression.From(IEnumerable<IExpression> operands) =>
-            From(operands, ops => Create(ops, UnspecifiedTerm.Instance))!;
+        protected abstract IExpression? From(
+            IEnumerable<IExpression> operands, IExpression higherOrder);
 
         public IExpression Infer(IInferContext context)
         {
             var higherOrder = this.HigherOrder.InferIfRequired(context);
             var operands = this.Operands.
                 Select(operand => operand.InferIfRequired(context)).
-                Distinct(ExactEqualityComparer.Instance).
+                Distinct(LogicalEqualityComparer.Instance).
                 Memoize();
 
             var operandHigherOrders = this.From(
-                operands.Select(operand => operand.HigherOrder));
+                operands.Select(operand => operand.HigherOrder),
+                UnspecifiedTerm.Instance)!;
 
             context.Unify(higherOrder, operandHigherOrders);
 
@@ -102,7 +101,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return From(operands, ops => this.Create(ops, higherOrder))!;
+                return From(operands, higherOrder)!;
             }
         }
 
@@ -111,7 +110,7 @@ namespace Favalet.Expressions.Algebraic
             var higherOrder = this.HigherOrder.FixupIfRequired(context);
             var operands = this.Operands.
                 Select(operand => operand.FixupIfRequired(context)).
-                Distinct(ExactEqualityComparer.Instance).
+                Distinct(LogicalEqualityComparer.Instance).
                 Memoize();
 
             if (this.HigherOrder.ExactEquals(higherOrder) &&
@@ -121,7 +120,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return From(operands, ops => this.Create(ops, higherOrder))!;
+                return From(operands, higherOrder)!;
             }
         }
 
@@ -130,7 +129,7 @@ namespace Favalet.Expressions.Algebraic
             var higherOrder = this.HigherOrder.ReduceIfRequired(context);
             var operands = this.Operands.
                 Select(operand => operand.ReduceIfRequired(context)).
-                Distinct(ExactEqualityComparer.Instance).
+                Distinct(LogicalEqualityComparer.Instance).
                 Memoize();
 
             if (this.HigherOrder.ExactEquals(higherOrder) &&
@@ -140,16 +139,27 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return From(operands, ops => this.Create(ops, higherOrder))!;
+                return From(operands, higherOrder)!;
             }
         }
+
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
+            rhs is TOperator oper &&
+                this.Operands.SequenceEqual(oper.Operands, comparer);
 
         public override sealed int GetHashCode() =>
             this.Operands.Aggregate(0, (agg, e) => agg ^ e.GetHashCode());
 
-        public override sealed bool Equals(IExpression? rhs) =>
-            rhs is TOperator oper &&
-                this.Operands.SequenceEqual(oper.Operands, ShallowEqualityComparer.Instance);
+        int IComparable<IExpression>.CompareTo(IExpression rhs)
+        {
+            if (rhs is TOperator op)
+            {
+                return this.Operands.
+                    Zip(op.Operands, ExpressionComparer.Compare).
+                    FirstOrDefault(r => r != 0);
+            }
+            return this.GetHashCode().CompareTo(rhs.GetHashCode());
+        }
 
         public override sealed T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.SuppressHigherOrder, this.Operands);
@@ -160,7 +170,7 @@ namespace Favalet.Expressions.Algebraic
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static void Deconstruct(this IOperatorExpression oper, out IExpression[] operands) =>
+        public static void Deconstruct(this IOperatorExpression_ oper, out IExpression[] operands) =>
             operands = oper.Operands;
     }
 }

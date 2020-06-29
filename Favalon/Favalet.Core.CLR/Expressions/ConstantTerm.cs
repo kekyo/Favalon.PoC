@@ -20,8 +20,8 @@
 using Favalet.Contexts;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
-using Favalet.Internal;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -44,7 +44,7 @@ namespace Favalet.Expressions
         object IConstantTerm.Value =>
             this.Value;
 
-        public override bool Equals(IExpression? rhs) =>
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
             rhs is IConstantTerm constant &&
                 this.Value.Equals(constant.Value);
 
@@ -79,7 +79,7 @@ namespace Favalet.Expressions
     {
         private static readonly IExpression charTerm = TypeTerm.From(typeof(char));
         private static readonly IExpression higherOrder =
-            OrExpression.From(new[] { charTerm, TypeTerm.From(typeof(string)) })!;
+            AndExpression_.From(new[] { charTerm, TypeTerm.From(typeof(string)) })!;
 
         public readonly char Value;
 
@@ -126,7 +126,7 @@ namespace Favalet.Expressions
             }
         }
 
-        public override bool Equals(IExpression? rhs) =>
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
             rhs is IConstantTerm constant &&
                 this.Value.Equals(constant.Value);
 

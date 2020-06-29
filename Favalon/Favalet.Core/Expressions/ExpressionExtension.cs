@@ -18,7 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
-using Favalet.Expressions.Specialized;
+using Favalet.Expressions.Comparer;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -76,16 +76,25 @@ namespace Favalet.Expressions
         public static bool ShallowEquals(
             this IExpression expression,
             IExpression rhs) =>
-            ShallowEqualityComparer.Instance.Equals(expression, rhs);
+            ShallowEqualityComparer.Equals(expression, rhs);
         public static bool ShallowSequenceEqual(
             this IEnumerable<IExpression> expressions,
             IEnumerable<IExpression> rhss) =>
             expressions.SequenceEqual(rhss, ShallowEqualityComparer.Instance);
 
+        public static bool LogicalEquals(
+            this IExpression expression,
+            IExpression rhs) =>
+            LogicalEqualityComparer.Equals(expression, rhs);
+        public static bool LogicalSequenceEqual(
+            this IEnumerable<IExpression> expressions,
+            IEnumerable<IExpression> rhss) =>
+            expressions.SequenceEqual(rhss, LogicalEqualityComparer.Instance);
+
         public static bool ExactEquals(
             this IExpression expression,
             IExpression rhs) =>
-            ExactEqualityComparer.Instance.Equals(expression, rhs);
+            ExactEqualityComparer.Equals(expression, rhs);
         public static bool ExactSequenceEqual(
             this IEnumerable<IExpression> expressions,
             IEnumerable<IExpression> rhss) =>

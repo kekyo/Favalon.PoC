@@ -42,6 +42,21 @@ namespace Favalet.Expressions
 
         public static ITerm FromNumeric(string value)
         {
+            // TODO: Make numeric value expression (polymorphic)
+#if true
+            if (int.TryParse(value, out var intValue))
+            {
+                return ConstantTerm.From(intValue);
+            }
+            else if (long.TryParse(value, out var longValue))
+            {
+                return ConstantTerm.From(longValue);
+            }
+            else if (double.TryParse(value, out var doubleValue))
+            {
+                return ConstantTerm.From(doubleValue);
+            }
+#else
             if (byte.TryParse(value, out var byteValue))
             {
                 return ConstantTerm.From(byteValue);
@@ -66,6 +81,7 @@ namespace Favalet.Expressions
             {
                 return ConstantTerm.From(doubleValue);
             }
+#endif
             else
             {
                 throw new FormatException(value);

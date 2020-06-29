@@ -17,12 +17,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Favalet.Internal
 {
@@ -35,30 +36,24 @@ namespace Favalet.Internal
 
     internal static class ReflectionUtilities
     {
-        private static readonly HashSet<Type> knownClsCompilant =
+        private static readonly HashSet<Type> firstClassTypes =
             new HashSet<Type>
             {
                 typeof(bool), typeof(byte), typeof(short), typeof(int), typeof(long),
-                typeof(float), typeof(double),
+                typeof(float), typeof(double)
             };
 
-        private static readonly HashSet<Type> knownInteger =
+        private static readonly HashSet<Type> integerTypes =
             new HashSet<Type>
             {
                 typeof(byte), typeof(short), typeof(int), typeof(long),
                 typeof(sbyte), typeof(ushort), typeof(uint), typeof(ulong),
             };
 
-        private static readonly HashSet<(Type, Type)> primitiveConvertibles =
+        private static readonly HashSet<(Type, Type)> predefinedConvertibles =
+            // From, To
             new HashSet<(Type, Type)>
             {
-                (typeof(char), typeof(ushort)),
-                (typeof(char), typeof(int)),
-                (typeof(char), typeof(uint)),
-                (typeof(char), typeof(long)),
-                (typeof(char), typeof(ulong)),
-                (typeof(char), typeof(float)),
-                (typeof(char), typeof(double)),
                 (typeof(byte), typeof(char)),
                 (typeof(byte), typeof(short)),
                 (typeof(byte), typeof(ushort)),
@@ -68,37 +63,55 @@ namespace Favalet.Internal
                 (typeof(byte), typeof(ulong)),
                 (typeof(byte), typeof(float)),
                 (typeof(byte), typeof(double)),
+                (typeof(byte), typeof(char)),
+
                 (typeof(sbyte), typeof(short)),
                 (typeof(sbyte), typeof(int)),
                 (typeof(sbyte), typeof(long)),
                 (typeof(sbyte), typeof(float)),
                 (typeof(sbyte), typeof(double)),
+
                 (typeof(short), typeof(int)),
                 (typeof(short), typeof(long)),
                 (typeof(short), typeof(float)),
                 (typeof(short), typeof(double)),
+
                 (typeof(ushort), typeof(int)),
                 (typeof(ushort), typeof(uint)),
                 (typeof(ushort), typeof(long)),
                 (typeof(ushort), typeof(ulong)),
                 (typeof(ushort), typeof(float)),
                 (typeof(ushort), typeof(double)),
+                (typeof(ushort), typeof(char)),
+
                 (typeof(int), typeof(long)),
                 (typeof(int), typeof(float)),
                 (typeof(int), typeof(double)),
+
                 (typeof(uint), typeof(long)),
                 (typeof(uint), typeof(ulong)),
                 (typeof(uint), typeof(float)),
                 (typeof(uint), typeof(double)),
+
                 (typeof(long), typeof(float)),
                 (typeof(long), typeof(double)),
+
                 (typeof(ulong), typeof(float)),
                 (typeof(ulong), typeof(double)),
+
                 (typeof(float), typeof(double)),
+
+                (typeof(char), typeof(ushort)),
+                (typeof(char), typeof(int)),
+                (typeof(char), typeof(uint)),
+                (typeof(char), typeof(long)),
+                (typeof(char), typeof(ulong)),
+                (typeof(char), typeof(float)),
+                (typeof(char), typeof(double)),
             };
 
-        private static readonly Dictionary<Type, int> sizeOf =
-            new Dictionary<Type, int>
+        private static readonly Dictionary<Type, int?> sizeOf =
+            new Dictionary<Type, int?>
             {
                 { typeof(bool), 1 },
                 { typeof(byte), 1 },
@@ -147,25 +160,73 @@ namespace Favalet.Internal
             { "op_DivisionAssignment", "/=" },
         };
 
+        private static readonly Dictionary<(Type, Type), int> typeCompared =
+            new Dictionary<(Type, Type), int>();
+
+        private static readonly Dictionary<(MethodBase, MethodBase), int> methodCompared =
+            new Dictionary<(MethodBase, MethodBase), int>();
+
+        private static readonly Dictionary<Type, (Type, Type[])> delegateSignatures =
+            new Dictionary<Type, (Type, Type[])>();
+
         public static readonly Type[] EmptyTypes =
-#if NET35 || NETSTANDARD1_0
+#if NET35 || NETSTANDARD1_1
             new Type[0];
 #else
             Type.EmptyTypes;
 #endif
 
-        public static int SizeOf(this Type type) =>
-            sizeOf[type];
+        private static TValue GetOrAdd<TKey, TValue>(
+            this Dictionary<TKey, TValue> dictionary,
+            TKey key,
+            Func<TKey, TValue> generator)
+        {
+            Monitor.Enter(dictionary);
+            if (!dictionary.TryGetValue(key, out var value))
+            {
+                Monitor.Exit(dictionary);
+                value = generator(key);
+                lock (dictionary)
+                {
+                    dictionary[key] = value;
+                }
+            }
+            else
+            {
+                Monitor.Exit(dictionary);
+            }
 
-        public static bool IsClsCompliant(this Type type) =>
-            knownClsCompilant.Contains(type);
+            return value;
+        }
+
+        public static int? SizeOf(this Type type) =>
+            sizeOf.GetOrAdd(type, t =>
+            {
+                if (t.IsValueType())
+                {
+                    try
+                    {
+                        return Marshal.SizeOf(t);
+                    }
+                    catch (ArgumentException)
+                    {
+                    }
+                }
+                return null;
+            });
+
+        public static bool IsFirstClass(this Type type) =>
+            firstClassTypes.Contains(type);
 
         public static bool IsInteger(this Type type) =>
-            knownInteger.Contains(type);
+            integerTypes.Contains(type);
 
-        public static bool IsTypeConstructor(Type type) =>
+        public static bool IsTypeConstructor(this Type type) =>
             type.IsGenericTypeDefinition() && (type.GetGenericArguments().Length == 1);
 
+        public static bool TryGetOperatorSymbol(this MethodInfo method, out string symbol) =>
+            operatorSymbols.TryGetValue(method.Name, out symbol) && method.IsStatic && method.IsSpecialName;
+        
         public static string GetName(this MemberInfo member, NameOptions option = NameOptions.WithGenericParameters)
         {
             var type = member.AsType();
@@ -182,10 +243,13 @@ namespace Favalet.Internal
 
             if (member is MethodInfo method1 && method1.IsSpecialName)
             {
-                if (option == NameOptions.Symbols &&
-                    operatorSymbols.TryGetValue(name, out var symbol))
+                if (method1.IsStatic &&
+                    option == NameOptions.Symbols)
                 {
-                    name = symbol;
+                    if (operatorSymbols.TryGetValue(name, out var symbol))
+                    {
+                        name = symbol;
+                    }
                 }
                 else if (method1.DeclaringType is Type type2 &&
                     type2.GetDeclaredProperties().FirstOrDefault(p =>
@@ -273,14 +337,14 @@ namespace Favalet.Internal
 
         public static bool IsConvertibleFrom(this Type type, Type from)
         {
-            if (type.Equals(from))
+            if (object.ReferenceEquals(type, from) || type.Equals(from))
             {
                 return true;
             }
 
             if (type.IsPrimitive() && from.IsPrimitive())
             {
-                return primitiveConvertibles.Contains((from, type));
+                return predefinedConvertibles.Contains((from, type));
             }
             else
             {
@@ -288,16 +352,239 @@ namespace Favalet.Internal
             }
         }
 
-        public static (Type, Type[]) GetDelegateSignature(Type delegateType)
-        {
-            Debug.Assert(typeof(Delegate).IsConvertibleFrom(delegateType));
+        public static (Type, Type[]) GetDelegateSignature(Type delegateType) =>
+            delegateSignatures.GetOrAdd(delegateType, t =>
+            {
+                Debug.Assert(typeof(Delegate).IsConvertibleFrom(t));
 
-            var invoke = delegateType.GetDeclaredMethod("Invoke");
+                var invoke = t.GetDeclaredMethod("Invoke");
 
-            var parameters = invoke.GetParameters();
-            return parameters.Length >= 1 ?
-                (invoke.ReturnType, parameters.Select(parameter => parameter.ParameterType).Memoize()) :
-                (invoke.ReturnType, EmptyTypes);
-        }
+                var parameters = invoke.GetParameters();
+                return parameters.Length >= 1 ?
+                    (invoke.ReturnType, parameters.Select(parameter => parameter.ParameterType).Memoize()) :
+                    (invoke.ReturnType, EmptyTypes);
+            });
+
+        public static int Compare(Type tx, Type ty) =>
+            typeCompared.GetOrAdd((tx, ty), e =>
+            {
+                var (tx, ty) = e;
+
+                if (object.ReferenceEquals(tx, ty) || tx.Equals(ty))
+                {
+                    return 0;
+                }
+
+                if (tx.DeclaringType is Type txt &&
+                    ty.DeclaringType is Type tyt &&
+                    Compare(txt, tyt) is int r && r != 0)
+                {
+                    return r;
+                }
+
+                var txfc = tx.IsFirstClass();
+                var tyfc = ty.IsFirstClass();
+                if (txfc && !tyfc)
+                {
+                    return -1;
+                }
+                if (!txfc && tyfc)
+                {
+                    return 1;
+                }
+
+                var txi = tx.IsInteger();
+                var tyi = ty.IsInteger();
+                if (txi && !tyi)
+                {
+                    return -1;
+                }
+                if (!txi && tyi)
+                {
+                    return 1;
+                }
+                if (txi && tyi)
+                {
+                    var txs = tx.SizeOf()!.Value;
+                    var tys = ty.SizeOf()!.Value;
+                    if (txs < tys)
+                    {
+                        return -1;
+                    }
+                    if (txs > tys)
+                    {
+                        return 1;
+                    }
+                }
+
+                var txp = tx.IsPrimitive();
+                var typ = ty.IsPrimitive();
+                if (txp && !typ)
+                {
+                    return -1;
+                }
+                if (!txp && typ)
+                {
+                    return 1;
+                }
+
+                var txv = tx.IsValueType();
+                var tyv = ty.IsValueType();
+                if (txv && !tyv)
+                {
+                    return -1;
+                }
+                if (!txv && tyv)
+                {
+                    return 1;
+                }
+                if (txv && tyv)
+                {
+                    if (tx.SizeOf() is int txs && ty.SizeOf() is int tys)
+                    {
+                        if (txs < tys)
+                        {
+                            return -1;
+                        }
+                        if (txs > tys)
+                        {
+                            return 1;
+                        }
+                    }
+                }
+
+                var txg = tx.IsGenericType();
+                var tyg = ty.IsGenericType();
+                if (!txg && tyg)
+                {
+                    return -1;
+                }
+                if (txg && !tyg)
+                {
+                    return 1;
+                }
+                if (txg && tyg)
+                {
+                    if (!tx.IsGenericParameter && ty.IsGenericParameter)
+                    {
+                        return -1;
+                    }
+                    if (tx.IsGenericParameter && !ty.IsGenericParameter)
+                    {
+                        return 1;
+                    }
+
+                    if (!tx.IsGenericParameter && !ty.IsGenericParameter)
+                    {
+                        var txgps = tx.GetGenericArguments();
+                        var tygps = ty.GetGenericArguments();
+                        if (txgps.Length < tygps.Length)
+                        {
+                            return -1;
+                        }
+                        if (txgps.Length > tygps.Length)
+                        {
+                            return 1;
+                        }
+
+                        if (txgps.
+                            Zip(tygps, (x, y) => Compare(x, y)).
+                            FirstOrDefault(r => r != 0) is int r2 && r2 != 0)
+                        {
+                            return r2;
+                        }
+                    }
+                }
+
+                // TODO: array
+
+                if (ty.IsAssignableFrom(tx))
+                {
+                    return -1;
+                }
+                if (tx.IsAssignableFrom(ty))
+                {
+                    return 1;
+                }
+
+                // Not compatible types.
+                return tx.GetFullName().CompareTo(ty.GetFullName());
+            });
+
+        public static int Compare(MethodBase mx, MethodBase my) =>
+            methodCompared.GetOrAdd((mx, my), e =>
+            {
+                var (mx, my) = e;
+
+                if (object.ReferenceEquals(mx, my) || mx.Equals(my))
+                {
+                    return 0;
+                }
+
+                if (mx.DeclaringType is Type mxt &&
+                    my.DeclaringType is Type myt &&
+                    Compare(mxt, myt) is int r && r != 0)
+                {
+                    return r;
+                }
+
+                if (!mx.IsGenericMethod && my.IsGenericMethod)
+                {
+                    return -1;
+                }
+                if (mx.IsGenericMethod && !my.IsGenericMethod)
+                {
+                    return 1;
+                }
+                if (mx.IsGenericMethod && my.IsGenericMethod)
+                {
+                    var txgps = mx.GetGenericArguments();
+                    var tygps = my.GetGenericArguments();
+                    if (txgps.Length < tygps.Length)
+                    {
+                        return -1;
+                    }
+                    if (txgps.Length > tygps.Length)
+                    {
+                        return 1;
+                    }
+
+                    if (txgps.
+                        Zip(tygps, (x, y) => Compare(x, y)).
+                        FirstOrDefault(r => r != 0) is int r4 && r4 != 0)
+                    {
+                        return r4;
+                    }
+                }
+
+                var mxps = mx.GetParameters().Select(p => p.ParameterType).Memoize();
+                var myps = my.GetParameters().Select(p => p.ParameterType).Memoize();
+
+                if (mxps.Length < myps.Length)
+                {
+                    return -1;
+                }
+                if (mxps.Length > myps.Length)
+                {
+                    return 1;
+                }
+
+                if (mxps.
+                    Zip(myps, (x, y) => Compare(x, y)).
+                    FirstOrDefault(r => r != 0) is int r2 && r2 != 0)
+                {
+                    return r2;
+                }
+
+                var mxrt = mx is MethodInfo mxi ? mxi.ReturnType : mx.DeclaringType;
+                var myrt = my is MethodInfo myi ? myi.ReturnType : my.DeclaringType;
+                if (Compare(mxrt, myrt) is int r3 && r3 != 0)
+                {
+                    return r3;
+                }
+
+                // Not compatible methods.
+                return mx.GetFullName().CompareTo(my.GetFullName());
+            });
     }
 }

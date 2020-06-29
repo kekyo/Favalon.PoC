@@ -21,14 +21,14 @@ using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
 namespace Favalet.Expressions
 {
     public abstract class MethodTerm :
-        Expression, ITerm, ICallableExpression
+        Expression, ITerm, ICallableExpression, IComparable<IExpression>
     {
         public readonly MethodBase Method;
 
@@ -56,12 +56,20 @@ namespace Favalet.Expressions
             }
         }
 
-        public override sealed bool Equals(IExpression? rhs) =>
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
             rhs is MethodTerm method &&
                 this.Method.Equals(method.Method);
 
         public override int GetHashCode() =>
             this.Method.GetHashCode();
+
+        int IComparable<IExpression>.CompareTo(IExpression rhs) =>
+            rhs is MethodTerm rm ?
+                ReflectionUtilities.Compare(this.Method, rm.Method) :
+                this.GetHashCode().CompareTo(rhs.GetHashCode());
+
+        public void Deconstruct(out MethodBase method) =>
+            method = this.Method;
 
         public static ConstructorTerm From(Type type, params Type[] parameters) =>
             ConstructorTerm.From(type.GetDeclaredConstructor(parameters));
@@ -124,6 +132,9 @@ namespace Favalet.Expressions
                 FormatOptions.SuppressHigherOrder,
                 $"{this.Method.GetFullName()}({this.Method.GetParameters()[0].ParameterType.GetFullName()})");
 
+        public void Deconstruct(out ConstructorInfo constructor) =>
+            constructor = (ConstructorInfo)this.Method;
+
         internal static ConstructorTerm From(ConstructorInfo constructor) =>
             // TODO: multiple arguments
             // TODO: nothing arguments
@@ -145,7 +156,6 @@ namespace Favalet.Expressions
         public IExpression Infer(IInferContext context)
         {
             var higherOrder = this.HigherOrder.InferIfRequired(context);
-
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
@@ -159,7 +169,6 @@ namespace Favalet.Expressions
         public IExpression Fixup(IFixupContext context)
         {
             var higherOrder = this.HigherOrder.FixupIfRequired(context);
-
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
@@ -175,6 +184,9 @@ namespace Favalet.Expressions
                 this,
                 FormatOptions.Standard,
                 $"{this.Method.GetFullName()}({this.Method.GetParameters()[0].ParameterType.GetFullName()}):{((MethodInfo)this.Method).ReturnType.GetFullName()}");
+
+        public void Deconstruct(out MethodInfo method) =>
+            method = (MethodInfo)this.Method;
 
         internal static ConcreteMethodTerm From(MethodInfo method) =>
             // TODO: multiple arguments

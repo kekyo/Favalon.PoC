@@ -18,6 +18,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Expressions;
+using Favalet.Expressions.Comparer;
+using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,8 +37,6 @@ namespace Favalet.Contexts
     {
         ITypeContextFeatures Features { get; }
 
-        bool IsInferring { get; }
-
         int DrawNextPlaceholderIndex();
     }
 
@@ -44,7 +44,6 @@ namespace Favalet.Contexts
         TypeContext, ITypeEnvironment, IRootTypeContext
     {
         private int placeholderIndex;
-        private bool isInferring;
 
         public readonly ITypeContextFeatures Features;
         public readonly int MaxIterationCount;
@@ -60,9 +59,6 @@ namespace Favalet.Contexts
         ITypeContextFeatures IRootTypeContext.Features =>
             this.Features;
 
-        bool IRootTypeContext.IsInferring =>
-            this.isInferring;
-
         int IRootTypeContext.DrawNextPlaceholderIndex() =>
             placeholderIndex++;
 
@@ -70,47 +66,43 @@ namespace Favalet.Contexts
         {
             Debug.WriteLine($"Infer [0]: {expression}");
 
-            this.isInferring = true;
-
-            try
+            if (expression is IInferrableExpression inferrable)
             {
-                if (expression is IInferrableExpression inferrable)
+                var context = InferContext.Create(this);
+
+                var current = inferrable.Infer(context);
+
+                for (var index = 1; index < this.MaxIterationCount; index++)
                 {
-                    var context = InferContext.Create(this);
-
-                    var inferred = inferrable.Infer(context);
-                    var fixupped = inferred.FixupIfRequired(context);
-                    var current = fixupped;
-
-                    for (var index = 1; index < this.MaxIterationCount; index++)
+                    var inferred = current.InferIfRequired(context);
+                    if (ExactEqualityComparer.Equals(current, inferred))
                     {
-                        inferred = current.InferIfRequired(context);
-                        fixupped = inferred.FixupIfRequired(context);
-
-                        if (current.ExactEquals(fixupped))
+                        var fixupped = inferred.FixupIfRequired(context);
+                        if (ExactEqualityComparer.Equals(inferred, fixupped))
                         {
                             Debug.WriteLine($"Infer [F]: {fixupped}");
                             return fixupped;
                         }
                         else
                         {
-                            Debug.WriteLine($"Infer [{index}]: {fixupped}");
+                            Debug.WriteLine($"Infer [2:{index}]: {fixupped}");
                             current = fixupped;
                         }
                     }
+                    else
+                    {
+                        Debug.WriteLine($"Infer [1:{index}]: {inferred}");
+                        current = inferred;
+                    }
+                }
 
-                    // Cannot finish inferring.
-                    throw new InvalidOperationException(
-                        $"Cannot finish inferring: {expression}");
-                }
-                else
-                {
-                    return expression;
-                }
+                // Cannot finish inferring.
+                throw new InvalidOperationException(
+                    $"Cannot finish inferring: {expression}");
             }
-            finally
+            else
             {
-                this.isInferring = false;
+                return expression;
             }
         }
 
@@ -143,7 +135,7 @@ namespace Favalet.Contexts
                 {
                     var reduced = current.ReduceIfRequired(context);
 
-                    if (current.ExactEquals(reduced))
+                    if (ExactEqualityComparer.Equals(current, reduced))
                     {
                         Debug.WriteLine($"Reduce [F]: {reduced}");
                         return reduced;

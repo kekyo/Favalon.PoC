@@ -18,7 +18,10 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using Favalet.Expressions.Comparer;
 using Favalet.Expressions.Specialized;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -47,7 +50,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class FunctionDeclaredExpression :
-        Expression, IFunctionDeclaredExpression
+        Expression, IFunctionDeclaredExpression, IComparable<IExpression>
     {
         public readonly IExpression Parameter;
         public readonly IExpression Result;
@@ -128,13 +131,30 @@ namespace Favalet.Expressions
             }
         }
 
-        public override bool Equals(IExpression? rhs) =>
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
             rhs is IFunctionDeclaredExpression functionDeclaration &&
-            this.Parameter.Equals(functionDeclaration.Parameter) &&
-            this.Result.Equals(functionDeclaration.Result);
+            comparer.Equals(this.Parameter, functionDeclaration.Parameter) &&
+            comparer.Equals(this.Result, functionDeclaration.Result);
 
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^ this.Result.GetHashCode();
+
+        int IComparable<IExpression>.CompareTo(IExpression rhs)
+        {
+            if (rhs is IFunctionDeclaredExpression fde)
+            {
+                if (ExpressionComparer.Compare(this.Parameter, fde.Parameter) is int rp && rp != 0)
+                {
+                    return rp;
+                }
+                if (ExpressionComparer.Compare(this.Result, fde.Result) is int rr && rr != 0)
+                {
+                    return rr;
+                }
+                return 0;
+            }
+            return this.GetHashCode().CompareTo(rhs.GetHashCode());
+        }
 
         public override T Format<T>(IFormatContext<T> context) =>
             context.Format(this, FormatOptions.Standard, this.Parameter, this.Result);

@@ -20,33 +20,31 @@
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Comparer
 {
-    public sealed class ExactEqualityComparer : IEqualityComparer<IExpression>
+    public sealed class LogicalEqualityComparer : IEqualityComparer<IExpression>
     {
-        private ExactEqualityComparer()
+        private LogicalEqualityComparer()
         { }
 
-        public bool Equals(IExpression x, IExpression y)
-        {
-            if (object.ReferenceEquals(x, y))
+        public static bool Equals(IExpression x, IExpression y) =>
+            (x, y) switch
             {
-                return true;
-            }
-
-            return (x, y) switch
-            {
-                (TerminationTerm _, TerminationTerm _) => true,
                 (_, TerminationTerm _) => false,
                 (TerminationTerm _, _) => false,
-                _ => x.Equals(y) && this.Equals(x.HigherOrder, y.HigherOrder),
+                (_, UnspecifiedTerm _) => false,
+                (UnspecifiedTerm _, _) => false,
+                _ => object.ReferenceEquals(x, y) ||
+                    (x.Equals(y, Instance) && Equals(x.HigherOrder, y.HigherOrder)),
             };
-        }
+ 
+        bool IEqualityComparer<IExpression>.Equals(IExpression x, IExpression y) =>
+            Equals(x, y);
 
         public int GetHashCode(IExpression? obj) =>
             obj!.GetHashCode();
 
-        public static readonly ExactEqualityComparer Instance =
-            new ExactEqualityComparer();
+        public static readonly IEqualityComparer<IExpression> Instance =
+            new LogicalEqualityComparer();
     }
 }

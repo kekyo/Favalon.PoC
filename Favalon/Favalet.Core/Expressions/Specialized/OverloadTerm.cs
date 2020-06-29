@@ -19,20 +19,33 @@
 
 using Favalet.Contexts;
 using Favalet.Expressions.Algebraic;
+using Favalet.Expressions.Comparer;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Favalet.Expressions.Specialized
 {
     public sealed class OverloadTerm :
-        OperatorExpression<IOrExpression>, IOrExpression
+        OperatorExpression_<IOrExpression_>, IOrExpression_
     {
         private OverloadTerm(IExpression[] operands, IExpression higherOrder) : 
             base(operands, higherOrder)
-        { }
+        {
+#if DEBUG
+            var r = operands.OrderBy(oper => oper, ExpressionComparer.Instance).Memoize();
+            var r2 = r.OrderBy(oper => oper, ExpressionComparer.Instance).Memoize();
+            Debug.Assert(operands.SequenceEqual(r, ExactEqualityComparer.Instance));
+            Debug.Assert(operands.SequenceEqual(r2, ExactEqualityComparer.Instance));
+#endif
+        }
 
-        protected override IOrExpression Create(IExpression[] operands, IExpression higherOrder) =>
-            new OverloadTerm(operands, higherOrder);
+        protected override IExpression? From(
+            IEnumerable<IExpression> operands,
+            IExpression higherOrder) =>
+            InternalFrom(
+                operands.OrderBy(oper => oper, ExpressionComparer.Instance).Memoize(),
+                higherOrder);
 
         public override IExpression Fixup(IFixupContext context)
         {
@@ -42,34 +55,51 @@ namespace Favalet.Expressions.Specialized
                 Distinct(ExactEqualityComparer.Instance).
                 Memoize();
 
-            var valids = overloads.
-                Select(overload => (overload, higherOrder: context.Widen(higherOrder, overload.HigherOrder)!)).
-                Where(entry => entry.higherOrder != null).
-                Distinct().
+            var widened = overloads.
+                Select(overload => (overload, widened: context.Widen(higherOrder, overload.HigherOrder))).
                 Memoize();
 
-            if (valids.Length == 0)
+            if (widened.Any(entry => entry.widened.IsUnexpected))
             {
-                if (this.HigherOrder.ExactEquals(higherOrder))
+                if (this.HigherOrder.ExactEquals(higherOrder) &&
+                    this.Operands.ExactSequenceEqual(overloads))
                 {
                     return this;
                 }
                 else
                 {
-                    return From(this.Operands, ops => new OverloadTerm(ops, higherOrder), false)!;
+                    return InternalFrom(overloads, higherOrder)!;
                 }
             }
 
-            var validOverloads = valids.
-                Select(entry => entry.overload).
-                OrderBy(overload => overload.GetHashCode()).   // make stable
+            var valid = widened.
+                Where(entry => entry.widened.Expression != null).
+                Select(entry => (entry.overload, expression: entry.widened.Expression!)).
+                Distinct().
                 Memoize();
-            var validHigherOrders = valids.
-                Select(entry => entry.higherOrder).
-                OrderBy(overload => overload.GetHashCode()).   // make stable
+            if (valid.Length == 0)
+            {
+                if (this.HigherOrder.ExactEquals(higherOrder) &&
+                    this.Operands.ExactSequenceEqual(overloads))
+                {
+                    return this;
+                }
+                else
+                {
+                    return InternalFrom(overloads, higherOrder)!;
+                }
+            }
+
+            var validOverloads = valid.
+                Select(entry => entry.overload).
+                OrderBy(overload => overload, ExpressionComparer.Instance).   // make stable
+                Memoize();
+            var validHigherOrders = valid.
+                Select(entry => entry.expression.HigherOrder).
+                OrderBy(higherOrder => higherOrder, ExpressionComparer.Instance).   // make stable
                 Memoize();
 
-            var validHigherOrder = From(validHigherOrders)!;
+            var validHigherOrder = InternalFrom(validHigherOrders, UnspecifiedTerm.Instance)!;
 
             if (this.HigherOrder.ExactEquals(validHigherOrder) &&
                 this.Operands.ExactSequenceEqual(validOverloads))
@@ -78,11 +108,17 @@ namespace Favalet.Expressions.Specialized
             }
             else
             {
-                return From(validOverloads, ops => new OverloadTerm(ops, validHigherOrder), false)!;
+                return InternalFrom(validOverloads, validHigherOrder)!;
             }
         }
 
+        private static IExpression? InternalFrom(IEnumerable<IExpression> operands, IExpression higherOrder) =>
+            From(
+                operands,
+                ops => new OverloadTerm(ops.OrderBy(oper => oper, ExpressionComparer.Instance).Memoize(), higherOrder),
+                false);
+
         internal static IExpression? From(IEnumerable<IExpression> operands) =>
-            From(operands, ops => new OverloadTerm(ops, UnspecifiedTerm.Instance), false);
+            InternalFrom(operands, UnspecifiedTerm.Instance);
     }
 }

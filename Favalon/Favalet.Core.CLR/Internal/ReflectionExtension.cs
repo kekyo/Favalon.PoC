@@ -27,7 +27,7 @@ namespace System.Reflection
 {
     internal static class ReflectionExtension
     {
-#if NETSTANDARD1_0
+#if NETSTANDARD1_1
         public static bool IsPublic(this Type type) =>
             type.GetTypeInfo().IsPublic;
 

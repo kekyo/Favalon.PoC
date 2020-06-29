@@ -17,10 +17,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-namespace Favalet.Expressions.Specialized
-{
-    public interface ITypeTerm : ITerm
-    {
-        bool IsConvertibleFrom(ITypeTerm from);
-    }
-}
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Favalet.Core.Tests")]

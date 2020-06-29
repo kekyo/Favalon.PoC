@@ -17,31 +17,29 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
-namespace Favalet.Expressions.Specialized
+namespace Favalet.Expressions.Algebraic
 {
-    internal sealed class TerminationTerm :
-        Expression
+    public interface IOrExpression_ :
+        IOperatorExpression_
     {
-        private TerminationTerm()
+    }
+
+    public sealed class OrExpression_ :
+        OperatorExpression_<IOrExpression_>, IOrExpression_
+    {
+        private OrExpression_(IExpression[] operands, IExpression higherOrder) :
+            base(operands, higherOrder)
         { }
 
-        public override IExpression HigherOrder =>
-            this;
+        protected override IExpression? From(
+            IEnumerable<IExpression> operands,
+            IExpression higherOrder) =>
+            From(operands, ops => new OrExpression_(ops, higherOrder), true);
 
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
-            false;
-
-        public override T Format<T>(IFormatContext<T> context) =>
-            context.Format(this, FormatOptions.ForceText | FormatOptions.SuppressHigherOrder, "!!TERM");
-
-        public static readonly IExpression Instance =
-            new TerminationTerm();
+        public static IExpression? From(IEnumerable<IExpression> operands) =>
+            From(operands, ops => new OrExpression_(ops, UnspecifiedTerm.Instance), true);
     }
 }

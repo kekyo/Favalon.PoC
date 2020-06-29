@@ -19,34 +19,34 @@
 
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
+using System.Diagnostics;
 
-namespace Favalet.Expressions
+namespace Favalet.Expressions.Comparer
 {
-    public sealed class ShallowEqualityComparer : IEqualityComparer<IExpression>
+    public sealed class ExactEqualityComparer : IEqualityComparer<IExpression>
     {
-        private ShallowEqualityComparer()
+        private ExactEqualityComparer()
         { }
 
-        public bool Equals(IExpression x, IExpression y)
+        public static bool Equals(IExpression x, IExpression y)
         {
-            if (object.ReferenceEquals(x, y))
+            var r =
+                object.ReferenceEquals(x, y) ||
+                (x.Equals(y, Instance) && Equals(x.HigherOrder, y.HigherOrder));
+            if (!r)
             {
-                return true;
+                Debug.WriteLine("false");
             }
-
-            return (x, y) switch
-            {
-                (TerminationTerm _, TerminationTerm _) => true,
-                (_, TerminationTerm _) => false,
-                (TerminationTerm _, _) => false,
-                _ => x.Equals(y),
-            };
+            return r;
         }
+
+        bool IEqualityComparer<IExpression>.Equals(IExpression x, IExpression y) =>
+            Equals(x, y);
 
         public int GetHashCode(IExpression? obj) =>
             obj!.GetHashCode();
 
-        public static readonly ShallowEqualityComparer Instance =
-            new ShallowEqualityComparer();
+        public static readonly IEqualityComparer<IExpression> Instance =
+            new ExactEqualityComparer();
     }
 }

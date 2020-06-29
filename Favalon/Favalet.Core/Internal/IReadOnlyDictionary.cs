@@ -17,31 +17,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-using Favalet.Contexts;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-
-namespace Favalet.Expressions.Specialized
+namespace System.Collections.Generic
 {
-    internal sealed class TerminationTerm :
-        Expression
+#if NET35 || NET40
+    internal interface IReadOnlyCollection<T> : IEnumerable<T>
     {
-        private TerminationTerm()
-        { }
-
-        public override IExpression HigherOrder =>
-            this;
-
-#if !NET35 && !NET40
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
-            false;
-
-        public override T Format<T>(IFormatContext<T> context) =>
-            context.Format(this, FormatOptions.ForceText | FormatOptions.SuppressHigherOrder, "!!TERM");
-
-        public static readonly IExpression Instance =
-            new TerminationTerm();
+        int Count { get; }
     }
+
+    internal interface IReadOnlyDictionary<TKey, TValue> : IReadOnlyCollection<KeyValuePair<TKey, TValue>>
+    {
+        TValue this[TKey key] { get; }
+        IEnumerable<TValue> Values { get; }
+        bool ContainsKey(TKey key);
+        bool TryGetValue(TKey key, out TValue value);
+    }
+#endif
 }

@@ -52,9 +52,9 @@ namespace Favalet.Parsers
                 index++;
 #endif
                 runner = runner.Run(context, token);
-
+#if DEBUG
                 Debug.WriteLine($"Parse [{index - 1}]: Token={token}, Expression={context.Expression}");
-
+#endif
                 context.SetLastToken(token);
             }
 

@@ -18,6 +18,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 using Favalet.Contexts;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -30,7 +32,7 @@ namespace Favalet.Expressions.Specialized
     }
 
     public sealed class PlaceholderTerm :
-        Expression, IPlaceholderTerm, IInferrableExpression, IReducibleExpression
+        Expression, IPlaceholderTerm, IInferrableExpression, IReducibleExpression, IComparable<IExpression>
     {
         public readonly int Index;
 
@@ -49,7 +51,6 @@ namespace Favalet.Expressions.Specialized
         public IExpression Infer(IInferContext context)
         {
             var higherOrder = this.HigherOrder.InferIfRequired(context);
-
             if (this.HigherOrder.ExactEquals(higherOrder))
             {
                 return this;
@@ -94,7 +95,7 @@ namespace Favalet.Expressions.Specialized
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public override bool Equals(IExpression? rhs) =>
+        public override bool Equals(IExpression? rhs, IEqualityComparer<IExpression> comparer) =>
             rhs is IPlaceholderTerm placeholder &&
             this.Index.Equals(placeholder.Index);
 
@@ -103,6 +104,11 @@ namespace Favalet.Expressions.Specialized
 #endif
         public override int GetHashCode() =>
             this.Index.GetHashCode();
+
+        int IComparable<IExpression>.CompareTo(IExpression rhs) =>
+            rhs is IPlaceholderTerm pt ?
+                this.Index.CompareTo(pt.Index) :
+                this.GetHashCode().CompareTo(rhs.GetHashCode());
 
         public override T Format<T>(IFormatContext<T> context) =>
 //            context.Format(this, FormatOptions.ForceText, $"'{context.GetPlaceholderIndexString(this.Index)}");

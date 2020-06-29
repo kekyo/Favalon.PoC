@@ -13,8 +13,8 @@ namespace Favalet
         public static IdentityTerm Identity(string symbol) =>
             IdentityTerm.Create(symbol);
 
-        public static EquivalenceExpression Equivalence(IOperandExpression operand) =>
-            EquivalenceExpression.Create(operand);
+        public static EquivalenceOperator Equivalence(IOperandExpression operand) =>
+            EquivalenceOperator.Create(operand);
 
         public static AndExpression And(params IExpression[] operands) =>
             AndExpression.Create(operands);

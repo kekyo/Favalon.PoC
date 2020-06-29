@@ -7,30 +7,30 @@ using System.Threading.Tasks;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface IEquivalenceExpression : IExpression
+    public interface IEquivalenceOperator : IExpression
     {
         IOperandExpression Operand { get; }
     }
 
-    public sealed class EquivalenceExpression :
-        IEquivalenceExpression
+    public sealed class EquivalenceOperator :
+        IEquivalenceOperator
     {
         private readonly IOperandExpression Operand;
 
-        private EquivalenceExpression(IOperandExpression expression) =>
+        private EquivalenceOperator(IOperandExpression expression) =>
             this.Operand = expression;
 
-        IOperandExpression IEquivalenceExpression.Operand =>
+        IOperandExpression IEquivalenceOperator.Operand =>
             this.Operand;
 
         public override int GetHashCode() =>
             this.Operand.GetHashCode();
 
-        public bool Equals(IEquivalenceExpression rhs) =>
+        public bool Equals(IEquivalenceOperator rhs) =>
             this.Operand.Equals(rhs.Operand);
 
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
-            other is IEquivalenceExpression rhs && Equals(rhs);
+            other is IEquivalenceOperator rhs && Equals(rhs);
 
         private static IExpression Reduce(IReduceContext context, IOperandExpression operand)
         {
@@ -54,7 +54,7 @@ namespace Favalet.Expressions.Algebraic
         public IExpression Reduce(IReduceContext context) =>
             Reduce(context, this.Operand);
 
-        public static EquivalenceExpression Create(IOperandExpression operand) =>
-            new EquivalenceExpression(operand);
+        public static EquivalenceOperator Create(IOperandExpression operand) =>
+            new EquivalenceOperator(operand);
     }
 }

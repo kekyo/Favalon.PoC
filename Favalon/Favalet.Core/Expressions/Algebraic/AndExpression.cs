@@ -6,19 +6,24 @@ using System.Threading.Tasks;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface IAndExpression : IOperandExpression
+    public interface IAndExpression : IBinaryExpression
     {
     }
 
     public sealed class AndExpression :
-        OperandExpression<IAndExpression>,
+        BinaryExpression<IAndExpression>,
         IAndExpression
     {
-        private AndExpression(IExpression[] operands) :
-            base(operands)
+        private AndExpression(IExpression left, IExpression right) :
+            base(left, right)
         { }
 
-        public static AndExpression Create(IExpression[] operands) =>
-            new AndExpression(operands);
+        public override IExpression Reduce(IReduceContext context) =>
+            new AndExpression(
+                this.Left.Reduce(context),
+                this.Right.Reduce(context));
+
+        public static AndExpression Create(IExpression left, IExpression right) =>
+            new AndExpression(left, right);
     }
 }

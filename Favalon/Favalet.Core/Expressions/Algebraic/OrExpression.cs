@@ -6,19 +6,24 @@ using System.Threading.Tasks;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface IOrExpression : IOperandExpression
+    public interface IOrExpression : IBinaryExpression
     {
     }
 
     public sealed class OrExpression :
-        OperandExpression<IOrExpression>,
+        BinaryExpression<IOrExpression>,
         IOrExpression
     {
-        private OrExpression(IExpression[] operands) :
-            base(operands)
+        private OrExpression(IExpression left, IExpression right) :
+            base(left, right)
         { }
 
-        public static OrExpression Create(IExpression[] operands) =>
-            new OrExpression(operands);
+        public override IExpression Reduce(IReduceContext context) =>
+            new OrExpression(
+                this.Left.Reduce(context),
+                this.Right.Reduce(context));
+
+        public static OrExpression Create(IExpression left, IExpression right) =>
+            new OrExpression(left, right);
     }
 }

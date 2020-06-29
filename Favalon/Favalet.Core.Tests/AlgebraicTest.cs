@@ -300,6 +300,79 @@ namespace Favalet
 
             Assert.AreEqual(expected, reduced);
         }
+
+        [Test]
+        public void ReducePartialReducibleDifferenceAndOrEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    And(
+                        Or(
+                            Identity("A"),
+                            Identity("B")),
+                        Or(
+                            Identity("A"),
+                            Identity("B"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Or(
+                    Identity("A"),
+                    Identity("B"));
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReducePartialReducibleDifferenceOrAndEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    Or(
+                        And(
+                            Identity("A"),
+                            Identity("B")),
+                        And(
+                            Identity("A"),
+                            Identity("B"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                And(
+                    Identity("A"),
+                    Identity("B"));
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReducePartialReduciblePartiallyAndOrEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    And(
+                        Identity("A"),
+                        Or(
+                            Identity("A"),
+                            Identity("B"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Or(
+                    Identity("A"),
+                    Identity("B"));
+
+            Assert.AreEqual(expected, reduced);
+        }
         #endregion
     }
 }

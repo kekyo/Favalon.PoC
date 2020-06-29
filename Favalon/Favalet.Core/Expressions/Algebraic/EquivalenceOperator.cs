@@ -9,18 +9,18 @@ namespace Favalet.Expressions.Algebraic
 {
     public interface IEquivalenceOperator : IExpression
     {
-        IOperandExpression Operand { get; }
+        IBinaryExpression Operand { get; }
     }
 
     public sealed class EquivalenceOperator :
         IEquivalenceOperator
     {
-        private readonly IOperandExpression Operand;
+        private readonly IBinaryExpression Operand;
 
-        private EquivalenceOperator(IOperandExpression expression) =>
+        private EquivalenceOperator(IBinaryExpression expression) =>
             this.Operand = expression;
 
-        IOperandExpression IEquivalenceOperator.Operand =>
+        IBinaryExpression IEquivalenceOperator.Operand =>
             this.Operand;
 
         public override int GetHashCode() =>
@@ -32,29 +32,35 @@ namespace Favalet.Expressions.Algebraic
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is IEquivalenceOperator rhs && Equals(rhs);
 
-        private static IExpression Reduce(IReduceContext context, IOperandExpression operand)
+        private static IExpression Reduce(IReduceContext context, IExpression operand)
         {
-            var suppressed =
-                operand.Operands.
-                Select(expr => expr is IOperandExpression oper ?
-                    Reduce(context, oper) :
-                    expr.Reduce(context)).
-                Distinct().
-                ToArray();
-
-            return (suppressed.Length, operand) switch
+            if (operand is IBinaryExpression binary)
             {
-                (1, _) => suppressed[0],
-                (_, IAndExpression _) => AndExpression.Create(suppressed),
-                (_, IOrExpression _) => OrExpression.Create(suppressed),
-                _ => throw new InvalidOperationException()
-            };
+                var left = Reduce(context, binary.Left);
+                var right = Reduce(context, binary.Right);
+
+                if (left.Equals(right))
+                {
+                    return left;
+                }
+
+                return binary switch
+                {
+                    IAndExpression _ => AndExpression.Create(left, right),
+                    IOrExpression _ => OrExpression.Create(left, right),
+                    _ => throw new InvalidOperationException()
+                };
+            }
+            else
+            {
+                return operand.Reduce(context);
+            }
         }
 
         public IExpression Reduce(IReduceContext context) =>
             Reduce(context, this.Operand);
 
-        public static EquivalenceOperator Create(IOperandExpression operand) =>
+        public static EquivalenceOperator Create(IBinaryExpression operand) =>
             new EquivalenceOperator(operand);
     }
 }

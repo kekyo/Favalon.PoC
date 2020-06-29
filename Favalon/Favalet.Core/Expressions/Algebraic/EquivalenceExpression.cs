@@ -45,8 +45,8 @@ namespace Favalet.Expressions.Algebraic
             return (suppressed.Length, operand) switch
             {
                 (1, _) => suppressed[0],
-                (_, IAndExpression _) => Create(AndExpression.Create(suppressed)),
-                (_, IOrExpression _) => Create(OrExpression.Create(suppressed)),
+                (_, IAndExpression _) => AndExpression.Create(suppressed),
+                (_, IOrExpression _) => OrExpression.Create(suppressed),
                 _ => throw new InvalidOperationException()
             };
         }

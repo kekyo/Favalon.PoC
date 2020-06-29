@@ -41,7 +41,12 @@ namespace Favalet
 
             var reduced = scope.Reduce(expression);
 
-            Assert.AreEqual(expression, reduced);
+            var expected =
+                And(
+                    Identity("A"),
+                    Identity("B"));
+
+            Assert.AreEqual(expected, reduced);
         }
 
         [Test]
@@ -110,7 +115,12 @@ namespace Favalet
 
             var reduced = scope.Reduce(expression);
 
-            Assert.AreEqual(expression, reduced);
+            var expected =
+                Or(
+                    Identity("A"),
+                    Identity("B"));
+
+            Assert.AreEqual(expected, reduced);
         }
 
         [Test]
@@ -193,6 +203,56 @@ namespace Favalet
 
             var expected =
                 Identity("A");
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReducePartialReducibleCombinedAndOrEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    And(
+                        Or(
+                            Identity("A"),
+                            Identity("A")),
+                        Or(
+                            Identity("B"),
+                            Identity("B"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                And(
+                    Identity("A"),
+                    Identity("B"));
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReducePartialReducibleCombinedOrAndEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    Or(
+                        And(
+                            Identity("A"),
+                            Identity("A")),
+                        And(
+                            Identity("B"),
+                            Identity("B"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Or(
+                    Identity("A"),
+                    Identity("B"));
 
             Assert.AreEqual(expected, reduced);
         }

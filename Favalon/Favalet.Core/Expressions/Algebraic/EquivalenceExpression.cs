@@ -9,45 +9,52 @@ namespace Favalet.Expressions.Algebraic
 {
     public interface IEquivalenceExpression : IExpression
     {
-        IAndExpression Expression { get; }
+        IOperandExpression Operand { get; }
     }
 
     public sealed class EquivalenceExpression :
         IEquivalenceExpression
     {
-        private readonly IAndExpression Expression;
+        private readonly IOperandExpression Operand;
 
-        private EquivalenceExpression(IAndExpression expression) =>
-            this.Expression = expression;
+        private EquivalenceExpression(IOperandExpression expression) =>
+            this.Operand = expression;
 
-        IAndExpression IEquivalenceExpression.Expression =>
-            this.Expression;
+        IOperandExpression IEquivalenceExpression.Operand =>
+            this.Operand;
 
         public override int GetHashCode() =>
-            this.Expression.GetHashCode();
+            this.Operand.GetHashCode();
 
         public bool Equals(IEquivalenceExpression rhs) =>
-            this.Expression.Equals(rhs.Expression);
+            this.Operand.Equals(rhs.Operand);
 
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is IEquivalenceExpression rhs && Equals(rhs);
 
-        public IExpression Reduce(IReduceContext context)
+        private static IExpression Reduce(IReduceContext context, IOperandExpression operand)
         {
             var suppressed =
-                this.Expression.Operands.
+                operand.Operands.
+                Select(expr => expr is IOperandExpression oper ?
+                    Reduce(context, oper) :
+                    expr.Reduce(context)).
                 Distinct().
                 ToArray();
 
-            return suppressed.Length switch
+            return (suppressed.Length, operand) switch
             {
-                0 => AndExpression.Create(ArrayEx.Empty<IExpression>()),
-                1 => suppressed[0],
-                _ => Create(AndExpression.Create(suppressed))
+                (1, _) => suppressed[0],
+                (_, IAndExpression _) => Create(AndExpression.Create(suppressed)),
+                (_, IOrExpression _) => Create(OrExpression.Create(suppressed)),
+                _ => throw new InvalidOperationException()
             };
         }
 
-        public static EquivalenceExpression Create(IAndExpression expression) =>
-            new EquivalenceExpression(expression);
+        public IExpression Reduce(IReduceContext context) =>
+            Reduce(context, this.Operand);
+
+        public static EquivalenceExpression Create(IOperandExpression operand) =>
+            new EquivalenceExpression(operand);
     }
 }

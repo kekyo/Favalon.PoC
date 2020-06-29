@@ -12,6 +12,7 @@ namespace Favalet
     [TestFixture]
     public sealed class AlgebraicTest
     {
+        #region And
         [Test]
         public void ReduceSingleAnd()
         {
@@ -28,7 +29,7 @@ namespace Favalet
         }
 
         [Test]
-        public void ReduceSingleAndInData()
+        public void ReduceSingleAndEquiv()
         {
             var scope = Scope.Create();
 
@@ -60,7 +61,7 @@ namespace Favalet
         }
 
         [Test]
-        public void ReduceReducibleSingleAndInData()
+        public void ReduceReducibleSingleAndEquiv()
         {
             var scope = Scope.Create();
 
@@ -78,5 +79,123 @@ namespace Favalet
 
             Assert.AreEqual(expected, reduced);
         }
+        #endregion
+
+        #region Or
+        [Test]
+        public void ReduceSingleOr()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Or(
+                    Identity("A"),
+                    Identity("B"));
+
+            var reduced = scope.Reduce(expression);
+
+            Assert.AreEqual(expression, reduced);
+        }
+
+        [Test]
+        public void ReduceSingleOrEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    Or(
+                        Identity("A"),
+                        Identity("B")));
+
+            var reduced = scope.Reduce(expression);
+
+            Assert.AreEqual(expression, reduced);
+        }
+
+        [Test]
+        public void ReduceNonReducibleSingleOr()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Or(
+                    Identity("A"),
+                    Identity("A"),
+                    Identity("A"));
+
+            var reduced = scope.Reduce(expression);
+
+            Assert.AreEqual(expression, reduced);
+        }
+
+        [Test]
+        public void ReduceReducibleSingleOrEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    Or(
+                        Identity("A"),
+                        Identity("A"),
+                        Identity("A")));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Identity("A");
+
+            Assert.AreEqual(expected, reduced);
+        }
+        #endregion
+
+        #region CombinedAndOr
+        [Test]
+        public void ReduceReducibleCombinedAndOrEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    And(
+                        Or(
+                            Identity("A"),
+                            Identity("A")),
+                        Or(
+                            Identity("A"),
+                            Identity("A"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Identity("A");
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReduceReducibleCombinedOrAndEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    Or(
+                        And(
+                            Identity("A"),
+                            Identity("A")),
+                        And(
+                            Identity("A"),
+                            Identity("A"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Identity("A");
+
+            Assert.AreEqual(expected, reduced);
+        }
+        #endregion
     }
 }

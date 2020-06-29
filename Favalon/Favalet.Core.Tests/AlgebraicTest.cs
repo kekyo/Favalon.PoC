@@ -84,6 +84,28 @@ namespace Favalet
 
             Assert.AreEqual(expected, reduced);
         }
+
+        [Test]
+        public void ReduceReducibleMultipleAndEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    And(
+                        Identity("A"),
+                        Identity("A"),
+                        And(
+                            Identity("A"),
+                            Identity("A"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Identity("A");
+
+            Assert.AreEqual(expected, reduced);
+        }
         #endregion
 
         #region Or
@@ -150,6 +172,28 @@ namespace Favalet
                         Identity("A"),
                         Identity("A"),
                         Identity("A")));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Identity("A");
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReduceReducibleMultipleOrEquiv()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    Or(
+                        Identity("A"),
+                        Identity("A"),
+                        Or(
+                            Identity("A"),
+                            Identity("A"))));
 
             var reduced = scope.Reduce(expression);
 

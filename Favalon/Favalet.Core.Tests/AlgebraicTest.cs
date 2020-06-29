@@ -26,5 +26,57 @@ namespace Favalet
 
             Assert.AreEqual(expression, reduced);
         }
+
+        [Test]
+        public void ReduceSingleAndInData()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    And(
+                        Identity("A"),
+                        Identity("B")));
+
+            var reduced = scope.Reduce(expression);
+
+            Assert.AreEqual(expression, reduced);
+        }
+
+        [Test]
+        public void ReduceNonReducibleSingleAnd()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                And(
+                    Identity("A"),
+                    Identity("A"),
+                    Identity("A"));
+
+            var reduced = scope.Reduce(expression);
+
+            Assert.AreEqual(expression, reduced);
+        }
+
+        [Test]
+        public void ReduceReducibleSingleAndInData()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Equivalence(
+                    And(
+                        Identity("A"),
+                        Identity("A"),
+                        Identity("A")));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Identity("A");
+
+            Assert.AreEqual(expected, reduced);
+        }
     }
 }

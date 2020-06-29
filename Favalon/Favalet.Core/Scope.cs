@@ -9,10 +9,15 @@ namespace Favalet
 
         public IExpression Reduce(IExpression expression)
         {
-            return expression;
+            var context = new ReduceContext();
+            return expression.Reduce(context);
         }
 
         public static Scope Create() =>
             new Scope();
+
+        private sealed class ReduceContext : IReduceContext
+        {
+        }
     }
 }

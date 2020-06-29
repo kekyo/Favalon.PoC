@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace Favalet
 {
-    public interface IExpression : IEquatable<IExpression?>
+    public interface IReduceContext
     {
-        IExpression Reduce(IReduceContext context);
     }
 }

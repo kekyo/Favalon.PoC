@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Favalet.Expressions;
+using Favalet.Expressions.Algebraic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

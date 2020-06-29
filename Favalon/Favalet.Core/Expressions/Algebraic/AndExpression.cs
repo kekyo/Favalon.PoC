@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Favalet
+namespace Favalet.Expressions.Algebraic
 {
     public interface IAndExpression : IExpression
     {

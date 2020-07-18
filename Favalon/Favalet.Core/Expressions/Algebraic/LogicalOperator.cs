@@ -10,18 +10,18 @@ namespace Favalet.Expressions.Algebraic
 {
     public interface ILogicalOperator : IExpression
     {
-        IBinaryExpression Operand { get; }
+        IExpression Operand { get; }
     }
 
     public sealed class LogicalOperator :
         ILogicalOperator
     {
-        private readonly IBinaryExpression Operand;
+        public readonly IExpression Operand;
 
-        private LogicalOperator(IBinaryExpression expression) =>
-            this.Operand = expression;
+        private LogicalOperator(IExpression operand) =>
+            this.Operand = operand;
 
-        IBinaryExpression ILogicalOperator.Operand =>
+        IExpression ILogicalOperator.Operand =>
             this.Operand;
 
         public override int GetHashCode() =>
@@ -85,11 +85,11 @@ namespace Favalet.Expressions.Algebraic
             {
                 Debug.Assert(and.Operands.Length >= 2);
 
-                var opers = and.Operands.
+                var reducedOpers = and.Operands.
                     Select(oper => ReduceLogical(context, oper)).
                     ToArray();
 
-                if (opers.Cast<IExpression?>().Aggregate(
+                if (reducedOpers.Cast<IExpression?>().Aggregate(
                     (agg, v) =>
                         (agg is IExpression a &&
                         v is IOrExpression(IExpression[] subopers) &&
@@ -98,9 +98,13 @@ namespace Favalet.Expressions.Algebraic
                 {
                     return oper2;
                 }
-                else
+                else if (and.Operands.EqualsPartiallyOrdered(reducedOpers))
                 {
                     return operand;
+                }
+                else
+                {
+                    return AndExpression.Create(reducedOpers);
                 }
             }
 
@@ -108,11 +112,11 @@ namespace Favalet.Expressions.Algebraic
             {
                 Debug.Assert(or.Operands.Length >= 2);
 
-                var opers = or.Operands.
+                var reducedOpers = or.Operands.
                     Select(oper => ReduceLogical(context, oper)).
                     ToArray();
 
-                if (opers.Cast<IExpression?>().Aggregate(
+                if (reducedOpers.Cast<IExpression?>().Aggregate(
                     (agg, v) =>
                         (agg is IExpression a &&
                         v is IAndExpression(IExpression[] subopers) &&
@@ -121,9 +125,13 @@ namespace Favalet.Expressions.Algebraic
                 {
                     return oper2;
                 }
-                else
+                else if (or.Operands.EqualsPartiallyOrdered(reducedOpers))
                 {
                     return operand;
+                }
+                else
+                {
+                    return OrExpression.Create(reducedOpers);
                 }
             }
             else
@@ -139,7 +147,7 @@ namespace Favalet.Expressions.Algebraic
             return ReduceLogical(context, reduced);
         }
 
-        public static LogicalOperator Create(IBinaryExpression operand) =>
+        public static LogicalOperator Create(IExpression operand) =>
             new LogicalOperator(operand);
     }
 }

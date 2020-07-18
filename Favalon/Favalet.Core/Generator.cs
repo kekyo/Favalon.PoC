@@ -1,10 +1,5 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Favalet
 {
@@ -17,16 +12,12 @@ namespace Favalet
             LogicalOperator.Create(operand);
 
         public static AndBinaryExpression AndBinary(
-            IExpression operand0, IExpression operand1, params IExpression[] operands) =>
-            operands.Aggregate(
-                AndBinaryExpression.Create(operand0, operand1),
-                AndBinaryExpression.Create);
+            IExpression lhs, IExpression rhs) =>
+            AndBinaryExpression.Create(lhs, rhs);
 
         public static OrBinaryExpression OrBinary(
-            IExpression operand0, IExpression operand1, params IExpression[] operands) =>
-            operands.Aggregate(
-                OrBinaryExpression.Create(operand0, operand1),
-                OrBinaryExpression.Create);
+            IExpression lhs, IExpression rhs) =>
+            OrBinaryExpression.Create(lhs, rhs);
 
         public static AndExpression And(params IExpression[] operands) =>
             AndExpression.Create(operands);

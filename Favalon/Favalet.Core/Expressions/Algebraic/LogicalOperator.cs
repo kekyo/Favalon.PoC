@@ -49,14 +49,12 @@ namespace Favalet.Expressions.Algebraic
             };
 
         private static IExpression CombineIfRequired(
-            IReduceContext context,
             IEnumerable<IExpression> expressions,
             Func<IExpression[], IExpression> creator)
         {
             var exprs = expressions.
-                Select(oper => CombineByBinaryType(context, oper)).
+                Select(oper => CombineByBinaryType(oper)).
                 Distinct().   // Commutative
-                Select(oper => oper.Reduce(context)).
                 ToArray();
             Debug.Assert(exprs.Length >= 1);
 
@@ -64,24 +62,21 @@ namespace Favalet.Expressions.Algebraic
         }
 
         private static IExpression CombineByBinaryType(
-            IReduceContext context,
             IExpression operand) =>
             operand switch
             {
                 IOrBinaryExpression or =>
                     CombineIfRequired(
-                        context,
                         EnumerateByBinaryType(or),
                         OrExpression.Create),
                 IAndBinaryExpression and =>
                     CombineIfRequired(
-                        context,
                         EnumerateByBinaryType(and),
                         AndExpression.Create),
                 _ => operand
             };
 
-        private static IExpression Reduce(
+        private static IExpression ReduceLogical(
             IReduceContext context,
             IExpression operand)
         {
@@ -91,7 +86,7 @@ namespace Favalet.Expressions.Algebraic
                 Debug.Assert(and.Operands.Length >= 2);
 
                 var opers = and.Operands.
-                    Select(oper => Reduce(context, oper)).
+                    Select(oper => ReduceLogical(context, oper)).
                     ToArray();
 
                 if (opers.Cast<IExpression?>().Aggregate(
@@ -114,7 +109,7 @@ namespace Favalet.Expressions.Algebraic
                 Debug.Assert(or.Operands.Length >= 2);
 
                 var opers = or.Operands.
-                    Select(oper => Reduce(context, oper)).
+                    Select(oper => ReduceLogical(context, oper)).
                     ToArray();
 
                 if (opers.Cast<IExpression?>().Aggregate(
@@ -137,8 +132,12 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public IExpression Reduce(IReduceContext context) =>
-            Reduce(context, CombineByBinaryType(context, this.Operand));
+        public IExpression Reduce(IReduceContext context)
+        {
+            var combined = CombineByBinaryType(this.Operand);
+            var reduced = combined.Reduce(context);
+            return ReduceLogical(context, reduced);
+        }
 
         public static LogicalOperator Create(IBinaryExpression operand) =>
             new LogicalOperator(operand);

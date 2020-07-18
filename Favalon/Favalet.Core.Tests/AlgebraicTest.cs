@@ -42,7 +42,7 @@ namespace Favalet
             var reduced = scope.Reduce(expression);
 
             var expected =
-                AndBinary(
+                And(
                     Identity("A"),
                     Identity("B"));
 
@@ -138,7 +138,7 @@ namespace Favalet
             var reduced = scope.Reduce(expression);
 
             var expected =
-                OrBinary(
+                Or(
                     Identity("A"),
                     Identity("B"));
 
@@ -269,7 +269,7 @@ namespace Favalet
             var reduced = scope.Reduce(expression);
 
             var expected =
-                AndBinary(
+                And(
                     Identity("A"),
                     Identity("B"));
 
@@ -294,7 +294,7 @@ namespace Favalet
             var reduced = scope.Reduce(expression);
 
             var expected =
-                OrBinary(
+                Or(
                     Identity("A"),
                     Identity("B"));
 

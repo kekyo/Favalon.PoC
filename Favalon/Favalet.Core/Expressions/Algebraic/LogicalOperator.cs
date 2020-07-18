@@ -49,70 +49,87 @@ namespace Favalet.Expressions.Algebraic
             };
 
         private static IExpression CombineIfRequired(
+            IReduceContext context,
             IEnumerable<IExpression> expressions,
             Func<IExpression[], IExpression> creator)
         {
-            var exprs = expressions.Distinct().ToArray();
+            var exprs = expressions.
+                Select(oper => CombineByBinaryType(context, oper)).
+                Distinct().   // Commutative
+                Select(oper => oper.Reduce(context)).
+                ToArray();
             Debug.Assert(exprs.Length >= 1);
+
             return (exprs.Length == 1) ? exprs[0] : creator(exprs);
         }
 
-        private static IExpression CombineByBinaryType(IExpression operand) =>
+        private static IExpression CombineByBinaryType(
+            IReduceContext context,
+            IExpression operand) =>
             operand switch
             {
                 IOrBinaryExpression or =>
-                    CombineIfRequired(EnumerateByBinaryType(or), OrExpression.Create),
+                    CombineIfRequired(
+                        context,
+                        EnumerateByBinaryType(or),
+                        OrExpression.Create),
                 IAndBinaryExpression and =>
-                    CombineIfRequired(EnumerateByBinaryType(and), AndExpression.Create),
+                    CombineIfRequired(
+                        context,
+                        EnumerateByBinaryType(and),
+                        AndExpression.Create),
                 _ => operand
             };
 
-        private static IExpression Reduce(IReduceContext context, IExpression operand)
+        private static IExpression Reduce(
+            IReduceContext context,
+            IExpression operand)
         {
-            if (operand is IBinaryExpression binary)
+            // Absorption
+            if (operand is IAndExpression and)
             {
-                var left = CombineByBinaryType(binary.Left.Reduce(context));
-                var right = CombineByBinaryType(binary.Right.Reduce(context));
+                Debug.Assert(and.Operands.Length >= 2);
 
-                if (left is ISetExpression l &&
-                    right is ISetExpression r &&
-                    l.Operands.EqualsPartiallyOrdered(r.Operands))
+                var opers = and.Operands.
+                    Select(oper => Reduce(context, oper)).
+                    ToArray();
+
+                if (opers.Cast<IExpression?>().Aggregate(
+                    (agg, v) =>
+                        (agg is IExpression a &&
+                        v is IOrExpression(IExpression[] subopers) &&
+                        subopers.Any(suboper => suboper.Equals(a))) ?
+                            agg : null) is IExpression oper2)
                 {
-                    return left;
+                    return oper2;
                 }
-
-                return (binary, left, right) switch
+                else
                 {
-                    // Absorption
-                    (IAndBinaryExpression _, IExpression _, IOrBinaryExpression(IExpression l1, IExpression r1))
-                        when left.Equals(l1) || left.Equals(r1) =>
-                        left,
-                    (IAndBinaryExpression _, IOrBinaryExpression(IExpression l1, IExpression r1), IExpression _)
-                        when right.Equals(l1) || right.Equals(r1) =>
-                        right,
-                    (IOrBinaryExpression _, IExpression _, IAndBinaryExpression(IExpression l1, IExpression r1))
-                        when left.Equals(l1) || left.Equals(r1) =>
-                        left,
-                    (IOrBinaryExpression _, IAndBinaryExpression(IExpression l1, IExpression r1), IExpression _)
-                        when right.Equals(l1) || right.Equals(r1) =>
-                        right,
+                    return operand;
+                }
+            }
 
-                    // Commutative
-                    (_, IAndBinaryExpression(IExpression l1, IExpression r1), IAndBinaryExpression(IExpression l2, IExpression r2))
-                        when l1.Equals(r2) && r1.Equals(l2) =>
-                        left,
-                    (_, IOrBinaryExpression(IExpression l1, IExpression r1), IOrBinaryExpression(IExpression l2, IExpression r2))
-                        when l1.Equals(r2) && r1.Equals(l2) =>
-                        left,
+            if (operand is IOrExpression or)
+            {
+                Debug.Assert(or.Operands.Length >= 2);
 
-                    // Reduced
-                    (IAndBinaryExpression _, _, _) =>
-                        AndBinaryExpression.Create(left, right),
-                    (IOrBinaryExpression _, _, _) =>
-                        OrBinaryExpression.Create(left, right),
+                var opers = or.Operands.
+                    Select(oper => Reduce(context, oper)).
+                    ToArray();
 
-                    _ => throw new InvalidOperationException()
-                };
+                if (opers.Cast<IExpression?>().Aggregate(
+                    (agg, v) =>
+                        (agg is IExpression a &&
+                        v is IAndExpression(IExpression[] subopers) &&
+                        subopers.Any(suboper => suboper.Equals(a))) ?
+                            agg : null) is IExpression oper2)
+                {
+                    return oper2;
+                }
+                else
+                {
+                    return operand;
+                }
             }
             else
             {
@@ -121,7 +138,7 @@ namespace Favalet.Expressions.Algebraic
         }
 
         public IExpression Reduce(IReduceContext context) =>
-            Reduce(context, this.Operand);
+            Reduce(context, CombineByBinaryType(context, this.Operand));
 
         public static LogicalOperator Create(IBinaryExpression operand) =>
             new LogicalOperator(operand);

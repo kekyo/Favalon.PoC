@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace Favalet.Expressions.Algebraic
     }
 
     public abstract class BinaryExpression<TBinaryExpression> :
-        IBinaryExpression
+        Expression, IBinaryExpression
         where TBinaryExpression : IBinaryExpression
     {
         public readonly IExpression Left;
@@ -25,8 +26,10 @@ namespace Favalet.Expressions.Algebraic
             this.Right = right;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IBinaryExpression.Left =>
             this.Left;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IBinaryExpression.Right =>
             this.Right;
 

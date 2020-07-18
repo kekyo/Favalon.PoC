@@ -34,6 +34,15 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
+        public override string GetPrettyString(PrettyStringTypes type) =>
+            type switch
+            {
+                PrettyStringTypes.Simple =>
+                    $"({this.Left.GetPrettyString(type)} && {this.Right.GetPrettyString(type)})",
+                _ =>
+                    $"(AndBinary {this.Left.GetPrettyString(type)} {this.Right.GetPrettyString(type)})"
+            };
+
         public static AndBinaryExpression Create(IExpression left, IExpression right) =>
             new AndBinaryExpression(left, right);
     }

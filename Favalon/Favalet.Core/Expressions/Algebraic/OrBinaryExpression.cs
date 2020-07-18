@@ -34,6 +34,15 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
+        public override string GetPrettyString(PrettyStringTypes type) =>
+            type switch
+            {
+                PrettyStringTypes.Simple =>
+                    $"({this.Left.GetPrettyString(type)} || {this.Right.GetPrettyString(type)})",
+                _ =>
+                    $"(OrBinary {this.Left.GetPrettyString(type)} {this.Right.GetPrettyString(type)})"
+            };
+
         public static OrBinaryExpression Create(IExpression left, IExpression right) =>
             new OrBinaryExpression(left, right);
     }

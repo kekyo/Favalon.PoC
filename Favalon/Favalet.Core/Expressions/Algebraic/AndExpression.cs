@@ -35,6 +35,15 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
+        public override string GetPrettyString(PrettyStringTypes type) =>
+            type switch
+            {
+                PrettyStringTypes.Simple =>
+                    "(" + string.Join(" && ", this.Operands.Select(oper => oper.GetPrettyString(type))) + ")",
+                _ =>
+                    "(And " + string.Join(" ", this.Operands.Select(oper => oper.GetPrettyString(type))) + ")",
+            };
+
         public static AndExpression Create(IExpression[] operands) =>
             new AndExpression(operands);
     }

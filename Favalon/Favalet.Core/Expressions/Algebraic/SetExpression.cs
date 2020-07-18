@@ -1,6 +1,7 @@
 ﻿using Favalet.Internal;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace Favalet.Expressions.Algebraic
     }
 
     public abstract class SetExpression<TSetExpression> :
-        ISetExpression
+        Expression, ISetExpression
         where TSetExpression : ISetExpression
     {
         public readonly IExpression[] Operands;
@@ -21,6 +22,7 @@ namespace Favalet.Expressions.Algebraic
         protected SetExpression(IExpression[] operands) =>
             this.Operands = operands;
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression[] ISetExpression.Operands =>
             this.Operands;
 

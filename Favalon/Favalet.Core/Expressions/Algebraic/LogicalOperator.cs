@@ -14,13 +14,14 @@ namespace Favalet.Expressions.Algebraic
     }
 
     public sealed class LogicalOperator :
-        ILogicalOperator
+        Expression, ILogicalOperator
     {
         public readonly IExpression Operand;
 
         private LogicalOperator(IExpression operand) =>
             this.Operand = operand;
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression ILogicalOperator.Operand =>
             this.Operand;
 
@@ -54,7 +55,7 @@ namespace Favalet.Expressions.Algebraic
         {
             var exprs = expressions.
                 Select(oper => CombineByBinaryType(oper)).
-                Distinct().   // Commutative
+                Distinct().   // Idempotence / Commutative / Associative
                 ToArray();
             Debug.Assert(exprs.Length >= 1);
 
@@ -73,79 +74,81 @@ namespace Favalet.Expressions.Algebraic
                     CombineIfRequired(
                         EnumerateByBinaryType(and),
                         AndExpression.Create),
+
+                // TODO: IOrExpression and IAndExpression
                 _ => operand
             };
 
-        private static IExpression ReduceLogical(
+        private static IExpression ComputeAbsorption(
             IReduceContext context,
             IExpression operand)
         {
             // Absorption
-            if (operand is IAndExpression and)
+            if (operand is ISetExpression set)
             {
-                Debug.Assert(and.Operands.Length >= 2);
+                Debug.Assert(set.Operands.Length >= 2);
 
-                var reducedOpers = and.Operands.
-                    Select(oper => ReduceLogical(context, oper)).
+                var reducedOpers = set.Operands.
+                    Select(oper => ComputeAbsorption(context, oper)).
                     ToArray();
 
-                if (reducedOpers.Cast<IExpression?>().Aggregate(
-                    (agg, v) =>
-                        (agg is IExpression a &&
-                        v is IOrExpression(IExpression[] subopers) &&
-                        subopers.Any(suboper => suboper.Equals(a))) ?
-                            agg : null) is IExpression oper2)
+                if (set is IAndExpression and)
                 {
-                    return oper2;
+                    if (reducedOpers.Cast<IExpression?>().Aggregate(
+                        (agg, v) =>
+                            (agg is IExpression a &&
+                            v is IOrExpression(IExpression[] subopers) &&
+                            subopers.Any(suboper => suboper.Equals(a))) ?
+                                agg : null) is IExpression oper2)
+                    {
+                        return oper2;
+                    }
+                    else if (and.Operands.EqualsPartiallyOrdered(reducedOpers))
+                    {
+                        return operand;
+                    }
+                    else
+                    {
+                        return AndExpression.Create(reducedOpers);
+                    }
                 }
-                else if (and.Operands.EqualsPartiallyOrdered(reducedOpers))
+
+                if (set is IOrExpression or)
                 {
-                    return operand;
+                    if (reducedOpers.Cast<IExpression?>().Aggregate(
+                        (agg, v) =>
+                            (agg is IExpression a &&
+                            v is IAndExpression(IExpression[] subopers) &&
+                            subopers.Any(suboper => suboper.Equals(a))) ?
+                                agg : null) is IExpression oper2)
+                    {
+                        return oper2;
+                    }
+                    else if (or.Operands.EqualsPartiallyOrdered(reducedOpers))
+                    {
+                        return operand;
+                    }
+                    else
+                    {
+                        return OrExpression.Create(reducedOpers);
+                    }
                 }
-                else
-                {
-                    return AndExpression.Create(reducedOpers);
-                }
+
+                throw new InvalidOperationException();
             }
 
-            if (operand is IOrExpression or)
-            {
-                Debug.Assert(or.Operands.Length >= 2);
-
-                var reducedOpers = or.Operands.
-                    Select(oper => ReduceLogical(context, oper)).
-                    ToArray();
-
-                if (reducedOpers.Cast<IExpression?>().Aggregate(
-                    (agg, v) =>
-                        (agg is IExpression a &&
-                        v is IAndExpression(IExpression[] subopers) &&
-                        subopers.Any(suboper => suboper.Equals(a))) ?
-                            agg : null) is IExpression oper2)
-                {
-                    return oper2;
-                }
-                else if (or.Operands.EqualsPartiallyOrdered(reducedOpers))
-                {
-                    return operand;
-                }
-                else
-                {
-                    return OrExpression.Create(reducedOpers);
-                }
-            }
-            else
-            {
-                return operand;
-            }
+            return operand;
         }
 
         public IExpression Reduce(IReduceContext context)
         {
             var combined = CombineByBinaryType(this.Operand);
-            var reduced = combined.Reduce(context);
-            return ReduceLogical(context, reduced);
+            var computed = ComputeAbsorption(context, combined);
+            return computed.Reduce(context);
         }
+
+        public override string GetPrettyString(PrettyStringTypes type) =>
+            $"(Logical {this.Operand.GetPrettyString(type)})";
 
         public static LogicalOperator Create(IExpression operand) =>
             new LogicalOperator(operand);

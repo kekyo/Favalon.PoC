@@ -32,8 +32,7 @@ namespace Favalet.Expressions.Algebraic
             other is ILogicalOperator rhs && Equals(rhs);
 
         public IExpression Reduce(IReduceContext context) =>
-            calculator.Compute(this.Operand).
-            Reduce(context);
+            calculator.Compute(this.Operand.Reduce(context));
 
         public override string GetPrettyString(PrettyStringTypes type) =>
             $"(Logical {this.Operand.GetPrettyString(type)})";

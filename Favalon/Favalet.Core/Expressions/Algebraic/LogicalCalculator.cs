@@ -29,16 +29,22 @@ namespace Favalet.Expressions.Algebraic
                     new[] { binary.Left, binary.Right }
             };
 
-        protected virtual IEnumerable<IExpression> Simplize(IEnumerable<IExpression> expressions) =>
+        protected virtual IEnumerable<IExpression> MakeSimpleOr(
+            IEnumerable<IExpression> expressions) =>
+            expressions.Distinct();   // Idempotence / Commutative / Associative
+
+        protected virtual IEnumerable<IExpression> MakeSimpleAnd(
+            IEnumerable<IExpression> expressions) =>
             expressions.Distinct();   // Idempotence / Commutative / Associative
 
         private IExpression CombineIfRequired(
             IEnumerable<IExpression> expressions,
+            Func<IEnumerable<IExpression>, IEnumerable<IExpression>> toSimplify,
             Func<IExpression[], IExpression> creator)
         {
-            var exprs = Simplize(
+            var exprs = toSimplify(
                 expressions.Select(oper => this.CombineByBinaryType(oper))).
-                ToArray();
+                Memoize();
             Debug.Assert(exprs.Length >= 1);
 
             return (exprs.Length == 1) ? exprs[0] : creator(exprs);
@@ -51,10 +57,12 @@ namespace Favalet.Expressions.Algebraic
                 IOrBinaryExpression or =>
                     this.CombineIfRequired(
                         EnumerateByBinaryType(or),
+                        MakeSimpleOr,
                         OrExpression.Create),
                 IAndBinaryExpression and =>
                     this.CombineIfRequired(
                         EnumerateByBinaryType(and),
+                        MakeSimpleAnd,
                         AndExpression.Create),
 
                 // TODO: IOrExpression and IAndExpression
@@ -70,7 +78,7 @@ namespace Favalet.Expressions.Algebraic
 
                 var reducedOpers = set.Operands.
                     Select(oper => this.ComputeAbsorption(oper)).
-                    ToArray();
+                    Memoize();
 
                 if (set is IAndExpression and)
                 {

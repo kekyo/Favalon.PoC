@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Favalet.CLR.Core\Favalet.CLR.Core.csproj" />
     <ProjectReference Include="..\Favalet.Core\Favalet.Core.csproj" />
   </ItemGroup>
 

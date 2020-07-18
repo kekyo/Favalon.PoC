@@ -23,7 +23,7 @@ namespace Favalet.Expressions.Algebraic
         {
             var operands = this.Operands.
                 Select(operand => operand.Reduce(context)).
-                ToArray();
+                Memoize();
 
             if (this.Operands.SequenceEqual(operands, ReferenceComparer.Instance))
             {

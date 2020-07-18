@@ -19,7 +19,7 @@ namespace Favalet
             var scope = Scope.Create();
 
             var expression =
-                And(
+                AndBinary(
                     Identity("A"),
                     Identity("B"));
 
@@ -29,20 +29,20 @@ namespace Favalet
         }
 
         [Test]
-        public void ReduceSingleAndEquiv()
+        public void ReduceSingleAndLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    And(
+                Logical(
+                    AndBinary(
                         Identity("A"),
                         Identity("B")));
 
             var reduced = scope.Reduce(expression);
 
             var expected =
-                And(
+                AndBinary(
                     Identity("A"),
                     Identity("B"));
 
@@ -55,7 +55,7 @@ namespace Favalet
             var scope = Scope.Create();
 
             var expression =
-                And(
+                AndBinary(
                     Identity("A"),
                     Identity("A"),
                     Identity("A"));
@@ -66,13 +66,13 @@ namespace Favalet
         }
 
         [Test]
-        public void ReduceReducibleSingleAndEquiv()
+        public void ReduceReducibleSingleAndLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    And(
+                Logical(
+                    AndBinary(
                         Identity("A"),
                         Identity("A"),
                         Identity("A")));
@@ -86,16 +86,16 @@ namespace Favalet
         }
 
         [Test]
-        public void ReduceReducibleMultipleAndEquiv()
+        public void ReduceReducibleMultipleAndLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    And(
+                Logical(
+                    AndBinary(
                         Identity("A"),
                         Identity("A"),
-                        And(
+                        AndBinary(
                             Identity("A"),
                             Identity("A"))));
 
@@ -115,7 +115,7 @@ namespace Favalet
             var scope = Scope.Create();
 
             var expression =
-                Or(
+                OrBinary(
                     Identity("A"),
                     Identity("B"));
 
@@ -125,20 +125,20 @@ namespace Favalet
         }
 
         [Test]
-        public void ReduceSingleOrEquiv()
+        public void ReduceSingleOrLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    Or(
+                Logical(
+                    OrBinary(
                         Identity("A"),
                         Identity("B")));
 
             var reduced = scope.Reduce(expression);
 
             var expected =
-                Or(
+                OrBinary(
                     Identity("A"),
                     Identity("B"));
 
@@ -151,7 +151,7 @@ namespace Favalet
             var scope = Scope.Create();
 
             var expression =
-                Or(
+                OrBinary(
                     Identity("A"),
                     Identity("A"),
                     Identity("A"));
@@ -162,13 +162,13 @@ namespace Favalet
         }
 
         [Test]
-        public void ReduceReducibleSingleOrEquiv()
+        public void ReduceReducibleSingleOrLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    Or(
+                Logical(
+                    OrBinary(
                         Identity("A"),
                         Identity("A"),
                         Identity("A")));
@@ -182,16 +182,16 @@ namespace Favalet
         }
 
         [Test]
-        public void ReduceReducibleMultipleOrEquiv()
+        public void ReduceReducibleMultipleOrLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    Or(
+                Logical(
+                    OrBinary(
                         Identity("A"),
                         Identity("A"),
-                        Or(
+                        OrBinary(
                             Identity("A"),
                             Identity("A"))));
 
@@ -206,17 +206,17 @@ namespace Favalet
 
         #region CombinedAndOr
         [Test]
-        public void ReduceReducibleCombinedAndOrEquiv()
+        public void ReduceReducibleCombinedAndOrLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    And(
-                        Or(
+                Logical(
+                    AndBinary(
+                        OrBinary(
                             Identity("A"),
                             Identity("A")),
-                        Or(
+                        OrBinary(
                             Identity("A"),
                             Identity("A"))));
 
@@ -229,17 +229,17 @@ namespace Favalet
         }
 
         [Test]
-        public void ReduceReducibleCombinedOrAndEquiv()
+        public void ReduceReducibleCombinedOrAndLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    Or(
-                        And(
+                Logical(
+                    OrBinary(
+                        AndBinary(
                             Identity("A"),
                             Identity("A")),
-                        And(
+                        AndBinary(
                             Identity("A"),
                             Identity("A"))));
 
@@ -252,24 +252,24 @@ namespace Favalet
         }
 
         [Test]
-        public void ReducePartialReducibleCombinedAndOrEquiv()
+        public void ReducePartialReducibleCombinedAndOrLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    And(
-                        Or(
+                Logical(
+                    AndBinary(
+                        OrBinary(
                             Identity("A"),
                             Identity("A")),
-                        Or(
+                        OrBinary(
                             Identity("B"),
                             Identity("B"))));
 
             var reduced = scope.Reduce(expression);
 
             var expected =
-                And(
+                AndBinary(
                     Identity("A"),
                     Identity("B"));
 
@@ -277,18 +277,43 @@ namespace Favalet
         }
 
         [Test]
-        public void ReducePartialReducibleCombinedOrAndEquiv()
+        public void ReducePartialReducibleCombinedOrAndLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    Or(
-                        And(
+                Logical(
+                    OrBinary(
+                        AndBinary(
                             Identity("A"),
                             Identity("A")),
-                        And(
+                        AndBinary(
                             Identity("B"),
+                            Identity("B"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                OrBinary(
+                    Identity("A"),
+                    Identity("B"));
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReducePartialReducibleDifferenceAndOrLogical()
+        {
+            var scope = Scope.Create();
+
+            var expression =
+                Logical(
+                    AndBinary(
+                        OrBinary(
+                            Identity("A"),
+                            Identity("B")),
+                        OrBinary(
+                            Identity("A"),
                             Identity("B"))));
 
             var reduced = scope.Reduce(expression);
@@ -302,42 +327,17 @@ namespace Favalet
         }
 
         [Test]
-        public void ReducePartialReducibleDifferenceAndOrEquiv()
+        public void ReducePartialReducibleDifferenceOrAndLogical()
         {
             var scope = Scope.Create();
 
             var expression =
-                Equivalence(
-                    And(
-                        Or(
+                Logical(
+                    OrBinary(
+                        AndBinary(
                             Identity("A"),
                             Identity("B")),
-                        Or(
-                            Identity("A"),
-                            Identity("B"))));
-
-            var reduced = scope.Reduce(expression);
-
-            var expected =
-                Or(
-                    Identity("A"),
-                    Identity("B"));
-
-            Assert.AreEqual(expected, reduced);
-        }
-
-        [Test]
-        public void ReducePartialReducibleDifferenceOrAndEquiv()
-        {
-            var scope = Scope.Create();
-
-            var expression =
-                Equivalence(
-                    Or(
-                        And(
-                            Identity("A"),
-                            Identity("B")),
-                        And(
+                        AndBinary(
                             Identity("A"),
                             Identity("B"))));
 
@@ -352,17 +352,64 @@ namespace Favalet
         }
 
         [Test]
-        public void ReducePartialReduciblePartiallyAndOrEquiv()
+        public void ReducePartialReduciblePartiallyAndOrLogical()
         {
             var scope = Scope.Create();
 
+            // Absorption
             var expression =
-                Equivalence(
-                    And(
+                Logical(
+                    AndBinary(
                         Identity("A"),
-                        Or(
+                        OrBinary(
                             Identity("A"),
                             Identity("B"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Identity("A");
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReducePartialReduciblePartiallyOrAndLogical()
+        {
+            var scope = Scope.Create();
+
+            // Absorption
+            var expression =
+                Logical(
+                    OrBinary(
+                        Identity("A"),
+                        AndBinary(
+                            Identity("A"),
+                            Identity("B"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                Identity("A");
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReducePartialReducibleAndOrTensorLogical()
+        {
+            var scope = Scope.Create();
+
+            // Absorption
+            var expression =
+                Logical(
+                    AndBinary(
+                        OrBinary(
+                            Identity("A"),
+                            Identity("B")),
+                        OrBinary(
+                            Identity("B"),
+                            Identity("A"))));
 
             var reduced = scope.Reduce(expression);
 
@@ -370,6 +417,66 @@ namespace Favalet
                 Or(
                     Identity("A"),
                     Identity("B"));
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReducePartialReducibleOrAndTensorLogical()
+        {
+            var scope = Scope.Create();
+
+            // Absorption
+            var expression =
+                Logical(
+                    OrBinary(
+                        AndBinary(
+                            Identity("A"),
+                            Identity("B")),
+                        AndBinary(
+                            Identity("B"),
+                            Identity("A"))));
+
+            var reduced = scope.Reduce(expression);
+
+            var expected =
+                And(
+                    Identity("A"),
+                    Identity("B"));
+
+            Assert.AreEqual(expected, reduced);
+        }
+
+        [Test]
+        public void ReducePartialReducibleAndOrMultipleTensorLogical()
+        {
+            var scope = Scope.Create();
+
+            // Absorption
+
+            // (A || (B || C)) && (B || (C || A))
+            var expression =
+                Logical(
+                    AndBinary(
+                        OrBinary(
+                            Identity("A"),
+                            OrBinary(
+                                Identity("B"),
+                                Identity("C"))),
+                        OrBinary(
+                            Identity("B"),
+                            OrBinary(
+                                Identity("C"),
+                                Identity("A")))));
+
+            var reduced = scope.Reduce(expression);
+
+            // A || B || C
+            var expected =
+                Or(
+                    Identity("A"),
+                    Identity("B"),
+                    Identity("C"));
 
             Assert.AreEqual(expected, reduced);
         }

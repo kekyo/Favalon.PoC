@@ -41,4 +41,16 @@ namespace Favalet.Expressions.Algebraic
 
         public abstract IExpression Reduce(IReduceContext context);
     }
+
+    public static class BinaryExpressionExtension
+    {
+        public static void Deconstruct(
+            this IBinaryExpression binary,
+            out IExpression left,
+            out IExpression right)
+        {
+            left = binary.Left;
+            right = binary.Right;
+        }
+    }
 }

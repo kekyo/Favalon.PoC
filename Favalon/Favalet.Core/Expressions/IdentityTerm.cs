@@ -30,10 +30,8 @@ namespace Favalet.Expressions
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is IIdentityTerm rhs && Equals(rhs);
 
-        public IExpression Reduce(IReduceContext context)
-        {
-            return this;
-        }
+        public IExpression Reduce(IReduceContext context) =>
+            this;
 
         public static IdentityTerm Create(string symbol) =>
             new IdentityTerm(symbol);

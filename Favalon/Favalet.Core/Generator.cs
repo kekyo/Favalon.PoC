@@ -13,13 +13,25 @@ namespace Favalet
         public static IdentityTerm Identity(string symbol) =>
             IdentityTerm.Create(symbol);
 
-        public static EquivalenceOperator Equivalence(IBinaryExpression operand) =>
-            EquivalenceOperator.Create(operand);
+        public static LogicalOperator Logical(IBinaryExpression operand) =>
+            LogicalOperator.Create(operand);
+
+        public static AndBinaryExpression AndBinary(
+            IExpression operand0, IExpression operand1, params IExpression[] operands) =>
+            operands.Aggregate(
+                AndBinaryExpression.Create(operand0, operand1),
+                AndBinaryExpression.Create);
+
+        public static OrBinaryExpression OrBinary(
+            IExpression operand0, IExpression operand1, params IExpression[] operands) =>
+            operands.Aggregate(
+                OrBinaryExpression.Create(operand0, operand1),
+                OrBinaryExpression.Create);
 
         public static AndExpression And(params IExpression[] operands) =>
-            (AndExpression)operands.Aggregate(AndExpression.Create);
+            AndExpression.Create(operands);
 
         public static OrExpression Or(params IExpression[] operands) =>
-            (OrExpression)operands.Aggregate(OrExpression.Create);
+            OrExpression.Create(operands);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalet.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,24 +7,35 @@ using System.Threading.Tasks;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface IAndExpression : IBinaryExpression
+    public interface IAndExpression :
+        ISetExpression
     {
     }
 
     public sealed class AndExpression :
-        BinaryExpression<IAndExpression>,
-        IAndExpression
+        SetExpression<AndExpression>, IAndExpression
     {
-        private AndExpression(IExpression left, IExpression right) :
-            base(left, right)
+        private AndExpression(IExpression[] operands) :
+            base(operands)
         { }
 
-        public override IExpression Reduce(IReduceContext context) =>
-            new AndExpression(
-                this.Left.Reduce(context),
-                this.Right.Reduce(context));
+        public override IExpression Reduce(IReduceContext context)
+        {
+            var operands = this.Operands.
+                Select(operand => operand.Reduce(context)).
+                ToArray();
 
-        public static AndExpression Create(IExpression left, IExpression right) =>
-            new AndExpression(left, right);
+            if (this.Operands.SequenceEqual(operands, ReferenceComparer.Instance))
+            {
+                return this;
+            }
+            else
+            {
+                return new AndExpression(operands);
+            }
+        }
+
+        public static AndExpression Create(IExpression[] operands) =>
+            new AndExpression(operands);
     }
 }

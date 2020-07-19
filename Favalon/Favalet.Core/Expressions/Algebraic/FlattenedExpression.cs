@@ -12,6 +12,9 @@ namespace Favalet.Expressions.Algebraic
         protected FlattenedExpression(IExpression[] operands) =>
             this.Operands = operands;
 
+        public override sealed int GetHashCode() =>
+            this.Operands.Aggregate(0, (agg, operand) => agg ^ operand.GetHashCode());
+
         public abstract bool Equals(IExpression? other);
 
         public IExpression Reduce(IReduceContext context) =>
@@ -32,7 +35,7 @@ namespace Favalet.Expressions.Algebraic
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
 
         public override string GetPrettyString(PrettyStringTypes type) =>
-            "(" + string.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(type)));
+            "(" + string.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")";
     }
 
     internal sealed class OrFlattenedExpression : FlattenedExpression
@@ -46,6 +49,6 @@ namespace Favalet.Expressions.Algebraic
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
 
         public override string GetPrettyString(PrettyStringTypes type) =>
-            "(" + string.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(type)));
+            "(" + string.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")";
     }
 }

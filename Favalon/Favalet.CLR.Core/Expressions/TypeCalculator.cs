@@ -2,6 +2,7 @@
 using Favalet.Internal;
 using System;
 using System.Collections.Generic;
+using System.Security;
 
 namespace Favalet.Expressions
 {
@@ -65,6 +66,44 @@ namespace Favalet.Expressions
             while (requiredRecompute);
 
             return exprs;
+        }
+
+        protected override IExpression? ChoiceForAnd(IExpression left, IExpression right)
+        {
+            // Narrowing
+            if (left is ITypeTerm(Type lt) &&
+                right is ITypeTerm(Type rt))
+            {
+                if (rt.IsAssignableFrom(lt))
+                {
+                    return left;
+                }
+                if (lt.IsAssignableFrom(rt))
+                {
+                    return right;
+                }
+            }
+
+            return base.ChoiceForAnd(left, right);
+        }
+
+        protected override IExpression? ChoiceForOr(IExpression left, IExpression right)
+        {
+            // Widening
+            if (left is ITypeTerm(Type lt) &&
+                right is ITypeTerm(Type rt))
+            {
+                if (lt.IsAssignableFrom(rt))
+                {
+                    return left;
+                }
+                if (rt.IsAssignableFrom(lt))
+                {
+                    return right;
+                }
+            }
+
+            return base.ChoiceForOr(left, right);
         }
     }
 }

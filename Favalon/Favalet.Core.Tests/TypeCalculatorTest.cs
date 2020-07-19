@@ -12,8 +12,8 @@ namespace Favalet
     [TestFixture]
     public sealed class TypeCalculatorTest
     {
-        private static readonly LogicalCalculator calculator =
-            new LogicalCalculator();
+        private static readonly TypeCalculator calculator =
+            new TypeCalculator();
 
         private static void AssertLogicalEqual(
             IExpression expected,

@@ -21,11 +21,11 @@ namespace Favalet.Expressions.Algebraic
         {
             var lf = left is TBinaryExpression lb ?
                 Flatten<TBinaryExpression>(lb.Left, lb.Right) :
-                new[] { left };
+                new[] { Flatten(left) };
 
             var rf = right is TBinaryExpression rb ?
                 Flatten<TBinaryExpression>(rb.Left, rb.Right) :
-                new[] { right };
+                new[] { Flatten(right) };
 
             return lf.Concat(rf);
         }
@@ -40,35 +40,10 @@ namespace Favalet.Expressions.Algebraic
                 _ => expression
             };
 
-        private static IEnumerable<IExpression> FlattenAll<TBinaryExpression>(
-            IExpression left, IExpression right)
-            where TBinaryExpression : IBinaryExpression
-        {
-            var lf = left is TBinaryExpression lb ?
-                FlattenAll<TBinaryExpression>(lb.Left, lb.Right) :
-                new[] { FlattenAll(left) };
-
-            var rf = right is TBinaryExpression rb ?
-                FlattenAll<TBinaryExpression>(rb.Left, rb.Right) :
-                new[] { FlattenAll(right) };
-
-            return lf.Concat(rf);
-        }
-
-        private static IExpression FlattenAll(IExpression expression) =>
-            expression switch
-            {
-                IAndBinaryExpression and => new AndFlattenedExpression(
-                    FlattenAll<IAndBinaryExpression>(and.Left, and.Right).Memoize()),
-                IOrBinaryExpression or => new OrFlattenedExpression(
-                    FlattenAll<IOrBinaryExpression>(or.Left, or.Right).Memoize()),
-                _ => expression
-            };
-
         public bool Equals(IExpression lhs, IExpression rhs)
         {
-            var left = FlattenAll(lhs);
-            var right = FlattenAll(rhs);
+            var left = Flatten(lhs);
+            var right = Flatten(rhs);
 
             return left.Equals(right);
         }
@@ -77,22 +52,25 @@ namespace Favalet.Expressions.Algebraic
             IExpression left, IExpression right)
             where TFlattenedExpression : FlattenedExpression
         {
-            if (Flatten(right) is TFlattenedExpression(IExpression[] operands1))
+            var fl = Flatten(left);
+            var fr = Flatten(right);
+
+            if (fr is TFlattenedExpression(IExpression[] rightOperands))
             {
-                foreach (var operand in operands1)
+                foreach (var rightOperand in rightOperands)
                 {
-                    if (this.Equals(left, operand))
+                    if (fl.Equals(rightOperand))
                     {
                         return left;
                     }
                 }
             }
 
-            if (Flatten(left) is TFlattenedExpression(IExpression[] operands2))
+            if (fl is TFlattenedExpression(IExpression[] leftOperands))
             {
-                foreach (var operand in operands2)
+                foreach (var leftOperand in leftOperands)
                 {
-                    if (this.Equals(operand, right))
+                    if (leftOperand.Equals(fr))
                     {
                         return right;
                     }
@@ -102,6 +80,18 @@ namespace Favalet.Expressions.Algebraic
             return null;
         }
 
+        protected virtual IExpression? ChoiceForAnd(IExpression left, IExpression right) =>
+            // Idempotence
+            this.Equals(left, right) ?
+                left :
+                null;
+
+        protected virtual IExpression? ChoiceForOr(IExpression left, IExpression right) =>
+            // Idempotence
+            this.Equals(left, right) ?
+                left :
+                null;
+
         public IExpression Compute(IExpression operand)
         {
             if (operand is IBinaryExpression binary)
@@ -109,22 +99,31 @@ namespace Favalet.Expressions.Algebraic
                 var left = this.Compute(binary.Left);
                 var right = this.Compute(binary.Right);
 
-                // Idempotence
-                if (this.Equals(left, right))
+                if (binary is IAndBinaryExpression)
                 {
-                    return left;
-                }
+                    if (this.ChoiceForAnd(left, right) is IExpression result)
+                    {
+                        return result;
+                    }
 
-                // Absorption
-                if (binary is IAndBinaryExpression &&
-                    this.ComputeAbsorption<OrFlattenedExpression>(left, right) is IExpression computed1)
-                {
-                    return computed1;
+                    // Absorption
+                    if (this.ComputeAbsorption<OrFlattenedExpression>(left, right) is IExpression computed1)
+                    {
+                        return computed1;
+                    }
                 }
-                else if (binary is IOrBinaryExpression &&
-                    this.ComputeAbsorption<AndFlattenedExpression>(left, right) is IExpression computed2)
+                else if (binary is IOrBinaryExpression)
                 {
-                    return computed2;
+                    if (this.ChoiceForOr(left, right) is IExpression result)
+                    {
+                        return result;
+                    }
+
+                    // Absorption
+                    if (this.ComputeAbsorption<AndFlattenedExpression>(left, right) is IExpression computed2)
+                    {
+                        return computed2;
+                    }
                 }
 
                 // Not changed

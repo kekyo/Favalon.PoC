@@ -29,20 +29,20 @@ namespace Favalet.Expressions.Algebraic
                     new[] { binary.Left, binary.Right }
             };
 
-        protected virtual IEnumerable<IExpression> MakeSimpleOr(
+        protected virtual IEnumerable<IExpression> ReduceByOr(
             IEnumerable<IExpression> expressions) =>
             expressions.Distinct();   // Idempotence / Commutative / Associative
 
-        protected virtual IEnumerable<IExpression> MakeSimpleAnd(
+        protected virtual IEnumerable<IExpression> ReduceByAnd(
             IEnumerable<IExpression> expressions) =>
             expressions.Distinct();   // Idempotence / Commutative / Associative
 
         private IExpression CombineIfRequired(
             IEnumerable<IExpression> expressions,
-            Func<IEnumerable<IExpression>, IEnumerable<IExpression>> toSimplify,
+            Func<IEnumerable<IExpression>, IEnumerable<IExpression>> reducer,
             Func<IExpression[], IExpression> creator)
         {
-            var exprs = toSimplify(
+            var exprs = reducer(
                 expressions.Select(oper => this.CombineByBinaryType(oper))).
                 Memoize();
             Debug.Assert(exprs.Length >= 1);
@@ -57,12 +57,12 @@ namespace Favalet.Expressions.Algebraic
                 IOrBinaryExpression or =>
                     this.CombineIfRequired(
                         EnumerateByBinaryType(or),
-                        MakeSimpleOr,
+                        ReduceByOr,
                         OrExpression.Create),
                 IAndBinaryExpression and =>
                     this.CombineIfRequired(
                         EnumerateByBinaryType(and),
-                        MakeSimpleAnd,
+                        ReduceByAnd,
                         AndExpression.Create),
 
                 // TODO: IOrExpression and IAndExpression

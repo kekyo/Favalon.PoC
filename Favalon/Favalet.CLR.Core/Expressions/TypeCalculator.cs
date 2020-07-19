@@ -8,6 +8,13 @@ namespace Favalet.Expressions
     public sealed class TypeCalculator :
         LogicalCalculator
     {
+        private enum ReduceResults
+        {
+            NonRelated,
+            AcceptLeft,
+            AcceptRight,
+        }
+
         private static IEnumerable<IExpression> ReduceTypes(
             IEnumerable<IExpression> expressions,
             Func<ITypeTerm, ITypeTerm, ReduceResults> predicate)
@@ -57,38 +64,7 @@ namespace Favalet.Expressions
             }
             while (requiredRecompute);
 
-
             return exprs;
         }
-
-        protected override ReduceResults ChoiceForAnd(
-            IExpression left, IExpression right) =>
-            (left is ITypeTerm(Type lt) && right is ITypeTerm(Type rt)) ?
-                (lt.IsAssignableFrom(rt) ?
-                    ReduceResults.AcceptRight :
-                    rt.IsAssignableFrom(lt) ?
-                        ReduceResults.AcceptLeft :
-                        ReduceResults.NonRelated) :
-                ReduceResults.NonRelated;
-
-        protected override ReduceResults ChoiceForOr(
-            IExpression left, IExpression right) =>
-            (left is ITypeTerm(Type lt) && right is ITypeTerm(Type rt)) ?
-                (lt.IsAssignableFrom(rt)?
-                    ReduceResults.AcceptLeft :
-                    rt.IsAssignableFrom(lt)?
-                        ReduceResults.AcceptRight :
-                        ReduceResults.NonRelated) :
-                ReduceResults.NonRelated;
-
-        // Narrow
-        protected override IEnumerable<IExpression> ReduceForAnd(
-            IEnumerable<IExpression> expressions) =>
-            ReduceTypes(expressions, this.ChoiceForAnd);
-
-        // Widen
-        protected override IEnumerable<IExpression> ReduceForOr(
-            IEnumerable<IExpression> expressions) =>
-            ReduceTypes(expressions, this.ChoiceForOr);
     }
 }

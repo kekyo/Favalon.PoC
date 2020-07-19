@@ -19,11 +19,5 @@ namespace Favalet
         public static OrBinaryExpression OrBinary(
             IExpression lhs, IExpression rhs) =>
             OrBinaryExpression.Create(lhs, rhs);
-
-        public static AndExpression And(params IExpression[] operands) =>
-            AndExpression.Create(operands);
-
-        public static OrExpression Or(params IExpression[] operands) =>
-            OrExpression.Create(operands);
     }
 }

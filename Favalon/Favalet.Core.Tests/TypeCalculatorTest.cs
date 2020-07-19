@@ -1,4 +1,5 @@
 ﻿using Favalet.Expressions;
+using Favalet.Expressions.Algebraic;
 using NUnit.Framework;
 using System;
 using System.Collections;
@@ -11,6 +12,22 @@ namespace Favalet
     [TestFixture]
     public sealed class TypeCalculatorTest
     {
+        private static readonly LogicalCalculator calculator =
+            new LogicalCalculator();
+
+        private static void AssertLogicalEqual(
+            IExpression expected,
+            IExpression actual)
+        {
+            if (!calculator.Equals(expected, actual))
+            {
+                Assert.Fail(
+                    "Expected = {0}\r\nActual   = {1}",
+                    expected.GetPrettyString(PrettyStringTypes.Simple),
+                    actual.GetPrettyString(PrettyStringTypes.Simple));
+            }
+        }
+
         #region CombinedAnd
         [Test]
         public void NonReducibleCombinedAndTypes1()
@@ -25,11 +42,11 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                And(
+                AndBinary(
                     Type<int>(),
                     Type<string>());
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -45,11 +62,11 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                And(
+                AndBinary(
                     Type<int>(),
                     Type<string>());
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -67,7 +84,7 @@ namespace Favalet
             var expected =
                 Type<int>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -85,7 +102,7 @@ namespace Favalet
             var expected =
                 Type<int>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -103,7 +120,7 @@ namespace Favalet
             var expected =
                 Type<string>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -121,7 +138,7 @@ namespace Favalet
             var expected =
                 Type<string>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -139,7 +156,7 @@ namespace Favalet
             var expected =
                 Type<int>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -157,7 +174,7 @@ namespace Favalet
             var expected =
                 Type<int>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -175,11 +192,11 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                And(
+                AndBinary(
                     Type<double>(),
                     Type<int>());
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -197,11 +214,11 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                And(
+                AndBinary(
                     Type<double>(),
                     Type<int>());
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -219,11 +236,11 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                And(
+                AndBinary(
                     Type<double>(),
                     Type<int>());
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -243,7 +260,7 @@ namespace Favalet
             var expected =
                 Type<Queue>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -263,7 +280,7 @@ namespace Favalet
             var expected =
                 Type<Queue>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -283,7 +300,7 @@ namespace Favalet
             var expected =
                 Type<Queue>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
         #endregion
 
@@ -301,11 +318,11 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                Or(
+                OrBinary(
                     Type<int>(),
                     Type<string>());
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -321,11 +338,11 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                Or(
+                OrBinary(
                     Type<string>(),
                     Type<int>());
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -343,7 +360,7 @@ namespace Favalet
             var expected =
                 Type<object>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -361,7 +378,7 @@ namespace Favalet
             var expected =
                 Type<object>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -379,7 +396,7 @@ namespace Favalet
             var expected =
                 Type<object>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -397,7 +414,7 @@ namespace Favalet
             var expected =
                 Type<object>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -415,7 +432,7 @@ namespace Favalet
             var expected =
                 Type<IFormattable>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -433,7 +450,7 @@ namespace Favalet
             var expected =
                 Type<IFormattable>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -453,7 +470,7 @@ namespace Favalet
             var expected =
                 Type<IFormattable>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -473,7 +490,7 @@ namespace Favalet
             var expected =
                 Type<IFormattable>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -493,7 +510,7 @@ namespace Favalet
             var expected =
                 Type<IFormattable>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -511,11 +528,11 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                Or(
+                OrBinary(
                     Type<ICloneable>(),
                     Type<IEnumerable>());
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -533,11 +550,11 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                Or(
+                OrBinary(
                     Type<ICloneable>(),
                     Type<IEnumerable>());
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -555,11 +572,11 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                Or(
+                OrBinary(
                     Type<ICloneable>(),
                     Type<IEnumerable>());
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
         #endregion
 
@@ -579,13 +596,13 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                And(
+                AndBinary(
                     Type<double>(),
-                    Or(
+                    OrBinary(
                         Type<int>(),
                         Type<string>()));
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -603,13 +620,13 @@ namespace Favalet
             var actual = calculator.Compute(expression);
 
             var expected =
-                Or(
+                OrBinary(
                     Type<double>(),
-                    And(
+                    AndBinary(
                         Type<int>(),
                         Type<string>()));
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         [Test]
@@ -631,7 +648,7 @@ namespace Favalet
             var expected =
                 Type<int>();
 
-            Assert.AreEqual(expected, actual);
+            AssertLogicalEqual(expected, actual);
         }
 
         #endregion

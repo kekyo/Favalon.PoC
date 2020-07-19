@@ -1,9 +1,6 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Favalet.Expressions;
+using Favalet.Expressions.Algebraic;
+using NUnit.Framework;
 
 using static Favalet.Generator;
 
@@ -12,6 +9,22 @@ namespace Favalet
     [TestFixture]
     public sealed class AlgebraicTest
     {
+        private static readonly LogicalCalculator calculator =
+            new LogicalCalculator();
+
+        private static void AssertLogicalEqual(
+            IExpression expected,
+            IExpression actual)
+        {
+            if (!calculator.Equals(expected, actual))
+            {
+                Assert.Fail(
+                    "Expected = {0}\r\nActual   = {1}",
+                    expected.GetPrettyString(PrettyStringTypes.Simple),
+                    actual.GetPrettyString(PrettyStringTypes.Simple));
+            }
+        }
+
         #region And
         [Test]
         public void NonReduceSingleAnd()
@@ -26,7 +39,7 @@ namespace Favalet
 
             var reduced = scope.Reduce(expression);
 
-            Assert.AreEqual(expression, reduced);
+            AssertLogicalEqual(expression, reduced);
         }
 
         [Test]
@@ -45,11 +58,11 @@ namespace Favalet
 
             // A && B
             var expected =
-                And(
+                AndBinary(
                     Identity("A"),
                     Identity("B"));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -67,7 +80,7 @@ namespace Favalet
 
             var reduced = scope.Reduce(expression);
 
-            Assert.AreEqual(expression, reduced);
+            AssertLogicalEqual(expression, reduced);
         }
 
         [Test]
@@ -90,7 +103,7 @@ namespace Favalet
             var expected =
                 Identity("A");
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -115,7 +128,7 @@ namespace Favalet
             var expected =
                 Identity("A");
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
         #endregion
 
@@ -133,7 +146,7 @@ namespace Favalet
 
             var reduced = scope.Reduce(expression);
 
-            Assert.AreEqual(expression, reduced);
+            AssertLogicalEqual(expression, reduced);
         }
 
         [Test]
@@ -152,11 +165,11 @@ namespace Favalet
 
             // A || B
             var expected =
-                Or(
+                OrBinary(
                     Identity("A"),
                     Identity("B"));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -174,7 +187,7 @@ namespace Favalet
 
             var reduced = scope.Reduce(expression);
 
-            Assert.AreEqual(expression, reduced);
+            AssertLogicalEqual(expression, reduced);
         }
 
         [Test]
@@ -197,7 +210,7 @@ namespace Favalet
             var expected =
                 Identity("A");
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -222,7 +235,7 @@ namespace Favalet
             var expected =
                 Identity("A");
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
         #endregion
 
@@ -249,7 +262,7 @@ namespace Favalet
             var expected =
                 Identity("A");
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -274,7 +287,7 @@ namespace Favalet
             var expected =
                 Identity("A");
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -297,11 +310,11 @@ namespace Favalet
 
             // A && B
             var expected =
-                And(
+                AndBinary(
                     Identity("A"),
                     Identity("B"));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -324,11 +337,11 @@ namespace Favalet
 
             // A || B
             var expected =
-                Or(
+                OrBinary(
                     Identity("A"),
                     Identity("B"));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -351,11 +364,11 @@ namespace Favalet
 
             // A || B
             var expected =
-                Or(
+                OrBinary(
                     Identity("A"),
                     Identity("B"));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -378,11 +391,11 @@ namespace Favalet
 
             // A && B
             var expected =
-                And(
+                AndBinary(
                     Identity("A"),
                     Identity("B"));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -407,7 +420,7 @@ namespace Favalet
             var expected =
                 Identity("A");
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -432,7 +445,7 @@ namespace Favalet
             var expected =
                 Identity("A");
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -455,11 +468,11 @@ namespace Favalet
 
             // A || B
             var expected =
-                Or(
+                OrBinary(
                     Identity("A"),
                     Identity("B"));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -481,11 +494,11 @@ namespace Favalet
             var reduced = scope.Reduce(expression);
 
             var expected =
-                And(
+                AndBinary(
                     Identity("A"),
                     Identity("B"));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -512,12 +525,13 @@ namespace Favalet
 
             // A || B || C
             var expected =
-                Or(
+                OrBinary(
                     Identity("A"),
-                    Identity("B"),
-                    Identity("C"));
+                    OrBinary(
+                        Identity("B"),
+                        Identity("C")));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -544,12 +558,13 @@ namespace Favalet
 
             // A && B && C
             var expected =
-                And(
+                AndBinary(
                     Identity("A"),
-                    Identity("B"),
-                    Identity("C"));
+                    AndBinary(
+                        Identity("B"),
+                        Identity("C")));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -576,12 +591,13 @@ namespace Favalet
 
             // A || B || C
             var expected =
-                Or(
+                OrBinary(
                     Identity("A"),
-                    Identity("B"),
-                    Identity("C"));
+                    OrBinary(
+                        Identity("B"),
+                        Identity("C")));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -608,12 +624,13 @@ namespace Favalet
 
             // A && B && C
             var expected =
-                And(
+                AndBinary(
                     Identity("A"),
-                    Identity("B"),
-                    Identity("C"));
+                    AndBinary(
+                        Identity("B"),
+                        Identity("C")));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -640,12 +657,13 @@ namespace Favalet
 
             // A || B || C
             var expected =
-                Or(
+                OrBinary(
                     Identity("A"),
-                    Identity("B"),
-                    Identity("C"));
+                    OrBinary(
+                        Identity("B"),
+                        Identity("C")));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -672,12 +690,13 @@ namespace Favalet
 
             // A && B && C
             var expected =
-                And(
+                AndBinary(
                     Identity("A"),
-                    Identity("B"),
-                    Identity("C"));
+                    AndBinary(
+                        Identity("B"),
+                        Identity("C")));
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -708,7 +727,7 @@ namespace Favalet
             var expected =
                 Identity("A");
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
 
         [Test]
@@ -739,7 +758,7 @@ namespace Favalet
             var expected =
                 Identity("A");
 
-            Assert.AreEqual(expected, reduced);
+            AssertLogicalEqual(expected, reduced);
         }
         #endregion
     }

@@ -2,7 +2,6 @@
 using Favalet.Internal;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -33,11 +32,13 @@ namespace Favalet.Expressions
                     var current = start.Next;
                     while (current != null)
                     {
+                        // Idempotence / Commutative / Associative
                         if (start.Value.Equals(current.Value))
                         {
                             exprs.Remove(current);
                             requiredRecompute = true;
                         }
+                        // The pair are both type term.
                         else if (
                             start.Value is ITypeTerm leftType &&
                             current.Value is ITypeTerm rightType)
@@ -67,11 +68,10 @@ namespace Favalet.Expressions
             return exprs;
         }
 
+        // Widen
         protected override IEnumerable<IExpression> ReduceByOr(
-            IEnumerable<IExpression> expressions)
-        {
-            // Widen
-            var widened = ReduceTypes(
+            IEnumerable<IExpression> expressions) =>
+            ReduceTypes(
                 expressions,
                 (calculatedExpr, expr) =>
                     calculatedExpr.RuntimeType.IsAssignableFrom(expr.RuntimeType) ?
@@ -80,14 +80,10 @@ namespace Favalet.Expressions
                             ReduceResults.AcceptRight :
                             ReduceResults.NonRelated);
 
-            return widened;
-        }
-
+        // Narrow
         protected override IEnumerable<IExpression> ReduceByAnd(
-            IEnumerable<IExpression> expressions)
-        {
-            // Narrow
-            var narrowed = ReduceTypes(
+            IEnumerable<IExpression> expressions) =>
+            ReduceTypes(
                 expressions,
                 (calculatedExpr, expr) =>
                     calculatedExpr.RuntimeType.IsAssignableFrom(expr.RuntimeType) ?
@@ -95,8 +91,5 @@ namespace Favalet.Expressions
                         expr.RuntimeType.IsAssignableFrom(calculatedExpr.RuntimeType) ?
                             ReduceResults.AcceptLeft :
                             ReduceResults.NonRelated);
-
-            return narrowed;
-        }
     }
 }

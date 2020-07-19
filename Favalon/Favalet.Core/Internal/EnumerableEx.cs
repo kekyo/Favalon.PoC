@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Favalet.Internal
 {
-    internal static class Enumerable
+    internal static class EnumerableEx
     {
         public static T[] Memoize<T>(
             this IEnumerable<T> enumerable) =>

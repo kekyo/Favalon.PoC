@@ -339,8 +339,8 @@ namespace Favalet
 
             var expected =
                 OrBinary(
-                    Type<string>(),
-                    Type<int>());
+                    Type<int>(),
+                    Type<string>());
 
             AssertLogicalEqual(expected, actual);
         }

@@ -26,7 +26,7 @@ namespace Favalet.Expressions.Algebraic
             this.Operand.GetHashCode();
 
         public bool Equals(ILogicalOperator rhs) =>
-            this.Operand.Equals(rhs.Operand);
+            calculator.Equals(this.Operand, rhs.Operand);
 
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is ILogicalOperator rhs && Equals(rhs);

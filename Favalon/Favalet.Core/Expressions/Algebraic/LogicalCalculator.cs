@@ -29,11 +29,11 @@ namespace Favalet.Expressions.Algebraic
                     new[] { binary.Left, binary.Right }
             };
 
-        protected virtual IEnumerable<IExpression> ReduceByOr(
+        protected virtual IEnumerable<IExpression> ReduceForOr(
             IEnumerable<IExpression> expressions) =>
             expressions.Distinct();   // Idempotence / Commutative / Associative
 
-        protected virtual IEnumerable<IExpression> ReduceByAnd(
+        protected virtual IEnumerable<IExpression> ReduceForAnd(
             IEnumerable<IExpression> expressions) =>
             expressions.Distinct();   // Idempotence / Commutative / Associative
 
@@ -57,19 +57,34 @@ namespace Favalet.Expressions.Algebraic
                 IOrBinaryExpression or =>
                     this.CombineIfRequired(
                         EnumerateByBinaryType(or),
-                        ReduceByOr,
+                        ReduceForOr,
                         OrExpression.Create),
                 IAndBinaryExpression and =>
                     this.CombineIfRequired(
                         EnumerateByBinaryType(and),
-                        ReduceByAnd,
+                        ReduceForAnd,
                         AndExpression.Create),
 
                 // TODO: IOrExpression and IAndExpression
                 _ => operand
             };
 
-        private IExpression ComputeAbsorption(IExpression operand)
+        protected enum ReduceResults
+        {
+            NonRelated,
+            AcceptLeft,
+            AcceptRight,
+        }
+
+        protected virtual ReduceResults ChoiceForAnd(
+            IExpression left, IExpression right) =>
+            left.Equals(right) ? ReduceResults.AcceptRight : ReduceResults.NonRelated;
+
+        protected virtual ReduceResults ChoiceForOr(
+            IExpression left, IExpression right) =>
+            left.Equals(right) ? ReduceResults.AcceptLeft : ReduceResults.NonRelated;
+
+        private IExpression ReduceAbsorption(IExpression operand)
         {
             // Absorption
             if (operand is ISetExpression set)
@@ -77,28 +92,50 @@ namespace Favalet.Expressions.Algebraic
                 Debug.Assert(set.Operands.Length >= 2);
 
                 var reducedOpers = set.Operands.
-                    Select(oper => this.ComputeAbsorption(oper)).
+                    Select(oper => this.ReduceAbsorption(oper)).
                     Memoize();
 
                 if (set is IAndExpression and)
                 {
-                    if (reducedOpers.Cast<IExpression?>().Aggregate(
-                        (agg, v) =>
-                            (agg is IExpression a &&
-                            v is IOrExpression(IExpression[] subopers) &&
-                            subopers.Any(suboper => suboper.Equals(a))) ?
-                                agg : null) is IExpression oper2)
+                    // Distribute
+                    var r = reducedOpers.Aggregate((left, right) =>
                     {
-                        return oper2;
-                    }
-                    else if (and.Operands.EqualsPartiallyOrdered(reducedOpers))
-                    {
-                        return operand;
-                    }
-                    else
-                    {
-                        return AndExpression.Create(reducedOpers);
-                    }
+                        var leftOr = left as IOrExpression;
+                        var rightOr = right as IOrExpression;
+
+                        if ((leftOr != null) && (rightOr != null))
+                        {
+                            return rightOr.Operands.Aggregate((rightOrLeft, rightOrRight) =>
+                            {
+                                return leftOr.Operands.Aggregate((leftOrLeft, leftOrRight) =>
+                                {
+                                    var aLeft = AndExpression.Create(leftOrLeft, rightOrLeft);
+                                    var aRight = AndExpression.Create(leftOrRight, rightOrRight);
+                                    return OrExpression.Create(aLeft, aRight);
+                                });
+                            });
+                        }
+
+                        if (rightOr != null)
+                        {
+                            return rightOr.Operands.Aggregate((orLeft, orRight) =>
+                            {
+                                var aLeft = AndExpression.Create(left, orLeft);
+                                var aRight = AndExpression.Create(left, orRight);
+                                return OrExpression.Create(aLeft, aRight);
+                            });
+                        }
+                        
+                        if (leftOr != null)
+                        {
+                            return leftOr.Operands.Aggregate((orLeft, orRight) =>
+                            {
+                                var aLeft = AndExpression.Create(orLeft, right);
+                                var aRight = AndExpression.Create(orRight, right);
+                                return OrExpression.Create(aLeft, aRight);
+                            });
+                        }
+                    });
                 }
 
                 if (set is IOrExpression or)
@@ -107,7 +144,8 @@ namespace Favalet.Expressions.Algebraic
                         (agg, v) =>
                             (agg is IExpression a &&
                             v is IAndExpression(IExpression[] subopers) &&
-                            subopers.Any(suboper => suboper.Equals(a))) ?
+                            subopers.Any(suboper =>
+                                this.ChoiceForOr(suboper, a) != ReduceResults.NonRelated)) ?
                                 agg : null) is IExpression oper2)
                     {
                         return oper2;
@@ -131,7 +169,7 @@ namespace Favalet.Expressions.Algebraic
         public IExpression Compute(IExpression operand)
         {
             var combined = this.CombineByBinaryType(operand);
-            return this.ComputeAbsorption(combined);
+            return this.ReduceAbsorption(combined);
         }
     }
 }

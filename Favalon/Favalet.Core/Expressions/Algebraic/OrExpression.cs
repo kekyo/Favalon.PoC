@@ -44,7 +44,7 @@ namespace Favalet.Expressions.Algebraic
                     "(Or " + string.Join(" ", this.Operands.Select(oper => oper.GetPrettyString(type))) + ")",
             };
 
-        public static OrExpression Create(IExpression[] operands) =>
+        public static OrExpression Create(params IExpression[] operands) =>
             new OrExpression(operands);
     }
 }

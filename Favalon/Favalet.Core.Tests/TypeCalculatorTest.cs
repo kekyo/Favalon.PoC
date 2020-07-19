@@ -11,7 +11,7 @@ namespace Favalet
     [TestFixture]
     public sealed class TypeCalculatorTest
     {
-        #region CombinedOr
+        #region CombinedAnd
         [Test]
         public void NonReducibleCombinedAndTypes1()
         {
@@ -561,6 +561,79 @@ namespace Favalet
 
             Assert.AreEqual(expected, actual);
         }
+        #endregion
+
+        #region CombinedBoth
+        [Test]
+        public void NonReducibleCombinedAndOrTypes()
+        {
+            var calculator = new TypeCalculator();
+
+            var expression =
+                AndBinary(
+                    Type<double>(),
+                    OrBinary(
+                        Type<int>(),
+                        Type<string>()));
+
+            var actual = calculator.Compute(expression);
+
+            var expected =
+                And(
+                    Type<double>(),
+                    Or(
+                        Type<int>(),
+                        Type<string>()));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void NonReducibleCombinedOrAndTypes()
+        {
+            var calculator = new TypeCalculator();
+
+            var expression =
+                OrBinary(
+                    Type<double>(),
+                    AndBinary(
+                        Type<int>(),
+                        Type<string>()));
+
+            var actual = calculator.Compute(expression);
+
+            var expected =
+                Or(
+                    Type<double>(),
+                    And(
+                        Type<int>(),
+                        Type<string>()));
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void ReducibleCombinedAndOrTypes()
+        {
+            var calculator = new TypeCalculator();
+
+            // IFormattable && (System.Int32 || System.String)
+            var expression =
+                AndBinary(
+                    Type<IFormattable>(),
+                    OrBinary(
+                        Type<int>(),
+                        Type<string>()));
+
+            var actual = calculator.Compute(expression);
+
+            // System.Int32
+            var expected =
+                Type<int>();
+
+            Assert.AreEqual(expected, actual);
+        }
+
         #endregion
     }
 }

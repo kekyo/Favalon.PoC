@@ -35,7 +35,7 @@ namespace Favalet
 
             // A && B
             var expression =
-                AndBinary(
+                And(
                     Identity("A"),
                     Identity("B"));
 
@@ -43,7 +43,7 @@ namespace Favalet
 
             // A && B
             var expected =
-                AndBinary(
+                And(
                     Identity("A"),
                     Identity("B"));
 
@@ -58,7 +58,7 @@ namespace Favalet
             // A && B
             var expression =
                 Logical(
-                    AndBinary(
+                    And(
                         Identity("A"),
                         Identity("B")));
 
@@ -66,7 +66,7 @@ namespace Favalet
 
             // A && B
             var expected =
-                AndBinary(
+                And(
                     Identity("A"),
                     Identity("B"));
 
@@ -80,8 +80,8 @@ namespace Favalet
 
             // (A && A) && A
             var expression =
-                AndBinary(
-                    AndBinary(
+                And(
+                    And(
                         Identity("A"),
                         Identity("A")),
                     Identity("A"));
@@ -90,8 +90,8 @@ namespace Favalet
 
             // (A && A) && A
             var expected =
-                AndBinary(
-                    AndBinary(
+                And(
+                    And(
                         Identity("A"),
                         Identity("A")),
                     Identity("A"));
@@ -107,8 +107,8 @@ namespace Favalet
             // (A && A) && A
             var expression =
                 Logical(
-                    AndBinary(
-                        AndBinary(
+                    And(
+                        And(
                             Identity("A"),
                             Identity("A")),
                         Identity("A")));
@@ -130,11 +130,11 @@ namespace Favalet
             // (A && A) && (A && A)
             var expression =
                 Logical(
-                    AndBinary(
-                        AndBinary(
+                    And(
+                        And(
                             Identity("A"),
                             Identity("A")),
-                        AndBinary(
+                        And(
                             Identity("A"),
                             Identity("A"))));
 
@@ -156,7 +156,7 @@ namespace Favalet
 
             // A || B
             var expression =
-                OrBinary(
+                Or(
                     Identity("A"),
                     Identity("B"));
 
@@ -164,7 +164,7 @@ namespace Favalet
 
             // A || B
             var expected =
-                OrBinary(
+                Or(
                     Identity("A"),
                     Identity("B"));
 
@@ -179,7 +179,7 @@ namespace Favalet
             // A || B
             var expression =
                 Logical(
-                    OrBinary(
+                    Or(
                         Identity("A"),
                         Identity("B")));
 
@@ -187,7 +187,7 @@ namespace Favalet
 
             // A || B
             var expected =
-                OrBinary(
+                Or(
                     Identity("A"),
                     Identity("B"));
 
@@ -201,8 +201,8 @@ namespace Favalet
 
             // (A || A) || A
             var expression =
-                OrBinary(
-                    OrBinary(
+                Or(
+                    Or(
                         Identity("A"),
                         Identity("A")),
                     Identity("A"));
@@ -211,8 +211,8 @@ namespace Favalet
 
             // (A || A) || A
             var expected =
-                OrBinary(
-                    OrBinary(
+                Or(
+                    Or(
                         Identity("A"),
                         Identity("A")),
                     Identity("A"));
@@ -228,8 +228,8 @@ namespace Favalet
             // (A || A) || A
             var expression =
                 Logical(
-                    OrBinary(
-                        OrBinary(
+                    Or(
+                        Or(
                             Identity("A"),
                             Identity("A")),
                         Identity("A")));
@@ -251,11 +251,11 @@ namespace Favalet
             // (A || A) || (A || A)
             var expression =
                 Logical(
-                    OrBinary(
-                        OrBinary(
+                    Or(
+                        Or(
                             Identity("A"),
                             Identity("A")),
-                        OrBinary(
+                        Or(
                             Identity("A"),
                             Identity("A"))));
 
@@ -278,11 +278,11 @@ namespace Favalet
             // (A || A) && (A || A)
             var expression =
                 Logical(
-                    AndBinary(
-                        OrBinary(
+                    And(
+                        Or(
                             Identity("A"),
                             Identity("A")),
-                        OrBinary(
+                        Or(
                             Identity("A"),
                             Identity("A"))));
 
@@ -303,11 +303,11 @@ namespace Favalet
             // (A && A) || (A && A)
             var expression =
                 Logical(
-                    OrBinary(
-                        AndBinary(
+                    Or(
+                        And(
                             Identity("A"),
                             Identity("A")),
-                        AndBinary(
+                        And(
                             Identity("A"),
                             Identity("A"))));
 
@@ -328,11 +328,11 @@ namespace Favalet
             // (A || A) && (B || B)
             var expression =
                 Logical(
-                    AndBinary(
-                        OrBinary(
+                    And(
+                        Or(
                             Identity("A"),
                             Identity("A")),
-                        OrBinary(
+                        Or(
                             Identity("B"),
                             Identity("B"))));
 
@@ -340,7 +340,7 @@ namespace Favalet
 
             // A && B
             var expected =
-                AndBinary(
+                And(
                     Identity("A"),
                     Identity("B"));
 
@@ -355,11 +355,11 @@ namespace Favalet
             // (A && A) || (B && B)
             var expression =
                 Logical(
-                    OrBinary(
-                        AndBinary(
+                    Or(
+                        And(
                             Identity("A"),
                             Identity("A")),
-                        AndBinary(
+                        And(
                             Identity("B"),
                             Identity("B"))));
 
@@ -367,7 +367,7 @@ namespace Favalet
 
             // A || B
             var expected =
-                OrBinary(
+                Or(
                     Identity("A"),
                     Identity("B"));
 
@@ -382,11 +382,11 @@ namespace Favalet
             // (A || B) && (A || B)
             var expression =
                 Logical(
-                    AndBinary(
-                        OrBinary(
+                    And(
+                        Or(
                             Identity("A"),
                             Identity("B")),
-                        OrBinary(
+                        Or(
                             Identity("A"),
                             Identity("B"))));
 
@@ -394,7 +394,7 @@ namespace Favalet
 
             // A || B
             var expected =
-                OrBinary(
+                Or(
                     Identity("A"),
                     Identity("B"));
 
@@ -409,11 +409,11 @@ namespace Favalet
             // (A && B) || (A && B)
             var expression =
                 Logical(
-                    OrBinary(
-                        AndBinary(
+                    Or(
+                        And(
                             Identity("A"),
                             Identity("B")),
-                        AndBinary(
+                        And(
                             Identity("A"),
                             Identity("B"))));
 
@@ -421,7 +421,7 @@ namespace Favalet
 
             // A && B
             var expected =
-                AndBinary(
+                And(
                     Identity("A"),
                     Identity("B"));
 
@@ -438,9 +438,9 @@ namespace Favalet
             // A && (A || B)
             var expression =
                 Logical(
-                    AndBinary(
+                    And(
                         Identity("A"),
-                        OrBinary(
+                        Or(
                             Identity("A"),
                             Identity("B"))));
 
@@ -463,9 +463,9 @@ namespace Favalet
             // A || (A && B)
             var expression =
                 Logical(
-                    OrBinary(
+                    Or(
                         Identity("A"),
-                        AndBinary(
+                        And(
                             Identity("A"),
                             Identity("B"))));
 
@@ -486,11 +486,11 @@ namespace Favalet
             // (A || B) && (B || A)
             var expression =
                 Logical(
-                    AndBinary(
-                        OrBinary(
+                    And(
+                        Or(
                             Identity("A"),
                             Identity("B")),
-                        OrBinary(
+                        Or(
                             Identity("B"),
                             Identity("A"))));
 
@@ -498,7 +498,7 @@ namespace Favalet
 
             // A || B
             var expected =
-                OrBinary(
+                Or(
                     Identity("A"),
                     Identity("B"));
 
@@ -513,18 +513,18 @@ namespace Favalet
             // (A && B) || (B && A)
             var expression =
                 Logical(
-                    OrBinary(
-                        AndBinary(
+                    Or(
+                        And(
                             Identity("A"),
                             Identity("B")),
-                        AndBinary(
+                        And(
                             Identity("B"),
                             Identity("A"))));
 
             var actual = scope.Reduce(expression);
 
             var expected =
-                AndBinary(
+                And(
                     Identity("A"),
                     Identity("B"));
 
@@ -539,15 +539,15 @@ namespace Favalet
             // (A || (B || C)) && (B || (C || A))
             var expression =
                 Logical(
-                    AndBinary(
-                        OrBinary(
+                    And(
+                        Or(
                             Identity("A"),
-                            OrBinary(
+                            Or(
                                 Identity("B"),
                                 Identity("C"))),
-                        OrBinary(
+                        Or(
                             Identity("B"),
-                            OrBinary(
+                            Or(
                                 Identity("C"),
                                 Identity("A")))));
 
@@ -555,9 +555,9 @@ namespace Favalet
 
             // A || B || C
             var expected =
-                OrBinary(
+                Or(
                     Identity("A"),
-                    OrBinary(
+                    Or(
                         Identity("B"),
                         Identity("C")));
 
@@ -572,15 +572,15 @@ namespace Favalet
             // (A && (B && C)) || (B && (C && A))
             var expression =
                 Logical(
-                    OrBinary(
-                        AndBinary(
+                    Or(
+                        And(
                             Identity("A"),
-                            AndBinary(
+                            And(
                                 Identity("B"),
                                 Identity("C"))),
-                        AndBinary(
+                        And(
                             Identity("B"),
-                            AndBinary(
+                            And(
                                 Identity("C"),
                                 Identity("A")))));
 
@@ -588,9 +588,9 @@ namespace Favalet
 
             // A && B && C
             var expected =
-                AndBinary(
+                And(
                     Identity("A"),
-                    AndBinary(
+                    And(
                         Identity("B"),
                         Identity("C")));
 
@@ -605,14 +605,14 @@ namespace Favalet
             // (A || (B || C)) && ((C || A) || B)
             var expression =
                 Logical(
-                    AndBinary(
-                        OrBinary(
+                    And(
+                        Or(
                             Identity("A"),
-                            OrBinary(
+                            Or(
                                 Identity("B"),
                                 Identity("C"))),
-                        OrBinary(
-                            OrBinary(
+                        Or(
+                            Or(
                                 Identity("C"),
                                 Identity("A")),
                             Identity("B"))));
@@ -621,9 +621,9 @@ namespace Favalet
 
             // A || B || C
             var expected =
-                OrBinary(
+                Or(
                     Identity("A"),
-                    OrBinary(
+                    Or(
                         Identity("B"),
                         Identity("C")));
 
@@ -638,14 +638,14 @@ namespace Favalet
             // (A && (B && C)) || ((C && A) && B)
             var expression =
                 Logical(
-                    OrBinary(
-                        AndBinary(
+                    Or(
+                        And(
                             Identity("A"),
-                            AndBinary(
+                            And(
                                 Identity("B"),
                                 Identity("C"))),
-                        AndBinary(
-                            AndBinary(
+                        And(
+                            And(
                                 Identity("C"),
                                 Identity("A")),
                             Identity("B"))));
@@ -654,9 +654,9 @@ namespace Favalet
 
             // A && B && C
             var expected =
-                AndBinary(
+                And(
                     Identity("A"),
-                    AndBinary(
+                    And(
                         Identity("B"),
                         Identity("C")));
 
@@ -671,15 +671,15 @@ namespace Favalet
             // ((A || B) || C) && (B || (C || A))
             var expression =
                 Logical(
-                    AndBinary(
-                        OrBinary(
-                            OrBinary(
+                    And(
+                        Or(
+                            Or(
                                 Identity("A"),
                                 Identity("B")),
                             Identity("C")),
-                        OrBinary(
+                        Or(
                             Identity("B"),
-                            OrBinary(
+                            Or(
                                 Identity("C"),
                                 Identity("A")))));
 
@@ -687,9 +687,9 @@ namespace Favalet
 
             // A || B || C
             var expected =
-                OrBinary(
+                Or(
                     Identity("A"),
-                    OrBinary(
+                    Or(
                         Identity("B"),
                         Identity("C")));
 
@@ -704,15 +704,15 @@ namespace Favalet
             // ((A && B) && C) || (B && (C && A))
             var expression =
                 Logical(
-                    OrBinary(
-                        AndBinary(
-                            AndBinary(
+                    Or(
+                        And(
+                            And(
                                 Identity("A"),
                                 Identity("B")),
                             Identity("C")),
-                        AndBinary(
+                        And(
                             Identity("B"),
-                            AndBinary(
+                            And(
                                 Identity("C"),
                                 Identity("A")))));
 
@@ -720,9 +720,9 @@ namespace Favalet
 
             // A && B && C
             var expected =
-                AndBinary(
+                And(
                     Identity("A"),
-                    AndBinary(
+                    And(
                         Identity("B"),
                         Identity("C")));
 
@@ -739,14 +739,14 @@ namespace Favalet
             // (A && (A || B)) || ((C && A) && B)
             var expression =
                 Logical(
-                    OrBinary(
-                        AndBinary(
+                    Or(
+                        And(
                             Identity("A"),
-                            OrBinary(
+                            Or(
                                 Identity("A"),
                                 Identity("B"))),
-                        AndBinary(
-                            AndBinary(
+                        And(
+                            And(
                                 Identity("C"),
                                 Identity("A")),
                             Identity("B"))));
@@ -770,14 +770,14 @@ namespace Favalet
             // (A || (A && B)) && ((C || A) || B)
             var expression =
                 Logical(
-                    AndBinary(
-                        OrBinary(
+                    And(
+                        Or(
                             Identity("A"),
-                            AndBinary(
+                            And(
                                 Identity("A"),
                                 Identity("B"))),
-                        OrBinary(
-                            OrBinary(
+                        Or(
+                            Or(
                                 Identity("C"),
                                 Identity("A")),
                             Identity("B"))));

@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface IOrBinaryExpression : IBinaryExpression
+    public interface IAndExpression : IBinaryExpression
     {
     }
 
-    public sealed class OrBinaryExpression :
-        BinaryExpression<IOrBinaryExpression>,
-        IOrBinaryExpression
+    public sealed class AndExpression :
+        BinaryExpression<IAndExpression>,
+        IAndExpression
     {
-        private OrBinaryExpression(IExpression left, IExpression right) :
+        private AndExpression(IExpression left, IExpression right) :
             base(left, right)
         { }
 
@@ -30,7 +30,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return new OrBinaryExpression(left, right);
+                return new AndExpression(left, right);
             }
         }
 
@@ -38,12 +38,12 @@ namespace Favalet.Expressions.Algebraic
             type switch
             {
                 PrettyStringTypes.Simple =>
-                    $"({this.Left.GetPrettyString(type)} || {this.Right.GetPrettyString(type)})",
+                    $"({this.Left.GetPrettyString(type)} && {this.Right.GetPrettyString(type)})",
                 _ =>
-                    $"(OrBinary {this.Left.GetPrettyString(type)} {this.Right.GetPrettyString(type)})"
+                    $"(And {this.Left.GetPrettyString(type)} {this.Right.GetPrettyString(type)})"
             };
 
-        public static OrBinaryExpression Create(IExpression left, IExpression right) =>
-            new OrBinaryExpression(left, right);
+        public static AndExpression Create(IExpression left, IExpression right) =>
+            new AndExpression(left, right);
     }
 }

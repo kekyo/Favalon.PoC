@@ -13,16 +13,16 @@ namespace Favalet
         public static LogicalOperator Logical(IBinaryExpression operand) =>
             LogicalOperator.Create(operand);
 
-        public static AndBinaryExpression AndBinary(
+        public static AndExpression And(
             IExpression lhs, IExpression rhs, params IExpression[] operands) =>
             operands.Aggregate(
-                AndBinaryExpression.Create(lhs, rhs),
-                AndBinaryExpression.Create);
+                AndExpression.Create(lhs, rhs),
+                AndExpression.Create);
 
-        public static OrBinaryExpression OrBinary(
+        public static OrExpression Or(
             IExpression lhs, IExpression rhs, params IExpression[] operands) =>
             operands.Aggregate(
-                OrBinaryExpression.Create(lhs, rhs),
-                OrBinaryExpression.Create);
+                OrExpression.Create(lhs, rhs),
+                OrExpression.Create);
     }
 }

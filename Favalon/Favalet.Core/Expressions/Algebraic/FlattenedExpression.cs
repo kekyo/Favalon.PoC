@@ -35,7 +35,13 @@ namespace Favalet.Expressions.Algebraic
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
 
         public override string GetPrettyString(PrettyStringTypes type) =>
-            "(" + string.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")";
+            type switch
+            {
+                PrettyStringTypes.Simple =>
+                    "(" + string.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")",
+                _ =>
+                    "(AndF " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")"
+            };
     }
 
     internal sealed class OrFlattenedExpression : FlattenedExpression
@@ -49,6 +55,12 @@ namespace Favalet.Expressions.Algebraic
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
 
         public override string GetPrettyString(PrettyStringTypes type) =>
-            "(" + string.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")";
+            type switch
+            {
+                PrettyStringTypes.Simple =>
+                    "(" + string.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")",
+                _ =>
+                    "(OrF " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")"
+            };
     }
 }

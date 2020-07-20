@@ -34,14 +34,14 @@ namespace Favalet
         public void NonReducibleCombinedAndTypes1()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<int>(),
                     Type<string>());
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                AndBinary(
+                And(
                     Type<int>(),
                     Type<string>());
 
@@ -52,14 +52,14 @@ namespace Favalet
         public void NonReducibleCombinedAndTypes2()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<string>(),
                     Type<int>());
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                AndBinary(
+                And(
                     Type<int>(),
                     Type<string>());
 
@@ -70,7 +70,7 @@ namespace Favalet
         public void ReducibleCombinedAndTypes1_1()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<object>(),
                     Type<int>());
 
@@ -86,7 +86,7 @@ namespace Favalet
         public void ReducibleCombinedAndTypes1_2()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<int>(),
                     Type<object>());
 
@@ -102,7 +102,7 @@ namespace Favalet
         public void ReducibleCombinedAndTypes2_1()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<object>(),
                     Type<string>());
 
@@ -118,7 +118,7 @@ namespace Favalet
         public void ReducibleCombinedAndTypes2_2()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<string>(),
                     Type<object>());
 
@@ -134,7 +134,7 @@ namespace Favalet
         public void ReducibleCombinedAndTypes3_1()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<IFormattable>(),
                     Type<int>());
 
@@ -150,7 +150,7 @@ namespace Favalet
         public void ReducibleCombinedAndTypes3_2()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<int>(),
                     Type<IFormattable>());
 
@@ -166,16 +166,16 @@ namespace Favalet
         public void ReducibleMultipleCombinedAndTypes1_1()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<double>(),
-                    AndBinary(
+                    And(
                         Type<IFormattable>(),
                         Type<int>()));
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                AndBinary(
+                And(
                     Type<double>(),
                     Type<int>());
 
@@ -186,16 +186,16 @@ namespace Favalet
         public void ReducibleMultipleCombinedAndTypes1_2()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<double>(),
-                    AndBinary(
+                    And(
                         Type<int>(),
                         Type<IFormattable>()));
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                AndBinary(
+                And(
                     Type<double>(),
                     Type<int>());
 
@@ -206,16 +206,16 @@ namespace Favalet
         public void ReducibleMultipleCombinedAndTypes1_3()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<IFormattable>(),
-                    AndBinary(
+                    And(
                         Type<int>(),
                         Type<double>()));
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                AndBinary(
+                And(
                     Type<double>(),
                     Type<int>());
 
@@ -226,9 +226,9 @@ namespace Favalet
         public void ReducibleMultipleCombinedAndTypes2_1()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<Queue>(),
-                    AndBinary(
+                    And(
                         Type<ICloneable>(),
                         Type<IEnumerable>()));
 
@@ -244,9 +244,9 @@ namespace Favalet
         public void ReducibleMultipleCombinedAndTypes2_2()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<ICloneable>(),
-                    AndBinary(
+                    And(
                         Type<Queue>(),
                         Type<IEnumerable>()));
 
@@ -262,9 +262,9 @@ namespace Favalet
         public void ReducibleMultipleCombinedAndTypes2_3()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<IEnumerable>(),
-                    AndBinary(
+                    And(
                         Type<ICloneable>(),
                         Type<Queue>()));
 
@@ -282,14 +282,14 @@ namespace Favalet
         public void NonReducibleCombinedOrTypes1()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<int>(),
                     Type<string>());
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                OrBinary(
+                Or(
                     Type<int>(),
                     Type<string>());
 
@@ -300,14 +300,14 @@ namespace Favalet
         public void NonReducibleCombinedOrTypes2()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<string>(),
                     Type<int>());
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                OrBinary(
+                Or(
                     Type<int>(),
                     Type<string>());
 
@@ -318,7 +318,7 @@ namespace Favalet
         public void ReducibleCombinedOrTypes1_1()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<object>(),
                     Type<int>());
 
@@ -334,7 +334,7 @@ namespace Favalet
         public void ReducibleCombinedOrTypes1_2()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<int>(),
                     Type<object>());
 
@@ -350,7 +350,7 @@ namespace Favalet
         public void ReducibleCombinedOrTypes2_1()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<object>(),
                     Type<string>());
 
@@ -366,7 +366,7 @@ namespace Favalet
         public void ReducibleCombinedOrTypes2_2()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<string>(),
                     Type<object>());
 
@@ -382,7 +382,7 @@ namespace Favalet
         public void ReducibleCombinedOrTypes3_1()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<IFormattable>(),
                     Type<int>());
 
@@ -398,7 +398,7 @@ namespace Favalet
         public void ReducibleCombinedOrTypes3_2()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<int>(),
                     Type<IFormattable>());
 
@@ -414,9 +414,9 @@ namespace Favalet
         public void ReducibleMultipleCombinedOrTypes1_1()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<double>(),
-                    OrBinary(
+                    Or(
                         Type<IFormattable>(),
                         Type<int>()));
 
@@ -432,9 +432,9 @@ namespace Favalet
         public void ReducibleMultipleCombinedOrTypes1_2()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<double>(),
-                    OrBinary(
+                    Or(
                         Type<int>(),
                         Type<IFormattable>()));
 
@@ -450,9 +450,9 @@ namespace Favalet
         public void ReducibleMultipleCombinedOrTypes1_3()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<IFormattable>(),
-                    OrBinary(
+                    Or(
                         Type<int>(),
                         Type<double>()));
 
@@ -468,16 +468,16 @@ namespace Favalet
         public void ReducibleMultipleCombinedOrTypes2_1()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<Queue>(),
-                    OrBinary(
+                    Or(
                         Type<ICloneable>(),
                         Type<IEnumerable>()));
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                OrBinary(
+                Or(
                     Type<ICloneable>(),
                     Type<IEnumerable>());
 
@@ -488,16 +488,16 @@ namespace Favalet
         public void ReducibleMultipleCombinedOrTypes2_2()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<ICloneable>(),
-                    OrBinary(
+                    Or(
                         Type<Queue>(),
                         Type<IEnumerable>()));
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                OrBinary(
+                Or(
                     Type<ICloneable>(),
                     Type<IEnumerable>());
 
@@ -508,16 +508,16 @@ namespace Favalet
         public void ReducibleMultipleCombinedOrTypes2_3()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<IEnumerable>(),
-                    OrBinary(
+                    Or(
                         Type<ICloneable>(),
                         Type<Queue>()));
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                OrBinary(
+                Or(
                     Type<ICloneable>(),
                     Type<IEnumerable>());
 
@@ -530,18 +530,18 @@ namespace Favalet
         public void NonReducibleCombinedAndOrTypes()
         {
             var expression =
-                AndBinary(
+                And(
                     Type<double>(),
-                    OrBinary(
+                    Or(
                         Type<int>(),
                         Type<string>()));
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                AndBinary(
+                And(
                     Type<double>(),
-                    OrBinary(
+                    Or(
                         Type<int>(),
                         Type<string>()));
 
@@ -552,18 +552,18 @@ namespace Favalet
         public void NonReducibleCombinedOrAndTypes()
         {
             var expression =
-                OrBinary(
+                Or(
                     Type<double>(),
-                    AndBinary(
+                    And(
                         Type<int>(),
                         Type<string>()));
 
             var actual = calculator.Compute(expression);
 
             var expected =
-                OrBinary(
+                Or(
                     Type<double>(),
-                    AndBinary(
+                    And(
                         Type<int>(),
                         Type<string>()));
 
@@ -575,9 +575,9 @@ namespace Favalet
         {
             // IFormattable && (Int32 || String)
             var expression =
-                AndBinary(
+                And(
                     Type<IFormattable>(),
-                    OrBinary(
+                    Or(
                         Type<int>(),
                         Type<string>()));
 
@@ -595,9 +595,9 @@ namespace Favalet
         {
             // IFormattable || (Int32 && String)
             var expression =
-                OrBinary(
+                Or(
                     Type<IFormattable>(),
-                    AndBinary(
+                    And(
                         Type<int>(),
                         Type<string>()));
 

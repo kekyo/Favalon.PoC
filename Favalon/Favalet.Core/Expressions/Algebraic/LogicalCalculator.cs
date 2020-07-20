@@ -33,10 +33,10 @@ namespace Favalet.Expressions.Algebraic
         private static IExpression Flatten(IExpression expression) =>
             expression switch
             {
-                IAndBinaryExpression and => new AndFlattenedExpression(
-                    Flatten<IAndBinaryExpression>(and.Left, and.Right).Memoize()),
-                IOrBinaryExpression or => new OrFlattenedExpression(
-                    Flatten<IOrBinaryExpression>(or.Left, or.Right).Memoize()),
+                IAndExpression and => new AndFlattenedExpression(
+                    Flatten<IAndExpression>(and.Left, and.Right).Memoize()),
+                IOrExpression or => new OrFlattenedExpression(
+                    Flatten<IOrExpression>(or.Left, or.Right).Memoize()),
                 _ => expression
             };
 
@@ -128,7 +128,7 @@ namespace Favalet.Expressions.Algebraic
                 var left = this.Compute(binary.Left);
                 var right = this.Compute(binary.Right);
 
-                if (binary is IAndBinaryExpression)
+                if (binary is IAndExpression)
                 {
                     // Idempotence
                     switch (this.ChoiceForAnd(left, right))
@@ -144,12 +144,12 @@ namespace Favalet.Expressions.Algebraic
                         left, right, this.ChoiceForAnd);
                     if (ConstructFinalResult(
                         absorption,
-                        OrBinaryExpression.Create) is IExpression result2)
+                        OrExpression.Create) is IExpression result2)
                     {
                         return result2;
                     }
                 }
-                else if (binary is IOrBinaryExpression)
+                else if (binary is IOrExpression)
                 {
                     // Idempotence
                     switch (this.ChoiceForOr(left, right))
@@ -165,7 +165,7 @@ namespace Favalet.Expressions.Algebraic
                         left, right, this.ChoiceForOr);
                     if (ConstructFinalResult(
                         absorption,
-                        AndBinaryExpression.Create) is IExpression result2)
+                        AndExpression.Create) is IExpression result2)
                     {
                         return result2;
                     }
@@ -180,13 +180,13 @@ namespace Favalet.Expressions.Algebraic
                 else
                 {
                     // Reconstruct
-                    if (binary is IAndBinaryExpression)
+                    if (binary is IAndExpression)
                     {
-                        return AndBinaryExpression.Create(left, right);
+                        return AndExpression.Create(left, right);
                     }
-                    else if (binary is IOrBinaryExpression)
+                    else if (binary is IOrExpression)
                     {
-                        return OrBinaryExpression.Create(left, right);
+                        return OrExpression.Create(left, right);
                     }
                     else
                     {

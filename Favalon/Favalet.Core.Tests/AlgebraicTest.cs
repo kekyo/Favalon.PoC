@@ -13,13 +13,15 @@ namespace Favalet
             new LogicalCalculator();
 
         private static void AssertLogicalEqual(
+            IExpression expression,
             IExpression expected,
             IExpression actual)
         {
             if (!calculator.Equals(expected, actual))
             {
                 Assert.Fail(
-                    "Expected = {0}\r\nActual   = {1}",
+                    "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",
+                    expression.GetPrettyString(PrettyStringTypes.Simple),
                     expected.GetPrettyString(PrettyStringTypes.Simple),
                     actual.GetPrettyString(PrettyStringTypes.Simple));
             }
@@ -37,9 +39,15 @@ namespace Favalet
                     Identity("A"),
                     Identity("B"));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
-            AssertLogicalEqual(expression, reduced);
+            // A && B
+            var expected =
+                AndBinary(
+                    Identity("A"),
+                    Identity("B"));
+
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -54,7 +62,7 @@ namespace Favalet
                         Identity("A"),
                         Identity("B")));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A && B
             var expected =
@@ -62,7 +70,7 @@ namespace Favalet
                     Identity("A"),
                     Identity("B"));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -78,9 +86,17 @@ namespace Favalet
                         Identity("A")),
                     Identity("A"));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
-            AssertLogicalEqual(expression, reduced);
+            // (A && A) && A
+            var expected =
+                AndBinary(
+                    AndBinary(
+                        Identity("A"),
+                        Identity("A")),
+                    Identity("A"));
+
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -97,13 +113,13 @@ namespace Favalet
                             Identity("A")),
                         Identity("A")));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A
             var expected =
                 Identity("A");
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -122,13 +138,13 @@ namespace Favalet
                             Identity("A"),
                             Identity("A"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A
             var expected =
                 Identity("A");
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
         #endregion
 
@@ -144,9 +160,15 @@ namespace Favalet
                     Identity("A"),
                     Identity("B"));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
-            AssertLogicalEqual(expression, reduced);
+            // A || B
+            var expected =
+                OrBinary(
+                    Identity("A"),
+                    Identity("B"));
+
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -161,7 +183,7 @@ namespace Favalet
                         Identity("A"),
                         Identity("B")));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A || B
             var expected =
@@ -169,7 +191,7 @@ namespace Favalet
                     Identity("A"),
                     Identity("B"));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -185,9 +207,17 @@ namespace Favalet
                         Identity("A")),
                     Identity("A"));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
-            AssertLogicalEqual(expression, reduced);
+            // (A || A) || A
+            var expected =
+                OrBinary(
+                    OrBinary(
+                        Identity("A"),
+                        Identity("A")),
+                    Identity("A"));
+
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -204,13 +234,13 @@ namespace Favalet
                             Identity("A")),
                         Identity("A")));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A
             var expected =
                 Identity("A");
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -229,13 +259,13 @@ namespace Favalet
                             Identity("A"),
                             Identity("A"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A
             var expected =
                 Identity("A");
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
         #endregion
 
@@ -256,13 +286,13 @@ namespace Favalet
                             Identity("A"),
                             Identity("A"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A
             var expected =
                 Identity("A");
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -281,13 +311,13 @@ namespace Favalet
                             Identity("A"),
                             Identity("A"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A
             var expected =
                 Identity("A");
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -306,7 +336,7 @@ namespace Favalet
                             Identity("B"),
                             Identity("B"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A && B
             var expected =
@@ -314,7 +344,7 @@ namespace Favalet
                     Identity("A"),
                     Identity("B"));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -333,7 +363,7 @@ namespace Favalet
                             Identity("B"),
                             Identity("B"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A || B
             var expected =
@@ -341,7 +371,7 @@ namespace Favalet
                     Identity("A"),
                     Identity("B"));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -360,7 +390,7 @@ namespace Favalet
                             Identity("A"),
                             Identity("B"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A || B
             var expected =
@@ -368,7 +398,7 @@ namespace Favalet
                     Identity("A"),
                     Identity("B"));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -387,7 +417,7 @@ namespace Favalet
                             Identity("A"),
                             Identity("B"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A && B
             var expected =
@@ -395,7 +425,7 @@ namespace Favalet
                     Identity("A"),
                     Identity("B"));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -414,13 +444,13 @@ namespace Favalet
                             Identity("A"),
                             Identity("B"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A
             var expected =
                 Identity("A");
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -439,13 +469,13 @@ namespace Favalet
                             Identity("A"),
                             Identity("B"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A
             var expected =
                 Identity("A");
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -464,7 +494,7 @@ namespace Favalet
                             Identity("B"),
                             Identity("A"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A || B
             var expected =
@@ -472,7 +502,7 @@ namespace Favalet
                     Identity("A"),
                     Identity("B"));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -491,14 +521,14 @@ namespace Favalet
                             Identity("B"),
                             Identity("A"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             var expected =
                 AndBinary(
                     Identity("A"),
                     Identity("B"));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -521,7 +551,7 @@ namespace Favalet
                                 Identity("C"),
                                 Identity("A")))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A || B || C
             var expected =
@@ -531,7 +561,7 @@ namespace Favalet
                         Identity("B"),
                         Identity("C")));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -554,7 +584,7 @@ namespace Favalet
                                 Identity("C"),
                                 Identity("A")))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A && B && C
             var expected =
@@ -564,7 +594,7 @@ namespace Favalet
                         Identity("B"),
                         Identity("C")));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -587,7 +617,7 @@ namespace Favalet
                                 Identity("A")),
                             Identity("B"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A || B || C
             var expected =
@@ -597,7 +627,7 @@ namespace Favalet
                         Identity("B"),
                         Identity("C")));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -620,7 +650,7 @@ namespace Favalet
                                 Identity("A")),
                             Identity("B"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A && B && C
             var expected =
@@ -630,7 +660,7 @@ namespace Favalet
                         Identity("B"),
                         Identity("C")));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -653,7 +683,7 @@ namespace Favalet
                                 Identity("C"),
                                 Identity("A")))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A || B || C
             var expected =
@@ -663,7 +693,7 @@ namespace Favalet
                         Identity("B"),
                         Identity("C")));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -686,7 +716,7 @@ namespace Favalet
                                 Identity("C"),
                                 Identity("A")))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A && B && C
             var expected =
@@ -696,7 +726,7 @@ namespace Favalet
                         Identity("B"),
                         Identity("C")));
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -721,13 +751,13 @@ namespace Favalet
                                 Identity("A")),
                             Identity("B"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A
             var expected =
                 Identity("A");
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -752,13 +782,13 @@ namespace Favalet
                                 Identity("A")),
                             Identity("B"))));
 
-            var reduced = scope.Reduce(expression);
+            var actual = scope.Reduce(expression);
 
             // A
             var expected =
                 Identity("A");
 
-            AssertLogicalEqual(expected, reduced);
+            AssertLogicalEqual(expression, expected, actual);
         }
         #endregion
     }

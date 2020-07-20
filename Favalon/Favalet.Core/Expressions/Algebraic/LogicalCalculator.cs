@@ -49,7 +49,9 @@ namespace Favalet.Expressions.Algebraic
         }
 
         private IExpression? ComputeAbsorption<TFlattenedExpression>(
-            IExpression left, IExpression right)
+            IExpression left,
+            IExpression right,
+            Func<IExpression, IExpression, IExpression?> predicate)
             where TFlattenedExpression : FlattenedExpression
         {
             var fl = Flatten(left);
@@ -59,9 +61,9 @@ namespace Favalet.Expressions.Algebraic
             {
                 foreach (var rightOperand in rightOperands)
                 {
-                    if (fl.Equals(rightOperand))
+                    if (predicate(fl, rightOperand) is IExpression result)
                     {
-                        return left;
+                        return result;
                     }
                 }
             }
@@ -70,7 +72,7 @@ namespace Favalet.Expressions.Algebraic
             {
                 foreach (var leftOperand in leftOperands)
                 {
-                    if (leftOperand.Equals(fr))
+                    if (predicate(leftOperand, fr) is IExpression result)
                     {
                         return right;
                     }
@@ -107,7 +109,10 @@ namespace Favalet.Expressions.Algebraic
                     }
 
                     // Absorption
-                    if (this.ComputeAbsorption<OrFlattenedExpression>(left, right) is IExpression computed1)
+                    if (this.ComputeAbsorption<OrFlattenedExpression>(
+                        left,
+                        right,
+                        ChoiceForAnd) is IExpression computed1)
                     {
                         return computed1;
                     }
@@ -120,7 +125,10 @@ namespace Favalet.Expressions.Algebraic
                     }
 
                     // Absorption
-                    if (this.ComputeAbsorption<AndFlattenedExpression>(left, right) is IExpression computed2)
+                    if (this.ComputeAbsorption<AndFlattenedExpression>(
+                        left,
+                        right,
+                        ChoiceForOr) is IExpression computed2)
                     {
                         return computed2;
                     }

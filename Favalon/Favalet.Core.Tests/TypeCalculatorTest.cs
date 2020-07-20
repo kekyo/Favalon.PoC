@@ -651,6 +651,29 @@ namespace Favalet
             AssertLogicalEqual(expected, actual);
         }
 
+        [Test]
+        public void ReducibleCombinedOrAndTypes()
+        {
+            var calculator = new TypeCalculator();
+
+            // IFormattable || (System.Int32 && System.String)
+            var expression =
+                OrBinary(
+                    Type<IFormattable>(),
+                    AndBinary(
+                        Type<int>(),
+                        Type<string>()));
+
+            var actual = calculator.Compute(expression);
+
+            // System.Int32
+            var expected =
+                AndBinary(
+                    Type<IFormattable>(),
+                    Type<string>());
+
+            AssertLogicalEqual(expected, actual);
+        }
         #endregion
     }
 }

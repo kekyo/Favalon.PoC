@@ -9,13 +9,6 @@ namespace Favalet.Expressions
     public sealed class TypeCalculator :
         LogicalCalculator
     {
-        private enum ReduceResults
-        {
-            NonRelated,
-            AcceptLeft,
-            AcceptRight,
-        }
-
         private static IEnumerable<IExpression> ReduceTypes(
             IEnumerable<IExpression> expressions,
             Func<ITypeTerm, ITypeTerm, ReduceResults> predicate)
@@ -68,7 +61,8 @@ namespace Favalet.Expressions
             return exprs;
         }
 
-        protected override IExpression? ChoiceForAnd(IExpression left, IExpression right)
+        protected override ReduceResults ChoiceForAnd(
+            IExpression left, IExpression right)
         {
             // Narrowing
             if (left is ITypeTerm(Type lt) &&
@@ -76,18 +70,19 @@ namespace Favalet.Expressions
             {
                 if (rt.IsAssignableFrom(lt))
                 {
-                    return left;
+                    return ReduceResults.AcceptLeft;
                 }
                 if (lt.IsAssignableFrom(rt))
                 {
-                    return right;
+                    return ReduceResults.AcceptRight;
                 }
             }
 
             return base.ChoiceForAnd(left, right);
         }
 
-        protected override IExpression? ChoiceForOr(IExpression left, IExpression right)
+        protected override ReduceResults ChoiceForOr(
+            IExpression left, IExpression right)
         {
             // Widening
             if (left is ITypeTerm(Type lt) &&
@@ -95,11 +90,11 @@ namespace Favalet.Expressions
             {
                 if (lt.IsAssignableFrom(rt))
                 {
-                    return left;
+                    return ReduceResults.AcceptLeft;
                 }
                 if (rt.IsAssignableFrom(lt))
                 {
-                    return right;
+                    return ReduceResults.AcceptRight;
                 }
             }
 

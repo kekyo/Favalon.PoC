@@ -1,6 +1,7 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using System;
+using System.Linq;
 
 namespace Favalet
 {
@@ -13,11 +14,15 @@ namespace Favalet
             LogicalOperator.Create(operand);
 
         public static AndBinaryExpression AndBinary(
-            IExpression lhs, IExpression rhs) =>
-            AndBinaryExpression.Create(lhs, rhs);
+            IExpression lhs, IExpression rhs, params IExpression[] operands) =>
+            operands.Aggregate(
+                AndBinaryExpression.Create(lhs, rhs),
+                AndBinaryExpression.Create);
 
         public static OrBinaryExpression OrBinary(
-            IExpression lhs, IExpression rhs) =>
-            OrBinaryExpression.Create(lhs, rhs);
+            IExpression lhs, IExpression rhs, params IExpression[] operands) =>
+            operands.Aggregate(
+                OrBinaryExpression.Create(lhs, rhs),
+                OrBinaryExpression.Create);
     }
 }

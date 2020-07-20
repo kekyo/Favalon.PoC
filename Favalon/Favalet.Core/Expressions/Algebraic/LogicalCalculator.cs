@@ -48,10 +48,17 @@ namespace Favalet.Expressions.Algebraic
             return left.Equals(right);
         }
 
-        private IExpression? ComputeAbsorption<TFlattenedExpression>(
+        protected enum ReduceResults
+        {
+            NonRelated,
+            AcceptLeft,
+            AcceptRight,
+        }
+
+        private IExpression[] ComputeAbsorption<TFlattenedExpression>(
             IExpression left,
             IExpression right,
-            Func<IExpression, IExpression, IExpression?> predicate)
+            Func<IExpression, IExpression, ReduceResults> predicate)
             where TFlattenedExpression : FlattenedExpression
         {
             var fl = Flatten(left);
@@ -59,40 +66,60 @@ namespace Favalet.Expressions.Algebraic
 
             if (fr is TFlattenedExpression(IExpression[] rightOperands))
             {
-                foreach (var rightOperand in rightOperands)
-                {
-                    if (predicate(fl, rightOperand) is IExpression result)
-                    {
-                        return result;
-                    }
-                }
+                return rightOperands.
+                    SelectMany(rightOperand =>
+                        predicate(fl, rightOperand) switch
+                        {
+                            ReduceResults.AcceptLeft => new[] { fl },
+                            ReduceResults.AcceptRight => new[] { rightOperand },
+                            _ => Enumerable.Empty<IExpression>()
+                        }).
+                    Distinct().
+                    Memoize();
             }
-
-            if (fl is TFlattenedExpression(IExpression[] leftOperands))
+            else if (fl is TFlattenedExpression(IExpression[] leftOperands))
             {
-                foreach (var leftOperand in leftOperands)
-                {
-                    if (predicate(leftOperand, fr) is IExpression result)
-                    {
-                        return right;
-                    }
-                }
+                return leftOperands.
+                    SelectMany(leftOperand =>
+                        predicate(leftOperand, fr) switch
+                        {
+                            ReduceResults.AcceptLeft => new[] { leftOperand },
+                            ReduceResults.AcceptRight => new[] { fr },
+                            _ => Enumerable.Empty<IExpression>()
+                        }).
+                    Distinct().
+                    Memoize();
             }
-
-            return null;
+            else
+            {
+                return ArrayEx.Empty<IExpression>();
+            }
         }
 
-        protected virtual IExpression? ChoiceForAnd(IExpression left, IExpression right) =>
+        protected virtual ReduceResults ChoiceForAnd(
+            IExpression left, IExpression right) =>
             // Idempotence
             this.Equals(left, right) ?
-                left :
-                null;
+                ReduceResults.AcceptLeft :
+                ReduceResults.NonRelated;
 
-        protected virtual IExpression? ChoiceForOr(IExpression left, IExpression right) =>
+        protected virtual ReduceResults ChoiceForOr(
+            IExpression left, IExpression right) =>
             // Idempotence
             this.Equals(left, right) ?
-                left :
-                null;
+                ReduceResults.AcceptLeft :
+                ReduceResults.NonRelated;
+
+        private static IExpression? ConstructFinalResult(
+            IExpression[] results,
+            Func<IExpression, IExpression, IExpression> creator) =>
+            results.Length switch
+            {
+                0 => null,
+                1 => results[0],
+                2 => creator(results[0], results[1]),
+                _ => results.Skip(2).Aggregate(creator(results[0], results[1]), creator)
+            };
 
         public IExpression Compute(IExpression operand)
         {
@@ -103,34 +130,44 @@ namespace Favalet.Expressions.Algebraic
 
                 if (binary is IAndBinaryExpression)
                 {
-                    if (this.ChoiceForAnd(left, right) is IExpression result)
+                    // Idempotence
+                    switch (this.ChoiceForAnd(left, right))
                     {
-                        return result;
+                        case ReduceResults.AcceptLeft:
+                            return left;
+                        case ReduceResults.AcceptRight:
+                            return right;
                     }
 
                     // Absorption
-                    if (this.ComputeAbsorption<OrFlattenedExpression>(
-                        left,
-                        right,
-                        ChoiceForAnd) is IExpression computed1)
+                    var absorption = this.ComputeAbsorption<OrFlattenedExpression>(
+                        left, right, this.ChoiceForAnd);
+                    if (ConstructFinalResult(
+                        absorption,
+                        OrBinaryExpression.Create) is IExpression result2)
                     {
-                        return computed1;
+                        return result2;
                     }
                 }
                 else if (binary is IOrBinaryExpression)
                 {
-                    if (this.ChoiceForOr(left, right) is IExpression result)
+                    // Idempotence
+                    switch (this.ChoiceForOr(left, right))
                     {
-                        return result;
+                        case ReduceResults.AcceptLeft:
+                            return left;
+                        case ReduceResults.AcceptRight:
+                            return right;
                     }
 
                     // Absorption
-                    if (this.ComputeAbsorption<AndFlattenedExpression>(
-                        left,
-                        right,
-                        ChoiceForOr) is IExpression computed2)
+                    var absorption = this.ComputeAbsorption<AndFlattenedExpression>(
+                        left, right, this.ChoiceForOr);
+                    if (ConstructFinalResult(
+                        absorption,
+                        AndBinaryExpression.Create) is IExpression result2)
                     {
-                        return computed2;
+                        return result2;
                     }
                 }
 

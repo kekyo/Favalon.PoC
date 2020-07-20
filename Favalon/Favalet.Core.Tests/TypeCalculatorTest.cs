@@ -1,11 +1,10 @@
 ﻿using Favalet.Expressions;
-using Favalet.Expressions.Algebraic;
 using NUnit.Framework;
 using System;
 using System.Collections;
 
-using static Favalet.Generator;
 using static Favalet.CLRGenerator;
+using static Favalet.Generator;
 
 namespace Favalet
 {
@@ -16,13 +15,15 @@ namespace Favalet
             new TypeCalculator();
 
         private static void AssertLogicalEqual(
+            IExpression expression,
             IExpression expected,
             IExpression actual)
         {
             if (!calculator.Equals(expected, actual))
             {
                 Assert.Fail(
-                    "Expected = {0}\r\nActual   = {1}",
+                    "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",
+                    expression.GetPrettyString(PrettyStringTypes.Simple),
                     expected.GetPrettyString(PrettyStringTypes.Simple),
                     actual.GetPrettyString(PrettyStringTypes.Simple));
             }
@@ -32,8 +33,6 @@ namespace Favalet
         [Test]
         public void NonReducibleCombinedAndTypes1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<int>(),
@@ -46,14 +45,12 @@ namespace Favalet
                     Type<int>(),
                     Type<string>());
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void NonReducibleCombinedAndTypes2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<string>(),
@@ -66,14 +63,12 @@ namespace Favalet
                     Type<int>(),
                     Type<string>());
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedAndTypes1_1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<object>(),
@@ -84,14 +79,12 @@ namespace Favalet
             var expected =
                 Type<int>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedAndTypes1_2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<int>(),
@@ -102,14 +95,12 @@ namespace Favalet
             var expected =
                 Type<int>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedAndTypes2_1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<object>(),
@@ -120,14 +111,12 @@ namespace Favalet
             var expected =
                 Type<string>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedAndTypes2_2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<string>(),
@@ -138,14 +127,12 @@ namespace Favalet
             var expected =
                 Type<string>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedAndTypes3_1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<IFormattable>(),
@@ -156,14 +143,12 @@ namespace Favalet
             var expected =
                 Type<int>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedAndTypes3_2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<int>(),
@@ -174,14 +159,12 @@ namespace Favalet
             var expected =
                 Type<int>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedAndTypes1_1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<double>(),
@@ -196,14 +179,12 @@ namespace Favalet
                     Type<double>(),
                     Type<int>());
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedAndTypes1_2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<double>(),
@@ -218,14 +199,12 @@ namespace Favalet
                     Type<double>(),
                     Type<int>());
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedAndTypes1_3()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<IFormattable>(),
@@ -240,14 +219,12 @@ namespace Favalet
                     Type<double>(),
                     Type<int>());
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedAndTypes2_1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<Queue>(),
@@ -260,14 +237,12 @@ namespace Favalet
             var expected =
                 Type<Queue>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedAndTypes2_2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<ICloneable>(),
@@ -280,14 +255,12 @@ namespace Favalet
             var expected =
                 Type<Queue>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedAndTypes2_3()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<IEnumerable>(),
@@ -300,7 +273,7 @@ namespace Favalet
             var expected =
                 Type<Queue>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
         #endregion
 
@@ -308,8 +281,6 @@ namespace Favalet
         [Test]
         public void NonReducibleCombinedOrTypes1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<int>(),
@@ -322,14 +293,12 @@ namespace Favalet
                     Type<int>(),
                     Type<string>());
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void NonReducibleCombinedOrTypes2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<string>(),
@@ -342,14 +311,12 @@ namespace Favalet
                     Type<int>(),
                     Type<string>());
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedOrTypes1_1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<object>(),
@@ -360,14 +327,12 @@ namespace Favalet
             var expected =
                 Type<object>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedOrTypes1_2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<int>(),
@@ -378,14 +343,12 @@ namespace Favalet
             var expected =
                 Type<object>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedOrTypes2_1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<object>(),
@@ -396,14 +359,12 @@ namespace Favalet
             var expected =
                 Type<object>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedOrTypes2_2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<string>(),
@@ -414,14 +375,12 @@ namespace Favalet
             var expected =
                 Type<object>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedOrTypes3_1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<IFormattable>(),
@@ -432,14 +391,12 @@ namespace Favalet
             var expected =
                 Type<IFormattable>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedOrTypes3_2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<int>(),
@@ -450,14 +407,12 @@ namespace Favalet
             var expected =
                 Type<IFormattable>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedOrTypes1_1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<double>(),
@@ -470,14 +425,12 @@ namespace Favalet
             var expected =
                 Type<IFormattable>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedOrTypes1_2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<double>(),
@@ -490,14 +443,12 @@ namespace Favalet
             var expected =
                 Type<IFormattable>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedOrTypes1_3()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<IFormattable>(),
@@ -510,14 +461,12 @@ namespace Favalet
             var expected =
                 Type<IFormattable>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedOrTypes2_1()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<Queue>(),
@@ -532,14 +481,12 @@ namespace Favalet
                     Type<ICloneable>(),
                     Type<IEnumerable>());
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedOrTypes2_2()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<ICloneable>(),
@@ -554,14 +501,12 @@ namespace Favalet
                     Type<ICloneable>(),
                     Type<IEnumerable>());
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleMultipleCombinedOrTypes2_3()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<IEnumerable>(),
@@ -576,7 +521,7 @@ namespace Favalet
                     Type<ICloneable>(),
                     Type<IEnumerable>());
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
         #endregion
 
@@ -584,8 +529,6 @@ namespace Favalet
         [Test]
         public void NonReducibleCombinedAndOrTypes()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 AndBinary(
                     Type<double>(),
@@ -602,14 +545,12 @@ namespace Favalet
                         Type<int>(),
                         Type<string>()));
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void NonReducibleCombinedOrAndTypes()
         {
-            var calculator = new TypeCalculator();
-
             var expression =
                 OrBinary(
                     Type<double>(),
@@ -626,15 +567,13 @@ namespace Favalet
                         Type<int>(),
                         Type<string>()));
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedAndOrTypes()
         {
-            var calculator = new TypeCalculator();
-
-            // IFormattable && (System.Int32 || System.String)
+            // IFormattable && (Int32 || String)
             var expression =
                 AndBinary(
                     Type<IFormattable>(),
@@ -644,19 +583,17 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
-            // System.Int32
+            // Int32
             var expected =
                 Type<int>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
         public void ReducibleCombinedOrAndTypes()
         {
-            var calculator = new TypeCalculator();
-
-            // IFormattable || (System.Int32 && System.String)
+            // IFormattable || (Int32 && String)
             var expression =
                 OrBinary(
                     Type<IFormattable>(),
@@ -666,13 +603,11 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
-            // System.Int32
+            // IFormattable
             var expected =
-                AndBinary(
-                    Type<IFormattable>(),
-                    Type<string>());
+                Type<IFormattable>();
 
-            AssertLogicalEqual(expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
         #endregion
     }

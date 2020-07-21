@@ -1,6 +1,5 @@
 ﻿using Favalet.Internal;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
@@ -15,35 +14,10 @@ namespace Favalet.Expressions.Algebraic
     public class LogicalCalculator :
         ILogicalCalculator
     {
-        private static IEnumerable<IExpression> Flatten<TBinaryExpression>(
-            IExpression left, IExpression right)
-            where TBinaryExpression : IBinaryExpression
-        {
-            var lf = left is TBinaryExpression lb ?
-                Flatten<TBinaryExpression>(lb.Left, lb.Right) :
-                new[] { Flatten(left) };
-
-            var rf = right is TBinaryExpression rb ?
-                Flatten<TBinaryExpression>(rb.Left, rb.Right) :
-                new[] { Flatten(right) };
-
-            return lf.Concat(rf);
-        }
-
-        private static IExpression Flatten(IExpression expression) =>
-            expression switch
-            {
-                IAndExpression and => new AndFlattenedExpression(
-                    Flatten<IAndExpression>(and.Left, and.Right).Memoize()),
-                IOrExpression or => new OrFlattenedExpression(
-                    Flatten<IOrExpression>(or.Left, or.Right).Memoize()),
-                _ => expression
-            };
-
         public bool Equals(IExpression lhs, IExpression rhs)
         {
-            var left = Flatten(lhs);
-            var right = Flatten(rhs);
+            var left = FlattenedExpression.FlattenAll(lhs);
+            var right = FlattenedExpression.FlattenAll(rhs);
 
             return left.Equals(right);
         }
@@ -61,8 +35,8 @@ namespace Favalet.Expressions.Algebraic
             Func<IExpression, IExpression, ReduceResults> predicate)
             where TFlattenedExpression : FlattenedExpression
         {
-            var fl = Flatten(left);
-            var fr = Flatten(right);
+            var fl = FlattenedExpression.Flatten(left);
+            var fr = FlattenedExpression.Flatten(right);
 
             if (fr is TFlattenedExpression(IExpression[] rightOperands))
             {

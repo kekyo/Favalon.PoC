@@ -1,5 +1,6 @@
 ﻿using Favalet.Internal;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
@@ -22,6 +23,56 @@ namespace Favalet.Expressions.Algebraic
 
         public void Deconstruct(out IExpression[] operands) =>
             operands = this.Operands;
+
+        private static IEnumerable<IExpression> Flatten<TBinaryExpression>(
+            IExpression left, IExpression right)
+            where TBinaryExpression : IBinaryExpression
+        {
+            var lf = left is TBinaryExpression lb ?
+                Flatten<TBinaryExpression>(lb.Left, lb.Right) :
+                new[] { left };
+
+            var rf = right is TBinaryExpression rb ?
+                Flatten<TBinaryExpression>(rb.Left, rb.Right) :
+                new[] { right };
+
+            return lf.Concat(rf);
+        }
+
+        public static IExpression Flatten(IExpression expression) =>
+            expression switch
+            {
+                IAndExpression and => new AndFlattenedExpression(
+                    Flatten<IAndExpression>(and.Left, and.Right).Memoize()),
+                IOrExpression or => new OrFlattenedExpression(
+                    Flatten<IOrExpression>(or.Left, or.Right).Memoize()),
+                _ => expression
+            };
+
+        private static IEnumerable<IExpression> FlattenAll<TBinaryExpression>(
+            IExpression left, IExpression right)
+            where TBinaryExpression : IBinaryExpression
+        {
+            var lf = left is TBinaryExpression lb ?
+                FlattenAll<TBinaryExpression>(lb.Left, lb.Right) :
+                new[] { FlattenAll(left) };
+
+            var rf = right is TBinaryExpression rb ?
+                FlattenAll<TBinaryExpression>(rb.Left, rb.Right) :
+                new[] { FlattenAll(right) };
+
+            return lf.Concat(rf);
+        }
+
+        public static IExpression FlattenAll(IExpression expression) =>
+            expression switch
+            {
+                IAndExpression and => new AndFlattenedExpression(
+                    FlattenAll<IAndExpression>(and.Left, and.Right).Memoize()),
+                IOrExpression or => new OrFlattenedExpression(
+                    FlattenAll<IOrExpression>(or.Left, or.Right).Memoize()),
+                _ => expression
+            };
     }
 
     internal sealed class AndFlattenedExpression : FlattenedExpression
@@ -40,7 +91,7 @@ namespace Favalet.Expressions.Algebraic
                 PrettyStringTypes.Simple =>
                     "(" + string.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")",
                 _ =>
-                    "(AndF " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")"
+                    "(AndFlattened " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")"
             };
     }
 
@@ -60,7 +111,7 @@ namespace Favalet.Expressions.Algebraic
                 PrettyStringTypes.Simple =>
                     "(" + string.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")",
                 _ =>
-                    "(OrF " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")"
+                    "(OrFlattened " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")"
             };
     }
 }

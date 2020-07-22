@@ -16,6 +16,9 @@ namespace Favalet.Expressions
         private TypeTerm(Type runtimeType) =>
             this.RuntimeType = runtimeType;
 
+        public IExpression HigherOrder =>
+            Generator.Kind();
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         Type ITypeTerm.RuntimeType =>
             this.RuntimeType;
@@ -39,8 +42,17 @@ namespace Favalet.Expressions
                 _ => $"(Type {this.RuntimeType.FullName})"
             };
 
-        public static TypeTerm From(Type type) =>
-            new TypeTerm(type);
+        public static ITerm From(Type type)
+        {
+            if (type.Equals(typeof(object).GetType()))
+            {
+                return Generator.Kind();
+            }
+            else
+            {
+                return new TypeTerm(type);
+            }
+        }
     }
 
     public static class TypeTermExtension

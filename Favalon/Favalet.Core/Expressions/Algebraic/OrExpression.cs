@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalet.Expressions.Specialized;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,8 +15,9 @@ namespace Favalet.Expressions.Algebraic
         BinaryExpression<IOrExpression>,
         IOrExpression
     {
-        private OrExpression(IExpression left, IExpression right) :
-            base(left, right)
+        private OrExpression(
+            IExpression left, IExpression right, IExpression higherOrder) :
+            base(left, right, higherOrder)
         { }
 
         public override IExpression Reduce(IReduceContext context)
@@ -30,7 +32,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return new OrExpression(left, right);
+                return new OrExpression(left, right, this.HigherOrder);
             }
         }
 
@@ -43,7 +45,11 @@ namespace Favalet.Expressions.Algebraic
                     $"(Or {this.Left.GetPrettyString(type)} {this.Right.GetPrettyString(type)})"
             };
 
-        public static OrExpression Create(IExpression left, IExpression right) =>
-            new OrExpression(left, right);
+        public static OrExpression Create(
+            IExpression left, IExpression right, IExpression higherOrder) =>
+            new OrExpression(left, right, higherOrder);
+        public static OrExpression Create(
+            IExpression left, IExpression right) =>
+            new OrExpression(left, right, UnspecifiedTerm.Instance);
     }
 }

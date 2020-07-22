@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalet.Expressions.Specialized;
+using System;
 using System.Diagnostics;
 
 namespace Favalet.Expressions
@@ -21,11 +22,15 @@ namespace Favalet.Expressions
         public readonly IExpression Function;
         public readonly IExpression Argument;
 
-        private ApplyExpression(IExpression function, IExpression argument)
+        private ApplyExpression(
+            IExpression function, IExpression argument, IExpression higherOrder)
         {
+            this.HigherOrder = higherOrder;
             this.Function = function;
             this.Argument = argument;
         }
+
+        public IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IApplyExpression.Function =>
@@ -67,7 +72,7 @@ namespace Favalet.Expressions
 
                 if (object.ReferenceEquals(function, reducedFunction))
                 {
-                    return new ApplyExpression(reducedFunction, argument);
+                    return new ApplyExpression(reducedFunction, argument, this.HigherOrder);
                 }
 
                 function = reducedFunction;
@@ -81,7 +86,11 @@ namespace Favalet.Expressions
                 _ => $"(Apply {this.Function.GetPrettyString(type)} {this.Argument.GetPrettyString(type)})"
             };
 
-        public static ApplyExpression Create(IExpression function, IExpression argument) =>
-            new ApplyExpression(function, argument);
+        public static ApplyExpression Create(
+            IExpression function, IExpression argument, IExpression higherOrder) =>
+            new ApplyExpression(function, argument, higherOrder);
+        public static ApplyExpression Create(
+            IExpression function, IExpression argument) =>
+            new ApplyExpression(function, argument, UnspecifiedTerm.Instance);
     }
 }

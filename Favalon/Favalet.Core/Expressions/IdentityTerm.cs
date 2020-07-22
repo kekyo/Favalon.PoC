@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalet.Expressions.Specialized;
+using System;
 using System.Diagnostics;
 
 namespace Favalet.Expressions
@@ -13,8 +14,13 @@ namespace Favalet.Expressions
     {
         public readonly string Symbol;
 
-        private IdentityTerm(string symbol) =>
+        private IdentityTerm(string symbol, IExpression higherOrder)
+        {
+            this.HigherOrder = higherOrder;
             this.Symbol = symbol;
+        }
+
+        public IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IIdentityTerm.Symbol =>
@@ -39,7 +45,9 @@ namespace Favalet.Expressions
                 _ => $"(Identity {this.Symbol})"
             };
 
+        public static IdentityTerm Create(string symbol, IExpression higherOrder) =>
+            new IdentityTerm(symbol, higherOrder);
         public static IdentityTerm Create(string symbol) =>
-            new IdentityTerm(symbol);
+            new IdentityTerm(symbol, UnspecifiedTerm.Instance);
     }
 }

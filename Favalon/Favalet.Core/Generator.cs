@@ -1,5 +1,6 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
+using Favalet.Expressions.Specialized;
 using System;
 using System.Linq;
 
@@ -7,6 +8,14 @@ namespace Favalet
 {
     public static class Generator
     {
+        public static FourthTerm Fourth() =>
+            FourthTerm.Instance;
+
+        private static readonly IdentityTerm kind =
+            IdentityTerm.Create("*", FourthTerm.Instance);
+        public static IdentityTerm Kind() =>
+            kind;
+
         public static IdentityTerm Identity(string symbol) =>
             IdentityTerm.Create(symbol);
 

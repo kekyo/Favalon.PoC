@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalet.Expressions.Specialized;
+using System;
 using System.Diagnostics;
 
 namespace Favalet.Expressions
@@ -17,11 +18,14 @@ namespace Favalet.Expressions
         public readonly string Parameter;
         public readonly IExpression Body;
 
-        private LambdaExpression(string parameter, IExpression body)
+        private LambdaExpression(string parameter, IExpression body, IExpression higherOrder)
         {
+            this.HigherOrder = higherOrder;
             this.Parameter = parameter;
             this.Body = body;
         }
+
+        public IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string ILambdaExpression.Parameter =>
@@ -51,7 +55,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new LambdaExpression(this.Parameter, body);
+                return new LambdaExpression(this.Parameter, body, this.HigherOrder);
             }
         }
 
@@ -65,7 +69,11 @@ namespace Favalet.Expressions
                 _ => $"(Lambda {this.Parameter} {this.Body.GetPrettyString(type)})"
             };
 
-        public static LambdaExpression Create(string parameter, IExpression body) =>
-            new LambdaExpression(parameter, body);
+        public static LambdaExpression Create(
+            string parameter, IExpression body, IExpression higherOrder) =>
+            new LambdaExpression(parameter, body, higherOrder);
+        public static LambdaExpression Create(
+            string parameter, IExpression body) =>
+            new LambdaExpression(parameter, body, UnspecifiedTerm.Instance);
     }
 }

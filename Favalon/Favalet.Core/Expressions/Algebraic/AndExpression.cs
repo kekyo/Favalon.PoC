@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Favalet.Expressions.Specialized;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -14,8 +10,9 @@ namespace Favalet.Expressions.Algebraic
         BinaryExpression<IAndExpression>,
         IAndExpression
     {
-        private AndExpression(IExpression left, IExpression right) :
-            base(left, right)
+        private AndExpression(
+            IExpression left, IExpression right, IExpression higherOrder) :
+            base(left, right, higherOrder)
         { }
 
         public override IExpression Reduce(IReduceContext context)
@@ -30,7 +27,7 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return new AndExpression(left, right);
+                return new AndExpression(left, right, this.HigherOrder);
             }
         }
 
@@ -43,7 +40,11 @@ namespace Favalet.Expressions.Algebraic
                     $"(And {this.Left.GetPrettyString(type)} {this.Right.GetPrettyString(type)})"
             };
 
-        public static AndExpression Create(IExpression left, IExpression right) =>
-            new AndExpression(left, right);
+        public static AndExpression Create(
+            IExpression left, IExpression right, IExpression higherOrder) =>
+            new AndExpression(left, right, higherOrder);
+        public static AndExpression Create(
+            IExpression left, IExpression right) =>
+            new AndExpression(left, right, UnspecifiedTerm.Instance);
     }
 }

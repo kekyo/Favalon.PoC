@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -20,11 +16,15 @@ namespace Favalet.Expressions.Algebraic
         public readonly IExpression Left;
         public readonly IExpression Right;
 
-        protected BinaryExpression(IExpression left, IExpression right)
+        protected BinaryExpression(
+            IExpression left, IExpression right, IExpression higherOrder)
         {
+            this.HigherOrder = higherOrder;
             this.Left = left;
             this.Right = right;
         }
+
+        public IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IBinaryExpression.Left =>

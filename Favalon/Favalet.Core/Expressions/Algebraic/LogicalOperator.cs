@@ -14,6 +14,9 @@ namespace Favalet.Expressions.Algebraic
         private LogicalOperator()
         { }
 
+        public IExpression HigherOrder =>
+            null!; // TODO:
+
         public bool Equals(ILogicalOperator rhs) =>
             true;
 

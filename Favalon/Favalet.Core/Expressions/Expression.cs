@@ -11,6 +11,8 @@ namespace Favalet.Expressions
 
     public interface IExpression : IEquatable<IExpression?>
     {
+        IExpression HigherOrder { get; }
+
         IExpression Reduce(IReduceContext context);
 
         string GetPrettyString(PrettyStringTypes type);

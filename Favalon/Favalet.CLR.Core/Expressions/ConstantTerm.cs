@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Favalet.Expressions
 {
@@ -15,6 +16,9 @@ namespace Favalet.Expressions
 
         private ConstantTerm(object value) =>
             this.Value = value;
+
+        public IExpression HigherOrder =>
+            TypeTerm.From(this.Value.GetType());
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IConstantTerm.Value =>
@@ -39,7 +43,7 @@ namespace Favalet.Expressions
                 _ => this.Value.ToString()
             };
 
-        public static ConstantTerm Create(object value) =>
+        public static ConstantTerm From(object value) =>
             new ConstantTerm(value);
     }
 }

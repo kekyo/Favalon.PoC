@@ -19,6 +19,9 @@ namespace Favalet.Expressions
         private MethodTerm(MethodBase runtimeMethod) =>
             this.RuntimeMethod = runtimeMethod;
 
+        public IExpression HigherOrder =>
+            null!; // TODO
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         MethodBase IMethodTerm.RuntimeMethod =>
             this.RuntimeMethod;
@@ -42,13 +45,13 @@ namespace Favalet.Expressions
                 if (this.RuntimeMethod is ConstructorInfo constructor)
                 {
                     var result = constructor.Invoke(new[] { constant.Value });
-                    return ConstantTerm.Create(result);
+                    return ConstantTerm.From(result);
                 }
                 else
                 {
                     var method = (MethodInfo)this.RuntimeMethod;
                     var result = method.Invoke(null, new[] { constant.Value });
-                    return ConstantTerm.Create(result);
+                    return ConstantTerm.From(result);
                 }
             }
             else

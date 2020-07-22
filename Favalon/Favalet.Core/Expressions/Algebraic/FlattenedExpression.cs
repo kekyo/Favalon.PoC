@@ -13,13 +13,16 @@ namespace Favalet.Expressions.Algebraic
         protected FlattenedExpression(IExpression[] operands) =>
             this.Operands = operands;
 
+        public IExpression HigherOrder =>
+            throw new InvalidOperationException();
+
         public override sealed int GetHashCode() =>
             this.Operands.Aggregate(0, (agg, operand) => agg ^ operand.GetHashCode());
 
         public abstract bool Equals(IExpression? other);
 
         public IExpression Reduce(IReduceContext context) =>
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
 
         public void Deconstruct(out IExpression[] operands) =>
             operands = this.Operands;

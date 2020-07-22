@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalet.Expressions.Specialized;
+using System;
 using System.Diagnostics;
 
 namespace Favalet.Expressions.Algebraic
@@ -15,8 +16,14 @@ namespace Favalet.Expressions.Algebraic
 
         public readonly IExpression Operand;
 
-        private LogicalExpression(IExpression operand) =>
+        private LogicalExpression(
+            IExpression operand, IExpression higherOrder)
+        {
+            this.HigherOrder = higherOrder;
             this.Operand = operand;
+        }
+
+        public IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression ILogicalExpression.Operand =>
@@ -37,7 +44,11 @@ namespace Favalet.Expressions.Algebraic
         public override string GetPrettyString(PrettyStringTypes type) =>
             $"(Logical {this.Operand.GetPrettyString(type)})";
 
-        public static LogicalExpression Create(IExpression operand) =>
-            new LogicalExpression(operand);
+        public static LogicalExpression Create(
+            IExpression operand, IExpression higherOrder) =>
+            new LogicalExpression(operand, higherOrder);
+        public static LogicalExpression Create(
+            IExpression operand) =>
+            new LogicalExpression(operand, UnspecifiedTerm.Instance);
     }
 }

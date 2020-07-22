@@ -6,15 +6,15 @@ namespace Favalet
 {
     public static class CLRGenerator
     {
-        public static TypeTerm Type<T>() =>
+        public static ITerm Type<T>() =>
             TypeTerm.From(typeof(T));
-        public static TypeTerm Type(Type runtimeType) =>
+        public static ITerm Type(Type runtimeType) =>
             TypeTerm.From(runtimeType);
 
         public static MethodTerm Method(MethodBase runtimeMethod) =>
             MethodTerm.From(runtimeMethod);
 
         public static ConstantTerm Constant(object value) =>
-            ConstantTerm.Create(value);
+            ConstantTerm.From(value);
     }
 }

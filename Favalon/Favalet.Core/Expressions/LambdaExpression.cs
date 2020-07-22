@@ -8,7 +8,7 @@ namespace Favalet.Expressions
     public interface ILambdaExpression :
         ICallableExpression
     {
-        string Parameter { get; }
+        IIdentityTerm Parameter { get; }
 
         IExpression Body { get; }
     }
@@ -16,11 +16,11 @@ namespace Favalet.Expressions
     public sealed class LambdaExpression :
         Expression, ILambdaExpression
     {
-        public readonly string Parameter;
+        public readonly IIdentityTerm Parameter;
         public readonly IExpression Body;
 
         private LambdaExpression(
-            string parameter, IExpression body, IExpression higherOrder)
+            IIdentityTerm parameter, IExpression body, IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
             this.Parameter = parameter;
@@ -30,7 +30,7 @@ namespace Favalet.Expressions
         public IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string ILambdaExpression.Parameter =>
+        IIdentityTerm ILambdaExpression.Parameter =>
             this.Parameter;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -72,10 +72,10 @@ namespace Favalet.Expressions
             };
 
         public static LambdaExpression Create(
-            string parameter, IExpression body, IExpression higherOrder) =>
+            IIdentityTerm parameter, IExpression body, IExpression higherOrder) =>
             new LambdaExpression(parameter, body, higherOrder);
         public static LambdaExpression Create(
-            string parameter, IExpression body) =>
+            IIdentityTerm parameter, IExpression body) =>
             new LambdaExpression(parameter, body, UnspecifiedTerm.Instance);
     }
 }

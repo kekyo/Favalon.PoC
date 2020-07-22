@@ -14,8 +14,10 @@ namespace Favalet.Contexts
             return expression.Reduce(context);
         }
 
-        public new void SetVariable(string symbol, IExpression expression) =>
-            base.SetVariable(symbol, expression);
+        public new void SetVariable(IIdentityTerm identity, IExpression expression) =>
+            base.SetVariable(identity, expression);
+        public void SetVariable(string identity, IExpression expression) =>
+            base.SetVariable(IdentityTerm.Create(identity), expression);
 
         public static Scope Create() =>
             new Scope();
@@ -24,27 +26,29 @@ namespace Favalet.Contexts
             IReduceContext
         {
             private readonly IScopeContext parent;
-            private string? symbol;
+            private IIdentityTerm? parameter;
             private IExpression? expression;
 
             public ReduceContext(IScopeContext parent) =>
                 this.parent = parent;
 
-            public IReduceContext NewScope(string symbol, IExpression expression)
+            public IReduceContext NewScope(IIdentityTerm parameter, IExpression expression)
             {
                 var newContext = new ReduceContext(this);
-                newContext.symbol = symbol;
+                newContext.parameter = parameter;
                 newContext.expression = expression;
 
                 return newContext;
             }
 
-            public IExpression? LookupVariable(string symbol) =>
-                this.symbol is string s &&
+            public IExpression? LookupVariable(IIdentityTerm identity) =>
+                // TODO: improving when identity's higher order acceptable
+                // TODO: what acceptable (narrowing, widening)
+                this.parameter is IIdentityTerm p &&
                  expression is IExpression expr &&
-                 s.Equals(symbol) ?
+                 p.Equals(identity) ?
                     expr :
-                    parent.LookupVariable(symbol);
+                    parent.LookupVariable(identity);
         }
     }
 }

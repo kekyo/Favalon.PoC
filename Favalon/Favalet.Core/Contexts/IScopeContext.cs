@@ -4,6 +4,6 @@ namespace Favalet.Contexts
 {
     public interface IScopeContext
     {
-        IExpression? LookupVariable(string symbol);
+        IExpression? LookupVariable(IIdentityTerm identity);
     }
 }

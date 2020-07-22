@@ -37,8 +37,11 @@ namespace Favalet
                 OrExpression.Create);
 
         public static LambdaExpression Lambda(
-            string parameter, IExpression body) =>
+            IIdentityTerm parameter, IExpression body) =>
             LambdaExpression.Create(parameter, body);
+        public static LambdaExpression Lambda(
+            string parameter, IExpression body) =>
+            LambdaExpression.Create(IdentityTerm.Create(parameter), body);
 
         public static ApplyExpression Apply(
             IExpression function, IExpression argument) =>

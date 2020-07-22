@@ -5,6 +5,6 @@ namespace Favalet.Contexts
     public interface IReduceContext :
         IScopeContext
     {
-        IReduceContext NewScope(string symbol, IExpression expression);
+        IReduceContext NewScope(IIdentityTerm parameter, IExpression expression);
     }
 }

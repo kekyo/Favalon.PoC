@@ -1,6 +1,7 @@
 ﻿using Favalet.Expressions;
-using System;
+using Favalet.Expressions.Algebraic;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Favalet.Contexts
 {
@@ -8,31 +9,44 @@ namespace Favalet.Contexts
         IScopeContext
     {
         private readonly ScopeContext? parent;
-        private Dictionary<string, IExpression>? variables;
+        private Dictionary<string, List<IExpression>>? variables;
 
         internal ScopeContext(ScopeContext? parent) =>
             this.parent = parent;
 
-        internal void SetVariable(string symbol, IExpression expression)
+        internal void SetVariable(IIdentityTerm identity, IExpression expression)
         {
-            if (variables == null)
+            if (this.variables == null)
             {
-                variables = new Dictionary<string, IExpression>();
+                this.variables = new Dictionary<string, List<IExpression>>();
             }
-            variables[symbol] = expression;
+            if (!this.variables.TryGetValue(identity.Symbol, out var list))
+            {
+                list = new List<IExpression>();
+                this.variables.Add(identity.Symbol, list);
+            }
+            list.Add(expression);
         }
 
-        public IExpression? LookupVariable(string symbol)
+        public IExpression? LookupVariable(IIdentityTerm identity)
         {
-            if (variables != null &&
-                variables.TryGetValue(symbol, out var expression))
+            if (this.variables != null &&
+                this.variables.TryGetValue(identity.Symbol, out var list))
             {
-                return expression;
+                return list.Aggregate(OrExpression.Create);
             }
             else
             {
-                return parent?.LookupVariable(symbol);
+                return parent?.LookupVariable(identity);
             }
         }
+    }
+
+    public static class ScopeContextExtension
+    {
+        public static IExpression? LookupVariable(
+            this IScopeContext context,
+            string identity) =>
+            context.LookupVariable(IdentityTerm.Create(identity));
     }
 }

@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface ILogicalOperator : IExpression
+    public interface ILogicalOperator : ICallableExpression
     {
-        IExpression Operand { get; }
     }
 
     public sealed class LogicalOperator :
@@ -13,31 +11,25 @@ namespace Favalet.Expressions.Algebraic
     {
         private static readonly LogicalCalculator calculator = new LogicalCalculator();
 
-        public readonly IExpression Operand;
-
-        private LogicalOperator(IExpression operand) =>
-            this.Operand = operand;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression ILogicalOperator.Operand =>
-            this.Operand;
-
-        public override int GetHashCode() =>
-            this.Operand.GetHashCode();
+        private LogicalOperator()
+        { }
 
         public bool Equals(ILogicalOperator rhs) =>
-            calculator.Equals(this.Operand, rhs.Operand);
+            true;
 
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is ILogicalOperator rhs && this.Equals(rhs);
 
         public IExpression Reduce(IReduceContext context) =>
-            calculator.Compute(this.Operand.Reduce(context));
+            this;
+
+        public IExpression Call(IReduceContext context, IExpression argument) =>
+            calculator.Compute(argument);
 
         public override string GetPrettyString(PrettyStringTypes type) =>
-            $"(Logical {this.Operand.GetPrettyString(type)})";
+            "Logical";
 
-        public static LogicalOperator Create(IExpression operand) =>
-            new LogicalOperator(operand);
+        public static readonly LogicalOperator Instance =
+            new LogicalOperator();
     }
 }

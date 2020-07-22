@@ -130,5 +130,130 @@ namespace Favalet
 
             AssertLogicalEqual(expression, expected, actual);
         }
+
+        [Test]
+        public void ApplyLambda3()
+        {
+            var scope = Scope.Create();
+
+            // Same argument symbols.
+
+            // inner = arg -> arg && C
+            scope.SetVariable(
+                "inner",
+                Lambda(
+                    "arg",
+                    And(
+                        Identity("arg"),
+                        Identity("B"))));
+
+            // (arg -> inner arg) A
+            var expression =
+                Apply(
+                    Lambda(
+                        "arg",
+                        Apply(
+                            Identity("inner"),
+                            Identity("arg"))),
+                    Identity("A"));
+
+            var actual = scope.Reduce(expression);
+
+            var expected =
+                And(
+                    Identity("A"),
+                    Identity("B"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void ApplyNestedLambda()
+        {
+            var scope = Scope.Create();
+
+            // Complex nested lambda (bind)
+
+            // inner = arg1 -> arg2 -> arg2 && arg1
+            scope.SetVariable(
+                "inner",
+                Lambda(
+                    "arg1",
+                    Lambda(
+                        "arg2",
+                        And(
+                            Identity("arg2"),
+                            Identity("arg1")))));
+
+            // inner A B
+            var expression =
+                Apply(
+                    Apply(
+                        Identity("inner"),
+                        Identity("A")),
+                    Identity("B"));
+
+            var actual = scope.Reduce(expression);
+
+            var expected =
+                And(
+                    Identity("A"),
+                    Identity("B"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void ApplyLogicalOperator1()
+        {
+            var scope = Scope.Create();
+
+            // Logical (B && A)
+            var expression =
+                Apply(
+                    Logical(),
+                    And(
+                        Identity("B"),
+                        Identity("A")));
+
+            var actual = scope.Reduce(expression);
+
+            // A && B
+            var expected =
+                And(
+                    Identity("A"),
+                    Identity("B"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void ApplyLogicalOperator2()
+        {
+            var scope = Scope.Create();
+
+            // logical = Logical
+            scope.SetVariable(
+                "logical",
+                Logical());
+
+            // logical (B && A)
+            var expression =
+                Apply(
+                    Identity("logical"),
+                    And(
+                        Identity("B"),
+                        Identity("A")));
+
+            var actual = scope.Reduce(expression);
+
+            // A && B
+            var expected =
+                And(
+                    Identity("A"),
+                    Identity("B"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
     }
 }

@@ -10,8 +10,10 @@ namespace Favalet
         public static IdentityTerm Identity(string symbol) =>
             IdentityTerm.Create(symbol);
 
-        public static LogicalOperator Logical(IBinaryExpression operand) =>
-            LogicalOperator.Create(operand);
+        public static LogicalExpression Logical(IBinaryExpression operand) =>
+            LogicalExpression.Create(operand);
+        public static LogicalOperator Logical() =>
+            LogicalOperator.Instance;
 
         public static AndExpression And(
             IExpression lhs, IExpression rhs, params IExpression[] operands) =>

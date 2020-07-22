@@ -220,5 +220,8 @@ namespace Favalet.Expressions.Algebraic
 
             return operand;
         }
+
+        public static readonly LogicalCalculator Instance =
+            new LogicalCalculator();
     }
 }

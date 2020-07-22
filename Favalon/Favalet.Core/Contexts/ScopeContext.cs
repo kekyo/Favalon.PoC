@@ -11,8 +11,13 @@ namespace Favalet.Contexts
         private readonly ScopeContext? parent;
         private Dictionary<string, List<IExpression>>? variables;
 
-        internal ScopeContext(ScopeContext? parent) =>
+        internal ScopeContext(ScopeContext? parent, ILogicalCalculator typeCalculator)
+        {
             this.parent = parent;
+            this.TypeCalculator = typeCalculator;
+        }
+
+        public ILogicalCalculator TypeCalculator { get; }
 
         internal void SetVariable(IIdentityTerm identity, IExpression expression)
         {

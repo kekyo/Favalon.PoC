@@ -33,6 +33,7 @@ namespace Favalet
         [Test]
         public void NonReducibleCombinedAndTypes1()
         {
+            // int && string
             var expression =
                 And(
                     Type<int>(),
@@ -40,6 +41,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // int && string
             var expected =
                 And(
                     Type<int>(),
@@ -51,6 +53,7 @@ namespace Favalet
         [Test]
         public void NonReducibleCombinedAndTypes2()
         {
+            // string && int
             var expression =
                 And(
                     Type<string>(),
@@ -58,6 +61,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // int && string
             var expected =
                 And(
                     Type<int>(),
@@ -69,6 +73,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedAndTypes1_1()
         {
+            // object && int
             var expression =
                 And(
                     Type<object>(),
@@ -76,6 +81,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // int
             var expected =
                 Type<int>();
 
@@ -85,6 +91,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedAndTypes1_2()
         {
+            // int && object
             var expression =
                 And(
                     Type<int>(),
@@ -92,6 +99,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // int
             var expected =
                 Type<int>();
 
@@ -101,6 +109,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedAndTypes2_1()
         {
+            // object && string
             var expression =
                 And(
                     Type<object>(),
@@ -108,6 +117,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // string
             var expected =
                 Type<string>();
 
@@ -117,6 +127,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedAndTypes2_2()
         {
+            // string && object
             var expression =
                 And(
                     Type<string>(),
@@ -124,6 +135,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // string
             var expected =
                 Type<string>();
 
@@ -133,6 +145,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedAndTypes3_1()
         {
+            // IFormattable && int
             var expression =
                 And(
                     Type<IFormattable>(),
@@ -140,6 +153,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // int
             var expected =
                 Type<int>();
 
@@ -149,6 +163,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedAndTypes3_2()
         {
+            // int && IFormattable
             var expression =
                 And(
                     Type<int>(),
@@ -156,6 +171,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // int
             var expected =
                 Type<int>();
 
@@ -165,6 +181,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedAndTypes1_1()
         {
+            // double && IFormattable && int
             var expression =
                 And(
                     Type<double>(),
@@ -174,6 +191,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // double && int
             var expected =
                 And(
                     Type<double>(),
@@ -185,6 +203,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedAndTypes1_2()
         {
+            // double && int && IFormattable
             var expression =
                 And(
                     Type<double>(),
@@ -194,6 +213,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // double && int
             var expected =
                 And(
                     Type<double>(),
@@ -205,6 +225,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedAndTypes1_3()
         {
+            // IFormattable && int && double
             var expression =
                 And(
                     Type<IFormattable>(),
@@ -214,6 +235,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // double && int
             var expected =
                 And(
                     Type<double>(),
@@ -225,6 +247,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedAndTypes2_1()
         {
+            // Queue && ICloneable && IEnumerable
             var expression =
                 And(
                     Type<Queue>(),
@@ -234,6 +257,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // Queue
             var expected =
                 Type<Queue>();
 
@@ -243,6 +267,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedAndTypes2_2()
         {
+            // ICloneable && Queue && IEnumerable
             var expression =
                 And(
                     Type<ICloneable>(),
@@ -252,6 +277,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // Queue
             var expected =
                 Type<Queue>();
 
@@ -261,6 +287,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedAndTypes2_3()
         {
+            // IEnumerable && ICloneable && Queue
             var expression =
                 And(
                     Type<IEnumerable>(),
@@ -270,6 +297,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // Queue
             var expected =
                 Type<Queue>();
 
@@ -281,6 +309,7 @@ namespace Favalet
         [Test]
         public void NonReducibleCombinedOrTypes1()
         {
+            // int || string
             var expression =
                 Or(
                     Type<int>(),
@@ -288,6 +317,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // int || string
             var expected =
                 Or(
                     Type<int>(),
@@ -299,6 +329,7 @@ namespace Favalet
         [Test]
         public void NonReducibleCombinedOrTypes2()
         {
+            // string || int
             var expression =
                 Or(
                     Type<string>(),
@@ -306,6 +337,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // int || string
             var expected =
                 Or(
                     Type<int>(),
@@ -317,6 +349,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedOrTypes1_1()
         {
+            // object || int
             var expression =
                 Or(
                     Type<object>(),
@@ -324,6 +357,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // object
             var expected =
                 Type<object>();
 
@@ -333,6 +367,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedOrTypes1_2()
         {
+            // int || object
             var expression =
                 Or(
                     Type<int>(),
@@ -340,6 +375,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // object
             var expected =
                 Type<object>();
 
@@ -349,6 +385,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedOrTypes2_1()
         {
+            // object || string
             var expression =
                 Or(
                     Type<object>(),
@@ -356,6 +393,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // object
             var expected =
                 Type<object>();
 
@@ -365,6 +403,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedOrTypes2_2()
         {
+            // string || object
             var expression =
                 Or(
                     Type<string>(),
@@ -372,6 +411,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // object
             var expected =
                 Type<object>();
 
@@ -381,6 +421,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedOrTypes3_1()
         {
+            // IFormattable || int
             var expression =
                 Or(
                     Type<IFormattable>(),
@@ -388,6 +429,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // IFormattable
             var expected =
                 Type<IFormattable>();
 
@@ -397,6 +439,7 @@ namespace Favalet
         [Test]
         public void ReducibleCombinedOrTypes3_2()
         {
+            // int || IFormattable
             var expression =
                 Or(
                     Type<int>(),
@@ -404,6 +447,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // IFormattable
             var expected =
                 Type<IFormattable>();
 
@@ -413,6 +457,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedOrTypes1_1()
         {
+            // double || IFormattable || int
             var expression =
                 Or(
                     Type<double>(),
@@ -422,6 +467,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // IFormattable
             var expected =
                 Type<IFormattable>();
 
@@ -431,6 +477,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedOrTypes1_2()
         {
+            // double || int || IFormattable
             var expression =
                 Or(
                     Type<double>(),
@@ -440,6 +487,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // IFormattable
             var expected =
                 Type<IFormattable>();
 
@@ -449,6 +497,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedOrTypes1_3()
         {
+            // IFormattable || int || double
             var expression =
                 Or(
                     Type<IFormattable>(),
@@ -458,6 +507,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // IFormattable
             var expected =
                 Type<IFormattable>();
 
@@ -467,6 +517,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedOrTypes2_1()
         {
+            // Queue || ICloneable || IEnumerable
             var expression =
                 Or(
                     Type<Queue>(),
@@ -476,6 +527,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // ICloneable || IEnumerable
             var expected =
                 Or(
                     Type<ICloneable>(),
@@ -487,6 +539,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedOrTypes2_2()
         {
+            // ICloneable || Queue || IEnumerable
             var expression =
                 Or(
                     Type<ICloneable>(),
@@ -496,6 +549,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // ICloneable || IEnumerable
             var expected =
                 Or(
                     Type<ICloneable>(),
@@ -507,6 +561,7 @@ namespace Favalet
         [Test]
         public void ReducibleMultipleCombinedOrTypes2_3()
         {
+            // IEnumerable || ICloneable || Queue
             var expression =
                 Or(
                     Type<IEnumerable>(),
@@ -516,6 +571,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // ICloneable || IEnumerable
             var expected =
                 Or(
                     Type<ICloneable>(),
@@ -529,6 +585,7 @@ namespace Favalet
         [Test]
         public void NonReducibleCombinedAndOrTypes()
         {
+            // double && (int || string)
             var expression =
                 And(
                     Type<double>(),
@@ -538,6 +595,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // double && (int || string)
             var expected =
                 And(
                     Type<double>(),
@@ -551,6 +609,7 @@ namespace Favalet
         [Test]
         public void NonReducibleCombinedOrAndTypes()
         {
+            // double || (int && string)
             var expression =
                 Or(
                     Type<double>(),
@@ -560,6 +619,7 @@ namespace Favalet
 
             var actual = calculator.Compute(expression);
 
+            // double || (int && string)
             var expected =
                 Or(
                     Type<double>(),

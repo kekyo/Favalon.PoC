@@ -36,8 +36,18 @@ namespace Favalet.Expressions
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
 
-        public IExpression Reduce(IReduceContext context) =>
-            context.LookupVariable(this) ?? this;
+        public IExpression Reduce(IReduceContext context)
+        {
+            if (context.LookupVariable(this) is IExpression lookup)
+            {
+                var reduced = lookup.Reduce(context);
+                return context.TypeCalculator.Compute(reduced);  // TODO: may not look at higher order.
+            }
+            else
+            {
+                return this;
+            }
+        }
 
         public override string GetPrettyString(PrettyStringTypes type) =>
             type switch

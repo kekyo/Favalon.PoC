@@ -18,7 +18,8 @@ namespace Favalet.Expressions
         public readonly string Parameter;
         public readonly IExpression Body;
 
-        private LambdaExpression(string parameter, IExpression body, IExpression higherOrder)
+        private LambdaExpression(
+            string parameter, IExpression body, IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
             this.Parameter = parameter;

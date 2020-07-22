@@ -20,7 +20,12 @@ namespace Favalet.Expressions
             this.RuntimeMethod = runtimeMethod;
 
         public IExpression HigherOrder =>
-            null!; // TODO
+            FunctionExpression.Create(
+                TypeTerm.From(this.RuntimeMethod.GetParameters()[0].ParameterType),
+                TypeTerm.From(
+                    this.RuntimeMethod is MethodInfo method ?
+                        method.ReturnType :
+                        this.RuntimeMethod.DeclaringType));
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         MethodBase IMethodTerm.RuntimeMethod =>

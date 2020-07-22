@@ -2,7 +2,6 @@
 using Favalet.Expressions.Algebraic;
 using NUnit.Framework;
 using System;
-using System.Collections;
 
 using static Favalet.CLRGenerator;
 using static Favalet.Generator;
@@ -252,6 +251,46 @@ namespace Favalet
                 And(
                     Identity("A"),
                     Identity("B"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void ApplyMethod()
+        {
+            var scope = Scope.Create();
+
+            // Math.Sqrt pi
+            var expression =
+                Apply(
+                    Method(typeof(Math).GetMethod("Sqrt")!),
+                    Constant(Math.PI));
+
+            var actual = scope.Reduce(expression);
+
+            // A && B
+            var expected =
+                Constant(Math.Sqrt(Math.PI));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void ApplyConstructor()
+        {
+            var scope = Scope.Create();
+
+            // Uri "http://example.com"
+            var expression =
+                Apply(
+                    Method(typeof(Uri).GetConstructor(new[] { typeof(string) })!),
+                    Constant("http://example.com"));
+
+            var actual = scope.Reduce(expression);
+
+            // Uri
+            var expected =
+                Constant(new Uri("http://example.com"));
 
             AssertLogicalEqual(expression, expected, actual);
         }

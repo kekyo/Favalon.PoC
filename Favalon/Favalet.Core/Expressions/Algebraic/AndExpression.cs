@@ -1,4 +1,5 @@
-﻿using Favalet.Expressions.Specialized;
+﻿using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 
 namespace Favalet.Expressions.Algebraic
 {

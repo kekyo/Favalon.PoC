@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Favalet.Contexts;
+using System;
 using System.Diagnostics;
 
 namespace Favalet.Expressions.Algebraic

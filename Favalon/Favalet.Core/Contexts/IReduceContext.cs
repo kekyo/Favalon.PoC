@@ -1,6 +1,6 @@
 ﻿using Favalet.Expressions;
 
-namespace Favalet
+namespace Favalet.Contexts
 {
     public interface IReduceContext :
         IScopeContext

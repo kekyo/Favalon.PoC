@@ -1,4 +1,5 @@
-﻿using Favalet.Expressions;
+﻿using Favalet.Contexts;
+using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using NUnit.Framework;
 using System;

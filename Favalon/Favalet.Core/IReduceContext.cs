@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Favalet.Expressions;
 
 namespace Favalet
 {
-    public interface IReduceContext
+    public interface IReduceContext :
+        IScopeContext
     {
+        IReduceContext NewScope(string symbol, IExpression expression);
     }
 }

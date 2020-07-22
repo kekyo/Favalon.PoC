@@ -34,7 +34,7 @@ namespace Favalet.Expressions
             other is IIdentityTerm rhs && Equals(rhs);
 
         public IExpression Reduce(IReduceContext context) =>
-            this;
+            context.LookupVariable(this.Symbol) ?? this;
 
         public override string GetPrettyString(PrettyStringTypes type) =>
             type switch

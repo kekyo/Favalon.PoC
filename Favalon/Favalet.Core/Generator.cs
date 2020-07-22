@@ -24,5 +24,9 @@ namespace Favalet
             operands.Aggregate(
                 OrExpression.Create(lhs, rhs),
                 OrExpression.Create);
+
+        public static LambdaExpression Lambda(
+            string symbol, IExpression body) =>
+            LambdaExpression.Create(symbol, body);
     }
 }

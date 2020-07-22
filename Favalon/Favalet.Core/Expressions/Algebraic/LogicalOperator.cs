@@ -29,7 +29,7 @@ namespace Favalet.Expressions.Algebraic
             calculator.Equals(this.Operand, rhs.Operand);
 
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
-            other is ILogicalOperator rhs && Equals(rhs);
+            other is ILogicalOperator rhs && this.Equals(rhs);
 
         public IExpression Reduce(IReduceContext context) =>
             calculator.Compute(this.Operand.Reduce(context));

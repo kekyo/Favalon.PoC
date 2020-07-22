@@ -31,7 +31,7 @@ namespace Favalet.Expressions
             this.Symbol.Equals(rhs.Symbol);
 
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
-            other is IIdentityTerm rhs && Equals(rhs);
+            other is IIdentityTerm rhs && this.Equals(rhs);
 
         public IExpression Reduce(IReduceContext context) =>
             context.LookupVariable(this.Symbol) ?? this;

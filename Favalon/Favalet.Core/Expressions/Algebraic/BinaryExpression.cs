@@ -40,7 +40,7 @@ namespace Favalet.Expressions.Algebraic
             this.Left.Equals(rhs.Left) && this.Right.Equals(rhs.Right);
 
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
-            other is TBinaryExpression rhs && Equals(rhs);
+            other is TBinaryExpression rhs && this.Equals(rhs);
 
         public abstract IExpression Reduce(IReduceContext context);
     }

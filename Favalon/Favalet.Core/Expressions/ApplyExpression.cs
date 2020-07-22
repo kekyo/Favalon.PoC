@@ -1,0 +1,87 @@
+﻿using System;
+using System.Diagnostics;
+
+namespace Favalet.Expressions
+{
+    public interface ICallableExpression : IExpression
+    {
+        IExpression Call(IReduceContext context, IExpression argument);
+    }
+
+    public interface IApplyExpression : IExpression
+    {
+        IExpression Function { get; }
+
+        IExpression Argument { get; }
+    }
+
+    public sealed class ApplyExpression :
+        Expression, IApplyExpression
+    {
+        public readonly IExpression Function;
+        public readonly IExpression Argument;
+
+        private ApplyExpression(IExpression function, IExpression argument)
+        {
+            this.Function = function;
+            this.Argument = argument;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IApplyExpression.Function =>
+            this.Function;
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IApplyExpression.Argument =>
+            this.Argument;
+
+        public override int GetHashCode() =>
+            this.Function.GetHashCode() ^ this.Argument.GetHashCode();
+
+        public bool Equals(IApplyExpression rhs) =>
+            this.Function.Equals(rhs.Function) &&
+            this.Argument.Equals(rhs.Argument);
+
+        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+            other is IApplyExpression rhs && this.Equals(rhs);
+
+        public IExpression Reduce(IReduceContext context)
+        {
+            var argument = this.Argument.Reduce(context);
+
+            var function = this.Function;
+            while (true)
+            {
+                if (function is ICallableExpression callable)
+                {
+                    return callable.Call(context, argument);
+                }
+
+                var reducedFunction = function.Reduce(context);
+
+                if (object.ReferenceEquals(this.Function, reducedFunction) &&
+                    object.ReferenceEquals(this.Argument, argument))
+                {
+                    return this;
+                }
+
+                if (object.ReferenceEquals(function, reducedFunction))
+                {
+                    return new ApplyExpression(reducedFunction, argument);
+                }
+
+                function = reducedFunction;
+            }
+        }
+
+        public override string GetPrettyString(PrettyStringTypes type) =>
+            type switch
+            {
+                PrettyStringTypes.Simple => $"({this.Function.GetPrettyString(type)} {this.Argument.GetPrettyString(type)})",
+                _ => $"(Apply {this.Function.GetPrettyString(type)} {this.Argument.GetPrettyString(type)})"
+            };
+
+        public static ApplyExpression Create(IExpression function, IExpression argument) =>
+            new ApplyExpression(function, argument);
+    }
+}

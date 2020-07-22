@@ -28,5 +28,9 @@ namespace Favalet
         public static LambdaExpression Lambda(
             string symbol, IExpression body) =>
             LambdaExpression.Create(symbol, body);
+
+        public static ApplyExpression Apply(
+            IExpression function, IExpression argument) =>
+            ApplyExpression.Create(function, argument);
     }
 }

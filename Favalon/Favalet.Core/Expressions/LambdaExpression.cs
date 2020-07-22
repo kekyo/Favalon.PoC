@@ -3,12 +3,8 @@ using System.Diagnostics;
 
 namespace Favalet.Expressions
 {
-    public interface ICallableExpression : IExpression
-    {
-        IExpression Call(IReduceContext context, IExpression argument);
-    }
-
-    public interface ILambdaExpression : ICallableExpression
+    public interface ILambdaExpression :
+        ICallableExpression
     {
         string Parameter { get; }
 
@@ -43,7 +39,7 @@ namespace Favalet.Expressions
             this.Body.Equals(rhs.Body);
 
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
-            other is ILambdaExpression rhs && Equals(rhs);
+            other is ILambdaExpression rhs && this.Equals(rhs);
 
         public IExpression Reduce(IReduceContext context)
         {
@@ -59,20 +55,8 @@ namespace Favalet.Expressions
             }
         }
 
-        public IExpression Call(IReduceContext context, IExpression argument)
-        {
-            var localContext = context.NewScope(this.Parameter, argument);
-            var body = this.Body.Reduce(localContext);
-
-            if (object.ReferenceEquals(this.Body, body))
-            {
-                return this;
-            }
-            else
-            {
-                return body;
-            }
-        }
+        public IExpression Call(IReduceContext context, IExpression argument) =>
+            this.Body.Reduce(context.NewScope(this.Parameter, argument));
 
         public override string GetPrettyString(PrettyStringTypes type) =>
             type switch

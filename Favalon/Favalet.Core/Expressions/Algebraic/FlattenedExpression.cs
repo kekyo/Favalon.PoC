@@ -24,7 +24,7 @@ namespace Favalet.Expressions.Algebraic
         public void Deconstruct(out IExpression[] operands) =>
             operands = this.Operands;
 
-        private static IEnumerable<IExpression> Flatten<TBinaryExpression>(
+        public static IEnumerable<IExpression> Flatten<TBinaryExpression>(
             IExpression left, IExpression right)
             where TBinaryExpression : IBinaryExpression
         {
@@ -49,7 +49,7 @@ namespace Favalet.Expressions.Algebraic
                 _ => expression
             };
 
-        private static IEnumerable<IExpression> FlattenAll<TBinaryExpression>(
+        public static IEnumerable<IExpression> FlattenAll<TBinaryExpression>(
             IExpression left, IExpression right)
             where TBinaryExpression : IBinaryExpression
         {

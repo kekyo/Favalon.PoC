@@ -1,5 +1,7 @@
 ﻿using Favalet.Internal;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
@@ -29,47 +31,6 @@ namespace Favalet.Expressions.Algebraic
             AcceptRight,
         }
 
-        private IExpression[] ComputeAbsorption<TFlattenedExpression>(
-            IExpression left,
-            IExpression right,
-            Func<IExpression, IExpression, ReduceResults> predicate)
-            where TFlattenedExpression : FlattenedExpression
-        {
-            var fl = FlattenedExpression.Flatten(left);
-            var fr = FlattenedExpression.Flatten(right);
-
-            if (fr is TFlattenedExpression(IExpression[] rightOperands))
-            {
-                return rightOperands.
-                    SelectMany(rightOperand =>
-                        predicate(fl, rightOperand) switch
-                        {
-                            ReduceResults.AcceptLeft => new[] { fl },
-                            ReduceResults.AcceptRight => new[] { rightOperand },
-                            _ => Enumerable.Empty<IExpression>()
-                        }).
-                    Distinct().
-                    Memoize();
-            }
-            else if (fl is TFlattenedExpression(IExpression[] leftOperands))
-            {
-                return leftOperands.
-                    SelectMany(leftOperand =>
-                        predicate(leftOperand, fr) switch
-                        {
-                            ReduceResults.AcceptLeft => new[] { leftOperand },
-                            ReduceResults.AcceptRight => new[] { fr },
-                            _ => Enumerable.Empty<IExpression>()
-                        }).
-                    Distinct().
-                    Memoize();
-            }
-            else
-            {
-                return ArrayEx.Empty<IExpression>();
-            }
-        }
-
         protected virtual ReduceResults ChoiceForAnd(
             IExpression left, IExpression right) =>
             // Idempotence
@@ -84,7 +45,97 @@ namespace Favalet.Expressions.Algebraic
                 ReduceResults.AcceptLeft :
                 ReduceResults.NonRelated;
 
-        private static IExpression? ConstructFinalResult(
+        private IEnumerable<IExpression> ComputeAbsorption<TFlattenedExpression>(
+            IExpression left,
+            IExpression right,
+            Func<IExpression, IExpression, ReduceResults> selector)
+            where TFlattenedExpression : FlattenedExpression
+        {
+            var fl = FlattenedExpression.Flatten(left);
+            var fr = FlattenedExpression.Flatten(right);
+
+            if (fr is TFlattenedExpression(IExpression[] rightOperands))
+            {
+                return rightOperands.
+                    SelectMany(rightOperand =>
+                        selector(fl, rightOperand) switch
+                        {
+                            ReduceResults.AcceptLeft => new[] { fl },
+                            ReduceResults.AcceptRight => new[] { rightOperand },
+                            _ => Enumerable.Empty<IExpression>()
+                        });
+            }
+            else if (fl is TFlattenedExpression(IExpression[] leftOperands))
+            {
+                return leftOperands.
+                    SelectMany(leftOperand =>
+                        selector(leftOperand, fr) switch
+                        {
+                            ReduceResults.AcceptLeft => new[] { leftOperand },
+                            ReduceResults.AcceptRight => new[] { fr },
+                            _ => Enumerable.Empty<IExpression>()
+                        });
+            }
+            else
+            {
+                return Enumerable.Empty<IExpression>();
+            }
+        }
+
+        private IEnumerable<IExpression> ComputeShrink<TBinaryExpression>(
+            IExpression left,
+            IExpression right,
+            Func<IExpression, IExpression, ReduceResults> selector)
+            where TBinaryExpression : IBinaryExpression
+        {
+            var flattened = FlattenedExpression.Flatten<TBinaryExpression>(left, right);
+            var candidates = new LinkedList<IExpression>(flattened);
+
+            bool requiredRecompute;
+            do
+            {
+                requiredRecompute = false;
+
+                var origin = candidates.First;
+                while (origin != null)
+                {
+                    var current = origin.Next;
+                    while (current != null)
+                    {
+                        // Idempotence / Commutative / Associative
+                        if (origin.Value.Equals(current.Value))
+                        {
+                            candidates.Remove(current);
+                            requiredRecompute = true;
+                        }
+                        // The pair are both type term.
+                        else
+                        {
+                            switch (selector(origin.Value, current.Value))
+                            {
+                                case ReduceResults.AcceptLeft:
+                                    current.Value = origin.Value;
+                                    requiredRecompute = true;
+                                    break;
+                                case ReduceResults.AcceptRight:
+                                    origin.Value = current.Value;
+                                    requiredRecompute = true;
+                                    break;
+                            }
+                        }
+
+                        current = current.Next;
+                    }
+
+                    origin = origin.Next;
+                }
+            }
+            while (requiredRecompute);
+
+            return candidates;
+        }
+
+        private static IExpression? ReConstructExpression(
             IExpression[] results,
             Func<IExpression, IExpression, IExpression> creator) =>
             results.Length switch
@@ -104,42 +155,40 @@ namespace Favalet.Expressions.Algebraic
 
                 if (binary is IAndExpression)
                 {
-                    // Idempotence
-                    switch (this.ChoiceForAnd(left, right))
+                    // Absorption
+                    var absorption =
+                        this.ComputeAbsorption<OrFlattenedExpression>(left, right, this.ChoiceForAnd).
+                        Memoize();
+                    if (ReConstructExpression(absorption, OrExpression.Create) is IExpression result1)
                     {
-                        case ReduceResults.AcceptLeft:
-                            return left;
-                        case ReduceResults.AcceptRight:
-                            return right;
+                        return this.Compute(result1);
                     }
 
-                    // Absorption
-                    var absorption = this.ComputeAbsorption<OrFlattenedExpression>(
-                        left, right, this.ChoiceForAnd);
-                    if (ConstructFinalResult(
-                        absorption,
-                        OrExpression.Create) is IExpression result2)
+                    // Shrink
+                    var shrinked =
+                        this.ComputeShrink<IAndExpression>(left, right, this.ChoiceForAnd).
+                        Memoize();
+                    if (ReConstructExpression(shrinked, AndExpression.Create) is IExpression result2)
                     {
                         return result2;
                     }
                 }
                 else if (binary is IOrExpression)
                 {
-                    // Idempotence
-                    switch (this.ChoiceForOr(left, right))
+                    // Absorption
+                    var absorption =
+                        this.ComputeAbsorption<AndFlattenedExpression>(left, right, this.ChoiceForOr).
+                        Memoize();
+                    if (ReConstructExpression(absorption, AndExpression.Create) is IExpression result1)
                     {
-                        case ReduceResults.AcceptLeft:
-                            return left;
-                        case ReduceResults.AcceptRight:
-                            return right;
+                        return this.Compute(result1);
                     }
 
-                    // Absorption
-                    var absorption = this.ComputeAbsorption<AndFlattenedExpression>(
-                        left, right, this.ChoiceForOr);
-                    if (ConstructFinalResult(
-                        absorption,
-                        AndExpression.Create) is IExpression result2)
+                    // Shrink
+                    var shrinked =
+                        this.ComputeShrink<IOrExpression>(left, right, this.ChoiceForOr).
+                        Memoize();
+                    if (ReConstructExpression(shrinked, OrExpression.Create) is IExpression result2)
                     {
                         return result2;
                     }

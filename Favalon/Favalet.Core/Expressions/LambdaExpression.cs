@@ -47,6 +47,20 @@ namespace Favalet.Expressions
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is ILambdaExpression rhs && this.Equals(rhs);
 
+        public IExpression Infer(IReduceContext context)
+        {
+            var body = this.Body.Infer(context);
+
+            if (object.ReferenceEquals(this.Body, body))
+            {
+                return this;
+            }
+            else
+            {
+                return new LambdaExpression(this.Parameter, body, this.HigherOrder);
+            }
+        }
+
         public IExpression Reduce(IReduceContext context)
         {
             var body = this.Body.Reduce(context);

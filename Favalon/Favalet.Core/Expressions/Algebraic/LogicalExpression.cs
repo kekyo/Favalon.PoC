@@ -39,11 +39,16 @@ namespace Favalet.Expressions.Algebraic
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is ILogicalExpression rhs && this.Equals(rhs);
 
+        public IExpression Infer(IReduceContext context) =>
+            this.Operand.Infer(context);
+
         public IExpression Reduce(IReduceContext context) =>
             calculator.Compute(this.Operand.Reduce(context));
 
-        public override string GetPrettyString(PrettyStringContext type) =>
-            this.FinalizePrettyString(type, $"Logical {this.Operand.GetPrettyString(type)}");
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                $"Logical {this.Operand.GetPrettyString(context)}");
 
         public static LogicalExpression Create(
             IExpression operand, IExpression higherOrder) =>

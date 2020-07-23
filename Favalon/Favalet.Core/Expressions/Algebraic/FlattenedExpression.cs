@@ -21,6 +21,9 @@ namespace Favalet.Expressions.Algebraic
 
         public abstract bool Equals(IExpression? other);
 
+        public IExpression Infer(IReduceContext context) =>
+            throw new InvalidOperationException();
+
         public IExpression Reduce(IReduceContext context) =>
             throw new InvalidOperationException();
 

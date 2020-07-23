@@ -18,6 +18,9 @@ namespace Favalet.Expressions.Specialized
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is UnspecifiedTerm;
 
+        public IExpression Infer(IReduceContext context) =>
+            this;
+
         public IExpression Reduce(IReduceContext context) =>
             this;
 
@@ -30,5 +33,7 @@ namespace Favalet.Expressions.Specialized
 
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();
+        public static readonly FunctionExpression Function =
+            FunctionExpression.Create(Instance, Instance);
     }
 }

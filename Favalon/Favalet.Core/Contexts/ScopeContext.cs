@@ -5,6 +5,13 @@ using System.Linq;
 
 namespace Favalet.Contexts
 {
+    public interface IScopeContext
+    {
+        ILogicalCalculator TypeCalculator { get; }
+
+        IExpression? LookupVariable(IIdentityTerm identity);
+    }
+
     public abstract class ScopeContext :
         IScopeContext
     {

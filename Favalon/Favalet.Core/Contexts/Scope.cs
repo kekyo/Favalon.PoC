@@ -1,9 +1,16 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
-using System;
 
 namespace Favalet.Contexts
 {
+    public interface IReduceContext :
+        IScopeContext
+    {
+        IReduceContext NewScope(IIdentityTerm parameter, IExpression expression);
+
+        void Unify(IExpression from, IExpression to);
+    }
+
     public sealed class Scope : ScopeContext
     {
         private Scope(ILogicalCalculator typeCalculator) :
@@ -12,12 +19,13 @@ namespace Favalet.Contexts
 
         public IExpression Infer(IExpression expression)
         {
-            return expression;
+            var context = new ReduceContext(this, this);
+            return expression.Infer(context);
         }
 
         public IExpression Reduce(IExpression expression)
         {
-            var context = new ReduceContext(this, this.TypeCalculator);
+            var context = new ReduceContext(this, this);
             return expression.Reduce(context);
         }
 
@@ -35,24 +43,31 @@ namespace Favalet.Contexts
             IReduceContext
         {
             private readonly IScopeContext parent;
+            private readonly Scope parentScope;
             private IIdentityTerm? parameter;
             private IExpression? expression;
 
-            public ReduceContext(IScopeContext parent, ILogicalCalculator typeCalculator)
+            public ReduceContext(IScopeContext parent, Scope parentScope)
             {
                 this.parent = parent;
-                this.TypeCalculator = typeCalculator;
+                this.parentScope = parentScope;
             }
 
-            public ILogicalCalculator TypeCalculator { get; }
+            public ILogicalCalculator TypeCalculator =>
+                this.parentScope.TypeCalculator;
 
             public IReduceContext NewScope(IIdentityTerm parameter, IExpression expression)
             {
-                var newContext = new ReduceContext(this, this.TypeCalculator);
+                var newContext = new ReduceContext(this, this.parentScope);
                 newContext.parameter = parameter;
                 newContext.expression = expression;
 
                 return newContext;
+            }
+
+            public void Unify(IExpression from, IExpression to)
+            {
+                // TODO:
             }
 
             public IExpression? LookupVariable(IIdentityTerm identity) =>

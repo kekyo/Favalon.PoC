@@ -43,6 +43,7 @@ namespace Favalet.Expressions.Algebraic
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is TBinaryExpression rhs && this.Equals(rhs);
 
+        public abstract IExpression Infer(IReduceContext context);
         public abstract IExpression Reduce(IReduceContext context);
     }
 

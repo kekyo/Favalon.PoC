@@ -9,6 +9,7 @@ namespace Favalet.Expressions
     {
         IExpression HigherOrder { get; }
 
+        IExpression Infer(IReduceContext context);
         IExpression Reduce(IReduceContext context);
 
         string GetPrettyString(PrettyStringContext type);

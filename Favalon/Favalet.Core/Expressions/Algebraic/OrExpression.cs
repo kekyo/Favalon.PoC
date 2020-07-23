@@ -21,6 +21,22 @@ namespace Favalet.Expressions.Algebraic
             base(left, right, higherOrder)
         { }
 
+        public override IExpression Infer(IReduceContext context)
+        {
+            var left = this.Left.Infer(context);
+            var right = this.Right.Infer(context);
+
+            if (object.ReferenceEquals(this.Left, left) &&
+                object.ReferenceEquals(this.Right, right))
+            {
+                return this;
+            }
+            else
+            {
+                return new OrExpression(left, right, this.HigherOrder);
+            }
+        }
+
         public override IExpression Reduce(IReduceContext context)
         {
             var left = this.Left.Reduce(context);

@@ -47,6 +47,22 @@ namespace Favalet.Expressions
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is IFunctionExpression rhs && this.Equals(rhs);
 
+        public IExpression Infer(IReduceContext context)
+        {
+            var parameter = this.Parameter.Infer(context);
+            var result = this.Result.Infer(context);
+
+            if (object.ReferenceEquals(this.Parameter, parameter) &&
+                object.ReferenceEquals(this.Result, result))
+            {
+                return this;
+            }
+            else
+            {
+                return new FunctionExpression(parameter, result, this.HigherOrder);
+            }
+        }
+
         public IExpression Reduce(IReduceContext context)
         {
             var parameter = this.Parameter.Reduce(context);

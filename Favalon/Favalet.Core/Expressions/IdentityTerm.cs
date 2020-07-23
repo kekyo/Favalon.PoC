@@ -36,12 +36,30 @@ namespace Favalet.Expressions
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
 
+        public IExpression Infer(IReduceContext context)
+        {
+            if (context.LookupVariable(this) is IExpression lookup)
+            {
+                // TODO: may not look at higher order.
+                var inferred = lookup.Infer(context);
+
+                context.Unify(inferred.HigherOrder, this.HigherOrder);
+
+                return inferred;
+            }
+            else
+            {
+                return this;
+            }
+        }
+
         public IExpression Reduce(IReduceContext context)
         {
             if (context.LookupVariable(this) is IExpression lookup)
             {
+                // TODO: may not look at higher order.
                 var reduced = lookup.Reduce(context);
-                return context.TypeCalculator.Compute(reduced);  // TODO: may not look at higher order.
+                return context.TypeCalculator.Compute(reduced);
             }
             else
             {

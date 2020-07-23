@@ -18,6 +18,9 @@ namespace Favalet.Expressions.Specialized
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is FourthTerm;
 
+        public IExpression Infer(IReduceContext context) =>
+            this;
+
         public IExpression Reduce(IReduceContext context) =>
             this;
 

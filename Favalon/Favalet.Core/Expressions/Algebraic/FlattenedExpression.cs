@@ -92,14 +92,12 @@ namespace Favalet.Expressions.Algebraic
             other is AndFlattenedExpression rhs &&
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple =>
-                    "(" + string.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")",
-                _ =>
-                    "(AndFlattened " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    string.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(context))) :
+                    "AndFlattened " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(context))));
     }
 
     internal sealed class OrFlattenedExpression : FlattenedExpression
@@ -116,13 +114,11 @@ namespace Favalet.Expressions.Algebraic
             other is OrFlattenedExpression rhs &&
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple =>
-                    "(" + string.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")",
-                _ =>
-                    "(OrFlattened " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(type))) + ")"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    string.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(context))) :
+                    "OrFlattened " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(context))));
     }
 }

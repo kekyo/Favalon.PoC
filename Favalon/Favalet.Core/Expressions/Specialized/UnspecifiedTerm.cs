@@ -21,12 +21,12 @@ namespace Favalet.Expressions.Specialized
         public IExpression Reduce(IReduceContext context) =>
             this;
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple => "?",
-                _ => "(Unspecified)"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    "?" :
+                    "Unspecified");
 
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();

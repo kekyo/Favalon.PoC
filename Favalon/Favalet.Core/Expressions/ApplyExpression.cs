@@ -80,12 +80,12 @@ namespace Favalet.Expressions
             }
         }
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple => $"({this.Function.GetPrettyString(type)} {this.Argument.GetPrettyString(type)})",
-                _ => $"(Apply {this.Function.GetPrettyString(type)} {this.Argument.GetPrettyString(type)})"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    $"{this.Function.GetPrettyString(context)} {this.Argument.GetPrettyString(context)}" :
+                    $"Apply {this.Function.GetPrettyString(context)} {this.Argument.GetPrettyString(context)}");
 
         public static ApplyExpression Create(
             IExpression function, IExpression argument, IExpression higherOrder) =>

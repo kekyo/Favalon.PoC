@@ -64,12 +64,12 @@ namespace Favalet.Expressions
         public IExpression Call(IReduceContext context, IExpression argument) =>
             this.Body.Reduce(context.NewScope(this.Parameter, argument));
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple => $"({this.Parameter} -> {this.Body.GetPrettyString(type)})",
-                _ => $"(Lambda {this.Parameter} {this.Body.GetPrettyString(type)})"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    $"{this.Parameter} -> {this.Body.GetPrettyString(context)}" :
+                    $"Lambda {this.Parameter} {this.Body.GetPrettyString(context)}");
 
         public static LambdaExpression Create(
             IIdentityTerm parameter, IExpression body, IExpression higherOrder) =>

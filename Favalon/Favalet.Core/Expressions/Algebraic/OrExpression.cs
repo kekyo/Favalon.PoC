@@ -37,14 +37,12 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple =>
-                    $"({this.Left.GetPrettyString(type)} || {this.Right.GetPrettyString(type)})",
-                _ =>
-                    $"(Or {this.Left.GetPrettyString(type)} {this.Right.GetPrettyString(type)})"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    $"{this.Left.GetPrettyString(context)} || {this.Right.GetPrettyString(context)}" :
+                    $"Or {this.Left.GetPrettyString(context)} {this.Right.GetPrettyString(context)}");
 
         public static OrExpression Create(
             IExpression left, IExpression right, IExpression higherOrder) =>

@@ -1,4 +1,5 @@
-﻿using Favalet.Expressions;
+﻿using Favalet.Contexts;
+using Favalet.Expressions;
 using NUnit.Framework;
 using System;
 using System.Collections;
@@ -23,9 +24,9 @@ namespace Favalet
             {
                 Assert.Fail(
                     "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",
-                    expression.GetPrettyString(PrettyStringTypes.Simple),
-                    expected.GetPrettyString(PrettyStringTypes.Simple),
-                    actual.GetPrettyString(PrettyStringTypes.Simple));
+                    expression.GetPrettyString(PrettyStringContext.Simple),
+                    expected.GetPrettyString(PrettyStringContext.Simple),
+                    actual.GetPrettyString(PrettyStringContext.Simple));
             }
         }
 

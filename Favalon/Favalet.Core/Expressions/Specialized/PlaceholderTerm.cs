@@ -28,12 +28,12 @@ namespace Favalet.Expressions.Specialized
         public IExpression Reduce(IReduceContext context) =>
             this;
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple => $"'{this.Index}",
-                _ => "(Placeholder '{this.Index})"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    $"'{this.Index}" :
+                    $"Placeholder '{this.Index}");
 
         internal static PlaceholderTerm Create(
             int index, IExpression higherOrder) =>

@@ -1,4 +1,5 @@
 ﻿using Favalet.Contexts;
+using Favalet.Internal;
 using System;
 using System.Diagnostics;
 
@@ -36,12 +37,12 @@ namespace Favalet.Expressions
         public IExpression Reduce(IReduceContext context) =>
             this;
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple => this.RuntimeType.FullName,
-                _ => $"(Type {this.RuntimeType.FullName})"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    this.RuntimeType.GetReadableName() :
+                    $"Type {this.RuntimeType.GetReadableName()}");
 
         public static ITerm From(Type type)
         {

@@ -37,12 +37,12 @@ namespace Favalet.Expressions
         public IExpression Reduce(IReduceContext context) =>
             this;
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            this.Value switch
+        public override string GetPrettyString(PrettyStringContext type) =>
+            this.FinalizePrettyString(type, this.Value switch
             {
                 string value => $"\"{value}\"",
                 _ => this.Value.ToString()
-            };
+            });
 
         public static ConstantTerm From(object value) =>
             new ConstantTerm(value);

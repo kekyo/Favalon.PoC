@@ -49,12 +49,12 @@ namespace Favalet.Expressions
             }
         }
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple => this.Symbol,
-                _ => $"(Identity {this.Symbol})"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    this.Symbol :
+                    $"Identity {this.Symbol}");
 
         public static IdentityTerm Create(string symbol, IExpression higherOrder) =>
             new IdentityTerm(symbol, higherOrder);

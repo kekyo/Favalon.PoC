@@ -42,8 +42,8 @@ namespace Favalet.Expressions.Algebraic
         public IExpression Reduce(IReduceContext context) =>
             calculator.Compute(this.Operand.Reduce(context));
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            $"(Logical {this.Operand.GetPrettyString(type)})";
+        public override string GetPrettyString(PrettyStringContext type) =>
+            this.FinalizePrettyString(type, $"Logical {this.Operand.GetPrettyString(type)}");
 
         public static LogicalExpression Create(
             IExpression operand, IExpression higherOrder) =>

@@ -21,12 +21,12 @@ namespace Favalet.Expressions.Specialized
         public IExpression Reduce(IReduceContext context) =>
             this;
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple => "#",
-                _ => "(Fourth)"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    "#" :
+                    "Fourth");
 
         public static readonly FourthTerm Instance =
             new FourthTerm();

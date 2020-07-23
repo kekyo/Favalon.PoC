@@ -62,16 +62,16 @@ namespace Favalet.Expressions
             }
             else
             {
-                throw new ArgumentException(argument.GetPrettyString(PrettyStringTypes.Simple));
+                throw new ArgumentException(argument.GetPrettyString(PrettyStringContext.Simple));
             }
         }
 
-        public override string GetPrettyString(PrettyStringTypes type) =>
-            type switch
-            {
-                PrettyStringTypes.Simple => this.RuntimeMethod.GetReadableName(),
-                _ => $"(Method {this.RuntimeMethod.GetReadableName()})"
-            };
+        public override string GetPrettyString(PrettyStringContext context) =>
+            this.FinalizePrettyString(
+                context,
+                context.IsSimple ?
+                    this.RuntimeMethod.GetReadableName() :
+                    $"Method {this.RuntimeMethod.GetReadableName()}");
 
         public static MethodTerm From(MethodBase method) =>
             new MethodTerm(method);

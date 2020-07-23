@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 using static Favalet.Generator;
 
-namespace Favalet
+namespace Favalet.Reduces
 {
     [TestFixture]
     public sealed class AlgebraicTest

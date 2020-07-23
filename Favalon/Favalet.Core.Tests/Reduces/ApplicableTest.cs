@@ -7,7 +7,7 @@ using System;
 using static Favalet.CLRGenerator;
 using static Favalet.Generator;
 
-namespace Favalet
+namespace Favalet.Reduces
 {
     [TestFixture]
     public sealed class ApplicableTest

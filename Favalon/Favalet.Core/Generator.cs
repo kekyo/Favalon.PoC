@@ -18,23 +18,23 @@ namespace Favalet
 
         public static IdentityTerm Identity(string symbol) =>
             IdentityTerm.Create(symbol);
+        public static IdentityTerm Identity(string symbol, IExpression higherOrder) =>
+            IdentityTerm.Create(symbol, higherOrder);
 
         public static LogicalExpression Logical(IBinaryExpression operand) =>
             LogicalExpression.Create(operand);
         public static LogicalOperator Logical() =>
             LogicalOperator.Instance;
 
-        public static AndExpression And(
-            IExpression lhs, IExpression rhs, params IExpression[] operands) =>
-            operands.Aggregate(
-                AndExpression.Create(lhs, rhs),
-                AndExpression.Create);
+        public static AndExpression And(IExpression lhs, IExpression rhs) =>
+            AndExpression.Create(lhs, rhs);
+        public static AndExpression And(IExpression lhs, IExpression rhs, IExpression higherOrder) =>
+            AndExpression.Create(lhs, rhs, higherOrder);
 
-        public static OrExpression Or(
-            IExpression lhs, IExpression rhs, params IExpression[] operands) =>
-            operands.Aggregate(
-                OrExpression.Create(lhs, rhs),
-                OrExpression.Create);
+        public static OrExpression Or(IExpression lhs, IExpression rhs) =>
+            OrExpression.Create(lhs, rhs);
+        public static OrExpression Or(IExpression lhs, IExpression rhs, IExpression higherOrder) =>
+            OrExpression.Create(lhs, rhs, higherOrder);
 
         public static LambdaExpression Lambda(
             IIdentityTerm parameter, IExpression body) =>

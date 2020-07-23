@@ -14,11 +14,10 @@ namespace Favalet.Expressions.Algebraic
         protected FlattenedExpression(IExpression[] operands) =>
             this.Operands = operands;
 
-        public IExpression HigherOrder =>
-            throw new InvalidOperationException();
+        public abstract IExpression HigherOrder { get; }
 
         public override sealed int GetHashCode() =>
-            this.Operands.Aggregate(0, (agg, operand) => agg ^ operand.GetHashCode());
+            this.Operands.Aggregate(0, (agg, operand) => agg ^ operand?.GetHashCode() ?? 0);
 
         public abstract bool Equals(IExpression? other);
 
@@ -85,6 +84,10 @@ namespace Favalet.Expressions.Algebraic
             base(operands)
         { }
 
+        public override IExpression HigherOrder =>
+            new AndFlattenedExpression(
+                this.Operands.Select(operand => operand.HigherOrder).Memoize());
+
         public override bool Equals(IExpression? other) =>
             other is AndFlattenedExpression rhs &&
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
@@ -104,6 +107,10 @@ namespace Favalet.Expressions.Algebraic
         public OrFlattenedExpression(IExpression[] operands) :
             base(operands)
         { }
+
+        public override IExpression HigherOrder =>
+            new OrFlattenedExpression(
+                this.Operands.Select(operand => operand.HigherOrder).Memoize());
 
         public override bool Equals(IExpression? other) =>
             other is OrFlattenedExpression rhs &&

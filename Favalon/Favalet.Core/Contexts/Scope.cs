@@ -10,6 +10,11 @@ namespace Favalet.Contexts
             base(null, typeCalculator)
         { }
 
+        public IExpression Infer(IExpression expression)
+        {
+            return expression;
+        }
+
         public IExpression Reduce(IExpression expression)
         {
             var context = new ReduceContext(this, this.TypeCalculator);

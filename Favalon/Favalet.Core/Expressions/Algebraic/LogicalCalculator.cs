@@ -1,6 +1,6 @@
-﻿using Favalet.Internal;
+﻿using Favalet.Expressions.Specialized;
+using Favalet.Internal;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,6 +9,7 @@ namespace Favalet.Expressions.Algebraic
     public interface ILogicalCalculator
     {
         bool Equals(IExpression lhs, IExpression rhs);
+        bool ExactEquals(IExpression lhs, IExpression rhs);
 
         IExpression Compute(IExpression operand);
     }
@@ -18,10 +19,42 @@ namespace Favalet.Expressions.Algebraic
     {
         public bool Equals(IExpression lhs, IExpression rhs)
         {
-            var left = FlattenedExpression.FlattenAll(lhs);
-            var right = FlattenedExpression.FlattenAll(rhs);
+            if (object.ReferenceEquals(lhs, rhs))
+            {
+                return true;
+            }
+            else
+            {
+                var left = FlattenedExpression.FlattenAll(lhs);
+                var right = FlattenedExpression.FlattenAll(rhs);
 
-            return left.Equals(right);
+                return left.Equals(right);
+            }
+        }
+
+        public bool ExactEquals(IExpression lhs, IExpression rhs)
+        {
+            if (object.ReferenceEquals(lhs, rhs))
+            {
+                return true;
+            }
+            else
+            {
+                var left = FlattenedExpression.FlattenAll(lhs);
+                var right = FlattenedExpression.FlattenAll(rhs);
+
+                return
+                    left.Equals(right) &&
+                    (lhs, rhs) switch
+                    {
+                        (FourthTerm _, FourthTerm _) => true,
+                        (FourthTerm _, _) => false,
+                        (_, FourthTerm _) => false,
+                        _ => this.Equals(
+                            this.Compute(lhs.HigherOrder),
+                            this.Compute(rhs.HigherOrder))
+                    };
+            }
         }
 
         protected enum ReduceResults

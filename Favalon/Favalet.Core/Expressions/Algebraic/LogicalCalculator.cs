@@ -45,7 +45,7 @@ namespace Favalet.Expressions.Algebraic
 
                 return
                     left.Equals(right) &&
-                    (lhs, rhs) switch
+                    (left, right) switch
                     {
                         (FourthTerm _, FourthTerm _) => true,
                         (FourthTerm _, _) => false,

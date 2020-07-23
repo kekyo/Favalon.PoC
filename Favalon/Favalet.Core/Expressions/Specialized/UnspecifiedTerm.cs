@@ -10,7 +10,7 @@ namespace Favalet.Expressions.Specialized
         { }
 
         public IExpression HigherOrder =>
-            Instance;
+            null!;
 
         public bool Equals(UnspecifiedTerm rhs) =>
             rhs != null;

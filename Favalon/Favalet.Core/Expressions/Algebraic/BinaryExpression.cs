@@ -44,6 +44,7 @@ namespace Favalet.Expressions.Algebraic
             other is TBinaryExpression rhs && this.Equals(rhs);
 
         public abstract IExpression Infer(IReduceContext context);
+        public abstract IExpression Fixup(IReduceContext context);
         public abstract IExpression Reduce(IReduceContext context);
     }
 

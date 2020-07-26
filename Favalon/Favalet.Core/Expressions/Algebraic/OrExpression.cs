@@ -23,8 +23,16 @@ namespace Favalet.Expressions.Algebraic
 
         public override IExpression Infer(IReduceContext context)
         {
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
             var left = this.Left.Infer(context);
             var right = this.Right.Infer(context);
+
+            var andHigherOrder = new OrExpression(
+                left.HigherOrder,
+                right.HigherOrder,
+                UnspecifiedTerm.Instance);
+
+            context.Unify(andHigherOrder, higherOrder);
 
             if (object.ReferenceEquals(this.Left, left) &&
                 object.ReferenceEquals(this.Right, right))
@@ -33,7 +41,24 @@ namespace Favalet.Expressions.Algebraic
             }
             else
             {
-                return new OrExpression(left, right, this.HigherOrder);
+                return new OrExpression(left, right, higherOrder);
+            }
+        }
+
+        public override IExpression Fixup(IReduceContext context)
+        {
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var left = this.Left.Fixup(context);
+            var right = this.Right.Fixup(context);
+
+            if (object.ReferenceEquals(this.Left, left) &&
+                object.ReferenceEquals(this.Right, right))
+            {
+                return this;
+            }
+            else
+            {
+                return new OrExpression(left, right, higherOrder);
             }
         }
 

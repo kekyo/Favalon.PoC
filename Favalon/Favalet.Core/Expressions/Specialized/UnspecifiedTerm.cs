@@ -19,6 +19,9 @@ namespace Favalet.Expressions.Specialized
             other is UnspecifiedTerm;
 
         public IExpression Infer(IReduceContext context) =>
+            PlaceholderTerm.Create(context);
+
+        public IExpression Fixup(IReduceContext context) =>
             this;
 
         public IExpression Reduce(IReduceContext context) =>

@@ -24,6 +24,9 @@ namespace Favalet.Expressions.Algebraic
         public IExpression Infer(IReduceContext context) =>
             throw new InvalidOperationException();
 
+        public IExpression Fixup(IReduceContext context) =>
+            throw new InvalidOperationException();
+
         public IExpression Reduce(IReduceContext context) =>
             throw new InvalidOperationException();
 

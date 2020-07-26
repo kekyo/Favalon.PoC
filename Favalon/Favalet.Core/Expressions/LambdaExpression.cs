@@ -49,15 +49,52 @@ namespace Favalet.Expressions
 
         public IExpression Infer(IReduceContext context)
         {
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var parameter = this.Parameter.Infer(context);
             var body = this.Body.Infer(context);
 
-            if (object.ReferenceEquals(this.Body, body))
+            var lambdaHigherOrder = FunctionExpression.Create(
+                parameter.HigherOrder,
+                body.HigherOrder,
+                UnspecifiedTerm.Instance);
+
+            context.Unify(lambdaHigherOrder, higherOrder);
+
+            if (object.ReferenceEquals(this.Parameter, parameter) &&
+                object.ReferenceEquals(this.Body, body) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
             {
                 return this;
             }
+            else if (parameter is IIdentityTerm identity)
+            {
+                return new LambdaExpression(identity, body, higherOrder);
+            }
             else
             {
-                return new LambdaExpression(this.Parameter, body, this.HigherOrder);
+                return new LambdaExpression(this.Parameter, body, higherOrder);
+            }
+        }
+
+        public IExpression Fixup(IReduceContext context)
+        {
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var parameter = this.Parameter.Fixup(context);
+            var body = this.Body.Fixup(context);
+
+            if (object.ReferenceEquals(this.Parameter, parameter) &&
+                object.ReferenceEquals(this.Body, body) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
+            {
+                return this;
+            }
+            else if (parameter is IIdentityTerm identity)
+            {
+                return new LambdaExpression(identity, body, higherOrder);
+            }
+            else
+            {
+                return new LambdaExpression(this.Parameter, body, higherOrder);
             }
         }
 

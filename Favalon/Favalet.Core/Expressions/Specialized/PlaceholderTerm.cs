@@ -6,15 +6,21 @@ namespace Favalet.Expressions.Specialized
     public sealed class PlaceholderTerm :
         Expression, ITerm
     {
+        private readonly IReduceContext context;
+        private readonly Lazy<PlaceholderTerm> higherOrder;
+
         public readonly int Index;
 
-        private PlaceholderTerm(int index, IExpression higherOrder)
+        private PlaceholderTerm(IReduceContext context, int index)
         {
-            this.HigherOrder = higherOrder;
+            this.context = context;
             this.Index = index;
+            this.higherOrder = new Lazy<PlaceholderTerm>(
+                () => new PlaceholderTerm(this.context, this.context.NewPlaceholderIndex()));
         }
 
-        public IExpression HigherOrder { get; }
+        public IExpression HigherOrder =>
+            this.higherOrder.Value;
 
         public override int GetHashCode() =>
             this.Index.GetHashCode();
@@ -25,8 +31,33 @@ namespace Favalet.Expressions.Specialized
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is PlaceholderTerm rhs && this.Equals(rhs);
 
-        public IExpression Infer(IReduceContext context) =>
-            this;
+        public IExpression Infer(IReduceContext context)
+        {
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+
+            if (object.ReferenceEquals(this.HigherOrder, higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new PlaceholderTerm(this.context, this.Index);
+            }
+        }
+
+        public IExpression Fixup(IReduceContext context)
+        {
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+
+            if (object.ReferenceEquals(this.HigherOrder, higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new PlaceholderTerm(this.context, this.Index);
+            }
+        }
 
         public IExpression Reduce(IReduceContext context) =>
             this;
@@ -38,8 +69,7 @@ namespace Favalet.Expressions.Specialized
                     $"'{this.Index}" :
                     $"Placeholder '{this.Index}");
 
-        internal static PlaceholderTerm Create(
-            int index, IExpression higherOrder) =>
-            new PlaceholderTerm(index, higherOrder);
+        internal static PlaceholderTerm Create(IReduceContext context) =>
+            new PlaceholderTerm(context, context.NewPlaceholderIndex());
     }
 }

@@ -39,8 +39,39 @@ namespace Favalet.Expressions.Algebraic
         bool IEquatable<IExpression?>.Equals(IExpression? other) =>
             other is ILogicalExpression rhs && this.Equals(rhs);
 
-        public IExpression Infer(IReduceContext context) =>
-            this.Operand.Infer(context);
+        public IExpression Infer(IReduceContext context)
+        {
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var operand = this.Operand.Infer(context);
+
+            context.Unify(operand.HigherOrder, higherOrder);
+
+            if (object.ReferenceEquals(this.HigherOrder, higherOrder) &&
+                object.ReferenceEquals(this.Operand, operand))
+            {
+                return this;
+            }
+            else
+            {
+                return new LogicalExpression(operand, higherOrder);
+            }
+        }
+
+        public IExpression Fixup(IReduceContext context)
+        {
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var operand = this.Operand.Fixup(context);
+
+            if (object.ReferenceEquals(this.HigherOrder, higherOrder) &&
+                object.ReferenceEquals(this.Operand, operand))
+            {
+                return this;
+            }
+            else
+            {
+                return new LogicalExpression(operand, higherOrder);
+            }
+        }
 
         public IExpression Reduce(IReduceContext context) =>
             calculator.Compute(this.Operand.Reduce(context));

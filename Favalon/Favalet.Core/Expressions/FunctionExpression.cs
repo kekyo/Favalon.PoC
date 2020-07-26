@@ -49,17 +49,43 @@ namespace Favalet.Expressions
 
         public IExpression Infer(IReduceContext context)
         {
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
             var parameter = this.Parameter.Infer(context);
             var result = this.Result.Infer(context);
 
+            var functionHigherOrder = FunctionExpression.Create(
+                parameter.HigherOrder,
+                result.HigherOrder);
+
+            context.Unify(functionHigherOrder, higherOrder);
+
             if (object.ReferenceEquals(this.Parameter, parameter) &&
-                object.ReferenceEquals(this.Result, result))
+                object.ReferenceEquals(this.Result, result) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
             {
                 return this;
             }
             else
             {
-                return new FunctionExpression(parameter, result, this.HigherOrder);
+                return new FunctionExpression(parameter, result, higherOrder);
+            }
+        }
+
+        public IExpression Fixup(IReduceContext context)
+        {
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var parameter = this.Parameter.Fixup(context);
+            var result = this.Result.Fixup(context);
+
+            if (object.ReferenceEquals(this.Parameter, parameter) &&
+                object.ReferenceEquals(this.Result, result) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new FunctionExpression(parameter, result, higherOrder);
             }
         }
 

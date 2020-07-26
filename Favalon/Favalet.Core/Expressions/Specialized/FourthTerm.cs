@@ -21,6 +21,9 @@ namespace Favalet.Expressions.Specialized
         public IExpression Infer(IReduceContext context) =>
             this;
 
+        public IExpression Fixup(IReduceContext context) =>
+            this;
+
         public IExpression Reduce(IReduceContext context) =>
             this;
 

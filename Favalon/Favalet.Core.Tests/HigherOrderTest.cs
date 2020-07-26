@@ -29,7 +29,29 @@ namespace Favalet
         }
 
         [Test]
-        public void UnspecifiedTypeInferring()
+        public void UnspecifiedTypeInferring1()
+        {
+            var scope = Scope.Create();
+
+            scope.SetVariable(
+                "true",
+                Constant(true));
+
+            // true && false
+            var expression =
+                Identity("true");
+
+            var actual = scope.Infer(expression);
+
+            // true:bool
+            var expected =
+                Identity("true", Type<bool>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void UnspecifiedTypeInferring2()
         {
             var scope = Scope.Create();
 

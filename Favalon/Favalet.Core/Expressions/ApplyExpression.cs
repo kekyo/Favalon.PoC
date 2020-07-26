@@ -24,7 +24,9 @@ namespace Favalet.Expressions
         public readonly IExpression Argument;
 
         private ApplyExpression(
-            IExpression function, IExpression argument, IExpression higherOrder)
+            IExpression function,
+            IExpression argument,
+            IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
             this.Function = function;
@@ -53,30 +55,43 @@ namespace Favalet.Expressions
 
         public IExpression Infer(IReduceContext context)
         {
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
             var argument = this.Argument.Infer(context);
+            var function = this.Function.Infer(context);
 
-            var function = this.Function;
-            while (true)
+            var functionHigherOrder = FunctionExpression.Create(
+                argument.HigherOrder,
+                higherOrder);
+
+            context.Unify(function.HigherOrder, functionHigherOrder);
+
+            if (object.ReferenceEquals(this.Argument, argument) &&
+                object.ReferenceEquals(this.Function, function) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
             {
-                if (function is ICallableExpression callable)
-                {
-                    return callable.Call(context, argument);
-                }
+                return this;
+            }
+            else
+            {
+                return new ApplyExpression(function, argument, higherOrder);
+            }
+        }
 
-                var reducedFunction = function.Infer(context);
+        public IExpression Fixup(IReduceContext context)
+        {
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var argument = this.Argument.Fixup(context);
+            var function = this.Function.Fixup(context);
 
-                if (object.ReferenceEquals(this.Function, reducedFunction) &&
-                    object.ReferenceEquals(this.Argument, argument))
-                {
-                    return this;
-                }
-
-                if (object.ReferenceEquals(function, reducedFunction))
-                {
-                    return new ApplyExpression(reducedFunction, argument, this.HigherOrder);
-                }
-
-                function = reducedFunction;
+            if (object.ReferenceEquals(this.Argument, argument) &&
+                object.ReferenceEquals(this.Function, function) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new ApplyExpression(function, argument, higherOrder);
             }
         }
 

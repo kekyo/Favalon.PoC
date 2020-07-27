@@ -2,6 +2,7 @@
 using Favalet.Internal;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
@@ -11,6 +12,7 @@ namespace Favalet.Expressions.Algebraic
     {
         public readonly IExpression[] Operands;
 
+        [DebuggerStepThrough]
         protected FlattenedExpression(IExpression[] operands) =>
             this.Operands = operands;
 
@@ -82,6 +84,7 @@ namespace Favalet.Expressions.Algebraic
 
     internal sealed class AndFlattenedExpression : FlattenedExpression
     {
+        [DebuggerStepThrough]
         public AndFlattenedExpression(IExpression[] operands) :
             base(operands)
         { }
@@ -104,6 +107,7 @@ namespace Favalet.Expressions.Algebraic
 
     internal sealed class OrFlattenedExpression : FlattenedExpression
     {
+        [DebuggerStepThrough]
         public OrFlattenedExpression(IExpression[] operands) :
             base(operands)
         { }

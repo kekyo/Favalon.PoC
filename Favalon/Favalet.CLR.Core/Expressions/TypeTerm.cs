@@ -15,6 +15,7 @@ namespace Favalet.Expressions
     {
         public readonly Type RuntimeType;
 
+        [DebuggerStepThrough]
         private TypeTerm(Type runtimeType) =>
             this.RuntimeType = runtimeType;
 

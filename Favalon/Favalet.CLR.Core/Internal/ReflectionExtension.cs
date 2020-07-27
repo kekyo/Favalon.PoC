@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Favalet.Internal
@@ -28,15 +29,18 @@ namespace Favalet.Internal
             };
 
 #if NETSTANDARD1_0
+        [DebuggerStepThrough]
         public static bool IsAssignableFrom(this Type lhs, Type rhs) =>
             lhs.GetTypeInfo().IsAssignableFrom(rhs.GetTypeInfo());
 #endif
 
+        [DebuggerStepThrough]
         public static string GetReadableName(this Type type) =>
             readableNames.TryGetValue(type, out var name) ?
                 name :
                 type.FullName;
 
+        [DebuggerStepThrough]
         public static string GetReadableName(this MethodBase method) =>
             $"{method.DeclaringType.GetReadableName()}.{method.Name}";
     }

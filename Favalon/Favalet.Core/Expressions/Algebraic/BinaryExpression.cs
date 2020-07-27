@@ -17,6 +17,7 @@ namespace Favalet.Expressions.Algebraic
         public readonly IExpression Left;
         public readonly IExpression Right;
 
+        [DebuggerStepThrough]
         protected BinaryExpression(
             IExpression left, IExpression right, IExpression higherOrder)
         {

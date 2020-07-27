@@ -4,15 +4,14 @@ using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Favalet.Contexts
 {
     public interface IReduceContext :
         IScopeContext
     {
-        IExpression Infer(IExpression expression);
         IExpression Fixup(IExpression expression);
-        IExpression Reduce(IExpression expression);
 
         IReduceContext NewScope(IIdentityTerm parameter, IExpression expression);
 
@@ -22,19 +21,22 @@ namespace Favalet.Contexts
 
         void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
 
-        IExpression FixupHigherOrder(IExpression higherOrder);
+        IExpression? ResolvePlaceholderIndex(int index);
     }
 
-    public sealed class Scope : ScopeContext
+    public sealed class Scope :
+        ScopeContext, IScopeContext
     {
-        private int placeholderIndex;
+        private int placeholderIndex = -1;
 
+        [DebuggerStepThrough]
         private Scope(ILogicalCalculator typeCalculator) :
             base(null, typeCalculator)
         { }
 
+        [DebuggerStepThrough]
         internal int DrawNewPlaceholderIndex() =>
-            this.placeholderIndex++;
+            Interlocked.Increment(ref this.placeholderIndex);
 
         public IExpression Infer(IExpression expression)
         {
@@ -59,13 +61,17 @@ namespace Favalet.Contexts
             return reduced;
         }
 
+        [DebuggerHidden]
         public new void SetVariable(IIdentityTerm identity, IExpression expression) =>
             base.SetVariable(identity, expression);
+        [DebuggerHidden]
         public void SetVariable(string identity, IExpression expression) =>
             base.SetVariable(IdentityTerm.Create(identity), expression);
 
+        [DebuggerStepThrough]
         public static Scope Create(ILogicalCalculator typeCalculator) =>
             new Scope(typeCalculator);
+        [DebuggerStepThrough]
         public static Scope Create() =>
             new Scope(LogicalCalculator.Instance);
 
@@ -78,6 +84,7 @@ namespace Favalet.Contexts
             private IIdentityTerm? parameter;
             private IExpression? expression;
 
+            [DebuggerStepThrough]
             public ReduceContext(
                 Scope rootScope,
                 IScopeContext parentScope,
@@ -114,6 +121,7 @@ namespace Favalet.Contexts
                 return newContext;
             }
 
+            [DebuggerStepThrough]
             public int NewPlaceholderIndex() =>
                 this.rootScope.DrawNewPlaceholderIndex();
 
@@ -146,19 +154,28 @@ namespace Favalet.Contexts
                         else
                         {
                             // TODO: variance
-                            this.unifiedExpressions[pto.Index] = from;
+                            lock (this.unifiedExpressions)
+                            {
+                                this.unifiedExpressions[pto.Index] = from;
+                            }
                             return;
                         }
                     }
 
                     // TODO: variance
-                    this.unifiedExpressions[pfrom.Index] = to;
+                    lock (this.unifiedExpressions)
+                    {
+                        this.unifiedExpressions[pfrom.Index] = to;
+                    }
                     return;
                 }
                 else if (to is PlaceholderTerm pto)
                 {
                     // TODO: variance
-                    this.unifiedExpressions[pto.Index] = from;
+                    lock (this.unifiedExpressions)
+                    {
+                        this.unifiedExpressions[pto.Index] = from;
+                    }
                     return;
                 }
 
@@ -171,10 +188,10 @@ namespace Favalet.Contexts
                 throw new ArgumentException();
             }
 
-            public IExpression FixupHigherOrder(IExpression higherOrder)
-            {
-                return higherOrder;
-            }
+            public IExpression? ResolvePlaceholderIndex(int index) =>
+                this.unifiedExpressions.TryGetValue(index, out var resolved) ?
+                    resolved :
+                    null;
 
             public IExpression? LookupVariable(IIdentityTerm identity) =>
                 // TODO: improving when identity's higher order acceptable

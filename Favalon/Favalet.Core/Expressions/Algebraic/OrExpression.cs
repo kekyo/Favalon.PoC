@@ -1,10 +1,6 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -16,6 +12,7 @@ namespace Favalet.Expressions.Algebraic
         BinaryExpression<IOrExpression>,
         IOrExpression
     {
+        [DebuggerStepThrough]
         private OrExpression(
             IExpression left, IExpression right, IExpression higherOrder) :
             base(left, right, higherOrder)
@@ -47,7 +44,7 @@ namespace Favalet.Expressions.Algebraic
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var higherOrder = context.Fixup(this.HigherOrder);
             var left = context.Fixup(this.Left);
             var right = context.Fixup(this.Right);
 
@@ -85,9 +82,11 @@ namespace Favalet.Expressions.Algebraic
                     $"{this.Left.GetPrettyString(context)} || {this.Right.GetPrettyString(context)}" :
                     $"Or {this.Left.GetPrettyString(context)} {this.Right.GetPrettyString(context)}");
 
+        [DebuggerStepThrough]
         public static OrExpression Create(
             IExpression left, IExpression right, IExpression higherOrder) =>
             new OrExpression(left, right, higherOrder);
+        [DebuggerStepThrough]
         public static OrExpression Create(
             IExpression left, IExpression right) =>
             new OrExpression(left, right, UnspecifiedTerm.Instance);

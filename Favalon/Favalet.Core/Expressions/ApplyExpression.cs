@@ -79,7 +79,7 @@ namespace Favalet.Expressions
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var higherOrder = context.Fixup(this.HigherOrder);
             var argument = context.Fixup(this.Argument);
             var function = context.Fixup(this.Function);
 
@@ -131,9 +131,11 @@ namespace Favalet.Expressions
                     $"{this.Function.GetPrettyString(context)} {this.Argument.GetPrettyString(context)}" :
                     $"Apply {this.Function.GetPrettyString(context)} {this.Argument.GetPrettyString(context)}");
 
+        [DebuggerStepThrough]
         public static ApplyExpression Create(
             IExpression function, IExpression argument, IExpression higherOrder) =>
             new ApplyExpression(function, argument, higherOrder);
+        [DebuggerStepThrough]
         public static ApplyExpression Create(
             IExpression function, IExpression argument) =>
             new ApplyExpression(function, argument, UnspecifiedTerm.Instance);

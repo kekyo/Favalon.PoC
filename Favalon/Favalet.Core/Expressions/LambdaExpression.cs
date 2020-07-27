@@ -78,7 +78,7 @@ namespace Favalet.Expressions
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var higherOrder = context.Fixup(this.HigherOrder);
             var parameter = context.Fixup(this.Parameter);
             var body = context.Fixup(this.Body);
 
@@ -124,9 +124,11 @@ namespace Favalet.Expressions
                     $"{this.Parameter} -> {this.Body.GetPrettyString(context)}" :
                     $"Lambda {this.Parameter} {this.Body.GetPrettyString(context)}");
 
+        [DebuggerStepThrough]
         public static LambdaExpression Create(
             IIdentityTerm parameter, IExpression body, IExpression higherOrder) =>
             new LambdaExpression(parameter, body, higherOrder);
+        [DebuggerStepThrough]
         public static LambdaExpression Create(
             IIdentityTerm parameter, IExpression body) =>
             new LambdaExpression(parameter, body, UnspecifiedTerm.Instance);

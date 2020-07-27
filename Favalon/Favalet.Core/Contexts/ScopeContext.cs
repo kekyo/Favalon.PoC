@@ -1,6 +1,7 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Favalet.Contexts
@@ -10,14 +11,17 @@ namespace Favalet.Contexts
         ILogicalCalculator TypeCalculator { get; }
 
         IExpression? LookupVariable(IIdentityTerm identity);
+
+        IExpression Infer(IExpression expression);
+        IExpression Reduce(IExpression expression);
     }
 
-    public abstract class ScopeContext :
-        IScopeContext
+    public abstract class ScopeContext
     {
         private readonly ScopeContext? parent;
         private Dictionary<string, List<IExpression>>? variables;
 
+        [DebuggerStepThrough]
         internal ScopeContext(ScopeContext? parent, ILogicalCalculator typeCalculator)
         {
             this.parent = parent;

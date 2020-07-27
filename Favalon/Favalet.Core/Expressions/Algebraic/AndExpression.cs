@@ -1,5 +1,6 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
+using System.Diagnostics;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -11,6 +12,7 @@ namespace Favalet.Expressions.Algebraic
         BinaryExpression<IAndExpression>,
         IAndExpression
     {
+        [DebuggerStepThrough]
         private AndExpression(
             IExpression left, IExpression right, IExpression higherOrder) :
             base(left, right, higherOrder)
@@ -42,7 +44,7 @@ namespace Favalet.Expressions.Algebraic
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var higherOrder = context.Fixup(this.HigherOrder);
             var left = context.Fixup(this.Left);
             var right = context.Fixup(this.Right);
 
@@ -80,9 +82,11 @@ namespace Favalet.Expressions.Algebraic
                     $"{this.Left.GetPrettyString(context)} && {this.Right.GetPrettyString(context)}" :
                     $"And {this.Left.GetPrettyString(context)} {this.Right.GetPrettyString(context)}");
 
+        [DebuggerStepThrough]
         public static AndExpression Create(
             IExpression left, IExpression right, IExpression higherOrder) =>
             new AndExpression(left, right, higherOrder);
+        [DebuggerStepThrough]
         public static AndExpression Create(
             IExpression left, IExpression right) =>
             new AndExpression(left, right, UnspecifiedTerm.Instance);

@@ -58,7 +58,7 @@ namespace Favalet.Expressions
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var higherOrder = context.Fixup(this.HigherOrder);
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder))
             {
@@ -90,8 +90,10 @@ namespace Favalet.Expressions
                     this.Symbol :
                     $"Identity {this.Symbol}");
 
+        [DebuggerStepThrough]
         public static IdentityTerm Create(string symbol, IExpression higherOrder) =>
             new IdentityTerm(symbol, higherOrder);
+        [DebuggerStepThrough]
         public static IdentityTerm Create(string symbol) =>
             new IdentityTerm(symbol, UnspecifiedTerm.Instance);
     }

@@ -59,7 +59,7 @@ namespace Favalet.Expressions.Algebraic
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var higherOrder = context.Fixup(this.HigherOrder);
             var operand = context.Fixup(this.Operand);
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder) &&

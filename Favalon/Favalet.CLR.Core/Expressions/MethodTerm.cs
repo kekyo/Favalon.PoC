@@ -17,6 +17,7 @@ namespace Favalet.Expressions
     {
         public readonly MethodBase RuntimeMethod;
 
+        [DebuggerStepThrough]
         private MethodTerm(MethodBase runtimeMethod) =>
             this.RuntimeMethod = runtimeMethod;
 

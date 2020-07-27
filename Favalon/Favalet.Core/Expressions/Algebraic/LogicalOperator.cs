@@ -1,6 +1,7 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using System;
+using System.Diagnostics;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -13,6 +14,7 @@ namespace Favalet.Expressions.Algebraic
     {
         private static readonly LogicalCalculator calculator = new LogicalCalculator();
 
+        [DebuggerStepThrough]
         private LogicalOperator()
         { }
 

@@ -47,15 +47,13 @@ namespace Favalet.Expressions.Specialized
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
-
-            if (object.ReferenceEquals(this.HigherOrder, higherOrder))
+            if (context.ResolvePlaceholderIndex(this.Index) is IExpression resolved)
             {
-                return this;
+                return resolved;
             }
             else
             {
-                return new PlaceholderTerm(this.context, this.Index);
+                return this;
             }
         }
 

@@ -15,6 +15,7 @@ namespace Favalet.Expressions
     {
         public readonly object Value;
 
+        [DebuggerStepThrough]
         private ConstantTerm(object value) =>
             this.Value = value;
 
@@ -50,6 +51,7 @@ namespace Favalet.Expressions
                 _ => this.Value.ToString()
             });
 
+        [DebuggerStepThrough]
         public static ConstantTerm From(object value) =>
             new ConstantTerm(value);
     }

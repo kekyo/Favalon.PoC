@@ -19,7 +19,12 @@ namespace Favalet.Expressions.Specialized
             other is UnspecifiedTerm;
 
         protected override IExpression Infer(IReduceContext context) =>
-            PlaceholderTerm.Create(context);
+            context is IPlaceholderProvider provider ?
+                (IExpression)PlaceholderTerm.Create(
+                    provider,
+                    provider.AssignPlaceholderIndex(),
+                    PlaceholderOrders.Type) :
+                this;
 
         protected override IExpression Fixup(IReduceContext context) =>
             this;

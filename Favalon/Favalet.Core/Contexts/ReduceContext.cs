@@ -14,8 +14,6 @@ namespace Favalet.Contexts
 
         IReduceContext NewScope(IIdentityTerm parameter, IExpression expression);
 
-        int NewPlaceholderIndex();
-
         IExpression InferHigherOrder(IExpression higherOrder);
 
         void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
@@ -24,7 +22,7 @@ namespace Favalet.Contexts
     }
 
     internal sealed class ReduceContext :
-        IReduceContext
+        IReduceContext, IPlaceholderProvider
     {
         private readonly Scope rootScope;
         private readonly IScopeContext parentScope;
@@ -70,8 +68,8 @@ namespace Favalet.Contexts
         }
 
         [DebuggerStepThrough]
-        public int NewPlaceholderIndex() =>
-            this.rootScope.DrawNewPlaceholderIndex();
+        public int AssignPlaceholderIndex() =>
+            ((IPlaceholderProvider)this.rootScope).AssignPlaceholderIndex();
 
         public IExpression InferHigherOrder(IExpression higherOrder)
         {

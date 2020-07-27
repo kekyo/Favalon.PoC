@@ -4,17 +4,35 @@ using System.Diagnostics;
 
 namespace Favalet.Expressions.Specialized
 {
+    public enum PlaceholderOrders
+    {
+        Variable = 0,
+        Type,
+        Kind,
+        Fourth
+    }
+
+    public interface IPlaceholderProvider
+    {
+        int AssignPlaceholderIndex();
+    }
+
     public sealed class PlaceholderTerm :
         Expression, ITerm
     {
-        private readonly IReduceContext context;
+        private readonly PlaceholderOrders candidateOrder;
+        private IPlaceholderProvider provider;
         private PlaceholderTerm? higherOrder;
 
         public readonly int Index;
 
-        private PlaceholderTerm(IReduceContext context, int index)
+        private PlaceholderTerm(
+            IPlaceholderProvider provider,
+            int index,
+            PlaceholderOrders candidateOrder)
         {
-            this.context = context;
+            this.candidateOrder = candidateOrder;
+            this.provider = provider;
             this.Index = index;
         }
 
@@ -23,14 +41,21 @@ namespace Favalet.Expressions.Specialized
             [DebuggerStepThrough]
             get
             {
+                if (this.candidateOrder >= PlaceholderOrders.Kind)
+                {
+                    return FourthTerm.Instance;
+                }
+
                 if (this.higherOrder == null)
                 {
                     lock (this)
                     {
                         if (this.higherOrder == null)
                         {
-                            this.higherOrder =
-                                new PlaceholderTerm(this.context, this.context.NewPlaceholderIndex());
+                            this.higherOrder = new PlaceholderTerm(
+                                this.provider, 
+                                this.provider.AssignPlaceholderIndex(),
+                                this.candidateOrder + 1);
                         }
                     }
                 }
@@ -47,19 +72,8 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? other) =>
             other is PlaceholderTerm rhs && this.Equals(rhs);
 
-        protected override IExpression Infer(IReduceContext context)
-        {
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
-
-            if (object.ReferenceEquals(this.HigherOrder, higherOrder))
-            {
-                return this;
-            }
-            else
-            {
-                return new PlaceholderTerm(this.context, this.Index);
-            }
-        }
+        protected override IExpression Infer(IReduceContext context) =>
+            this;
 
         protected override IExpression Fixup(IReduceContext context)
         {
@@ -84,7 +98,13 @@ namespace Favalet.Expressions.Specialized
                     $"Placeholder '{this.Index}");
 
         [DebuggerStepThrough]
-        internal static PlaceholderTerm Create(IReduceContext context) =>
-            new PlaceholderTerm(context, context.NewPlaceholderIndex());
+        internal static PlaceholderTerm Create(
+            IPlaceholderProvider provider,
+            int index,
+            PlaceholderOrders candidateOrder) =>
+            new PlaceholderTerm(
+                provider,
+                index,
+                candidateOrder);
     }
 }

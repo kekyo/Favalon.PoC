@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 using static Favalet.Generator;
 using static Favalet.CLRGenerator;
+using Favalet.Expressions.Specialized;
 
 namespace Favalet
 {
@@ -76,6 +77,30 @@ namespace Favalet
                     Identity("true", Type<bool>()),
                     Identity("false", Type<bool>()),
                     Type<bool>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringWithAnnotation1()
+        {
+            var scope = Scope.Create();
+
+            // true && false
+            var expression =
+                And(
+                    Identity("true"),
+                    Identity("false"));
+
+            var actual = scope.Infer(expression);
+
+            // true
+            var ph0 = scope.UnsafeCreatePlaceholder(0);
+            var expected =
+                And(
+                    Identity("true", ph0),
+                    Identity("false", ph0),
+                    ph0);
 
             AssertLogicalEqual(expression, expected, actual);
         }

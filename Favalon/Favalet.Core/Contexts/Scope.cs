@@ -3,13 +3,14 @@ using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 
 namespace Favalet.Contexts
 {
     public sealed class Scope :
-        ScopeContext, IScopeContext
+        ScopeContext, IScopeContext, IPlaceholderProvider
     {
         private int placeholderIndex = -1;
 
@@ -19,8 +20,29 @@ namespace Favalet.Contexts
         { }
 
         [DebuggerStepThrough]
-        internal int DrawNewPlaceholderIndex() =>
+        private int AssignPlaceholderIndex() =>
             Interlocked.Increment(ref this.placeholderIndex);
+        [DebuggerStepThrough]
+        int IPlaceholderProvider.AssignPlaceholderIndex() =>
+            this.AssignPlaceholderIndex();
+
+        [DebuggerStepThrough]
+        public PlaceholderTerm CreatePlaceholder(
+            PlaceholderOrders candidateOrder = PlaceholderOrders.Type) =>
+            PlaceholderTerm.Create(
+                this,
+                this.AssignPlaceholderIndex(),
+                candidateOrder);
+
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        [DebuggerStepThrough]
+        public PlaceholderTerm UnsafeCreatePlaceholder(
+            int index,
+            PlaceholderOrders candidateOrder = PlaceholderOrders.Type) =>
+            PlaceholderTerm.Create(
+                this,
+                index,
+                candidateOrder);
 
         public IExpression Infer(IExpression expression)
         {

@@ -39,10 +39,10 @@ namespace Favalet.Expressions.Algebraic
         public override bool Equals(IExpression? other) =>
             other is ILogicalExpression rhs && this.Equals(rhs);
 
-        public override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
-            var operand = this.Operand.Infer(context);
+            var operand = context.Infer(this.Operand);
 
             context.Unify(operand.HigherOrder, higherOrder);
 
@@ -57,10 +57,10 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
-            var operand = this.Operand.Fixup(context);
+            var operand = context.Fixup(this.Operand);
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder) &&
                 object.ReferenceEquals(this.Operand, operand))
@@ -73,8 +73,8 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public override IExpression Reduce(IReduceContext context) =>
-            calculator.Compute(this.Operand.Reduce(context));
+        protected override IExpression Reduce(IReduceContext context) =>
+            calculator.Compute(context.Reduce(this.Operand));
 
         public override string GetPrettyString(PrettyStringContext context) =>
             this.FinalizePrettyString(

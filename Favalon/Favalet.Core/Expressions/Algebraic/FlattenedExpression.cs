@@ -14,20 +14,16 @@ namespace Favalet.Expressions.Algebraic
         protected FlattenedExpression(IExpression[] operands) =>
             this.Operands = operands;
 
-        public abstract IExpression HigherOrder { get; }
-
         public override sealed int GetHashCode() =>
             this.Operands.Aggregate(0, (agg, operand) => agg ^ operand?.GetHashCode() ?? 0);
 
-        public abstract bool Equals(IExpression? other);
-
-        public IExpression Infer(IReduceContext context) =>
+        protected override sealed IExpression Infer(IReduceContext context) =>
             throw new InvalidOperationException();
 
-        public IExpression Fixup(IReduceContext context) =>
+        protected override sealed IExpression Fixup(IReduceContext context) =>
             throw new InvalidOperationException();
 
-        public IExpression Reduce(IReduceContext context) =>
+        protected override sealed IExpression Reduce(IReduceContext context) =>
             throw new InvalidOperationException();
 
         public void Deconstruct(out IExpression[] operands) =>

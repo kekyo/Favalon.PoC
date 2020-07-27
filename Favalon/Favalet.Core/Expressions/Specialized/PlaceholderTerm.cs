@@ -31,7 +31,7 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? other) =>
             other is PlaceholderTerm rhs && this.Equals(rhs);
 
-        public override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
@@ -45,7 +45,7 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        public override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
@@ -59,7 +59,7 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        public override IExpression Reduce(IReduceContext context) =>
+        protected override IExpression Reduce(IReduceContext context) =>
             this;
 
         public override string GetPrettyString(PrettyStringContext context) =>

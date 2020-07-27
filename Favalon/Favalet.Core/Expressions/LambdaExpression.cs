@@ -47,11 +47,11 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is ILambdaExpression rhs && this.Equals(rhs);
 
-        public override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
-            var parameter = this.Parameter.Infer(context);
-            var body = this.Body.Infer(context);
+            var parameter = context.Infer(this.Parameter);
+            var body = context.Infer(this.Body);
 
             var lambdaHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder,
@@ -76,11 +76,11 @@ namespace Favalet.Expressions
             }
         }
 
-        public override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
-            var parameter = this.Parameter.Fixup(context);
-            var body = this.Body.Fixup(context);
+            var parameter = context.Fixup(this.Parameter);
+            var body = context.Fixup(this.Body);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
                 object.ReferenceEquals(this.Body, body) &&
@@ -98,9 +98,9 @@ namespace Favalet.Expressions
             }
         }
 
-        public override IExpression Reduce(IReduceContext context)
+        protected override IExpression Reduce(IReduceContext context)
         {
-            var body = this.Body.Reduce(context);
+            var body = context.Reduce(this.Body);
 
             if (object.ReferenceEquals(this.Body, body))
             {
@@ -113,7 +113,9 @@ namespace Favalet.Expressions
         }
 
         public IExpression Call(IReduceContext context, IExpression argument) =>
-            this.Body.Reduce(context.NewScope(this.Parameter, argument));
+            context.
+                NewScope(this.Parameter, argument).
+                Reduce(this.Body);
 
         public override string GetPrettyString(PrettyStringContext context) =>
             this.FinalizePrettyString(

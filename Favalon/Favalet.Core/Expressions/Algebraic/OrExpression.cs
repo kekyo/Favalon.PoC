@@ -21,11 +21,11 @@ namespace Favalet.Expressions.Algebraic
             base(left, right, higherOrder)
         { }
 
-        public override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
-            var left = this.Left.Infer(context);
-            var right = this.Right.Infer(context);
+            var left = context.Infer(this.Left);
+            var right = context.Infer(this.Right);
 
             var andHigherOrder = new OrExpression(
                 left.HigherOrder,
@@ -45,11 +45,11 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
-            var left = this.Left.Fixup(context);
-            var right = this.Right.Fixup(context);
+            var left = context.Fixup(this.Left);
+            var right = context.Fixup(this.Right);
 
             if (object.ReferenceEquals(this.Left, left) &&
                 object.ReferenceEquals(this.Right, right))
@@ -62,10 +62,10 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public override IExpression Reduce(IReduceContext context)
+        protected override IExpression Reduce(IReduceContext context)
         {
-            var left = this.Left.Reduce(context);
-            var right = this.Right.Reduce(context);
+            var left = context.Reduce(this.Left);
+            var right = context.Reduce(this.Right);
 
             if (object.ReferenceEquals(this.Left, left) &&
                 object.ReferenceEquals(this.Right, right))

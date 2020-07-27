@@ -53,11 +53,11 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is IApplyExpression rhs && this.Equals(rhs);
 
-        public override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
-            var argument = this.Argument.Infer(context);
-            var function = this.Function.Infer(context);
+            var argument = context.Infer(this.Argument);
+            var function = context.Infer(this.Function);
 
             var functionHigherOrder = FunctionExpression.Create(
                 argument.HigherOrder,
@@ -77,11 +77,11 @@ namespace Favalet.Expressions
             }
         }
 
-        public override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
-            var argument = this.Argument.Fixup(context);
-            var function = this.Function.Fixup(context);
+            var argument = context.Fixup(this.Argument);
+            var function = context.Fixup(this.Function);
 
             if (object.ReferenceEquals(this.Argument, argument) &&
                 object.ReferenceEquals(this.Function, function) &&
@@ -95,9 +95,9 @@ namespace Favalet.Expressions
             }
         }
 
-        public override IExpression Reduce(IReduceContext context)
+        protected override IExpression Reduce(IReduceContext context)
         {
-            var argument = this.Argument.Reduce(context);
+            var argument = context.Reduce(this.Argument);
 
             var function = this.Function;
             while (true)
@@ -107,7 +107,7 @@ namespace Favalet.Expressions
                     return callable.Call(context, argument);
                 }
 
-                var reducedFunction = function.Reduce(context);
+                var reducedFunction = context.Reduce(function);
 
                 if (object.ReferenceEquals(this.Function, reducedFunction) &&
                     object.ReferenceEquals(this.Argument, argument))

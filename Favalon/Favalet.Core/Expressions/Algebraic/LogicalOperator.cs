@@ -25,13 +25,13 @@ namespace Favalet.Expressions.Algebraic
         public override bool Equals(IExpression? other) =>
             other is ILogicalOperator rhs && this.Equals(rhs);
 
-        public override IExpression Infer(IReduceContext context) =>
+        protected override IExpression Infer(IReduceContext context) =>
             this;
 
-        public override IExpression Fixup(IReduceContext context) =>
+        protected override IExpression Fixup(IReduceContext context) =>
             this;
 
-        public override IExpression Reduce(IReduceContext context) =>
+        protected override IExpression Reduce(IReduceContext context) =>
             this;
 
         public IExpression Call(IReduceContext context, IExpression argument) =>

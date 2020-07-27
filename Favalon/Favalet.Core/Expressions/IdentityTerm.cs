@@ -36,13 +36,13 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
 
-        public override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
             if (context.LookupVariable(this) is IExpression lookup)
             {
-                var inferred = lookup.Infer(context);
+                var inferred = context.Infer(lookup);
                 context.Unify(inferred.HigherOrder, higherOrder);
             }
 
@@ -56,7 +56,7 @@ namespace Favalet.Expressions
             }
         }
 
-        public override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
@@ -70,11 +70,11 @@ namespace Favalet.Expressions
             }
         }
 
-        public override IExpression Reduce(IReduceContext context)
+        protected override IExpression Reduce(IReduceContext context)
         {
             if (context.LookupVariable(this) is IExpression lookup)
             {
-                var reduced = lookup.Reduce(context);
+                var reduced = context.Reduce(lookup);
                 return context.TypeCalculator.Compute(reduced);
             }
             else

@@ -47,11 +47,11 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is IFunctionExpression rhs && this.Equals(rhs);
 
-        public override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
-            var parameter = this.Parameter.Infer(context);
-            var result = this.Result.Infer(context);
+            var parameter = context.Infer(this.Parameter);
+            var result = context.Infer(this.Result);
 
             var functionHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder,
@@ -71,11 +71,11 @@ namespace Favalet.Expressions
             }
         }
 
-        public override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
-            var parameter = this.Parameter.Fixup(context);
-            var result = this.Result.Fixup(context);
+            var parameter = context.Fixup(this.Parameter);
+            var result = context.Fixup(this.Result);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
                 object.ReferenceEquals(this.Result, result) &&
@@ -89,10 +89,10 @@ namespace Favalet.Expressions
             }
         }
 
-        public override IExpression Reduce(IReduceContext context)
+        protected override IExpression Reduce(IReduceContext context)
         {
-            var parameter = this.Parameter.Reduce(context);
-            var result = this.Result.Reduce(context);
+            var parameter = context.Reduce(this.Parameter);
+            var result = context.Reduce(this.Result);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
                 object.ReferenceEquals(this.Result, result))

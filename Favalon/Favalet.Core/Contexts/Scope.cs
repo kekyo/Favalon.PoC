@@ -10,6 +10,10 @@ namespace Favalet.Contexts
     public interface IReduceContext :
         IScopeContext
     {
+        IExpression Infer(IExpression expression);
+        IExpression Fixup(IExpression expression);
+        IExpression Reduce(IExpression expression);
+
         IReduceContext NewScope(IIdentityTerm parameter, IExpression expression);
 
         int NewPlaceholderIndex();
@@ -38,8 +42,8 @@ namespace Favalet.Contexts
                 this,
                 this,
                 new Dictionary<int, IExpression>());
-            var inferred = expression.Infer(context);
-            var fixupped = inferred.Fixup(context);
+            var inferred = context.Infer(expression);
+            var fixupped = context.Fixup(inferred);
 
             return fixupped;
         }
@@ -50,7 +54,7 @@ namespace Favalet.Contexts
                 this,
                 this,
                 new Dictionary<int, IExpression>());
-            var reduced = expression.Reduce(context);
+            var reduced = context.Reduce(expression);
 
             return reduced;
         }
@@ -87,6 +91,16 @@ namespace Favalet.Contexts
             public ILogicalCalculator TypeCalculator =>
                 this.rootScope.TypeCalculator;
 
+            [DebuggerHidden]
+            public IExpression Infer(IExpression expression) =>
+                expression is Expression expr ? expr.InternalInfer(this) : expression;
+            [DebuggerHidden]
+            public IExpression Fixup(IExpression expression) =>
+                expression is Expression expr ? expr.InternalFixup(this) : expression;
+            [DebuggerHidden]
+            public IExpression Reduce(IExpression expression) =>
+                expression is Expression expr ? expr.InternalReduce(this) : expression;
+
             public IReduceContext NewScope(IIdentityTerm parameter, IExpression expression)
             {
                 var newContext = new ReduceContext(
@@ -105,13 +119,13 @@ namespace Favalet.Contexts
 
             public IExpression InferHigherOrder(IExpression higherOrder)
             {
-                var inferred = higherOrder.Infer(this);
+                var inferred = this.Infer(higherOrder);
 
                 var context = new ReduceContext(
                     this.rootScope,
                     this,
                     this.unifiedExpressions);
-                var reduced = inferred.Reduce(context);
+                var reduced = context.Reduce(inferred);
 
                 return reduced;
             }

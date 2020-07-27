@@ -9,16 +9,14 @@ namespace Favalet.Expressions
     {
         IExpression HigherOrder { get; }
 
-        IExpression Infer(IReduceContext context);
-        IExpression Fixup(IReduceContext context);
-        IExpression Reduce(IReduceContext context);
-
         string GetPrettyString(PrettyStringContext type);
     }
 
     public interface ITerm : IExpression
     {
     }
+
+    #pragma warning disable CS0659
 
     [DebuggerDisplay("{DebugPrint}")]
     public abstract class Expression :
@@ -29,9 +27,19 @@ namespace Favalet.Expressions
 
         public abstract IExpression HigherOrder { get; }
 
-        public abstract IExpression Infer(IReduceContext context);
-        public abstract IExpression Fixup(IReduceContext context);
-        public abstract IExpression Reduce(IReduceContext context);
+        protected abstract IExpression Infer(IReduceContext context);
+        protected abstract IExpression Fixup(IReduceContext context);
+        protected abstract IExpression Reduce(IReduceContext context);
+
+        [DebuggerHidden]
+        internal IExpression InternalInfer(IReduceContext context) =>
+            this.Infer(context);
+        [DebuggerHidden]
+        internal IExpression InternalFixup(IReduceContext context) =>
+            this.Fixup(context);
+        [DebuggerHidden]
+        internal IExpression InternalReduce(IReduceContext context) =>
+            this.Reduce(context);
 
         public abstract string GetPrettyString(PrettyStringContext context);
 

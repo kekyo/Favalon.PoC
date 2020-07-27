@@ -1,5 +1,6 @@
 ﻿using Favalet.Contexts;
 using System;
+using System.Diagnostics;
 
 namespace Favalet.Expressions.Specialized
 {
@@ -7,7 +8,7 @@ namespace Favalet.Expressions.Specialized
         Expression, ITerm
     {
         private readonly IReduceContext context;
-        private readonly Lazy<PlaceholderTerm> higherOrder;
+        private PlaceholderTerm? higherOrder;
 
         public readonly int Index;
 
@@ -15,12 +16,27 @@ namespace Favalet.Expressions.Specialized
         {
             this.context = context;
             this.Index = index;
-            this.higherOrder = new Lazy<PlaceholderTerm>(
-                () => new PlaceholderTerm(this.context, this.context.NewPlaceholderIndex()));
         }
 
-        public override IExpression HigherOrder =>
-            this.higherOrder.Value;
+        public override IExpression HigherOrder
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                if (this.higherOrder == null)
+                {
+                    lock (this)
+                    {
+                        if (this.higherOrder == null)
+                        {
+                            this.higherOrder =
+                                new PlaceholderTerm(this.context, this.context.NewPlaceholderIndex());
+                        }
+                    }
+                }
+                return this.higherOrder;
+            }
+        }
 
         public override int GetHashCode() =>
             this.Index.GetHashCode();
@@ -67,6 +83,7 @@ namespace Favalet.Expressions.Specialized
                     $"'{this.Index}" :
                     $"Placeholder '{this.Index}");
 
+        [DebuggerStepThrough]
         internal static PlaceholderTerm Create(IReduceContext context) =>
             new PlaceholderTerm(context, context.NewPlaceholderIndex());
     }

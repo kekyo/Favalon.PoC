@@ -24,12 +24,8 @@ namespace Favalet.Expressions.Algebraic
             var left = context.Infer(this.Left);
             var right = context.Infer(this.Right);
 
-            var andHigherOrder = new AndExpression(
-                left.HigherOrder,
-                right.HigherOrder,
-                UnspecifiedTerm.Instance);
-
-            context.Unify(andHigherOrder, higherOrder);
+            context.Unify(left.HigherOrder, higherOrder);
+            context.Unify(right.HigherOrder, higherOrder);
 
             if (object.ReferenceEquals(this.Left, left) &&
                 object.ReferenceEquals(this.Right, right))

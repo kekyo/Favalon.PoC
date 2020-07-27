@@ -81,8 +81,9 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
+        #region And
         [Test]
-        public void InferringWithAnnotation1()
+        public void InferringAndWithoutAnnotation()
         {
             var scope = Scope.Create();
 
@@ -94,7 +95,7 @@ namespace Favalet
 
             var actual = scope.Infer(expression);
 
-            // true
+            // (true:'0 && false:'0):'0
             var ph0 = scope.UnsafeCreatePlaceholder(0);
             var expected =
                 And(
@@ -104,5 +105,123 @@ namespace Favalet
 
             AssertLogicalEqual(expression, expected, actual);
         }
+
+        [Test]
+        public void InferringAndWithAnnotation1()
+        {
+            var scope = Scope.Create();
+
+            // (true && false):bool
+            var expression =
+                And(
+                    Identity("true"),
+                    Identity("false"),
+                    Type<bool>());
+
+            var actual = scope.Infer(expression);
+
+            // (true:bool && false:bool):bool
+            var expected =
+                And(
+                    Identity("true", Type<bool>()),
+                    Identity("false", Type<bool>()),
+                    Type<bool>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringAndWithAnnotation2()
+        {
+            var scope = Scope.Create();
+
+            // true:bool && false
+            var expression =
+                And(
+                    Identity("true", Type<bool>()),
+                    Identity("false"));
+
+            var actual = scope.Infer(expression);
+
+            // (true:bool && false:bool):bool
+            var expected =
+                And(
+                    Identity("true", Type<bool>()),
+                    Identity("false", Type<bool>()),
+                    Type<bool>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringAndWithAnnotation3()
+        {
+            var scope = Scope.Create();
+
+            // true && false:bool
+            var expression =
+                And(
+                    Identity("true"),
+                    Identity("false", Type<bool>()));
+
+            var actual = scope.Infer(expression);
+
+            // (true:bool && false:bool):bool
+            var expected =
+                And(
+                    Identity("true", Type<bool>()),
+                    Identity("false", Type<bool>()),
+                    Type<bool>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringAndWithAnnotation4()
+        {
+            var scope = Scope.Create();
+
+            // true:bool && false:bool
+            var expression =
+                And(
+                    Identity("true", Type<bool>()),
+                    Identity("false", Type<bool>()));
+
+            var actual = scope.Infer(expression);
+
+            // (true:bool && false:bool):bool
+            var expected =
+                And(
+                    Identity("true", Type<bool>()),
+                    Identity("false", Type<bool>()),
+                    Type<bool>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringAndWithAnnotation5()
+        {
+            var scope = Scope.Create();
+
+            // (true:bool && false:bool):bool
+            var expression =
+                And(
+                    Identity("true", Type<bool>()),
+                    Identity("false", Type<bool>()),
+                    Type<bool>());
+
+            var actual = scope.Infer(expression);
+
+            // (true:bool && false:bool):bool
+            var expected =
+                And(
+                    Identity("true", Type<bool>()),
+                    Identity("false", Type<bool>()),
+                    Type<bool>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        #endregion
     }
 }

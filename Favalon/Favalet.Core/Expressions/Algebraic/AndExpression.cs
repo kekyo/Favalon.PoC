@@ -28,7 +28,8 @@ namespace Favalet.Expressions.Algebraic
             context.Unify(right.HigherOrder, higherOrder);
 
             if (object.ReferenceEquals(this.Left, left) &&
-                object.ReferenceEquals(this.Right, right))
+                object.ReferenceEquals(this.Right, right) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
             {
                 return this;
             }
@@ -45,7 +46,8 @@ namespace Favalet.Expressions.Algebraic
             var right = context.Fixup(this.Right);
 
             if (object.ReferenceEquals(this.Left, left) &&
-                object.ReferenceEquals(this.Right, right))
+                object.ReferenceEquals(this.Right, right) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
             {
                 return this;
             }

@@ -21,7 +21,7 @@ namespace Favalet.Expressions
             this.Symbol = symbol;
         }
 
-        public IExpression HigherOrder { get; }
+        public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IIdentityTerm.Symbol =>
@@ -33,10 +33,10 @@ namespace Favalet.Expressions
         public bool Equals(IIdentityTerm rhs) =>
             this.Symbol.Equals(rhs.Symbol);
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
 
-        public IExpression Infer(IReduceContext context)
+        public override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
@@ -56,7 +56,7 @@ namespace Favalet.Expressions
             }
         }
 
-        public IExpression Fixup(IReduceContext context)
+        public override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
@@ -70,7 +70,7 @@ namespace Favalet.Expressions
             }
         }
 
-        public IExpression Reduce(IReduceContext context)
+        public override IExpression Reduce(IReduceContext context)
         {
             if (context.LookupVariable(this) is IExpression lookup)
             {

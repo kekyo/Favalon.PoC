@@ -27,7 +27,7 @@ namespace Favalet.Expressions
             this.Body = body;
         }
 
-        public IExpression HigherOrder { get; }
+        public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IIdentityTerm ILambdaExpression.Parameter =>
@@ -44,10 +44,10 @@ namespace Favalet.Expressions
             this.Parameter.Equals(rhs.Parameter) &&
             this.Body.Equals(rhs.Body);
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is ILambdaExpression rhs && this.Equals(rhs);
 
-        public IExpression Infer(IReduceContext context)
+        public override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
             var parameter = this.Parameter.Infer(context);
@@ -76,7 +76,7 @@ namespace Favalet.Expressions
             }
         }
 
-        public IExpression Fixup(IReduceContext context)
+        public override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
             var parameter = this.Parameter.Fixup(context);
@@ -98,7 +98,7 @@ namespace Favalet.Expressions
             }
         }
 
-        public IExpression Reduce(IReduceContext context)
+        public override IExpression Reduce(IReduceContext context)
         {
             var body = this.Body.Reduce(context);
 

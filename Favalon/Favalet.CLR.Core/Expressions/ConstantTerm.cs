@@ -18,7 +18,7 @@ namespace Favalet.Expressions
         private ConstantTerm(object value) =>
             this.Value = value;
 
-        public IExpression HigherOrder =>
+        public override IExpression HigherOrder =>
             TypeTerm.From(this.Value.GetType());
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -31,16 +31,16 @@ namespace Favalet.Expressions
         public bool Equals(IConstantTerm rhs) =>
             this.Value.Equals(rhs.Value);
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is IConstantTerm rhs && this.Equals(rhs);
 
-        public IExpression Infer(IReduceContext context) =>
+        public override IExpression Infer(IReduceContext context) =>
             this;
 
-        public IExpression Fixup(IReduceContext context) =>
+        public override IExpression Fixup(IReduceContext context) =>
             this;
 
-        public IExpression Reduce(IReduceContext context) =>
+        public override IExpression Reduce(IReduceContext context) =>
             this;
 
         public override string GetPrettyString(PrettyStringContext type) =>

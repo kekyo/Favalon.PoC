@@ -20,7 +20,7 @@ namespace Favalet.Expressions
         private MethodTerm(MethodBase runtimeMethod) =>
             this.RuntimeMethod = runtimeMethod;
 
-        public IExpression HigherOrder =>
+        public override IExpression HigherOrder =>
             FunctionExpression.Create(
                 TypeTerm.From(this.RuntimeMethod.GetParameters()[0].ParameterType),
                 TypeTerm.From(
@@ -38,16 +38,16 @@ namespace Favalet.Expressions
         public bool Equals(IMethodTerm rhs) =>
             this.RuntimeMethod.Equals(rhs.RuntimeMethod);
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is IMethodTerm rhs && this.Equals(rhs);
 
-        public IExpression Infer(IReduceContext context) =>
+        public override IExpression Infer(IReduceContext context) =>
             this;
 
-        public IExpression Fixup(IReduceContext context) =>
+        public override IExpression Fixup(IReduceContext context) =>
             this;
 
-        public IExpression Reduce(IReduceContext context) =>
+        public override IExpression Reduce(IReduceContext context) =>
             this;
 
         public IExpression Call(IReduceContext context, IExpression argument)

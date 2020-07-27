@@ -9,22 +9,22 @@ namespace Favalet.Expressions.Specialized
         private FourthTerm()
         { }
 
-        public IExpression HigherOrder =>
+        public override IExpression HigherOrder =>
             null!;
 
         public bool Equals(FourthTerm rhs) =>
             rhs != null;
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is FourthTerm;
 
-        public IExpression Infer(IReduceContext context) =>
+        public override IExpression Infer(IReduceContext context) =>
             this;
 
-        public IExpression Fixup(IReduceContext context) =>
+        public override IExpression Fixup(IReduceContext context) =>
             this;
 
-        public IExpression Reduce(IReduceContext context) =>
+        public override IExpression Reduce(IReduceContext context) =>
             this;
 
         public override string GetPrettyString(PrettyStringContext context) =>

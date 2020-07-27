@@ -9,22 +9,22 @@ namespace Favalet.Expressions.Specialized
         private UnspecifiedTerm()
         { }
 
-        public IExpression HigherOrder =>
+        public override IExpression HigherOrder =>
             null!;
 
         public bool Equals(UnspecifiedTerm rhs) =>
             rhs != null;
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is UnspecifiedTerm;
 
-        public IExpression Infer(IReduceContext context) =>
+        public override IExpression Infer(IReduceContext context) =>
             PlaceholderTerm.Create(context);
 
-        public IExpression Fixup(IReduceContext context) =>
+        public override IExpression Fixup(IReduceContext context) =>
             this;
 
-        public IExpression Reduce(IReduceContext context) =>
+        public override IExpression Reduce(IReduceContext context) =>
             this;
 
         public override string GetPrettyString(PrettyStringContext context) =>

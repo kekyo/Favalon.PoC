@@ -19,7 +19,7 @@ namespace Favalet.Expressions.Specialized
                 () => new PlaceholderTerm(this.context, this.context.NewPlaceholderIndex()));
         }
 
-        public IExpression HigherOrder =>
+        public override IExpression HigherOrder =>
             this.higherOrder.Value;
 
         public override int GetHashCode() =>
@@ -28,10 +28,10 @@ namespace Favalet.Expressions.Specialized
         public bool Equals(PlaceholderTerm rhs) =>
             this.Index == rhs.Index;
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is PlaceholderTerm rhs && this.Equals(rhs);
 
-        public IExpression Infer(IReduceContext context)
+        public override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
@@ -45,7 +45,7 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        public IExpression Fixup(IReduceContext context)
+        public override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
@@ -59,7 +59,7 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        public IExpression Reduce(IReduceContext context) =>
+        public override IExpression Reduce(IReduceContext context) =>
             this;
 
         public override string GetPrettyString(PrettyStringContext context) =>

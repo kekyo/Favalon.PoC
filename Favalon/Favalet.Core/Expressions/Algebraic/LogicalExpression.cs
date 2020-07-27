@@ -24,7 +24,7 @@ namespace Favalet.Expressions.Algebraic
             this.Operand = operand;
         }
 
-        public IExpression HigherOrder { get; }
+        public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression ILogicalExpression.Operand =>
@@ -36,10 +36,10 @@ namespace Favalet.Expressions.Algebraic
         public bool Equals(ILogicalExpression rhs) =>
             calculator.Equals(this.Operand, rhs.Operand);
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is ILogicalExpression rhs && this.Equals(rhs);
 
-        public IExpression Infer(IReduceContext context)
+        public override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
             var operand = this.Operand.Infer(context);
@@ -57,7 +57,7 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public IExpression Fixup(IReduceContext context)
+        public override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
             var operand = this.Operand.Fixup(context);
@@ -73,7 +73,7 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public IExpression Reduce(IReduceContext context) =>
+        public override IExpression Reduce(IReduceContext context) =>
             calculator.Compute(this.Operand.Reduce(context));
 
         public override string GetPrettyString(PrettyStringContext context) =>

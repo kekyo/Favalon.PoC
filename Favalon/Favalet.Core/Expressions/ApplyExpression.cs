@@ -33,7 +33,7 @@ namespace Favalet.Expressions
             this.Argument = argument;
         }
 
-        public IExpression HigherOrder { get; }
+        public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IApplyExpression.Function =>
@@ -50,10 +50,10 @@ namespace Favalet.Expressions
             this.Function.Equals(rhs.Function) &&
             this.Argument.Equals(rhs.Argument);
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is IApplyExpression rhs && this.Equals(rhs);
 
-        public IExpression Infer(IReduceContext context)
+        public override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
             var argument = this.Argument.Infer(context);
@@ -77,7 +77,7 @@ namespace Favalet.Expressions
             }
         }
 
-        public IExpression Fixup(IReduceContext context)
+        public override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
             var argument = this.Argument.Fixup(context);
@@ -95,7 +95,7 @@ namespace Favalet.Expressions
             }
         }
 
-        public IExpression Reduce(IReduceContext context)
+        public override IExpression Reduce(IReduceContext context)
         {
             var argument = this.Argument.Reduce(context);
 

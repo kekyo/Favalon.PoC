@@ -16,22 +16,22 @@ namespace Favalet.Expressions.Algebraic
         private LogicalOperator()
         { }
 
-        public IExpression HigherOrder =>
+        public override IExpression HigherOrder =>
             UnspecifiedTerm.Function;
 
         public bool Equals(ILogicalOperator rhs) =>
             true;
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is ILogicalOperator rhs && this.Equals(rhs);
 
-        public IExpression Infer(IReduceContext context) =>
+        public override IExpression Infer(IReduceContext context) =>
             this;
 
-        public IExpression Fixup(IReduceContext context) =>
+        public override IExpression Fixup(IReduceContext context) =>
             this;
 
-        public IExpression Reduce(IReduceContext context) =>
+        public override IExpression Reduce(IReduceContext context) =>
             this;
 
         public IExpression Call(IReduceContext context, IExpression argument) =>

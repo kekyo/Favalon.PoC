@@ -25,7 +25,7 @@ namespace Favalet.Expressions.Algebraic
             this.Right = right;
         }
 
-        public IExpression HigherOrder { get; }
+        public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IBinaryExpression.Left =>
@@ -40,12 +40,8 @@ namespace Favalet.Expressions.Algebraic
         public bool Equals(TBinaryExpression rhs) =>
             this.Left.Equals(rhs.Left) && this.Right.Equals(rhs.Right);
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is TBinaryExpression rhs && this.Equals(rhs);
-
-        public abstract IExpression Infer(IReduceContext context);
-        public abstract IExpression Fixup(IReduceContext context);
-        public abstract IExpression Reduce(IReduceContext context);
     }
 
     public static class BinaryExpressionExtension

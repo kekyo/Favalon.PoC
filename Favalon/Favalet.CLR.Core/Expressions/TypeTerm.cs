@@ -18,7 +18,7 @@ namespace Favalet.Expressions
         private TypeTerm(Type runtimeType) =>
             this.RuntimeType = runtimeType;
 
-        public IExpression HigherOrder =>
+        public override IExpression HigherOrder =>
             Generator.Kind();
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -31,16 +31,16 @@ namespace Favalet.Expressions
         public bool Equals(ITypeTerm rhs) =>
             this.RuntimeType.Equals(rhs.RuntimeType);
 
-        bool IEquatable<IExpression?>.Equals(IExpression? other) =>
+        public override bool Equals(IExpression? other) =>
             other is ITypeTerm rhs && Equals(rhs);
 
-        public IExpression Infer(IReduceContext context) =>
+        public override IExpression Infer(IReduceContext context) =>
             this;
 
-        public IExpression Fixup(IReduceContext context) =>
+        public override IExpression Fixup(IReduceContext context) =>
             this;
 
-        public IExpression Reduce(IReduceContext context) =>
+        public override IExpression Reduce(IReduceContext context) =>
             this;
 
         public override string GetPrettyString(PrettyStringContext context) =>

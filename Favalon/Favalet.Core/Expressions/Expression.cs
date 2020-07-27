@@ -21,10 +21,17 @@ namespace Favalet.Expressions
     }
 
     [DebuggerDisplay("{DebugPrint}")]
-    public abstract class Expression
+    public abstract class Expression :
+        IExpression
     {
         protected Expression()
         { }
+
+        public abstract IExpression HigherOrder { get; }
+
+        public abstract IExpression Infer(IReduceContext context);
+        public abstract IExpression Fixup(IReduceContext context);
+        public abstract IExpression Reduce(IReduceContext context);
 
         public abstract string GetPrettyString(PrettyStringContext context);
 
@@ -59,5 +66,10 @@ namespace Favalet.Expressions
 
         public override sealed string ToString() =>
             this.GetPrettyString(PrettyStringContext.Strict);
+
+        public abstract bool Equals(IExpression? other);
+
+        public override bool Equals(object obj) =>
+            this.Equals(obj as IExpression);
     }
 }

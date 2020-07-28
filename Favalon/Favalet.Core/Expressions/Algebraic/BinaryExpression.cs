@@ -35,6 +35,64 @@ namespace Favalet.Expressions.Algebraic
         IExpression IBinaryExpression.Right =>
             this.Right;
 
+        internal abstract IExpression OnCreate(
+            IExpression left, IExpression right, IExpression higherOrder);
+
+        protected override sealed IExpression Infer(IReduceContext context)
+        {
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var left = context.Infer(this.Left);
+            var right = context.Infer(this.Right);
+
+            context.Unify(left.HigherOrder, higherOrder);
+            context.Unify(right.HigherOrder, higherOrder);
+
+            if (object.ReferenceEquals(this.Left, left) &&
+                object.ReferenceEquals(this.Right, right) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return this.OnCreate(left, right, higherOrder);
+            }
+        }
+
+        protected override sealed IExpression Fixup(IReduceContext context)
+        {
+            var higherOrder = context.Fixup(this.HigherOrder);
+            var left = context.Fixup(this.Left);
+            var right = context.Fixup(this.Right);
+
+            if (object.ReferenceEquals(this.Left, left) &&
+                object.ReferenceEquals(this.Right, right) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return this.OnCreate(left, right, higherOrder);
+            }
+        }
+
+        protected override sealed IExpression Reduce(IReduceContext context)
+        {
+            var left = context.Reduce(this.Left);
+            var right = context.Reduce(this.Right);
+
+            if (object.ReferenceEquals(this.Left, left) &&
+                object.ReferenceEquals(this.Right, right))
+            {
+                return this;
+            }
+            else
+            {
+                return this.OnCreate(left, right, this.HigherOrder);
+            }
+        }
+
         public override int GetHashCode() =>
             this.Left.GetHashCode() ^ this.Right.GetHashCode();
 

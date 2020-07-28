@@ -1,7 +1,7 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions;
 using NUnit.Framework;
-
+using System;
 using static Favalet.CLRGenerator;
 using static Favalet.Generator;
 
@@ -25,9 +25,9 @@ namespace Favalet
             }
         }
 
-        #region UnspecifiedType
+        #region From variable
         [Test]
-        public void UnspecifiedTypeInferring1()
+        public void InferringFromVariable1()
         {
             var scope = Scope.Create();
 
@@ -35,7 +35,7 @@ namespace Favalet
                 "true",
                 Constant(true));
 
-            // true && false
+            // true
             var expression =
                 Identity("true");
 
@@ -49,7 +49,7 @@ namespace Favalet
         }
 
         [Test]
-        public void UnspecifiedTypeInferring2()
+        public void InferringFromVariable2()
         {
             var scope = Scope.Create();
 
@@ -79,24 +79,35 @@ namespace Favalet
         }
         #endregion
 
-        #region And
-        [Test]
-        public void InferringAndWithoutAnnotation1()
+        #region Binary operators
+        private static readonly Func<IExpression, IExpression, IExpression?, IExpression>[] BinaryOperators =
+            new[]
+            {
+                new Func<IExpression, IExpression, IExpression?, IExpression>((lhs, rhs, ho) =>
+                    ho is IExpression ? And(lhs, rhs, ho) : And(lhs, rhs)),
+                new Func<IExpression, IExpression, IExpression?, IExpression>((lhs, rhs, ho) =>
+                    ho is IExpression ? Or(lhs, rhs, ho) : Or(lhs, rhs)),
+            };
+
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithoutAnnotation1(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true && false
             var expression =
-                And(
+                oper(
                     Identity("true"),
-                    Identity("false"));
+                    Identity("false"),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:'0 && false:'0):'0
             var ph0 = PseudoPlaceholderTerm.Create(0);
             var expected =
-                And(
+                oper(
                     Identity("true", ph0),
                     Identity("false", ph0),
                     ph0);
@@ -104,8 +115,9 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithoutAnnotation2()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithoutAnnotation2(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
@@ -135,14 +147,15 @@ namespace Favalet
 
         /////////////////////////////////////////////////////
 
-        [Test]
-        public void InferringAndWithAnnotation11()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation11(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // (true && false):bool
             var expression =
-                And(
+                oper(
                     Identity("true"),
                     Identity("false"),
                     Type<bool>());
@@ -151,7 +164,7 @@ namespace Favalet
 
             // (true:bool && false:bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
                     Identity("false", Type<bool>()),
                     Type<bool>());
@@ -159,22 +172,24 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation12()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation12(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true:bool && false
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    Identity("false"));
+                    Identity("false"),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && false:bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
                     Identity("false", Type<bool>()),
                     Type<bool>());
@@ -182,22 +197,24 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation13()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation13(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true && false:bool
             var expression =
-                And(
+                oper(
                     Identity("true"),
-                    Identity("false", Type<bool>()));
+                    Identity("false", Type<bool>()),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && false:bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
                     Identity("false", Type<bool>()),
                     Type<bool>());
@@ -205,22 +222,24 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation14()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation14(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true:bool && false:bool
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    Identity("false", Type<bool>()));
+                    Identity("false", Type<bool>()),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && false:bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
                     Identity("false", Type<bool>()),
                     Type<bool>());
@@ -228,14 +247,15 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation15()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation15(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // (true:bool && false:bool):bool
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
                     Identity("false", Type<bool>()),
                     Type<bool>());
@@ -244,7 +264,7 @@ namespace Favalet
 
             // (true:bool && false:bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
                     Identity("false", Type<bool>()),
                     Type<bool>());
@@ -254,27 +274,29 @@ namespace Favalet
 
         /////////////////////////////////////////////////////
 
-        [Test]
-        public void InferringAndWithAnnotation21()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation21(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // (true && (false && true)):bool
             var expression =
-                And(
+                oper(
                     Identity("true"),
-                    And(
+                    oper(
                         Identity("false"),
-                        Identity("true")),
+                        Identity("true"),
+                        null),
                     Type<bool>());
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -283,26 +305,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation22()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation22(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true:bool && (false && true)
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false"),
-                        Identity("true")));
+                        Identity("true"),
+                        null),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -311,26 +336,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation23()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation23(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true && (false:bool && true)
             var expression =
-                And(
+                oper(
                     Identity("true"),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
-                        Identity("true")));
+                        Identity("true"),
+                        null),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -339,26 +367,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation24()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation24(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true && (false && true:bool)
             var expression =
-                And(
+                oper(
                     Identity("true"),
-                    And(
+                    oper(
                         Identity("false"),
-                        Identity("true", Type<bool>())));
+                        Identity("true", Type<bool>()),
+                        null),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -367,27 +398,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation25()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation25(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true && (false && true):bool
             var expression =
-                And(
+                oper(
                     Identity("true"),
-                    And(
+                    oper(
                         Identity("false"),
                         Identity("true"),
-                        Type<bool>()));
+                        Type<bool>()),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -396,26 +429,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation26()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation26(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true:bool && (false:bool && true)
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
-                        Identity("true")));
+                        Identity("true"),
+                        null),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -424,26 +460,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation27()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation27(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true && (false:bool && true:bool)
             var expression =
-                And(
+                oper(
                     Identity("true"),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>())));
+                        Identity("true", Type<bool>()),
+                        null),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -452,26 +491,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation28()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation28(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true:bool && (false && true:bool)
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false"),
-                        Identity("true", Type<bool>())));
+                        Identity("true", Type<bool>()),
+                        null),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -480,26 +522,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation29()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation29(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true:bool && (false:bool && true:bool)
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>())));
+                        Identity("true", Type<bool>()),
+                        null),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -508,27 +553,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation30()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation30(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true:bool && (false && true):bool
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false"),
                         Identity("true"),
-                        Type<bool>()));
+                        Type<bool>()),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -537,27 +584,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation31()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation31(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true:bool && (false:bool && true):bool
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true"),
-                        Type<bool>()));
+                        Type<bool>()),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -566,27 +615,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation32()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation32(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true:bool && (false && true:bool):bool
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false"),
                         Identity("true", Type<bool>()),
-                        Type<bool>()));
+                        Type<bool>()),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -595,27 +646,29 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation33()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation33(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // true:bool && (false:bool && true:bool):bool
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
-                        Type<bool>()));
+                        Type<bool>()),
+                    null);
 
             var actual = scope.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -624,16 +677,17 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
-        public void InferringAndWithAnnotation34()
+        [TestCaseSource("BinaryOperators")]
+        public void InferringBinaryWithAnnotation34(
+            Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
             var scope = Scope.Create();
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expression =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -643,9 +697,9 @@ namespace Favalet
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
-                And(
+                oper(
                     Identity("true", Type<bool>()),
-                    And(
+                    oper(
                         Identity("false", Type<bool>()),
                         Identity("true", Type<bool>()),
                         Type<bool>()),
@@ -656,7 +710,6 @@ namespace Favalet
         #endregion
 
 
-        // TODO: Orについてテストする
         // TODO: Lambdaについてテストする
         // TODO: Functionについてテストする
         // TODO: Applyについてテストする

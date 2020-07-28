@@ -22,6 +22,7 @@ namespace Favalet.Expressions.Specialized
 
         public override IExpression HigherOrder { get; }
 
+        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IBoundSymbolTerm.Symbol =>
             this.Symbol;

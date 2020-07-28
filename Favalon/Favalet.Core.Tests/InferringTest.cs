@@ -48,7 +48,7 @@ namespace Favalet
         [Test]
         public void InferringFromVariable1()
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             scope.SetVariable(
                 "true",
@@ -70,7 +70,7 @@ namespace Favalet
         [Test]
         public void InferringFromVariable2()
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             scope.SetVariable(
                 "true",
@@ -112,7 +112,7 @@ namespace Favalet
         public void InferringBinaryWithoutAnnotation1(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true && false
             var expression =
@@ -139,7 +139,7 @@ namespace Favalet
         public void InferringBinaryWithoutAnnotation2(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // (true && false) && true
             var expression =
@@ -172,7 +172,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation11(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // (true && false):bool
             var expression =
@@ -197,7 +197,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation12(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true:bool && false
             var expression =
@@ -222,7 +222,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation13(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true && false:bool
             var expression =
@@ -247,7 +247,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation14(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true:bool && false:bool
             var expression =
@@ -272,7 +272,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation15(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // (true:bool && false:bool):bool
             var expression =
@@ -299,7 +299,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation21(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // (true && (false && true)):bool
             var expression =
@@ -330,7 +330,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation22(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true:bool && (false && true)
             var expression =
@@ -361,7 +361,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation23(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true && (false:bool && true)
             var expression =
@@ -392,7 +392,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation24(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true && (false && true:bool)
             var expression =
@@ -423,7 +423,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation25(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true && (false && true):bool
             var expression =
@@ -454,7 +454,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation26(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true:bool && (false:bool && true)
             var expression =
@@ -485,7 +485,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation27(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true && (false:bool && true:bool)
             var expression =
@@ -516,7 +516,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation28(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true:bool && (false && true:bool)
             var expression =
@@ -547,7 +547,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation29(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true:bool && (false:bool && true:bool)
             var expression =
@@ -578,7 +578,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation30(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true:bool && (false && true):bool
             var expression =
@@ -609,7 +609,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation31(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true:bool && (false:bool && true):bool
             var expression =
@@ -640,7 +640,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation32(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true:bool && (false && true:bool):bool
             var expression =
@@ -671,7 +671,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation33(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // true:bool && (false:bool && true:bool):bool
             var expression =
@@ -702,7 +702,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation34(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expression =
@@ -734,7 +734,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithoutAnnotation1()
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // a -> a
             var expression =
@@ -759,7 +759,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithoutAnnotation2()
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // a -> b
             var expression =
@@ -785,7 +785,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation1()
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // a:bool -> a
             var expression =
@@ -808,7 +808,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation2()
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // a -> a:bool
             var expression =
@@ -831,7 +831,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation3()
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // a:bool -> a:bool
             var expression =
@@ -854,13 +854,16 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation4()
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // (a -> a):(bool -> _)
             var expression =
                 Lambda(
                     BoundSymbol("a"),
-                    Identity("a"));
+                    Identity("a"),
+                    Function(
+                        Type<bool>(),
+                        Unspecified()));
 
             var actual = scope.Infer(expression);
 

@@ -29,10 +29,12 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
 
+        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IFunctionExpression.Parameter =>
             this.Parameter;
 
+        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IFunctionExpression.Result =>
             this.Result;
@@ -55,7 +57,8 @@ namespace Favalet.Expressions
 
             var functionHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder,
-                result.HigherOrder);
+                result.HigherOrder,
+                context.CreatePlaceholder(PlaceholderOrderHints.KindOrAbove));
 
             context.Unify(functionHigherOrder, higherOrder);
 
@@ -120,5 +123,18 @@ namespace Favalet.Expressions
         public static FunctionExpression Create(
             IExpression parameter, IExpression result) =>
             new FunctionExpression(parameter, result, UnspecifiedTerm.Instance);
+    }
+
+    public static class FunctionExpressionExtension
+    {
+        [DebuggerHidden]
+        public static void Deconstruct(
+            this IFunctionExpression function,
+            out IExpression parameter,
+            out IExpression result)
+        {
+            parameter = function.Parameter;
+            result = function.Result;
+        }
     }
 }

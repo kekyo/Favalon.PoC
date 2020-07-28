@@ -18,19 +18,16 @@ namespace Favalet.Contexts
         { }
 
         [DebuggerStepThrough]
-        private int AssignPlaceholderIndex() =>
-            Interlocked.Increment(ref this.placeholderIndex);
-        [DebuggerStepThrough]
-        int IPlaceholderProvider.AssignPlaceholderIndex() =>
-            this.AssignPlaceholderIndex();
-
-        [DebuggerStepThrough]
         public PlaceholderTerm CreatePlaceholder(
-            PlaceholderOrders candidateOrder = PlaceholderOrders.Type) =>
+            PlaceholderOrderHints orderHint = PlaceholderOrderHints.TypeOrAbove) =>
             PlaceholderTerm.Create(
                 this,
-                this.AssignPlaceholderIndex(),
-                candidateOrder);
+                Interlocked.Increment(ref this.placeholderIndex),
+                orderHint);
+        [DebuggerStepThrough]
+        IPlaceholderTerm IPlaceholderProvider.CreatePlaceholder(
+            PlaceholderOrderHints orderHint) =>
+            this.CreatePlaceholder(orderHint);
 
         public IExpression Infer(IExpression expression)
         {
@@ -65,8 +62,5 @@ namespace Favalet.Contexts
         [DebuggerStepThrough]
         public static Scope Create(ILogicalCalculator typeCalculator) =>
             new Scope(typeCalculator);
-        [DebuggerStepThrough]
-        public static Scope Create() =>
-            new Scope(LogicalCalculator.Instance);
     }
 }

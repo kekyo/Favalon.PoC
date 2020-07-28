@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace Favalet.Contexts
 {
     public interface IReduceContext :
-        IScopeContext
+        IScopeContext, IPlaceholderProvider
     {
         IExpression Fixup(IExpression expression);
 
@@ -22,7 +22,7 @@ namespace Favalet.Contexts
     }
 
     internal sealed class ReduceContext :
-        IReduceContext, IPlaceholderProvider
+        IReduceContext
     {
         private readonly Scope rootScope;
         private readonly IScopeContext parentScope;
@@ -69,8 +69,8 @@ namespace Favalet.Contexts
         }
 
         [DebuggerStepThrough]
-        public int AssignPlaceholderIndex() =>
-            ((IPlaceholderProvider)this.rootScope).AssignPlaceholderIndex();
+        public IPlaceholderTerm CreatePlaceholder(PlaceholderOrderHints candidateOrder) =>
+            this.rootScope.CreatePlaceholder(candidateOrder);
 
         public IExpression InferHigherOrder(IExpression higherOrder)
         {
@@ -90,46 +90,65 @@ namespace Favalet.Contexts
             Debug.Assert(!(from is UnspecifiedTerm));
             Debug.Assert(!(to is UnspecifiedTerm));
 
-            if (from is IPlacehoderTerm pfrom)
+            if (from is IPlaceholderTerm(int findex))
             {
-                if (to is IPlacehoderTerm pto)
+                if (to is IPlaceholderTerm(int tindex))
                 {
-                    if (pfrom.Index == pto.Index)
-                    {
-                        return;
-                    }
-                    else
+                    if (findex != tindex)
                     {
                         // TODO: variance
                         lock (this.unifiedExpressions)
                         {
-                            if (this.unifiedExpressions.TryGetValue(pfrom.Index, out var target))
+                            if (this.unifiedExpressions.TryGetValue(findex, out var target))
                             {
-                                this.Unify(pto, target);
+                                this.Unify(to, target);
                             }
                             else
                             {
-                                this.unifiedExpressions[pfrom.Index] = to;
+                                this.unifiedExpressions[findex] = to;
                             }
                         }
-                        return;
                     }
                 }
-
-                // TODO: variance
-                lock (this.unifiedExpressions)
+                else
                 {
-                    this.unifiedExpressions[pfrom.Index] = to;
+                    // TODO: variance
+                    lock (this.unifiedExpressions)
+                    {
+                        if (this.unifiedExpressions.TryGetValue(findex, out var target))
+                        {
+                            this.Unify(to, target);
+                        }
+                        else
+                        {
+                            this.unifiedExpressions[findex] = to;
+                        }
+                    }
                 }
                 return;
             }
-            else if (to is IPlacehoderTerm pto)
+            else if (to is IPlaceholderTerm(int tindex))
             {
                 // TODO: variance
                 lock (this.unifiedExpressions)
                 {
-                    this.unifiedExpressions[pto.Index] = from;
+                    if (this.unifiedExpressions.TryGetValue(tindex, out var target))
+                    {
+                        this.Unify(from, target);
+                    }
+                    else
+                    {
+                        this.unifiedExpressions[tindex] = from;
+                    }
                 }
+                return;
+            }
+
+            if (from is IFunctionExpression(IExpression fp, IExpression fr) &&
+                to is IFunctionExpression(IExpression tp, IExpression tr))
+            {
+                this.Unify(fp, tp);
+                this.Unify(fr, tr);
                 return;
             }
 
@@ -151,7 +170,7 @@ namespace Favalet.Contexts
                 if (this.unifiedExpressions.TryGetValue(targetIndex, out var resolved))
                 {
                     lastExpression = resolved;
-                    if (lastExpression is IPlacehoderTerm placeholder)
+                    if (lastExpression is IPlaceholderTerm placeholder)
                     {
                         targetIndex = placeholder.Index;
                         continue;

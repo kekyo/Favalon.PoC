@@ -4,38 +4,38 @@ using System.Diagnostics;
 
 namespace Favalet.Expressions.Specialized
 {
-    public enum PlaceholderOrders
+    public enum PlaceholderOrderHints
     {
-        Variable = 0,
-        Type,
-        Kind,
+        VariableOrAbove = 0,
+        TypeOrAbove,
+        KindOrAbove,
         Fourth
     }
 
     public interface IPlaceholderProvider
     {
-        int AssignPlaceholderIndex();
+        IPlaceholderTerm CreatePlaceholder(PlaceholderOrderHints orderHint);
     }
 
-    public interface IPlacehoderTerm :
+    public interface IPlaceholderTerm :
         ITerm
     {
         int Index { get; }
     }
 
     public sealed class PlaceholderTerm :
-        Expression, IPlacehoderTerm
+        Expression, IPlaceholderTerm
     {
-        private readonly PlaceholderOrders candidateOrder;
+        private readonly PlaceholderOrderHints candidateOrder;
         private IPlaceholderProvider provider;
-        private PlaceholderTerm? higherOrder;
+        private IPlaceholderTerm? higherOrder;
 
         public readonly int Index;
 
         private PlaceholderTerm(
             IPlaceholderProvider provider,
             int index,
-            PlaceholderOrders candidateOrder)
+            PlaceholderOrderHints candidateOrder)
         {
             this.candidateOrder = candidateOrder;
             this.provider = provider;
@@ -49,7 +49,7 @@ namespace Favalet.Expressions.Specialized
             {
                 // Helps for inferring:
                 //   Nested higher order has ceil limit to 4th order.
-                if (this.candidateOrder >= PlaceholderOrders.Kind)
+                if (this.candidateOrder >= PlaceholderOrderHints.KindOrAbove)
                 {
                     return FourthTerm.Instance;
                 }
@@ -60,9 +60,7 @@ namespace Favalet.Expressions.Specialized
                     {
                         if (this.higherOrder == null)
                         {
-                            this.higherOrder = new PlaceholderTerm(
-                                this.provider, 
-                                this.provider.AssignPlaceholderIndex(),
+                            this.higherOrder = this.provider.CreatePlaceholder(
                                 this.candidateOrder + 1);
                         }
                     }
@@ -71,17 +69,18 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        int IPlacehoderTerm.Index =>
+        [DebuggerHidden]
+        int IPlaceholderTerm.Index =>
             this.Index;
 
         public override int GetHashCode() =>
             this.Index.GetHashCode();
 
-        public bool Equals(IPlacehoderTerm rhs) =>
+        public bool Equals(IPlaceholderTerm rhs) =>
             this.Index == rhs.Index;
 
         public override bool Equals(IExpression? other) =>
-            other is IPlacehoderTerm rhs && this.Equals(rhs);
+            other is IPlaceholderTerm rhs && this.Equals(rhs);
 
         protected override IExpression Infer(IReduceContext context) =>
             this;
@@ -112,10 +111,19 @@ namespace Favalet.Expressions.Specialized
         internal static PlaceholderTerm Create(
             IPlaceholderProvider provider,
             int index,
-            PlaceholderOrders candidateOrder) =>
+            PlaceholderOrderHints orderHint) =>
             new PlaceholderTerm(
                 provider,
                 index,
-                candidateOrder);
+                orderHint);
+    }
+
+    public static class PlaceholderTermExtension
+    {
+        [DebuggerHidden]
+        public static void Deconstruct(
+            this IPlaceholderTerm placeholder,
+            out int index) =>
+            index = placeholder.Index;
     }
 }

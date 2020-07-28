@@ -34,11 +34,13 @@ namespace Favalet.Expressions
         }
 
         public override IExpression HigherOrder { get; }
-
+        
+        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IApplyExpression.Function =>
             this.Function;
 
+        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IApplyExpression.Argument =>
             this.Argument;
@@ -139,5 +141,18 @@ namespace Favalet.Expressions
         public static ApplyExpression Create(
             IExpression function, IExpression argument) =>
             new ApplyExpression(function, argument, UnspecifiedTerm.Instance);
+    }
+
+    public static class ApplyExpressionExtension
+    {
+        [DebuggerHidden]
+        public static void Deconstruct(
+            this IApplyExpression apply,
+            out IExpression function,
+            out IExpression argument)
+        {
+            function = apply.Function;
+            argument = apply.Argument;
+        }
     }
 }

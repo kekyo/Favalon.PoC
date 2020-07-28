@@ -9,7 +9,7 @@ using static Favalet.Generator;
 namespace Favalet.Reduces
 {
     [TestFixture]
-    public sealed class ApplicableTest
+    public sealed class CallableTest
     {
         private static void AssertLogicalEqual(
             IExpression expression,
@@ -29,7 +29,7 @@ namespace Favalet.Reduces
         [Test]
         public void LookupIdentity()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             scope.SetVariable("ABC", Identity("XYZ"));
 
@@ -47,7 +47,7 @@ namespace Favalet.Reduces
         [Test]
         public void PureLambda()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             var expression =
                 Lambda(
@@ -71,7 +71,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyLambda1()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (arg -> arg && B) A
             var expression =
@@ -96,7 +96,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyLambda2()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // inner = arg1 -> arg1 && B
             scope.SetVariable(
@@ -131,7 +131,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyLambda3()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // Same argument symbols.
 
@@ -168,7 +168,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyNestedLambda1()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // Complex nested lambda (bind)
 
@@ -205,7 +205,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyNestedLambda2()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // Complex nested lambda (bind)
 
@@ -242,7 +242,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyLogicalOperator1()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // Logical (A && (B && A))
             var expression =
@@ -268,7 +268,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyLogicalOperator2()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // logical = Logical
             scope.SetVariable(
@@ -299,7 +299,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyMethod()
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // Math.Sqrt pi
             var expression =
@@ -319,7 +319,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyConstructor()
         {
-            var scope = Scope.Create();
+            var scope = CLRScope();
 
             // Uri "http://example.com"
             var expression =

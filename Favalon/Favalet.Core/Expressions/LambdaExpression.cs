@@ -29,10 +29,12 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
 
+        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IBoundSymbolTerm ILambdaExpression.Parameter =>
             this.Parameter;
 
+        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression ILambdaExpression.Body =>
             this.Body;
@@ -58,7 +60,8 @@ namespace Favalet.Expressions
 
             var lambdaHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder,
-                body.HigherOrder);
+                body.HigherOrder,
+                context.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove));
 
             context.Unify(lambdaHigherOrder, higherOrder);
 
@@ -128,5 +131,18 @@ namespace Favalet.Expressions
         public static LambdaExpression Create(
             IBoundSymbolTerm parameter, IExpression body) =>
             new LambdaExpression(parameter, body, UnspecifiedTerm.Instance);
+    }
+
+    public static class LambdaExpressionExtension
+    {
+        [DebuggerHidden]
+        public static void Deconstruct(
+            this ILambdaExpression lambda,
+            out IBoundSymbolTerm parameter,
+            out IExpression body)
+        {
+            parameter = lambda.Parameter;
+            body = lambda.Body;
+        }
     }
 }

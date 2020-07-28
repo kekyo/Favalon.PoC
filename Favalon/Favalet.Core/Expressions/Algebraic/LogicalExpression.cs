@@ -26,6 +26,7 @@ namespace Favalet.Expressions.Algebraic
 
         public override IExpression HigherOrder { get; }
 
+        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression ILogicalExpression.Operand =>
             this.Operand;
@@ -81,9 +82,11 @@ namespace Favalet.Expressions.Algebraic
                 this,
                 $"Logical {this.Operand.GetPrettyString(context)}");
 
+        [DebuggerStepThrough]
         public static LogicalExpression Create(
             IExpression operand, IExpression higherOrder) =>
             new LogicalExpression(operand, higherOrder);
+        [DebuggerStepThrough]
         public static LogicalExpression Create(
             IExpression operand) =>
             new LogicalExpression(operand, UnspecifiedTerm.Instance);

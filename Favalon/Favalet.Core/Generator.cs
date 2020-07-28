@@ -1,4 +1,5 @@
-﻿using Favalet.Expressions;
+﻿using Favalet.Contexts;
+using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Diagnostics;
@@ -7,6 +8,10 @@ namespace Favalet
 {
     public static class Generator
     {
+        [DebuggerStepThrough]
+        public static Scope Scope() =>
+            Favalet.Contexts.Scope.Create(LogicalCalculator.Instance);
+
         private static readonly IdentityTerm kind =
             IdentityTerm.Create("*", FourthTerm.Instance);
 
@@ -17,6 +22,10 @@ namespace Favalet
         [DebuggerStepThrough]
         public static IdentityTerm Kind() =>
             kind;
+
+        [DebuggerStepThrough]
+        public static UnspecifiedTerm Unspecified() =>
+            UnspecifiedTerm.Instance;
 
         [DebuggerStepThrough]
         public static IdentityTerm Identity(string symbol) =>

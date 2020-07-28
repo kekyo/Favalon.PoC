@@ -1,9 +1,6 @@
 ﻿using Favalet.Contexts;
-using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
-using System;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -25,6 +22,7 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
 
+        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IIdentityTerm.Symbol =>
             this.Symbol;

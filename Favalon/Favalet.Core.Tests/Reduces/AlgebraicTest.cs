@@ -32,7 +32,7 @@ namespace Favalet.Reduces
         [Test]
         public void NonReduceSingleAnd()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // A && B
             var expression =
@@ -54,7 +54,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceSingleAnd()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // A && B
             var expression =
@@ -77,7 +77,7 @@ namespace Favalet.Reduces
         [Test]
         public void NonReduceDuplicatedAnd()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A && A) && A
             var expression =
@@ -103,7 +103,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceDuplicatedAnd()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A && A) && A
             var expression =
@@ -126,7 +126,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceMultipleDuplicatedAnd()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A && A) && (A && A)
             var expression =
@@ -153,7 +153,7 @@ namespace Favalet.Reduces
         [Test]
         public void NonReduceSingleOr()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // A || B
             var expression =
@@ -175,7 +175,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceSingleOr()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // A || B
             var expression =
@@ -198,7 +198,7 @@ namespace Favalet.Reduces
         [Test]
         public void NonReduceDuplicatedOr()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A || A) || A
             var expression =
@@ -224,7 +224,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceDuplicatedOr()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A || A) || A
             var expression =
@@ -247,7 +247,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceMultipleDuplicatedOr()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A || A) || (A || A)
             var expression =
@@ -274,7 +274,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceDuplicatedCombinedAndOr()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A || A) && (A || A)
             var expression =
@@ -299,7 +299,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceDuplicatedCombinedOrAnd()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A && A) || (A && A)
             var expression =
@@ -324,7 +324,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialCombinedAndOr()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A || A) && (B || B)
             var expression =
@@ -351,7 +351,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialCombinedOrAnd()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A && A) || (B && B)
             var expression =
@@ -378,7 +378,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialDifferenceAndOr()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A || B) && (A || B)
             var expression =
@@ -405,7 +405,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialDifferenceOrAnd()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A && B) || (A && B)
             var expression =
@@ -432,7 +432,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialPartiallyAndOr()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // Absorption
 
@@ -457,7 +457,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialPartiallyOrAnd()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // Absorption
 
@@ -482,7 +482,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialAndOrTensor()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A || B) && (B || A)
             var expression =
@@ -509,7 +509,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialOrAndTensor()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A && B) || (B && A)
             var expression =
@@ -535,7 +535,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialAndOrMultipleTensorLogical1()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A || (B || C)) && (B || (C || A))
             var expression =
@@ -568,7 +568,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialOrAndMultipleTensorLogical1()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A && (B && C)) || (B && (C && A))
             var expression =
@@ -601,7 +601,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialAndOrMultipleTensorLogical2()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A || (B || C)) && ((C || A) || B)
             var expression =
@@ -634,7 +634,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialOrAndMultipleTensorLogical2()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // (A && (B && C)) || ((C && A) && B)
             var expression =
@@ -667,7 +667,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialAndOrMultipleTensorLogical3()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // ((A || B) || C) && (B || (C || A))
             var expression =
@@ -700,7 +700,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialOrAndMultipleTensorLogical3()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // ((A && B) && C) || (B && (C && A))
             var expression =
@@ -733,7 +733,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialAndOrComplex()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // Absorption
 
@@ -764,7 +764,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialOrAndComplex()
         {
-            var scope = Scope.Create();
+            var scope = Scope();
 
             // Absorption
 

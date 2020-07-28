@@ -20,10 +20,7 @@ namespace Favalet.Expressions.Specialized
 
         protected override IExpression Infer(IReduceContext context) =>
             context is IPlaceholderProvider provider ?
-                (IExpression)PlaceholderTerm.Create(
-                    provider,
-                    provider.AssignPlaceholderIndex(),
-                    PlaceholderOrders.Type) :
+                (IExpression)provider.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove) :
                 this;
 
         protected override IExpression Fixup(IReduceContext context) =>

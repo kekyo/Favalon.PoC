@@ -1,26 +1,22 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions;
-using Favalet.Expressions.Algebraic;
 using NUnit.Framework;
 using System;
 
-using static Favalet.Generator;
 using static Favalet.CLRGenerator;
+using static Favalet.Generator;
 
 namespace Favalet.Reduces
 {
     [TestFixture]
     public sealed class ApplicableTest
     {
-        private static readonly LogicalCalculator calculator =
-            new LogicalCalculator();
-
         private static void AssertLogicalEqual(
             IExpression expression,
             IExpression expected,
             IExpression actual)
         {
-            if (!calculator.ExactEquals(expected, actual))
+            if (!expected.Equals(actual))
             {
                 Assert.Fail(
                     "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",
@@ -102,7 +98,7 @@ namespace Favalet.Reduces
         {
             var scope = Scope.Create();
 
-            // inner = arg1 -> arg1 && C
+            // inner = arg1 -> arg1 && B
             scope.SetVariable(
                 "inner",
                 Lambda(
@@ -123,6 +119,7 @@ namespace Favalet.Reduces
 
             var actual = scope.Reduce(expression);
 
+            // A && B
             var expected =
                 And(
                     Identity("A"),
@@ -138,7 +135,7 @@ namespace Favalet.Reduces
 
             // Same argument symbols.
 
-            // inner = arg -> arg && C
+            // inner = arg -> arg && B
             scope.SetVariable(
                 "inner",
                 Lambda(
@@ -159,6 +156,7 @@ namespace Favalet.Reduces
 
             var actual = scope.Reduce(expression);
 
+            // A && B
             var expected =
                 And(
                     Identity("A"),
@@ -168,7 +166,7 @@ namespace Favalet.Reduces
         }
 
         [Test]
-        public void ApplyNestedLambda()
+        public void ApplyNestedLambda1()
         {
             var scope = Scope.Create();
 
@@ -195,6 +193,44 @@ namespace Favalet.Reduces
 
             var actual = scope.Reduce(expression);
 
+            // B && A
+            var expected =
+                And(
+                    Identity("B"),
+                    Identity("A"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void ApplyNestedLambda2()
+        {
+            var scope = Scope.Create();
+
+            // Complex nested lambda (bind)
+
+            // inner = arg2 -> arg1 -> arg2 && arg1
+            scope.SetVariable(
+                "inner",
+                Lambda(
+                    "arg2",
+                    Lambda(
+                        "arg1",
+                        And(
+                            Identity("arg2"),
+                            Identity("arg1")))));
+
+            // inner A B
+            var expression =
+                Apply(
+                    Apply(
+                        Identity("inner"),
+                        Identity("A")),
+                    Identity("B"));
+
+            var actual = scope.Reduce(expression);
+
+            // A && B
             var expected =
                 And(
                     Identity("A"),
@@ -208,13 +244,15 @@ namespace Favalet.Reduces
         {
             var scope = Scope.Create();
 
-            // Logical (B && A)
+            // Logical (A && (B && A))
             var expression =
                 Apply(
                     Logical(),
                     And(
-                        Identity("B"),
-                        Identity("A")));
+                        Identity("A"),
+                        And(
+                            Identity("B"),
+                            Identity("A"))));
 
             var actual = scope.Reduce(expression);
 
@@ -237,13 +275,15 @@ namespace Favalet.Reduces
                 "logical",
                 Logical());
 
-            // logical (B && A)
+            // logical (A && (B && A))
             var expression =
                 Apply(
                     Identity("logical"),
                     And(
-                        Identity("B"),
-                        Identity("A")));
+                        Identity("A"),
+                        And(
+                            Identity("B"),
+                            Identity("A"))));
 
             var actual = scope.Reduce(expression);
 
@@ -269,7 +309,7 @@ namespace Favalet.Reduces
 
             var actual = scope.Reduce(expression);
 
-            // A && B
+            // [sqrt(pi)]
             var expected =
                 Constant(Math.Sqrt(Math.PI));
 
@@ -289,7 +329,7 @@ namespace Favalet.Reduces
 
             var actual = scope.Reduce(expression);
 
-            // Uri
+            // [Uri("http://example.com")]
             var expected =
                 Constant(new Uri("http://example.com"));
 

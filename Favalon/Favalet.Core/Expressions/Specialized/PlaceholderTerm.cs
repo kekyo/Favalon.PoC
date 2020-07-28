@@ -17,8 +17,14 @@ namespace Favalet.Expressions.Specialized
         int AssignPlaceholderIndex();
     }
 
+    public interface IPlacehoderTerm :
+        ITerm
+    {
+        int Index { get; }
+    }
+
     public sealed class PlaceholderTerm :
-        Expression, ITerm
+        Expression, IPlacehoderTerm
     {
         private readonly PlaceholderOrders candidateOrder;
         private IPlaceholderProvider provider;
@@ -63,14 +69,17 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
+        int IPlacehoderTerm.Index =>
+            this.Index;
+
         public override int GetHashCode() =>
             this.Index.GetHashCode();
 
-        public bool Equals(PlaceholderTerm rhs) =>
+        public bool Equals(IPlacehoderTerm rhs) =>
             this.Index == rhs.Index;
 
         public override bool Equals(IExpression? other) =>
-            other is PlaceholderTerm rhs && this.Equals(rhs);
+            other is IPlacehoderTerm rhs && this.Equals(rhs);
 
         protected override IExpression Infer(IReduceContext context) =>
             this;

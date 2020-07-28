@@ -34,16 +34,6 @@ namespace Favalet.Contexts
                 this.AssignPlaceholderIndex(),
                 candidateOrder);
 
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        [DebuggerStepThrough]
-        public PlaceholderTerm UnsafeCreatePlaceholder(
-            int index,
-            PlaceholderOrders candidateOrder = PlaceholderOrders.Type) =>
-            PlaceholderTerm.Create(
-                this,
-                index,
-                candidateOrder);
-
         public IExpression Infer(IExpression expression)
         {
             var context = new ReduceContext(

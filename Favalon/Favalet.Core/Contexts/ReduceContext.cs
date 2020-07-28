@@ -89,9 +89,9 @@ namespace Favalet.Contexts
             Debug.Assert(!(from is UnspecifiedTerm));
             Debug.Assert(!(to is UnspecifiedTerm));
 
-            if (from is PlaceholderTerm pfrom)
+            if (from is IPlacehoderTerm pfrom)
             {
-                if (to is PlaceholderTerm pto)
+                if (to is IPlacehoderTerm pto)
                 {
                     if (pfrom.Index == pto.Index)
                     {
@@ -122,7 +122,7 @@ namespace Favalet.Contexts
                 }
                 return;
             }
-            else if (to is PlaceholderTerm pto)
+            else if (to is IPlacehoderTerm pto)
             {
                 // TODO: variance
                 lock (this.unifiedExpressions)
@@ -141,10 +141,25 @@ namespace Favalet.Contexts
             throw new ArgumentException();
         }
 
-        public IExpression? ResolvePlaceholderIndex(int index) =>
-            this.unifiedExpressions.TryGetValue(index, out var resolved) ?
-                resolved :
-                null;
+        public IExpression? ResolvePlaceholderIndex(int index)
+        {
+            var targetIndex = index;
+            IExpression? lastExpression = null;
+            while (true)
+            {
+                if (this.unifiedExpressions.TryGetValue(targetIndex, out var resolved))
+                {
+                    lastExpression = resolved;
+                    if (lastExpression is IPlacehoderTerm placeholder)
+                    {
+                        targetIndex = placeholder.Index;
+                        continue;
+                    }
+                }
+
+                return lastExpression;
+            }
+        }
 
         public IExpression? LookupVariable(IIdentityTerm identity) =>
             // TODO: improving when identity's higher order acceptable

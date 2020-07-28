@@ -36,7 +36,7 @@ namespace Favalet.Expressions.Specialized
             context.FinalizePrettyString(
                 this,
                 context.IsSimple ?
-                    "?" :
+                    "_" :
                     "Unspecified");
 
         public static readonly UnspecifiedTerm Instance =

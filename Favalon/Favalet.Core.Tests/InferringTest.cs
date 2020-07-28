@@ -755,6 +755,124 @@ namespace Favalet
 
             AssertLogicalEqual(provider, expression, expected, actual);
         }
+
+        [Test]
+        public void InferringLambdaWithoutAnnotation2()
+        {
+            var scope = Scope.Create();
+
+            // a -> b
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("b"));
+
+            var actual = scope.Infer(expression);
+
+            // (a:'0 -> b:'1):('0 -> '1)
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var ph1 = provider.CreatePlaceholder();
+            var expected =
+                Lambda(
+                    BoundSymbol("a", ph0),
+                    Identity("b", ph1),
+                    Function(ph0, ph1));
+
+            AssertLogicalEqual(provider, expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation1()
+        {
+            var scope = Scope.Create();
+
+            // a:bool -> a
+            var expression =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("a"));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("a", Type<bool>()),
+                    Function(Type<bool>(), Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation2()
+        {
+            var scope = Scope.Create();
+
+            // a -> a:bool
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a", Type<bool>()));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("a", Type<bool>()),
+                    Function(Type<bool>(), Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation3()
+        {
+            var scope = Scope.Create();
+
+            // a:bool -> a:bool
+            var expression =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("a", Type<bool>()));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("a", Type<bool>()),
+                    Function(Type<bool>(), Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation4()
+        {
+            var scope = Scope.Create();
+
+            // (a -> a):(bool -> _)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("a", Type<bool>()),
+                    Function(Type<bool>(), Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
         #endregion
 
 

@@ -84,8 +84,8 @@ namespace Favalet.Expressions
         }
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 context.IsSimple ?
                     this.Symbol :
                     $"Identity {this.Symbol}");

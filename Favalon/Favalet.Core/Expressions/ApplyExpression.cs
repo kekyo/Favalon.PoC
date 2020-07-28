@@ -125,8 +125,8 @@ namespace Favalet.Expressions
         }
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 context.IsSimple ?
                     $"{this.Function.GetPrettyString(context)} {this.Argument.GetPrettyString(context)}" :
                     $"Apply {this.Function.GetPrettyString(context)} {this.Argument.GetPrettyString(context)}");

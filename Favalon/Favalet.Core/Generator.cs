@@ -54,6 +54,14 @@ namespace Favalet
         public static LambdaExpression Lambda(
             string parameter, IExpression body) =>
             LambdaExpression.Create(IdentityTerm.Create(parameter), body);
+        [DebuggerStepThrough]
+        public static LambdaExpression Lambda(
+            IIdentityTerm parameter, IExpression body, IExpression higherOrder) =>
+            LambdaExpression.Create(parameter, body, higherOrder);
+        [DebuggerStepThrough]
+        public static LambdaExpression Lambda(
+            string parameter, IExpression body, IExpression higherOrder) =>
+            LambdaExpression.Create(IdentityTerm.Create(parameter), body, higherOrder);
 
         [DebuggerStepThrough]
         public static ApplyExpression Apply(
@@ -64,5 +72,9 @@ namespace Favalet
         public static FunctionExpression Function(
             IExpression parameter, IExpression result) =>
             FunctionExpression.Create(parameter, result);
+        [DebuggerStepThrough]
+        public static FunctionExpression Function(
+            IExpression parameter, IExpression result, IExpression higherOrder) =>
+            FunctionExpression.Create(parameter, result, higherOrder);
     }
 }

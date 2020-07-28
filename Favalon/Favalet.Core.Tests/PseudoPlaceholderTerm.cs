@@ -2,46 +2,58 @@
 using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
 using System;
+using System.Threading;
 
 namespace Favalet
 {
     // For testing purpose.
-    public sealed class PseudoPlaceholderTerm :
-        Expression, IPlacehoderTerm
+    public sealed class PseudoPlaceholderProvider
     {
-        public readonly int Index;
+        private volatile int index = -1;
 
-        private PseudoPlaceholderTerm(int index) =>
-            this.Index = index;
+        private PseudoPlaceholderProvider()
+        { }
 
-        public override IExpression HigherOrder =>
-            throw new NotImplementedException();
+        public IPlacehoderTerm CreatePlaceholder() =>
+            new PseudoPlaceholderTerm(Interlocked.Increment(ref this.index));
 
-        int IPlacehoderTerm.Index =>
-            this.Index;
+        public static PseudoPlaceholderProvider Create() =>
+            new PseudoPlaceholderProvider();
 
-        public override int GetHashCode() =>
-            this.Index.GetHashCode();
+        private sealed class PseudoPlaceholderTerm :
+            Expression, IPlacehoderTerm
+        {
+            public readonly int Index;
 
-        public bool Equals(IPlacehoderTerm rhs) =>
-            this.Index == rhs.Index;
+            public PseudoPlaceholderTerm(int index) =>
+                this.Index = index;
 
-        public override bool Equals(IExpression? other) =>
-            other is IPlacehoderTerm rhs && this.Equals(rhs);
+            public override IExpression HigherOrder =>
+                throw new NotImplementedException();
 
-        public override string GetPrettyString(PrettyStringContext context) =>
-            $"'P{this.Index}";
+            int IPlacehoderTerm.Index =>
+                this.Index;
 
-        protected override IExpression Fixup(IReduceContext context) =>
-            throw new NotImplementedException();
+            public override int GetHashCode() =>
+                this.Index.GetHashCode();
 
-        protected override IExpression Infer(IReduceContext context) =>
-            throw new NotImplementedException();
+            public bool Equals(IPlacehoderTerm rhs) =>
+                this.Index == rhs.Index;
 
-        protected override IExpression Reduce(IReduceContext context) =>
-            throw new NotImplementedException();
+            public override bool Equals(IExpression? other) =>
+                other is IPlacehoderTerm rhs && this.Equals(rhs);
 
-        public static PseudoPlaceholderTerm Create(int index) =>
-            new PseudoPlaceholderTerm(index);
+            public override string GetPrettyString(PrettyStringContext context) =>
+                $"\"{this.Index}";
+
+            protected override IExpression Fixup(IReduceContext context) =>
+                throw new NotImplementedException();
+
+            protected override IExpression Infer(IReduceContext context) =>
+                throw new NotImplementedException();
+
+            protected override IExpression Reduce(IReduceContext context) =>
+                throw new NotImplementedException();
+        }
     }
 }

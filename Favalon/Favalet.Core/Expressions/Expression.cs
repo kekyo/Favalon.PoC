@@ -44,28 +44,6 @@ namespace Favalet.Expressions
 
         public abstract string GetPrettyString(PrettyStringContext context);
 
-        protected string FinalizePrettyString(PrettyStringContext context, string preFormatted)
-        {
-            var higherOrder = ((IExpression)this).HigherOrder;
-            return (context.IsPartial, this, higherOrder) switch
-            {
-                (true, _, _) =>
-                    preFormatted,
-                (_, _, UnspecifiedTerm _) =>
-                    preFormatted,
-                (_, _, null) =>
-                    preFormatted,
-                (_, ITerm _, ITerm _) =>
-                    $"{preFormatted}:{higherOrder.GetPrettyString(context.MakePartial())}",
-                (_, ITerm _, _) =>
-                    $"{preFormatted}:({higherOrder.GetPrettyString(context.MakePartial())})",
-                (_, _, ITerm _) =>
-                    $"({preFormatted}):{higherOrder.GetPrettyString(context.MakePartial())}",
-                _ =>
-                    $"({preFormatted}):({higherOrder.GetPrettyString(context.MakePartial())})",
-            };
-        }
-
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebugPrint =>
             this.GetPrettyString(PrettyStringContext.Simple);
@@ -81,5 +59,18 @@ namespace Favalet.Expressions
         [DebuggerHidden]
         public override bool Equals(object obj) =>
             this.Equals(obj as IExpression);
+    }
+
+    public static class ExpressionExtension
+    {
+        public static bool ExactEquals(this IExpression lhs, IExpression rhs) =>
+            object.ReferenceEquals(lhs, rhs) ||
+            (lhs.Equals(rhs) && (lhs, rhs) switch
+            {
+                (FourthTerm _, FourthTerm _) => true,
+                (FourthTerm _, _) => false,
+                (_, FourthTerm _) => false,
+                _ => lhs.HigherOrder.ExactEquals(rhs.HigherOrder)
+            });
     }
 }

@@ -28,8 +28,8 @@ namespace Favalet.Expressions.Specialized
             this;
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 context.IsSimple ?
                     "#" :
                     "Fourth");

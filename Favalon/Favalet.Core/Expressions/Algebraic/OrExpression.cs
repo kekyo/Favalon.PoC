@@ -24,8 +24,8 @@ namespace Favalet.Expressions.Algebraic
             new OrExpression(left, right, higherOrder);
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 context.IsSimple ?
                     $"{this.Left.GetPrettyString(context)} || {this.Right.GetPrettyString(context)}" :
                     $"Or {this.Left.GetPrettyString(context)} {this.Right.GetPrettyString(context)}");

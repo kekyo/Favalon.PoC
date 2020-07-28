@@ -55,8 +55,7 @@ namespace Favalet.Expressions
 
             var lambdaHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder,
-                body.HigherOrder,
-                UnspecifiedTerm.Instance);
+                body.HigherOrder);
 
             context.Unify(lambdaHigherOrder, higherOrder);
 
@@ -72,6 +71,7 @@ namespace Favalet.Expressions
             }
             else
             {
+                // TODO: error?
                 return new LambdaExpression(this.Parameter, body, higherOrder);
             }
         }
@@ -94,6 +94,7 @@ namespace Favalet.Expressions
             }
             else
             {
+                // TODO: error?
                 return new LambdaExpression(this.Parameter, body, higherOrder);
             }
         }
@@ -118,11 +119,11 @@ namespace Favalet.Expressions
                 Reduce(this.Body);
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 context.IsSimple ?
-                    $"{this.Parameter} -> {this.Body.GetPrettyString(context)}" :
-                    $"Lambda {this.Parameter} {this.Body.GetPrettyString(context)}");
+                    $"{this.Parameter.GetPrettyString(context)} -> {this.Body.GetPrettyString(context)}" :
+                    $"Lambda {this.Parameter.GetPrettyString(context)} {this.Body.GetPrettyString(context)}");
 
         [DebuggerStepThrough]
         public static LambdaExpression Create(

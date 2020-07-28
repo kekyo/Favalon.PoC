@@ -98,8 +98,8 @@ namespace Favalet.Expressions.Algebraic
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 context.IsSimple ?
                     string.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(context))) :
                     "AndFlattened " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(context))));
@@ -121,8 +121,8 @@ namespace Favalet.Expressions.Algebraic
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 context.IsSimple ?
                     string.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(context))) :
                     "OrFlattened " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(context))));

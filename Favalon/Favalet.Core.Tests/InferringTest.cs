@@ -2,6 +2,7 @@
 using Favalet.Expressions;
 using NUnit.Framework;
 using System;
+
 using static Favalet.CLRGenerator;
 using static Favalet.Generator;
 
@@ -15,7 +16,7 @@ namespace Favalet
             IExpression expected,
             IExpression actual)
         {
-            if (!expected.Equals(actual))
+            if (!expected.ExactEquals(actual))
             {
                 Assert.Fail(
                     "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",
@@ -105,7 +106,7 @@ namespace Favalet
             var actual = scope.Infer(expression);
 
             // (true:'0 && false:'0):'0
-            var ph0 = PseudoPlaceholderTerm.Create(0);
+            var ph0 = PseudoPlaceholderProvider.Create().CreatePlaceholder();
             var expected =
                 oper(
                     Identity("true", ph0),
@@ -132,7 +133,7 @@ namespace Favalet
             var actual = scope.Infer(expression);
 
             // (true:'0 && false:'0) && true:'0
-            var ph0 = PseudoPlaceholderTerm.Create(0);
+            var ph0 = PseudoPlaceholderProvider.Create().CreatePlaceholder();
             var expected =
                 And(
                     And(
@@ -708,6 +709,35 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
         #endregion
+
+        #region Lambda
+        [Test]
+        public void InferringLambdaWithoutAnnotation1()
+        {
+            var scope = Scope.Create();
+
+            // a -> a
+            var expression =
+                Lambda(
+                    Identity("a"),
+                    Identity("a"));
+
+            var actual = scope.Infer(expression);
+
+            // (true:'1 -> false:'2):('1 -> '2)
+            var php = PseudoPlaceholderProvider.Create();
+            var ph0 = php.CreatePlaceholder();
+            var ph1 = php.CreatePlaceholder();
+            var expected =
+                Lambda(
+                    Identity("a", ph0),
+                    Identity("a", ph1),
+                    Function(ph0, ph1));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        #endregion
+
 
 
         // TODO: Lambdaについてテストする

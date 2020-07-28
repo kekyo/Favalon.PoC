@@ -13,13 +13,15 @@ namespace Favalet.Expressions.Algebraic
         Expression, ILogicalOperator
     {
         private static readonly LogicalCalculator calculator = new LogicalCalculator();
+        private static readonly FunctionExpression higherOrder =
+            FunctionExpression.Create(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
 
         [DebuggerStepThrough]
         private LogicalOperator()
         { }
 
         public override IExpression HigherOrder =>
-            UnspecifiedTerm.Function;
+            higherOrder;
 
         public bool Equals(ILogicalOperator rhs) =>
             true;
@@ -40,8 +42,8 @@ namespace Favalet.Expressions.Algebraic
             calculator.Compute(argument);
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 "Logical");
 
         public static readonly LogicalOperator Instance =

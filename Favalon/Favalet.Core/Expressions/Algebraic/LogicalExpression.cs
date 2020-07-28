@@ -77,8 +77,8 @@ namespace Favalet.Expressions.Algebraic
             calculator.Compute(context.Reduce(this.Operand));
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 $"Logical {this.Operand.GetPrettyString(context)}");
 
         public static LogicalExpression Create(

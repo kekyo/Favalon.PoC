@@ -45,8 +45,8 @@ namespace Favalet.Expressions
             this;
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 context.IsSimple ?
                     this.RuntimeType.GetReadableName() :
                     $"Type {this.RuntimeType.GetReadableName()}");

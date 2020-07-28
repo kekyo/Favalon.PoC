@@ -33,15 +33,13 @@ namespace Favalet.Expressions.Specialized
             this;
 
         public override string GetPrettyString(PrettyStringContext context) =>
-            this.FinalizePrettyString(
-                context,
+            context.FinalizePrettyString(
+                this,
                 context.IsSimple ?
                     "?" :
                     "Unspecified");
 
         public static readonly UnspecifiedTerm Instance =
             new UnspecifiedTerm();
-        public static readonly FunctionExpression Function =
-            FunctionExpression.Create(Instance, Instance);
     }
 }

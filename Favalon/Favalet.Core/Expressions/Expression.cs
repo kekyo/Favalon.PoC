@@ -65,12 +65,12 @@ namespace Favalet.Expressions
     {
         public static bool ExactEquals(this IExpression lhs, IExpression rhs) =>
             object.ReferenceEquals(lhs, rhs) ||
-            (lhs.Equals(rhs) && (lhs, rhs) switch
+            (lhs, rhs) switch
             {
                 (FourthTerm _, FourthTerm _) => true,
                 (FourthTerm _, _) => false,
                 (_, FourthTerm _) => false,
-                _ => lhs.HigherOrder.ExactEquals(rhs.HigherOrder)
-            });
+                _ => lhs.Equals(rhs) && lhs.HigherOrder.ExactEquals(rhs.HigherOrder)
+            };
     }
 }

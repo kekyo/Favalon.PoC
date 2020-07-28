@@ -24,7 +24,7 @@ namespace Favalet.Expressions.Algebraic
             higherOrder;
 
         public bool Equals(ILogicalOperator rhs) =>
-            true;
+            rhs != null;
 
         public override bool Equals(IExpression? other) =>
             other is ILogicalOperator rhs && this.Equals(rhs);

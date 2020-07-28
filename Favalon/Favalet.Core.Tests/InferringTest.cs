@@ -11,6 +11,7 @@ namespace Favalet
     [TestFixture]
     public sealed class InferringTest
     {
+        #region AssertLogicalEqual
         private static void AssertLogicalEqual(
             IExpression expression,
             IExpression expected,
@@ -25,6 +26,23 @@ namespace Favalet
                     actual.GetPrettyString(PrettyStringContext.Simple));
             }
         }
+
+        private static void AssertLogicalEqual(
+            PseudoPlaceholderProvider provider,
+            IExpression expression,
+            IExpression expected,
+            IExpression actual)
+        {
+            if (!provider.Equals(expected, actual))
+            {
+                Assert.Fail(
+                    "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",
+                    expression.GetPrettyString(PrettyStringContext.Simple),
+                    expected.GetPrettyString(PrettyStringContext.Simple),
+                    actual.GetPrettyString(PrettyStringContext.Simple));
+            }
+        }
+        #endregion
 
         #region From variable
         [Test]
@@ -106,14 +124,15 @@ namespace Favalet
             var actual = scope.Infer(expression);
 
             // (true:'0 && false:'0):'0
-            var ph0 = PseudoPlaceholderProvider.Create().CreatePlaceholder();
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
             var expected =
                 oper(
                     Identity("true", ph0),
                     Identity("false", ph0),
                     ph0);
 
-            AssertLogicalEqual(expression, expected, actual);
+            AssertLogicalEqual(provider, expression, expected, actual);
         }
 
         [TestCaseSource("BinaryOperators")]
@@ -133,7 +152,8 @@ namespace Favalet
             var actual = scope.Infer(expression);
 
             // (true:'0 && false:'0) && true:'0
-            var ph0 = PseudoPlaceholderProvider.Create().CreatePlaceholder();
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
             var expected =
                 And(
                     And(
@@ -143,7 +163,7 @@ namespace Favalet
                     Identity("true", ph0),
                     ph0);
 
-            AssertLogicalEqual(expression, expected, actual);
+            AssertLogicalEqual(provider, expression, expected, actual);
         }
 
         /////////////////////////////////////////////////////
@@ -724,17 +744,16 @@ namespace Favalet
 
             var actual = scope.Infer(expression);
 
-            // (true:'1 -> false:'2):('1 -> '2)
-            var php = PseudoPlaceholderProvider.Create();
-            var ph0 = php.CreatePlaceholder();
-            var ph1 = php.CreatePlaceholder();
+            // (a:'0 -> a:'0):('0 -> '0)
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
             var expected =
                 Lambda(
                     Identity("a", ph0),
-                    Identity("a", ph1),
-                    Function(ph0, ph1));
+                    Identity("a", ph0),
+                    Function(ph0, ph0));
 
-            AssertLogicalEqual(expression, expected, actual);
+            AssertLogicalEqual(provider, expression, expected, actual);
         }
         #endregion
 

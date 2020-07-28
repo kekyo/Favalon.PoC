@@ -739,7 +739,7 @@ namespace Favalet
             // a -> a
             var expression =
                 Lambda(
-                    Identity("a"),
+                    BoundSymbol("a"),
                     Identity("a"));
 
             var actual = scope.Infer(expression);
@@ -749,7 +749,7 @@ namespace Favalet
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 Lambda(
-                    Identity("a", ph0),
+                    BoundSymbol("a", ph0),
                     Identity("a", ph0),
                     Function(ph0, ph0));
 

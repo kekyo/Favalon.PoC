@@ -8,7 +8,7 @@ namespace Favalet.Expressions
     public interface ILambdaExpression :
         ICallableExpression
     {
-        IIdentityTerm Parameter { get; }
+        IBoundSymbolTerm Parameter { get; }
 
         IExpression Body { get; }
     }
@@ -16,11 +16,11 @@ namespace Favalet.Expressions
     public sealed class LambdaExpression :
         Expression, ILambdaExpression
     {
-        public readonly IIdentityTerm Parameter;
+        public readonly IBoundSymbolTerm Parameter;
         public readonly IExpression Body;
 
         private LambdaExpression(
-            IIdentityTerm parameter, IExpression body, IExpression higherOrder)
+            IBoundSymbolTerm parameter, IExpression body, IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
             this.Parameter = parameter;
@@ -30,7 +30,7 @@ namespace Favalet.Expressions
         public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IIdentityTerm ILambdaExpression.Parameter =>
+        IBoundSymbolTerm ILambdaExpression.Parameter =>
             this.Parameter;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -50,8 +50,11 @@ namespace Favalet.Expressions
         protected override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
-            var parameter = context.Infer(this.Parameter);
-            var body = context.Infer(this.Body);
+            var parameter = (IBoundSymbolTerm)context.Infer(this.Parameter);
+
+            var newScope = context.NewScope(parameter, parameter);
+
+            var body = newScope.Infer(this.Body);
 
             var lambdaHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder,
@@ -65,21 +68,16 @@ namespace Favalet.Expressions
             {
                 return this;
             }
-            else if (parameter is IIdentityTerm identity)
-            {
-                return new LambdaExpression(identity, body, higherOrder);
-            }
             else
             {
-                // TODO: error?
-                return new LambdaExpression(this.Parameter, body, higherOrder);
+                return new LambdaExpression(parameter, body, higherOrder);
             }
         }
 
         protected override IExpression Fixup(IReduceContext context)
         {
             var higherOrder = context.Fixup(this.HigherOrder);
-            var parameter = context.Fixup(this.Parameter);
+            var parameter = (IBoundSymbolTerm)context.Fixup(this.Parameter);
             var body = context.Fixup(this.Body);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
@@ -88,28 +86,25 @@ namespace Favalet.Expressions
             {
                 return this;
             }
-            else if (parameter is IIdentityTerm identity)
-            {
-                return new LambdaExpression(identity, body, higherOrder);
-            }
             else
             {
-                // TODO: error?
-                return new LambdaExpression(this.Parameter, body, higherOrder);
+                return new LambdaExpression(parameter, body, higherOrder);
             }
         }
 
         protected override IExpression Reduce(IReduceContext context)
         {
+            var parameter = (IBoundSymbolTerm)context.Reduce(this.Parameter);
             var body = context.Reduce(this.Body);
 
-            if (object.ReferenceEquals(this.Body, body))
+            if (object.ReferenceEquals(this.Parameter, parameter) &&
+                object.ReferenceEquals(this.Body, body))
             {
                 return this;
             }
             else
             {
-                return new LambdaExpression(this.Parameter, body, this.HigherOrder);
+                return new LambdaExpression(parameter, body, this.HigherOrder);
             }
         }
 
@@ -127,11 +122,11 @@ namespace Favalet.Expressions
 
         [DebuggerStepThrough]
         public static LambdaExpression Create(
-            IIdentityTerm parameter, IExpression body, IExpression higherOrder) =>
+            IBoundSymbolTerm parameter, IExpression body, IExpression higherOrder) =>
             new LambdaExpression(parameter, body, higherOrder);
         [DebuggerStepThrough]
         public static LambdaExpression Create(
-            IIdentityTerm parameter, IExpression body) =>
+            IBoundSymbolTerm parameter, IExpression body) =>
             new LambdaExpression(parameter, body, UnspecifiedTerm.Instance);
     }
 }

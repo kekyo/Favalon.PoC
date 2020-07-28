@@ -1,7 +1,9 @@
 ﻿using Favalet.Contexts;
+using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -39,10 +41,15 @@ namespace Favalet.Expressions
         protected override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var variables = context.LookupVariables(this);
 
-            if (context.LookupVariable(this) is IExpression lookup)
+            if (variables.Length >= 1)
             {
-                var inferred = context.Infer(lookup);
+                // TODO: overloading
+                var symbolHigherOrder = context.InferHigherOrder(variables[0].SymbolHigherOrder);
+                var inferred = context.Infer(variables[0].Expression);
+
+                context.Unify(symbolHigherOrder, higherOrder);
                 context.Unify(inferred.HigherOrder, higherOrder);
             }
 
@@ -72,9 +79,11 @@ namespace Favalet.Expressions
 
         protected override IExpression Reduce(IReduceContext context)
         {
-            if (context.LookupVariable(this) is IExpression lookup)
+            var variables = context.LookupVariables(this);
+
+            if (variables.Length >= 1)
             {
-                var reduced = context.Reduce(lookup);
+                var reduced = context.Reduce(variables[0].Expression);
                 return context.TypeCalculator.Compute(reduced);
             }
             else

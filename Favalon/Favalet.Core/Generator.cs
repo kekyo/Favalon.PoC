@@ -26,6 +26,13 @@ namespace Favalet
             IdentityTerm.Create(symbol, higherOrder);
 
         [DebuggerStepThrough]
+        public static BoundSymbolTerm BoundSymbol(string symbol) =>
+            BoundSymbolTerm.Create(symbol);
+        [DebuggerStepThrough]
+        public static BoundSymbolTerm BoundSymbol(string symbol, IExpression higherOrder) =>
+            BoundSymbolTerm.Create(symbol, higherOrder);
+
+        [DebuggerStepThrough]
         public static LogicalExpression Logical(IBinaryExpression operand) =>
             LogicalExpression.Create(operand);
         [DebuggerStepThrough]
@@ -48,20 +55,20 @@ namespace Favalet
 
         [DebuggerStepThrough]
         public static LambdaExpression Lambda(
-            IIdentityTerm parameter, IExpression body) =>
+            IBoundSymbolTerm parameter, IExpression body) =>
             LambdaExpression.Create(parameter, body);
         [DebuggerStepThrough]
         public static LambdaExpression Lambda(
             string parameter, IExpression body) =>
-            LambdaExpression.Create(IdentityTerm.Create(parameter), body);
+            LambdaExpression.Create(BoundSymbolTerm.Create(parameter), body);
         [DebuggerStepThrough]
         public static LambdaExpression Lambda(
-            IIdentityTerm parameter, IExpression body, IExpression higherOrder) =>
+            IBoundSymbolTerm parameter, IExpression body, IExpression higherOrder) =>
             LambdaExpression.Create(parameter, body, higherOrder);
         [DebuggerStepThrough]
         public static LambdaExpression Lambda(
             string parameter, IExpression body, IExpression higherOrder) =>
-            LambdaExpression.Create(IdentityTerm.Create(parameter), body, higherOrder);
+            LambdaExpression.Create(BoundSymbolTerm.Create(parameter), body, higherOrder);
 
         [DebuggerStepThrough]
         public static ApplyExpression Apply(

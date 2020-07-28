@@ -12,7 +12,7 @@ namespace Favalet.Contexts
     {
         IExpression Fixup(IExpression expression);
 
-        IReduceContext NewScope(IIdentityTerm parameter, IExpression expression);
+        IReduceContext NewScope(IBoundSymbolTerm parameter, IExpression expression);
 
         IExpression InferHigherOrder(IExpression higherOrder);
 
@@ -27,7 +27,7 @@ namespace Favalet.Contexts
         private readonly Scope rootScope;
         private readonly IScopeContext parentScope;
         private readonly Dictionary<int, IExpression> unifiedExpressions;
-        private IIdentityTerm? parameter;
+        private IBoundSymbolTerm? parameter;
         private IExpression? expression;
 
         [DebuggerStepThrough]
@@ -54,7 +54,8 @@ namespace Favalet.Contexts
         public IExpression Reduce(IExpression expression) =>
             expression is Expression expr ? expr.InternalReduce(this) : expression;
 
-        public IReduceContext NewScope(IIdentityTerm parameter, IExpression expression)
+        public IReduceContext NewScope(
+            IBoundSymbolTerm parameter, IExpression expression)
         {
             var newContext = new ReduceContext(
                 this.rootScope,
@@ -104,7 +105,7 @@ namespace Favalet.Contexts
                         {
                             if (this.unifiedExpressions.TryGetValue(pfrom.Index, out var target))
                             {
-                                this.unifiedExpressions[pto.Index] = target;
+                                this.Unify(pto, target);
                             }
                             else
                             {
@@ -161,13 +162,13 @@ namespace Favalet.Contexts
             }
         }
 
-        public IExpression? LookupVariable(IIdentityTerm identity) =>
+        public VariableInformation[] LookupVariables(IIdentityTerm identity) =>
             // TODO: improving when identity's higher order acceptable
             // TODO: what acceptable (narrowing, widening)
-            this.parameter is IIdentityTerm p &&
-             expression is IExpression expr &&
-             p.Equals(identity) ?
-                expr :
-                parentScope.LookupVariable(identity);
+            this.parameter is IBoundSymbolTerm p &&
+            expression is IExpression expr &&
+            p.Symbol.Equals(identity.Symbol) ?
+                new[] { VariableInformation.Create(p.HigherOrder, expr) } :
+                parentScope.LookupVariables(identity);
     }
 }

@@ -85,22 +85,34 @@ namespace Favalet
                 }
             }
 
-            return (lhs, rhs) switch
+            switch (lhs, rhs)
             {
-                (FourthTerm _, FourthTerm _) => true,
-                (FourthTerm _, _) => false,
-                (_, FourthTerm _) => false,
-                (ILambdaExpression le, ILambdaExpression re) =>
-                    Equals(le.Parameter, re.Parameter, indexes) &&
-                    Equals(le.Body, re.Body, indexes),
-                (IFunctionExpression le, IFunctionExpression re) =>
-                    Equals(le.Parameter, re.Parameter, indexes) &&
-                    Equals(le.Result, re.Result, indexes),
-                (IApplyExpression le, IApplyExpression re) =>
-                    Equals(le.Function, re.Function, indexes) &&
-                    Equals(le.Argument, re.Argument, indexes),
-                _ => lhs.Equals(rhs) && Equals(lhs.HigherOrder, rhs.HigherOrder, indexes)
-            };
+                case (FourthTerm _, FourthTerm _):
+                    return true;
+                case (FourthTerm _, _):
+                    return false;
+                case (_, FourthTerm _):
+                    return false;
+                case (ILambdaExpression le, ILambdaExpression re):
+                    return
+                        Equals(le.Parameter, re.Parameter, indexes) &&
+                        Equals(le.Body, re.Body, indexes) &&
+                        Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                case (IFunctionExpression le, IFunctionExpression re):
+                    return
+                        Equals(le.Parameter, re.Parameter, indexes) &&
+                        Equals(le.Result, re.Result, indexes) &&
+                        Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                case (IApplyExpression le, IApplyExpression re):
+                    return
+                        Equals(le.Function, re.Function, indexes) &&
+                        Equals(le.Argument, re.Argument, indexes) &&
+                        Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                default:
+                    return
+                        lhs.Equals(rhs) &&
+                        Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+            }
         }
 
         [DebuggerHidden]

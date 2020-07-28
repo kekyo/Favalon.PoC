@@ -47,6 +47,8 @@ namespace Favalet.Expressions.Specialized
             [DebuggerStepThrough]
             get
             {
+                // Helps for inferring:
+                //   Nested higher order has ceil limit to 4th order.
                 if (this.candidateOrder >= PlaceholderOrders.Kind)
                 {
                     return FourthTerm.Instance;
@@ -88,7 +90,7 @@ namespace Favalet.Expressions.Specialized
         {
             if (context.ResolvePlaceholderIndex(this.Index) is IExpression resolved)
             {
-                return resolved;
+                return context.Fixup(resolved);
             }
             else
             {

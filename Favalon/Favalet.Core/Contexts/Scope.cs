@@ -1,9 +1,7 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 
@@ -58,11 +56,11 @@ namespace Favalet.Contexts
         }
 
         [DebuggerHidden]
-        public new void SetVariable(IIdentityTerm identity, IExpression expression) =>
-            base.SetVariable(identity, expression);
+        public new void SetVariable(IBoundSymbolTerm symbol, IExpression expression) =>
+            base.SetVariable(symbol, expression);
         [DebuggerHidden]
-        public void SetVariable(string identity, IExpression expression) =>
-            base.SetVariable(IdentityTerm.Create(identity), expression);
+        public void SetVariable(string symbol, IExpression expression) =>
+            base.SetVariable(BoundSymbolTerm.Create(symbol), expression);
 
         [DebuggerStepThrough]
         public static Scope Create(ILogicalCalculator typeCalculator) =>

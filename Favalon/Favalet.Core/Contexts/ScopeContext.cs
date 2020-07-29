@@ -49,7 +49,7 @@ namespace Favalet.Contexts
 
         public ILogicalCalculator TypeCalculator { get; }
 
-        private protected void SetVariable(IBoundSymbolTerm symbol, IExpression expression)
+        private protected void MutableBind(IBoundSymbolTerm symbol, IExpression expression)
         {
             if (this.variables == null)
             {

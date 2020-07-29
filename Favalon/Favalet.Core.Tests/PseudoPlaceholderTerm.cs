@@ -13,7 +13,7 @@ namespace Favalet
         private PseudoPlaceholderProvider()
         { }
 
-        public ITerm CreatePlaceholder() =>
+        public PseudoPlaceholderTerm CreatePlaceholder() =>
             new PseudoPlaceholderTerm(Interlocked.Increment(ref this.pseudoIndex));
 
         public static PseudoPlaceholderProvider Create() =>

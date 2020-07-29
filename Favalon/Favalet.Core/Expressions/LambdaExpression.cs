@@ -54,7 +54,7 @@ namespace Favalet.Expressions
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
             var parameter = (IBoundSymbolTerm)context.Infer(this.Parameter);
 
-            var newScope = context.NewScope(parameter, parameter);
+            var newScope = context.Bind(parameter, parameter);
 
             var body = newScope.Infer(this.Body);
 
@@ -113,7 +113,7 @@ namespace Favalet.Expressions
 
         public IExpression Call(IReduceContext context, IExpression argument) =>
             context.
-                NewScope(this.Parameter, argument).
+                Bind(this.Parameter, argument).
                 Reduce(this.Body);
 
         public override string GetPrettyString(PrettyStringContext context) =>

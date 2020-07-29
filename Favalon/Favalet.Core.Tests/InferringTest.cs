@@ -34,7 +34,7 @@ namespace Favalet
         {
             var scope = CLRScope();
 
-            scope.SetVariable(
+            scope.MutableBind(
                 "true",
                 Constant(true));
 
@@ -56,10 +56,10 @@ namespace Favalet
         {
             var scope = CLRScope();
 
-            scope.SetVariable(
+            scope.MutableBind(
                 "true",
                 Constant(true));
-            scope.SetVariable(
+            scope.MutableBind(
                 "false",
                 Constant(false));
 
@@ -860,11 +860,338 @@ namespace Favalet
 
             AssertLogicalEqual(expression, expected, actual);
         }
+
+        [Test]
+        public void InferringLambdaWithAnnotation5()
+        {
+            var scope = CLRScope();
+
+            // (a -> a):(_ -> bool)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Unspecified(),
+                        Type<bool>()));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("a", Type<bool>()),
+                    Function(Type<bool>(), Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation6()
+        {
+            var scope = CLRScope();
+
+            // (a -> a):(bool -> bool)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Type<bool>(),
+                        Type<bool>()));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("a", Type<bool>()),
+                    Function(Type<bool>(), Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation7()
+        {
+            var scope = CLRScope();
+
+            // (a -> a):(_ -> _)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Unspecified(),
+                        Unspecified()));
+
+            var actual = scope.Infer(expression);
+
+            // (a:'0 -> a:'0):('0 -> '0)
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Lambda(
+                    BoundSymbol("a", ph0),
+                    Identity("a", ph0),
+                    Function(ph0, ph0));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation8()
+        {
+            var scope = CLRScope();
+
+            // (a -> b):(bool -> _)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("b"),
+                    Function(
+                        Type<bool>(),
+                        Unspecified()));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> b:'0):(bool -> '0)
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("b", ph0),
+                    Function(Type<bool>(), ph0));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation9()
+        {
+            var scope = CLRScope();
+
+            // (a -> b):(_ -> bool)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("b"),
+                    Function(
+                        Unspecified(),
+                        Type<bool>()));
+
+            var actual = scope.Infer(expression);
+
+            // (a:'0 -> b:bool):('0 -> bool)
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Lambda(
+                    BoundSymbol("a", ph0),
+                    Identity("b", Type<bool>()),
+                    Function(ph0, Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation10()
+        {
+            var scope = CLRScope();
+
+            // (a -> b):(bool -> bool)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("b"),
+                    Function(
+                        Type<bool>(),
+                        Type<bool>()));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> b:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("b", Type<bool>()),
+                    Function(Type<bool>(), Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation11()
+        {
+            var scope = CLRScope();
+
+            // (a -> b:bool):(bool -> _)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("b", Type<bool>()),
+                    Function(
+                        Type<bool>(),
+                        Unspecified()));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> b:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("b", Type<bool>()),
+                    Function(Type<bool>(), Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation12()
+        {
+            var scope = CLRScope();
+
+            // (a:bool -> b):(_ -> bool)
+            var expression =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("b"),
+                    Function(
+                        Unspecified(),
+                        Type<bool>()));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> b:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("b", Type<bool>()),
+                    Function(Type<bool>(), Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaShadowedVariable1()
+        {
+            var scope = CLRScope();
+
+            // a = c:int
+            scope.MutableBind(
+                BoundSymbol("a"),
+                Identity("c", Type<int>()));
+
+            // a -> a:bool
+            var expression =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("a"));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("a", Type<bool>()),
+                    Function(Type<bool>(), Type<bool>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaShadowedVariable2()
+        {
+            var scope = CLRScope();
+
+            // b:int = c
+            scope.MutableBind(
+                BoundSymbol("b", Type<int>()),
+                Identity("c"));
+
+            // a:bool -> b
+            var expression =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("b"));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> b:int):(bool -> int)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("b", Type<int>()),
+                    Function(Type<bool>(), Type<int>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaShadowedVariable3()
+        {
+            var scope = CLRScope();
+
+            // b = 123:int
+            scope.MutableBind(
+                BoundSymbol("b"),
+                Constant(123));
+
+            // a:bool -> b
+            var expression =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("b"));
+
+            var actual = scope.Infer(expression);
+
+            // (a:bool -> b:int):(bool -> int)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Type<bool>()),
+                    Identity("b", Type<int>()),
+                    Function(Type<bool>(), Type<int>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaComplex1()
+        {
+            var scope = CLRScope();
+
+            // b = 123:int
+            scope.MutableBind(
+                BoundSymbol("b"),
+                Constant(123));
+
+            // a -> b
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("b"));
+
+            var actual = scope.Infer(expression);
+
+            // (a:'0 -> b:int):('0 -> int)
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Lambda(
+                    BoundSymbol("a", ph0),
+                    Identity("b", Type<int>()),
+                    Function(ph0, Type<int>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
         #endregion
 
 
 
-        // TODO: Lambdaについてテストする
         // TODO: Functionについてテストする
         // TODO: Applyについてテストする
 

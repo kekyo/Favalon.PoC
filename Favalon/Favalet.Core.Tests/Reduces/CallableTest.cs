@@ -31,7 +31,7 @@ namespace Favalet.Reduces
         {
             var scope = Scope();
 
-            scope.SetVariable("ABC", Identity("XYZ"));
+            scope.MutableBind("ABC", Identity("XYZ"));
 
             var expression =
                 Identity("ABC");
@@ -99,7 +99,7 @@ namespace Favalet.Reduces
             var scope = Scope();
 
             // inner = arg1 -> arg1 && B
-            scope.SetVariable(
+            scope.MutableBind(
                 "inner",
                 Lambda(
                     "arg1",
@@ -136,7 +136,7 @@ namespace Favalet.Reduces
             // Same argument symbols.
 
             // inner = arg -> arg && B
-            scope.SetVariable(
+            scope.MutableBind(
                 "inner",
                 Lambda(
                     "arg",
@@ -173,7 +173,7 @@ namespace Favalet.Reduces
             // Complex nested lambda (bind)
 
             // inner = arg1 -> arg2 -> arg2 && arg1
-            scope.SetVariable(
+            scope.MutableBind(
                 "inner",
                 Lambda(
                     "arg1",
@@ -210,7 +210,7 @@ namespace Favalet.Reduces
             // Complex nested lambda (bind)
 
             // inner = arg2 -> arg1 -> arg2 && arg1
-            scope.SetVariable(
+            scope.MutableBind(
                 "inner",
                 Lambda(
                     "arg2",
@@ -271,7 +271,7 @@ namespace Favalet.Reduces
             var scope = Scope();
 
             // logical = Logical
-            scope.SetVariable(
+            scope.MutableBind(
                 "logical",
                 Logical());
 

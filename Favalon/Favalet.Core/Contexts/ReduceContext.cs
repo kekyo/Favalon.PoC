@@ -12,7 +12,7 @@ namespace Favalet.Contexts
     {
         IExpression Fixup(IExpression expression);
 
-        IReduceContext NewScope(IBoundSymbolTerm parameter, IExpression expression);
+        IReduceContext Bind(IBoundSymbolTerm parameter, IExpression expression);
 
         IExpression InferHigherOrder(IExpression higherOrder);
 
@@ -27,7 +27,7 @@ namespace Favalet.Contexts
         private readonly Scope rootScope;
         private readonly IScopeContext parentScope;
         private readonly Dictionary<int, IExpression> unifiedExpressions;
-        private IBoundSymbolTerm? parameter;
+        private IBoundSymbolTerm? symbol;
         private IExpression? expression;
 
         [DebuggerStepThrough]
@@ -54,15 +54,15 @@ namespace Favalet.Contexts
         public IExpression Reduce(IExpression expression) =>
             expression is Expression expr ? expr.InternalReduce(this) : expression;
 
-        public IReduceContext NewScope(
-            IBoundSymbolTerm parameter, IExpression expression)
+        public IReduceContext Bind(
+            IBoundSymbolTerm symbol, IExpression expression)
         {
             var newContext = new ReduceContext(
                 this.rootScope,
                 this,
                 this.unifiedExpressions);
 
-            newContext.parameter = parameter;
+            newContext.symbol = symbol;
             newContext.expression = expression;
 
             return newContext;
@@ -165,7 +165,17 @@ namespace Favalet.Contexts
         public void Unify(IExpression from, IExpression to)
         {
             this.InternalUnify(from, to);
-            this.InternalUnify(from.HigherOrder, to.HigherOrder);
+
+            switch (from, to)
+            {
+                case (FourthTerm _, _):
+                case (_, FourthTerm _):
+                    break;
+
+                default:
+                    this.Unify(from.HigherOrder, to.HigherOrder);
+                    break;
+            }
         }
 
         public IExpression? ResolvePlaceholderIndex(int index)
@@ -191,7 +201,7 @@ namespace Favalet.Contexts
         public VariableInformation[] LookupVariables(IIdentityTerm identity) =>
             // TODO: improving when identity's higher order acceptable
             // TODO: what acceptable (narrowing, widening)
-            this.parameter is IBoundSymbolTerm p &&
+            this.symbol is IBoundSymbolTerm p &&
             expression is IExpression expr &&
             p.Symbol.Equals(identity.Symbol) ?
                 new[] { VariableInformation.Create(p.HigherOrder, expr) } :

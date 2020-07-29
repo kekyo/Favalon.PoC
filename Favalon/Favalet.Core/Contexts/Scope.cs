@@ -53,11 +53,11 @@ namespace Favalet.Contexts
         }
 
         [DebuggerHidden]
-        public new void SetVariable(IBoundSymbolTerm symbol, IExpression expression) =>
-            base.SetVariable(symbol, expression);
+        public new void MutableBind(IBoundSymbolTerm symbol, IExpression expression) =>
+            base.MutableBind(symbol, expression);
         [DebuggerHidden]
-        public void SetVariable(string symbol, IExpression expression) =>
-            base.SetVariable(BoundSymbolTerm.Create(symbol), expression);
+        public void MutableBind(string symbol, IExpression expression) =>
+            base.MutableBind(BoundSymbolTerm.Create(symbol), expression);
 
         [DebuggerStepThrough]
         public static Scope Create(ILogicalCalculator typeCalculator) =>

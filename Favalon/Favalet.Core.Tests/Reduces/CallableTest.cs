@@ -29,14 +29,14 @@ namespace Favalet.Reduces
         [Test]
         public void LookupIdentity()
         {
-            var scope = Scope();
+            var environment = Environment();
 
-            scope.MutableBind("ABC", Identity("XYZ"));
+            environment.MutableBind("ABC", Identity("XYZ"));
 
             var expression =
                 Identity("ABC");
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             var expected =
                 Identity("XYZ");
@@ -47,7 +47,7 @@ namespace Favalet.Reduces
         [Test]
         public void PureLambda()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             var expression =
                 Lambda(
@@ -56,7 +56,7 @@ namespace Favalet.Reduces
                         Identity("arg"),
                         Identity("B")));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             var expected =
                 Lambda(
@@ -71,7 +71,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyLambda1()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (arg -> arg && B) A
             var expression =
@@ -83,7 +83,7 @@ namespace Favalet.Reduces
                             Identity("B"))),
                     Identity("A"));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             var expected =
                 And(
@@ -96,10 +96,10 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyLambda2()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // inner = arg1 -> arg1 && B
-            scope.MutableBind(
+            environment.MutableBind(
                 "inner",
                 Lambda(
                     "arg1",
@@ -117,7 +117,7 @@ namespace Favalet.Reduces
                             Identity("arg2"))),
                     Identity("A"));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
@@ -131,12 +131,12 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyLambda3()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // Same argument symbols.
 
             // inner = arg -> arg && B
-            scope.MutableBind(
+            environment.MutableBind(
                 "inner",
                 Lambda(
                     "arg",
@@ -154,7 +154,7 @@ namespace Favalet.Reduces
                             Identity("arg"))),
                     Identity("A"));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
@@ -168,12 +168,12 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyNestedLambda1()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // Complex nested lambda (bind)
 
             // inner = arg1 -> arg2 -> arg2 && arg1
-            scope.MutableBind(
+            environment.MutableBind(
                 "inner",
                 Lambda(
                     "arg1",
@@ -191,7 +191,7 @@ namespace Favalet.Reduces
                         Identity("A")),
                     Identity("B"));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // B && A
             var expected =
@@ -205,12 +205,12 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyNestedLambda2()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // Complex nested lambda (bind)
 
             // inner = arg2 -> arg1 -> arg2 && arg1
-            scope.MutableBind(
+            environment.MutableBind(
                 "inner",
                 Lambda(
                     "arg2",
@@ -228,7 +228,7 @@ namespace Favalet.Reduces
                         Identity("A")),
                     Identity("B"));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
@@ -242,7 +242,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyLogicalOperator1()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // Logical (A && (B && A))
             var expression =
@@ -254,7 +254,7 @@ namespace Favalet.Reduces
                             Identity("B"),
                             Identity("A"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
@@ -268,10 +268,10 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyLogicalOperator2()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // logical = Logical
-            scope.MutableBind(
+            environment.MutableBind(
                 "logical",
                 Logical());
 
@@ -285,7 +285,7 @@ namespace Favalet.Reduces
                             Identity("B"),
                             Identity("A"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
@@ -299,7 +299,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyMethod()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // Math.Sqrt pi
             var expression =
@@ -307,7 +307,7 @@ namespace Favalet.Reduces
                     Method(typeof(Math).GetMethod("Sqrt")!),
                     Constant(Math.PI));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // [sqrt(pi)]
             var expected =
@@ -319,7 +319,7 @@ namespace Favalet.Reduces
         [Test]
         public void ApplyConstructor()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // Uri "http://example.com"
             var expression =
@@ -327,7 +327,7 @@ namespace Favalet.Reduces
                     Method(typeof(Uri).GetConstructor(new[] { typeof(string) })!),
                     Constant("http://example.com"));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // [Uri("http://example.com")]
             var expected =

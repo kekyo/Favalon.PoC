@@ -70,7 +70,7 @@ namespace Favalet.Contexts
             if (this.variables != null &&
                 this.variables.TryGetValue(identity.Symbol, out var list))
             {
-                return list.ToArray();
+                return list.Memoize();
             }
             else
             {

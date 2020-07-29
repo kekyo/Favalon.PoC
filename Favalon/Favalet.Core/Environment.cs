@@ -1,19 +1,26 @@
-﻿using Favalet.Expressions;
+﻿using Favalet.Contexts;
+using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Favalet.Contexts
+namespace Favalet
 {
-    public sealed class Scope :
-        ScopeContext, IScopeContext, IPlaceholderProvider
+    public interface IEnvironment :
+        IScopeContext, IPlaceholderProvider
+    {
+        void MutableBind(IBoundSymbolTerm symbol, IExpression expression);
+    }
+
+    public sealed class Environment :
+        ScopeContext, IEnvironment
     {
         private int placeholderIndex = -1;
 
         [DebuggerStepThrough]
-        private Scope(ILogicalCalculator typeCalculator) :
+        private Environment(ILogicalCalculator typeCalculator) :
             base(null, typeCalculator)
         { }
 
@@ -55,12 +62,22 @@ namespace Favalet.Contexts
         [DebuggerHidden]
         public new void MutableBind(IBoundSymbolTerm symbol, IExpression expression) =>
             base.MutableBind(symbol, expression);
-        [DebuggerHidden]
-        public void MutableBind(string symbol, IExpression expression) =>
-            base.MutableBind(BoundSymbolTerm.Create(symbol), expression);
 
         [DebuggerStepThrough]
-        public static Scope Create(ILogicalCalculator typeCalculator) =>
-            new Scope(typeCalculator);
+        public static Environment Create(ILogicalCalculator typeCalculator)
+        {
+            var environment = new Environment(typeCalculator);
+            return environment;
+        }
+    }
+
+    public static class EnvironmentExtension
+    {
+        [DebuggerHidden]
+        public static void MutableBind(
+            this IEnvironment environment,
+            string symbol,
+            IExpression expression) =>
+            environment.MutableBind(BoundSymbolTerm.Create(symbol), expression);
     }
 }

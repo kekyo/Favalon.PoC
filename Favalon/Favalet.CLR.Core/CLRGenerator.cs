@@ -1,5 +1,4 @@
-﻿using Favalet.Contexts;
-using Favalet.Expressions;
+﻿using Favalet.Expressions;
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -9,8 +8,8 @@ namespace Favalet
     public static class CLRGenerator
     {
         [DebuggerStepThrough]
-        public static Scope CLRScope() =>
-            Favalet.Contexts.Scope.Create(TypeCalculator.Instance);
+        public static Environment CLREnvironment() =>
+            Favalet.Environment.Create(TypeCalculator.Instance);
 
         [DebuggerHidden]
         public static ITerm Type<T>() =>

@@ -32,7 +32,7 @@ namespace Favalet.Reduces
         [Test]
         public void NonReduceSingleAnd()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // A && B
             var expression =
@@ -40,7 +40,7 @@ namespace Favalet.Reduces
                     Identity("A"),
                     Identity("B"));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
@@ -54,7 +54,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceSingleAnd()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // A && B
             var expression =
@@ -63,7 +63,7 @@ namespace Favalet.Reduces
                         Identity("A"),
                         Identity("B")));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
@@ -77,7 +77,7 @@ namespace Favalet.Reduces
         [Test]
         public void NonReduceDuplicatedAnd()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A && A) && A
             var expression =
@@ -87,7 +87,7 @@ namespace Favalet.Reduces
                         Identity("A")),
                     Identity("A"));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // (A && A) && A
             var expected =
@@ -103,7 +103,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceDuplicatedAnd()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A && A) && A
             var expression =
@@ -114,7 +114,7 @@ namespace Favalet.Reduces
                             Identity("A")),
                         Identity("A")));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A
             var expected =
@@ -126,7 +126,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceMultipleDuplicatedAnd()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A && A) && (A && A)
             var expression =
@@ -139,7 +139,7 @@ namespace Favalet.Reduces
                             Identity("A"),
                             Identity("A"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A
             var expected =
@@ -153,7 +153,7 @@ namespace Favalet.Reduces
         [Test]
         public void NonReduceSingleOr()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // A || B
             var expression =
@@ -161,7 +161,7 @@ namespace Favalet.Reduces
                     Identity("A"),
                     Identity("B"));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A || B
             var expected =
@@ -175,7 +175,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceSingleOr()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // A || B
             var expression =
@@ -184,7 +184,7 @@ namespace Favalet.Reduces
                         Identity("A"),
                         Identity("B")));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A || B
             var expected =
@@ -198,7 +198,7 @@ namespace Favalet.Reduces
         [Test]
         public void NonReduceDuplicatedOr()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A || A) || A
             var expression =
@@ -208,7 +208,7 @@ namespace Favalet.Reduces
                         Identity("A")),
                     Identity("A"));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // (A || A) || A
             var expected =
@@ -224,7 +224,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceDuplicatedOr()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A || A) || A
             var expression =
@@ -235,7 +235,7 @@ namespace Favalet.Reduces
                             Identity("A")),
                         Identity("A")));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A
             var expected =
@@ -247,7 +247,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceMultipleDuplicatedOr()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A || A) || (A || A)
             var expression =
@@ -260,7 +260,7 @@ namespace Favalet.Reduces
                             Identity("A"),
                             Identity("A"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A
             var expected =
@@ -274,7 +274,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceDuplicatedCombinedAndOr()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A || A) && (A || A)
             var expression =
@@ -287,7 +287,7 @@ namespace Favalet.Reduces
                             Identity("A"),
                             Identity("A"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A
             var expected =
@@ -299,7 +299,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReduceDuplicatedCombinedOrAnd()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A && A) || (A && A)
             var expression =
@@ -312,7 +312,7 @@ namespace Favalet.Reduces
                             Identity("A"),
                             Identity("A"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A
             var expected =
@@ -324,7 +324,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialCombinedAndOr()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A || A) && (B || B)
             var expression =
@@ -337,7 +337,7 @@ namespace Favalet.Reduces
                             Identity("B"),
                             Identity("B"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
@@ -351,7 +351,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialCombinedOrAnd()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A && A) || (B && B)
             var expression =
@@ -364,7 +364,7 @@ namespace Favalet.Reduces
                             Identity("B"),
                             Identity("B"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A || B
             var expected =
@@ -378,7 +378,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialDifferenceAndOr()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A || B) && (A || B)
             var expression =
@@ -391,7 +391,7 @@ namespace Favalet.Reduces
                             Identity("A"),
                             Identity("B"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A || B
             var expected =
@@ -405,7 +405,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialDifferenceOrAnd()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A && B) || (A && B)
             var expression =
@@ -418,7 +418,7 @@ namespace Favalet.Reduces
                             Identity("A"),
                             Identity("B"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
@@ -432,7 +432,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialPartiallyAndOr()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // Absorption
 
@@ -445,7 +445,7 @@ namespace Favalet.Reduces
                             Identity("A"),
                             Identity("B"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A
             var expected =
@@ -457,7 +457,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialPartiallyOrAnd()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // Absorption
 
@@ -470,7 +470,7 @@ namespace Favalet.Reduces
                             Identity("A"),
                             Identity("B"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A
             var expected =
@@ -482,7 +482,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialAndOrTensor()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A || B) && (B || A)
             var expression =
@@ -495,7 +495,7 @@ namespace Favalet.Reduces
                             Identity("B"),
                             Identity("A"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A || B
             var expected =
@@ -509,7 +509,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialOrAndTensor()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A && B) || (B && A)
             var expression =
@@ -522,7 +522,7 @@ namespace Favalet.Reduces
                             Identity("B"),
                             Identity("A"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             var expected =
                 And(
@@ -535,7 +535,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialAndOrMultipleTensorLogical1()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A || (B || C)) && (B || (C || A))
             var expression =
@@ -552,7 +552,7 @@ namespace Favalet.Reduces
                                 Identity("C"),
                                 Identity("A")))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A || B || C
             var expected =
@@ -568,7 +568,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialOrAndMultipleTensorLogical1()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A && (B && C)) || (B && (C && A))
             var expression =
@@ -585,7 +585,7 @@ namespace Favalet.Reduces
                                 Identity("C"),
                                 Identity("A")))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B && C
             var expected =
@@ -601,7 +601,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialAndOrMultipleTensorLogical2()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A || (B || C)) && ((C || A) || B)
             var expression =
@@ -618,7 +618,7 @@ namespace Favalet.Reduces
                                 Identity("A")),
                             Identity("B"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A || B || C
             var expected =
@@ -634,7 +634,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialOrAndMultipleTensorLogical2()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // (A && (B && C)) || ((C && A) && B)
             var expression =
@@ -651,7 +651,7 @@ namespace Favalet.Reduces
                                 Identity("A")),
                             Identity("B"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B && C
             var expected =
@@ -667,7 +667,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialAndOrMultipleTensorLogical3()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // ((A || B) || C) && (B || (C || A))
             var expression =
@@ -684,7 +684,7 @@ namespace Favalet.Reduces
                                 Identity("C"),
                                 Identity("A")))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A || B || C
             var expected =
@@ -700,7 +700,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialOrAndMultipleTensorLogical3()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // ((A && B) && C) || (B && (C && A))
             var expression =
@@ -717,7 +717,7 @@ namespace Favalet.Reduces
                                 Identity("C"),
                                 Identity("A")))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A && B && C
             var expected =
@@ -733,7 +733,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialAndOrComplex()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // Absorption
 
@@ -752,7 +752,7 @@ namespace Favalet.Reduces
                                 Identity("A")),
                             Identity("B"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A
             var expected =
@@ -764,7 +764,7 @@ namespace Favalet.Reduces
         [Test]
         public void ReducePartialOrAndComplex()
         {
-            var scope = Scope();
+            var environment = Environment();
 
             // Absorption
 
@@ -783,7 +783,7 @@ namespace Favalet.Reduces
                                 Identity("A")),
                             Identity("B"))));
 
-            var actual = scope.Reduce(expression);
+            var actual = environment.Reduce(expression);
 
             // A
             var expected =

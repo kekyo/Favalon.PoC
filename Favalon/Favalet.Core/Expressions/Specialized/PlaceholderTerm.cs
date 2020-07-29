@@ -14,7 +14,8 @@ namespace Favalet.Expressions.Specialized
 
     public interface IPlaceholderProvider
     {
-        IPlaceholderTerm CreatePlaceholder(PlaceholderOrderHints orderHint);
+        IPlaceholderTerm CreatePlaceholder(
+            PlaceholderOrderHints orderHint = PlaceholderOrderHints.TypeOrAbove);
     }
 
     public interface IPlaceholderTerm :

@@ -9,19 +9,18 @@ namespace Favalet
     public static class Generator
     {
         [DebuggerStepThrough]
-        public static Scope Scope() =>
-            Favalet.Contexts.Scope.Create(LogicalCalculator.Instance);
+        public static Environment Environment() =>
+            Favalet.Environment.Create(LogicalCalculator.Instance);
 
         private static readonly IdentityTerm kind =
             IdentityTerm.Create("*", FourthTerm.Instance);
 
         [DebuggerStepThrough]
-        public static FourthTerm Fourth() =>
-            FourthTerm.Instance;
-
-        [DebuggerStepThrough]
         public static IdentityTerm Kind() =>
             kind;
+        [DebuggerStepThrough]
+        public static IdentityTerm Kind(string symbol) =>
+            IdentityTerm.Create(symbol, FourthTerm.Instance);
 
         [DebuggerStepThrough]
         public static UnspecifiedTerm Unspecified() =>

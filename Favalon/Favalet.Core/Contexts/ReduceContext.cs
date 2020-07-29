@@ -24,7 +24,7 @@ namespace Favalet.Contexts
     internal sealed class ReduceContext :
         IReduceContext
     {
-        private readonly Scope rootScope;
+        private readonly Environment rootScope;
         private readonly IScopeContext parentScope;
         private readonly Dictionary<int, IExpression> unifiedExpressions;
         private IBoundSymbolTerm? symbol;
@@ -32,7 +32,7 @@ namespace Favalet.Contexts
 
         [DebuggerStepThrough]
         public ReduceContext(
-            Scope rootScope,
+            Environment rootScope,
             IScopeContext parentScope,
             Dictionary<int, IExpression> unifiedExpressions)
         {

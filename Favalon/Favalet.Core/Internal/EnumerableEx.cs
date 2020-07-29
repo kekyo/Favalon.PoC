@@ -13,6 +13,7 @@ namespace Favalet.Internal
             enumerable switch
             {
                 T[] array => array,
+                List<T> list => list.ToArray(),
                 _ => enumerable.ToArray()
             };
 

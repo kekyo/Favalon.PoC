@@ -32,9 +32,9 @@ namespace Favalet
         [Test]
         public void InferringFromVariable1()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
-            scope.MutableBind(
+            environment.MutableBind(
                 "true",
                 Constant(true));
 
@@ -42,7 +42,7 @@ namespace Favalet
             var expression =
                 Identity("true");
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // true:bool
             var expected =
@@ -54,12 +54,12 @@ namespace Favalet
         [Test]
         public void InferringFromVariable2()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
-            scope.MutableBind(
+            environment.MutableBind(
                 "true",
                 Constant(true));
-            scope.MutableBind(
+            environment.MutableBind(
                 "false",
                 Constant(false));
 
@@ -69,7 +69,7 @@ namespace Favalet
                     Identity("true"),
                     Identity("false"));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && false:bool):bool
             var expected =
@@ -96,7 +96,7 @@ namespace Favalet
         public void InferringBinaryWithoutAnnotation1(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true && false
             var expression =
@@ -105,7 +105,7 @@ namespace Favalet
                     Identity("false"),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:'0 && false:'0):'0
             var provider = PseudoPlaceholderProvider.Create();
@@ -123,7 +123,7 @@ namespace Favalet
         public void InferringBinaryWithoutAnnotation2(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (true && false) && true
             var expression =
@@ -133,7 +133,7 @@ namespace Favalet
                         Identity("false")),
                     Identity("true"));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:'0 && false:'0) && true:'0
             var provider = PseudoPlaceholderProvider.Create();
@@ -156,7 +156,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation11(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (true && false):bool
             var expression =
@@ -165,7 +165,7 @@ namespace Favalet
                     Identity("false"),
                     Type<bool>());
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && false:bool):bool
             var expected =
@@ -181,7 +181,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation12(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true:bool && false
             var expression =
@@ -190,7 +190,7 @@ namespace Favalet
                     Identity("false"),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && false:bool):bool
             var expected =
@@ -206,7 +206,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation13(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true && false:bool
             var expression =
@@ -215,7 +215,7 @@ namespace Favalet
                     Identity("false", Type<bool>()),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && false:bool):bool
             var expected =
@@ -231,7 +231,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation14(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true:bool && false:bool
             var expression =
@@ -240,7 +240,7 @@ namespace Favalet
                     Identity("false", Type<bool>()),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && false:bool):bool
             var expected =
@@ -256,7 +256,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation15(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (true:bool && false:bool):bool
             var expression =
@@ -265,7 +265,7 @@ namespace Favalet
                     Identity("false", Type<bool>()),
                     Type<bool>());
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && false:bool):bool
             var expected =
@@ -283,7 +283,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation21(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (true && (false && true)):bool
             var expression =
@@ -295,7 +295,7 @@ namespace Favalet
                         null),
                     Type<bool>());
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -314,7 +314,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation22(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true:bool && (false && true)
             var expression =
@@ -326,7 +326,7 @@ namespace Favalet
                         null),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -345,7 +345,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation23(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true && (false:bool && true)
             var expression =
@@ -357,7 +357,7 @@ namespace Favalet
                         null),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -376,7 +376,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation24(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true && (false && true:bool)
             var expression =
@@ -388,7 +388,7 @@ namespace Favalet
                         null),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -407,7 +407,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation25(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true && (false && true):bool
             var expression =
@@ -419,7 +419,7 @@ namespace Favalet
                         Type<bool>()),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -438,7 +438,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation26(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true:bool && (false:bool && true)
             var expression =
@@ -450,7 +450,7 @@ namespace Favalet
                         null),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -469,7 +469,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation27(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true && (false:bool && true:bool)
             var expression =
@@ -481,7 +481,7 @@ namespace Favalet
                         null),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -500,7 +500,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation28(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true:bool && (false && true:bool)
             var expression =
@@ -512,7 +512,7 @@ namespace Favalet
                         null),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -531,7 +531,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation29(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true:bool && (false:bool && true:bool)
             var expression =
@@ -543,7 +543,7 @@ namespace Favalet
                         null),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -562,7 +562,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation30(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true:bool && (false && true):bool
             var expression =
@@ -574,7 +574,7 @@ namespace Favalet
                         Type<bool>()),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -593,7 +593,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation31(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true:bool && (false:bool && true):bool
             var expression =
@@ -605,7 +605,7 @@ namespace Favalet
                         Type<bool>()),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -624,7 +624,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation32(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true:bool && (false && true:bool):bool
             var expression =
@@ -636,7 +636,7 @@ namespace Favalet
                         Type<bool>()),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -655,7 +655,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation33(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // true:bool && (false:bool && true:bool):bool
             var expression =
@@ -667,7 +667,7 @@ namespace Favalet
                         Type<bool>()),
                     null);
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -686,7 +686,7 @@ namespace Favalet
         public void InferringBinaryWithAnnotation34(
             Func<IExpression, IExpression, IExpression?, IExpression> oper)
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expression =
@@ -698,7 +698,7 @@ namespace Favalet
                         Type<bool>()),
                     Type<bool>());
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
@@ -718,7 +718,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithoutAnnotation1()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // a -> a
             var expression =
@@ -726,7 +726,7 @@ namespace Favalet
                     BoundSymbol("a"),
                     Identity("a"));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:'0 -> a:'0):('0 -> '0)
             var provider = PseudoPlaceholderProvider.Create();
@@ -743,7 +743,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithoutAnnotation2()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // a -> b
             var expression =
@@ -751,7 +751,7 @@ namespace Favalet
                     BoundSymbol("a"),
                     Identity("b"));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:'0 -> b:'1):('0 -> '1)
             var provider = PseudoPlaceholderProvider.Create();
@@ -769,7 +769,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation1()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // a:bool -> a
             var expression =
@@ -777,7 +777,7 @@ namespace Favalet
                     BoundSymbol("a", Type<bool>()),
                     Identity("a"));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
@@ -792,7 +792,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation2()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // a -> a:bool
             var expression =
@@ -800,7 +800,7 @@ namespace Favalet
                     BoundSymbol("a"),
                     Identity("a", Type<bool>()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
@@ -815,7 +815,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation3()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // a:bool -> a:bool
             var expression =
@@ -823,7 +823,7 @@ namespace Favalet
                     BoundSymbol("a", Type<bool>()),
                     Identity("a", Type<bool>()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
@@ -838,7 +838,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation4()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (a -> a):(bool -> _)
             var expression =
@@ -849,7 +849,7 @@ namespace Favalet
                         Type<bool>(),
                         Unspecified()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
@@ -864,7 +864,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation5()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (a -> a):(_ -> bool)
             var expression =
@@ -875,7 +875,7 @@ namespace Favalet
                         Unspecified(),
                         Type<bool>()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
@@ -890,7 +890,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation6()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (a -> a):(bool -> bool)
             var expression =
@@ -901,7 +901,7 @@ namespace Favalet
                         Type<bool>(),
                         Type<bool>()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
@@ -916,7 +916,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation7()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (a -> a):(_ -> _)
             var expression =
@@ -927,7 +927,7 @@ namespace Favalet
                         Unspecified(),
                         Unspecified()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:'0 -> a:'0):('0 -> '0)
             var provider = PseudoPlaceholderProvider.Create();
@@ -944,7 +944,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation8()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (a -> b):(bool -> _)
             var expression =
@@ -955,7 +955,7 @@ namespace Favalet
                         Type<bool>(),
                         Unspecified()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> b:'0):(bool -> '0)
             var provider = PseudoPlaceholderProvider.Create();
@@ -972,7 +972,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation9()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (a -> b):(_ -> bool)
             var expression =
@@ -983,7 +983,7 @@ namespace Favalet
                         Unspecified(),
                         Type<bool>()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:'0 -> b:bool):('0 -> bool)
             var provider = PseudoPlaceholderProvider.Create();
@@ -1000,7 +1000,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation10()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (a -> b):(bool -> bool)
             var expression =
@@ -1011,7 +1011,7 @@ namespace Favalet
                         Type<bool>(),
                         Type<bool>()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> b:bool):(bool -> bool)
             var expected =
@@ -1026,7 +1026,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation11()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (a -> b:bool):(bool -> _)
             var expression =
@@ -1037,7 +1037,7 @@ namespace Favalet
                         Type<bool>(),
                         Unspecified()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> b:bool):(bool -> bool)
             var expected =
@@ -1052,7 +1052,7 @@ namespace Favalet
         [Test]
         public void InferringLambdaWithAnnotation12()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // (a:bool -> b):(_ -> bool)
             var expression =
@@ -1063,7 +1063,7 @@ namespace Favalet
                         Unspecified(),
                         Type<bool>()));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> b:bool):(bool -> bool)
             var expected =
@@ -1076,13 +1076,251 @@ namespace Favalet
         }
 
         [Test]
+        public void InferringLambdaWithAnnotation13()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(bool -> _):(* -> *)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Identity("bool"),
+                        Unspecified(),
+                        Function(
+                            Kind(),
+                            Kind())));
+
+            var actual = environment.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool):(* -> *)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Identity("bool", Kind())),
+                    Identity("a", Identity("bool", Kind())),
+                    Function(
+                        Identity("bool", Kind()),
+                        Identity("bool", Kind()),
+                        Function(
+                            Kind(),
+                            Kind())));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation14()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(_ -> bool):(* -> *)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Unspecified(),
+                        Identity("bool"),
+                        Function(
+                            Kind(),
+                            Kind())));
+
+            var actual = environment.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool):(* -> *)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Identity("bool", Kind())),
+                    Identity("a", Identity("bool", Kind())),
+                    Function(
+                        Identity("bool", Kind()),
+                        Identity("bool", Kind()),
+                        Function(
+                            Kind(),
+                            Kind())));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation15()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(bool -> bool):(* -> *)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Identity("bool"),
+                        Identity("bool"),
+                        Function(
+                            Kind(),
+                            Kind())));
+
+            var actual = environment.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool):(* -> *)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Identity("bool", Kind())),
+                    Identity("a", Identity("bool", Kind())),
+                    Function(
+                        Identity("bool", Kind()),
+                        Identity("bool", Kind()),
+                        Function(
+                            Kind(),
+                            Kind())));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation16()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(bool -> _):(* -> _)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Identity("bool"),
+                        Unspecified(),
+                        Function(
+                            Kind(),
+                            Unspecified())));
+
+            var actual = environment.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool):(* -> *)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Identity("bool", Kind())),
+                    Identity("a", Identity("bool", Kind())),
+                    Function(
+                        Identity("bool", Kind()),
+                        Identity("bool", Kind()),
+                        Function(
+                            Kind(),
+                            Kind())));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation17()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(_ -> bool):(_ -> *)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Unspecified(),
+                        Identity("bool"),
+                        Function(
+                            Unspecified(),
+                            Kind())));
+
+            var actual = environment.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool):(* -> *)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Identity("bool", Kind())),
+                    Identity("a", Identity("bool", Kind())),
+                    Function(
+                        Identity("bool", Kind()),
+                        Identity("bool", Kind()),
+                        Function(
+                            Kind(),
+                            Kind())));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation18()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(_ -> bool):(* -> _)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Unspecified(),
+                        Identity("bool"),
+                        Function(
+                            Kind(),
+                            Unspecified())));
+
+            var actual = environment.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool):(* -> *)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Identity("bool", Kind())),
+                    Identity("a", Identity("bool", Kind())),
+                    Function(
+                        Identity("bool", Kind()),
+                        Identity("bool", Kind()),
+                        Function(
+                            Kind(),
+                            Kind())));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation19()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(bool -> _):(_ -> *)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Identity("bool"),
+                        Unspecified(),
+                        Function(
+                            Unspecified(),
+                            Kind())));
+
+            var actual = environment.Infer(expression);
+
+            // (a:bool:* -> a:bool:*):(bool:* -> bool:*):(* -> *)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Identity("bool", Kind())),
+                    Identity("a", Identity("bool", Kind())),
+                    Function(
+                        Identity("bool", Kind()),
+                        Identity("bool", Kind()),
+                        Function(
+                            Kind(),
+                            Kind())));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
         public void InferringLambdaShadowedVariable1()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // a = c:int
-            scope.MutableBind(
-                BoundSymbol("a"),
+            environment.MutableBind(
+                "a",
                 Identity("c", Type<int>()));
 
             // a -> a:bool
@@ -1091,7 +1329,7 @@ namespace Favalet
                     BoundSymbol("a", Type<bool>()),
                     Identity("a"));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
@@ -1106,10 +1344,10 @@ namespace Favalet
         [Test]
         public void InferringLambdaShadowedVariable2()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // b:int = c
-            scope.MutableBind(
+            environment.MutableBind(
                 BoundSymbol("b", Type<int>()),
                 Identity("c"));
 
@@ -1119,7 +1357,7 @@ namespace Favalet
                     BoundSymbol("a", Type<bool>()),
                     Identity("b"));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> b:int):(bool -> int)
             var expected =
@@ -1134,11 +1372,11 @@ namespace Favalet
         [Test]
         public void InferringLambdaShadowedVariable3()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // b = 123:int
-            scope.MutableBind(
-                BoundSymbol("b"),
+            environment.MutableBind(
+                "b",
                 Constant(123));
 
             // a:bool -> b
@@ -1147,7 +1385,7 @@ namespace Favalet
                     BoundSymbol("a", Type<bool>()),
                     Identity("b"));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:bool -> b:int):(bool -> int)
             var expected =
@@ -1162,11 +1400,11 @@ namespace Favalet
         [Test]
         public void InferringLambdaComplex1()
         {
-            var scope = CLRScope();
+            var environment = CLREnvironment();
 
             // b = 123:int
-            scope.MutableBind(
-                BoundSymbol("b"),
+            environment.MutableBind(
+                "b",
                 Constant(123));
 
             // a -> b
@@ -1175,7 +1413,7 @@ namespace Favalet
                     BoundSymbol("a"),
                     Identity("b"));
 
-            var actual = scope.Infer(expression);
+            var actual = environment.Infer(expression);
 
             // (a:'0 -> b:int):('0 -> int)
             var provider = PseudoPlaceholderProvider.Create();

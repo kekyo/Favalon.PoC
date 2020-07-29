@@ -17,23 +17,7 @@ namespace Favalet
             IExpression expected,
             IExpression actual)
         {
-            if (!expected.ExactEquals(actual))
-            {
-                Assert.Fail(
-                    "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",
-                    expression.GetPrettyString(PrettyStringContext.Simple),
-                    expected.GetPrettyString(PrettyStringContext.Simple),
-                    actual.GetPrettyString(PrettyStringContext.Simple));
-            }
-        }
-
-        private static void AssertLogicalEqual(
-            PseudoPlaceholderProvider provider,
-            IExpression expression,
-            IExpression expected,
-            IExpression actual)
-        {
-            if (!provider.Equals(expected, actual))
+            if (!ExpressionAssert.Equals(expected, actual))
             {
                 Assert.Fail(
                     "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",
@@ -132,7 +116,7 @@ namespace Favalet
                     Identity("false", ph0),
                     ph0);
 
-            AssertLogicalEqual(provider, expression, expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [TestCaseSource("BinaryOperators")]
@@ -163,7 +147,7 @@ namespace Favalet
                     Identity("true", ph0),
                     ph0);
 
-            AssertLogicalEqual(provider, expression, expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         /////////////////////////////////////////////////////
@@ -753,7 +737,7 @@ namespace Favalet
                     Identity("a", ph0),
                     Function(ph0, ph0));
 
-            AssertLogicalEqual(provider, expression, expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
@@ -779,7 +763,7 @@ namespace Favalet
                     Identity("b", ph1),
                     Function(ph0, ph1));
 
-            AssertLogicalEqual(provider, expression, expected, actual);
+            AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]

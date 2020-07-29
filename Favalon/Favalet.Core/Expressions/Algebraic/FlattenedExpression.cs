@@ -102,8 +102,8 @@ namespace Favalet.Expressions.Algebraic
             context.FinalizePrettyString(
                 this,
                 context.IsSimple ?
-                    string.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(context))) :
-                    "AndFlattened " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(context))));
+                    StringUtilities.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(context))) :
+                    "AndFlattened " + StringUtilities.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(context))));
     }
 
     internal sealed class OrFlattenedExpression : FlattenedExpression
@@ -125,7 +125,7 @@ namespace Favalet.Expressions.Algebraic
             context.FinalizePrettyString(
                 this,
                 context.IsSimple ?
-                    string.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(context))) :
-                    "OrFlattened " + string.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(context))));
+                    StringUtilities.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(context))) :
+                    "OrFlattened " + StringUtilities.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(context))));
     }
 }

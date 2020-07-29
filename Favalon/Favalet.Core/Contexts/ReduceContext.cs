@@ -75,17 +75,18 @@ namespace Favalet.Contexts
         public IExpression InferHigherOrder(IExpression higherOrder)
         {
             var inferred = this.Infer(higherOrder);
+            var fixupped = this.Fixup(inferred);
 
             var context = new ReduceContext(
                 this.rootScope,
                 this,
                 this.unifiedExpressions);
-            var reduced = context.Reduce(inferred);
+            var reduced = context.Reduce(fixupped);
 
             return reduced;
         }
 
-        public void Unify(IExpression from, IExpression to)
+        private void InternalUnify(IExpression from, IExpression to)
         {
             Debug.Assert(!(from is UnspecifiedTerm));
             Debug.Assert(!(to is UnspecifiedTerm));
@@ -159,6 +160,12 @@ namespace Favalet.Contexts
 
             // Can't accept from --> to
             throw new ArgumentException();
+        }
+
+        public void Unify(IExpression from, IExpression to)
+        {
+            this.InternalUnify(from, to);
+            this.InternalUnify(from.HigherOrder, to.HigherOrder);
         }
 
         public IExpression? ResolvePlaceholderIndex(int index)

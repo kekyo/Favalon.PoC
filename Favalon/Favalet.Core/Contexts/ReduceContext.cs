@@ -88,62 +88,67 @@ namespace Favalet.Contexts
             return reduced;
         }
 
+        //private void Occur(IExpression from, IExpression to)
+        //{
+        //    if (type is FunctionType ft)
+        //    {
+        //        return
+        //            Occur(ft.ParameterType, unspecifiedType) ||
+        //            Occur(ft.ResultType, unspecifiedType);
+        //    }
+
+        //    if (type is UnspecifiedType unspecifiedType2)
+        //    {
+        //        if (unspecifiedType2.Index == unspecifiedType.Index)
+        //        {
+        //            return true;
+        //        }
+
+        //        if (this.GetInferredType(unspecifiedType2) is Type it)
+        //        {
+        //            return Occur(it, unspecifiedType);
+        //        }
+        //    }
+
+        //    return false;
+        //}
+
+        private void InternalUnify(IPlaceholderTerm from, IExpression to)
+        {
+            // TODO: variance
+            lock (this.unifiedExpressions)
+            {
+                if (this.unifiedExpressions.TryGetValue(from.Index, out var target))
+                {
+                    this.Unify(to, target);
+                }
+                else
+                {
+                    this.unifiedExpressions[from.Index] = to;
+                }
+            }
+        }
+
         private void InternalUnify(IExpression from, IExpression to)
         {
             Debug.Assert(!(from is UnspecifiedTerm));
             Debug.Assert(!(to is UnspecifiedTerm));
 
-            if (from is IPlaceholderTerm(int findex))
+            if (from is IPlaceholderTerm(int findex) fph)
             {
-                if (to is IPlaceholderTerm(int tindex))
+                if (to is IPlaceholderTerm(int tindex) && (findex == tindex))
                 {
-                    if (findex != tindex)
-                    {
-                        // TODO: variance
-                        lock (this.unifiedExpressions)
-                        {
-                            if (this.unifiedExpressions.TryGetValue(findex, out var target))
-                            {
-                                this.Unify(to, target);
-                            }
-                            else
-                            {
-                                this.unifiedExpressions[findex] = to;
-                            }
-                        }
-                    }
+                    return;
                 }
                 else
                 {
-                    // TODO: variance
-                    lock (this.unifiedExpressions)
-                    {
-                        if (this.unifiedExpressions.TryGetValue(findex, out var target))
-                        {
-                            this.Unify(to, target);
-                        }
-                        else
-                        {
-                            this.unifiedExpressions[findex] = to;
-                        }
-                    }
+                    this.InternalUnify(fph, to);
+                    return;
                 }
-                return;
             }
-            else if (to is IPlaceholderTerm(int tindex))
+            else if (to is IPlaceholderTerm tph)
             {
-                // TODO: variance
-                lock (this.unifiedExpressions)
-                {
-                    if (this.unifiedExpressions.TryGetValue(tindex, out var target))
-                    {
-                        this.Unify(from, target);
-                    }
-                    else
-                    {
-                        this.unifiedExpressions[tindex] = from;
-                    }
-                }
+                this.InternalUnify(tph, from);
                 return;
             }
 

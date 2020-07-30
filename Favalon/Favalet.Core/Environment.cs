@@ -2,7 +2,6 @@
 using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
@@ -41,7 +40,7 @@ namespace Favalet
             var context = new ReduceContext(
                 this,
                 this,
-                new Dictionary<int, IExpression>());
+                new Unifier(this.TypeCalculator));
 
             Debug.WriteLine(
                 $"Infer[{context.GetHashCode()}]: expression=\"{expression.GetPrettyString(PrettyStringContext.Strict)}\"");
@@ -62,7 +61,7 @@ namespace Favalet
             var context = new ReduceContext(
                 this,
                 this,
-                new Dictionary<int, IExpression>());
+                new Unifier(this.TypeCalculator));
 
             Debug.WriteLine(
                 $"Reduce[{context.GetHashCode()}]: expression=\"{expression.GetPrettyString(PrettyStringContext.Strict)}\"");

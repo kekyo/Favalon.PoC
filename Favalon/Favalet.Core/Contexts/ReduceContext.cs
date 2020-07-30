@@ -1,11 +1,7 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
-using Favalet.Internal;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Favalet.Contexts
 {
@@ -23,12 +19,12 @@ namespace Favalet.Contexts
         IExpression? ResolvePlaceholderIndex(int index);
     }
 
-    internal sealed class ReduceContext :
+    internal sealed partial class ReduceContext :
         IReduceContext
     {
         private readonly Environment rootScope;
         private readonly IScopeContext parentScope;
-        private readonly Dictionary<int, IExpression> unifiedExpressions;
+        private readonly Unifier unifier;
         private IBoundSymbolTerm? symbol;
         private IExpression? expression;
 
@@ -36,11 +32,11 @@ namespace Favalet.Contexts
         public ReduceContext(
             Environment rootScope,
             IScopeContext parentScope,
-            Dictionary<int, IExpression> unifiedExpressions)
+            Unifier unifier)
         {
             this.rootScope = rootScope;
             this.parentScope = parentScope;
-            this.unifiedExpressions = unifiedExpressions;
+            this.unifier = unifier;
         }
 
         public ILogicalCalculator TypeCalculator =>
@@ -62,7 +58,7 @@ namespace Favalet.Contexts
             var newContext = new ReduceContext(
                 this.rootScope,
                 this,
-                this.unifiedExpressions);
+                this.unifier);
 
             newContext.symbol = symbol;
             newContext.expression = expression;
@@ -82,141 +78,19 @@ namespace Favalet.Contexts
             var context = new ReduceContext(
                 this.rootScope,
                 this,
-                this.unifiedExpressions);
+                this.unifier);
             var reduced = context.Reduce(fixupped);
 
             return reduced;
         }
 
-        //private void Occur(IExpression from, IExpression to)
-        //{
-        //    if (type is FunctionType ft)
-        //    {
-        //        return
-        //            Occur(ft.ParameterType, unspecifiedType) ||
-        //            Occur(ft.ResultType, unspecifiedType);
-        //    }
+        [DebuggerHidden]
+        public void Unify(IExpression fromHigherOrder, IExpression toHigherOrder) =>
+            this.unifier.Unify(fromHigherOrder, toHigherOrder);
 
-        //    if (type is UnspecifiedType unspecifiedType2)
-        //    {
-        //        if (unspecifiedType2.Index == unspecifiedType.Index)
-        //        {
-        //            return true;
-        //        }
-
-        //        if (this.GetInferredType(unspecifiedType2) is Type it)
-        //        {
-        //            return Occur(it, unspecifiedType);
-        //        }
-        //    }
-
-        //    return false;
-        //}
-
-        private void InternalUnify(IPlaceholderTerm from, IExpression to)
-        {
-            // TODO: variance
-            lock (this.unifiedExpressions)
-            {
-                if (this.unifiedExpressions.TryGetValue(from.Index, out var target))
-                {
-                    this.Unify(to, target);
-                }
-                else
-                {
-                    this.unifiedExpressions[from.Index] = to;
-                }
-            }
-        }
-
-        private void InternalUnify(IExpression from, IExpression to)
-        {
-            Debug.Assert(!(from is UnspecifiedTerm));
-            Debug.Assert(!(to is UnspecifiedTerm));
-
-            if (from is IPlaceholderTerm(int findex) fph)
-            {
-                if (to is IPlaceholderTerm(int tindex) && (findex == tindex))
-                {
-                    return;
-                }
-                else
-                {
-                    this.InternalUnify(fph, to);
-                    return;
-                }
-            }
-            else if (to is IPlaceholderTerm tph)
-            {
-                this.InternalUnify(tph, from);
-                return;
-            }
-
-            if (from is IFunctionExpression(IExpression fp, IExpression fr) &&
-                to is IFunctionExpression(IExpression tp, IExpression tr))
-            {
-                this.Unify(fp, tp);
-                this.Unify(fr, tr);
-                return;
-            }
-
-            if (this.TypeCalculator.ExactEquals(from, to))
-            {
-                return;
-            }
-
-            // Can't accept from --> to
-            throw new ArgumentException(
-                $"Couldn't accept unification: From=\"{from.GetPrettyString(PrettyStringContext.Simple)}\", To=\"{to.GetPrettyString(PrettyStringContext.Simple)}\".");
-        }
-
-        public void Unify(IExpression from, IExpression to)
-        {
-            this.InternalUnify(from, to);
-
-            switch (from, to)
-            {
-                case (FourthTerm _, _):
-                case (_, FourthTerm _):
-                    break;
-
-                default:
-                    this.Unify(from.HigherOrder, to.HigherOrder);
-                    break;
-            }
-        }
-
-        public IExpression? ResolvePlaceholderIndex(int index)
-        {
-            var taken = new HashSet<int>();
-            var list = new List<int>();
-            var targetIndex = index;
-            IExpression? lastExpression = null;
-
-            while (true)
-            {
-                list.Add(targetIndex);
-
-                if (taken.Add(targetIndex))
-                {
-                    if (this.unifiedExpressions.TryGetValue(targetIndex, out var resolved))
-                    {
-                        lastExpression = resolved;
-                        if (lastExpression is IPlaceholderTerm placeholder)
-                        {
-                            targetIndex = placeholder.Index;
-                            continue;
-                        }
-                    }
-
-                    return lastExpression;
-                }
-
-                throw new InvalidOperationException(
-                    "Detected circular variable reference: " +
-                    StringUtilities.Join(" --> ", list.Select(index => $"'{index}")));
-            }
-        }
+        [DebuggerHidden]
+        public IExpression? ResolvePlaceholderIndex(int index) =>
+            this.unifier.ResolvePlaceholderIndex(index);
 
         public VariableInformation[] LookupVariables(IIdentityTerm identity) =>
             // TODO: improving when identity's higher order acceptable

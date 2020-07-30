@@ -69,23 +69,23 @@ namespace Favalet.Expressions
             }
             else
             {
-                throw new ArgumentException(argument.GetPrettyString(PrettyStringContext.Simple));
+                throw new ArgumentException(argument.GetPrettyString(PrettyStringTypes.Readable));
             }
         }
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    this.RuntimeMethod.GetReadableName() :
-                    $"Method {this.RuntimeMethod.GetReadableName()}");
+                this.RuntimeMethod.GetReadableName());
 
+        [DebuggerStepThrough]
         public static MethodTerm From(MethodBase method) =>
             new MethodTerm(method);
     }
 
     public static class MethodTermExtension
     {
+        [DebuggerHidden]
         public static void Deconstruct(
             this IMethodTerm method,
             out MethodBase runtimeMethod) =>

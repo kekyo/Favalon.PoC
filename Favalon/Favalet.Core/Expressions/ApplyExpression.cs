@@ -126,12 +126,10 @@ namespace Favalet.Expressions
             }
         }
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    $"{this.Function.GetPrettyString(context)} {this.Argument.GetPrettyString(context)}" :
-                    $"Apply {this.Function.GetPrettyString(context)} {this.Argument.GetPrettyString(context)}");
+                $"{context.GetPrettyString(this.Function)} {context.GetPrettyString(this.Argument)}");
 
         [DebuggerStepThrough]
         public static ApplyExpression Create(

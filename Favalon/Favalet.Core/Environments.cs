@@ -7,19 +7,22 @@ using System.Threading;
 
 namespace Favalet
 {
-    public interface IEnvironment :
+    public interface IEnvironments :
         IScopeContext, IPlaceholderProvider
     {
         void MutableBind(IBoundSymbolTerm symbol, IExpression expression);
     }
 
-    public sealed class Environment :
-        ScopeContext, IEnvironment
+    public sealed class Environments :
+        ScopeContext, IEnvironments
     {
+#if DEBUG
+        private Unifier? lastUnifier;
+#endif
         private int placeholderIndex = -1;
 
         [DebuggerStepThrough]
-        private Environment(ILogicalCalculator typeCalculator) :
+        private Environments(ILogicalCalculator typeCalculator) :
             base(null, typeCalculator)
         { }
 
@@ -37,39 +40,39 @@ namespace Favalet
 
         public IExpression Infer(IExpression expression)
         {
-            var context = new ReduceContext(
-                this,
-                this,
-                new Unifier(this.TypeCalculator));
+            var unifier = new Unifier(this.TypeCalculator);
+            var context = new ReduceContext(this, this, unifier);
 
             Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: expression=\"{expression.GetPrettyString(PrettyStringContext.Strict)}\"");
+                $"Infer[{context.GetHashCode()}]: expression=\"{expression.GetPrettyString(PrettyStringTypes.StrictAll)}\"");
 
             var inferred = context.Infer(expression);
             Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetPrettyString(PrettyStringContext.Strict)}\"");
+                $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetPrettyString(PrettyStringTypes.StrictAll)}\"");
             
             var fixupped = context.Fixup(inferred);
             Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: fixupped=\"{fixupped.GetPrettyString(PrettyStringContext.Strict)}\"");
-
+                $"Infer[{context.GetHashCode()}]: fixupped=\"{fixupped.GetPrettyString(PrettyStringTypes.StrictAll)}\"");
+#if DEBUG
+            this.lastUnifier = unifier;
+#endif
             return fixupped;
         }
 
         public IExpression Reduce(IExpression expression)
         {
-            var context = new ReduceContext(
-                this,
-                this,
-                new Unifier(this.TypeCalculator));
+            var unifier = new Unifier(this.TypeCalculator);
+            var context = new ReduceContext(this, this, unifier);
 
             Debug.WriteLine(
-                $"Reduce[{context.GetHashCode()}]: expression=\"{expression.GetPrettyString(PrettyStringContext.Strict)}\"");
+                $"Reduce[{context.GetHashCode()}]: expression=\"{expression.GetPrettyString(PrettyStringTypes.StrictAll)}\"");
 
             var reduced = context.Reduce(expression);
             Debug.WriteLine(
-                $"Reduce[{context.GetHashCode()}]: reduced=\"{reduced.GetPrettyString(PrettyStringContext.Strict)}\"");
-
+                $"Reduce[{context.GetHashCode()}]: reduced=\"{reduced.GetPrettyString(PrettyStringTypes.StrictAll)}\"");
+#if DEBUG
+            this.lastUnifier = unifier;
+#endif
             return reduced;
         }
 
@@ -78,9 +81,9 @@ namespace Favalet
             base.MutableBind(symbol, expression);
 
         [DebuggerStepThrough]
-        public static Environment Create(ILogicalCalculator typeCalculator)
+        public static Environments Create(ILogicalCalculator typeCalculator)
         {
-            var environment = new Environment(typeCalculator);
+            var environment = new Environments(typeCalculator);
             return environment;
         }
     }
@@ -89,7 +92,7 @@ namespace Favalet
     {
         [DebuggerHidden]
         public static void MutableBind(
-            this IEnvironment environment,
+            this IEnvironments environment,
             string symbol,
             IExpression expression) =>
             environment.MutableBind(BoundSymbolTerm.Create(symbol), expression);

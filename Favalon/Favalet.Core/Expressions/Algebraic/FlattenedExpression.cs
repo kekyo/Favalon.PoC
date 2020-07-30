@@ -98,12 +98,12 @@ namespace Favalet.Expressions.Algebraic
             other is AndFlattenedExpression rhs &&
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    StringUtilities.Join(" && ", this.Operands.Select(operand => operand.GetPrettyString(context))) :
-                    "AndFlattened " + StringUtilities.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(context))));
+                StringUtilities.Join(
+                    " && ",
+                    this.Operands.Select(context.GetPrettyString)));
     }
 
     internal sealed class OrFlattenedExpression : FlattenedExpression
@@ -121,11 +121,11 @@ namespace Favalet.Expressions.Algebraic
             other is OrFlattenedExpression rhs &&
             this.Operands.EqualsPartiallyOrdered(rhs.Operands);
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    StringUtilities.Join(" || ", this.Operands.Select(operand => operand.GetPrettyString(context))) :
-                    "OrFlattened " + StringUtilities.Join(" ", this.Operands.Select(operand => operand.GetPrettyString(context))));
+                StringUtilities.Join(
+                    " || ",
+                    this.Operands.Select(context.GetPrettyString)));
     }
 }

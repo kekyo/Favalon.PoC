@@ -1,8 +1,6 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using Favalet.Internal;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -92,12 +90,10 @@ namespace Favalet.Expressions
             }
         }
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    this.Symbol :
-                    $"Identity {this.Symbol}");
+                this.Symbol);
 
         [DebuggerStepThrough]
         public static IdentityTerm Create(string symbol, IExpression higherOrder) =>

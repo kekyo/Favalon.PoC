@@ -117,12 +117,10 @@ namespace Favalet.Expressions
                 Bind(this.Parameter, argument).
                 Reduce(this.Body);
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    $"{this.Parameter.GetPrettyString(context)} -> {this.Body.GetPrettyString(context)}" :
-                    $"Lambda {this.Parameter.GetPrettyString(context)} {this.Body.GetPrettyString(context)}");
+                $"{context.GetPrettyString(this.Parameter)} -> {context.GetPrettyString(this.Body)}");
 
         [DebuggerStepThrough]
         public static LambdaExpression Create(

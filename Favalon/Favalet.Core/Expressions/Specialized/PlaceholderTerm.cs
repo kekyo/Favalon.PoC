@@ -71,6 +71,7 @@ namespace Favalet.Expressions.Specialized
         }
 
         [DebuggerHidden]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         int IPlaceholderTerm.Index =>
             this.Index;
 
@@ -101,12 +102,10 @@ namespace Favalet.Expressions.Specialized
         protected override IExpression Reduce(IReduceContext context) =>
             this;
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    $"'{this.Index}" :
-                    $"Placeholder '{this.Index}");
+                $"'{this.Index}");
 
         [DebuggerStepThrough]
         internal static PlaceholderTerm Create(

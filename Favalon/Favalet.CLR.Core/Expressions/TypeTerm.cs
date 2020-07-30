@@ -44,13 +44,12 @@ namespace Favalet.Expressions
         protected override IExpression Reduce(IReduceContext context) =>
             this;
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    this.RuntimeType.GetReadableName() :
-                    $"Type {this.RuntimeType.GetReadableName()}");
+                this.RuntimeType.GetReadableName());
 
+        [DebuggerStepThrough]
         public static ITerm From(Type type)
         {
             if (type.Equals(typeof(object).GetType()))
@@ -66,6 +65,7 @@ namespace Favalet.Expressions
 
     public static class TypeTermExtension
     {
+        [DebuggerHidden]
         public static void Deconstruct(
             this ITypeTerm type,
             out Type runtimeType) =>

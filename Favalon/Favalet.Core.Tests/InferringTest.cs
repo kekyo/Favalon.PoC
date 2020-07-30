@@ -21,9 +21,9 @@ namespace Favalet
             {
                 Assert.Fail(
                     "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",
-                    expression.GetPrettyString(PrettyStringContext.Simple),
-                    expected.GetPrettyString(PrettyStringContext.Simple),
-                    actual.GetPrettyString(PrettyStringContext.Simple));
+                    expression.GetPrettyString(PrettyStringTypes.Readable),
+                    expected.GetPrettyString(PrettyStringTypes.Readable),
+                    actual.GetPrettyString(PrettyStringTypes.Readable));
             }
         }
         #endregion
@@ -1139,6 +1139,8 @@ namespace Favalet
                         Function(
                             Kind(),
                             Kind())));
+
+            var r = expected.GetPrettyString(PrettyStringTypes.Readable);
 
             AssertLogicalEqual(expression, expected, actual);
         }

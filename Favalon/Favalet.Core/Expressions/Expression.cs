@@ -8,8 +8,6 @@ namespace Favalet.Expressions
     public interface IExpression : IEquatable<IExpression?>
     {
         IExpression HigherOrder { get; }
-
-        string GetPrettyString(PrettyStringContext type);
     }
 
     public interface ITerm : IExpression
@@ -25,6 +23,11 @@ namespace Favalet.Expressions
         [DebuggerStepThrough]
         protected Expression()
         { }
+
+        public string Type =>
+            this.GetType().Name.
+            Replace("Expression", string.Empty).
+            Replace("Term", string.Empty);
 
         public abstract IExpression HigherOrder { get; }
 
@@ -42,17 +45,21 @@ namespace Favalet.Expressions
         internal IExpression InternalReduce(IReduceContext context) =>
             this.Reduce(context);
 
-        public abstract string GetPrettyString(PrettyStringContext context);
+        protected abstract string GetPrettyString(IPrettyStringContext context);
+
+        [DebuggerHidden]
+        internal string InternalGetPrettyString(IPrettyStringContext context) =>
+            this.GetPrettyString(context);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebugPrint =>
-            this.GetPrettyString(PrettyStringContext.Simple);
+            this.GetPrettyString(PrettyStringTypes.Readable);
 
-        public string StrictExpression =>
-            this.GetPrettyString(PrettyStringContext.Strict);
+        public string StrictAll =>
+            this.GetPrettyString(PrettyStringTypes.StrictAll);
 
         public override sealed string ToString() =>
-            this.GetPrettyString(PrettyStringContext.Strict);
+            this.GetPrettyString(PrettyStringTypes.Strict);
 
         public abstract bool Equals(IExpression? other);
 
@@ -72,5 +79,10 @@ namespace Favalet.Expressions
                 (_, FourthTerm _) => false,
                 _ => lhs.Equals(rhs) && lhs.HigherOrder.ExactEquals(rhs.HigherOrder)
             };
+
+        [DebuggerHidden]
+        public static string GetPrettyString(this IExpression expression, PrettyStringTypes type) =>
+            PrettyStringContext.Create(type).
+            GetPrettyString(expression);
     }
 }

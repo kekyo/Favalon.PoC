@@ -9,8 +9,8 @@ namespace Favalet
     public static class Generator
     {
         [DebuggerStepThrough]
-        public static Environment Environment() =>
-            Favalet.Environment.Create(LogicalCalculator.Instance);
+        public static Environments Environment() =>
+            Favalet.Environments.Create(LogicalCalculator.Instance);
 
         private static readonly IdentityTerm kind =
             IdentityTerm.Create("*", FourthTerm.Instance);
@@ -90,6 +90,6 @@ namespace Favalet
         [DebuggerStepThrough]
         public static IExpression Function(
             IExpression parameter, IExpression result, IExpression higherOrder) =>
-            FunctionExpression.From(parameter, result);
+            FunctionExpression.From(parameter, result, higherOrder);
     }
 }

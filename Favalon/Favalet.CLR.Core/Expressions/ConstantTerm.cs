@@ -44,14 +44,14 @@ namespace Favalet.Expressions
         protected override IExpression Reduce(IReduceContext context) =>
             this;
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
                 this.Value switch
-            {
-                string value => $"\"{value}\"",
-                _ => this.Value.ToString()
-            });
+                {
+                    string value => $"\"{value}\"",
+                    _ => this.Value.ToString()
+                });
 
         [DebuggerStepThrough]
         public static ConstantTerm From(object value) =>

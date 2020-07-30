@@ -22,7 +22,7 @@ namespace Favalet.Contexts
     internal sealed partial class ReduceContext :
         IReduceContext
     {
-        private readonly Environment rootScope;
+        private readonly Environments rootScope;
         private readonly IScopeContext parentScope;
         private readonly Unifier unifier;
         private IBoundSymbolTerm? symbol;
@@ -30,7 +30,7 @@ namespace Favalet.Contexts
 
         [DebuggerStepThrough]
         public ReduceContext(
-            Environment rootScope,
+            Environments rootScope,
             IScopeContext parentScope,
             Unifier unifier)
         {

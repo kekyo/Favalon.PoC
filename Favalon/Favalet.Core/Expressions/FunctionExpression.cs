@@ -109,12 +109,10 @@ namespace Favalet.Expressions
             }
         }
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    $"{this.Parameter.GetPrettyString(context)} -> {this.Result.GetPrettyString(context)}" :
-                    $"Function {this.Parameter.GetPrettyString(context)} {this.Result.GetPrettyString(context)}");
+                $"{context.GetPrettyString(this.Parameter)} -> {context.GetPrettyString(this.Result)}");
 
         [DebuggerStepThrough]
         private static IExpression From(

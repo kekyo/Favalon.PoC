@@ -1,32 +1,66 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
+using System.Diagnostics;
 
 namespace Favalet.Contexts
 {
-    public struct PrettyStringContext
+    public interface IPrettyStringContext
     {
-        public readonly bool IsSimple;
-        internal readonly bool IsPartial;
+        string GetPrettyString(IExpression expression);
+        string FinalizePrettyString(IExpression expression, string preFormatted);
+    }
 
-        public PrettyStringContext(bool isSimple)
+    public enum PrettyStringTypes
+    {
+        Readable,
+        Strict,
+        StrictAll
+    }
+
+    public sealed class PrettyStringContext :
+        IPrettyStringContext
+    {
+        private readonly PrettyStringTypes type;
+        private readonly bool isPartial;
+
+        [DebuggerStepThrough]
+        private PrettyStringContext(PrettyStringTypes type, bool isPartial)
         {
-            IsSimple = isSimple;
-            IsPartial = false;
+            this.type = type;
+            this.isPartial = isPartial;
         }
 
-        private PrettyStringContext(bool isSimple, bool isPartial)
-        {
-            IsSimple = isSimple;
-            IsPartial = isPartial;
-        }
+        public string GetPrettyString(IExpression expression) =>
+            (this.type, expression, expression) switch
+            {
+                (PrettyStringTypes.Readable, Expression expr, _) => expr.InternalGetPrettyString(this),
+                (_, Expression expr, ITerminationTerm _) => expr.InternalGetPrettyString(this),
+                (_, Expression expr, _) => $"{expr.Type} {expr.InternalGetPrettyString(this)}",
+                _ => this.FinalizePrettyString(expression, "?")
+            };
 
-        private PrettyStringContext MakePartial() =>
-            new PrettyStringContext(this.IsSimple, true);
+        string IPrettyStringContext.GetPrettyString(IExpression expression) =>
+            (this.type, expression, expression) switch
+            {
+                (PrettyStringTypes.Readable, Expression expr, ITerm _) => expr.InternalGetPrettyString(this),
+                (PrettyStringTypes.Readable, Expression expr, _) => $"({expr.InternalGetPrettyString(this)})",
+                (_, Expression expr, ITerminationTerm _) => expr.InternalGetPrettyString(this),
+                (_, Expression expr, _) => $"({expr.Type} {expr.InternalGetPrettyString(this)})",
+                _ => this.FinalizePrettyString(expression, "?")
+            };
+
+        [DebuggerStepThrough]
+        private IPrettyStringContext MakePartial() =>
+            (this.type, this.isPartial) switch
+            {
+                (PrettyStringTypes.StrictAll, _) => this,
+                _ => new PrettyStringContext(this.type, true),
+            };
 
         public string FinalizePrettyString(IExpression expression, string preFormatted)
         {
             var higherOrder = expression.HigherOrder;
-            return (this.IsPartial, expression, higherOrder) switch
+            return (this.isPartial, expression, higherOrder) switch
             {
                 (true, _, _) =>
                     preFormatted,
@@ -34,20 +68,15 @@ namespace Favalet.Contexts
                     preFormatted,
                 (_, _, null) =>
                     preFormatted,
-                (_, ITerm _, ITerm _) =>
-                    $"{preFormatted}:{higherOrder.GetPrettyString(this.MakePartial())}",
                 (_, ITerm _, _) =>
-                    $"{preFormatted}:({higherOrder.GetPrettyString(this.MakePartial())})",
-                (_, _, ITerm _) =>
-                    $"({preFormatted}):{higherOrder.GetPrettyString(this.MakePartial())}",
+                    $"{preFormatted}:{this.MakePartial().GetPrettyString(higherOrder)}",
                 _ =>
-                    $"({preFormatted}):({higherOrder.GetPrettyString(this.MakePartial())})",
+                    $"({preFormatted}):{this.MakePartial().GetPrettyString(higherOrder)}",
             };
         }
 
-        public static readonly PrettyStringContext Simple =
-            new PrettyStringContext(true);
-        public static readonly PrettyStringContext Strict =
-            new PrettyStringContext(false);
+        [DebuggerStepThrough]
+        public static PrettyStringContext Create(PrettyStringTypes type) =>
+            new PrettyStringContext(type, false);
     }
 }

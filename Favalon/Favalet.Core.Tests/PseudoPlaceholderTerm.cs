@@ -1,6 +1,8 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions;
+using Favalet.Expressions.Specialized;
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Favalet
@@ -13,14 +15,16 @@ namespace Favalet
         private PseudoPlaceholderProvider()
         { }
 
+        [DebuggerStepThrough]
         public PseudoPlaceholderTerm CreatePlaceholder() =>
             new PseudoPlaceholderTerm(Interlocked.Increment(ref this.pseudoIndex));
 
+        [DebuggerStepThrough]
         public static PseudoPlaceholderProvider Create() =>
             new PseudoPlaceholderProvider();
 
         internal sealed class PseudoPlaceholderTerm :
-            Expression, ITerm
+            Expression, ITerminationTerm
         {
             public readonly int PseudoIndex;
 
@@ -39,7 +43,7 @@ namespace Favalet
             public override bool Equals(IExpression? other) =>
                 throw new NotImplementedException();
 
-            public override string GetPrettyString(PrettyStringContext context) =>
+            protected override string GetPrettyString(IPrettyStringContext context) =>
                 $"'{this.PseudoIndex}";
 
             protected override IExpression Fixup(IReduceContext context) =>

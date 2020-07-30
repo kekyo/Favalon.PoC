@@ -23,12 +23,10 @@ namespace Favalet.Expressions.Algebraic
             IExpression left, IExpression right, IExpression higherOrder) =>
             new AndExpression(left, right, higherOrder);
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    $"{this.Left.GetPrettyString(context)} && {this.Right.GetPrettyString(context)}" :
-                    $"And {this.Left.GetPrettyString(context)} {this.Right.GetPrettyString(context)}");
+                $"{context.GetPrettyString(this.Left)} && {context.GetPrettyString(this.Right)}");
 
         [DebuggerStepThrough]
         public static AndExpression Create(

@@ -41,10 +41,8 @@ namespace Favalet.Expressions.Algebraic
         public IExpression Call(IReduceContext context, IExpression argument) =>
             calculator.Compute(argument);
 
-        public override string GetPrettyString(PrettyStringContext context) =>
-            context.FinalizePrettyString(
-                this,
-                "Logical");
+        protected override string GetPrettyString(IPrettyStringContext context) =>
+            "Logical";
 
         public static readonly LogicalOperator Instance =
             new LogicalOperator();

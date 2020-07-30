@@ -89,9 +89,9 @@ namespace Favalet
                     return true;
                 case (FourthTerm _, FourthTerm _):
                     return true;
-                case (FourthTerm _, _):
+                case (ITerminationTerm _, _):
                     return Trap(false);
-                case (_, FourthTerm _):
+                case (_, ITerminationTerm _):
                     return Trap(false);
                 case (ILambdaExpression le, ILambdaExpression re):
                     return

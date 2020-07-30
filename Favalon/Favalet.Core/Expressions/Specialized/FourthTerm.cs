@@ -1,14 +1,17 @@
 ﻿using Favalet.Contexts;
 using System;
+using System.Diagnostics;
 
 namespace Favalet.Expressions.Specialized
 {
     public sealed class FourthTerm :
-        Expression, ITerm
+        Expression, ITerminationTerm
     {
         private FourthTerm()
         { }
 
+        [DebuggerHidden]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public override IExpression HigherOrder =>
             null!;
 
@@ -27,12 +30,8 @@ namespace Favalet.Expressions.Specialized
         protected override IExpression Reduce(IReduceContext context) =>
             this;
 
-        public override string GetPrettyString(PrettyStringContext context) =>
-            context.FinalizePrettyString(
-                this,
-                context.IsSimple ?
-                    "#" :
-                    "Fourth");
+        protected override string GetPrettyString(IPrettyStringContext context) =>
+            "#";
 
         public static readonly FourthTerm Instance =
             new FourthTerm();

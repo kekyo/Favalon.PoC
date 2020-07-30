@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Favalet.Contexts
 {
@@ -72,7 +73,7 @@ namespace Favalet.Contexts
 
             // Can't accept from --> to
             throw new ArgumentException(
-                $"Couldn't accept unification: From=\"{from.GetPrettyString(PrettyStringContext.Strict)}\", To=\"{to.GetPrettyString(PrettyStringContext.Strict)}\".");
+                $"Couldn't accept unification: From=\"{from.GetPrettyString(PrettyStringTypes.StrictAll)}\", To=\"{to.GetPrettyString(PrettyStringTypes.StrictAll)}\".");
         }
 
         public void Unify(IExpression from, IExpression to)
@@ -81,8 +82,8 @@ namespace Favalet.Contexts
 
             switch (from, to)
             {
-                case (FourthTerm _, _):
-                case (_, FourthTerm _):
+                case (ITerminationTerm _, _):
+                case (_, ITerminationTerm _):
                     break;
 
                 default:
@@ -133,5 +134,12 @@ namespace Favalet.Contexts
                     "Detected circular variable reference: " + marker);
             }
         }
+
+        public override string ToString() =>
+            StringUtilities.Join(
+                ",",
+                this.unifiedExpressions.
+                OrderBy(entry => entry.Key).
+                Select(entry => $"'{entry.Key} --> {entry.Value.GetPrettyString(PrettyStringTypes.Readable)}"));
     }
 }

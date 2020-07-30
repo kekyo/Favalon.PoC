@@ -8,8 +8,8 @@ namespace Favalet
     public static class CLRGenerator
     {
         [DebuggerStepThrough]
-        public static Environment CLREnvironment() =>
-            Favalet.Environment.Create(TypeCalculator.Instance);
+        public static Environments CLREnvironment() =>
+            Favalet.Environments.Create(TypeCalculator.Instance);
 
         [DebuggerHidden]
         public static ITerm Type<T>() =>

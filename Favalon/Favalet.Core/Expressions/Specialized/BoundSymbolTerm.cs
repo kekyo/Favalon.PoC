@@ -67,12 +67,10 @@ namespace Favalet.Expressions.Specialized
         protected override IExpression Reduce(IReduceContext context) =>
             this;
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                context.IsSimple ?
-                    this.Symbol :
-                    $"BoundSymbol {this.Symbol}");
+                this.Symbol);
 
         [DebuggerStepThrough]
         public static BoundSymbolTerm Create(string symbol, IExpression higherOrder) =>

@@ -77,10 +77,10 @@ namespace Favalet.Expressions.Algebraic
         protected override IExpression Reduce(IReduceContext context) =>
             calculator.Compute(context.Reduce(this.Operand));
 
-        public override string GetPrettyString(PrettyStringContext context) =>
+        protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                $"Logical {this.Operand.GetPrettyString(context)}");
+                context.GetPrettyString(this.Operand));
 
         [DebuggerStepThrough]
         public static LogicalExpression Create(

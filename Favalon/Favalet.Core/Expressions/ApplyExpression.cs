@@ -61,7 +61,7 @@ namespace Favalet.Expressions
             var argument = context.Infer(this.Argument);
             var function = context.Infer(this.Function);
 
-            var functionHigherOrder = FunctionExpression.Create(
+            var functionHigherOrder = FunctionExpression.From(
                 argument.HigherOrder,
                 higherOrder);
 

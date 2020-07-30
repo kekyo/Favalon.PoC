@@ -58,10 +58,11 @@ namespace Favalet.Expressions
 
             var body = newScope.Infer(this.Body);
 
-            var lambdaHigherOrder = FunctionExpression.Create(
+            var lambdaHigherOrder = FunctionExpression.From(
                 parameter.HigherOrder,
                 body.HigherOrder,
-                context.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove));
+                context,
+                PlaceholderOrderHints.TypeOrAbove);
 
             context.Unify(lambdaHigherOrder, higherOrder);
 

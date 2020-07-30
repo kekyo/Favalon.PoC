@@ -1,9 +1,11 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
+using Favalet.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Favalet.Contexts
 {
@@ -159,7 +161,8 @@ namespace Favalet.Contexts
             }
 
             // Can't accept from --> to
-            throw new ArgumentException();
+            throw new ArgumentException(
+                $"Couldn't accept unification: From=\"{from.GetPrettyString(PrettyStringContext.Simple)}\", To=\"{to.GetPrettyString(PrettyStringContext.Simple)}\".");
         }
 
         public void Unify(IExpression from, IExpression to)
@@ -180,21 +183,33 @@ namespace Favalet.Contexts
 
         public IExpression? ResolvePlaceholderIndex(int index)
         {
+            var taken = new HashSet<int>();
+            var list = new List<int>();
             var targetIndex = index;
             IExpression? lastExpression = null;
+
             while (true)
             {
-                if (this.unifiedExpressions.TryGetValue(targetIndex, out var resolved))
+                list.Add(targetIndex);
+
+                if (taken.Add(targetIndex))
                 {
-                    lastExpression = resolved;
-                    if (lastExpression is IPlaceholderTerm placeholder)
+                    if (this.unifiedExpressions.TryGetValue(targetIndex, out var resolved))
                     {
-                        targetIndex = placeholder.Index;
-                        continue;
+                        lastExpression = resolved;
+                        if (lastExpression is IPlaceholderTerm placeholder)
+                        {
+                            targetIndex = placeholder.Index;
+                            continue;
+                        }
                     }
+
+                    return lastExpression;
                 }
 
-                return lastExpression;
+                throw new InvalidOperationException(
+                    "Detected circular variable reference: " +
+                    StringUtilities.Join(" --> ", list.Select(index => $"'{index}")));
             }
         }
 

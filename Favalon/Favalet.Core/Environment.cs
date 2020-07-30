@@ -42,8 +42,17 @@ namespace Favalet
                 this,
                 this,
                 new Dictionary<int, IExpression>());
+
+            Debug.WriteLine(
+                $"Infer[{context.GetHashCode()}]: expression=\"{expression.GetPrettyString(PrettyStringContext.Strict)}\"");
+
             var inferred = context.Infer(expression);
+            Debug.WriteLine(
+                $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetPrettyString(PrettyStringContext.Strict)}\"");
+            
             var fixupped = context.Fixup(inferred);
+            Debug.WriteLine(
+                $"Infer[{context.GetHashCode()}]: fixupped=\"{fixupped.GetPrettyString(PrettyStringContext.Strict)}\"");
 
             return fixupped;
         }
@@ -54,7 +63,13 @@ namespace Favalet
                 this,
                 this,
                 new Dictionary<int, IExpression>());
+
+            Debug.WriteLine(
+                $"Reduce[{context.GetHashCode()}]: expression=\"{expression.GetPrettyString(PrettyStringContext.Strict)}\"");
+
             var reduced = context.Reduce(expression);
+            Debug.WriteLine(
+                $"Reduce[{context.GetHashCode()}]: reduced=\"{reduced.GetPrettyString(PrettyStringContext.Strict)}\"");
 
             return reduced;
         }

@@ -55,10 +55,11 @@ namespace Favalet.Expressions
             var parameter = context.Infer(this.Parameter);
             var result = context.Infer(this.Result);
 
-            var functionHigherOrder = FunctionExpression.Create(
+            var functionHigherOrder = From(
                 parameter.HigherOrder,
                 result.HigherOrder,
-                context.CreatePlaceholder(PlaceholderOrderHints.KindOrAbove));
+                context,
+                PlaceholderOrderHints.KindOrAbove);
 
             context.Unify(functionHigherOrder, higherOrder);
 
@@ -116,13 +117,28 @@ namespace Favalet.Expressions
                     $"Function {this.Parameter.GetPrettyString(context)} {this.Result.GetPrettyString(context)}");
 
         [DebuggerStepThrough]
-        public static FunctionExpression Create(
-            IExpression parameter, IExpression result, IExpression higherOrder) =>
-            new FunctionExpression(parameter, result, higherOrder);
+        private static IExpression From(
+            IExpression parameter, IExpression result, Func<IExpression> higherOrder) =>
+            (parameter, result) switch
+            {
+                (FourthTerm _, _) => FourthTerm.Instance,
+                (_, FourthTerm _) => FourthTerm.Instance,
+                _ => new FunctionExpression(parameter, result, higherOrder())
+            };
+
         [DebuggerStepThrough]
-        public static FunctionExpression Create(
+        public static IExpression From(
+            IExpression parameter, IExpression result, IExpression higherOrder) =>
+            From(parameter, result, () => higherOrder);
+        [DebuggerStepThrough]
+        public static IExpression From(
             IExpression parameter, IExpression result) =>
-            new FunctionExpression(parameter, result, UnspecifiedTerm.Instance);
+            From(parameter, result, () => UnspecifiedTerm.Instance);
+
+        [DebuggerStepThrough]
+        internal static IExpression From(
+            IExpression parameter, IExpression result, IReduceContext context, PlaceholderOrderHints orderHint) =>
+            From(parameter, result, () => context.CreatePlaceholder(orderHint));
     }
 
     public static class FunctionExpressionExtension

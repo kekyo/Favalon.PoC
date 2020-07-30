@@ -22,7 +22,7 @@ namespace Favalet.Expressions
             this.RuntimeMethod = runtimeMethod;
 
         public override IExpression HigherOrder =>
-            FunctionExpression.Create(
+            FunctionExpression.From(
                 TypeTerm.From(this.RuntimeMethod.GetParameters()[0].ParameterType),
                 TypeTerm.From(
                     this.RuntimeMethod is MethodInfo method ?

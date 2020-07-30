@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Favalet.Contexts
 {
@@ -31,6 +30,10 @@ namespace Favalet.Contexts
                 else
                 {
                     this.unifiedExpressions[fromIndex] = to;
+#if DEBUG
+                    Debug.Assert(fromIndex != 3);
+                    ResolvePlaceholderIndex(fromIndex);
+#endif
                 }
             }
         }
@@ -78,15 +81,14 @@ namespace Favalet.Contexts
 
         public void Unify(IExpression from, IExpression to)
         {
-            this.UnifyCore(from, to);
-
             switch (from, to)
             {
-                case (ITerminationTerm _, _):
-                case (_, ITerminationTerm _):
+                case (TerminationTerm _, _):
+                case (_, TerminationTerm _):
                     break;
 
                 default:
+                    this.UnifyCore(from, to);
                     this.Unify(from.HigherOrder, to.HigherOrder);
                     break;
             }

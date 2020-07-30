@@ -24,7 +24,7 @@ namespace Favalet
             new PseudoPlaceholderProvider();
 
         internal sealed class PseudoPlaceholderTerm :
-            Expression, ITerminationTerm
+            Expression, ITerm
         {
             public readonly int PseudoIndex;
 

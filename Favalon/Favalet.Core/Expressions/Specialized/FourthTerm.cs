@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace Favalet.Expressions.Specialized
 {
     public sealed class FourthTerm :
-        Expression, ITerminationTerm
+        Expression, ITerm
     {
         private FourthTerm()
         { }
@@ -13,7 +13,7 @@ namespace Favalet.Expressions.Specialized
         [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public override IExpression HigherOrder =>
-            null!;
+            TerminationTerm.Instance;
 
         public bool Equals(FourthTerm rhs) =>
             rhs != null;

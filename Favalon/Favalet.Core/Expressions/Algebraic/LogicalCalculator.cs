@@ -48,8 +48,8 @@ namespace Favalet.Expressions.Algebraic
                     (left, right) switch
                     {
                         (FourthTerm _, FourthTerm _) => true,
-                        (ITerminationTerm _, _) => false,
-                        (_, ITerminationTerm _) => false,
+                        (TerminationTerm _, _) => false,
+                        (_, TerminationTerm _) => false,
                         _ => this.Equals(
                             this.Compute(lhs.HigherOrder),
                             this.Compute(rhs.HigherOrder))

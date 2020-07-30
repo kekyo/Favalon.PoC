@@ -4,27 +4,25 @@ using System.Diagnostics;
 
 namespace Favalet.Expressions.Specialized
 {
-    public sealed class UnspecifiedTerm :
+    internal sealed class TerminationTerm :
         Expression, ITerm
     {
-        private UnspecifiedTerm()
+        private TerminationTerm()
         { }
 
         [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public override IExpression HigherOrder =>
-            TerminationTerm.Instance;
+            Instance;
 
-        public bool Equals(UnspecifiedTerm rhs) =>
-            rhs != null;
+        public bool Equals(FourthTerm rhs) =>
+            false;
 
         public override bool Equals(IExpression? other) =>
-            other is UnspecifiedTerm;
+            false;
 
         protected override IExpression Infer(IReduceContext context) =>
-            context is IPlaceholderProvider provider ?
-                (IExpression)provider.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove) :
-                this;
+            this;
 
         protected override IExpression Fixup(IReduceContext context) =>
             this;
@@ -33,9 +31,9 @@ namespace Favalet.Expressions.Specialized
             this;
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
-            "_";
+            "#TERM";
 
-        public static readonly UnspecifiedTerm Instance =
-            new UnspecifiedTerm();
+        public static readonly TerminationTerm Instance =
+            new TerminationTerm();
     }
 }

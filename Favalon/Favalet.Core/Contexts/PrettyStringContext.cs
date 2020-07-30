@@ -34,7 +34,7 @@ namespace Favalet.Contexts
             (this.type, expression, expression) switch
             {
                 (PrettyStringTypes.Readable, Expression expr, _) => expr.InternalGetPrettyString(this),
-                (_, Expression expr, ITerminationTerm _) => expr.InternalGetPrettyString(this),
+                (_, Expression expr, TerminationTerm _) => expr.InternalGetPrettyString(this),
                 (_, Expression expr, _) => $"{expr.Type} {expr.InternalGetPrettyString(this)}",
                 _ => this.FinalizePrettyString(expression, "?")
             };
@@ -44,7 +44,7 @@ namespace Favalet.Contexts
             {
                 (PrettyStringTypes.Readable, Expression expr, ITerm _) => expr.InternalGetPrettyString(this),
                 (PrettyStringTypes.Readable, Expression expr, _) => $"({expr.InternalGetPrettyString(this)})",
-                (_, Expression expr, ITerminationTerm _) => expr.InternalGetPrettyString(this),
+                (_, Expression expr, TerminationTerm _) => expr.InternalGetPrettyString(this),
                 (_, Expression expr, _) => $"({expr.Type} {expr.InternalGetPrettyString(this)})",
                 _ => this.FinalizePrettyString(expression, "?")
             };
@@ -60,15 +60,17 @@ namespace Favalet.Contexts
         public string FinalizePrettyString(IExpression expression, string preFormatted)
         {
             var higherOrder = expression.HigherOrder;
-            return (this.isPartial, expression, higherOrder) switch
+            return (this.type, this.isPartial, expression, higherOrder) switch
             {
-                (true, _, _) =>
+                (_, true, _, _) =>
                     preFormatted,
-                (_, _, UnspecifiedTerm _) =>
+                (_, _, _, TerminationTerm _) =>
                     preFormatted,
-                (_, _, null) =>
+                (PrettyStringTypes.Readable, _, _, UnspecifiedTerm _) =>
                     preFormatted,
-                (_, ITerm _, _) =>
+                (PrettyStringTypes.Readable, _, _, FourthTerm _) =>
+                    preFormatted,
+                (_, _, ITerm _, _) =>
                     $"{preFormatted}:{this.MakePartial().GetPrettyString(higherOrder)}",
                 _ =>
                     $"({preFormatted}):{this.MakePartial().GetPrettyString(higherOrder)}",

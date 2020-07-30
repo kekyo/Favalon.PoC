@@ -1110,6 +1110,34 @@ namespace Favalet
         }
 
         [Test]
+        public void InferringLambdaWithAnnotation131()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(bool -> _)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Identity("bool"),
+                        Unspecified()));
+
+            var actual = environment.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Identity("bool")),
+                    Identity("a", Identity("bool")),
+                    Function(
+                        Identity("bool"),
+                        Identity("bool")));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
         public void InferringLambdaWithAnnotation14()
         {
             var environment = CLREnvironment();

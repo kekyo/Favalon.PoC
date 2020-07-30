@@ -115,26 +115,26 @@ namespace Favalet.Expressions
                 $"{context.GetPrettyString(this.Parameter)} -> {context.GetPrettyString(this.Result)}");
 
         [DebuggerStepThrough]
-        private static IExpression From(
+        private static FunctionExpression From(
             IExpression parameter, IExpression result, Func<IExpression> higherOrder) =>
             (parameter, result) switch
             {
-                (FourthTerm _, _) => FourthTerm.Instance,
-                (_, FourthTerm _) => FourthTerm.Instance,
+                (FourthTerm _, _) => new FunctionExpression(parameter, result, TerminationTerm.Instance),
+                (_, FourthTerm _) => new FunctionExpression(parameter, result, TerminationTerm.Instance),
                 _ => new FunctionExpression(parameter, result, higherOrder())
             };
 
         [DebuggerStepThrough]
-        public static IExpression From(
+        public static FunctionExpression From(
             IExpression parameter, IExpression result, IExpression higherOrder) =>
             From(parameter, result, () => higherOrder);
         [DebuggerStepThrough]
-        public static IExpression From(
+        public static FunctionExpression From(
             IExpression parameter, IExpression result) =>
             From(parameter, result, () => UnspecifiedTerm.Instance);
 
         [DebuggerStepThrough]
-        internal static IExpression From(
+        internal static FunctionExpression From(
             IExpression parameter, IExpression result, IReduceContext context, PlaceholderOrderHints orderHint) =>
             From(parameter, result, () => context.CreatePlaceholder(orderHint));
     }

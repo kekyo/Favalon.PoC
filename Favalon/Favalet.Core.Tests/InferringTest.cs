@@ -1076,7 +1076,35 @@ namespace Favalet
         }
 
         [Test]
-        public void InferringLambdaWithAnnotation13()
+        public void InferringLambdaWithAnnotation13_1()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(bool -> _)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Identity("bool"),
+                        Unspecified()));
+
+            var actual = environment.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Identity("bool")),
+                    Identity("a", Identity("bool")),
+                    Function(
+                        Identity("bool"),
+                        Identity("bool")));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation13_2()
         {
             var environment = CLREnvironment();
 
@@ -1110,18 +1138,18 @@ namespace Favalet
         }
 
         [Test]
-        public void InferringLambdaWithAnnotation131()
+        public void InferringLambdaWithAnnotation14_1()
         {
             var environment = CLREnvironment();
 
-            // (a -> a):(bool -> _)
+            // (a -> a):(_ -> bool)
             var expression =
                 Lambda(
                     BoundSymbol("a"),
                     Identity("a"),
                     Function(
-                        Identity("bool"),
-                        Unspecified()));
+                        Unspecified(),
+                        Identity("bool")));
 
             var actual = environment.Infer(expression);
 
@@ -1134,11 +1162,13 @@ namespace Favalet
                         Identity("bool"),
                         Identity("bool")));
 
+            var r = expected.GetPrettyString(PrettyStringTypes.Readable);
+
             AssertLogicalEqual(expression, expected, actual);
         }
 
         [Test]
-        public void InferringLambdaWithAnnotation14()
+        public void InferringLambdaWithAnnotation14_2()
         {
             var environment = CLREnvironment();
 
@@ -1174,7 +1204,35 @@ namespace Favalet
         }
 
         [Test]
-        public void InferringLambdaWithAnnotation15()
+        public void InferringLambdaWithAnnotation15_1()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(bool -> bool)
+            var expression =
+                Lambda(
+                    BoundSymbol("a"),
+                    Identity("a"),
+                    Function(
+                        Identity("bool"),
+                        Identity("bool")));
+
+            var actual = environment.Infer(expression);
+
+            // (a:bool -> a:bool):(bool -> bool)
+            var expected =
+                Lambda(
+                    BoundSymbol("a", Identity("bool")),
+                    Identity("a", Identity("bool")),
+                    Function(
+                        Identity("bool"),
+                        Identity("bool")));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringLambdaWithAnnotation15_2()
         {
             var environment = CLREnvironment();
 

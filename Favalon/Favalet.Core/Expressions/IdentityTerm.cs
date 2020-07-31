@@ -46,11 +46,14 @@ namespace Favalet.Expressions
             if (variables.Length >= 1)
             {
                 // TODO: overloading
-                var symbolHigherOrder = context.InferHigherOrder(variables[0].SymbolHigherOrder);
-                var inferred = context.Infer(variables[0].Expression);
+                if (!object.ReferenceEquals(this, variables[0].Expression))
+                {
+                    var inferred = context.Infer(variables[0].Expression);
+                    var symbolHigherOrder = context.InferHigherOrder(variables[0].SymbolHigherOrder);
 
-                context.Unify(symbolHigherOrder, higherOrder);
-                context.Unify(inferred.HigherOrder, higherOrder);
+                    context.Unify(symbolHigherOrder, higherOrder);
+                    context.Unify(inferred.HigherOrder, higherOrder);
+                }
             }
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder))

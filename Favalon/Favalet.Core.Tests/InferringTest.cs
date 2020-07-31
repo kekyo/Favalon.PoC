@@ -1608,6 +1608,61 @@ namespace Favalet
 
             AssertLogicalEqual(expression, expected, actual);
         }
+
+        [Test]
+        public void InferringApplyYCombinatorWithoutAnnotation()
+        {
+            var environment = CLREnvironment();
+
+            // https://stackoverflow.com/questions/4085079/how-would-you-implement-a-fixed-point-operator-y-combinator-in-f
+            // Y = G -> (g -> G (x -> g g x)) (g -> G (x -> g g x))
+            var expression =
+                Lambda(
+                    "G",
+                    Apply(
+                        Lambda( // g -> G (x -> g g x)
+                            "g",
+                            Apply(
+                                Identity("G"),
+                                Lambda( // x -> g g x
+                                    "x",
+                                    Apply(
+                                        Apply(
+                                            Identity("g"),
+                                            Identity("g")),
+                                        Identity("x"))))),
+                        Lambda( // g -> G (x -> g g x)
+                            "g",
+                            Apply(
+                                Identity("G"),
+                                Lambda( // x -> g g x
+                                    "x",
+                                    Apply(
+                                        Apply(
+                                            Identity("g"),
+                                            Identity("g")),
+                                        Identity("x")))))));
+
+            var actual = environment.Infer(expression);
+
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Identity(
+                        "a",
+                        Function(
+                            Function(ph0, ph0),
+                            Function(ph0, ph0))),
+                    Identity(
+                        "a",
+                        Function(ph0, ph0)),
+                    Function(
+                        ph0,
+                        ph0));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
         #endregion
 
 

@@ -100,5 +100,8 @@ namespace Favalet.Contexts
             p.Symbol.Equals(identity.Symbol) ?
                 new[] { VariableInformation.Create(p.HigherOrder, expr) } :
                 parentScope.LookupVariables(identity);
+
+        public override string ToString() =>
+            this.unifier.ToString();
     }
 }

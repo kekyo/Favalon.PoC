@@ -60,8 +60,8 @@ namespace Favalet.Expressions
         internal string InternalGetPrettyString(IPrettyStringContext context) =>
             this.GetPrettyString(context);
 
-        public XElement Xml =>
-            this.GetXml();
+        public string Xml =>
+            this.GetXml().ToString();
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string Readable =>

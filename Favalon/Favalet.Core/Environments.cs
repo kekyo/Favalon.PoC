@@ -28,11 +28,23 @@ namespace Favalet
 
         [DebuggerStepThrough]
         public PlaceholderTerm CreatePlaceholder(
-            PlaceholderOrderHints orderHint = PlaceholderOrderHints.TypeOrAbove) =>
-            PlaceholderTerm.Create(
+            PlaceholderOrderHints orderHint = PlaceholderOrderHints.TypeOrAbove)
+        {
+            var ph = PlaceholderTerm.Create(
                 this,
                 Interlocked.Increment(ref this.placeholderIndex),
                 orderHint);
+#if DEBUG
+            // Preassigns higher orders.
+            var ho = ph.HigherOrder;
+            while (!(ho is TerminationTerm))
+            {
+                ho = ho.HigherOrder;
+            }
+#endif
+            return ph;
+        }
+
         [DebuggerStepThrough]
         IPlaceholderTerm IPlaceholderProvider.CreatePlaceholder(
             PlaceholderOrderHints orderHint) =>
@@ -44,15 +56,16 @@ namespace Favalet
             var context = new ReduceContext(this, this, unifier);
 
             Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: expression=\"{expression.GetPrettyString(PrettyStringTypes.StrictAll)}\"");
+                $"Infer[{context.GetHashCode()}]: expression=\"{expression.GetXml()}\"");
 
             var inferred = context.Infer(expression);
+#if DEBUG
             Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetPrettyString(PrettyStringTypes.StrictAll)}\"");
-            
+                $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetXml()}\", unifier=\"{this.lastUnifier}\"");
+#endif            
             var fixupped = context.Fixup(inferred);
             Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: fixupped=\"{fixupped.GetPrettyString(PrettyStringTypes.StrictAll)}\"");
+                $"Infer[{context.GetHashCode()}]: fixupped=\"{fixupped.GetXml()}\"");
 #if DEBUG
             this.lastUnifier = unifier;
 #endif
@@ -65,11 +78,11 @@ namespace Favalet
             var context = new ReduceContext(this, this, unifier);
 
             Debug.WriteLine(
-                $"Reduce[{context.GetHashCode()}]: expression=\"{expression.GetPrettyString(PrettyStringTypes.StrictAll)}\"");
+                $"Reduce[{context.GetHashCode()}]: expression=\"{expression.GetXml()}\"");
 
             var reduced = context.Reduce(expression);
             Debug.WriteLine(
-                $"Reduce[{context.GetHashCode()}]: reduced=\"{reduced.GetPrettyString(PrettyStringTypes.StrictAll)}\"");
+                $"Reduce[{context.GetHashCode()}]: reduced=\"{reduced.GetXml()}\"");
 #if DEBUG
             this.lastUnifier = unifier;
 #endif

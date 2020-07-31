@@ -28,7 +28,7 @@ namespace Favalet.Contexts
         private XObject GetXmlHigherOrder(IExpression higherOrder) =>
             this.GetXml(higherOrder) switch
             {
-                XElement element when !element.Nodes().Any() =>
+                XElement element when !(element.Nodes().Any() || element.Attributes().Any()) =>
                     new XAttribute("higherOrder", element.Name),
                 XElement element =>
                     new XElement("HigherOrder", element)

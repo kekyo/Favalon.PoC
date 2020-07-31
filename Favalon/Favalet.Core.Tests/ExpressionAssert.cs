@@ -47,17 +47,17 @@ namespace Favalet
             {
                 if (indexes.TryGetPseudoIndex(lp1.Index, out var rpi))
                 {
-                    return Trap(rpi == rp1.PseudoIndex);
+                    return Trap(rpi == rp1.Index);
                 }
                 else
                 {
-                    if (indexes.TryGetIndex(rp1.PseudoIndex, out var li))
+                    if (indexes.TryGetIndex(rp1.Index, out var li))
                     {
                         return Trap(li == lp1.Index);
                     }
                     else
                     {
-                        indexes.Set(lp1.Index, rp1.PseudoIndex);
+                        indexes.Set(lp1.Index, rp1.Index);
                     }
                     return true;
                 }
@@ -67,17 +67,17 @@ namespace Favalet
             {
                 if (indexes.TryGetPseudoIndex(rp2.Index, out var lpi))
                 {
-                    return Trap(lpi == lp2.PseudoIndex);
+                    return Trap(lpi == lp2.Index);
                 }
                 else
                 {
-                    if (indexes.TryGetIndex(lp2.PseudoIndex, out var ri))
+                    if (indexes.TryGetIndex(lp2.Index, out var ri))
                     {
                         return Trap(ri == rp2.Index);
                     }
                     else
                     {
-                        indexes.Set(rp2.Index, lp2.PseudoIndex);
+                        indexes.Set(rp2.Index, lp2.Index);
                     }
                     return true;
                 }

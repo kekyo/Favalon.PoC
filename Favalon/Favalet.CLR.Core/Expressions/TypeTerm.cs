@@ -1,7 +1,9 @@
 ﻿using Favalet.Contexts;
 using Favalet.Internal;
 using System;
+using System.Collections;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace Favalet.Expressions
 {
@@ -43,6 +45,9 @@ namespace Favalet.Expressions
 
         protected override IExpression Reduce(IReduceContext context) =>
             this;
+
+        protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
+            new[] { new XAttribute("name", this.RuntimeType.GetReadableName()) };
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(

@@ -12,9 +12,9 @@ namespace Favalet.Internal
             string.Join(separator, values.Memoize());
 #else
 #if !NET35 && !NET40
-        [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+        [DebuggerHidden]
         public static string Join(string separator, IEnumerable<string> values) =>
             string.Join(separator, values);
 #endif

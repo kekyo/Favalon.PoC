@@ -1,7 +1,8 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using System;
+using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -40,6 +41,9 @@ namespace Favalet.Expressions.Algebraic
 
         public IExpression Call(IReduceContext context, IExpression argument) =>
             calculator.Compute(argument);
+
+        protected override sealed IEnumerable GetXmlValues(IXmlRenderContext context) =>
+            Enumerable.Empty<object>();
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
             "Logical";

@@ -1,5 +1,7 @@
 ﻿using Favalet.Contexts;
+using System.Collections;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace Favalet.Expressions.Specialized
 {
@@ -66,6 +68,9 @@ namespace Favalet.Expressions.Specialized
 
         protected override IExpression Reduce(IReduceContext context) =>
             this;
+
+        protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
+            new[] { new XAttribute("symbol", this.Symbol) };
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(

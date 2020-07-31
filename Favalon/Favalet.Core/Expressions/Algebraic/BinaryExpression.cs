@@ -1,5 +1,5 @@
 ﻿using Favalet.Contexts;
-using System;
+using System.Collections;
 using System.Diagnostics;
 
 namespace Favalet.Expressions.Algebraic
@@ -103,6 +103,9 @@ namespace Favalet.Expressions.Algebraic
 
         public override bool Equals(IExpression? other) =>
             other is TBinaryExpression rhs && this.Equals(rhs);
+
+        protected override sealed IEnumerable GetXmlValues(IXmlRenderContext context) =>
+            new[] { context.GetXml(this.Left), context.GetXml(this.Right) };
     }
 
     public static class BinaryExpressionExtension

@@ -1,6 +1,6 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using System;
+using System.Collections;
 using System.Diagnostics;
 
 namespace Favalet.Expressions
@@ -116,6 +116,9 @@ namespace Favalet.Expressions
             context.
                 Bind(this.Parameter, argument).
                 Reduce(this.Body);
+
+        protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
+            new[] { context.GetXml(this.Parameter), context.GetXml(this.Body) };
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(

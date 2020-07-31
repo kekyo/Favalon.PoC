@@ -1,6 +1,7 @@
 ﻿using Favalet.Contexts;
-using System;
+using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Favalet.Expressions.Specialized
 {
@@ -31,6 +32,9 @@ namespace Favalet.Expressions.Specialized
 
         protected override IExpression Reduce(IReduceContext context) =>
             this;
+
+        protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
+            Enumerable.Empty<object>();
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
             "_";

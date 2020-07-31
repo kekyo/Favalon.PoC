@@ -1,6 +1,6 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using System;
+using System.Collections;
 using System.Diagnostics;
 
 namespace Favalet.Expressions
@@ -125,6 +125,9 @@ namespace Favalet.Expressions
                 function = reducedFunction;
             }
         }
+
+        protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
+            new[] { context.GetXml(this.Function), context.GetXml(this.Argument) };
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(

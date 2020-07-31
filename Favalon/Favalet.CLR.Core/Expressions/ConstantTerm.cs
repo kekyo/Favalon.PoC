@@ -1,7 +1,10 @@
 ﻿using Favalet.Contexts;
 using System;
+using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace Favalet.Expressions
 {
@@ -44,14 +47,20 @@ namespace Favalet.Expressions
         protected override IExpression Reduce(IReduceContext context) =>
             this;
 
+        private string StringValue =>
+            this.Value switch
+            {
+                string value => $"\"{value}\"",
+                _ => this.Value.ToString()
+            };
+
+        protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
+            new[] { new XAttribute("value", this.StringValue) };
+
         protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                this.Value switch
-                {
-                    string value => $"\"{value}\"",
-                    _ => this.Value.ToString()
-                });
+                this.StringValue);
 
         [DebuggerStepThrough]
         public static ConstantTerm From(object value) =>

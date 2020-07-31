@@ -1,12 +1,16 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using System;
+using System.Collections;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace Favalet.Expressions
 {
     public interface IExpression : IEquatable<IExpression?>
     {
+        string Type { get; }
+
         IExpression HigherOrder { get; }
     }
 
@@ -16,7 +20,7 @@ namespace Favalet.Expressions
 
     #pragma warning disable CS0659
 
-    [DebuggerDisplay("{DebugPrint}")]
+    [DebuggerDisplay("{Readable}")]
     public abstract class Expression :
         IExpression
     {
@@ -45,18 +49,23 @@ namespace Favalet.Expressions
         internal IExpression InternalReduce(IReduceContext context) =>
             this.Reduce(context);
 
+        protected abstract IEnumerable GetXmlValues(IXmlRenderContext context);
+
         protected abstract string GetPrettyString(IPrettyStringContext context);
 
+        [DebuggerHidden]
+        internal IEnumerable InternalGetXmlValues(IXmlRenderContext context) =>
+            this.GetXmlValues(context);
         [DebuggerHidden]
         internal string InternalGetPrettyString(IPrettyStringContext context) =>
             this.GetPrettyString(context);
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string DebugPrint =>
-            this.GetPrettyString(PrettyStringTypes.Readable);
+        public XElement Xml =>
+            this.GetXml();
 
-        public string StrictAll =>
-            this.GetPrettyString(PrettyStringTypes.StrictAll);
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public string Readable =>
+            this.GetPrettyString(PrettyStringTypes.Readable);
 
         public override sealed string ToString() =>
             this.GetPrettyString(PrettyStringTypes.Strict);
@@ -77,8 +86,15 @@ namespace Favalet.Expressions
                 (FourthTerm _, FourthTerm _) => true,
                 (FourthTerm _, _) => false,
                 (_, FourthTerm _) => false,
-                _ => lhs.Equals(rhs) && lhs.HigherOrder.ExactEquals(rhs.HigherOrder)
+                _ =>
+                    lhs.Equals(rhs) &&
+                    ExactEquals(lhs.HigherOrder, rhs.HigherOrder)
             };
+
+        [DebuggerHidden]
+        public static XElement GetXml(this IExpression expression) =>
+            XmlRenderContext.Create().
+            GetXml(expression);
 
         [DebuggerHidden]
         public static string GetPrettyString(this IExpression expression, PrettyStringTypes type) =>

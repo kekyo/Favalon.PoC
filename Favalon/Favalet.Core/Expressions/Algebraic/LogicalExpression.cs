@@ -1,6 +1,6 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
-using System;
+using System.Collections;
 using System.Diagnostics;
 
 namespace Favalet.Expressions.Algebraic
@@ -76,6 +76,9 @@ namespace Favalet.Expressions.Algebraic
 
         protected override IExpression Reduce(IReduceContext context) =>
             calculator.Compute(context.Reduce(this.Operand));
+
+        protected override sealed IEnumerable GetXmlValues(IXmlRenderContext context) =>
+            new[] { context.GetXml(this.Operand) };
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(

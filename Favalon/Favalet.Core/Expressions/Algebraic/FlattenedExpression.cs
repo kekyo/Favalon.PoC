@@ -1,6 +1,7 @@
 ﻿using Favalet.Contexts;
 using Favalet.Internal;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -27,6 +28,9 @@ namespace Favalet.Expressions.Algebraic
 
         protected override sealed IExpression Reduce(IReduceContext context) =>
             throw new InvalidOperationException();
+
+        protected override sealed IEnumerable GetXmlValues(IXmlRenderContext context) =>
+            this.Operands.Select(context.GetXml);
 
         [DebuggerHidden]
         public void Deconstruct(out IExpression[] operands) =>

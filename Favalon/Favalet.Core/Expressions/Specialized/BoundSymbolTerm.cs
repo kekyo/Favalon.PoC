@@ -16,6 +16,7 @@ namespace Favalet.Expressions.Specialized
     {
         public readonly string Symbol;
 
+        [DebuggerStepThrough]
         private BoundSymbolTerm(string symbol, IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
@@ -24,10 +25,12 @@ namespace Favalet.Expressions.Specialized
 
         public override IExpression HigherOrder { get; }
 
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IBoundSymbolTerm.Symbol =>
-            this.Symbol;
+        string IBoundSymbolTerm.Symbol
+        {
+            [DebuggerStepThrough]
+            get => this.Symbol;
+        }
 
         public override int GetHashCode() =>
             this.Symbol.GetHashCode();

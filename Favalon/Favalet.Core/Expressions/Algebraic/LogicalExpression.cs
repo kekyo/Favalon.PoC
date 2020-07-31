@@ -17,6 +17,7 @@ namespace Favalet.Expressions.Algebraic
 
         public readonly IExpression Operand;
 
+        [DebuggerStepThrough]
         private LogicalExpression(
             IExpression operand, IExpression higherOrder)
         {
@@ -26,10 +27,12 @@ namespace Favalet.Expressions.Algebraic
 
         public override IExpression HigherOrder { get; }
 
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression ILogicalExpression.Operand =>
-            this.Operand;
+        IExpression ILogicalExpression.Operand
+        {
+            [DebuggerStepThrough]
+            get => this.Operand;
+        }
 
         public override int GetHashCode() =>
             this.Operand.GetHashCode();

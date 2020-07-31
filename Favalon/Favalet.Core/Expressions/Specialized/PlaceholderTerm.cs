@@ -34,6 +34,7 @@ namespace Favalet.Expressions.Specialized
 
         public readonly int Index;
 
+        [DebuggerStepThrough]
         private PlaceholderTerm(
             IPlaceholderProvider provider,
             int index,
@@ -71,10 +72,12 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        int IPlaceholderTerm.Index =>
-            this.Index;
+        int IPlaceholderTerm.Index
+        {
+            [DebuggerStepThrough]
+            get => this.Index;
+        }
 
         public override int GetHashCode() =>
             this.Index.GetHashCode();
@@ -124,7 +127,7 @@ namespace Favalet.Expressions.Specialized
 
     public static class PlaceholderTermExtension
     {
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static void Deconstruct(
             this IPlaceholderTerm placeholder,
             out int index) =>

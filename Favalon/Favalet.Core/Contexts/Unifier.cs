@@ -212,5 +212,8 @@ namespace Favalet.Contexts
                 this.unifications.
                 OrderBy(entry => entry.Key).
                 Select(entry => $"'{entry.Key} --> {entry.Value.GetPrettyString(PrettyStringTypes.Readable)}"));
+
+        public override string ToString() =>
+            "Unifier: " + this.Simple;
     }
 }

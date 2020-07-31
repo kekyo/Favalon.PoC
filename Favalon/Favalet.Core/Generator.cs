@@ -1,97 +1,85 @@
-﻿using Favalet.Contexts;
-using Favalet.Expressions;
+﻿using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Favalet
 {
+    [DebuggerStepThrough]
     public static class Generator
     {
-        [DebuggerStepThrough]
         public static Environments Environment() =>
             Favalet.Environments.Create(LogicalCalculator.Instance);
 
         private static readonly IdentityTerm kind =
             IdentityTerm.Create("*", FourthTerm.Instance);
 
-        [DebuggerStepThrough]
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static IdentityTerm Kind() =>
             kind;
-        [DebuggerStepThrough]
         public static IdentityTerm Kind(string symbol) =>
             IdentityTerm.Create(symbol, FourthTerm.Instance);
 
-        [DebuggerStepThrough]
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static UnspecifiedTerm Unspecified() =>
             UnspecifiedTerm.Instance;
 
-        [DebuggerStepThrough]
         public static IdentityTerm Identity(string symbol) =>
             IdentityTerm.Create(symbol);
-        [DebuggerStepThrough]
         public static IdentityTerm Identity(string symbol, IExpression higherOrder) =>
             IdentityTerm.Create(symbol, higherOrder);
 
-        [DebuggerStepThrough]
         public static BoundSymbolTerm BoundSymbol(string symbol) =>
             BoundSymbolTerm.Create(symbol);
-        [DebuggerStepThrough]
         public static BoundSymbolTerm BoundSymbol(string symbol, IExpression higherOrder) =>
             BoundSymbolTerm.Create(symbol, higherOrder);
 
-        [DebuggerStepThrough]
         public static LogicalExpression Logical(IBinaryExpression operand) =>
             LogicalExpression.Create(operand);
-        [DebuggerStepThrough]
+#if !NET35 && !NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static LogicalOperator Logical() =>
             LogicalOperator.Instance;
 
-        [DebuggerStepThrough]
         public static AndExpression And(IExpression lhs, IExpression rhs) =>
             AndExpression.Create(lhs, rhs);
-        [DebuggerStepThrough]
         public static AndExpression And(IExpression lhs, IExpression rhs, IExpression higherOrder) =>
             AndExpression.Create(lhs, rhs, higherOrder);
 
-        [DebuggerStepThrough]
         public static OrExpression Or(IExpression lhs, IExpression rhs) =>
             OrExpression.Create(lhs, rhs);
-        [DebuggerStepThrough]
         public static OrExpression Or(IExpression lhs, IExpression rhs, IExpression higherOrder) =>
             OrExpression.Create(lhs, rhs, higherOrder);
 
-        [DebuggerStepThrough]
         public static LambdaExpression Lambda(
             IBoundSymbolTerm parameter, IExpression body) =>
             LambdaExpression.Create(parameter, body);
-        [DebuggerStepThrough]
         public static LambdaExpression Lambda(
             string parameter, IExpression body) =>
             LambdaExpression.Create(BoundSymbolTerm.Create(parameter), body);
-        [DebuggerStepThrough]
         public static LambdaExpression Lambda(
             IBoundSymbolTerm parameter, IExpression body, IExpression higherOrder) =>
             LambdaExpression.Create(parameter, body, higherOrder);
-        [DebuggerStepThrough]
         public static LambdaExpression Lambda(
             string parameter, IExpression body, IExpression higherOrder) =>
             LambdaExpression.Create(BoundSymbolTerm.Create(parameter), body, higherOrder);
 
-        [DebuggerStepThrough]
         public static ApplyExpression Apply(
             IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument);
-        [DebuggerStepThrough]
         public static ApplyExpression Apply(
             IExpression function, IExpression argument, IExpression higherOrder) =>
             ApplyExpression.Create(function, argument, higherOrder);
 
-        [DebuggerStepThrough]
         public static FunctionExpression Function(
             IExpression parameter, IExpression result) =>
             FunctionExpression.Create(parameter, result);
-        [DebuggerStepThrough]
         public static FunctionExpression Function(
             IExpression parameter, IExpression result, IExpression higherOrder) =>
             FunctionExpression.Create(parameter, result, higherOrder);

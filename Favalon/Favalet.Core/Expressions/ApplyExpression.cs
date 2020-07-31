@@ -23,6 +23,7 @@ namespace Favalet.Expressions
         public readonly IExpression Function;
         public readonly IExpression Argument;
 
+        [DebuggerStepThrough]
         private ApplyExpression(
             IExpression function,
             IExpression argument,
@@ -35,15 +36,19 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
         
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression IApplyExpression.Function =>
-            this.Function;
+        IExpression IApplyExpression.Function
+        {
+            [DebuggerStepThrough]
+            get => this.Function;
+        }
 
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression IApplyExpression.Argument =>
-            this.Argument;
+        IExpression IApplyExpression.Argument
+        {
+            [DebuggerStepThrough]
+            get => this.Argument;
+        }
 
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
@@ -148,7 +153,7 @@ namespace Favalet.Expressions
 
     public static class ApplyExpressionExtension
     {
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static void Deconstruct(
             this IApplyExpression apply,
             out IExpression function,

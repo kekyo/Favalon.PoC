@@ -17,23 +17,35 @@ namespace Favalet.Expressions
     public sealed class MethodTerm :
         Expression, IMethodTerm
     {
+        private readonly ValueLazy<FunctionExpression> higherOrder;
+
         public readonly MethodBase RuntimeMethod;
 
         [DebuggerStepThrough]
-        private MethodTerm(MethodBase runtimeMethod) =>
+        private MethodTerm(MethodBase runtimeMethod)
+        {
             this.RuntimeMethod = runtimeMethod;
+            this.higherOrder = ValueLazy.Create(() =>
+                FunctionExpression.Create(
+                    TypeTerm.From(this.RuntimeMethod.GetParameters()[0].ParameterType),
+                    TypeTerm.From(
+                        this.RuntimeMethod is MethodInfo method ?
+                            method.ReturnType :
+                            this.RuntimeMethod.DeclaringType)));
+        }
 
-        public override IExpression HigherOrder =>
-            FunctionExpression.Create(
-                TypeTerm.From(this.RuntimeMethod.GetParameters()[0].ParameterType),
-                TypeTerm.From(
-                    this.RuntimeMethod is MethodInfo method ?
-                        method.ReturnType :
-                        this.RuntimeMethod.DeclaringType));
+        public override IExpression HigherOrder
+        {
+            [DebuggerStepThrough]
+            get => this.higherOrder.Value;
+        }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        MethodBase IMethodTerm.RuntimeMethod =>
-            this.RuntimeMethod;
+        MethodBase IMethodTerm.RuntimeMethod
+        {
+            [DebuggerStepThrough]
+            get => this.RuntimeMethod;
+        }
 
         public override int GetHashCode() =>
             this.RuntimeMethod.GetHashCode();
@@ -90,7 +102,7 @@ namespace Favalet.Expressions
 
     public static class MethodTermExtension
     {
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static void Deconstruct(
             this IMethodTerm method,
             out MethodBase runtimeMethod) =>

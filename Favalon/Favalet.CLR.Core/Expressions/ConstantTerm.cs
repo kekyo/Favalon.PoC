@@ -1,4 +1,5 @@
 ﻿using Favalet.Contexts;
+using Favalet.Internal;
 using System;
 using System.Collections;
 using System.Diagnostics;
@@ -16,18 +17,30 @@ namespace Favalet.Expressions
     public sealed class ConstantTerm :
         Expression, IConstantTerm
     {
+        private readonly ValueLazy<ITerm> higherOrder;
+
         public readonly object Value;
 
         [DebuggerStepThrough]
-        private ConstantTerm(object value) =>
+        private ConstantTerm(object value)
+        {
             this.Value = value;
+            this.higherOrder = ValueLazy.Create(() =>
+                TypeTerm.From(this.Value.GetType()));
+        }
 
-        public override IExpression HigherOrder =>
-            TypeTerm.From(this.Value.GetType());
+        public override IExpression HigherOrder
+        {
+            [DebuggerStepThrough]
+            get => higherOrder.Value;
+        }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        object IConstantTerm.Value =>
-            this.Value;
+        object IConstantTerm.Value
+        {
+            [DebuggerStepThrough]
+            get => this.Value;
+        }
 
         public override int GetHashCode() =>
             this.Value.GetHashCode();
@@ -47,12 +60,15 @@ namespace Favalet.Expressions
         protected override IExpression Reduce(IReduceContext context) =>
             this;
 
-        private string StringValue =>
-            this.Value switch
+        private string StringValue
+        {
+            [DebuggerStepThrough]
+            get => this.Value switch
             {
                 string value => $"\"{value}\"",
                 _ => this.Value.ToString()
             };
+        }
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             new[] { new XAttribute("value", this.StringValue) };

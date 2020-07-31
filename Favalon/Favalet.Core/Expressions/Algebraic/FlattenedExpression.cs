@@ -32,7 +32,7 @@ namespace Favalet.Expressions.Algebraic
         protected override sealed IEnumerable GetXmlValues(IXmlRenderContext context) =>
             this.Operands.Select(context.GetXml);
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public void Deconstruct(out IExpression[] operands) =>
             operands = this.Operands;
 

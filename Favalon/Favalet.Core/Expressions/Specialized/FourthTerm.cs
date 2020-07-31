@@ -5,13 +5,13 @@ using System.Linq;
 
 namespace Favalet.Expressions.Specialized
 {
+    [DebuggerStepThrough]
     public sealed class FourthTerm :
         Expression, ITerm
     {
         private FourthTerm()
         { }
 
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public override IExpression HigherOrder =>
             TerminationTerm.Instance;

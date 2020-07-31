@@ -7,7 +7,7 @@ namespace Favalet.Internal
 {
     internal static class EnumerableEx
     {
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static T[] Memoize<T>(
             this IEnumerable<T> enumerable) =>
             enumerable switch
@@ -18,7 +18,7 @@ namespace Favalet.Internal
             };
 
         // unfold
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static IEnumerable<U> Traverse<T, U>(
             this T? seed,
             Func<T, U?> predicate)
@@ -33,7 +33,7 @@ namespace Favalet.Internal
             }
         }
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static IEnumerable<U> Collect<T, U>(
             this IEnumerable<T> enumerable,
             Func<T, U?> predicate)
@@ -49,7 +49,7 @@ namespace Favalet.Internal
         }
 
 #if NET35 || NET40 || NET45 || NETSTANDARD1_0
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static IEnumerable<T> Append<T>(
             this IEnumerable<T> enumerable,
             T value)
@@ -62,7 +62,7 @@ namespace Favalet.Internal
         }
 #endif
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static bool EqualsPartiallyOrdered<T>(
             this IEnumerable<T> lhs,
             IEnumerable<T> rhs)

@@ -20,6 +20,7 @@ namespace Favalet.Expressions
         public readonly IExpression Parameter;
         public readonly IExpression Result;
 
+        [DebuggerStepThrough]
         private FunctionExpression(
             IExpression parameter, IExpression result, IExpression higherOrder)
         {
@@ -30,15 +31,19 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
 
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression IFunctionExpression.Parameter =>
-            this.Parameter;
+        IExpression IFunctionExpression.Parameter
+        {
+            [DebuggerStepThrough]
+            get => this.Parameter;
+        }
 
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression IFunctionExpression.Result =>
-            this.Result;
+        IExpression IFunctionExpression.Result
+        {
+            [DebuggerStepThrough]
+            get => this.Result;
+        }
 
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^ this.Result.GetHashCode();
@@ -145,7 +150,7 @@ namespace Favalet.Expressions
 
     public static class FunctionExpressionExtension
     {
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static void Deconstruct(
             this IFunctionExpression function,
             out IExpression parameter,

@@ -19,6 +19,7 @@ namespace Favalet.Expressions
         public readonly IBoundSymbolTerm Parameter;
         public readonly IExpression Body;
 
+        [DebuggerStepThrough]
         private LambdaExpression(
             IBoundSymbolTerm parameter, IExpression body, IExpression higherOrder)
         {
@@ -29,15 +30,19 @@ namespace Favalet.Expressions
 
         public override IExpression HigherOrder { get; }
 
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IBoundSymbolTerm ILambdaExpression.Parameter =>
-            this.Parameter;
+        IBoundSymbolTerm ILambdaExpression.Parameter
+        {
+            [DebuggerStepThrough]
+            get => this.Parameter;
+        }
 
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression ILambdaExpression.Body =>
-            this.Body;
+        IExpression ILambdaExpression.Body
+        {
+            [DebuggerStepThrough]
+            get => this.Body;
+        }
 
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^ this.Body.GetHashCode();
@@ -137,7 +142,7 @@ namespace Favalet.Expressions
 
     public static class LambdaExpressionExtension
     {
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static void Deconstruct(
             this ILambdaExpression lambda,
             out IBoundSymbolTerm parameter,

@@ -5,24 +5,20 @@ using System.Reflection;
 
 namespace Favalet
 {
+    [DebuggerStepThrough]
     public static class CLRGenerator
     {
-        [DebuggerStepThrough]
         public static Environments CLREnvironment() =>
             Favalet.Environments.Create(TypeCalculator.Instance);
 
-        [DebuggerHidden]
         public static ITerm Type<T>() =>
             TypeTerm.From(typeof(T));
-        [DebuggerHidden]
         public static ITerm Type(Type runtimeType) =>
             TypeTerm.From(runtimeType);
 
-        [DebuggerHidden]
         public static MethodTerm Method(MethodBase runtimeMethod) =>
             MethodTerm.From(runtimeMethod);
 
-        [DebuggerHidden]
         public static ConstantTerm Constant(object value) =>
             ConstantTerm.From(value);
     }

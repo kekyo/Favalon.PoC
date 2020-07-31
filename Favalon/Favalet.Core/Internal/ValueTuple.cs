@@ -1,7 +1,10 @@
 ﻿
 #if NET35
+using System.Diagnostics;
+
 namespace System
 {
+    [DebuggerStepThrough]
     internal struct ValueTuple<T1, T2>
     {
         public readonly T1 Item1;
@@ -14,6 +17,7 @@ namespace System
         }
     }
 
+    [DebuggerStepThrough]
     internal struct ValueTuple<T1, T2, T3>
     {
         public readonly T1 Item1;
@@ -28,6 +32,7 @@ namespace System
         }
     }
 
+    [DebuggerStepThrough]
     internal struct ValueTuple<T1, T2, T3, T4>
     {
         public readonly T1 Item1;

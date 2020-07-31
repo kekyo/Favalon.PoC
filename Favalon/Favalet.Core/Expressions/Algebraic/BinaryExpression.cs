@@ -28,14 +28,19 @@ namespace Favalet.Expressions.Algebraic
 
         public override IExpression HigherOrder { get; }
 
-        [DebuggerHidden]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression IBinaryExpression.Left =>
-            this.Left;
-        [DebuggerHidden]
+        IExpression IBinaryExpression.Left
+        {
+            [DebuggerStepThrough]
+            get => this.Left;
+        }
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IExpression IBinaryExpression.Right =>
-            this.Right;
+        IExpression IBinaryExpression.Right
+        {
+            [DebuggerStepThrough]
+            get => this.Right;
+        }
 
         internal abstract IExpression OnCreate(
             IExpression left, IExpression right, IExpression higherOrder);
@@ -110,7 +115,7 @@ namespace Favalet.Expressions.Algebraic
 
     public static class BinaryExpressionExtension
     {
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static void Deconstruct(
             this IBinaryExpression binary,
             out IExpression left,

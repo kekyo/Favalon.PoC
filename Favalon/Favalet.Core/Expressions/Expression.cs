@@ -39,13 +39,13 @@ namespace Favalet.Expressions
         protected abstract IExpression Fixup(IReduceContext context);
         protected abstract IExpression Reduce(IReduceContext context);
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         internal IExpression InternalInfer(IReduceContext context) =>
             this.Infer(context);
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         internal IExpression InternalFixup(IReduceContext context) =>
             this.Fixup(context);
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         internal IExpression InternalReduce(IReduceContext context) =>
             this.Reduce(context);
 
@@ -53,10 +53,10 @@ namespace Favalet.Expressions
 
         protected abstract string GetPrettyString(IPrettyStringContext context);
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         internal IEnumerable InternalGetXmlValues(IXmlRenderContext context) =>
             this.GetXmlValues(context);
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         internal string InternalGetPrettyString(IPrettyStringContext context) =>
             this.GetPrettyString(context);
 
@@ -72,7 +72,7 @@ namespace Favalet.Expressions
 
         public abstract bool Equals(IExpression? other);
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public override bool Equals(object obj) =>
             this.Equals(obj as IExpression);
     }
@@ -91,12 +91,12 @@ namespace Favalet.Expressions
                     ExactEquals(lhs.HigherOrder, rhs.HigherOrder)
             };
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static XElement GetXml(this IExpression expression) =>
             XmlRenderContext.Create().
             GetXml(expression);
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static string GetPrettyString(this IExpression expression, PrettyStringTypes type) =>
             PrettyStringContext.Create(type).
             GetPrettyString(expression);

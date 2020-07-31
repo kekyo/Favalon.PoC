@@ -89,7 +89,7 @@ namespace Favalet
             return reduced;
         }
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public new void MutableBind(IBoundSymbolTerm symbol, IExpression expression) =>
             base.MutableBind(symbol, expression);
 
@@ -103,7 +103,7 @@ namespace Favalet
 
     public static class EnvironmentExtension
     {
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static void MutableBind(
             this IEnvironments environment,
             string symbol,

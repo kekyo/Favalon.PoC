@@ -115,7 +115,7 @@ namespace Favalet
             }
         }
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static bool Equals(IExpression expected, IExpression actual) =>
             Equals(expected, actual, new Indexes());
     }

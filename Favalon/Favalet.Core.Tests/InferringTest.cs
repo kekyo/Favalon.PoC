@@ -1610,38 +1610,369 @@ namespace Favalet
         }
 
         [Test]
-        public void InferringApplyYCombinatorWithoutAnnotation()
+        public void InferringApplyWithAnnotation1()
         {
             var environment = CLREnvironment();
 
-            // https://stackoverflow.com/questions/4085079/how-would-you-implement-a-fixed-point-operator-y-combinator-in-f
-            // Y = G -> (g -> G (x -> g g x)) (g -> G (x -> g g x))
+            // a:(bool -> _) b
+            var expression =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Identity("bool"),
+                            Unspecified())),
+                    Identity("b"));
+
+            var actual = environment.Infer(expression);
+
+            // (a:(bool -> '0) b:bool):'0
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Identity("a",
+                        Function(Identity("bool"), ph0)),
+                    Identity("b", Identity("bool")),
+                    ph0);
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyWithAnnotation2()
+        {
+            var environment = CLREnvironment();
+
+            // a:(_ -> bool) b
+            var expression =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Unspecified(),
+                            Identity("bool"))),
+                    Identity("b"));
+
+            var actual = environment.Infer(expression);
+
+            // (a:('0 -> bool) b:'0):bool
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Identity("a",
+                        Function(ph0, Identity("bool"))),
+                    Identity("b", ph0),
+                    Identity("bool"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyWithAnnotation3()
+        {
+            var environment = CLREnvironment();
+
+            // a:(int -> bool) b
+            var expression =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Identity("int"),
+                            Identity("bool"))),
+                    Identity("b"));
+
+            var actual = environment.Infer(expression);
+
+            // (a:(int -> bool) b:int):bool
+            var expected =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Identity("int"),
+                            Identity("bool"))),
+                    Identity("b", Identity("int")),
+                    Identity("bool"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyWithAnnotation4()
+        {
+            var environment = CLREnvironment();
+
+            // a b:bool
+            var expression =
+                Apply(
+                    Identity("a"),
+                    Identity("b", Identity("bool")));
+
+            var actual = environment.Infer(expression);
+
+            // (a:(bool -> _) b:bool):_
+            var expected =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Identity("bool"),
+                            Unspecified())),
+                    Identity("b", Identity("bool")),
+                    Unspecified());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyWithAnnotation5()
+        {
+            var environment = CLREnvironment();
+
+            // (a b):bool
+            var expression =
+                Apply(
+                    Identity("a"),
+                    Identity("b"),
+                    Identity("bool"));
+
+            var actual = environment.Infer(expression);
+
+            // (a:('0 -> bool) b:'0):bool
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Identity("a",
+                        Function(
+                            ph0,
+                            Identity("bool"))),
+                    Identity("b", ph0),
+                    Identity("bool"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyWithAnnotation6()
+        {
+            var environment = CLREnvironment();
+
+            // (a b:bool):int
+            var expression =
+                Apply(
+                    Identity("a"),
+                    Identity("b", Identity("bool")),
+                    Identity("int"));
+
+            var actual = environment.Infer(expression);
+
+            // (a:(bool -> int) b:bool):int
+            var expected =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Identity("bool"),
+                            Identity("int"))),
+                    Identity("b", Identity("bool")),
+                    Identity("int"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyWithAnnotation7()
+        {
+            var environment = CLREnvironment();
+
+            // a:(_ -> int) b:bool
+            var expression =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Unspecified(),
+                            Identity("int"))),
+                    Identity("b", Identity("bool")));
+
+            var actual = environment.Infer(expression);
+
+            // (a:(bool -> int) b:bool):int
+            var expected =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Identity("bool"),
+                            Unspecified())),
+                    Identity("b", Identity("bool")),
+                    Unspecified());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyWithAnnotation8()
+        {
+            var environment = CLREnvironment();
+
+            // a:(_ -> int) b:bool
+            var expression =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Unspecified(),
+                            Identity("int"))),
+                    Identity("b", Identity("bool")));
+
+            var actual = environment.Infer(expression);
+
+            // (a:(bool -> int) b:bool):int
+            var expected =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Identity("bool"),
+                            Unspecified())),
+                    Identity("b", Identity("bool")),
+                    Unspecified());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyWithAnnotation9()
+        {
+            var environment = CLREnvironment();
+
+            // (a:(bool -> _) b):int
+            var expression =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Unspecified(),
+                            Identity("int"))),
+                    Identity("b", Identity("bool")));
+
+            var actual = environment.Infer(expression);
+
+            // (a:(bool -> int) b:bool):int
+            var expected =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Identity("bool"),
+                            Identity("int"))),
+                    Identity("b", Identity("bool")),
+                    Identity("int"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyWithAnnotation10()
+        {
+            var environment = CLREnvironment();
+
+            // (a:(bool -> int) b:bool):int
+            var expression =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Identity("bool"),
+                            Identity("int"))),
+                    Identity("b", Identity("bool")),
+                    Identity("int"));
+
+            var actual = environment.Infer(expression);
+
+            // (a:(bool -> int) b:bool):int
+            var expected =
+                Apply(
+                    Identity("a",
+                        Function(
+                            Identity("bool"),
+                            Identity("int"))),
+                    Identity("b", Identity("bool")),
+                    Identity("int"));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        //[Test]
+        public void InferringApplyYCombinator()
+        {
+            var environment = CLREnvironment();
+
+            // Y = f -> (x -> f (x x)) (x -> f (x x))
             var expression =
                 Lambda(
-                    "G",
+                    "f",
                     Apply(
-                        Lambda( // g -> G (x -> g g x)
-                            "g",
+                        Lambda( // x -> f (x x)
+                            "x",
                             Apply(
-                                Identity("G"),
-                                Lambda( // x -> g g x
-                                    "x",
+                                Identity("f"),
+                                Apply(
+                                    Identity("x"),
+                                    Identity("x")))),
+                        Lambda( // x -> f (x x)
+                            "x",
+                            Apply(
+                                Identity("f"),
+                                Apply(
+                                    Identity("x"),
+                                    Identity("x"))))));
+
+            var actual = environment.Infer(expression);
+
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Identity(
+                        "a",
+                        Function(
+                            Function(ph0, ph0),
+                            Function(ph0, ph0))),
+                    Identity(
+                        "a",
+                        Function(ph0, ph0)),
+                    Function(
+                        ph0,
+                        ph0));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        //[Test]
+        public void InferringApplyZCombinator()
+        {
+            var environment = CLREnvironment();
+
+            // Z = f -> (x -> f (y -> x x y)) (x -> f (y -> x x y))
+            var expression =
+                Lambda(
+                    "f",
+                    Apply(
+                        Lambda( // x -> f (y -> x x y)
+                            "x",
+                            Apply(
+                                Identity("f"),
+                                Lambda( // y -> x x y
+                                    "y",
                                     Apply(
                                         Apply(
-                                            Identity("g"),
-                                            Identity("g")),
-                                        Identity("x"))))),
-                        Lambda( // g -> G (x -> g g x)
-                            "g",
+                                            Identity("x"),
+                                            Identity("x")),
+                                        Identity("y"))))),
+                        Lambda( // x -> f (y -> x x y)
+                            "x",
                             Apply(
-                                Identity("G"),
-                                Lambda( // x -> g g x
-                                    "x",
+                                Identity("f"),
+                                Lambda( // y -> x x y
+                                    "y",
                                     Apply(
                                         Apply(
-                                            Identity("g"),
-                                            Identity("g")),
-                                        Identity("x")))))));
+                                            Identity("x"),
+                                            Identity("x")),
+                                        Identity("y")))))));
 
             var actual = environment.Infer(expression);
 

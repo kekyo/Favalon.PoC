@@ -17,7 +17,6 @@ namespace Favalet.Expressions.Algebraic
         private static readonly IExpression higherOrder =
             FunctionExpression.Create(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
 
-        [DebuggerStepThrough]
         private LogicalOperator()
         { }
 

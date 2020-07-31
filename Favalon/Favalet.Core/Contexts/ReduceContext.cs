@@ -8,11 +8,10 @@ namespace Favalet.Contexts
     public interface IReduceContext :
         IScopeContext, IPlaceholderProvider
     {
-        IExpression Fixup(IExpression expression);
-
         IReduceContext Bind(IBoundSymbolTerm parameter, IExpression expression);
 
         IExpression InferHigherOrder(IExpression higherOrder);
+        IExpression Fixup(IExpression expression);
 
         void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
 
@@ -42,13 +41,13 @@ namespace Favalet.Contexts
         public ILogicalCalculator TypeCalculator =>
             this.rootScope.TypeCalculator;
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public IExpression Infer(IExpression expression) =>
             expression is Expression expr ? expr.InternalInfer(this) : expression;
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public IExpression Fixup(IExpression expression) =>
             expression is Expression expr ? expr.InternalFixup(this) : expression;
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public IExpression Reduce(IExpression expression) =>
             expression is Expression expr ? expr.InternalReduce(this) : expression;
 
@@ -84,11 +83,11 @@ namespace Favalet.Contexts
             return reduced;
         }
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public void Unify(IExpression fromHigherOrder, IExpression toHigherOrder) =>
             this.unifier.Unify(fromHigherOrder, toHigherOrder);
 
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public IExpression? ResolvePlaceholderIndex(int index) =>
             this.unifier.ResolvePlaceholderIndex(index);
 
@@ -102,6 +101,6 @@ namespace Favalet.Contexts
                 parentScope.LookupVariables(identity);
 
         public override string ToString() =>
-            this.unifier.ToString();
+            "ReduceContext: " + this.unifier;
     }
 }

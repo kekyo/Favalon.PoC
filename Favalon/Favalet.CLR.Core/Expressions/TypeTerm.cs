@@ -21,12 +21,18 @@ namespace Favalet.Expressions
         private TypeTerm(Type runtimeType) =>
             this.RuntimeType = runtimeType;
 
-        public override IExpression HigherOrder =>
-            Generator.Kind();
+        public override IExpression HigherOrder
+        {
+            [DebuggerStepThrough]
+            get => Generator.Kind();
+        }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        Type ITypeTerm.RuntimeType =>
-            this.RuntimeType;
+        Type ITypeTerm.RuntimeType
+        {
+            [DebuggerStepThrough]
+            get => this.RuntimeType;
+        }
 
         public override int GetHashCode() =>
             this.RuntimeType.GetHashCode();
@@ -70,7 +76,7 @@ namespace Favalet.Expressions
 
     public static class TypeTermExtension
     {
-        [DebuggerHidden]
+        [DebuggerStepThrough]
         public static void Deconstruct(
             this ITypeTerm type,
             out Type runtimeType) =>

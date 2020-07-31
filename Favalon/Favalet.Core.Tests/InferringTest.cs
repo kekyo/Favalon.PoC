@@ -1516,10 +1516,100 @@ namespace Favalet
         }
         #endregion
 
+        #region Apply
+        [Test]
+        public void InferringApplyWithoutAnnotation()
+        {
+            var environment = CLREnvironment();
 
+            // a b
+            var expression =
+                Apply(
+                    Identity("a"),
+                    Identity("b"));
 
-        // TODO: Functionについてテストする
-        // TODO: Applyについてテストする
+            var actual = environment.Infer(expression);
+
+            // (a:('0 -> '1) b:'0):'1
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var ph1 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Identity("a", Function(ph0, ph1)),
+                    Identity("b", ph0),
+                    ph1);
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyNestedFunctionWithoutAnnotation1()
+        {
+            var environment = CLREnvironment();
+
+            // a a
+            var expression =
+                Apply(
+                    Identity("a"),
+                    Identity("a"));
+
+            var actual = environment.Infer(expression);
+
+            // (a:('0 -> '1) a:'0):'1
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var ph1 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Identity("a", Function(ph0, ph1)),
+                    Identity("a", ph0),
+                    ph1);
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringApplyNestedFunctionWithoutAnnotation2()
+        {
+            var environment = CLREnvironment();
+
+            // a = x -> x
+            environment.MutableBind(
+                "a",
+                Lambda(
+                    "x",
+                    Identity("x")));
+
+            // a a
+            var expression =
+                Apply(
+                    Identity("a"),
+                    Identity("a"));
+
+            var actual = environment.Infer(expression);
+
+            // ((x:('0 -> '0) -> x:('0 -> '0)) (x:'0 -> x:'0)):('0 -> '0)
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Identity(
+                        "a",
+                        Function(
+                            Function(ph0, ph0),
+                            Function(ph0, ph0))),
+                    Identity(
+                        "a",
+                        Function(ph0, ph0)),
+                    Function(
+                        ph0,
+                        ph0));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        #endregion
+
 
 
         // TODO: 異なる型でInferする場合をテストする

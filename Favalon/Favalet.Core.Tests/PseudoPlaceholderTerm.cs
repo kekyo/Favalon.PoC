@@ -34,22 +34,7 @@ namespace Favalet
                 this.Index = index;
 
             public override IExpression HigherOrder =>
-                throw new NotImplementedException();
-
-            public override int GetHashCode() =>
-                this.Index.GetHashCode();
-
-            public bool Equals(PseudoPlaceholderTerm rhs) =>
-                throw new NotImplementedException();
-
-            public override bool Equals(IExpression? other) =>
-                throw new NotImplementedException();
-
-            protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
-                new[] { new XAttribute("index", this.Index) };
-
-            protected override string GetPrettyString(IPrettyStringContext context) =>
-                $"'{this.Index}";
+                TerminationTerm.Instance;
 
             protected override IExpression Fixup(IReduceContext context) =>
                 throw new NotImplementedException();
@@ -59,6 +44,21 @@ namespace Favalet
 
             protected override IExpression Reduce(IReduceContext context) =>
                 throw new NotImplementedException();
+
+            public override int GetHashCode() =>
+                this.Index.GetHashCode();
+
+            public bool Equals(PseudoPlaceholderTerm rhs) =>
+                false;
+
+            public override bool Equals(IExpression? other) =>
+                false;
+
+            protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
+                new[] { new XAttribute("index", this.Index) };
+
+            protected override string GetPrettyString(IPrettyStringContext context) =>
+                $"'{this.Index}";
         }
     }
 }

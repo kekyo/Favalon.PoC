@@ -56,7 +56,7 @@ namespace Favalet.Expressions
             var parameter = context.Infer(this.Parameter);
             var result = context.Infer(this.Result);
 
-            var functionHigherOrder = From(
+            var functionHigherOrder = Create(
                 parameter.HigherOrder,
                 result.HigherOrder,
                 context,
@@ -119,7 +119,7 @@ namespace Favalet.Expressions
                 $"{context.GetPrettyString(this.Parameter)} -> {context.GetPrettyString(this.Result)}");
 
         [DebuggerStepThrough]
-        private static FunctionExpression From(
+        private static FunctionExpression Create(
             IExpression parameter, IExpression result, Func<IExpression> higherOrder) =>
             (parameter, result) switch
             {
@@ -129,18 +129,18 @@ namespace Favalet.Expressions
             };
 
         [DebuggerStepThrough]
-        public static FunctionExpression From(
+        public static FunctionExpression Create(
             IExpression parameter, IExpression result, IExpression higherOrder) =>
-            From(parameter, result, () => higherOrder);
+            Create(parameter, result, () => higherOrder);
         [DebuggerStepThrough]
-        public static FunctionExpression From(
+        public static FunctionExpression Create(
             IExpression parameter, IExpression result) =>
-            From(parameter, result, () => UnspecifiedTerm.Instance);
+            Create(parameter, result, () => UnspecifiedTerm.Instance);
 
         [DebuggerStepThrough]
-        internal static FunctionExpression From(
+        internal static FunctionExpression Create(
             IExpression parameter, IExpression result, IReduceContext context, PlaceholderOrderHints orderHint) =>
-            From(parameter, result, () => context.CreatePlaceholder(orderHint));
+            Create(parameter, result, () => context.CreatePlaceholder(orderHint));
     }
 
     public static class FunctionExpressionExtension

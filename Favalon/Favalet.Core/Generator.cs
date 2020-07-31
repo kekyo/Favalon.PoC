@@ -82,14 +82,18 @@ namespace Favalet
         public static ApplyExpression Apply(
             IExpression function, IExpression argument) =>
             ApplyExpression.Create(function, argument);
+        [DebuggerStepThrough]
+        public static ApplyExpression Apply(
+            IExpression function, IExpression argument, IExpression higherOrder) =>
+            ApplyExpression.Create(function, argument, higherOrder);
 
         [DebuggerStepThrough]
-        public static IExpression Function(
+        public static FunctionExpression Function(
             IExpression parameter, IExpression result) =>
-            FunctionExpression.From(parameter, result);
+            FunctionExpression.Create(parameter, result);
         [DebuggerStepThrough]
-        public static IExpression Function(
+        public static FunctionExpression Function(
             IExpression parameter, IExpression result, IExpression higherOrder) =>
-            FunctionExpression.From(parameter, result, higherOrder);
+            FunctionExpression.Create(parameter, result, higherOrder);
     }
 }

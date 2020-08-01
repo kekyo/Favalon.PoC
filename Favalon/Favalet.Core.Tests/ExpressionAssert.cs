@@ -9,20 +9,20 @@ namespace Favalet
     {
         private sealed class Indexes
         {
-            private readonly Dictionary<int, int> indexToPseudoIndex = new Dictionary<int, int>();
-            private readonly Dictionary<int, int> pseudoIndexToIndex = new Dictionary<int, int>();
+            private readonly Dictionary<string, string> indexToPseudoIndex = new Dictionary<string, string>();
+            private readonly Dictionary<string, string> pseudoIndexToIndex = new Dictionary<string, string>();
 
             [DebuggerStepThrough]
             public Indexes()
             { }
 
-            public bool TryGetPseudoIndex(int index, out int pseudoIndex) =>
+            public bool TryGetPseudoIndex(string index, out string pseudoIndex) =>
                 this.indexToPseudoIndex.TryGetValue(index, out pseudoIndex);
 
-            public bool TryGetIndex(int pseudoIndex, out int index) =>
+            public bool TryGetIndex(string pseudoIndex, out string index) =>
                 this.pseudoIndexToIndex.TryGetValue(pseudoIndex, out index);
 
-            public void Set(int index, int pseudoIndex)
+            public void Set(string index, string pseudoIndex)
             {
                 this.indexToPseudoIndex.Add(index, pseudoIndex);
                 this.pseudoIndexToIndex.Add(pseudoIndex, index);
@@ -42,42 +42,42 @@ namespace Favalet
                 return true;
             }
 
-            if (lhs is PlaceholderTerm lp1 &&
+            if (lhs is IIdentityTerm lp1 &&
                 rhs is PseudoPlaceholderProvider.PseudoPlaceholderTerm rp1)
             {
-                if (indexes.TryGetPseudoIndex(lp1.Index, out var rpi))
+                if (indexes.TryGetPseudoIndex(lp1.Symbol, out var rpi))
                 {
-                    return Trap(rpi == rp1.Index);
+                    return Trap(rpi == rp1.Symbol);
                 }
                 else
                 {
-                    if (indexes.TryGetIndex(rp1.Index, out var li))
+                    if (indexes.TryGetIndex(rp1.Symbol, out var li))
                     {
-                        return Trap(li == lp1.Index);
+                        return Trap(li == lp1.Symbol);
                     }
                     else
                     {
-                        indexes.Set(lp1.Index, rp1.Index);
+                        indexes.Set(lp1.Symbol, rp1.Symbol);
                     }
                     return true;
                 }
             }
             else if (lhs is PseudoPlaceholderProvider.PseudoPlaceholderTerm lp2 &&
-                rhs is PlaceholderTerm rp2)
+                rhs is IIdentityTerm rp2)
             {
-                if (indexes.TryGetPseudoIndex(rp2.Index, out var lpi))
+                if (indexes.TryGetPseudoIndex(rp2.Symbol, out var lpi))
                 {
-                    return Trap(lpi == lp2.Index);
+                    return Trap(lpi == lp2.Symbol);
                 }
                 else
                 {
-                    if (indexes.TryGetIndex(lp2.Index, out var ri))
+                    if (indexes.TryGetIndex(lp2.Symbol, out var ri))
                     {
-                        return Trap(ri == rp2.Index);
+                        return Trap(ri == rp2.Symbol);
                     }
                     else
                     {
-                        indexes.Set(rp2.Index, lp2.Index);
+                        indexes.Set(rp2.Symbol, lp2.Symbol);
                     }
                     return true;
                 }

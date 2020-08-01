@@ -1846,9 +1846,10 @@ namespace Favalet
                 Apply(
                     Identity("a",
                         Function(
-                            Unspecified(),
-                            Identity("int"))),
-                    Identity("b", Identity("bool")));
+                            Identity("bool"),
+                            Unspecified())),
+                    Identity("b"),
+                    Identity("int"));
 
             var actual = environment.Infer(expression);
 

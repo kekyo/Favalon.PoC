@@ -36,6 +36,9 @@ namespace Favalet
             public override IExpression HigherOrder =>
                 TerminationTerm.Instance;
 
+            public string Symbol =>
+                $"'{this.Index}";
+
             protected override IExpression Fixup(IReduceContext context) =>
                 throw new NotImplementedException();
 
@@ -58,7 +61,7 @@ namespace Favalet
                 new[] { new XAttribute("index", this.Index) };
 
             protected override string GetPrettyString(IPrettyStringContext context) =>
-                $"'{this.Index}";
+                this.Symbol;
         }
     }
 }

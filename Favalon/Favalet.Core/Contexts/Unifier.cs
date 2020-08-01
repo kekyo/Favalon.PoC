@@ -32,21 +32,25 @@ namespace Favalet.Contexts
             {
                 this.InternalUnify(from, rto);
             }
-            else
+            else if (from is PlaceholderTerm)
             {
                 this.unifications[from.Symbol] = to;
             }
+            else
+            {
+                this.unifications[to.Symbol] = from;
+            }
         }
 
-        private void InternalUnifyPlaceholder(string fromSymbol, IExpression to)
+        private void InternalUnifyPlaceholder(IIdentityTerm from, IExpression to)
         {
-            if (this.unifications.TryGetValue(fromSymbol, out var target))
+            if (this.unifications.TryGetValue(from.Symbol, out var target))
             {
                 this.InternalUnify(to, target);
             }
             else
             {
-                this.unifications[fromSymbol] = to;
+                this.unifications[from.Symbol] = to;
             }
         }
 
@@ -76,14 +80,14 @@ namespace Favalet.Contexts
                 else
                 {
                     // Unify from placeholder.
-                    this.InternalUnifyPlaceholder(fromSymbol, to);
+                    this.InternalUnifyPlaceholder(fph, to);
                     return;
                 }
             }
-            else if (to is IIdentityTerm(string toSymbol))
+            else if (to is IIdentityTerm tph)
             {
                 // Unify to placeholder.
-                this.InternalUnifyPlaceholder(toSymbol, from);
+                this.InternalUnifyPlaceholder(tph, from);
                 return;
             }
 
@@ -181,7 +185,7 @@ namespace Favalet.Contexts
                     "Detected circular variable reference: " + marker);
             }
 #else
-            return this.unifications.TryGetValue(index, out var resolved) ?
+            return this.unifications.TryGetValue(symbol, out var resolved) ?
                 resolved :
                 null;
 #endif
@@ -193,7 +197,7 @@ namespace Favalet.Contexts
                 this.unifications.
                 OrderBy(entry => entry.Key).
                 Select(entry => new XElement("Unification",
-                    new XAttribute("index", entry.Key),
+                    new XAttribute("symbol", entry.Key),
                     entry.Value.GetXml())).
                 Memoize()).
             ToString();
@@ -203,7 +207,7 @@ namespace Favalet.Contexts
                 Environment.NewLine,
                 this.unifications.
                 OrderBy(entry => entry.Key).
-                Select(entry => $"'{entry.Key} --> {entry.Value.GetPrettyString(PrettyStringTypes.Readable)}"));
+                Select(entry => $"{entry.Key} --> {entry.Value.GetPrettyString(PrettyStringTypes.Readable)}"));
 
         public override string ToString() =>
             "Unifier: " + this.Simple;

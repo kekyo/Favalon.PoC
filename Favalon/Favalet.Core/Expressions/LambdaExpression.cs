@@ -56,12 +56,12 @@ namespace Favalet.Expressions
 
         protected override IExpression Infer(IReduceContext context)
         {
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
             var parameter = (IBoundSymbolTerm)context.Infer(this.Parameter);
 
             var newScope = context.Bind(parameter, parameter);
 
             var body = newScope.Infer(this.Body);
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
             var lambdaHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder,
@@ -85,9 +85,9 @@ namespace Favalet.Expressions
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.Fixup(this.HigherOrder);
             var parameter = (IBoundSymbolTerm)context.Fixup(this.Parameter);
             var body = context.Fixup(this.Body);
+            var higherOrder = context.Fixup(this.HigherOrder);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
                 object.ReferenceEquals(this.Body, body) &&

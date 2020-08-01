@@ -1895,8 +1895,170 @@ namespace Favalet
             AssertLogicalEqual(expression, expected, actual);
         }
 
+        [Test]
+        public void InferringNestedApplyWithoutAnnotation()
+        {
+            var environment = CLREnvironment();
+
+            // a b c
+            var expression =
+                Apply(
+                    Apply(
+                        Identity("a"),
+                        Identity("b")),
+                    Identity("c"));
+
+            var actual = environment.Infer(expression);
+
+            // ((a:('0 -> ('1 -> '2)) b:'0 c:'1):'2
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var ph1 = provider.CreatePlaceholder();
+            var ph2 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Apply(
+                        Identity("a",
+                            Function(
+                                ph0,
+                                Function(ph1, ph2))),
+                        Identity("b", ph0)),
+                    Identity("c", ph1),
+                    ph2);
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringNestedApplyWithAnnotation1()
+        {
+            var environment = CLREnvironment();
+
+            // a b c:bool
+            var expression =
+                Apply(
+                    Apply(
+                        Identity("a"),
+                        Identity("b")),
+                    Identity("c", Identity("bool")));
+
+            var actual = environment.Infer(expression);
+
+            // ((a:('0 -> (bool -> '1)) b:'0 c:bool):'1
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var ph1 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Apply(
+                        Identity("a",
+                            Function(
+                                ph0,
+                                Function(Identity("bool"), ph1))),
+                        Identity("b", ph0)),
+                    Identity("c", Identity("bool")),
+                    ph1);
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringNestedApplyWithAnnotation2()
+        {
+            var environment = CLREnvironment();
+
+            // a b:bool c
+            var expression =
+                Apply(
+                    Apply(
+                        Identity("a"),
+                        Identity("b", Identity("bool"))),
+                    Identity("c"));
+
+            var actual = environment.Infer(expression);
+
+            // ((a:(bool -> ('0 -> '1)) b:bool c:'0):'1
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var ph1 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Apply(
+                        Identity("a",
+                            Function(
+                                Identity("bool"),
+                                Function(ph0, ph1))),
+                        Identity("b", Identity("bool"))),
+                    Identity("c", ph0),
+                    ph1);
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void InferringNestedApplyWithAnnotation3()
+        {
+            var environment = CLREnvironment();
+
+            // a:(bool -> _) b c
+            var expression =
+                Apply(
+                    Apply(
+                        Identity("a",
+                            Function(Identity("bool"), Unspecified())),
+                        Identity("b")),
+                    Identity("c"));
+
+            var actual = environment.Infer(expression);
+
+            // ((a:(bool -> ('0 -> '1)) b:bool c:'0):'1
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var ph1 = provider.CreatePlaceholder();
+            var expected =
+                Apply(
+                    Apply(
+                        Identity("a",
+                            Function(
+                                Identity("bool"),
+                                Function(ph0, ph1))),
+                        Identity("b", Identity("bool"))),
+                    Identity("c", ph0),
+                    ph1);
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
         //[Test]
-        public void InferringApplyYCombinator()
+        public void InferringApplyYCombinator1()
+        {
+            var environment = CLREnvironment();
+
+            // Y = f -> f (Y f)
+            environment.MutableBind(
+                "Y",
+                Lambda(
+                    "f",
+                    Apply(
+                        Identity("f"),
+                        Apply(
+                            Identity("Y"),
+                            Identity("f")))));
+
+            // Y
+            var expression =
+                Identity("Y");
+
+            var actual = environment.Infer(expression);
+
+            var expected =
+                Identity("TODO:");
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        //[Test]
+        public void InferringApplyYCombinator2()
         {
             var environment = CLREnvironment();
 
@@ -1925,18 +2087,7 @@ namespace Favalet
             var provider = PseudoPlaceholderProvider.Create();
             var ph0 = provider.CreatePlaceholder();
             var expected =
-                Apply(
-                    Identity(
-                        "a",
-                        Function(
-                            Function(ph0, ph0),
-                            Function(ph0, ph0))),
-                    Identity(
-                        "a",
-                        Function(ph0, ph0)),
-                    Function(
-                        ph0,
-                        ph0));
+                Identity("TODO:");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -1979,18 +2130,7 @@ namespace Favalet
             var provider = PseudoPlaceholderProvider.Create();
             var ph0 = provider.CreatePlaceholder();
             var expected =
-                Apply(
-                    Identity(
-                        "a",
-                        Function(
-                            Function(ph0, ph0),
-                            Function(ph0, ph0))),
-                    Identity(
-                        "a",
-                        Function(ph0, ph0)),
-                    Function(
-                        ph0,
-                        ph0));
+                Identity("TODO:");
 
             AssertLogicalEqual(expression, expected, actual);
         }

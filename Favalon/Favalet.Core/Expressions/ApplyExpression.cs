@@ -62,9 +62,9 @@ namespace Favalet.Expressions
 
         protected override IExpression Infer(IReduceContext context)
         {
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
             var argument = context.Infer(this.Argument);
             var function = context.Infer(this.Function);
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
             var functionHigherOrder = FunctionExpression.Create(
                 argument.HigherOrder,
@@ -88,9 +88,9 @@ namespace Favalet.Expressions
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.Fixup(this.HigherOrder);
             var argument = context.Fixup(this.Argument);
             var function = context.Fixup(this.Function);
+            var higherOrder = context.Fixup(this.HigherOrder);
 
             if (object.ReferenceEquals(this.Argument, argument) &&
                 object.ReferenceEquals(this.Function, function) &&

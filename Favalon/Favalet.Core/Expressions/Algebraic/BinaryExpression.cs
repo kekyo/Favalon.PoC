@@ -47,9 +47,9 @@ namespace Favalet.Expressions.Algebraic
 
         protected override sealed IExpression Infer(IReduceContext context)
         {
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
             var left = context.Infer(this.Left);
             var right = context.Infer(this.Right);
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
             context.Unify(left.HigherOrder, higherOrder);
             context.Unify(right.HigherOrder, higherOrder);
@@ -68,9 +68,9 @@ namespace Favalet.Expressions.Algebraic
 
         protected override sealed IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.Fixup(this.HigherOrder);
             var left = context.Fixup(this.Left);
             var right = context.Fixup(this.Right);
+            var higherOrder = context.Fixup(this.HigherOrder);
 
             if (object.ReferenceEquals(this.Left, left) &&
                 object.ReferenceEquals(this.Right, right) &&

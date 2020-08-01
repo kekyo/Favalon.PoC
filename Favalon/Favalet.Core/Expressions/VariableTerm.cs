@@ -6,18 +6,13 @@ using System.Xml.Linq;
 
 namespace Favalet.Expressions
 {
-    public interface IIdentityTerm : ITerm
-    {
-        string Symbol { get; }
-    }
-
-    public sealed class IdentityTerm :
+    public sealed class VariableTerm :
         Expression, IIdentityTerm
     {
         public readonly string Symbol;
 
         [DebuggerStepThrough]
-        private IdentityTerm(string symbol, IExpression higherOrder)
+        private VariableTerm(string symbol, IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
             this.Symbol = symbol;
@@ -65,21 +60,28 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new IdentityTerm(this.Symbol, higherOrder);
+                return new VariableTerm(this.Symbol, higherOrder);
             }
         }
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var higherOrder = context.Fixup(this.HigherOrder);
-
-            if (object.ReferenceEquals(this.HigherOrder, higherOrder))
+            if (context.Resolve(this.Symbol) is IExpression resolved)
             {
-                return this;
+                return context.Fixup(resolved);
             }
             else
             {
-                return new IdentityTerm(this.Symbol, higherOrder);
+                var higherOrder = context.Fixup(this.HigherOrder);
+
+                if (object.ReferenceEquals(this.HigherOrder, higherOrder))
+                {
+                    return this;
+                }
+                else
+                {
+                    return new VariableTerm(this.Symbol, higherOrder);
+                }
             }
         }
 
@@ -107,10 +109,10 @@ namespace Favalet.Expressions
                 this.Symbol);
 
         [DebuggerStepThrough]
-        public static IdentityTerm Create(string symbol, IExpression higherOrder) =>
-            new IdentityTerm(symbol, higherOrder);
+        public static VariableTerm Create(string symbol, IExpression higherOrder) =>
+            new VariableTerm(symbol, higherOrder);
         [DebuggerStepThrough]
-        public static IdentityTerm Create(string symbol) =>
-            new IdentityTerm(symbol, UnspecifiedTerm.Instance);
+        public static VariableTerm Create(string symbol) =>
+            new VariableTerm(symbol, UnspecifiedTerm.Instance);
     }
 }

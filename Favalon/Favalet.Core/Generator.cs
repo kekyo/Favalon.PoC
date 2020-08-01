@@ -12,16 +12,16 @@ namespace Favalet
         public static Environments Environment() =>
             Favalet.Environments.Create(LogicalCalculator.Instance);
 
-        private static readonly IdentityTerm kind =
-            IdentityTerm.Create("*", FourthTerm.Instance);
+        private static readonly VariableTerm kind =
+            VariableTerm.Create("*", FourthTerm.Instance);
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static IdentityTerm Kind() =>
+        public static VariableTerm Kind() =>
             kind;
-        public static IdentityTerm Kind(string symbol) =>
-            IdentityTerm.Create(symbol, FourthTerm.Instance);
+        public static VariableTerm Kind(string symbol) =>
+            VariableTerm.Create(symbol, FourthTerm.Instance);
 
 #if !NET35 && !NET40
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -29,10 +29,10 @@ namespace Favalet
         public static UnspecifiedTerm Unspecified() =>
             UnspecifiedTerm.Instance;
 
-        public static IdentityTerm Identity(string symbol) =>
-            IdentityTerm.Create(symbol);
-        public static IdentityTerm Identity(string symbol, IExpression higherOrder) =>
-            IdentityTerm.Create(symbol, higherOrder);
+        public static VariableTerm Identity(string symbol) =>
+            VariableTerm.Create(symbol);
+        public static VariableTerm Identity(string symbol, IExpression higherOrder) =>
+            VariableTerm.Create(symbol, higherOrder);
 
         public static BoundSymbolTerm BoundSymbol(string symbol) =>
             BoundSymbolTerm.Create(symbol);

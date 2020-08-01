@@ -86,6 +86,6 @@ namespace Favalet.Contexts
         public static VariableInformation[] LookupVariables(
             this IScopeContext context,
             string identity) =>
-            context.LookupVariables(IdentityTerm.Create(identity));
+            context.LookupVariables(VariableTerm.Create(identity));
     }
 }

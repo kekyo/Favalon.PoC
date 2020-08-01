@@ -15,7 +15,7 @@ namespace Favalet.Contexts
 
         void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
 
-        IExpression? ResolvePlaceholderIndex(int index);
+        IExpression? Resolve(string symbol);
     }
 
     internal sealed partial class ReduceContext :
@@ -66,7 +66,7 @@ namespace Favalet.Contexts
         }
 
         [DebuggerStepThrough]
-        public IPlaceholderTerm CreatePlaceholder(PlaceholderOrderHints candidateOrder) =>
+        public IIdentityTerm CreatePlaceholder(PlaceholderOrderHints candidateOrder) =>
             this.rootScope.CreatePlaceholder(candidateOrder);
 
         public IExpression InferHigherOrder(IExpression higherOrder)
@@ -88,8 +88,8 @@ namespace Favalet.Contexts
             this.unifier.Unify(fromHigherOrder, toHigherOrder);
 
         [DebuggerStepThrough]
-        public IExpression? ResolvePlaceholderIndex(int index) =>
-            this.unifier.ResolvePlaceholderIndex(index);
+        public IExpression? Resolve(string symbol) =>
+            this.unifier.Resolve(symbol);
 
         public VariableInformation[] LookupVariables(IIdentityTerm identity) =>
             // TODO: improving when identity's higher order acceptable

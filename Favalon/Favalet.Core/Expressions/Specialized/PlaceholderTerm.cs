@@ -15,22 +15,16 @@ namespace Favalet.Expressions.Specialized
 
     public interface IPlaceholderProvider
     {
-        IPlaceholderTerm CreatePlaceholder(
+        IIdentityTerm CreatePlaceholder(
             PlaceholderOrderHints orderHint = PlaceholderOrderHints.TypeOrAbove);
     }
 
-    public interface IPlaceholderTerm :
-        ITerm
-    {
-        int Index { get; }
-    }
-
     public sealed class PlaceholderTerm :
-        Expression, IPlaceholderTerm
+        Expression, IIdentityTerm
     {
         private readonly PlaceholderOrderHints candidateOrder;
         private IPlaceholderProvider provider;
-        private IPlaceholderTerm? higherOrder;
+        private IIdentityTerm? higherOrder;
 
         public readonly int Index;
 
@@ -72,34 +66,43 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        int IPlaceholderTerm.Index
+        public string Symbol
         {
             [DebuggerStepThrough]
-            get => this.Index;
+            get => $"'{this.Index}";
         }
 
         public override int GetHashCode() =>
             this.Index.GetHashCode();
 
-        public bool Equals(IPlaceholderTerm rhs) =>
-            this.Index == rhs.Index;
+        public bool Equals(IIdentityTerm rhs) =>
+            this.Symbol.Equals(rhs.Symbol);
 
         public override bool Equals(IExpression? other) =>
-            other is IPlaceholderTerm rhs && this.Equals(rhs);
+            other is IIdentityTerm rhs && this.Equals(rhs);
 
         protected override IExpression Infer(IReduceContext context) =>
             this;
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            if (context.ResolvePlaceholderIndex(this.Index) is IExpression resolved)
+            if (context.Resolve(this.Symbol) is IExpression resolved)
             {
                 return context.Fixup(resolved);
             }
             else
             {
-                return this;
+                var higherOrder = context.Fixup(this.HigherOrder);
+
+                if (object.ReferenceEquals(this.HigherOrder, higherOrder))
+                {
+                    return this;
+                }
+                else
+                {
+                    return new PlaceholderTerm(
+                        this.provider, this.Index, this.candidateOrder);
+                }
             }
         }
 
@@ -112,7 +115,7 @@ namespace Favalet.Expressions.Specialized
         protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
                 this,
-                $"'{this.Index}");
+                this.Symbol);
 
         [DebuggerStepThrough]
         internal static PlaceholderTerm Create(
@@ -123,14 +126,5 @@ namespace Favalet.Expressions.Specialized
                 provider,
                 index,
                 orderHint);
-    }
-
-    public static class PlaceholderTermExtension
-    {
-        [DebuggerStepThrough]
-        public static void Deconstruct(
-            this IPlaceholderTerm placeholder,
-            out int index) =>
-            index = placeholder.Index;
     }
 }

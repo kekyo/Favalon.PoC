@@ -14,47 +14,39 @@ namespace Favalet.Contexts
     internal sealed class Unifier
     {
         private readonly ILogicalCalculator typeCalculator;
-        private readonly Dictionary<int, IExpression> unifications =
-            new Dictionary<int, IExpression>();
+        private readonly Dictionary<string, IExpression> unifications =
+            new Dictionary<string, IExpression>();
 
         public Unifier(ILogicalCalculator typeCalculator) =>
             this.typeCalculator = typeCalculator;
 
-        private void InternalUnifyBothPlaceholders(IPlaceholderTerm from, IPlaceholderTerm to)
+        private void InternalUnifyBothPlaceholders(IIdentityTerm from, IIdentityTerm to)
         {
             // Greater prioritize by exist unification rather than not exist.
             // Because will check ignoring circular reference at recursive path [1].
-            if (this.unifications.TryGetValue(from.Index, out var rfrom))
+            if (this.unifications.TryGetValue(from.Symbol, out var rfrom))
             {
                 this.InternalUnify(rfrom, to);
             }
-            else if (this.unifications.TryGetValue(to.Index, out var rto))
+            else if (this.unifications.TryGetValue(to.Symbol, out var rto))
             {
                 this.InternalUnify(from, rto);
             }
             else
             {
-                this.unifications[from.Index] = to;
-#if DEBUG
-                // DEBUG: Check invalid circular reference.
-                ResolvePlaceholderIndex(from.Index);
-#endif
+                this.unifications[from.Symbol] = to;
             }
         }
 
-        private void InternalUnifyPlaceholder(int fromIndex, IExpression to)
+        private void InternalUnifyPlaceholder(string fromSymbol, IExpression to)
         {
-            if (this.unifications.TryGetValue(fromIndex, out var target))
+            if (this.unifications.TryGetValue(fromSymbol, out var target))
             {
                 this.InternalUnify(to, target);
             }
             else
             {
-                this.unifications[fromIndex] = to;
-#if DEBUG
-                // DEBUG: Check invalid circular reference.
-                ResolvePlaceholderIndex(fromIndex);
-#endif
+                this.unifications[fromSymbol] = to;
             }
         }
 
@@ -64,12 +56,12 @@ namespace Favalet.Contexts
             Debug.Assert(!(to is UnspecifiedTerm));
 
             // Interpret placeholders.
-            if (from is IPlaceholderTerm(int fromIndex) fph)
+            if (from is IIdentityTerm(string fromSymbol) fph)
             {
-                if (to is IPlaceholderTerm(int toIndex) tph)
+                if (to is IIdentityTerm(string toSymbol) tph)
                 {
                     // [1]
-                    if (fromIndex == toIndex)
+                    if (fromSymbol == toSymbol)
                     {
                         // Ignore equal placeholders.
                         return;
@@ -84,14 +76,14 @@ namespace Favalet.Contexts
                 else
                 {
                     // Unify from placeholder.
-                    this.InternalUnifyPlaceholder(fromIndex, to);
+                    this.InternalUnifyPlaceholder(fromSymbol, to);
                     return;
                 }
             }
-            else if (to is IPlaceholderTerm(int toIndex))
+            else if (to is IIdentityTerm(string toSymbol))
             {
                 // Unify to placeholder.
-                this.InternalUnifyPlaceholder(toIndex, from);
+                this.InternalUnifyPlaceholder(toSymbol, from);
                 return;
             }
 
@@ -145,39 +137,39 @@ namespace Favalet.Contexts
 #if DEBUG
         private sealed class PlaceholderMarker
         {
-            private readonly HashSet<int> indexes = new HashSet<int>();
-            private readonly List<int> list = new List<int>();
+            private readonly HashSet<string> symbols = new HashSet<string>();
+            private readonly List<string> list = new List<string>();
 
-            public bool Mark(int placeholderIndex)
+            public bool Mark(string targetSymbol)
             {
-                list.Add(placeholderIndex);
-                return indexes.Add(placeholderIndex);
+                list.Add(targetSymbol);
+                return symbols.Add(targetSymbol);
             }
 
             public override string ToString() =>
-                StringUtilities.Join(" --> ", this.list.Select(index => $"'{index}"));
+                StringUtilities.Join(" --> ", this.list);
         }
 #endif
 
-        public IExpression? ResolvePlaceholderIndex(int index)
+        public IExpression? Resolve(string symbol)
         {
 #if DEBUG
             // Release build code may cause stack overflow by recursive Fixup() calls,
             // so it's dodging by the loop (only applicable nested placeholders.)
             var marker = new PlaceholderMarker();
-            var targetIndex = index;
+            var targetSymbol = symbol;
             IExpression? lastExpression = null;
 
             while (true)
             {
-                if (marker.Mark(targetIndex))
+                if (marker.Mark(targetSymbol))
                 {
-                    if (this.unifications.TryGetValue(targetIndex, out var resolved))
+                    if (this.unifications.TryGetValue(targetSymbol, out var resolved))
                     {
                         lastExpression = resolved;
-                        if (lastExpression is IPlaceholderTerm placeholder)
+                        if (lastExpression is IIdentityTerm identity)
                         {
-                            targetIndex = placeholder.Index;
+                            targetSymbol = identity.Symbol;
                             continue;
                         }
                     }

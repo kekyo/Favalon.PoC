@@ -17,7 +17,7 @@ namespace Favalet.Expressions
     public sealed class ConstantTerm :
         Expression, IConstantTerm
     {
-        private readonly ValueLazy<ITerm> higherOrder;
+        private readonly LazySlim<ITerm> higherOrder;
 
         public readonly object Value;
 
@@ -25,7 +25,7 @@ namespace Favalet.Expressions
         private ConstantTerm(object value)
         {
             this.Value = value;
-            this.higherOrder = ValueLazy.Create(() =>
+            this.higherOrder = LazySlim.Create(() =>
                 TypeTerm.From(this.Value.GetType()));
         }
 

@@ -69,7 +69,10 @@ namespace Favalet.Expressions
                 context,
                 PlaceholderOrderHints.TypeOrAbove);
 
-            context.Unify(lambdaHigherOrder, higherOrder);
+            var inferredLambdaHigherOrder =
+                context.Infer(lambdaHigherOrder);
+
+            context.Unify(inferredLambdaHigherOrder, higherOrder);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
                 object.ReferenceEquals(this.Body, body) &&

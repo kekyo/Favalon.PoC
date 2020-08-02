@@ -22,21 +22,23 @@ namespace Favalet.Expressions.Specialized
     public sealed class PlaceholderTerm :
         Expression, IIdentityTerm
     {
-        private readonly PlaceholderOrderHints candidateOrder;
         private IPlaceholderProvider provider;
         private IIdentityTerm? higherOrder;
 
         public readonly int Index;
+        public readonly PlaceholderOrderHints OrderHint;
 
         [DebuggerStepThrough]
         private PlaceholderTerm(
             IPlaceholderProvider provider,
             int index,
-            PlaceholderOrderHints candidateOrder)
+            PlaceholderOrderHints orderHint)
         {
-            this.candidateOrder = candidateOrder;
+            Debug.Assert(orderHint <= PlaceholderOrderHints.Fourth);
+
             this.provider = provider;
             this.Index = index;
+            this.OrderHint = orderHint;
         }
 
         public override IExpression HigherOrder
@@ -46,9 +48,9 @@ namespace Favalet.Expressions.Specialized
             {
                 // Helps for inferring:
                 //   Nested higher order has ceil limit to 4th order.
-                if (this.candidateOrder >= PlaceholderOrderHints.KindOrAbove)
+                if (this.OrderHint >= PlaceholderOrderHints.Fourth)
                 {
-                    return FourthTerm.Instance;
+                    return TerminationTerm.Instance;
                 }
 
                 if (this.higherOrder == null)
@@ -58,7 +60,7 @@ namespace Favalet.Expressions.Specialized
                         if (this.higherOrder == null)
                         {
                             this.higherOrder = this.provider.CreatePlaceholder(
-                                this.candidateOrder + 1);
+                                this.OrderHint + 1);
                         }
                     }
                 }
@@ -101,7 +103,7 @@ namespace Favalet.Expressions.Specialized
                 else
                 {
                     return new PlaceholderTerm(
-                        this.provider, this.Index, this.candidateOrder);
+                        this.provider, this.Index, this.OrderHint);
                 }
             }
         }
@@ -126,5 +128,18 @@ namespace Favalet.Expressions.Specialized
                 provider,
                 index,
                 orderHint);
+    }
+
+    public static class PlaceholderTermExtension
+    {
+        [DebuggerStepThrough]
+        public static void Deconstruct(
+            this PlaceholderTerm placeholder,
+            out string symbol,
+            out PlaceholderOrderHints orderHint)
+        {
+            symbol = placeholder.Symbol;
+            orderHint = placeholder.OrderHint;
+        }
     }
 }

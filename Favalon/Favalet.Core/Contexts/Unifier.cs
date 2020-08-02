@@ -34,12 +34,10 @@ namespace Favalet.Contexts
             }
             else if (from is PlaceholderTerm)
             {
-                Debug.Assert(to.Symbol != "'8");
                 this.unifications[from.Symbol] = to;
             }
             else
             {
-                Debug.Assert(from.Symbol != "'8");
                 this.unifications[to.Symbol] = from;
             }
         }
@@ -62,9 +60,9 @@ namespace Favalet.Contexts
             Debug.Assert(!(to is UnspecifiedTerm));
 
             // Interpret placeholders.
-            if (from is IIdentityTerm(string fromSymbol) fph)
+            if (from is IIdentityTerm(string fromSymbol) fi)
             {
-                if (to is IIdentityTerm(string toSymbol) tph)
+                if (to is IIdentityTerm(string toSymbol) ti)
                 {
                     // [1]
                     if (fromSymbol == toSymbol)
@@ -75,21 +73,21 @@ namespace Favalet.Contexts
                     else
                     {
                         // Unify both placeholders.
-                        this.InternalUnifyBothPlaceholders(fph, tph);
+                        this.InternalUnifyBothPlaceholders(fi, ti);
                         return;
                     }
                 }
                 else
                 {
                     // Unify from placeholder.
-                    this.InternalUnifyPlaceholder(fph, to);
+                    this.InternalUnifyPlaceholder(fi, to);
                     return;
                 }
             }
-            else if (to is IIdentityTerm tph)
+            else if (to is IIdentityTerm ti)
             {
                 // Unify to placeholder.
-                this.InternalUnifyPlaceholder(tph, from);
+                this.InternalUnifyPlaceholder(ti, from);
                 return;
             }
 
@@ -104,6 +102,18 @@ namespace Favalet.Contexts
 
             // Logical equals.
             if (this.typeCalculator.Equals(from, to))
+            {
+                return;
+            }
+
+            // Special placeholder case
+            if (from is PlaceholderTerm(_, PlaceholderOrderHints.Fourth) &&
+                to is IFunctionExpression(FourthTerm _, FourthTerm _))
+            {
+                return;
+            }
+            else if (from is IFunctionExpression(FourthTerm _, FourthTerm _) &&
+                to is PlaceholderTerm(_, PlaceholderOrderHints.Fourth))
             {
                 return;
             }
@@ -137,6 +147,7 @@ namespace Favalet.Contexts
             }
         }
 
+        [DebuggerStepThrough]
         public void Unify(IExpression from, IExpression to)
         {
             if (object.ReferenceEquals(from, to))

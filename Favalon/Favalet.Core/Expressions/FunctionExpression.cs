@@ -1,5 +1,6 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
+using Favalet.Internal;
 using System;
 using System.Collections;
 using System.Diagnostics;
@@ -17,19 +18,31 @@ namespace Favalet.Expressions
     public sealed class FunctionExpression :
         Expression, IFunctionExpression
     {
+        private readonly LazySlim<IExpression> higherOrder;
+
         public readonly IExpression Parameter;
         public readonly IExpression Result;
 
         [DebuggerStepThrough]
         private FunctionExpression(
-            IExpression parameter, IExpression result, IExpression higherOrder)
+            IExpression parameter, IExpression result, Func<IExpression> higherOrder)
         {
-            this.HigherOrder = higherOrder;
             this.Parameter = parameter;
             this.Result = result;
+            this.higherOrder = LazySlim.Create(higherOrder);
         }
 
-        public override IExpression HigherOrder { get; }
+        [DebuggerStepThrough]
+        private FunctionExpression(
+            IExpression parameter, IExpression result, IExpression higherOrder)
+        {
+            this.Parameter = parameter;
+            this.Result = result;
+            this.higherOrder = LazySlim.Create(higherOrder);
+        }
+
+        public override IExpression HigherOrder =>
+            this.higherOrder.Value;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IFunctionExpression.Parameter
@@ -125,12 +138,17 @@ namespace Favalet.Expressions
 
         [DebuggerStepThrough]
         private static FunctionExpression Create(
-            IExpression parameter, IExpression result, Func<IExpression> higherOrder) =>
+            IExpression parameter,
+            IExpression result,
+            Func<IExpression> higherOrder) =>
             (parameter, result) switch
             {
-                (FourthTerm _, _) => new FunctionExpression(parameter, result, TerminationTerm.Instance),
-                (_, FourthTerm _) => new FunctionExpression(parameter, result, TerminationTerm.Instance),
-                _ => new FunctionExpression(parameter, result, higherOrder())
+                (FourthTerm _, _) => new FunctionExpression(
+                    parameter, result, TerminationTerm.Instance),
+                (_, FourthTerm _) => new FunctionExpression(
+                    parameter, result, TerminationTerm.Instance),
+                _ => new FunctionExpression(
+                    parameter, result, higherOrder)
             };
 
         [DebuggerStepThrough]
@@ -142,10 +160,49 @@ namespace Favalet.Expressions
             IExpression parameter, IExpression result) =>
             Create(parameter, result, () => UnspecifiedTerm.Instance);
 
+        private sealed class LazyHigherOrderPlaceholderFunctionGenerator
+        {
+            private readonly IReduceContext context;
+            private readonly PlaceholderOrderHints orderHint;
+
+            public LazyHigherOrderPlaceholderFunctionGenerator(
+                IReduceContext context,
+                PlaceholderOrderHints orderHint)
+            {
+                this.context = context;
+                this.orderHint = orderHint;
+            }
+
+            public IExpression Create()
+            {
+                if (this.orderHint >= PlaceholderOrderHints.Fourth)
+                {
+                    return FunctionExpression.Create(
+                        FourthTerm.Instance,
+                        FourthTerm.Instance,
+                        () => TerminationTerm.Instance);
+                }
+                else
+                {
+                    var generator = new LazyHigherOrderPlaceholderFunctionGenerator(this.context, this.orderHint + 1);
+                    return FunctionExpression.Create(
+                        context.CreatePlaceholder(this.orderHint),
+                        context.CreatePlaceholder(this.orderHint),
+                        generator.Create);
+                }
+            }
+        }
+
         [DebuggerStepThrough]
         internal static FunctionExpression Create(
-            IExpression parameter, IExpression result, IReduceContext context, PlaceholderOrderHints orderHint) =>
-            Create(parameter, result, () => context.CreatePlaceholder(orderHint));
+            IExpression parameter,
+            IExpression result,
+            IReduceContext context,
+            PlaceholderOrderHints orderHint)
+        {
+            var generator = new LazyHigherOrderPlaceholderFunctionGenerator(context, orderHint);
+            return Create(parameter, result, generator.Create);
+        }
     }
 
     public static class FunctionExpressionExtension

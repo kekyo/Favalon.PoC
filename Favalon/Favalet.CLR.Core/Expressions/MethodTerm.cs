@@ -17,7 +17,7 @@ namespace Favalet.Expressions
     public sealed class MethodTerm :
         Expression, IMethodTerm
     {
-        private readonly ValueLazy<FunctionExpression> higherOrder;
+        private readonly LazySlim<FunctionExpression> higherOrder;
 
         public readonly MethodBase RuntimeMethod;
 
@@ -25,7 +25,7 @@ namespace Favalet.Expressions
         private MethodTerm(MethodBase runtimeMethod)
         {
             this.RuntimeMethod = runtimeMethod;
-            this.higherOrder = ValueLazy.Create(() =>
+            this.higherOrder = LazySlim.Create(() =>
                 FunctionExpression.Create(
                     TypeTerm.From(this.RuntimeMethod.GetParameters()[0].ParameterType),
                     TypeTerm.From(

@@ -65,7 +65,7 @@ namespace Favalet.Expressions
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string Readable =>
-            this.GetPrettyString(PrettyStringTypes.Readable);
+            $"{this.Type}: {this.GetPrettyString(PrettyStringTypes.Readable)}";
 
         public override sealed string ToString() =>
             this.GetPrettyString(PrettyStringTypes.Strict);

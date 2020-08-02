@@ -34,10 +34,12 @@ namespace Favalet.Contexts
             }
             else if (from is PlaceholderTerm)
             {
+                Debug.Assert(to.Symbol != "'8");
                 this.unifications[from.Symbol] = to;
             }
             else
             {
+                Debug.Assert(from.Symbol != "'8");
                 this.unifications[to.Symbol] = from;
             }
         }
@@ -113,6 +115,11 @@ namespace Favalet.Contexts
 
         private void InternalUnify(IExpression from, IExpression to)
         {
+            if (object.ReferenceEquals(from, to))
+            {
+                return;
+            }
+
             switch (from, to)
             {
                 // Ignore TerminationTerm unification.
@@ -132,6 +139,11 @@ namespace Favalet.Contexts
 
         public void Unify(IExpression from, IExpression to)
         {
+            if (object.ReferenceEquals(from, to))
+            {
+                return;
+            }
+
             lock (this.unifications)
             {
                 this.InternalUnify(from, to);

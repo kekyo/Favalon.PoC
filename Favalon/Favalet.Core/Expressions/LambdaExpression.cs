@@ -57,11 +57,11 @@ namespace Favalet.Expressions
         protected override IExpression Infer(IReduceContext context)
         {
             var parameter = (IBoundSymbolTerm)context.Infer(this.Parameter);
+            var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
             var newScope = context.Bind(parameter, parameter);
 
             var body = newScope.Infer(this.Body);
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
             var lambdaHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder,

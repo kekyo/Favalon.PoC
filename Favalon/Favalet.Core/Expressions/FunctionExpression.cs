@@ -72,6 +72,22 @@ namespace Favalet.Expressions
         {
             var parameter = context.Infer(this.Parameter);
             var result = context.Infer(this.Result);
+
+            if (parameter is FourthTerm ||
+                result is FourthTerm)
+            {
+                if (object.ReferenceEquals(this.Parameter, parameter) &&
+                    object.ReferenceEquals(this.Result, result) &&
+                    this.HigherOrder is TerminationTerm)
+                {
+                    return this;
+                }
+                else
+                {
+                    return new FunctionExpression(parameter, result, TerminationTerm.Instance);
+                }
+            }
+
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
             var functionHigherOrder = Create(

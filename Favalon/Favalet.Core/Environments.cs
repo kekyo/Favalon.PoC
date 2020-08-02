@@ -61,7 +61,7 @@ namespace Favalet
             var inferred = context.Infer(expression);
 #if DEBUG
             Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetXml()}\", unifier=\"{this.lastUnifier}\"");
+                $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetXml()}\", unifier=\"{unifier}\"");
 #endif            
             var fixupped = context.Fixup(inferred);
             Debug.WriteLine(

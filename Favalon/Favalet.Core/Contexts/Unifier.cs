@@ -106,18 +106,6 @@ namespace Favalet.Contexts
                 return;
             }
 
-            // Special placeholder case
-            if (from is PlaceholderTerm(_, PlaceholderOrderHints.Fourth) &&
-                to is IFunctionExpression(FourthTerm _, FourthTerm _))
-            {
-                return;
-            }
-            else if (from is IFunctionExpression(FourthTerm _, FourthTerm _) &&
-                to is PlaceholderTerm(_, PlaceholderOrderHints.Fourth))
-            {
-                return;
-            }
-
             // Can't accept from --> to
             throw new ArgumentException(
                 $"Couldn't accept unification: From=\"{from.GetPrettyString(PrettyStringTypes.StrictAll)}\", To=\"{to.GetPrettyString(PrettyStringTypes.StrictAll)}\".");
@@ -181,7 +169,8 @@ namespace Favalet.Contexts
         public IExpression? Resolve(string symbol)
         {
 #if DEBUG
-            // Release build code may cause stack overflow by recursive Fixup() calls,
+            // Release build code may cause stack overflow by recursive Fixup() calls
+            // and the debugger will be crashed,
             // so it's dodging by the loop (only applicable nested placeholders.)
             var marker = new PlaceholderMarker();
             var targetSymbol = symbol;

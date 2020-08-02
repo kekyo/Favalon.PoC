@@ -87,26 +87,28 @@ namespace Favalet.Expressions
                     return new FunctionExpression(parameter, result, TerminationTerm.Instance);
                 }
             }
-
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
-
-            var functionHigherOrder = Create(
-                parameter.HigherOrder,
-                result.HigherOrder,
-                context,
-                PlaceholderOrderHints.KindOrAbove);
-
-            context.Unify(functionHigherOrder, higherOrder);
-
-            if (object.ReferenceEquals(this.Parameter, parameter) &&
-                object.ReferenceEquals(this.Result, result) &&
-                object.ReferenceEquals(this.HigherOrder, higherOrder))
-            {
-                return this;
-            }
             else
             {
-                return new FunctionExpression(parameter, result, higherOrder);
+                var higherOrder = context.InferHigherOrder(this.HigherOrder);
+
+                var functionHigherOrder = Create(
+                    parameter.HigherOrder,
+                    result.HigherOrder,
+                    context,
+                    PlaceholderOrderHints.KindOrAbove);
+
+                context.Unify(functionHigherOrder, higherOrder);
+
+                if (object.ReferenceEquals(this.Parameter, parameter) &&
+                    object.ReferenceEquals(this.Result, result) &&
+                    object.ReferenceEquals(this.HigherOrder, higherOrder))
+                {
+                    return this;
+                }
+                else
+                {
+                    return new FunctionExpression(parameter, result, higherOrder);
+                }
             }
         }
 

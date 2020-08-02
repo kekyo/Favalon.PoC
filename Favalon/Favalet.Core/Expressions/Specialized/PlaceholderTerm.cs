@@ -46,8 +46,6 @@ namespace Favalet.Expressions.Specialized
             [DebuggerStepThrough]
             get
             {
-                // Helps for inferring:
-                //   Nested higher order has ceil limit to 4th order.
                 if (this.OrderHint >= PlaceholderOrderHints.Fourth)
                 {
                     return TerminationTerm.Instance;

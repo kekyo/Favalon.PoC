@@ -70,7 +70,7 @@ namespace Favalet.Expressions
                 PlaceholderOrderHints.TypeOrAbove);
 
             var inferredLambdaHigherOrder =
-                context.Infer(lambdaHigherOrder);
+                context.InferHigherOrder(lambdaHigherOrder);
 
             context.Unify(inferredLambdaHigherOrder, higherOrder);
 

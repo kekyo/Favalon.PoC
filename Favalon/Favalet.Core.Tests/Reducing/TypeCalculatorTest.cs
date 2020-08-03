@@ -7,7 +7,7 @@ using System.Collections;
 using static Favalet.CLRGenerator;
 using static Favalet.Generator;
 
-namespace Favalet
+namespace Favalet.Reducing
 {
     [TestFixture]
     public sealed class TypeCalculatorTest

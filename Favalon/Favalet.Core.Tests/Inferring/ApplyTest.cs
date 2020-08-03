@@ -34,8 +34,8 @@ namespace Favalet.Inferring
             // a b
             var expression =
                 Apply(
-                    Identity("a"),
-                    Identity("b"));
+                    Variable("a"),
+                    Variable("b"));
 
             var actual = environment.Infer(expression);
 
@@ -45,8 +45,8 @@ namespace Favalet.Inferring
             var ph1 = provider.CreatePlaceholder();
             var expected =
                 Apply(
-                    Identity("a", Function(ph0, ph1)),
-                    Identity("b", ph0),
+                    Variable("a", Function(ph0, ph1)),
+                    Variable("b", ph0),
                     ph1);
 
             AssertLogicalEqual(expression, expected, actual);
@@ -60,8 +60,8 @@ namespace Favalet.Inferring
             // a a
             var expression =
                 Apply(
-                    Identity("a"),
-                    Identity("a"));
+                    Variable("a"),
+                    Variable("a"));
 
             var actual = environment.Infer(expression);
 
@@ -71,8 +71,8 @@ namespace Favalet.Inferring
             var ph1 = provider.CreatePlaceholder();
             var expected =
                 Apply(
-                    Identity("a", Function(ph0, ph1)),
-                    Identity("a", ph0),
+                    Variable("a", Function(ph0, ph1)),
+                    Variable("a", ph0),
                     ph1);
 
             AssertLogicalEqual(expression, expected, actual);
@@ -88,13 +88,13 @@ namespace Favalet.Inferring
                 "a",
                 Lambda(
                     "x",
-                    Identity("x")));
+                    Variable("x")));
 
             // a a
             var expression =
                 Apply(
-                    Identity("a"),
-                    Identity("a"));
+                    Variable("a"),
+                    Variable("a"));
 
             var actual = environment.Infer(expression);
 
@@ -103,12 +103,12 @@ namespace Favalet.Inferring
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 Apply(
-                    Identity(
+                    Variable(
                         "a",
                         Function(
                             Function(ph0, ph0),
                             Function(ph0, ph0))),
-                    Identity(
+                    Variable(
                         "a",
                         Function(ph0, ph0)),
                     Function(
@@ -126,11 +126,11 @@ namespace Favalet.Inferring
             // a:(bool -> _) b
             var expression =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("bool"),
+                            Variable("bool"),
                             Unspecified())),
-                    Identity("b"));
+                    Variable("b"));
 
             var actual = environment.Infer(expression);
 
@@ -139,9 +139,9 @@ namespace Favalet.Inferring
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 Apply(
-                    Identity("a",
-                        Function(Identity("bool"), ph0)),
-                    Identity("b", Identity("bool")),
+                    Variable("a",
+                        Function(Variable("bool"), ph0)),
+                    Variable("b", Variable("bool")),
                     ph0);
 
             AssertLogicalEqual(expression, expected, actual);
@@ -155,11 +155,11 @@ namespace Favalet.Inferring
             // a:(_ -> bool) b
             var expression =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
                             Unspecified(),
-                            Identity("bool"))),
-                    Identity("b"));
+                            Variable("bool"))),
+                    Variable("b"));
 
             var actual = environment.Infer(expression);
 
@@ -168,10 +168,10 @@ namespace Favalet.Inferring
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 Apply(
-                    Identity("a",
-                        Function(ph0, Identity("bool"))),
-                    Identity("b", ph0),
-                    Identity("bool"));
+                    Variable("a",
+                        Function(ph0, Variable("bool"))),
+                    Variable("b", ph0),
+                    Variable("bool"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -184,23 +184,23 @@ namespace Favalet.Inferring
             // a:(int -> bool) b
             var expression =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("int"),
-                            Identity("bool"))),
-                    Identity("b"));
+                            Variable("int"),
+                            Variable("bool"))),
+                    Variable("b"));
 
             var actual = environment.Infer(expression);
 
             // (a:(int -> bool) b:int):bool
             var expected =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("int"),
-                            Identity("bool"))),
-                    Identity("b", Identity("int")),
-                    Identity("bool"));
+                            Variable("int"),
+                            Variable("bool"))),
+                    Variable("b", Variable("int")),
+                    Variable("bool"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -213,19 +213,19 @@ namespace Favalet.Inferring
             // a b:bool
             var expression =
                 Apply(
-                    Identity("a"),
-                    Identity("b", Identity("bool")));
+                    Variable("a"),
+                    Variable("b", Variable("bool")));
 
             var actual = environment.Infer(expression);
 
             // (a:(bool -> _) b:bool):_
             var expected =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("bool"),
+                            Variable("bool"),
                             Unspecified())),
-                    Identity("b", Identity("bool")),
+                    Variable("b", Variable("bool")),
                     Unspecified());
 
             AssertLogicalEqual(expression, expected, actual);
@@ -239,9 +239,9 @@ namespace Favalet.Inferring
             // (a b):bool
             var expression =
                 Apply(
-                    Identity("a"),
-                    Identity("b"),
-                    Identity("bool"));
+                    Variable("a"),
+                    Variable("b"),
+                    Variable("bool"));
 
             var actual = environment.Infer(expression);
 
@@ -250,12 +250,12 @@ namespace Favalet.Inferring
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
                             ph0,
-                            Identity("bool"))),
-                    Identity("b", ph0),
-                    Identity("bool"));
+                            Variable("bool"))),
+                    Variable("b", ph0),
+                    Variable("bool"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -268,21 +268,21 @@ namespace Favalet.Inferring
             // (a b:bool):int
             var expression =
                 Apply(
-                    Identity("a"),
-                    Identity("b", Identity("bool")),
-                    Identity("int"));
+                    Variable("a"),
+                    Variable("b", Variable("bool")),
+                    Variable("int"));
 
             var actual = environment.Infer(expression);
 
             // (a:(bool -> int) b:bool):int
             var expected =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("bool"),
-                            Identity("int"))),
-                    Identity("b", Identity("bool")),
-                    Identity("int"));
+                            Variable("bool"),
+                            Variable("int"))),
+                    Variable("b", Variable("bool")),
+                    Variable("int"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -295,22 +295,22 @@ namespace Favalet.Inferring
             // a:(_ -> int) b:bool
             var expression =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
                             Unspecified(),
-                            Identity("int"))),
-                    Identity("b", Identity("bool")));
+                            Variable("int"))),
+                    Variable("b", Variable("bool")));
 
             var actual = environment.Infer(expression);
 
             // (a:(bool -> int) b:bool):int
             var expected =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("bool"),
+                            Variable("bool"),
                             Unspecified())),
-                    Identity("b", Identity("bool")),
+                    Variable("b", Variable("bool")),
                     Unspecified());
 
             AssertLogicalEqual(expression, expected, actual);
@@ -324,22 +324,22 @@ namespace Favalet.Inferring
             // a:(_ -> int) b:bool
             var expression =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
                             Unspecified(),
-                            Identity("int"))),
-                    Identity("b", Identity("bool")));
+                            Variable("int"))),
+                    Variable("b", Variable("bool")));
 
             var actual = environment.Infer(expression);
 
             // (a:(bool -> int) b:bool):int
             var expected =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("bool"),
+                            Variable("bool"),
                             Unspecified())),
-                    Identity("b", Identity("bool")),
+                    Variable("b", Variable("bool")),
                     Unspecified());
 
             AssertLogicalEqual(expression, expected, actual);
@@ -353,24 +353,24 @@ namespace Favalet.Inferring
             // (a:(bool -> _) b):int
             var expression =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("bool"),
+                            Variable("bool"),
                             Unspecified())),
-                    Identity("b"),
-                    Identity("int"));
+                    Variable("b"),
+                    Variable("int"));
 
             var actual = environment.Infer(expression);
 
             // (a:(bool -> int) b:bool):int
             var expected =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("bool"),
-                            Identity("int"))),
-                    Identity("b", Identity("bool")),
-                    Identity("int"));
+                            Variable("bool"),
+                            Variable("int"))),
+                    Variable("b", Variable("bool")),
+                    Variable("int"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -383,24 +383,24 @@ namespace Favalet.Inferring
             // (a:(bool -> int) b:bool):int
             var expression =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("bool"),
-                            Identity("int"))),
-                    Identity("b", Identity("bool")),
-                    Identity("int"));
+                            Variable("bool"),
+                            Variable("int"))),
+                    Variable("b", Variable("bool")),
+                    Variable("int"));
 
             var actual = environment.Infer(expression);
 
             // (a:(bool -> int) b:bool):int
             var expected =
                 Apply(
-                    Identity("a",
+                    Variable("a",
                         Function(
-                            Identity("bool"),
-                            Identity("int"))),
-                    Identity("b", Identity("bool")),
-                    Identity("int"));
+                            Variable("bool"),
+                            Variable("int"))),
+                    Variable("b", Variable("bool")),
+                    Variable("int"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -414,9 +414,9 @@ namespace Favalet.Inferring
             var expression =
                 Apply(
                     Apply(
-                        Identity("a"),
-                        Identity("b")),
-                    Identity("c"));
+                        Variable("a"),
+                        Variable("b")),
+                    Variable("c"));
 
             var actual = environment.Infer(expression);
 
@@ -428,12 +428,12 @@ namespace Favalet.Inferring
             var expected =
                 Apply(
                     Apply(
-                        Identity("a",
+                        Variable("a",
                             Function(
                                 ph0,
                                 Function(ph1, ph2))),
-                        Identity("b", ph0)),
-                    Identity("c", ph1),
+                        Variable("b", ph0)),
+                    Variable("c", ph1),
                     ph2);
 
             AssertLogicalEqual(expression, expected, actual);
@@ -448,9 +448,9 @@ namespace Favalet.Inferring
             var expression =
                 Apply(
                     Apply(
-                        Identity("a"),
-                        Identity("b")),
-                    Identity("c", Identity("bool")));
+                        Variable("a"),
+                        Variable("b")),
+                    Variable("c", Variable("bool")));
 
             var actual = environment.Infer(expression);
 
@@ -461,12 +461,12 @@ namespace Favalet.Inferring
             var expected =
                 Apply(
                     Apply(
-                        Identity("a",
+                        Variable("a",
                             Function(
                                 ph0,
-                                Function(Identity("bool"), ph1))),
-                        Identity("b", ph0)),
-                    Identity("c", Identity("bool")),
+                                Function(Variable("bool"), ph1))),
+                        Variable("b", ph0)),
+                    Variable("c", Variable("bool")),
                     ph1);
 
             AssertLogicalEqual(expression, expected, actual);
@@ -481,9 +481,9 @@ namespace Favalet.Inferring
             var expression =
                 Apply(
                     Apply(
-                        Identity("a"),
-                        Identity("b", Identity("bool"))),
-                    Identity("c"));
+                        Variable("a"),
+                        Variable("b", Variable("bool"))),
+                    Variable("c"));
 
             var actual = environment.Infer(expression);
 
@@ -494,12 +494,12 @@ namespace Favalet.Inferring
             var expected =
                 Apply(
                     Apply(
-                        Identity("a",
+                        Variable("a",
                             Function(
-                                Identity("bool"),
+                                Variable("bool"),
                                 Function(ph0, ph1))),
-                        Identity("b", Identity("bool"))),
-                    Identity("c", ph0),
+                        Variable("b", Variable("bool"))),
+                    Variable("c", ph0),
                     ph1);
 
             AssertLogicalEqual(expression, expected, actual);
@@ -514,10 +514,10 @@ namespace Favalet.Inferring
             var expression =
                 Apply(
                     Apply(
-                        Identity("a",
-                            Function(Identity("bool"), Unspecified())),
-                        Identity("b")),
-                    Identity("c"));
+                        Variable("a",
+                            Function(Variable("bool"), Unspecified())),
+                        Variable("b")),
+                    Variable("c"));
 
             var actual = environment.Infer(expression);
 
@@ -528,12 +528,12 @@ namespace Favalet.Inferring
             var expected =
                 Apply(
                     Apply(
-                        Identity("a",
+                        Variable("a",
                             Function(
-                                Identity("bool"),
+                                Variable("bool"),
                                 Function(ph0, ph1))),
-                        Identity("b", Identity("bool"))),
-                    Identity("c", ph0),
+                        Variable("b", Variable("bool"))),
+                    Variable("c", ph0),
                     ph1);
 
             AssertLogicalEqual(expression, expected, actual);
@@ -550,19 +550,19 @@ namespace Favalet.Inferring
                 Lambda(
                     "f",
                     Apply(
-                        Identity("f"),
+                        Variable("f"),
                         Apply(
-                            Identity("Y"),
-                            Identity("f")))));
+                            Variable("Y"),
+                            Variable("f")))));
 
             // Y
             var expression =
-                Identity("Y");
+                Variable("Y");
 
             var actual = environment.Infer(expression);
 
             var expected =
-                Identity("TODO:");
+                Variable("TODO:");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -580,24 +580,24 @@ namespace Favalet.Inferring
                         Lambda( // x -> f (x x)
                             "x",
                             Apply(
-                                Identity("f"),
+                                Variable("f"),
                                 Apply(
-                                    Identity("x"),
-                                    Identity("x")))),
+                                    Variable("x"),
+                                    Variable("x")))),
                         Lambda( // x -> f (x x)
                             "x",
                             Apply(
-                                Identity("f"),
+                                Variable("f"),
                                 Apply(
-                                    Identity("x"),
-                                    Identity("x"))))));
+                                    Variable("x"),
+                                    Variable("x"))))));
 
             var actual = environment.Infer(expression);
 
             var provider = PseudoPlaceholderProvider.Create();
             var ph0 = provider.CreatePlaceholder();
             var expected =
-                Identity("TODO:");
+                Variable("TODO:");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -615,32 +615,32 @@ namespace Favalet.Inferring
                         Lambda( // x -> f (y -> x x y)
                             "x",
                             Apply(
-                                Identity("f"),
+                                Variable("f"),
                                 Lambda( // y -> x x y
                                     "y",
                                     Apply(
                                         Apply(
-                                            Identity("x"),
-                                            Identity("x")),
-                                        Identity("y"))))),
+                                            Variable("x"),
+                                            Variable("x")),
+                                        Variable("y"))))),
                         Lambda( // x -> f (y -> x x y)
                             "x",
                             Apply(
-                                Identity("f"),
+                                Variable("f"),
                                 Lambda( // y -> x x y
                                     "y",
                                     Apply(
                                         Apply(
-                                            Identity("x"),
-                                            Identity("x")),
-                                        Identity("y")))))));
+                                            Variable("x"),
+                                            Variable("x")),
+                                        Variable("y")))))));
 
             var actual = environment.Infer(expression);
 
             var provider = PseudoPlaceholderProvider.Create();
             var ph0 = provider.CreatePlaceholder();
             var expected =
-                Identity("TODO:");
+                Variable("TODO:");
 
             AssertLogicalEqual(expression, expected, actual);
         }

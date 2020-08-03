@@ -37,13 +37,13 @@ namespace Favalet.Inferring
 
             // true
             var expression =
-                Identity("true");
+                Variable("true");
 
             var actual = environment.Infer(expression);
 
             // true:bool
             var expected =
-                Identity("true", Type<bool>());
+                Variable("true", Type<bool>());
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -63,16 +63,16 @@ namespace Favalet.Inferring
             // true && false
             var expression =
                 And(
-                    Identity("true"),
-                    Identity("false"));
+                    Variable("true"),
+                    Variable("false"));
 
             var actual = environment.Infer(expression);
 
             // (true:bool && false:bool):bool
             var expected =
                 And(
-                    Identity("true", Type<bool>()),
-                    Identity("false", Type<bool>()),
+                    Variable("true", Type<bool>()),
+                    Variable("false", Type<bool>()),
                     Type<bool>());
 
             AssertLogicalEqual(expression, expected, actual);

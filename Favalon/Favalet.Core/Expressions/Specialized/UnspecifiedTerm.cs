@@ -14,7 +14,7 @@ namespace Favalet.Expressions.Specialized
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public override IExpression HigherOrder =>
-            TerminationTerm.Instance;
+            DeadEndTerm.Instance;
 
         public bool Equals(UnspecifiedTerm rhs) =>
             rhs != null;

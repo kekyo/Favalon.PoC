@@ -8,7 +8,7 @@ namespace Favalet.Expressions
     public interface ILambdaExpression :
         ICallableExpression
     {
-        IBoundSymbolTerm Parameter { get; }
+        IBoundVariableTerm Parameter { get; }
 
         IExpression Body { get; }
     }
@@ -16,12 +16,12 @@ namespace Favalet.Expressions
     public sealed class LambdaExpression :
         Expression, ILambdaExpression
     {
-        public readonly IBoundSymbolTerm Parameter;
+        public readonly IBoundVariableTerm Parameter;
         public readonly IExpression Body;
 
         [DebuggerStepThrough]
         private LambdaExpression(
-            IBoundSymbolTerm parameter, IExpression body, IExpression higherOrder)
+            IBoundVariableTerm parameter, IExpression body, IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
             this.Parameter = parameter;
@@ -31,7 +31,7 @@ namespace Favalet.Expressions
         public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IBoundSymbolTerm ILambdaExpression.Parameter
+        IBoundVariableTerm ILambdaExpression.Parameter
         {
             [DebuggerStepThrough]
             get => this.Parameter;
@@ -56,7 +56,7 @@ namespace Favalet.Expressions
 
         protected override IExpression Infer(IReduceContext context)
         {
-            var parameter = (IBoundSymbolTerm)context.Infer(this.Parameter);
+            var parameter = (IBoundVariableTerm)context.Infer(this.Parameter);
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
 
             var newScope = context.Bind(parameter, parameter);
@@ -88,7 +88,7 @@ namespace Favalet.Expressions
 
         protected override IExpression Fixup(IReduceContext context)
         {
-            var parameter = (IBoundSymbolTerm)context.Fixup(this.Parameter);
+            var parameter = (IBoundVariableTerm)context.Fixup(this.Parameter);
             var body = context.Fixup(this.Body);
             var higherOrder = context.Fixup(this.HigherOrder);
 
@@ -106,7 +106,7 @@ namespace Favalet.Expressions
 
         protected override IExpression Reduce(IReduceContext context)
         {
-            var parameter = (IBoundSymbolTerm)context.Reduce(this.Parameter);
+            var parameter = (IBoundVariableTerm)context.Reduce(this.Parameter);
             var body = context.Reduce(this.Body);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
@@ -135,11 +135,11 @@ namespace Favalet.Expressions
 
         [DebuggerStepThrough]
         public static LambdaExpression Create(
-            IBoundSymbolTerm parameter, IExpression body, IExpression higherOrder) =>
+            IBoundVariableTerm parameter, IExpression body, IExpression higherOrder) =>
             new LambdaExpression(parameter, body, higherOrder);
         [DebuggerStepThrough]
         public static LambdaExpression Create(
-            IBoundSymbolTerm parameter, IExpression body) =>
+            IBoundVariableTerm parameter, IExpression body) =>
             new LambdaExpression(parameter, body, UnspecifiedTerm.Instance);
     }
 
@@ -148,7 +148,7 @@ namespace Favalet.Expressions
         [DebuggerStepThrough]
         public static void Deconstruct(
             this ILambdaExpression lambda,
-            out IBoundSymbolTerm parameter,
+            out IBoundVariableTerm parameter,
             out IExpression body)
         {
             parameter = lambda.Parameter;

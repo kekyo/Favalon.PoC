@@ -10,7 +10,7 @@ namespace Favalet
     public interface IEnvironments :
         IScopeContext, IPlaceholderProvider
     {
-        void MutableBind(IBoundSymbolTerm symbol, IExpression expression);
+        void MutableBind(IBoundVariableTerm symbol, IExpression expression);
     }
 
     public sealed class Environments :
@@ -37,7 +37,7 @@ namespace Favalet
 #if DEBUG
             // Preassigns higher orders.
             var ho = ph.HigherOrder;
-            while (!(ho is TerminationTerm))
+            while (!(ho is DeadEndTerm))
             {
                 ho = ho.HigherOrder;
             }
@@ -90,7 +90,7 @@ namespace Favalet
         }
 
         [DebuggerStepThrough]
-        public new void MutableBind(IBoundSymbolTerm symbol, IExpression expression) =>
+        public new void MutableBind(IBoundVariableTerm symbol, IExpression expression) =>
             base.MutableBind(symbol, expression);
 
         [DebuggerStepThrough]
@@ -108,6 +108,6 @@ namespace Favalet
             this IEnvironments environment,
             string symbol,
             IExpression expression) =>
-            environment.MutableBind(BoundSymbolTerm.Create(symbol), expression);
+            environment.MutableBind(BoundVariableTerm.Create(symbol), expression);
     }
 }

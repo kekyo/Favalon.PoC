@@ -7,11 +7,6 @@ using System.Xml.Linq;
 
 namespace Favalet.Contexts
 {
-    internal interface IDeadEndExpression :
-        IExpression
-    {
-    }
-
     public interface IXmlRenderContext
     {
         XElement GetXml(IExpression expression);
@@ -37,7 +32,7 @@ namespace Favalet.Contexts
         public XElement GetXml(IExpression expression) =>
             (expression, expression.HigherOrder) switch
             {
-                (Expression expr, IDeadEndExpression _) =>
+                (Expression expr, IDeadEndTerm _) =>
                     new XElement(
                         expr.Type,
                         expr.InternalGetXmlValues(this).

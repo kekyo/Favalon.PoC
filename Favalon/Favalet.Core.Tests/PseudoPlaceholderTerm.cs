@@ -34,7 +34,7 @@ namespace Favalet
                 this.Index = index;
 
             public override IExpression HigherOrder =>
-                TerminationTerm.Instance;
+                DeadEndTerm.Instance;
 
             public string Symbol =>
                 $"'{this.Index}";

@@ -2,7 +2,8 @@
 
 namespace Favalet.Expressions
 {
-    public interface IIdentityTerm : ITerm
+    public interface IIdentityTerm :
+        ITerm
     {
         string Symbol { get; }
     }

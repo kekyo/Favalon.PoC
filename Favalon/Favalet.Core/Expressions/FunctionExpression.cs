@@ -78,13 +78,13 @@ namespace Favalet.Expressions
             {
                 if (object.ReferenceEquals(this.Parameter, parameter) &&
                     object.ReferenceEquals(this.Result, result) &&
-                    this.HigherOrder is TerminationTerm)
+                    this.HigherOrder is DeadEndTerm)
                 {
                     return this;
                 }
                 else
                 {
-                    return new FunctionExpression(parameter, result, TerminationTerm.Instance);
+                    return new FunctionExpression(parameter, result, DeadEndTerm.Instance);
                 }
             }
             else
@@ -162,9 +162,9 @@ namespace Favalet.Expressions
             (parameter, result) switch
             {
                 (FourthTerm _, _) => new FunctionExpression(
-                    parameter, result, TerminationTerm.Instance),
+                    parameter, result, DeadEndTerm.Instance),
                 (_, FourthTerm _) => new FunctionExpression(
-                    parameter, result, TerminationTerm.Instance),
+                    parameter, result, DeadEndTerm.Instance),
                 _ => new FunctionExpression(
                     parameter, result, higherOrder)
             };
@@ -198,7 +198,7 @@ namespace Favalet.Expressions
                     return FunctionExpression.Create(
                         FourthTerm.Instance,
                         FourthTerm.Instance,
-                        () => TerminationTerm.Instance);
+                        () => DeadEndTerm.Instance);
                 }
                 else
                 {

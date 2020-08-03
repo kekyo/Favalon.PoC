@@ -44,8 +44,8 @@ namespace Favalet.Inferring
             // true && false
             var expression =
                 oper(
-                    Identity("true"),
-                    Identity("false"),
+                    Variable("true"),
+                    Variable("false"),
                     null);
 
             var actual = environment.Infer(expression);
@@ -55,8 +55,8 @@ namespace Favalet.Inferring
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 oper(
-                    Identity("true", ph0),
-                    Identity("false", ph0),
+                    Variable("true", ph0),
+                    Variable("false", ph0),
                     ph0);
 
             AssertLogicalEqual(expression, expected, actual);
@@ -72,9 +72,9 @@ namespace Favalet.Inferring
             var expression =
                 And(
                     And(
-                        Identity("true"),
-                        Identity("false")),
-                    Identity("true"));
+                        Variable("true"),
+                        Variable("false")),
+                    Variable("true"));
 
             var actual = environment.Infer(expression);
 
@@ -84,10 +84,10 @@ namespace Favalet.Inferring
             var expected =
                 And(
                     And(
-                        Identity("true", ph0),
-                        Identity("false", ph0),
+                        Variable("true", ph0),
+                        Variable("false", ph0),
                         ph0),
-                    Identity("true", ph0),
+                    Variable("true", ph0),
                     ph0);
 
             AssertLogicalEqual(expression, expected, actual);
@@ -104,8 +104,8 @@ namespace Favalet.Inferring
             // (true && false):bool
             var expression =
                 oper(
-                    Identity("true"),
-                    Identity("false"),
+                    Variable("true"),
+                    Variable("false"),
                     Type<bool>());
 
             var actual = environment.Infer(expression);
@@ -113,8 +113,8 @@ namespace Favalet.Inferring
             // (true:bool && false:bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
-                    Identity("false", Type<bool>()),
+                    Variable("true", Type<bool>()),
+                    Variable("false", Type<bool>()),
                     Type<bool>());
 
             AssertLogicalEqual(expression, expected, actual);
@@ -129,8 +129,8 @@ namespace Favalet.Inferring
             // true:bool && false
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
-                    Identity("false"),
+                    Variable("true", Type<bool>()),
+                    Variable("false"),
                     null);
 
             var actual = environment.Infer(expression);
@@ -138,8 +138,8 @@ namespace Favalet.Inferring
             // (true:bool && false:bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
-                    Identity("false", Type<bool>()),
+                    Variable("true", Type<bool>()),
+                    Variable("false", Type<bool>()),
                     Type<bool>());
 
             AssertLogicalEqual(expression, expected, actual);
@@ -154,8 +154,8 @@ namespace Favalet.Inferring
             // true && false:bool
             var expression =
                 oper(
-                    Identity("true"),
-                    Identity("false", Type<bool>()),
+                    Variable("true"),
+                    Variable("false", Type<bool>()),
                     null);
 
             var actual = environment.Infer(expression);
@@ -163,8 +163,8 @@ namespace Favalet.Inferring
             // (true:bool && false:bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
-                    Identity("false", Type<bool>()),
+                    Variable("true", Type<bool>()),
+                    Variable("false", Type<bool>()),
                     Type<bool>());
 
             AssertLogicalEqual(expression, expected, actual);
@@ -179,8 +179,8 @@ namespace Favalet.Inferring
             // true:bool && false:bool
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
-                    Identity("false", Type<bool>()),
+                    Variable("true", Type<bool>()),
+                    Variable("false", Type<bool>()),
                     null);
 
             var actual = environment.Infer(expression);
@@ -188,8 +188,8 @@ namespace Favalet.Inferring
             // (true:bool && false:bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
-                    Identity("false", Type<bool>()),
+                    Variable("true", Type<bool>()),
+                    Variable("false", Type<bool>()),
                     Type<bool>());
 
             AssertLogicalEqual(expression, expected, actual);
@@ -204,8 +204,8 @@ namespace Favalet.Inferring
             // (true:bool && false:bool):bool
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
-                    Identity("false", Type<bool>()),
+                    Variable("true", Type<bool>()),
+                    Variable("false", Type<bool>()),
                     Type<bool>());
 
             var actual = environment.Infer(expression);
@@ -213,8 +213,8 @@ namespace Favalet.Inferring
             // (true:bool && false:bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
-                    Identity("false", Type<bool>()),
+                    Variable("true", Type<bool>()),
+                    Variable("false", Type<bool>()),
                     Type<bool>());
 
             AssertLogicalEqual(expression, expected, actual);
@@ -231,10 +231,10 @@ namespace Favalet.Inferring
             // (true && (false && true)):bool
             var expression =
                 oper(
-                    Identity("true"),
+                    Variable("true"),
                     oper(
-                        Identity("false"),
-                        Identity("true"),
+                        Variable("false"),
+                        Variable("true"),
                         null),
                     Type<bool>());
 
@@ -243,10 +243,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -262,10 +262,10 @@ namespace Favalet.Inferring
             // true:bool && (false && true)
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false"),
-                        Identity("true"),
+                        Variable("false"),
+                        Variable("true"),
                         null),
                     null);
 
@@ -274,10 +274,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -293,10 +293,10 @@ namespace Favalet.Inferring
             // true && (false:bool && true)
             var expression =
                 oper(
-                    Identity("true"),
+                    Variable("true"),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true"),
+                        Variable("false", Type<bool>()),
+                        Variable("true"),
                         null),
                     null);
 
@@ -305,10 +305,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -324,10 +324,10 @@ namespace Favalet.Inferring
             // true && (false && true:bool)
             var expression =
                 oper(
-                    Identity("true"),
+                    Variable("true"),
                     oper(
-                        Identity("false"),
-                        Identity("true", Type<bool>()),
+                        Variable("false"),
+                        Variable("true", Type<bool>()),
                         null),
                     null);
 
@@ -336,10 +336,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -355,10 +355,10 @@ namespace Favalet.Inferring
             // true && (false && true):bool
             var expression =
                 oper(
-                    Identity("true"),
+                    Variable("true"),
                     oper(
-                        Identity("false"),
-                        Identity("true"),
+                        Variable("false"),
+                        Variable("true"),
                         Type<bool>()),
                     null);
 
@@ -367,10 +367,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -386,10 +386,10 @@ namespace Favalet.Inferring
             // true:bool && (false:bool && true)
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true"),
+                        Variable("false", Type<bool>()),
+                        Variable("true"),
                         null),
                     null);
 
@@ -398,10 +398,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -417,10 +417,10 @@ namespace Favalet.Inferring
             // true && (false:bool && true:bool)
             var expression =
                 oper(
-                    Identity("true"),
+                    Variable("true"),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         null),
                     null);
 
@@ -429,10 +429,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -448,10 +448,10 @@ namespace Favalet.Inferring
             // true:bool && (false && true:bool)
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false"),
-                        Identity("true", Type<bool>()),
+                        Variable("false"),
+                        Variable("true", Type<bool>()),
                         null),
                     null);
 
@@ -460,10 +460,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -479,10 +479,10 @@ namespace Favalet.Inferring
             // true:bool && (false:bool && true:bool)
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         null),
                     null);
 
@@ -491,10 +491,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -510,10 +510,10 @@ namespace Favalet.Inferring
             // true:bool && (false && true):bool
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false"),
-                        Identity("true"),
+                        Variable("false"),
+                        Variable("true"),
                         Type<bool>()),
                     null);
 
@@ -522,10 +522,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -541,10 +541,10 @@ namespace Favalet.Inferring
             // true:bool && (false:bool && true):bool
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true"),
+                        Variable("false", Type<bool>()),
+                        Variable("true"),
                         Type<bool>()),
                     null);
 
@@ -553,10 +553,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -572,10 +572,10 @@ namespace Favalet.Inferring
             // true:bool && (false && true:bool):bool
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false"),
-                        Identity("true", Type<bool>()),
+                        Variable("false"),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     null);
 
@@ -584,10 +584,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -603,10 +603,10 @@ namespace Favalet.Inferring
             // true:bool && (false:bool && true:bool):bool
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     null);
 
@@ -615,10 +615,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -634,10 +634,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expression =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 
@@ -646,10 +646,10 @@ namespace Favalet.Inferring
             // (true:bool && (false:bool && true:bool):bool):bool
             var expected =
                 oper(
-                    Identity("true", Type<bool>()),
+                    Variable("true", Type<bool>()),
                     oper(
-                        Identity("false", Type<bool>()),
-                        Identity("true", Type<bool>()),
+                        Variable("false", Type<bool>()),
+                        Variable("true", Type<bool>()),
                         Type<bool>()),
                     Type<bool>());
 

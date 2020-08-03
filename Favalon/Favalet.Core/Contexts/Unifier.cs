@@ -121,8 +121,8 @@ namespace Favalet.Contexts
             switch (from, to)
             {
                 // Ignore TerminationTerm unification.
-                case (TerminationTerm _, _):
-                case (_, TerminationTerm _):
+                case (DeadEndTerm _, _):
+                case (_, DeadEndTerm _):
                     break;
 
                 default:

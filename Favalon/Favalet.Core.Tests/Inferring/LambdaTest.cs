@@ -34,8 +34,8 @@ namespace Favalet.Inferring
             // a -> a
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"));
+                    BoundVariable("a"),
+                    Variable("a"));
 
             var actual = environment.Infer(expression);
 
@@ -44,8 +44,8 @@ namespace Favalet.Inferring
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 Lambda(
-                    BoundSymbol("a", ph0),
-                    Identity("a", ph0),
+                    BoundVariable("a", ph0),
+                    Variable("a", ph0),
                     Function(ph0, ph0));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -59,8 +59,8 @@ namespace Favalet.Inferring
             // a -> b
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("b"));
+                    BoundVariable("a"),
+                    Variable("b"));
 
             var actual = environment.Infer(expression);
 
@@ -70,8 +70,8 @@ namespace Favalet.Inferring
             var ph1 = provider.CreatePlaceholder();
             var expected =
                 Lambda(
-                    BoundSymbol("a", ph0),
-                    Identity("b", ph1),
+                    BoundVariable("a", ph0),
+                    Variable("b", ph1),
                     Function(ph0, ph1));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -85,16 +85,16 @@ namespace Favalet.Inferring
             // a:bool -> a
             var expression =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("a"));
+                    BoundVariable("a", Type<bool>()),
+                    Variable("a"));
 
             var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("a", Type<bool>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("a", Type<bool>()),
                     Function(Type<bool>(), Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -108,16 +108,16 @@ namespace Favalet.Inferring
             // a -> a:bool
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a", Type<bool>()));
+                    BoundVariable("a"),
+                    Variable("a", Type<bool>()));
 
             var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("a", Type<bool>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("a", Type<bool>()),
                     Function(Type<bool>(), Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -131,16 +131,16 @@ namespace Favalet.Inferring
             // a:bool -> a:bool
             var expression =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("a", Type<bool>()));
+                    BoundVariable("a", Type<bool>()),
+                    Variable("a", Type<bool>()));
 
             var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("a", Type<bool>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("a", Type<bool>()),
                     Function(Type<bool>(), Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -154,8 +154,8 @@ namespace Favalet.Inferring
             // (a -> a):(bool -> _)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
                         Type<bool>(),
                         Unspecified()));
@@ -165,8 +165,8 @@ namespace Favalet.Inferring
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("a", Type<bool>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("a", Type<bool>()),
                     Function(Type<bool>(), Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -180,8 +180,8 @@ namespace Favalet.Inferring
             // (a -> a):(_ -> bool)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
                         Unspecified(),
                         Type<bool>()));
@@ -191,8 +191,8 @@ namespace Favalet.Inferring
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("a", Type<bool>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("a", Type<bool>()),
                     Function(Type<bool>(), Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -206,8 +206,8 @@ namespace Favalet.Inferring
             // (a -> a):(bool -> bool)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
                         Type<bool>(),
                         Type<bool>()));
@@ -217,8 +217,8 @@ namespace Favalet.Inferring
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("a", Type<bool>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("a", Type<bool>()),
                     Function(Type<bool>(), Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -232,8 +232,8 @@ namespace Favalet.Inferring
             // (a -> a):(_ -> _)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
                         Unspecified(),
                         Unspecified()));
@@ -245,8 +245,8 @@ namespace Favalet.Inferring
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 Lambda(
-                    BoundSymbol("a", ph0),
-                    Identity("a", ph0),
+                    BoundVariable("a", ph0),
+                    Variable("a", ph0),
                     Function(ph0, ph0));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -260,8 +260,8 @@ namespace Favalet.Inferring
             // (a -> b):(bool -> _)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("b"),
+                    BoundVariable("a"),
+                    Variable("b"),
                     Function(
                         Type<bool>(),
                         Unspecified()));
@@ -273,8 +273,8 @@ namespace Favalet.Inferring
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("b", ph0),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("b", ph0),
                     Function(Type<bool>(), ph0));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -288,8 +288,8 @@ namespace Favalet.Inferring
             // (a -> b):(_ -> bool)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("b"),
+                    BoundVariable("a"),
+                    Variable("b"),
                     Function(
                         Unspecified(),
                         Type<bool>()));
@@ -301,8 +301,8 @@ namespace Favalet.Inferring
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 Lambda(
-                    BoundSymbol("a", ph0),
-                    Identity("b", Type<bool>()),
+                    BoundVariable("a", ph0),
+                    Variable("b", Type<bool>()),
                     Function(ph0, Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -316,8 +316,8 @@ namespace Favalet.Inferring
             // (a -> b):(bool -> bool)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("b"),
+                    BoundVariable("a"),
+                    Variable("b"),
                     Function(
                         Type<bool>(),
                         Type<bool>()));
@@ -327,8 +327,8 @@ namespace Favalet.Inferring
             // (a:bool -> b:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("b", Type<bool>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("b", Type<bool>()),
                     Function(Type<bool>(), Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -342,8 +342,8 @@ namespace Favalet.Inferring
             // (a -> b:bool):(bool -> _)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("b", Type<bool>()),
+                    BoundVariable("a"),
+                    Variable("b", Type<bool>()),
                     Function(
                         Type<bool>(),
                         Unspecified()));
@@ -353,8 +353,8 @@ namespace Favalet.Inferring
             // (a:bool -> b:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("b", Type<bool>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("b", Type<bool>()),
                     Function(Type<bool>(), Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -368,8 +368,8 @@ namespace Favalet.Inferring
             // (a:bool -> b):(_ -> bool)
             var expression =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("b"),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("b"),
                     Function(
                         Unspecified(),
                         Type<bool>()));
@@ -379,8 +379,8 @@ namespace Favalet.Inferring
             // (a:bool -> b:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("b", Type<bool>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("b", Type<bool>()),
                     Function(Type<bool>(), Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -394,10 +394,10 @@ namespace Favalet.Inferring
             // (a -> a):(bool -> _)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
-                        Identity("bool"),
+                        Variable("bool"),
                         Unspecified()));
 
             var actual = environment.Infer(expression);
@@ -405,11 +405,11 @@ namespace Favalet.Inferring
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Identity("bool")),
-                    Identity("a", Identity("bool")),
+                    BoundVariable("a", Variable("bool")),
+                    Variable("a", Variable("bool")),
                     Function(
-                        Identity("bool"),
-                        Identity("bool")));
+                        Variable("bool"),
+                        Variable("bool")));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -422,10 +422,10 @@ namespace Favalet.Inferring
             // (a -> a):(bool -> _):(* -> *)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
-                        Identity("bool"),
+                        Variable("bool"),
                         Unspecified(),
                         Function(
                             Kind(),
@@ -436,11 +436,11 @@ namespace Favalet.Inferring
             // (a:bool -> a:bool):(bool -> bool):(* -> *)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Identity("bool", Kind())),
-                    Identity("a", Identity("bool", Kind())),
+                    BoundVariable("a", Variable("bool", Kind())),
+                    Variable("a", Variable("bool", Kind())),
                     Function(
-                        Identity("bool", Kind()),
-                        Identity("bool", Kind()),
+                        Variable("bool", Kind()),
+                        Variable("bool", Kind()),
                         Function(
                             Kind(),
                             Kind())));
@@ -456,22 +456,22 @@ namespace Favalet.Inferring
             // (a -> a):(_ -> bool)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
                         Unspecified(),
-                        Identity("bool")));
+                        Variable("bool")));
 
             var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Identity("bool")),
-                    Identity("a", Identity("bool")),
+                    BoundVariable("a", Variable("bool")),
+                    Variable("a", Variable("bool")),
                     Function(
-                        Identity("bool"),
-                        Identity("bool")));
+                        Variable("bool"),
+                        Variable("bool")));
 
             var r = expected.GetPrettyString(PrettyStringTypes.Readable);
 
@@ -486,11 +486,11 @@ namespace Favalet.Inferring
             // (a -> a):(_ -> bool):(* -> *)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
                         Unspecified(),
-                        Identity("bool"),
+                        Variable("bool"),
                         Function(
                             Kind(),
                             Kind())));
@@ -500,11 +500,11 @@ namespace Favalet.Inferring
             // (a:bool -> a:bool):(bool -> bool):(* -> *)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Identity("bool", Kind())),
-                    Identity("a", Identity("bool", Kind())),
+                    BoundVariable("a", Variable("bool", Kind())),
+                    Variable("a", Variable("bool", Kind())),
                     Function(
-                        Identity("bool", Kind()),
-                        Identity("bool", Kind()),
+                        Variable("bool", Kind()),
+                        Variable("bool", Kind()),
                         Function(
                             Kind(),
                             Kind())));
@@ -522,22 +522,22 @@ namespace Favalet.Inferring
             // (a -> a):(bool -> bool)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
-                        Identity("bool"),
-                        Identity("bool")));
+                        Variable("bool"),
+                        Variable("bool")));
 
             var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Identity("bool")),
-                    Identity("a", Identity("bool")),
+                    BoundVariable("a", Variable("bool")),
+                    Variable("a", Variable("bool")),
                     Function(
-                        Identity("bool"),
-                        Identity("bool")));
+                        Variable("bool"),
+                        Variable("bool")));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -550,11 +550,11 @@ namespace Favalet.Inferring
             // (a -> a):(bool -> bool):(* -> *)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
-                        Identity("bool"),
-                        Identity("bool"),
+                        Variable("bool"),
+                        Variable("bool"),
                         Function(
                             Kind(),
                             Kind())));
@@ -564,11 +564,11 @@ namespace Favalet.Inferring
             // (a:bool -> a:bool):(bool -> bool):(* -> *)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Identity("bool", Kind())),
-                    Identity("a", Identity("bool", Kind())),
+                    BoundVariable("a", Variable("bool", Kind())),
+                    Variable("a", Variable("bool", Kind())),
                     Function(
-                        Identity("bool", Kind()),
-                        Identity("bool", Kind()),
+                        Variable("bool", Kind()),
+                        Variable("bool", Kind()),
                         Function(
                             Kind(),
                             Kind())));
@@ -584,10 +584,10 @@ namespace Favalet.Inferring
             // (a -> a):(bool -> _):(* -> _)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
-                        Identity("bool"),
+                        Variable("bool"),
                         Unspecified(),
                         Function(
                             Kind(),
@@ -598,11 +598,11 @@ namespace Favalet.Inferring
             // (a:bool -> a:bool):(bool -> bool):(* -> *)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Identity("bool", Kind())),
-                    Identity("a", Identity("bool", Kind())),
+                    BoundVariable("a", Variable("bool", Kind())),
+                    Variable("a", Variable("bool", Kind())),
                     Function(
-                        Identity("bool", Kind()),
-                        Identity("bool", Kind()),
+                        Variable("bool", Kind()),
+                        Variable("bool", Kind()),
                         Function(
                             Kind(),
                             Kind())));
@@ -618,11 +618,11 @@ namespace Favalet.Inferring
             // (a -> a):(_ -> bool):(_ -> *)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
                         Unspecified(),
-                        Identity("bool"),
+                        Variable("bool"),
                         Function(
                             Unspecified(),
                             Kind())));
@@ -632,11 +632,11 @@ namespace Favalet.Inferring
             // (a:bool -> a:bool):(bool -> bool):(* -> *)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Identity("bool", Kind())),
-                    Identity("a", Identity("bool", Kind())),
+                    BoundVariable("a", Variable("bool", Kind())),
+                    Variable("a", Variable("bool", Kind())),
                     Function(
-                        Identity("bool", Kind()),
-                        Identity("bool", Kind()),
+                        Variable("bool", Kind()),
+                        Variable("bool", Kind()),
                         Function(
                             Kind(),
                             Kind())));
@@ -652,11 +652,11 @@ namespace Favalet.Inferring
             // (a -> a):(_ -> bool):(* -> _)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
                         Unspecified(),
-                        Identity("bool"),
+                        Variable("bool"),
                         Function(
                             Kind(),
                             Unspecified())));
@@ -666,11 +666,11 @@ namespace Favalet.Inferring
             // (a:bool -> a:bool):(bool -> bool):(* -> *)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Identity("bool", Kind())),
-                    Identity("a", Identity("bool", Kind())),
+                    BoundVariable("a", Variable("bool", Kind())),
+                    Variable("a", Variable("bool", Kind())),
                     Function(
-                        Identity("bool", Kind()),
-                        Identity("bool", Kind()),
+                        Variable("bool", Kind()),
+                        Variable("bool", Kind()),
                         Function(
                             Kind(),
                             Kind())));
@@ -686,10 +686,10 @@ namespace Favalet.Inferring
             // (a -> a):(bool -> _):(_ -> *)
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("a"),
+                    BoundVariable("a"),
+                    Variable("a"),
                     Function(
-                        Identity("bool"),
+                        Variable("bool"),
                         Unspecified(),
                         Function(
                             Unspecified(),
@@ -700,11 +700,11 @@ namespace Favalet.Inferring
             // (a:bool:* -> a:bool:*):(bool:* -> bool:*):(* -> *)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Identity("bool", Kind())),
-                    Identity("a", Identity("bool", Kind())),
+                    BoundVariable("a", Variable("bool", Kind())),
+                    Variable("a", Variable("bool", Kind())),
                     Function(
-                        Identity("bool", Kind()),
-                        Identity("bool", Kind()),
+                        Variable("bool", Kind()),
+                        Variable("bool", Kind()),
                         Function(
                             Kind(),
                             Kind())));
@@ -720,21 +720,21 @@ namespace Favalet.Inferring
             // a = c:int
             environment.MutableBind(
                 "a",
-                Identity("c", Type<int>()));
+                Variable("c", Type<int>()));
 
             // a -> a:bool
             var expression =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("a"));
+                    BoundVariable("a", Type<bool>()),
+                    Variable("a"));
 
             var actual = environment.Infer(expression);
 
             // (a:bool -> a:bool):(bool -> bool)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("a", Type<bool>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("a", Type<bool>()),
                     Function(Type<bool>(), Type<bool>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -747,22 +747,22 @@ namespace Favalet.Inferring
 
             // b:int = c
             environment.MutableBind(
-                BoundSymbol("b", Type<int>()),
-                Identity("c"));
+                BoundVariable("b", Type<int>()),
+                Variable("c"));
 
             // a:bool -> b
             var expression =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("b"));
+                    BoundVariable("a", Type<bool>()),
+                    Variable("b"));
 
             var actual = environment.Infer(expression);
 
             // (a:bool -> b:int):(bool -> int)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("b", Type<int>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("b", Type<int>()),
                     Function(Type<bool>(), Type<int>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -781,16 +781,16 @@ namespace Favalet.Inferring
             // a:bool -> b
             var expression =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("b"));
+                    BoundVariable("a", Type<bool>()),
+                    Variable("b"));
 
             var actual = environment.Infer(expression);
 
             // (a:bool -> b:int):(bool -> int)
             var expected =
                 Lambda(
-                    BoundSymbol("a", Type<bool>()),
-                    Identity("b", Type<int>()),
+                    BoundVariable("a", Type<bool>()),
+                    Variable("b", Type<int>()),
                     Function(Type<bool>(), Type<int>()));
 
             AssertLogicalEqual(expression, expected, actual);
@@ -809,8 +809,8 @@ namespace Favalet.Inferring
             // a -> b
             var expression =
                 Lambda(
-                    BoundSymbol("a"),
-                    Identity("b"));
+                    BoundVariable("a"),
+                    Variable("b"));
 
             var actual = environment.Infer(expression);
 
@@ -819,8 +819,8 @@ namespace Favalet.Inferring
             var ph0 = provider.CreatePlaceholder();
             var expected =
                 Lambda(
-                    BoundSymbol("a", ph0),
-                    Identity("b", Type<int>()),
+                    BoundVariable("a", ph0),
+                    Variable("b", Type<int>()),
                     Function(ph0, Type<int>()));
 
             AssertLogicalEqual(expression, expected, actual);

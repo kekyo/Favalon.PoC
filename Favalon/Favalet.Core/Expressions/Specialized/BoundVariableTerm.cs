@@ -5,19 +5,19 @@ using System.Xml.Linq;
 
 namespace Favalet.Expressions.Specialized
 {
-    public interface IBoundSymbolTerm :
+    public interface IBoundVariableTerm :
         ITerm
     {
         string Symbol { get; }
     }
 
-    public sealed class BoundSymbolTerm :
-        Expression, IBoundSymbolTerm
+    public sealed class BoundVariableTerm :
+        Expression, IBoundVariableTerm
     {
         public readonly string Symbol;
 
         [DebuggerStepThrough]
-        private BoundSymbolTerm(string symbol, IExpression higherOrder)
+        private BoundVariableTerm(string symbol, IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
             this.Symbol = symbol;
@@ -26,7 +26,7 @@ namespace Favalet.Expressions.Specialized
         public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IBoundSymbolTerm.Symbol
+        string IBoundVariableTerm.Symbol
         {
             [DebuggerStepThrough]
             get => this.Symbol;
@@ -35,11 +35,11 @@ namespace Favalet.Expressions.Specialized
         public override int GetHashCode() =>
             this.Symbol.GetHashCode();
 
-        public bool Equals(IBoundSymbolTerm rhs) =>
+        public bool Equals(IBoundVariableTerm rhs) =>
             this.Symbol.Equals(rhs.Symbol);
 
         public override bool Equals(IExpression? other) =>
-            other is IBoundSymbolTerm rhs && this.Equals(rhs);
+            other is IBoundVariableTerm rhs && this.Equals(rhs);
 
         protected override IExpression Infer(IReduceContext context)
         {
@@ -51,7 +51,7 @@ namespace Favalet.Expressions.Specialized
             }
             else
             {
-                return new BoundSymbolTerm(this.Symbol, higherOrder);
+                return new BoundVariableTerm(this.Symbol, higherOrder);
             }
         }
 
@@ -65,7 +65,7 @@ namespace Favalet.Expressions.Specialized
             }
             else
             {
-                return new BoundSymbolTerm(this.Symbol, higherOrder);
+                return new BoundVariableTerm(this.Symbol, higherOrder);
             }
         }
 
@@ -81,10 +81,10 @@ namespace Favalet.Expressions.Specialized
                 this.Symbol);
 
         [DebuggerStepThrough]
-        public static BoundSymbolTerm Create(string symbol, IExpression higherOrder) =>
-            new BoundSymbolTerm(symbol, higherOrder);
+        public static BoundVariableTerm Create(string symbol, IExpression higherOrder) =>
+            new BoundVariableTerm(symbol, higherOrder);
         [DebuggerStepThrough]
-        public static BoundSymbolTerm Create(string symbol) =>
-            new BoundSymbolTerm(symbol, UnspecifiedTerm.Instance);
+        public static BoundVariableTerm Create(string symbol) =>
+            new BoundVariableTerm(symbol, UnspecifiedTerm.Instance);
     }
 }

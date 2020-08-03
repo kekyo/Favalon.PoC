@@ -5,11 +5,16 @@ using System.Linq;
 
 namespace Favalet.Expressions.Specialized
 {
-    [DebuggerStepThrough]
-    internal sealed class TerminationTerm :
-        Expression, ITerm, IDeadEndExpression
+    internal interface IDeadEndTerm :
+        ITerm
     {
-        private TerminationTerm()
+    }
+
+    [DebuggerStepThrough]
+    internal sealed class DeadEndTerm :
+        Expression, IDeadEndTerm
+    {
+        private DeadEndTerm()
         { }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -35,9 +40,9 @@ namespace Favalet.Expressions.Specialized
             Enumerable.Empty<object>();
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
-            "#TERM";
+            "#DeadEnd";
 
-        public static readonly TerminationTerm Instance =
-            new TerminationTerm();
+        public static readonly DeadEndTerm Instance =
+            new DeadEndTerm();
     }
 }

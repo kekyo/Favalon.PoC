@@ -29,15 +29,15 @@ namespace Favalet
         public static UnspecifiedTerm Unspecified() =>
             UnspecifiedTerm.Instance;
 
-        public static VariableTerm Identity(string symbol) =>
+        public static VariableTerm Variable(string symbol) =>
             VariableTerm.Create(symbol);
-        public static VariableTerm Identity(string symbol, IExpression higherOrder) =>
+        public static VariableTerm Variable(string symbol, IExpression higherOrder) =>
             VariableTerm.Create(symbol, higherOrder);
 
-        public static BoundSymbolTerm BoundSymbol(string symbol) =>
-            BoundSymbolTerm.Create(symbol);
-        public static BoundSymbolTerm BoundSymbol(string symbol, IExpression higherOrder) =>
-            BoundSymbolTerm.Create(symbol, higherOrder);
+        public static BoundVariableTerm BoundVariable(string symbol) =>
+            BoundVariableTerm.Create(symbol);
+        public static BoundVariableTerm BoundVariable(string symbol, IExpression higherOrder) =>
+            BoundVariableTerm.Create(symbol, higherOrder);
 
         public static LogicalExpression Logical(IBinaryExpression operand) =>
             LogicalExpression.Create(operand);
@@ -58,17 +58,17 @@ namespace Favalet
             OrExpression.Create(lhs, rhs, higherOrder);
 
         public static LambdaExpression Lambda(
-            IBoundSymbolTerm parameter, IExpression body) =>
+            IBoundVariableTerm parameter, IExpression body) =>
             LambdaExpression.Create(parameter, body);
         public static LambdaExpression Lambda(
             string parameter, IExpression body) =>
-            LambdaExpression.Create(BoundSymbolTerm.Create(parameter), body);
+            LambdaExpression.Create(BoundVariableTerm.Create(parameter), body);
         public static LambdaExpression Lambda(
-            IBoundSymbolTerm parameter, IExpression body, IExpression higherOrder) =>
+            IBoundVariableTerm parameter, IExpression body, IExpression higherOrder) =>
             LambdaExpression.Create(parameter, body, higherOrder);
         public static LambdaExpression Lambda(
             string parameter, IExpression body, IExpression higherOrder) =>
-            LambdaExpression.Create(BoundSymbolTerm.Create(parameter), body, higherOrder);
+            LambdaExpression.Create(BoundVariableTerm.Create(parameter), body, higherOrder);
 
         public static ApplyExpression Apply(
             IExpression function, IExpression argument) =>

@@ -8,7 +8,7 @@ namespace Favalet.Contexts
     public interface IReduceContext :
         IScopeContext, IPlaceholderProvider
     {
-        IReduceContext Bind(IBoundSymbolTerm parameter, IExpression expression);
+        IReduceContext Bind(IBoundVariableTerm parameter, IExpression expression);
 
         IExpression InferHigherOrder(IExpression higherOrder);
         IExpression Fixup(IExpression expression);
@@ -24,7 +24,7 @@ namespace Favalet.Contexts
         private readonly Environments rootScope;
         private readonly IScopeContext parentScope;
         private readonly Unifier unifier;
-        private IBoundSymbolTerm? symbol;
+        private IBoundVariableTerm? symbol;
         private IExpression? expression;
 
         [DebuggerStepThrough]
@@ -52,7 +52,7 @@ namespace Favalet.Contexts
             expression is Expression expr ? expr.InternalReduce(this) : expression;
 
         public IReduceContext Bind(
-            IBoundSymbolTerm symbol, IExpression expression)
+            IBoundVariableTerm symbol, IExpression expression)
         {
             var newContext = new ReduceContext(
                 this.rootScope,
@@ -94,7 +94,7 @@ namespace Favalet.Contexts
         public VariableInformation[] LookupVariables(IIdentityTerm identity) =>
             // TODO: improving when identity's higher order acceptable
             // TODO: what acceptable (narrowing, widening)
-            this.symbol is IBoundSymbolTerm p &&
+            this.symbol is IBoundVariableTerm p &&
             expression is IExpression expr &&
             p.Symbol.Equals(identity.Symbol) ?
                 new[] { VariableInformation.Create(p.HigherOrder, expr) } :

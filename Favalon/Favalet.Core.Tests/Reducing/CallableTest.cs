@@ -31,15 +31,15 @@ namespace Favalet.Reducing
         {
             var environment = Environment();
 
-            environment.MutableBind("ABC", Identity("XYZ"));
+            environment.MutableBind("ABC", Variable("XYZ"));
 
             var expression =
-                Identity("ABC");
+                Variable("ABC");
 
             var actual = environment.Reduce(expression);
 
             var expected =
-                Identity("XYZ");
+                Variable("XYZ");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -53,8 +53,8 @@ namespace Favalet.Reducing
                 Lambda(
                     "arg",
                     And(
-                        Identity("arg"),
-                        Identity("B")));
+                        Variable("arg"),
+                        Variable("B")));
 
             var actual = environment.Reduce(expression);
 
@@ -62,8 +62,8 @@ namespace Favalet.Reducing
                 Lambda(
                     "arg",
                     And(
-                        Identity("arg"),
-                        Identity("B")));
+                        Variable("arg"),
+                        Variable("B")));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -79,16 +79,16 @@ namespace Favalet.Reducing
                     Lambda(
                         "arg",
                         And(
-                            Identity("arg"),
-                            Identity("B"))),
-                    Identity("A"));
+                            Variable("arg"),
+                            Variable("B"))),
+                    Variable("A"));
 
             var actual = environment.Reduce(expression);
 
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -104,8 +104,8 @@ namespace Favalet.Reducing
                 Lambda(
                     "arg1",
                     And(
-                        Identity("arg1"),
-                        Identity("B"))));
+                        Variable("arg1"),
+                        Variable("B"))));
 
             // (arg2 -> inner arg2) A
             var expression =
@@ -113,17 +113,17 @@ namespace Favalet.Reducing
                     Lambda(
                         "arg2",
                         Apply(
-                            Identity("inner"),
-                            Identity("arg2"))),
-                    Identity("A"));
+                            Variable("inner"),
+                            Variable("arg2"))),
+                    Variable("A"));
 
             var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -141,8 +141,8 @@ namespace Favalet.Reducing
                 Lambda(
                     "arg",
                     And(
-                        Identity("arg"),
-                        Identity("B"))));
+                        Variable("arg"),
+                        Variable("B"))));
 
             // (arg -> inner arg) A
             var expression =
@@ -150,17 +150,17 @@ namespace Favalet.Reducing
                     Lambda(
                         "arg",
                         Apply(
-                            Identity("inner"),
-                            Identity("arg"))),
-                    Identity("A"));
+                            Variable("inner"),
+                            Variable("arg"))),
+                    Variable("A"));
 
             var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -180,24 +180,24 @@ namespace Favalet.Reducing
                     Lambda(
                         "arg2",
                         And(
-                            Identity("arg2"),
-                            Identity("arg1")))));
+                            Variable("arg2"),
+                            Variable("arg1")))));
 
             // inner A B
             var expression =
                 Apply(
                     Apply(
-                        Identity("inner"),
-                        Identity("A")),
-                    Identity("B"));
+                        Variable("inner"),
+                        Variable("A")),
+                    Variable("B"));
 
             var actual = environment.Reduce(expression);
 
             // B && A
             var expected =
                 And(
-                    Identity("B"),
-                    Identity("A"));
+                    Variable("B"),
+                    Variable("A"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -217,24 +217,24 @@ namespace Favalet.Reducing
                     Lambda(
                         "arg1",
                         And(
-                            Identity("arg2"),
-                            Identity("arg1")))));
+                            Variable("arg2"),
+                            Variable("arg1")))));
 
             // inner A B
             var expression =
                 Apply(
                     Apply(
-                        Identity("inner"),
-                        Identity("A")),
-                    Identity("B"));
+                        Variable("inner"),
+                        Variable("A")),
+                    Variable("B"));
 
             var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -249,18 +249,18 @@ namespace Favalet.Reducing
                 Apply(
                     Logical(),
                     And(
-                        Identity("A"),
+                        Variable("A"),
                         And(
-                            Identity("B"),
-                            Identity("A"))));
+                            Variable("B"),
+                            Variable("A"))));
 
             var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -278,20 +278,20 @@ namespace Favalet.Reducing
             // logical (A && (B && A))
             var expression =
                 Apply(
-                    Identity("logical"),
+                    Variable("logical"),
                     And(
-                        Identity("A"),
+                        Variable("A"),
                         And(
-                            Identity("B"),
-                            Identity("A"))));
+                            Variable("B"),
+                            Variable("A"))));
 
             var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }

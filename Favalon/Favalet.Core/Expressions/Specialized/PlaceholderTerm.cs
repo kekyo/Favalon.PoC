@@ -48,7 +48,7 @@ namespace Favalet.Expressions.Specialized
             {
                 if (this.OrderHint >= PlaceholderOrderHints.Fourth)
                 {
-                    return TerminationTerm.Instance;
+                    return DeadEndTerm.Instance;
                 }
 
                 if (this.higherOrder == null)

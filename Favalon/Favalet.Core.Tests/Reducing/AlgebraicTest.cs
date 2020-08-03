@@ -37,16 +37,16 @@ namespace Favalet.Reducing
             // A && B
             var expression =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -60,16 +60,16 @@ namespace Favalet.Reducing
             var expression =
                 Logical(
                     And(
-                        Identity("A"),
-                        Identity("B")));
+                        Variable("A"),
+                        Variable("B")));
 
             var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -83,9 +83,9 @@ namespace Favalet.Reducing
             var expression =
                 And(
                     And(
-                        Identity("A"),
-                        Identity("A")),
-                    Identity("A"));
+                        Variable("A"),
+                        Variable("A")),
+                    Variable("A"));
 
             var actual = environment.Reduce(expression);
 
@@ -93,9 +93,9 @@ namespace Favalet.Reducing
             var expected =
                 And(
                     And(
-                        Identity("A"),
-                        Identity("A")),
-                    Identity("A"));
+                        Variable("A"),
+                        Variable("A")),
+                    Variable("A"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -110,15 +110,15 @@ namespace Favalet.Reducing
                 Logical(
                     And(
                         And(
-                            Identity("A"),
-                            Identity("A")),
-                        Identity("A")));
+                            Variable("A"),
+                            Variable("A")),
+                        Variable("A")));
 
             var actual = environment.Reduce(expression);
 
             // A
             var expected =
-                Identity("A");
+                Variable("A");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -133,17 +133,17 @@ namespace Favalet.Reducing
                 Logical(
                     And(
                         And(
-                            Identity("A"),
-                            Identity("A")),
+                            Variable("A"),
+                            Variable("A")),
                         And(
-                            Identity("A"),
-                            Identity("A"))));
+                            Variable("A"),
+                            Variable("A"))));
 
             var actual = environment.Reduce(expression);
 
             // A
             var expected =
-                Identity("A");
+                Variable("A");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -158,16 +158,16 @@ namespace Favalet.Reducing
             // A || B
             var expression =
                 Or(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             var actual = environment.Reduce(expression);
 
             // A || B
             var expected =
                 Or(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -181,16 +181,16 @@ namespace Favalet.Reducing
             var expression =
                 Logical(
                     Or(
-                        Identity("A"),
-                        Identity("B")));
+                        Variable("A"),
+                        Variable("B")));
 
             var actual = environment.Reduce(expression);
 
             // A || B
             var expected =
                 Or(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -204,9 +204,9 @@ namespace Favalet.Reducing
             var expression =
                 Or(
                     Or(
-                        Identity("A"),
-                        Identity("A")),
-                    Identity("A"));
+                        Variable("A"),
+                        Variable("A")),
+                    Variable("A"));
 
             var actual = environment.Reduce(expression);
 
@@ -214,9 +214,9 @@ namespace Favalet.Reducing
             var expected =
                 Or(
                     Or(
-                        Identity("A"),
-                        Identity("A")),
-                    Identity("A"));
+                        Variable("A"),
+                        Variable("A")),
+                    Variable("A"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -231,15 +231,15 @@ namespace Favalet.Reducing
                 Logical(
                     Or(
                         Or(
-                            Identity("A"),
-                            Identity("A")),
-                        Identity("A")));
+                            Variable("A"),
+                            Variable("A")),
+                        Variable("A")));
 
             var actual = environment.Reduce(expression);
 
             // A
             var expected =
-                Identity("A");
+                Variable("A");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -254,17 +254,17 @@ namespace Favalet.Reducing
                 Logical(
                     Or(
                         Or(
-                            Identity("A"),
-                            Identity("A")),
+                            Variable("A"),
+                            Variable("A")),
                         Or(
-                            Identity("A"),
-                            Identity("A"))));
+                            Variable("A"),
+                            Variable("A"))));
 
             var actual = environment.Reduce(expression);
 
             // A
             var expected =
-                Identity("A");
+                Variable("A");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -281,17 +281,17 @@ namespace Favalet.Reducing
                 Logical(
                     And(
                         Or(
-                            Identity("A"),
-                            Identity("A")),
+                            Variable("A"),
+                            Variable("A")),
                         Or(
-                            Identity("A"),
-                            Identity("A"))));
+                            Variable("A"),
+                            Variable("A"))));
 
             var actual = environment.Reduce(expression);
 
             // A
             var expected =
-                Identity("A");
+                Variable("A");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -306,17 +306,17 @@ namespace Favalet.Reducing
                 Logical(
                     Or(
                         And(
-                            Identity("A"),
-                            Identity("A")),
+                            Variable("A"),
+                            Variable("A")),
                         And(
-                            Identity("A"),
-                            Identity("A"))));
+                            Variable("A"),
+                            Variable("A"))));
 
             var actual = environment.Reduce(expression);
 
             // A
             var expected =
-                Identity("A");
+                Variable("A");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -331,19 +331,19 @@ namespace Favalet.Reducing
                 Logical(
                     And(
                         Or(
-                            Identity("A"),
-                            Identity("A")),
+                            Variable("A"),
+                            Variable("A")),
                         Or(
-                            Identity("B"),
-                            Identity("B"))));
+                            Variable("B"),
+                            Variable("B"))));
 
             var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -358,19 +358,19 @@ namespace Favalet.Reducing
                 Logical(
                     Or(
                         And(
-                            Identity("A"),
-                            Identity("A")),
+                            Variable("A"),
+                            Variable("A")),
                         And(
-                            Identity("B"),
-                            Identity("B"))));
+                            Variable("B"),
+                            Variable("B"))));
 
             var actual = environment.Reduce(expression);
 
             // A || B
             var expected =
                 Or(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -385,19 +385,19 @@ namespace Favalet.Reducing
                 Logical(
                     And(
                         Or(
-                            Identity("A"),
-                            Identity("B")),
+                            Variable("A"),
+                            Variable("B")),
                         Or(
-                            Identity("A"),
-                            Identity("B"))));
+                            Variable("A"),
+                            Variable("B"))));
 
             var actual = environment.Reduce(expression);
 
             // A || B
             var expected =
                 Or(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -412,19 +412,19 @@ namespace Favalet.Reducing
                 Logical(
                     Or(
                         And(
-                            Identity("A"),
-                            Identity("B")),
+                            Variable("A"),
+                            Variable("B")),
                         And(
-                            Identity("A"),
-                            Identity("B"))));
+                            Variable("A"),
+                            Variable("B"))));
 
             var actual = environment.Reduce(expression);
 
             // A && B
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -440,16 +440,16 @@ namespace Favalet.Reducing
             var expression =
                 Logical(
                     And(
-                        Identity("A"),
+                        Variable("A"),
                         Or(
-                            Identity("A"),
-                            Identity("B"))));
+                            Variable("A"),
+                            Variable("B"))));
 
             var actual = environment.Reduce(expression);
 
             // A
             var expected =
-                Identity("A");
+                Variable("A");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -465,16 +465,16 @@ namespace Favalet.Reducing
             var expression =
                 Logical(
                     Or(
-                        Identity("A"),
+                        Variable("A"),
                         And(
-                            Identity("A"),
-                            Identity("B"))));
+                            Variable("A"),
+                            Variable("B"))));
 
             var actual = environment.Reduce(expression);
 
             // A
             var expected =
-                Identity("A");
+                Variable("A");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -489,19 +489,19 @@ namespace Favalet.Reducing
                 Logical(
                     And(
                         Or(
-                            Identity("A"),
-                            Identity("B")),
+                            Variable("A"),
+                            Variable("B")),
                         Or(
-                            Identity("B"),
-                            Identity("A"))));
+                            Variable("B"),
+                            Variable("A"))));
 
             var actual = environment.Reduce(expression);
 
             // A || B
             var expected =
                 Or(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -516,18 +516,18 @@ namespace Favalet.Reducing
                 Logical(
                     Or(
                         And(
-                            Identity("A"),
-                            Identity("B")),
+                            Variable("A"),
+                            Variable("B")),
                         And(
-                            Identity("B"),
-                            Identity("A"))));
+                            Variable("B"),
+                            Variable("A"))));
 
             var actual = environment.Reduce(expression);
 
             var expected =
                 And(
-                    Identity("A"),
-                    Identity("B"));
+                    Variable("A"),
+                    Variable("B"));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -542,25 +542,25 @@ namespace Favalet.Reducing
                 Logical(
                     And(
                         Or(
-                            Identity("A"),
+                            Variable("A"),
                             Or(
-                                Identity("B"),
-                                Identity("C"))),
+                                Variable("B"),
+                                Variable("C"))),
                         Or(
-                            Identity("B"),
+                            Variable("B"),
                             Or(
-                                Identity("C"),
-                                Identity("A")))));
+                                Variable("C"),
+                                Variable("A")))));
 
             var actual = environment.Reduce(expression);
 
             // A || B || C
             var expected =
                 Or(
-                    Identity("A"),
+                    Variable("A"),
                     Or(
-                        Identity("B"),
-                        Identity("C")));
+                        Variable("B"),
+                        Variable("C")));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -575,25 +575,25 @@ namespace Favalet.Reducing
                 Logical(
                     Or(
                         And(
-                            Identity("A"),
+                            Variable("A"),
                             And(
-                                Identity("B"),
-                                Identity("C"))),
+                                Variable("B"),
+                                Variable("C"))),
                         And(
-                            Identity("B"),
+                            Variable("B"),
                             And(
-                                Identity("C"),
-                                Identity("A")))));
+                                Variable("C"),
+                                Variable("A")))));
 
             var actual = environment.Reduce(expression);
 
             // A && B && C
             var expected =
                 And(
-                    Identity("A"),
+                    Variable("A"),
                     And(
-                        Identity("B"),
-                        Identity("C")));
+                        Variable("B"),
+                        Variable("C")));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -608,25 +608,25 @@ namespace Favalet.Reducing
                 Logical(
                     And(
                         Or(
-                            Identity("A"),
+                            Variable("A"),
                             Or(
-                                Identity("B"),
-                                Identity("C"))),
+                                Variable("B"),
+                                Variable("C"))),
                         Or(
                             Or(
-                                Identity("C"),
-                                Identity("A")),
-                            Identity("B"))));
+                                Variable("C"),
+                                Variable("A")),
+                            Variable("B"))));
 
             var actual = environment.Reduce(expression);
 
             // A || B || C
             var expected =
                 Or(
-                    Identity("A"),
+                    Variable("A"),
                     Or(
-                        Identity("B"),
-                        Identity("C")));
+                        Variable("B"),
+                        Variable("C")));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -641,25 +641,25 @@ namespace Favalet.Reducing
                 Logical(
                     Or(
                         And(
-                            Identity("A"),
+                            Variable("A"),
                             And(
-                                Identity("B"),
-                                Identity("C"))),
+                                Variable("B"),
+                                Variable("C"))),
                         And(
                             And(
-                                Identity("C"),
-                                Identity("A")),
-                            Identity("B"))));
+                                Variable("C"),
+                                Variable("A")),
+                            Variable("B"))));
 
             var actual = environment.Reduce(expression);
 
             // A && B && C
             var expected =
                 And(
-                    Identity("A"),
+                    Variable("A"),
                     And(
-                        Identity("B"),
-                        Identity("C")));
+                        Variable("B"),
+                        Variable("C")));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -675,24 +675,24 @@ namespace Favalet.Reducing
                     And(
                         Or(
                             Or(
-                                Identity("A"),
-                                Identity("B")),
-                            Identity("C")),
+                                Variable("A"),
+                                Variable("B")),
+                            Variable("C")),
                         Or(
-                            Identity("B"),
+                            Variable("B"),
                             Or(
-                                Identity("C"),
-                                Identity("A")))));
+                                Variable("C"),
+                                Variable("A")))));
 
             var actual = environment.Reduce(expression);
 
             // A || B || C
             var expected =
                 Or(
-                    Identity("A"),
+                    Variable("A"),
                     Or(
-                        Identity("B"),
-                        Identity("C")));
+                        Variable("B"),
+                        Variable("C")));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -708,24 +708,24 @@ namespace Favalet.Reducing
                     Or(
                         And(
                             And(
-                                Identity("A"),
-                                Identity("B")),
-                            Identity("C")),
+                                Variable("A"),
+                                Variable("B")),
+                            Variable("C")),
                         And(
-                            Identity("B"),
+                            Variable("B"),
                             And(
-                                Identity("C"),
-                                Identity("A")))));
+                                Variable("C"),
+                                Variable("A")))));
 
             var actual = environment.Reduce(expression);
 
             // A && B && C
             var expected =
                 And(
-                    Identity("A"),
+                    Variable("A"),
                     And(
-                        Identity("B"),
-                        Identity("C")));
+                        Variable("B"),
+                        Variable("C")));
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -742,21 +742,21 @@ namespace Favalet.Reducing
                 Logical(
                     Or(
                         And(
-                            Identity("A"),
+                            Variable("A"),
                             Or(
-                                Identity("A"),
-                                Identity("B"))),
+                                Variable("A"),
+                                Variable("B"))),
                         And(
                             And(
-                                Identity("C"),
-                                Identity("A")),
-                            Identity("B"))));
+                                Variable("C"),
+                                Variable("A")),
+                            Variable("B"))));
 
             var actual = environment.Reduce(expression);
 
             // A
             var expected =
-                Identity("A");
+                Variable("A");
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -773,21 +773,21 @@ namespace Favalet.Reducing
                 Logical(
                     And(
                         Or(
-                            Identity("A"),
+                            Variable("A"),
                             And(
-                                Identity("A"),
-                                Identity("B"))),
+                                Variable("A"),
+                                Variable("B"))),
                         Or(
                             Or(
-                                Identity("C"),
-                                Identity("A")),
-                            Identity("B"))));
+                                Variable("C"),
+                                Variable("A")),
+                            Variable("B"))));
 
             var actual = environment.Reduce(expression);
 
             // A
             var expected =
-                Identity("A");
+                Variable("A");
 
             AssertLogicalEqual(expression, expected, actual);
         }

@@ -47,9 +47,9 @@ namespace Favalet.Expressions.Algebraic
                     left.Equals(right) &&
                     (left, right) switch
                     {
-                        (FourthTerm _, FourthTerm _) => true,
-                        (DeadEndTerm _, _) => false,
-                        (_, DeadEndTerm _) => false,
+                        (IDeadEndTerm _, IDeadEndTerm _) => true,
+                        (IDeadEndTerm _, _) => false,
+                        (_, IDeadEndTerm _) => false,
                         _ => this.Equals(
                             this.Compute(lhs.HigherOrder),
                             this.Compute(rhs.HigherOrder))

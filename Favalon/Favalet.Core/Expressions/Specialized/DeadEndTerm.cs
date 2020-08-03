@@ -21,9 +21,6 @@ namespace Favalet.Expressions.Specialized
         public override IExpression HigherOrder =>
             Instance;
 
-        public bool Equals(FourthTerm rhs) =>
-            false;
-
         public override bool Equals(IExpression? other) =>
             false;
 
@@ -40,7 +37,7 @@ namespace Favalet.Expressions.Specialized
             Enumerable.Empty<object>();
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
-            "#DeadEnd";
+            "#DE";
 
         public static readonly DeadEndTerm Instance =
             new DeadEndTerm();

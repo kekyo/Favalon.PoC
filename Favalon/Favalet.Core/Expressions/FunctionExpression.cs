@@ -78,7 +78,7 @@ namespace Favalet.Expressions
             {
                 if (object.ReferenceEquals(this.Parameter, parameter) &&
                     object.ReferenceEquals(this.Result, result) &&
-                    this.HigherOrder is DeadEndTerm)
+                    this.HigherOrder is IDeadEndTerm)
                 {
                     return this;
                 }

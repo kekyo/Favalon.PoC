@@ -34,7 +34,7 @@ namespace Favalet.Contexts
             (this.type, expression, expression) switch
             {
                 (PrettyStringTypes.Readable, Expression expr, _) => expr.InternalGetPrettyString(this),
-                (_, Expression expr, DeadEndTerm _) => expr.InternalGetPrettyString(this),
+                (_, Expression expr, IDeadEndTerm _) => expr.InternalGetPrettyString(this),
                 (_, Expression expr, _) => $"{expr.Type} {expr.InternalGetPrettyString(this)}",
                 _ => this.FinalizePrettyString(expression, "?")
             };
@@ -44,7 +44,7 @@ namespace Favalet.Contexts
             {
                 (PrettyStringTypes.Readable, Expression expr, ITerm _) => expr.InternalGetPrettyString(this),
                 (PrettyStringTypes.Readable, Expression expr, _) => $"({expr.InternalGetPrettyString(this)})",
-                (_, Expression expr, DeadEndTerm _) => expr.InternalGetPrettyString(this),
+                (_, Expression expr, IDeadEndTerm _) => expr.InternalGetPrettyString(this),
                 (_, Expression expr, _) => $"({expr.Type} {expr.InternalGetPrettyString(this)})",
                 _ => this.FinalizePrettyString(expression, "?")
             };
@@ -64,7 +64,7 @@ namespace Favalet.Contexts
             {
                 (_, true, _, _) =>
                     preFormatted,
-                (_, _, _, DeadEndTerm _) =>
+                (_, _, _, IDeadEndTerm _) =>
                     preFormatted,
                 (PrettyStringTypes.Readable, _, _, UnspecifiedTerm _) =>
                     preFormatted,

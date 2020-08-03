@@ -85,6 +85,6 @@ namespace Favalet.Expressions.Specialized
             new BoundVariableTerm(symbol, higherOrder);
         [DebuggerStepThrough]
         public static BoundVariableTerm Create(string symbol) =>
-            new BoundVariableTerm(symbol, UnspecifiedTerm.Instance);
+            new BoundVariableTerm(symbol, UnspecifiedTerm.TypeInstance);
     }
 }

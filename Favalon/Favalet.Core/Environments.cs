@@ -8,13 +8,13 @@ using System.Threading;
 namespace Favalet
 {
     public interface IEnvironments :
-        IScopeContext, IPlaceholderProvider
+        IScopeContext
     {
         void MutableBind(IBoundVariableTerm symbol, IExpression expression);
     }
 
     public sealed class Environments :
-        ScopeContext, IEnvironments
+        ScopeContext, IEnvironments, IPlaceholderProvider
     {
 #if DEBUG
         private Unifier? lastUnifier;
@@ -27,8 +27,8 @@ namespace Favalet
         { }
 
         [DebuggerStepThrough]
-        public PlaceholderTerm CreatePlaceholder(
-            PlaceholderOrderHints orderHint = PlaceholderOrderHints.TypeOrAbove)
+        internal PlaceholderTerm CreatePlaceholder(
+            PlaceholderOrderHints orderHint)
         {
             var ph = PlaceholderTerm.Create(
                 this,
@@ -44,6 +44,10 @@ namespace Favalet
 #endif
             return ph;
         }
+
+        [DebuggerStepThrough]
+        public PlaceholderTerm CreatePlaceholder() =>
+            this.CreatePlaceholder(PlaceholderOrderHints.VariableOrAbove);
 
         [DebuggerStepThrough]
         IIdentityTerm IPlaceholderProvider.CreatePlaceholder(

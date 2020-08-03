@@ -1,4 +1,5 @@
 ﻿using Favalet.Contexts;
+using Favalet.Internal;
 using System.Collections;
 using System.Diagnostics;
 using System.Xml.Linq;
@@ -15,15 +16,14 @@ namespace Favalet.Expressions.Specialized
 
     public interface IPlaceholderProvider
     {
-        IIdentityTerm CreatePlaceholder(
-            PlaceholderOrderHints orderHint = PlaceholderOrderHints.TypeOrAbove);
+        IIdentityTerm CreatePlaceholder(PlaceholderOrderHints orderHint);
     }
 
     public sealed class PlaceholderTerm :
         Expression, IIdentityTerm
     {
         private IPlaceholderProvider provider;
-        private IIdentityTerm? higherOrder;
+        private readonly LazySlim<IExpression> higherOrder;
 
         public readonly int Index;
         public readonly PlaceholderOrderHints OrderHint;
@@ -39,31 +39,16 @@ namespace Favalet.Expressions.Specialized
             this.provider = provider;
             this.Index = index;
             this.OrderHint = orderHint;
+            this.higherOrder = LazySlim.Create(() =>
+                (this.OrderHint >= PlaceholderOrderHints.Fourth) ?
+                    (IExpression)DeadEndTerm.Instance :
+                    this.provider.CreatePlaceholder(this.OrderHint + 1));
         }
 
         public override IExpression HigherOrder
         {
             [DebuggerStepThrough]
-            get
-            {
-                if (this.OrderHint >= PlaceholderOrderHints.Fourth)
-                {
-                    return DeadEndTerm.Instance;
-                }
-
-                if (this.higherOrder == null)
-                {
-                    lock (this)
-                    {
-                        if (this.higherOrder == null)
-                        {
-                            this.higherOrder = this.provider.CreatePlaceholder(
-                                this.OrderHint + 1);
-                        }
-                    }
-                }
-                return this.higherOrder;
-            }
+            get => this.higherOrder.Value;
         }
 
         public string Symbol

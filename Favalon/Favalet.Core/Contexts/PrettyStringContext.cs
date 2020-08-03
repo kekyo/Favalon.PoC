@@ -6,6 +6,8 @@ namespace Favalet.Contexts
 {
     public interface IPrettyStringContext
     {
+        PrettyStringTypes Type { get; }
+
         string GetPrettyString(IExpression expression);
         string FinalizePrettyString(IExpression expression, string preFormatted);
     }
@@ -20,18 +22,25 @@ namespace Favalet.Contexts
     public sealed class PrettyStringContext :
         IPrettyStringContext
     {
-        private readonly PrettyStringTypes type;
         private readonly bool isPartial;
+
+        public readonly PrettyStringTypes Type;
 
         [DebuggerStepThrough]
         private PrettyStringContext(PrettyStringTypes type, bool isPartial)
         {
-            this.type = type;
+            this.Type = type;
             this.isPartial = isPartial;
         }
 
+        PrettyStringTypes IPrettyStringContext.Type
+        {
+            [DebuggerStepThrough]
+            get => this.Type;
+        }
+
         public string GetPrettyString(IExpression expression) =>
-            (this.type, expression, expression) switch
+            (this.Type, expression, expression) switch
             {
                 (PrettyStringTypes.Readable, Expression expr, _) => expr.InternalGetPrettyString(this),
                 (_, Expression expr, DeadEndTerm _) => expr.InternalGetPrettyString(this),
@@ -40,7 +49,7 @@ namespace Favalet.Contexts
             };
 
         string IPrettyStringContext.GetPrettyString(IExpression expression) =>
-            (this.type, expression, expression) switch
+            (this.Type, expression, expression) switch
             {
                 (PrettyStringTypes.Readable, Expression expr, ITerm _) => expr.InternalGetPrettyString(this),
                 (PrettyStringTypes.Readable, Expression expr, _) => $"({expr.InternalGetPrettyString(this)})",
@@ -51,16 +60,16 @@ namespace Favalet.Contexts
 
         [DebuggerStepThrough]
         private IPrettyStringContext MakePartial() =>
-            (this.type, this.isPartial) switch
+            (this.Type, this.isPartial) switch
             {
                 (PrettyStringTypes.StrictAll, _) => this,
-                _ => new PrettyStringContext(this.type, true),
+                _ => new PrettyStringContext(this.Type, true),
             };
 
         public string FinalizePrettyString(IExpression expression, string preFormatted)
         {
             var higherOrder = expression.HigherOrder;
-            return (this.type, this.isPartial, expression, higherOrder) switch
+            return (this.Type, this.isPartial, expression, higherOrder) switch
             {
                 (_, true, _, _) =>
                     preFormatted,

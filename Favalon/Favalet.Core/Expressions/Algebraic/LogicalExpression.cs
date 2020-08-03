@@ -95,6 +95,6 @@ namespace Favalet.Expressions.Algebraic
         [DebuggerStepThrough]
         public static LogicalExpression Create(
             IExpression operand) =>
-            new LogicalExpression(operand, UnspecifiedTerm.Instance);
+            new LogicalExpression(operand, UnspecifiedTerm.TypeInstance);
     }
 }

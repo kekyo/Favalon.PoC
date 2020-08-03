@@ -35,6 +35,6 @@ namespace Favalet.Expressions.Algebraic
         [DebuggerStepThrough]
         public static OrExpression Create(
             IExpression left, IExpression right) =>
-            new OrExpression(left, right, UnspecifiedTerm.Instance);
+            new OrExpression(left, right, UnspecifiedTerm.TypeInstance);
     }
 }

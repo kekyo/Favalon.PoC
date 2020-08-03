@@ -148,7 +148,7 @@ namespace Favalet.Expressions
         [DebuggerStepThrough]
         public static ApplyExpression Create(
             IExpression function, IExpression argument) =>
-            new ApplyExpression(function, argument, UnspecifiedTerm.Instance);
+            new ApplyExpression(function, argument, UnspecifiedTerm.TypeInstance);
     }
 
     [DebuggerStepThrough]

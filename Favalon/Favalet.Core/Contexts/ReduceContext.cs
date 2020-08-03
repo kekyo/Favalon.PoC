@@ -66,8 +66,8 @@ namespace Favalet.Contexts
         }
 
         [DebuggerStepThrough]
-        public IIdentityTerm CreatePlaceholder(PlaceholderOrderHints candidateOrder) =>
-            this.rootScope.CreatePlaceholder(candidateOrder);
+        public IIdentityTerm CreatePlaceholder(PlaceholderOrderHints orderHint) =>
+            this.rootScope.CreatePlaceholder(orderHint);
 
         public IExpression InferHigherOrder(IExpression higherOrder)
         {

@@ -113,6 +113,6 @@ namespace Favalet.Expressions
             new VariableTerm(symbol, higherOrder);
         [DebuggerStepThrough]
         public static VariableTerm Create(string symbol) =>
-            new VariableTerm(symbol, UnspecifiedTerm.Instance);
+            new VariableTerm(symbol, UnspecifiedTerm.TypeInstance);
     }
 }

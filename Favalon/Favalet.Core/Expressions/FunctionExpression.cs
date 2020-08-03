@@ -176,7 +176,7 @@ namespace Favalet.Expressions
         [DebuggerStepThrough]
         public static FunctionExpression Create(
             IExpression parameter, IExpression result) =>
-            Create(parameter, result, () => UnspecifiedTerm.Instance);
+            Create(parameter, result, () => UnspecifiedTerm.TypeInstance);
 
         private sealed class LazyHigherOrderPlaceholderFunctionGenerator
         {

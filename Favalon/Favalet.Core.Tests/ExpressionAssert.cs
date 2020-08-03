@@ -1,5 +1,6 @@
 ﻿using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -31,7 +32,10 @@ namespace Favalet
 
         private static bool Trap(bool result)
         {
-            Trace.Assert(result || !Debugger.IsAttached);
+            if (!result && Debugger.IsAttached)
+            {
+                throw new AssertionException("Trap ExpressionAssert");
+            }
             return result;
         }
 

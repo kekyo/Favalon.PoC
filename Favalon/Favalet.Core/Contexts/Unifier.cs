@@ -100,15 +100,18 @@ namespace Favalet.Contexts
                 return;
             }
 
-            // Logical equals.
-            if (this.typeCalculator.Equals(from, to))
-            {
-                return;
-            }
+            //// Logical calculation
+            //var widening = OrExpression.Create(from, to);
+            //var calculated = this.typeCalculator.Compute(widening);
 
-            // Can't accept from --> to
-            throw new ArgumentException(
-                $"Couldn't accept unification: From=\"{from.GetPrettyString(PrettyStringTypes.StrictAll)}\", To=\"{to.GetPrettyString(PrettyStringTypes.StrictAll)}\".");
+            //if (this.typeCalculator.Equals(from, to))
+            //{
+            //    return;
+            //}
+
+            //// Can't accept from --> to
+            //throw new ArgumentException(
+            //    $"Couldn't accept unification: From=\"{from.GetPrettyString(PrettyStringTypes.StrictAll)}\", To=\"{to.GetPrettyString(PrettyStringTypes.StrictAll)}\".");
         }
 
         public void Unify(IExpression from, IExpression to)

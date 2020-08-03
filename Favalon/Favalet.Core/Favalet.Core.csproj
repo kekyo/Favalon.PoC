@@ -19,7 +19,7 @@
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(TargetFramework) != 'net35-client'">
+  <ItemGroup Condition="$(TargetFrameworkVersion) != 'v3.5' And $(TargetFrameworkVersion) != 'v4.0'">
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 

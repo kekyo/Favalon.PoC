@@ -1,5 +1,5 @@
 ﻿
-#if NET35
+#if NET35 || NET40
 using System.Diagnostics;
 
 namespace System
@@ -33,7 +33,7 @@ namespace System
     }
 
     [DebuggerStepThrough]
-    internal struct ValueTuple<T1, T2, T3, T4>
+    internal readonly struct ValueTuple<T1, T2, T3, T4>
     {
         public readonly T1 Item1;
         public readonly T2 Item2;

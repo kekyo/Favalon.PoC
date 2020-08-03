@@ -9,6 +9,16 @@ using static Favalet.Generator;
 
 namespace Favalet.Reducing
 {
+    internal interface ITest1
+    { }
+
+    internal interface ITest2
+    { }
+
+    internal sealed class TestClass :
+        ITest1, ITest2
+    { }
+
     [TestFixture]
     public sealed class TypeCalculatorTest
     {
@@ -248,19 +258,19 @@ namespace Favalet.Reducing
         [Test]
         public void ReducibleMultipleCombinedAndTypes2_1()
         {
-            // Queue && ICloneable && IEnumerable
+            // TestClass && ITest1 && ITest2
             var expression =
                 And(
-                    Type<Queue>(),
+                    Type<TestClass>(),
                     And(
-                        Type<ICloneable>(),
-                        Type<IEnumerable>()));
+                        Type<ITest1>(),
+                        Type<ITest2>()));
 
             var actual = calculator.Compute(expression);
 
-            // Queue
+            // TestClass
             var expected =
-                Type<Queue>();
+                Type<TestClass>();
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -268,19 +278,19 @@ namespace Favalet.Reducing
         [Test]
         public void ReducibleMultipleCombinedAndTypes2_2()
         {
-            // ICloneable && Queue && IEnumerable
+            // ITest1 && TestClass && ITest2
             var expression =
                 And(
-                    Type<ICloneable>(),
+                    Type<ITest1>(),
                     And(
-                        Type<Queue>(),
-                        Type<IEnumerable>()));
+                        Type<TestClass>(),
+                        Type<ITest2>()));
 
             var actual = calculator.Compute(expression);
 
-            // Queue
+            // TestClass
             var expected =
-                Type<Queue>();
+                Type<TestClass>();
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -288,19 +298,19 @@ namespace Favalet.Reducing
         [Test]
         public void ReducibleMultipleCombinedAndTypes2_3()
         {
-            // IEnumerable && ICloneable && Queue
+            // ITest2 && ITest1 && TestClass
             var expression =
                 And(
-                    Type<IEnumerable>(),
+                    Type<ITest2>(),
                     And(
-                        Type<ICloneable>(),
-                        Type<Queue>()));
+                        Type<ITest1>(),
+                        Type<TestClass>()));
 
             var actual = calculator.Compute(expression);
 
-            // Queue
+            // TestClass
             var expected =
-                Type<Queue>();
+                Type<TestClass>();
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -518,21 +528,21 @@ namespace Favalet.Reducing
         [Test]
         public void ReducibleMultipleCombinedOrTypes2_1()
         {
-            // Queue || ICloneable || IEnumerable
+            // TestClass || ITest1 || ITest2
             var expression =
                 Or(
-                    Type<Queue>(),
+                    Type<TestClass>(),
                     Or(
-                        Type<ICloneable>(),
-                        Type<IEnumerable>()));
+                        Type<ITest1>(),
+                        Type<ITest2>()));
 
             var actual = calculator.Compute(expression);
 
-            // ICloneable || IEnumerable
+            // ITest1 || ITest2
             var expected =
                 Or(
-                    Type<ICloneable>(),
-                    Type<IEnumerable>());
+                    Type<ITest1>(),
+                    Type<ITest2>());
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -540,21 +550,21 @@ namespace Favalet.Reducing
         [Test]
         public void ReducibleMultipleCombinedOrTypes2_2()
         {
-            // ICloneable || Queue || IEnumerable
+            // ITest1 || TestClass || ITest2
             var expression =
                 Or(
-                    Type<ICloneable>(),
+                    Type<ITest1>(),
                     Or(
-                        Type<Queue>(),
-                        Type<IEnumerable>()));
+                        Type<TestClass>(),
+                        Type<ITest2>()));
 
             var actual = calculator.Compute(expression);
 
-            // ICloneable || IEnumerable
+            // ITest1 || ITest2
             var expected =
                 Or(
-                    Type<ICloneable>(),
-                    Type<IEnumerable>());
+                    Type<ITest1>(),
+                    Type<ITest2>());
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -562,21 +572,21 @@ namespace Favalet.Reducing
         [Test]
         public void ReducibleMultipleCombinedOrTypes2_3()
         {
-            // IEnumerable || ICloneable || Queue
+            // ITest2 || ITest1 || TestClass
             var expression =
                 Or(
-                    Type<IEnumerable>(),
+                    Type<ITest2>(),
                     Or(
-                        Type<ICloneable>(),
-                        Type<Queue>()));
+                        Type<ITest1>(),
+                        Type<TestClass>()));
 
             var actual = calculator.Compute(expression);
 
-            // ICloneable || IEnumerable
+            // ITest1 || ITest2
             var expected =
                 Or(
-                    Type<ICloneable>(),
-                    Type<IEnumerable>());
+                    Type<ITest1>(),
+                    Type<ITest2>());
 
             AssertLogicalEqual(expression, expected, actual);
         }

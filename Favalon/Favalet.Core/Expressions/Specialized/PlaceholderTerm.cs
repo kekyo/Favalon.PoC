@@ -128,9 +128,9 @@ namespace Favalet.Expressions.Specialized
                 orderHint);
     }
 
+    [DebuggerStepThrough]
     public static class PlaceholderTermExtension
     {
-        [DebuggerStepThrough]
         public static void Deconstruct(
             this PlaceholderTerm placeholder,
             out string symbol,

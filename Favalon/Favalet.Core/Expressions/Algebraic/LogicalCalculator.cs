@@ -47,9 +47,9 @@ namespace Favalet.Expressions.Algebraic
                     left.Equals(right) &&
                     (left, right) switch
                     {
-                        (IDeadEndTerm _, IDeadEndTerm _) => true,
-                        (IDeadEndTerm _, _) => false,
-                        (_, IDeadEndTerm _) => false,
+                        (DeadEndTerm _, DeadEndTerm _) => true,
+                        (DeadEndTerm _, _) => false,
+                        (_, DeadEndTerm _) => false,
                         _ => this.Equals(
                             this.Compute(lhs.HigherOrder),
                             this.Compute(rhs.HigherOrder))
@@ -57,31 +57,31 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        protected enum ReduceResults
+        protected enum ChoiceResults
         {
             NonRelated,
             AcceptLeft,
             AcceptRight,
         }
 
-        protected virtual ReduceResults ChoiceForAnd(
+        protected virtual ChoiceResults ChoiceForAnd(
             IExpression left, IExpression right) =>
             // Idempotence
             this.Equals(left, right) ?
-                ReduceResults.AcceptLeft :
-                ReduceResults.NonRelated;
+                ChoiceResults.AcceptLeft :
+                ChoiceResults.NonRelated;
 
-        protected virtual ReduceResults ChoiceForOr(
+        protected virtual ChoiceResults ChoiceForOr(
             IExpression left, IExpression right) =>
             // Idempotence
             this.Equals(left, right) ?
-                ReduceResults.AcceptLeft :
-                ReduceResults.NonRelated;
+                ChoiceResults.AcceptLeft :
+                ChoiceResults.NonRelated;
 
         private IEnumerable<IExpression> ComputeAbsorption<TFlattenedExpression>(
             IExpression left,
             IExpression right,
-            Func<IExpression, IExpression, ReduceResults> selector)
+            Func<IExpression, IExpression, ChoiceResults> selector)
             where TFlattenedExpression : FlattenedExpression
         {
             var fl = FlattenedExpression.Flatten(left);
@@ -93,8 +93,8 @@ namespace Favalet.Expressions.Algebraic
                     SelectMany(rightOperand =>
                         selector(fl, rightOperand) switch
                         {
-                            ReduceResults.AcceptLeft => new[] { fl },
-                            ReduceResults.AcceptRight => new[] { rightOperand },
+                            ChoiceResults.AcceptLeft => new[] { fl },
+                            ChoiceResults.AcceptRight => new[] { rightOperand },
                             _ => Enumerable.Empty<IExpression>()
                         });
             }
@@ -104,8 +104,8 @@ namespace Favalet.Expressions.Algebraic
                     SelectMany(leftOperand =>
                         selector(leftOperand, fr) switch
                         {
-                            ReduceResults.AcceptLeft => new[] { leftOperand },
-                            ReduceResults.AcceptRight => new[] { fr },
+                            ChoiceResults.AcceptLeft => new[] { leftOperand },
+                            ChoiceResults.AcceptRight => new[] { fr },
                             _ => Enumerable.Empty<IExpression>()
                         });
             }
@@ -118,7 +118,7 @@ namespace Favalet.Expressions.Algebraic
         private IEnumerable<IExpression> ComputeShrink<TBinaryExpression>(
             IExpression left,
             IExpression right,
-            Func<IExpression, IExpression, ReduceResults> selector)
+            Func<IExpression, IExpression, ChoiceResults> selector)
             where TBinaryExpression : IBinaryExpression
         {
             var flattened = FlattenedExpression.Flatten<TBinaryExpression>(left, right);
@@ -146,11 +146,11 @@ namespace Favalet.Expressions.Algebraic
                         {
                             switch (selector(origin.Value, current.Value))
                             {
-                                case ReduceResults.AcceptLeft:
+                                case ChoiceResults.AcceptLeft:
                                     current.Value = origin.Value;
                                     requiredRecompute = true;
                                     break;
-                                case ReduceResults.AcceptRight:
+                                case ChoiceResults.AcceptRight:
                                     origin.Value = current.Value;
                                     requiredRecompute = true;
                                     break;

@@ -7,7 +7,7 @@ namespace Favalet.Expressions
     public sealed class TypeCalculator :
         LogicalCalculator
     {
-        protected override ReduceResults ChoiceForAnd(
+        protected override ChoiceResults ChoiceForAnd(
             IExpression left, IExpression right)
         {
             // Narrowing
@@ -16,18 +16,18 @@ namespace Favalet.Expressions
             {
                 if (rt.IsAssignableFrom(lt))
                 {
-                    return ReduceResults.AcceptLeft;
+                    return ChoiceResults.AcceptLeft;
                 }
                 if (lt.IsAssignableFrom(rt))
                 {
-                    return ReduceResults.AcceptRight;
+                    return ChoiceResults.AcceptRight;
                 }
             }
 
             return base.ChoiceForAnd(left, right);
         }
 
-        protected override ReduceResults ChoiceForOr(
+        protected override ChoiceResults ChoiceForOr(
             IExpression left, IExpression right)
         {
             // Widening
@@ -36,11 +36,11 @@ namespace Favalet.Expressions
             {
                 if (lt.IsAssignableFrom(rt))
                 {
-                    return ReduceResults.AcceptLeft;
+                    return ChoiceResults.AcceptLeft;
                 }
                 if (rt.IsAssignableFrom(lt))
                 {
-                    return ReduceResults.AcceptRight;
+                    return ChoiceResults.AcceptRight;
                 }
             }
 

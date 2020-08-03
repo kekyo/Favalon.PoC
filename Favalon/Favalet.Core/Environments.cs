@@ -37,7 +37,7 @@ namespace Favalet
 #if DEBUG
             // Preassigns higher orders.
             var ho = ph.HigherOrder;
-            while (!(ho is IDeadEndTerm))
+            while (!(ho is DeadEndTerm))
             {
                 ho = ho.HigherOrder;
             }

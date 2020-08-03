@@ -5,14 +5,9 @@ using System.Linq;
 
 namespace Favalet.Expressions.Specialized
 {
-    internal interface IDeadEndTerm :
-        ITerm
-    {
-    }
-
     [DebuggerStepThrough]
     internal sealed class DeadEndTerm :
-        Expression, IDeadEndTerm
+        Expression
     {
         private DeadEndTerm()
         { }
@@ -41,5 +36,12 @@ namespace Favalet.Expressions.Specialized
 
         public static readonly DeadEndTerm Instance =
             new DeadEndTerm();
+    }
+
+    [DebuggerStepThrough]
+    public static class DeadEndTermExtension
+    {
+        public static bool IsDeadEnd(this IExpression expression) =>
+            expression is DeadEndTerm;
     }
 }

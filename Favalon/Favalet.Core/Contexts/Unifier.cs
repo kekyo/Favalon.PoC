@@ -26,11 +26,11 @@ namespace Favalet.Contexts
             // Because will check ignoring circular reference at recursive path [1].
             if (this.unifications.TryGetValue(from.Symbol, out var rfrom))
             {
-                this.InternalUnify(rfrom, to);
+                this.Unify(rfrom, to);
             }
             else if (this.unifications.TryGetValue(to.Symbol, out var rto))
             {
-                this.InternalUnify(from, rto);
+                this.Unify(from, rto);
             }
             else if (from is PlaceholderTerm)
             {
@@ -46,7 +46,7 @@ namespace Favalet.Contexts
         {
             if (this.unifications.TryGetValue(from.Symbol, out var target))
             {
-                this.InternalUnify(to, target);
+                this.Unify(to, target);
             }
             else
             {
@@ -95,8 +95,8 @@ namespace Favalet.Contexts
                 to is IFunctionExpression(IExpression tp, IExpression tr))
             {
                 // Unify FunctionExpression.
-                this.InternalUnify(fp, tp);
-                this.InternalUnify(fr, tr);
+                this.Unify(fp, tp);
+                this.Unify(fr, tr);
                 return;
             }
 
@@ -111,7 +111,7 @@ namespace Favalet.Contexts
                 $"Couldn't accept unification: From=\"{from.GetPrettyString(PrettyStringTypes.StrictAll)}\", To=\"{to.GetPrettyString(PrettyStringTypes.StrictAll)}\".");
         }
 
-        private void InternalUnify(IExpression from, IExpression to)
+        public void Unify(IExpression from, IExpression to)
         {
             if (object.ReferenceEquals(from, to))
             {
@@ -121,8 +121,8 @@ namespace Favalet.Contexts
             switch (from, to)
             {
                 // Ignore DeadEndTerm unification.
-                case (IDeadEndTerm _, _):
-                case (_, IDeadEndTerm _):
+                case (DeadEndTerm _, _):
+                case (_, DeadEndTerm _):
                     break;
 
                 default:
@@ -130,22 +130,8 @@ namespace Favalet.Contexts
                     this.InternalUnifyCore(from, to);
 
                     // Unification higher order.
-                    this.InternalUnify(from.HigherOrder, to.HigherOrder);
+                    this.Unify(from.HigherOrder, to.HigherOrder);
                     break;
-            }
-        }
-
-        [DebuggerStepThrough]
-        public void Unify(IExpression from, IExpression to)
-        {
-            if (object.ReferenceEquals(from, to))
-            {
-                return;
-            }
-
-            lock (this.unifications)
-            {
-                this.InternalUnify(from, to);
             }
         }
 

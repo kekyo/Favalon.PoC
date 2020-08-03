@@ -32,7 +32,7 @@ namespace Favalet.Contexts
         public XElement GetXml(IExpression expression) =>
             (expression, expression.HigherOrder) switch
             {
-                (Expression expr, IDeadEndTerm _) =>
+                (Expression expr, DeadEndTerm _) =>
                     new XElement(
                         expr.Type,
                         expr.InternalGetXmlValues(this).

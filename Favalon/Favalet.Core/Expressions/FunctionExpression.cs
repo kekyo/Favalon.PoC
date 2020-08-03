@@ -78,7 +78,7 @@ namespace Favalet.Expressions
             {
                 if (object.ReferenceEquals(this.Parameter, parameter) &&
                     object.ReferenceEquals(this.Result, result) &&
-                    this.HigherOrder is IDeadEndTerm)
+                    this.HigherOrder is DeadEndTerm)
                 {
                     return this;
                 }
@@ -223,9 +223,9 @@ namespace Favalet.Expressions
         }
     }
 
+    [DebuggerStepThrough]
     public static class FunctionExpressionExtension
     {
-        [DebuggerStepThrough]
         public static void Deconstruct(
             this IFunctionExpression function,
             out IExpression parameter,

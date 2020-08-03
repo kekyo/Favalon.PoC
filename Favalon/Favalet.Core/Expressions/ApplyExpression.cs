@@ -151,9 +151,9 @@ namespace Favalet.Expressions
             new ApplyExpression(function, argument, UnspecifiedTerm.Instance);
     }
 
+    [DebuggerStepThrough]
     public static class ApplyExpressionExtension
     {
-        [DebuggerStepThrough]
         public static void Deconstruct(
             this IApplyExpression apply,
             out IExpression function,

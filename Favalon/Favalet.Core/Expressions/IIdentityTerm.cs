@@ -8,9 +8,9 @@ namespace Favalet.Expressions
         string Symbol { get; }
     }
 
+    [DebuggerStepThrough]
     public static class IdentityTermExtension
     {
-        [DebuggerStepThrough]
         public static void Deconstruct(
             this IIdentityTerm identity,
             out string symbol) =>

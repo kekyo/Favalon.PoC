@@ -143,9 +143,9 @@ namespace Favalet.Expressions
             new LambdaExpression(parameter, body, UnspecifiedTerm.Instance);
     }
 
+    [DebuggerStepThrough]
     public static class LambdaExpressionExtension
     {
-        [DebuggerStepThrough]
         public static void Deconstruct(
             this ILambdaExpression lambda,
             out IBoundVariableTerm parameter,

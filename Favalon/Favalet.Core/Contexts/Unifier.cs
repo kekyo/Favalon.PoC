@@ -143,7 +143,9 @@ namespace Favalet.Contexts
 
                     // Unification.
                     var unified = this.InternalUnifyCore(from, to);
-                    break;
+
+                    // Combine.
+                    return this.Unify(unified.HigherOrder, unifiedHigherOrder);
             }
         }
 

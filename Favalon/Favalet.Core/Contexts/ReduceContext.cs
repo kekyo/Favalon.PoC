@@ -13,7 +13,7 @@ namespace Favalet.Contexts
         IExpression InferHigherOrder(IExpression higherOrder);
         IExpression Fixup(IExpression expression);
 
-        void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
+        IExpression Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
 
         IExpression? Resolve(string symbol);
     }
@@ -84,7 +84,7 @@ namespace Favalet.Contexts
         }
 
         [DebuggerStepThrough]
-        public void Unify(IExpression fromHigherOrder, IExpression toHigherOrder) =>
+        public IExpression Unify(IExpression fromHigherOrder, IExpression toHigherOrder) =>
             this.unifier.Unify(fromHigherOrder, toHigherOrder);
 
         [DebuggerStepThrough]

@@ -17,10 +17,10 @@ namespace Favalet
             public Indexes()
             { }
 
-            public bool TryGetPseudoIndex(string index, out string pseudoIndex) =>
+            public bool TryGetPseudoIndex(string index, out string? pseudoIndex) =>
                 this.indexToPseudoIndex.TryGetValue(index, out pseudoIndex);
 
-            public bool TryGetIndex(string pseudoIndex, out string index) =>
+            public bool TryGetIndex(string pseudoIndex, out string? index) =>
                 this.pseudoIndexToIndex.TryGetValue(pseudoIndex, out index);
 
             public void Set(string index, string pseudoIndex)

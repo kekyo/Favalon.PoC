@@ -54,14 +54,16 @@ namespace Favalet.Expressions
                 }
             }
 
-            if (object.ReferenceEquals(this.HigherOrder, higherOrder))
-            {
-                return this;
-            }
-            else
-            {
-                return new VariableTerm(this.Symbol, higherOrder);
-            }
+            var variable =
+                object.ReferenceEquals(this.HigherOrder, higherOrder) ?
+                    this :
+                    new VariableTerm(this.Symbol, higherOrder);
+            var placeholder =
+                context.CreatePlaceholder(PlaceholderOrderHints.VariableOrAbove);
+
+            context.Unify(placeholder, variable);
+
+            return placeholder;
         }
 
         protected override IExpression Fixup(IReduceContext context)

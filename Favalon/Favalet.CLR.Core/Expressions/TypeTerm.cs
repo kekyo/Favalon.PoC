@@ -1,4 +1,5 @@
 ﻿using Favalet.Contexts;
+using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
 using System.Collections;
@@ -43,8 +44,15 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is ITypeTerm rhs && Equals(rhs);
 
-        protected override IExpression Infer(IReduceContext context) =>
-            this;
+        protected override IExpression Infer(IReduceContext context)
+        {
+            var placeholder =
+                context.CreatePlaceholder(PlaceholderOrderHints.VariableOrAbove);
+
+            context.Unify(placeholder, this);
+
+            return placeholder;
+        }
 
         protected override IExpression Fixup(IReduceContext context) =>
             this;

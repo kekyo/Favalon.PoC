@@ -72,15 +72,16 @@ namespace Favalet.Contexts
         public IExpression InferHigherOrder(IExpression higherOrder)
         {
             var inferred = this.Infer(higherOrder);
-            var fixupped = this.Fixup(inferred);
+            //var fixupped = this.Fixup(inferred);
 
-            var context = new ReduceContext(
-                this.rootScope,
-                this,
-                this.unifier);
-            var reduced = context.Reduce(fixupped);
+            //var context = new ReduceContext(
+            //    this.rootScope,
+            //    this,
+            //    this.unifier);
+            //var reduced = context.Reduce(fixupped);
 
-            return reduced;
+            //return reduced;
+            return inferred;
         }
 
         [DebuggerStepThrough]

@@ -86,7 +86,7 @@ namespace Favalet.Contexts
 
         [DebuggerStepThrough]
         public void Unify(IExpression fromHigherOrder, IExpression toHigherOrder) =>
-            this.unifier.Unify(fromHigherOrder, toHigherOrder);
+            this.unifier.Unify(this, fromHigherOrder, toHigherOrder);
 
         [DebuggerStepThrough]
         public IExpression? Resolve(string symbol) =>

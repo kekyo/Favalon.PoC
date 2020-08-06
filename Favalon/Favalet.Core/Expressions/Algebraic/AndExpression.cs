@@ -19,7 +19,7 @@ namespace Favalet.Expressions.Algebraic
         { }
 
         [DebuggerStepThrough]
-        internal override IExpression OnCreate(
+        protected override IExpression OnCreate(
             IExpression left, IExpression right, IExpression higherOrder) =>
             new AndExpression(left, right, higherOrder);
 

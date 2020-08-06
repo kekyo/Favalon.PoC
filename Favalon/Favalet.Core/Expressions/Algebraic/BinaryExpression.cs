@@ -42,7 +42,7 @@ namespace Favalet.Expressions.Algebraic
             get => this.Right;
         }
 
-        internal abstract IExpression OnCreate(
+        protected abstract IExpression OnCreate(
             IExpression left, IExpression right, IExpression higherOrder);
 
         protected override sealed IExpression Infer(IReduceContext context)

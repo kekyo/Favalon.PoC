@@ -13,48 +13,60 @@ namespace Favalet.Contexts
     [DebuggerDisplay("{Simple}")]
     internal sealed class Unifier
     {
-        private readonly ILogicalCalculator typeCalculator;
         private readonly Dictionary<string, IExpression> unifications =
             new Dictionary<string, IExpression>();
 
-        public Unifier(ILogicalCalculator typeCalculator) =>
-            this.typeCalculator = typeCalculator;
+        private Unifier()
+        {
+        }
 
-        private void InternalUnifyBothPlaceholders(IIdentityTerm from, IIdentityTerm to)
+        private IExpression InternalUnifyBothPlaceholders(
+            IReduceContext context,
+            IIdentityTerm from,
+            IIdentityTerm to)
         {
             // Greater prioritize by exist unification rather than not exist.
             // Because will check ignoring circular reference at recursive path [1].
             if (this.unifications.TryGetValue(from.Symbol, out var rfrom))
             {
-                this.Unify(rfrom, to);
+                return this.InternalUnify(context, rfrom, to);
             }
             else if (this.unifications.TryGetValue(to.Symbol, out var rto))
             {
-                this.Unify(from, rto);
+                return this.InternalUnify(context, from, rto);
             }
             else if (from is PlaceholderTerm)
             {
                 this.unifications[from.Symbol] = to;
+                return to;
             }
             else
             {
                 this.unifications[to.Symbol] = from;
+                return from;
             }
         }
 
-        private void InternalUnifyPlaceholder(IIdentityTerm from, IExpression to)
+        private IExpression InternalUnifyPlaceholder(
+            IReduceContext context,
+            IIdentityTerm from,
+            IExpression to)
         {
             if (this.unifications.TryGetValue(from.Symbol, out var target))
             {
-                this.Unify(to, target);
+                return this.InternalUnify(context, to, target);
             }
             else
             {
                 this.unifications[from.Symbol] = to;
+                return to;
             }
         }
 
-        private void InternalUnifyCore(IExpression from, IExpression to)
+        private IExpression InternalUnifyCore(
+            IReduceContext context,
+            IExpression from,
+            IExpression to)
         {
             Debug.Assert(!(from is UnspecifiedTerm));
             Debug.Assert(!(to is UnspecifiedTerm));
@@ -68,53 +80,66 @@ namespace Favalet.Contexts
                     if (fromSymbol == toSymbol)
                     {
                         // Ignore equal placeholders.
-                        return;
+                        return from;
                     }
                     else
                     {
                         // Unify both placeholders.
-                        this.InternalUnifyBothPlaceholders(fi, ti);
-                        return;
+                        return this.InternalUnifyBothPlaceholders(context, fi, ti);
                     }
                 }
                 else
                 {
                     // Unify from placeholder.
-                    this.InternalUnifyPlaceholder(fi, to);
-                    return;
+                    return this.InternalUnifyPlaceholder(context, fi, to);
                 }
             }
             else if (to is IIdentityTerm ti)
             {
                 // Unify to placeholder.
-                this.InternalUnifyPlaceholder(ti, from);
-                return;
+                return this.InternalUnifyPlaceholder(context, ti, from);
             }
 
             if (from is IFunctionExpression(IExpression fp, IExpression fr) &&
                 to is IFunctionExpression(IExpression tp, IExpression tr))
             {
                 // Unify FunctionExpression.
-                this.Unify(fp, tp);
-                this.Unify(fr, tr);
-                return;
+                var f = this.InternalUnify(context, fp, tp);
+                var r = this.InternalUnify(context, fr, tr);
+                return FunctionExpression.Create(
+                    f,
+                    r,
+                    context,
+                    PlaceholderOrderHints.TypeOrAbove);
             }
 
-            if (this.typeCalculator.Equals(from, to))
+            // Logical equals.
+            if (context.TypeCalculator.Equals(from, to))
             {
-                return;
+                return from;
             }
+            
+            // 
+            var placeholder =
+                context.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove);
 
-            // Can't accept from --> to
-            throw new ArgumentException(
-                $"Couldn't accept unification: From=\"{from.GetPrettyString(PrettyStringTypes.StrictAll)}\", To=\"{to.GetPrettyString(PrettyStringTypes.StrictAll)}\".");
+            var combined = OrExpression.Create(from, to);
+            var calculated = context.TypeCalculator.Compute(combined);
+
+            var result = this.InternalUnify(context, placeholder, calculated);
+
+            return result;
         }
 
-        public void Unify(IExpression from, IExpression to)
+        private IExpression InternalUnify(
+            IReduceContext context,
+            IExpression from,
+            IExpression to)
         {
+            // Make short circuit.
             if (object.ReferenceEquals(from, to))
             {
-                return;
+                return from;
             }
 
             switch (from, to)
@@ -122,17 +147,22 @@ namespace Favalet.Contexts
                 // Ignore DeadEndTerm unification.
                 case (DeadEndTerm _, _):
                 case (_, DeadEndTerm _):
-                    break;
+                    return DeadEndTerm.Instance;
 
                 default:
-                    // Unification.
-                    this.InternalUnifyCore(from, to);
-
                     // Unification higher order.
-                    this.Unify(from.HigherOrder, to.HigherOrder);
-                    break;
+                    var higherOrder = this.InternalUnify(context, from.HigherOrder, to.HigherOrder);
+
+                    // Unification.
+                    return this.InternalUnifyCore(context, from, to);
             }
         }
+
+        public void Unify(
+            IReduceContext context,
+            IExpression from,
+            IExpression to) =>
+            this.InternalUnify(context, from, to);
 
 #if DEBUG
         private sealed class PlaceholderMarker
@@ -208,5 +238,8 @@ namespace Favalet.Contexts
 
         public override string ToString() =>
             "Unifier: " + this.Simple;
+        
+        public static Unifier Create() =>
+            new Unifier();
     }
 }

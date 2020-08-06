@@ -35,7 +35,7 @@ namespace Favalet
                 Interlocked.Increment(ref this.placeholderIndex),
                 orderHint);
 #if DEBUG
-            // Preassigns higher orders.
+            // Preassigned higher orders.
             var ho = ph.HigherOrder;
             while (!(ho is DeadEndTerm))
             {

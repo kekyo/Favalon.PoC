@@ -39,7 +39,7 @@ namespace Favalet.Expressions
         protected override IExpression Infer(IReduceContext context)
         {
             var higherOrder = context.InferHigherOrder(this.HigherOrder);
-            var variables = context.LookupVariables(this);
+            var variables = context.LookupVariables(this.Symbol);
 
             if (variables.Length >= 1)
             {
@@ -89,7 +89,7 @@ namespace Favalet.Expressions
 
         protected override IExpression Reduce(IReduceContext context)
         {
-            var variables = context.LookupVariables(this);
+            var variables = context.LookupVariables(this.Symbol);
 
             if (variables.Length >= 1)
             {

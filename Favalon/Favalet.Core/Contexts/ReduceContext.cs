@@ -92,14 +92,14 @@ namespace Favalet.Contexts
         public IExpression? Resolve(string symbol) =>
             this.unifier.Resolve(symbol);
 
-        public VariableInformation[] LookupVariables(IIdentityTerm identity) =>
+        public VariableInformation[] LookupVariables(string symbol) =>
             // TODO: improving when identity's higher order acceptable
             // TODO: what acceptable (narrowing, widening)
             this.symbol is IBoundVariableTerm p &&
             expression is IExpression expr &&
-            p.Symbol.Equals(identity.Symbol) ?
-                new[] { VariableInformation.Create(p.HigherOrder, expr) } :
-                parentScope.LookupVariables(identity);
+            p.Symbol.Equals(symbol) ?
+                new[] { VariableInformation.Create(symbol, p.HigherOrder, expr) } :
+                parentScope.LookupVariables(symbol);
 
         public override string ToString() =>
             "ReduceContext: " + this.unifier;

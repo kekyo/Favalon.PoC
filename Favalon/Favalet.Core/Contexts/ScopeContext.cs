@@ -4,32 +4,40 @@ using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Favalet.Contexts
 {
-    public struct VariableInformation
+    public readonly struct VariableInformation
     {
+#if DEBUG
+        public readonly string Symbol;
+#endif
         public readonly IExpression SymbolHigherOrder;
         public readonly IExpression Expression;
 
         private VariableInformation(
-            IExpression symbolHigherOrder, IExpression expression)
+            string symbol, IExpression symbolHigherOrder, IExpression expression)
         {
+#if DEBUG
+            this.Symbol = symbol;
+#endif
             this.SymbolHigherOrder = symbolHigherOrder;
             this.Expression = expression;
         }
 
+        public override string ToString() =>
+            $"{this.Symbol}:{this.SymbolHigherOrder.GetPrettyString(PrettyStringTypes.Readable)} --> {this.Expression.GetPrettyString(PrettyStringTypes.Readable)}";
+
         public static VariableInformation Create(
-            IExpression symbolHigherOrder, IExpression expression) =>
-            new VariableInformation(symbolHigherOrder, expression);
+            string symbol, IExpression symbolHigherOrder, IExpression expression) =>
+            new VariableInformation(symbol, symbolHigherOrder, expression);
     }
 
     public interface IScopeContext
     {
         ILogicalCalculator TypeCalculator { get; }
 
-        VariableInformation[] LookupVariables(IIdentityTerm identity);
+        VariableInformation[] LookupVariables(string symbol);
 
         IExpression Infer(IExpression expression);
         IExpression Reduce(IExpression expression);
@@ -51,10 +59,7 @@ namespace Favalet.Contexts
 
         private protected void MutableBind(IBoundVariableTerm symbol, IExpression expression)
         {
-            if (this.variables == null)
-            {
-                this.variables = new Dictionary<string, List<VariableInformation>>();
-            }
+            this.variables ??= new Dictionary<string, List<VariableInformation>>();
 
             if (!this.variables.TryGetValue(symbol.Symbol, out var list))
             {
@@ -62,30 +67,26 @@ namespace Favalet.Contexts
                 this.variables.Add(symbol.Symbol, list);
             }
 
-            list.Add(VariableInformation.Create(symbol.HigherOrder, expression));
+            list.Add(
+                VariableInformation.Create(
+                    symbol.Symbol,
+                    symbol.HigherOrder,
+                    expression));
         }
 
-        public VariableInformation[] LookupVariables(IIdentityTerm identity)
+        public VariableInformation[] LookupVariables(string symbol)
         {
             if (this.variables != null &&
-                this.variables.TryGetValue(identity.Symbol, out var list))
+                this.variables.TryGetValue(symbol, out var list))
             {
                 return list.Memoize();
             }
             else
             {
                 return
-                    this.parent?.LookupVariables(identity) ??
+                    this.parent?.LookupVariables(symbol) ??
                     ArrayEx.Empty<VariableInformation>();
             }
         }
-    }
-
-    public static class ScopeContextExtension
-    {
-        public static VariableInformation[] LookupVariables(
-            this IScopeContext context,
-            string identity) =>
-            context.LookupVariables(VariableTerm.Create(identity));
     }
 }

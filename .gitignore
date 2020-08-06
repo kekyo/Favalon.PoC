@@ -247,3 +247,5 @@ toolchain/
 *.vcxproj.filters
 
 .idea/
+
+.ionide/

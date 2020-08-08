@@ -60,6 +60,12 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is IApplyExpression rhs && this.Equals(rhs);
 
+        protected override IExpression MakeRewritable(IReduceContext context) =>
+            new ApplyExpression(
+                context.MakeRewritable(this.Function),
+                context.MakeRewritable(this.Argument),
+                context.MakeRewritableHigherOrder(this.HigherOrder));
+
         protected override IExpression Infer(IReduceContext context)
         {
             var argument = context.Infer(this.Argument);

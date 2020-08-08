@@ -45,6 +45,12 @@ namespace Favalet.Expressions.Algebraic
         internal abstract IExpression OnCreate(
             IExpression left, IExpression right, IExpression higherOrder);
 
+        protected override sealed IExpression MakeRewritable(IReduceContext context) =>
+            this.OnCreate(
+                context.MakeRewritable(this.Left),
+                context.MakeRewritable(this.Right),
+                context.MakeRewritableHigherOrder(this.HigherOrder));
+
         protected override sealed IExpression Infer(IReduceContext context)
         {
             var left = context.Infer(this.Left);

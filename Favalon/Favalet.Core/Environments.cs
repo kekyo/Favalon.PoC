@@ -62,7 +62,13 @@ namespace Favalet
             Debug.WriteLine(
                 $"Infer[{context.GetHashCode()}]: expression=\"{expression.GetXml()}\"");
 
-            var inferred = context.Infer(expression);
+            var rewritable = context.MakeRewritable(expression);
+#if DEBUG
+            Debug.WriteLine(
+                $"Infer[{context.GetHashCode()}]: rewritable=\"{rewritable.GetXml()}\", unifier=\"{unifier}\"");
+#endif            
+
+            var inferred = context.Infer(rewritable);
 #if DEBUG
             Debug.WriteLine(
                 $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetXml()}\", unifier=\"{unifier}\"");

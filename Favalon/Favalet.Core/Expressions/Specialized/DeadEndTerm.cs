@@ -19,6 +19,9 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? other) =>
             false;
 
+        protected override IExpression MakeRewritable(IReduceContext context) =>
+            this;
+
         protected override IExpression Infer(IReduceContext context) =>
             this;
 

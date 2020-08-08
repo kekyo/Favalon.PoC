@@ -1,10 +1,7 @@
 ﻿using Favalet.Contexts;
 using Favalet.Internal;
-using System;
 using System.Collections;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 using System.Xml.Linq;
 
 namespace Favalet.Expressions
@@ -17,16 +14,15 @@ namespace Favalet.Expressions
     public sealed class ConstantTerm :
         Expression, IConstantTerm
     {
-        private readonly LazySlim<ITerm> higherOrder;
+        private readonly LazySlim<IExpression> higherOrder;
 
         public readonly object Value;
 
         [DebuggerStepThrough]
-        private ConstantTerm(object value)
+        private ConstantTerm(object value, LazySlim<IExpression> higherOrder)
         {
             this.Value = value;
-            this.higherOrder = LazySlim.Create(() =>
-                TypeTerm.From(this.Value.GetType()));
+            this.higherOrder = higherOrder;
         }
 
         public override IExpression HigherOrder
@@ -50,6 +46,11 @@ namespace Favalet.Expressions
 
         public override bool Equals(IExpression? other) =>
             other is IConstantTerm rhs && this.Equals(rhs);
+
+        protected override IExpression MakeRewritable(IReduceContext context) =>
+            new ConstantTerm(
+                this.Value,
+                LazySlim.Create(context.MakeRewritableHigherOrder(this.HigherOrder)));
 
         protected override IExpression Infer(IReduceContext context) =>
             this;
@@ -80,6 +81,7 @@ namespace Favalet.Expressions
 
         [DebuggerStepThrough]
         public static ConstantTerm From(object value) =>
-            new ConstantTerm(value);
+            new ConstantTerm(value, LazySlim.Create(() =>
+                (IExpression)TypeTerm.From(value.GetType())));
     }
 }

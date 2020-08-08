@@ -33,6 +33,9 @@ namespace Favalet.Contexts
             this.unifications[symbol] = expression;
         }
 
+        public void RegisterPair(IIdentityTerm identity, IExpression expression) =>
+            this.Update(identity.Symbol, expression);
+
         private void InternalUnifyBothPlaceholders(
             IReduceContext context, IIdentityTerm from, IIdentityTerm to)
         {

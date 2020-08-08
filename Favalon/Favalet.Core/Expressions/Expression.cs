@@ -35,10 +35,14 @@ namespace Favalet.Expressions
 
         public abstract IExpression HigherOrder { get; }
 
+        protected abstract IExpression MakeRewritable(IReduceContext context);
         protected abstract IExpression Infer(IReduceContext context);
         protected abstract IExpression Fixup(IReduceContext context);
         protected abstract IExpression Reduce(IReduceContext context);
 
+        [DebuggerStepThrough]
+        internal IExpression InternalMakeRewritable(IReduceContext context) =>
+            this.MakeRewritable(context);
         [DebuggerStepThrough]
         internal IExpression InternalInfer(IReduceContext context) =>
             this.Infer(context);

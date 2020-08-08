@@ -43,6 +43,9 @@ namespace Favalet.Expressions
 
         public override bool Equals(IExpression? other) =>
             other is ITypeTerm rhs && Equals(rhs);
+        
+        protected override sealed IExpression MakeRewritable(IReduceContext context) =>
+            this;
 
         protected override IExpression Infer(IReduceContext context)
         {

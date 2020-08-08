@@ -10,6 +10,9 @@ namespace Favalet.Contexts
     {
         IReduceContext Bind(IBoundVariableTerm parameter, IExpression expression);
 
+        IExpression MakeRewritable(IExpression expression);
+        IExpression MakeRewritableHigherOrder(IExpression higherOrder);
+
         IExpression InferHigherOrder(IExpression higherOrder);
         IExpression Fixup(IExpression expression);
 
@@ -24,8 +27,8 @@ namespace Favalet.Contexts
         private readonly Environments rootScope;
         private readonly IScopeContext parentScope;
         private readonly Unifier unifier;
-        private IBoundVariableTerm? symbol;
-        private IExpression? expression;
+        private IBoundVariableTerm? boundSymbol;
+        private IExpression? boundExpression;
 
         [DebuggerStepThrough]
         public ReduceContext(
@@ -40,6 +43,24 @@ namespace Favalet.Contexts
 
         public ILogicalCalculator TypeCalculator =>
             this.rootScope.TypeCalculator;
+
+        [DebuggerStepThrough]
+        public IExpression MakeRewritable(IExpression expression) =>
+            expression is Expression expr ?
+                expr.InternalMakeRewritable(this) :
+                expression;
+
+        [DebuggerStepThrough]
+        public IExpression MakeRewritableHigherOrder(IExpression higherOrder)
+        {
+            var expr = this.MakeRewritable(higherOrder);
+            var placeholder =
+                this.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove);
+
+            this.unifier.RegisterPair(placeholder, expr);
+
+            return placeholder;
+        }
 
         [DebuggerStepThrough]
         public IExpression Infer(IExpression expression) =>
@@ -59,8 +80,8 @@ namespace Favalet.Contexts
                 this,
                 this.unifier);
 
-            newContext.symbol = symbol;
-            newContext.expression = expression;
+            newContext.boundSymbol = symbol;
+            newContext.boundExpression = expression;
 
             return newContext;
         }
@@ -93,8 +114,8 @@ namespace Favalet.Contexts
         public VariableInformation[] LookupVariables(string symbol) =>
             // TODO: improving when identity's higher order acceptable
             // TODO: what acceptable (narrowing, widening)
-            this.symbol is IBoundVariableTerm p &&
-            expression is IExpression expr &&
+            this.boundSymbol is IBoundVariableTerm p &&
+            boundExpression is IExpression expr &&
             p.Symbol.Equals(symbol) ?
                 new[] { VariableInformation.Create(symbol, p.HigherOrder, expr) } :
                 parentScope.LookupVariables(symbol);

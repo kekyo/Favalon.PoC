@@ -63,7 +63,7 @@ namespace Favalet.Expressions
         protected override IExpression Infer(IReduceContext context)
         {
             var parameter = (IBoundVariableTerm)context.Infer(this.Parameter);
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
 
             var newScope = context.Bind(parameter, parameter);
 
@@ -76,7 +76,7 @@ namespace Favalet.Expressions
                 PlaceholderOrderHints.TypeOrAbove);
 
             var inferredLambdaHigherOrder =
-                context.InferHigherOrder(lambdaHigherOrder);
+                context.Infer(lambdaHigherOrder);
 
             context.Unify(inferredLambdaHigherOrder, higherOrder);
 

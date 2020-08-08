@@ -30,9 +30,7 @@ namespace Favalet.Expressions.Specialized
                 this;
 
         protected override IExpression Infer(IReduceContext context) =>
-            context is IPlaceholderProvider provider ?
-                (IExpression)provider.CreatePlaceholder(this.orderHint) :
-                this;
+            this;
 
         protected override IExpression Fixup(IReduceContext context) =>
             this;

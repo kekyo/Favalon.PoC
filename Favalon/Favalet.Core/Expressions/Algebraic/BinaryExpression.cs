@@ -55,7 +55,7 @@ namespace Favalet.Expressions.Algebraic
         {
             var left = context.Infer(this.Left);
             var right = context.Infer(this.Right);
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
 
             context.Unify(left.HigherOrder, higherOrder);
             context.Unify(right.HigherOrder, higherOrder);

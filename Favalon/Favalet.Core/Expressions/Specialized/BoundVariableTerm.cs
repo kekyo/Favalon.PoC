@@ -48,7 +48,7 @@ namespace Favalet.Expressions.Specialized
 
         protected override IExpression Infer(IReduceContext context)
         {
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder))
             {

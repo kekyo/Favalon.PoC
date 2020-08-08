@@ -13,7 +13,6 @@ namespace Favalet.Contexts
         IExpression MakeRewritable(IExpression expression);
         IExpression MakeRewritableHigherOrder(IExpression higherOrder);
 
-        IExpression InferHigherOrder(IExpression higherOrder);
         IExpression Fixup(IExpression expression);
 
         void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
@@ -53,11 +52,14 @@ namespace Favalet.Contexts
         [DebuggerStepThrough]
         public IExpression MakeRewritableHigherOrder(IExpression higherOrder)
         {
-            var expr = this.MakeRewritable(higherOrder);
             var placeholder =
                 this.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove);
-
-            this.unifier.RegisterPair(placeholder, expr);
+            
+            if (!(higherOrder is UnspecifiedTerm))
+            {
+                var expr = this.MakeRewritable(higherOrder);
+                this.unifier.RegisterPair(placeholder, expr);
+            }
 
             return placeholder;
         }
@@ -89,19 +91,6 @@ namespace Favalet.Contexts
         [DebuggerStepThrough]
         public IIdentityTerm CreatePlaceholder(PlaceholderOrderHints orderHint) =>
             this.rootScope.CreatePlaceholder(orderHint);
-
-        public IExpression InferHigherOrder(IExpression higherOrder)
-        {
-            var inferred = this.Infer(higherOrder);
-
-            // Always replacing placeholder instead higher order.
-            var placeholder =
-                this.CreatePlaceholder(PlaceholderOrderHints.VariableOrAbove);
-
-            this.Unify(placeholder, inferred);
-            
-            return placeholder;
-        }
 
         [DebuggerStepThrough]
         public void Unify(IExpression fromHigherOrder, IExpression toHigherOrder) =>

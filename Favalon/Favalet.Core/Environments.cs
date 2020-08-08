@@ -46,10 +46,6 @@ namespace Favalet
         }
 
         [DebuggerStepThrough]
-        public PlaceholderTerm CreatePlaceholder() =>
-            this.CreatePlaceholder(PlaceholderOrderHints.VariableOrAbove);
-
-        [DebuggerStepThrough]
         IIdentityTerm IPlaceholderProvider.CreatePlaceholder(
             PlaceholderOrderHints orderHint) =>
             this.CreatePlaceholder(orderHint);

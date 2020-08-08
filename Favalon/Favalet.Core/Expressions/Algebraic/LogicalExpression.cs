@@ -50,7 +50,7 @@ namespace Favalet.Expressions.Algebraic
 
         protected override IExpression Infer(IReduceContext context)
         {
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
             var operand = context.Infer(this.Operand);
 
             context.Unify(operand.HigherOrder, higherOrder);

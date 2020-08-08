@@ -70,7 +70,7 @@ namespace Favalet.Expressions
         {
             var argument = context.Infer(this.Argument);
             var function = context.Infer(this.Function);
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
 
             var functionHigherOrder = FunctionExpression.Create(
                 argument.HigherOrder,

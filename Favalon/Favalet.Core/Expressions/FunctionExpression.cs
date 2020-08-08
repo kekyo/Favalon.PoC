@@ -95,7 +95,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                var higherOrder = context.InferHigherOrder(this.HigherOrder);
+                var higherOrder = context.Infer(this.HigherOrder);
 
                 var functionHigherOrder = Create(
                     parameter.HigherOrder,

@@ -72,21 +72,19 @@ namespace Favalet.Contexts
         public IExpression InferHigherOrder(IExpression higherOrder)
         {
             var inferred = this.Infer(higherOrder);
-            //var fixupped = this.Fixup(inferred);
 
-            //var context = new ReduceContext(
-            //    this.rootScope,
-            //    this,
-            //    this.unifier);
-            //var reduced = context.Reduce(fixupped);
+            // Always replacing placeholder instead higher order.
+            var placeholder =
+                this.CreatePlaceholder(PlaceholderOrderHints.VariableOrAbove);
 
-            //return reduced;
-            return inferred;
+            this.Unify(placeholder, inferred);
+            
+            return placeholder;
         }
 
         [DebuggerStepThrough]
         public void Unify(IExpression fromHigherOrder, IExpression toHigherOrder) =>
-            this.unifier.Unify(fromHigherOrder, toHigherOrder);
+            this.unifier.Unify(this, fromHigherOrder, toHigherOrder);
 
         [DebuggerStepThrough]
         public IExpression? Resolve(string symbol) =>

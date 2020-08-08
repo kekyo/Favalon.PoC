@@ -3,6 +3,7 @@ using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -19,60 +20,144 @@ namespace Favalet.Contexts
         public Unifier()
         {
         }
+        
+#if DEBUG
+        private sealed class PlaceholderMarker
+        {
+            private readonly HashSet<string> symbols;
+            private readonly List<string> list;
 
+            private PlaceholderMarker(HashSet<string> symbols, List<string> list)
+            {
+                this.symbols = symbols;
+                this.list = list;
+            }
+
+            public bool Mark(string targetSymbol)
+            {
+                list.Add(targetSymbol);
+                return symbols.Add(targetSymbol);
+            }
+
+            public PlaceholderMarker Fork() =>
+                new PlaceholderMarker(new HashSet<string>(this.symbols), new List<string>(this.list));
+
+            public override string ToString() =>
+                StringUtilities.Join(" --> ", this.list);
+            
+            public static PlaceholderMarker Create() =>
+                new PlaceholderMarker(new HashSet<string>(), new List<string>());
+        }
+
+        private void Verify(PlaceholderMarker marker, IExpression expression)
+        {
+            if (expression is IIdentityTerm identity)
+            {
+                this.Verify(marker, identity.Symbol);
+            }
+            else if (expression is IFunctionExpression(IExpression p, IExpression r))
+            {
+                this.Verify(marker.Fork(), p);
+                this.Verify(marker.Fork(), r);
+            }
+        }
+        
+        private void Verify(PlaceholderMarker marker, string symbol)
+        {
+            var targetSymbol = symbol;
+            while (true)
+            {
+                if (marker.Mark(targetSymbol))
+                {
+                    if (this.unifications.TryGetValue(targetSymbol, out var resolved))
+                    {
+                        if (resolved is IIdentityTerm identity)
+                        {
+                            targetSymbol = identity.Symbol;
+                            continue;
+                        }
+                        else
+                        {
+                            this.Verify(marker, resolved);
+                        }
+                    }
+                    return;
+                }
+
+                throw new InvalidOperationException(
+                    "Detected circular variable reference: " + marker);
+            }
+        }
+#endif
+            
         private void Update(string symbol, IExpression expression)
         {
 #if DEBUG
-            if (this.unifications.TryGetValue(symbol, out var origin) &&
-                !origin.Equals(expression))
+            if (this.unifications.TryGetValue(symbol, out var origin))
             {
-                Debug.WriteLine(
-                    $"Unifier.Update: {symbol}: {origin.GetPrettyString(PrettyStringTypes.Readable)} ==> {expression.GetPrettyString(PrettyStringTypes.Readable)}");
+                if (!origin.Equals(expression))
+                {
+                    Debug.WriteLine(
+                        $"Unifier.Update: {symbol}: {origin.GetPrettyString(PrettyStringTypes.Readable)} ==> {expression.GetPrettyString(PrettyStringTypes.Readable)}");
+                }
             }
 #endif
             this.unifications[symbol] = expression;
+#if DEBUG
+            this.Verify(PlaceholderMarker.Create(), symbol);
+#endif
         }
 
         public void RegisterPair(IIdentityTerm identity, IExpression expression) =>
             this.Update(identity.Symbol, expression);
 
-        private void InternalUnifyBothPlaceholders(
+        private IExpression InternalUnifyBothPlaceholders(
             IReduceContext context, IIdentityTerm from, IIdentityTerm to)
         {
             // Greater prioritize by exist unification rather than not exist.
             // Because will check ignoring circular reference at recursive path [1].
-            if (this.unifications.TryGetValue(from.Symbol, out var rfrom))
+            switch
+                (this.unifications.TryGetValue(from.Symbol, out var rfrom),
+                 this.unifications.TryGetValue(to.Symbol, out var rto))
             {
-                this.Unify(context, rfrom, to);
+                case (true, false):
+                    var result1 = this.InternalUnify(context, rfrom, to);
+                    this.Update(from.Symbol, result1);
+                    return from;
+                case (false, true):
+                    var result2 = this.InternalUnify(context, from, rto);
+                    this.Update(to.Symbol, result2);
+                    return to;
             }
-            else if (this.unifications.TryGetValue(to.Symbol, out var rto))
+            
+            switch (from, to)
             {
-                this.Unify(context, from, rto);
-            }
-            else if (from is PlaceholderTerm)
-            {
-                this.Update(from.Symbol, to);
-            }
-            else
-            {
-                this.Update(to.Symbol, from);
+                case (PlaceholderTerm _, _):
+                    this.Update(from.Symbol, to);
+                    return from;
+                default:
+                    this.Update(to.Symbol, from);
+                    return to;
             }
         }
 
-        private void InternalUnifyPlaceholder(
+        private IExpression InternalUnifyPlaceholder(
             IReduceContext context, IIdentityTerm from, IExpression to)
         {
             if (this.unifications.TryGetValue(from.Symbol, out var target))
             {
-                this.Unify(context, to, target);
+                var result = this.InternalUnify(context, to, target);
+                this.Update(from.Symbol, result);
             }
             else
             {
                 this.Update(from.Symbol, to);
             }
+            
+            return from;
         }
 
-        private void InternalUnifyCore(
+        private IExpression InternalUnifyCore(
             IReduceContext context, IExpression from, IExpression to)
         {
             Debug.Assert(!(from is UnspecifiedTerm));
@@ -87,54 +172,53 @@ namespace Favalet.Contexts
                     if (fromSymbol == toSymbol)
                     {
                         // Ignore equal placeholders.
-                        return;
+                        return from;
                     }
                     else
                     {
                         // Unify both placeholders.
-                        this.InternalUnifyBothPlaceholders(context, fi, ti);
-                        return;
+                        return this.InternalUnifyBothPlaceholders(context, fi, ti);
                     }
                 }
                 else
                 {
                     // Unify from placeholder.
-                    this.InternalUnifyPlaceholder(context, fi, to);
-                    return;
+                    return this.InternalUnifyPlaceholder(context, fi, to);
                 }
             }
             else if (to is IIdentityTerm ti)
             {
                 // Unify to placeholder.
-                this.InternalUnifyPlaceholder(context, ti, from);
-                return;
+                return this.InternalUnifyPlaceholder(context, ti, from);
             }
 
             if (from is IFunctionExpression(IExpression fp, IExpression fr) &&
                 to is IFunctionExpression(IExpression tp, IExpression tr))
             {
                 // Unify FunctionExpression.
-                this.Unify(context, fp, tp);
-                this.Unify(context, fr, tr);
-                return;
+                var parameter = this.InternalUnify(context, fp, tp);
+                var result = this.InternalUnify(context, fr, tr);
+
+                var function = FunctionExpression.Create(
+                    parameter, result, context, PlaceholderOrderHints.TypeOrAbove);
+                return function;
             }
 
-            if (context.TypeCalculator.Equals(from, to))
-            {
-                return;
-            }
+            var combined = OrExpression.Create(from, to);
+            var calculated = context.TypeCalculator.Compute(combined);
 
-            // Can't accept from --> to
-            throw new ArgumentException(
-                $"Couldn't accept unification: From=\"{from.GetPrettyString(PrettyStringTypes.StrictAll)}\", To=\"{to.GetPrettyString(PrettyStringTypes.StrictAll)}\".");
+            var rewritable = context.MakeRewritable(calculated);
+            var inferred = context.Infer(rewritable);
+
+            return inferred;
         }
 
-        public void Unify(
+        private IExpression InternalUnify(
             IReduceContext context, IExpression from, IExpression to)
         {
             if (object.ReferenceEquals(from, to))
             {
-                return;
+                return from;
             }
 
             switch (from, to)
@@ -142,70 +226,29 @@ namespace Favalet.Contexts
                 // Ignore DeadEndTerm unification.
                 case (DeadEndTerm _, _):
                 case (_, DeadEndTerm _):
-                    break;
+                    return DeadEndTerm.Instance;
 
                 default:
-                    // Unification.
-                    this.InternalUnifyCore(context, from, to);
-
                     // Unification higher order.
-                    this.Unify(context, from.HigherOrder, to.HigherOrder);
-                    break;
+                    this.InternalUnify(context, from.HigherOrder, to.HigherOrder);
+
+                    // Unification.
+                    return this.InternalUnifyCore(context, from, to);
             }
         }
 
-#if DEBUG
-        private sealed class PlaceholderMarker
-        {
-            private readonly HashSet<string> symbols = new HashSet<string>();
-            private readonly List<string> list = new List<string>();
-
-            public bool Mark(string targetSymbol)
-            {
-                list.Add(targetSymbol);
-                return symbols.Add(targetSymbol);
-            }
-
-            public override string ToString() =>
-                StringUtilities.Join(" --> ", this.list);
-        }
-#endif
+        public void Unify(
+            IReduceContext context, IExpression from, IExpression to) =>
+            this.InternalUnify(context, from, to);
 
         public IExpression? Resolve(string symbol)
         {
 #if DEBUG
-            // Release build code may cause stack overflow by recursive Fixup() calls
-            // and the debugger will be crashed,
-            // so it's dodging by the loop (only applicable nested placeholders.)
-            var marker = new PlaceholderMarker();
-            var targetSymbol = symbol;
-            IExpression? lastExpression = null;
-
-            while (true)
-            {
-                if (marker.Mark(targetSymbol))
-                {
-                    if (this.unifications.TryGetValue(targetSymbol, out var resolved))
-                    {
-                        lastExpression = resolved;
-                        if (lastExpression is IIdentityTerm identity)
-                        {
-                            targetSymbol = identity.Symbol;
-                            continue;
-                        }
-                    }
-
-                    return lastExpression;
-                }
-
-                throw new InvalidOperationException(
-                    "Detected circular variable reference: " + marker);
-            }
-#else
+            this.Verify(PlaceholderMarker.Create(), symbol);
+#endif
             return this.unifications.TryGetValue(symbol, out var resolved) ?
                 resolved :
                 null;
-#endif
         }
 
         public string Xml =>

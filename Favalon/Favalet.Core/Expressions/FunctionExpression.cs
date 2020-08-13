@@ -122,7 +122,12 @@ namespace Favalet.Expressions
         {
             var parameter = context.Fixup(this.Parameter);
             var result = context.Fixup(this.Result);
-            var higherOrder = context.Fixup(this.HigherOrder);
+            
+            // HACK: Force applying DeadEndTerm if expressions are 4th order.
+            var higherOrder =
+                (parameter is FourthTerm || result is FourthTerm) ?
+                    DeadEndTerm.Instance :
+                    context.Fixup(this.HigherOrder);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
                 object.ReferenceEquals(this.Result, result) &&

@@ -13,15 +13,33 @@ namespace Favalet.Contexts
         IExpression MakeRewritable(IExpression expression);
         IExpression MakeRewritableHigherOrder(IExpression higherOrder);
 
-        IExpression Fixup(IExpression expression);
-
         void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
+    }
+
+    public interface IFixupContext
+    {
+        IExpression Fixup(IExpression expression);
 
         IExpression? Resolve(string symbol);
     }
 
+    internal abstract class FixupContext :
+        IFixupContext
+    {
+        [DebuggerStepThrough]
+        protected FixupContext()
+        {
+        }
+
+        [DebuggerStepThrough]
+        public IExpression Fixup(IExpression expression) =>
+            expression is Expression expr ? expr.InternalFixup(this) : expression;
+
+        public abstract IExpression? Resolve(string symbol);
+    }
+
     internal sealed partial class ReduceContext :
-        IReduceContext
+        FixupContext, IReduceContext
     {
         private readonly Environments rootScope;
         private readonly IScopeContext parentScope;
@@ -64,7 +82,6 @@ namespace Favalet.Contexts
                 if (!(higherOrder is UnspecifiedTerm))
                 {
                     var expr = this.MakeRewritable(higherOrder);
-    //                this.unifier.RegisterPair(placeholder, expr);
                     this.unifier.Unify(this, placeholder, expr);
                 }
 
@@ -75,9 +92,6 @@ namespace Favalet.Contexts
         [DebuggerStepThrough]
         public IExpression Infer(IExpression expression) =>
             expression is Expression expr ? expr.InternalInfer(this) : expression;
-        [DebuggerStepThrough]
-        public IExpression Fixup(IExpression expression) =>
-            expression is Expression expr ? expr.InternalFixup(this) : expression;
         [DebuggerStepThrough]
         public IExpression Reduce(IExpression expression) =>
             expression is Expression expr ? expr.InternalReduce(this) : expression;
@@ -105,7 +119,7 @@ namespace Favalet.Contexts
             this.unifier.Unify(this, fromHigherOrder, toHigherOrder);
 
         [DebuggerStepThrough]
-        public IExpression? Resolve(string symbol) =>
+        public override IExpression? Resolve(string symbol) =>
             this.unifier.Resolve(symbol);
 
         public VariableInformation[] LookupVariables(string symbol) =>

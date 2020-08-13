@@ -35,7 +35,7 @@ namespace Favalet.Expressions.Algebraic
         protected override IExpression Infer(IReduceContext context) =>
             this;
 
-        protected override IExpression Fixup(IReduceContext context) =>
+        protected override IExpression Fixup(IFixupContext context) =>
             this;
 
         protected override IExpression Reduce(IReduceContext context) =>
@@ -44,7 +44,7 @@ namespace Favalet.Expressions.Algebraic
         public IExpression Call(IReduceContext context, IExpression argument) =>
             calculator.Compute(argument);
 
-        protected override sealed IEnumerable GetXmlValues(IXmlRenderContext context) =>
+        protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             Enumerable.Empty<object>();
 
         protected override string GetPrettyString(IPrettyStringContext context) =>

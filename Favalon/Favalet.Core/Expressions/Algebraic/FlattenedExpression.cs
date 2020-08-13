@@ -26,7 +26,7 @@ namespace Favalet.Expressions.Algebraic
         protected override sealed IExpression Infer(IReduceContext context) =>
             throw new InvalidOperationException();
 
-        protected override sealed IExpression Fixup(IReduceContext context) =>
+        protected override sealed IExpression Fixup(IFixupContext context) =>
             throw new InvalidOperationException();
 
         protected override sealed IExpression Reduce(IReduceContext context) =>

@@ -11,7 +11,8 @@ using System.Xml.Linq;
 namespace Favalet.Contexts
 {
     [DebuggerDisplay("{Simple}")]
-    internal sealed class Unifier
+    internal sealed class Unifier :
+        FixupContext  // Because using Simple property implementation.
     {
         private readonly Dictionary<string, IExpression> unifications =
             new Dictionary<string, IExpression>();
@@ -19,7 +20,7 @@ namespace Favalet.Contexts
         public Unifier()
         {
         }
-        
+
         private sealed class PlaceholderMarker
         {
             private readonly HashSet<string> symbols;
@@ -32,7 +33,7 @@ namespace Favalet.Contexts
 #else
                 HashSet<string> symbols
 #endif
-                )
+            )
             {
                 this.symbols = symbols;
 #if DEBUG
@@ -80,7 +81,7 @@ namespace Favalet.Contexts
                 this.Occur(marker.Fork(), r);
             }
         }
-        
+
         private void Occur(PlaceholderMarker marker, string symbol)
         {
             var targetSymbol = symbol;
@@ -100,6 +101,7 @@ namespace Favalet.Contexts
                             this.Occur(marker, resolved);
                         }
                     }
+
                     return;
                 }
 #if DEBUG
@@ -111,7 +113,7 @@ namespace Favalet.Contexts
 #endif
             }
         }
-            
+
         private void Update(string symbol, IExpression expression)
         {
 #if DEBUG
@@ -128,9 +130,6 @@ namespace Favalet.Contexts
             this.Occur(PlaceholderMarker.Create(), symbol);
         }
 
-        // public void RegisterPair(IIdentityTerm identity, IExpression expression) =>
-        //     this.Update(identity.Symbol, expression);
-
         private IExpression InternalUnifyBothPlaceholders(
             IReduceContext context, IIdentityTerm from, IIdentityTerm to)
         {
@@ -138,7 +137,7 @@ namespace Favalet.Contexts
             // Because will check ignoring circular reference at recursive path [1].
             switch
                 (this.unifications.TryGetValue(from.Symbol, out var rfrom),
-                 this.unifications.TryGetValue(to.Symbol, out var rto))
+                    this.unifications.TryGetValue(to.Symbol, out var rto))
             {
                 case (true, false):
                     var result1 = this.InternalUnify(context, rfrom, to);
@@ -149,7 +148,7 @@ namespace Favalet.Contexts
                     this.Update(to.Symbol, result2);
                     return to;
             }
-            
+
             switch (from, to)
             {
                 case (PlaceholderTerm _, _):
@@ -173,7 +172,7 @@ namespace Favalet.Contexts
             {
                 this.Update(from.Symbol, to);
             }
-            
+
             return from;
         }
 
@@ -262,33 +261,33 @@ namespace Favalet.Contexts
             IReduceContext context, IExpression from, IExpression to) =>
             this.InternalUnify(context, from, to);
 
-        public IExpression? Resolve(string symbol)
+        public override IExpression? Resolve(string symbol)
         {
 #if DEBUG
             this.Occur(PlaceholderMarker.Create(), symbol);
 #endif
-            return this.unifications.TryGetValue(symbol, out var resolved) ?
-                resolved :
-                null;
+            return this.unifications.TryGetValue(symbol, out var resolved) ? resolved : null;
         }
 
         public string Xml =>
             new XElement(
                 "Unifier",
-                this.unifications.
-                OrderBy(entry => entry.Key).
-                Select(entry => new XElement("Unification",
+                this.unifications.OrderBy(entry => entry.Key).Select(entry => new XElement("Unification",
                     new XAttribute("symbol", entry.Key),
-                    entry.Value.GetXml())).
-                Memoize()).
-            ToString();
+                    entry.Value.GetXml())).Memoize()).ToString();
 
         public string Simple =>
             StringUtilities.Join(
                 Environment.NewLine,
                 this.unifications.
                 OrderBy(entry => entry.Key).
-                Select(entry => $"{entry.Key} --> {entry.Value.GetPrettyString(PrettyStringTypes.Readable)}"));
+                Select(entry => string.Format(
+                    "{0} --> {1}{2}",
+                    entry.Key,
+                    entry.Value.GetPrettyString(PrettyStringTypes.Readable),
+                    this.Resolve(entry.Key) is IExpression expr ?
+                        $" [{this.Fixup(expr).GetPrettyString(PrettyStringTypes.Readable)}]" :
+                        string.Empty)));
 
         public override string ToString() =>
             "Unifier: " + this.Simple;

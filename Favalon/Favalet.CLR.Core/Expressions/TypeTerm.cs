@@ -57,7 +57,7 @@ namespace Favalet.Expressions
             return placeholder;
         }
 
-        protected override IExpression Fixup(IReduceContext context) =>
+        protected override IExpression Fixup(IFixupContext context) =>
             this;
 
         protected override IExpression Reduce(IReduceContext context) =>

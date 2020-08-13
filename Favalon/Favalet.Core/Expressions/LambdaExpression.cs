@@ -92,7 +92,7 @@ namespace Favalet.Expressions
             }
         }
 
-        protected override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             var parameter = (IBoundVariableTerm)context.Fixup(this.Parameter);
             var body = context.Fixup(this.Body);

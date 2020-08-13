@@ -37,7 +37,7 @@ namespace Favalet.Expressions
 
         protected abstract IExpression MakeRewritable(IReduceContext context);
         protected abstract IExpression Infer(IReduceContext context);
-        protected abstract IExpression Fixup(IReduceContext context);
+        protected abstract IExpression Fixup(IFixupContext context);
         protected abstract IExpression Reduce(IReduceContext context);
 
         [DebuggerStepThrough]
@@ -47,7 +47,7 @@ namespace Favalet.Expressions
         internal IExpression InternalInfer(IReduceContext context) =>
             this.Infer(context);
         [DebuggerStepThrough]
-        internal IExpression InternalFixup(IReduceContext context) =>
+        internal IExpression InternalFixup(IFixupContext context) =>
             this.Fixup(context);
         [DebuggerStepThrough]
         internal IExpression InternalReduce(IReduceContext context) =>

@@ -72,7 +72,7 @@ namespace Favalet.Expressions
             }
         }
 
-        protected override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             if (context.Resolve(this.Symbol) is IExpression resolved)
             {

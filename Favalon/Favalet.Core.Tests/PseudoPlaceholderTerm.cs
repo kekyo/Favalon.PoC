@@ -42,7 +42,7 @@ namespace Favalet
             protected override IExpression MakeRewritable(IReduceContext context) =>
                 throw new NotImplementedException();
 
-            protected override IExpression Fixup(IReduceContext context) =>
+            protected override IExpression Fixup(IFixupContext context) =>
                 throw new NotImplementedException();
 
             protected override IExpression Infer(IReduceContext context) =>

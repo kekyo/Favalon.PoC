@@ -118,7 +118,7 @@ namespace Favalet.Expressions
             }
         }
 
-        protected override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             var parameter = context.Fixup(this.Parameter);
             var result = context.Fixup(this.Result);

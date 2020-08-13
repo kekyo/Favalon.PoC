@@ -72,7 +72,7 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        protected override sealed IExpression Fixup(IReduceContext context)
+        protected override sealed IExpression Fixup(IFixupContext context)
         {
             var left = context.Fixup(this.Left);
             var right = context.Fixup(this.Right);

@@ -32,7 +32,7 @@ namespace Favalet.Expressions.Specialized
         protected override IExpression Infer(IReduceContext context) =>
             this;
 
-        protected override IExpression Fixup(IReduceContext context) =>
+        protected override IExpression Fixup(IFixupContext context) =>
             this;
 
         protected override IExpression Reduce(IReduceContext context) =>

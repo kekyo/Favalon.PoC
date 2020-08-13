@@ -26,8 +26,11 @@ namespace Favalet.Contexts
         }
 
         public override string ToString() =>
+#if DEBUG
             $"{this.Symbol}:{this.SymbolHigherOrder.GetPrettyString(PrettyStringTypes.Readable)} --> {this.Expression.GetPrettyString(PrettyStringTypes.Readable)}";
-
+#else
+            $"{this.SymbolHigherOrder.GetPrettyString(PrettyStringTypes.Readable)} --> {this.Expression.GetPrettyString(PrettyStringTypes.Readable)}";
+#endif
         public static VariableInformation Create(
             string symbol, IExpression symbolHigherOrder, IExpression expression) =>
             new VariableInformation(symbol, symbolHigherOrder, expression);

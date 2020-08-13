@@ -19,10 +19,17 @@ namespace Favalet.Expressions.Specialized
         IIdentityTerm CreatePlaceholder(PlaceholderOrderHints orderHint);
     }
 
-    public sealed class PlaceholderTerm :
-        Expression, IIdentityTerm
+    public interface IPlaceholderTerm :
+        IIdentityTerm
     {
-        private IPlaceholderProvider provider;
+        int Index { get; }
+        PlaceholderOrderHints OrderHint { get; }
+    }
+
+    public sealed class PlaceholderTerm :
+        Expression, IPlaceholderTerm
+    {
+        private readonly IPlaceholderProvider provider;
         private readonly LazySlim<IExpression> higherOrder;
 
         public readonly int Index;
@@ -51,10 +58,25 @@ namespace Favalet.Expressions.Specialized
             get => this.higherOrder.Value;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string Symbol
         {
             [DebuggerStepThrough]
             get => $"'{this.Index}";
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        int IPlaceholderTerm.Index
+        {
+            [DebuggerStepThrough]
+            get => this.Index;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        PlaceholderOrderHints IPlaceholderTerm.OrderHint
+        {
+            [DebuggerStepThrough]
+            get => this.OrderHint;
         }
 
         public override int GetHashCode() =>
@@ -120,7 +142,7 @@ namespace Favalet.Expressions.Specialized
     public static class PlaceholderTermExtension
     {
         public static void Deconstruct(
-            this PlaceholderTerm placeholder,
+            this IPlaceholderTerm placeholder,
             out string symbol,
             out PlaceholderOrderHints orderHint)
         {

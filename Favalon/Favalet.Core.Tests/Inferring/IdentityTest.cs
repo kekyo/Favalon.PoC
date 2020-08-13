@@ -9,7 +9,7 @@ using static Favalet.Generator;
 namespace Favalet.Inferring
 {
     [TestFixture]
-    public sealed class FromVariableTest
+    public sealed class IdentityTest
     {
         private static void AssertLogicalEqual(
             IExpression expression,
@@ -74,6 +74,28 @@ namespace Favalet.Inferring
                     Variable("true", Type<bool>()),
                     Variable("false", Type<bool>()),
                     Type<bool>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+ 
+        [Test]
+        public void Placeholder1()
+        {
+            var environment = CLREnvironment();
+
+            // a:int -> b:object
+            var expression =
+                Lambda(
+                    BoundVariable("a", Type<int>()),
+                    Variable("a", Type<object>()));
+
+            var actual = environment.Infer(expression);
+
+            // a:object -> b:object
+            var expected =
+                Lambda(
+                    BoundVariable("a", Type<object>()),
+                    Variable("a", Type<object>()));
 
             AssertLogicalEqual(expression, expected, actual);
         }

@@ -52,16 +52,24 @@ namespace Favalet.Contexts
         [DebuggerStepThrough]
         public IExpression MakeRewritableHigherOrder(IExpression higherOrder)
         {
-            var placeholder =
-                this.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove);
-            
-            if (!(higherOrder is UnspecifiedTerm))
+            if (higherOrder is IPlaceholderTerm)
             {
-                var expr = this.MakeRewritable(higherOrder);
-                this.unifier.RegisterPair(placeholder, expr);
+                return higherOrder;
             }
+            else
+            {
+                var placeholder =
+                    this.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove);
+            
+                if (!(higherOrder is UnspecifiedTerm))
+                {
+                    var expr = this.MakeRewritable(higherOrder);
+    //                this.unifier.RegisterPair(placeholder, expr);
+                    this.unifier.Unify(this, placeholder, expr);
+                }
 
-            return placeholder;
+                return placeholder;
+            }
         }
 
         [DebuggerStepThrough]

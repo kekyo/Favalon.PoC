@@ -3,7 +3,6 @@ using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -21,48 +20,68 @@ namespace Favalet.Contexts
         {
         }
         
-#if DEBUG
         private sealed class PlaceholderMarker
         {
             private readonly HashSet<string> symbols;
+#if DEBUG
             private readonly List<string> list;
-
-            private PlaceholderMarker(HashSet<string> symbols, List<string> list)
+#endif
+            private PlaceholderMarker(
+#if DEBUG
+                HashSet<string> symbols, List<string> list
+#else
+                HashSet<string> symbols
+#endif
+                )
             {
                 this.symbols = symbols;
+#if DEBUG
                 this.list = list;
+#endif
             }
 
             public bool Mark(string targetSymbol)
             {
+#if DEBUG
                 list.Add(targetSymbol);
+#endif
                 return symbols.Add(targetSymbol);
             }
 
             public PlaceholderMarker Fork() =>
+#if DEBUG
                 new PlaceholderMarker(new HashSet<string>(this.symbols), new List<string>(this.list));
+#else
+                new PlaceholderMarker(new HashSet<string>(this.symbols));
+#endif
 
+#if DEBUG
             public override string ToString() =>
                 StringUtilities.Join(" --> ", this.list);
-            
+#endif
+
             public static PlaceholderMarker Create() =>
+#if DEBUG
                 new PlaceholderMarker(new HashSet<string>(), new List<string>());
+#else
+                new PlaceholderMarker(new HashSet<string>());
+#endif
         }
 
-        private void Verify(PlaceholderMarker marker, IExpression expression)
+        private void Occur(PlaceholderMarker marker, IExpression expression)
         {
             if (expression is IIdentityTerm identity)
             {
-                this.Verify(marker, identity.Symbol);
+                this.Occur(marker, identity.Symbol);
             }
             else if (expression is IFunctionExpression(IExpression p, IExpression r))
             {
-                this.Verify(marker.Fork(), p);
-                this.Verify(marker.Fork(), r);
+                this.Occur(marker.Fork(), p);
+                this.Occur(marker.Fork(), r);
             }
         }
         
-        private void Verify(PlaceholderMarker marker, string symbol)
+        private void Occur(PlaceholderMarker marker, string symbol)
         {
             var targetSymbol = symbol;
             while (true)
@@ -78,17 +97,20 @@ namespace Favalet.Contexts
                         }
                         else
                         {
-                            this.Verify(marker, resolved);
+                            this.Occur(marker, resolved);
                         }
                     }
                     return;
                 }
-
+#if DEBUG
                 throw new InvalidOperationException(
                     "Detected circular variable reference: " + marker);
+#else
+                throw new InvalidOperationException(
+                    "Detected circular variable reference: " + symbol);
+#endif
             }
         }
-#endif
             
         private void Update(string symbol, IExpression expression)
         {
@@ -103,13 +125,11 @@ namespace Favalet.Contexts
             }
 #endif
             this.unifications[symbol] = expression;
-#if DEBUG
-            this.Verify(PlaceholderMarker.Create(), symbol);
-#endif
+            this.Occur(PlaceholderMarker.Create(), symbol);
         }
 
-        public void RegisterPair(IIdentityTerm identity, IExpression expression) =>
-            this.Update(identity.Symbol, expression);
+        // public void RegisterPair(IIdentityTerm identity, IExpression expression) =>
+        //     this.Update(identity.Symbol, expression);
 
         private IExpression InternalUnifyBothPlaceholders(
             IReduceContext context, IIdentityTerm from, IIdentityTerm to)
@@ -160,8 +180,8 @@ namespace Favalet.Contexts
         private IExpression InternalUnifyCore(
             IReduceContext context, IExpression from, IExpression to)
         {
-            Debug.Assert(!(from is UnspecifiedTerm));
-            Debug.Assert(!(to is UnspecifiedTerm));
+            Debug.Assert(!(from is UnspecifiedTerm) && !(from is DeadEndTerm));
+            Debug.Assert(!(to is UnspecifiedTerm) && !(to is DeadEndTerm));
 
             // Interpret placeholders.
             if (from is IIdentityTerm(string fromSymbol) fi)
@@ -237,6 +257,7 @@ namespace Favalet.Contexts
             }
         }
 
+        [DebuggerStepThrough]
         public void Unify(
             IReduceContext context, IExpression from, IExpression to) =>
             this.InternalUnify(context, from, to);
@@ -244,7 +265,7 @@ namespace Favalet.Contexts
         public IExpression? Resolve(string symbol)
         {
 #if DEBUG
-            this.Verify(PlaceholderMarker.Create(), symbol);
+            this.Occur(PlaceholderMarker.Create(), symbol);
 #endif
             return this.unifications.TryGetValue(symbol, out var resolved) ?
                 resolved :

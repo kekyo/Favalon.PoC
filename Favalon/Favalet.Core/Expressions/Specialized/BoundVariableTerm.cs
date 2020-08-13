@@ -46,7 +46,7 @@ namespace Favalet.Expressions.Specialized
                 this.Symbol,
                 context.MakeRewritableHigherOrder(this.HigherOrder));
 
-        protected override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IInferContext context)
         {
             var higherOrder = context.Infer(this.HigherOrder);
 

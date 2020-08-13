@@ -41,12 +41,10 @@ namespace Favalet.Contexts
         ILogicalCalculator TypeCalculator { get; }
 
         VariableInformation[] LookupVariables(string symbol);
-
-        IExpression Infer(IExpression expression);
-        IExpression Reduce(IExpression expression);
     }
 
-    public abstract class ScopeContext
+    public abstract class ScopeContext :
+        IScopeContext
     {
         private readonly ScopeContext? parent;
         private Dictionary<string, List<VariableInformation>>? variables;

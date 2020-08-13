@@ -48,7 +48,7 @@ namespace Favalet.Expressions.Algebraic
                 context.MakeRewritable(this.Operand),
                 context.MakeRewritableHigherOrder(this.HigherOrder));
 
-        protected override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IInferContext context)
         {
             var higherOrder = context.Infer(this.HigherOrder);
             var operand = context.Infer(this.Operand);
@@ -85,7 +85,7 @@ namespace Favalet.Expressions.Algebraic
         protected override IExpression Reduce(IReduceContext context) =>
             calculator.Compute(context.Reduce(this.Operand));
 
-        protected override sealed IEnumerable GetXmlValues(IXmlRenderContext context) =>
+        protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             new[] { context.GetXml(this.Operand) };
 
         protected override string GetPrettyString(IPrettyStringContext context) =>

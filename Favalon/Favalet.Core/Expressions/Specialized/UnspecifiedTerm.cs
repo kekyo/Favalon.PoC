@@ -25,11 +25,9 @@ namespace Favalet.Expressions.Specialized
             other is UnspecifiedTerm;
 
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
-            context is IPlaceholderProvider provider ?
-                (IExpression)provider.CreatePlaceholder(this.orderHint) :
-                this;
+            context.CreatePlaceholder(this.orderHint);
 
-        protected override IExpression Infer(IReduceContext context) =>
+        protected override IExpression Infer(IInferContext context) =>
             this;
 
         protected override IExpression Fixup(IFixupContext context) =>

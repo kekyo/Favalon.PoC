@@ -6,7 +6,8 @@ using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface ILogicalOperator : ICallableExpression
+    public interface ILogicalOperator :
+        ICallableExpression
     {
     }
 
@@ -32,7 +33,7 @@ namespace Favalet.Expressions.Algebraic
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             this;
 
-        protected override IExpression Infer(IReduceContext context) =>
+        protected override IExpression Infer(IInferContext context) =>
             this;
 
         protected override IExpression Fixup(IFixupContext context) =>

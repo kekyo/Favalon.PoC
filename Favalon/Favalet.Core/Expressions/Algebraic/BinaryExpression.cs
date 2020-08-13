@@ -51,7 +51,7 @@ namespace Favalet.Expressions.Algebraic
                 context.MakeRewritable(this.Right),
                 context.MakeRewritableHigherOrder(this.HigherOrder));
 
-        protected override sealed IExpression Infer(IReduceContext context)
+        protected override sealed IExpression Infer(IInferContext context)
         {
             var left = context.Infer(this.Left);
             var right = context.Infer(this.Right);

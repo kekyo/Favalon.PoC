@@ -66,7 +66,7 @@ namespace Favalet.Expressions
                 context.MakeRewritable(this.Argument),
                 context.MakeRewritableHigherOrder(this.HigherOrder));
 
-        protected override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IInferContext context)
         {
             var argument = context.Infer(this.Argument);
             var function = context.Infer(this.Function);

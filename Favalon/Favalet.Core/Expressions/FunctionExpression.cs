@@ -74,7 +74,7 @@ namespace Favalet.Expressions
                 context.MakeRewritable(this.Result),
                 context.MakeRewritableHigherOrder(this.HigherOrder));
 
-        protected override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IInferContext context)
         {
             var parameter = context.Infer(this.Parameter);
             var result = context.Infer(this.Result);
@@ -195,11 +195,11 @@ namespace Favalet.Expressions
 
         private sealed class LazyHigherOrderPlaceholderFunctionGenerator
         {
-            private readonly IReduceContext context;
+            private readonly IInferContext context;
             private readonly PlaceholderOrderHints orderHint;
 
             public LazyHigherOrderPlaceholderFunctionGenerator(
-                IReduceContext context,
+                IInferContext context,
                 PlaceholderOrderHints orderHint)
             {
                 this.context = context;
@@ -230,7 +230,7 @@ namespace Favalet.Expressions
         internal static FunctionExpression Create(
             IExpression parameter,
             IExpression result,
-            IReduceContext context,
+            IInferContext context,
             PlaceholderOrderHints orderHint)
         {
             var generator = new LazyHigherOrderPlaceholderFunctionGenerator(context, orderHint);

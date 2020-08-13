@@ -5,16 +5,19 @@ using System.Diagnostics;
 
 namespace Favalet.Contexts
 {
-    public interface IMakeRewritableContext
+    public interface IMakeRewritableContext :
+        IPlaceholderProvider
     {
         IExpression MakeRewritable(IExpression expression);
         IExpression MakeRewritableHigherOrder(IExpression higherOrder);
     }
     
-    public interface IReduceContext :
-        IScopeContext, IMakeRewritableContext, IPlaceholderProvider
+    public interface IInferContext :
+        IScopeContext, IMakeRewritableContext
     {
-        IReduceContext Bind(IBoundVariableTerm parameter, IExpression expression);
+        IExpression Infer(IExpression expression);
+    
+        IInferContext Bind(IBoundVariableTerm parameter, IExpression expression);
 
         void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
     }
@@ -24,6 +27,14 @@ namespace Favalet.Contexts
         IExpression Fixup(IExpression expression);
 
         IExpression? Resolve(string symbol);
+    }
+
+    public interface IReduceContext :
+        IScopeContext
+    {
+        IExpression Reduce(IExpression expression);
+    
+        IReduceContext Bind(IBoundVariableTerm parameter, IExpression expression);
     }
 
     internal abstract class FixupContext :
@@ -42,7 +53,7 @@ namespace Favalet.Contexts
     }
 
     internal sealed partial class ReduceContext :
-        FixupContext, IReduceContext
+        FixupContext, IInferContext, IReduceContext
     {
         private readonly Environments rootScope;
         private readonly IScopeContext parentScope;
@@ -99,7 +110,7 @@ namespace Favalet.Contexts
         public IExpression Reduce(IExpression expression) =>
             expression is Expression expr ? expr.InternalReduce(this) : expression;
 
-        public IReduceContext Bind(
+        private ReduceContext Bind(
             IBoundVariableTerm symbol, IExpression expression)
         {
             var newContext = new ReduceContext(
@@ -112,6 +123,15 @@ namespace Favalet.Contexts
 
             return newContext;
         }
+
+        [DebuggerStepThrough]
+        IInferContext IInferContext.Bind(
+            IBoundVariableTerm symbol, IExpression expression) =>
+            this.Bind(symbol, expression);
+        [DebuggerStepThrough]
+        IReduceContext IReduceContext.Bind(
+            IBoundVariableTerm symbol, IExpression expression) =>
+            this.Bind(symbol, expression);
 
         [DebuggerStepThrough]
         public IIdentityTerm CreatePlaceholder(PlaceholderOrderHints orderHint) =>

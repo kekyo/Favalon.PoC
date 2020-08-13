@@ -55,7 +55,7 @@ namespace Favalet.Expressions
                 this.RuntimeMethod,
                 LazySlim.Create(context.MakeRewritableHigherOrder(this.HigherOrder)));
 
-        protected override IExpression Infer(IReduceContext context) =>
+        protected override IExpression Infer(IInferContext context) =>
             this;
 
         protected override IExpression Fixup(IFixupContext context) =>

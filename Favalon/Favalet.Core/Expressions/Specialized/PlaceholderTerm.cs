@@ -91,7 +91,7 @@ namespace Favalet.Expressions.Specialized
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             this;
 
-        protected override IExpression Infer(IReduceContext context) =>
+        protected override IExpression Infer(IInferContext context) =>
             this;
 
         protected override IExpression Fixup(IFixupContext context)

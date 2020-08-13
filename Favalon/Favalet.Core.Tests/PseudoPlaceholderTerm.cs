@@ -45,7 +45,7 @@ namespace Favalet
             protected override IExpression Fixup(IFixupContext context) =>
                 throw new NotImplementedException();
 
-            protected override IExpression Infer(IReduceContext context) =>
+            protected override IExpression Infer(IInferContext context) =>
                 throw new NotImplementedException();
 
             protected override IExpression Reduce(IReduceContext context) =>

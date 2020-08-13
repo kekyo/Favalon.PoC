@@ -12,7 +12,7 @@ namespace Favalet.Contexts
 {
     [DebuggerDisplay("{Simple}")]
     internal sealed class Unifier :
-        FixupContext  // Because using Simple property implementation.
+        FixupContext  // Because used by "Simple" property implementation.
     {
         private readonly Dictionary<string, IExpression> unifications =
             new Dictionary<string, IExpression>();
@@ -131,7 +131,7 @@ namespace Favalet.Contexts
         }
 
         private IExpression InternalUnifyBothPlaceholders(
-            IReduceContext context, IIdentityTerm from, IIdentityTerm to)
+            IInferContext context, IIdentityTerm from, IIdentityTerm to)
         {
             // Greater prioritize by exist unification rather than not exist.
             // Because will check ignoring circular reference at recursive path [1].
@@ -161,7 +161,7 @@ namespace Favalet.Contexts
         }
 
         private IExpression InternalUnifyPlaceholder(
-            IReduceContext context, IIdentityTerm from, IExpression to)
+            IInferContext context, IIdentityTerm from, IExpression to)
         {
             if (this.unifications.TryGetValue(from.Symbol, out var target))
             {
@@ -177,7 +177,7 @@ namespace Favalet.Contexts
         }
 
         private IExpression InternalUnifyCore(
-            IReduceContext context, IExpression from, IExpression to)
+            IInferContext context, IExpression from, IExpression to)
         {
             Debug.Assert(!(from is UnspecifiedTerm) && !(from is DeadEndTerm));
             Debug.Assert(!(to is UnspecifiedTerm) && !(to is DeadEndTerm));
@@ -233,7 +233,7 @@ namespace Favalet.Contexts
         }
 
         private IExpression InternalUnify(
-            IReduceContext context, IExpression from, IExpression to)
+            IInferContext context, IExpression from, IExpression to)
         {
             if (object.ReferenceEquals(from, to))
             {
@@ -258,7 +258,7 @@ namespace Favalet.Contexts
 
         [DebuggerStepThrough]
         public void Unify(
-            IReduceContext context, IExpression from, IExpression to) =>
+            IInferContext context, IExpression from, IExpression to) =>
             this.InternalUnify(context, from, to);
 
         public override IExpression? Resolve(string symbol)
@@ -275,7 +275,7 @@ namespace Favalet.Contexts
                 this.unifications.OrderBy(entry => entry.Key).Select(entry => new XElement("Unification",
                     new XAttribute("symbol", entry.Key),
                     entry.Value.GetXml())).Memoize()).ToString();
-
+        
         public string Simple =>
             StringUtilities.Join(
                 Environment.NewLine,
@@ -284,7 +284,7 @@ namespace Favalet.Contexts
                 Select(entry => string.Format(
                     "{0} --> {1}{2}",
                     entry.Key,
-                    entry.Value.GetPrettyString(PrettyStringTypes.Readable),
+                    entry.Value.GetPrettyString(PrettyStringTypes.ReadableWithoutHigherOrder),
                     this.Resolve(entry.Key) is IExpression expr ?
                         $" [{this.Fixup(expr).GetPrettyString(PrettyStringTypes.Readable)}]" :
                         string.Empty)));

@@ -36,7 +36,7 @@ namespace Favalet.Expressions
         public abstract IExpression HigherOrder { get; }
 
         protected abstract IExpression MakeRewritable(IMakeRewritableContext context);
-        protected abstract IExpression Infer(IReduceContext context);
+        protected abstract IExpression Infer(IInferContext context);
         protected abstract IExpression Fixup(IFixupContext context);
         protected abstract IExpression Reduce(IReduceContext context);
 
@@ -44,7 +44,7 @@ namespace Favalet.Expressions
         internal IExpression InternalMakeRewritable(IMakeRewritableContext context) =>
             this.MakeRewritable(context);
         [DebuggerStepThrough]
-        internal IExpression InternalInfer(IReduceContext context) =>
+        internal IExpression InternalInfer(IInferContext context) =>
             this.Infer(context);
         [DebuggerStepThrough]
         internal IExpression InternalFixup(IFixupContext context) =>
@@ -101,7 +101,9 @@ namespace Favalet.Expressions
             GetXml(expression);
 
         [DebuggerStepThrough]
-        public static string GetPrettyString(this IExpression expression, PrettyStringTypes type) =>
+        public static string GetPrettyString(
+            this IExpression expression,
+            PrettyStringTypes type) =>
             PrettyStringContext.Create(type).
             GetPrettyString(expression);
     }

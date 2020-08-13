@@ -23,7 +23,7 @@ namespace Favalet.Expressions.Algebraic
         protected override sealed IExpression MakeRewritable(IMakeRewritableContext context) =>
             throw new InvalidOperationException();
 
-        protected override sealed IExpression Infer(IReduceContext context) =>
+        protected override sealed IExpression Infer(IInferContext context) =>
             throw new InvalidOperationException();
 
         protected override sealed IExpression Fixup(IFixupContext context) =>

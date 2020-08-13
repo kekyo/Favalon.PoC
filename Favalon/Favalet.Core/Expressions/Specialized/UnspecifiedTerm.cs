@@ -24,7 +24,7 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? other) =>
             other is UnspecifiedTerm;
 
-        protected override IExpression MakeRewritable(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             context is IPlaceholderProvider provider ?
                 (IExpression)provider.CreatePlaceholder(this.orderHint) :
                 this;

@@ -20,7 +20,7 @@ namespace Favalet.Expressions.Algebraic
         public override sealed int GetHashCode() =>
             this.Operands.Aggregate(0, (agg, operand) => agg ^ operand?.GetHashCode() ?? 0);
 
-        protected override sealed IExpression MakeRewritable(IReduceContext context) =>
+        protected override sealed IExpression MakeRewritable(IMakeRewritableContext context) =>
             throw new InvalidOperationException();
 
         protected override sealed IExpression Infer(IReduceContext context) =>

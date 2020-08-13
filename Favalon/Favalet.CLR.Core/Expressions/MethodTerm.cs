@@ -50,7 +50,7 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is IMethodTerm rhs && this.Equals(rhs);
         
-        protected override IExpression MakeRewritable(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new MethodTerm(
                 this.RuntimeMethod,
                 LazySlim.Create(context.MakeRewritableHigherOrder(this.HigherOrder)));

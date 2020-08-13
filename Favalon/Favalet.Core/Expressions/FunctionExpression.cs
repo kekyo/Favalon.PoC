@@ -68,7 +68,7 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is IFunctionExpression rhs && this.Equals(rhs);
 
-        protected override IExpression MakeRewritable(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new FunctionExpression(
                 context.MakeRewritable(this.Parameter),
                 context.MakeRewritable(this.Result),
@@ -79,8 +79,9 @@ namespace Favalet.Expressions
             var parameter = context.Infer(this.Parameter);
             var result = context.Infer(this.Result);
 
-            if (parameter is FourthTerm ||
-                result is FourthTerm)
+            // Recursive inferring exit rule.
+            if (parameter is FourthTerm || result is FourthTerm ||
+                parameter.HigherOrder is DeadEndTerm || result is DeadEndTerm)
             {
                 if (object.ReferenceEquals(this.Parameter, parameter) &&
                     object.ReferenceEquals(this.Result, result) &&
@@ -103,7 +104,10 @@ namespace Favalet.Expressions
                     context,
                     PlaceholderOrderHints.KindOrAbove);
 
-                context.Unify(functionHigherOrder, higherOrder);
+                var inferredFunctionHigherOrder =
+                    context.Infer(functionHigherOrder);
+
+                context.Unify(inferredFunctionHigherOrder, higherOrder);
 
                 if (object.ReferenceEquals(this.Parameter, parameter) &&
                     object.ReferenceEquals(this.Result, result) &&

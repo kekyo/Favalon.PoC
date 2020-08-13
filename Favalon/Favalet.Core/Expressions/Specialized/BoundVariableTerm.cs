@@ -41,7 +41,7 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? other) =>
             other is IBoundVariableTerm rhs && this.Equals(rhs);
 
-        protected override IExpression MakeRewritable(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new BoundVariableTerm(
                 this.Symbol,
                 context.MakeRewritableHigherOrder(this.HigherOrder));

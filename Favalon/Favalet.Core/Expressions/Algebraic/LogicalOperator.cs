@@ -29,7 +29,7 @@ namespace Favalet.Expressions.Algebraic
         public override bool Equals(IExpression? other) =>
             other is ILogicalOperator rhs && this.Equals(rhs);
         
-        protected override IExpression MakeRewritable(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             this;
 
         protected override IExpression Infer(IReduceContext context) =>

@@ -5,13 +5,16 @@ using System.Diagnostics;
 
 namespace Favalet.Contexts
 {
-    public interface IReduceContext :
-        IScopeContext, IPlaceholderProvider
+    public interface IMakeRewritableContext
     {
-        IReduceContext Bind(IBoundVariableTerm parameter, IExpression expression);
-
         IExpression MakeRewritable(IExpression expression);
         IExpression MakeRewritableHigherOrder(IExpression higherOrder);
+    }
+    
+    public interface IReduceContext :
+        IScopeContext, IMakeRewritableContext, IPlaceholderProvider
+    {
+        IReduceContext Bind(IBoundVariableTerm parameter, IExpression expression);
 
         void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
     }

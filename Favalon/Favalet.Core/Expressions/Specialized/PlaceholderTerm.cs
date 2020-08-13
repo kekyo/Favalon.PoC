@@ -88,7 +88,7 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
 
-        protected override IExpression MakeRewritable(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             this;
 
         protected override IExpression Infer(IReduceContext context) =>

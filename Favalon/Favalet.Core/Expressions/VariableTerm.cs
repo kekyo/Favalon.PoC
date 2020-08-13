@@ -36,7 +36,7 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
 
-        protected override IExpression MakeRewritable(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new VariableTerm(
                 this.Symbol,
                 context.MakeRewritableHigherOrder(this.HigherOrder));

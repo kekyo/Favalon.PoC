@@ -43,7 +43,7 @@ namespace Favalet.Expressions.Algebraic
         public override bool Equals(IExpression? other) =>
             other is ILogicalExpression rhs && this.Equals(rhs);
         
-        protected override IExpression MakeRewritable(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new LogicalExpression(
                 context.MakeRewritable(this.Operand),
                 context.MakeRewritableHigherOrder(this.HigherOrder));

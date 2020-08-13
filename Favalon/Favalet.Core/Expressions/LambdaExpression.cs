@@ -54,7 +54,7 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is ILambdaExpression rhs && this.Equals(rhs);
 
-        protected override IExpression MakeRewritable(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new LambdaExpression(
                 (IBoundVariableTerm)context.MakeRewritable(this.Parameter),
                 context.MakeRewritable(this.Body),

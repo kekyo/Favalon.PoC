@@ -2,6 +2,7 @@
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Favalet.Contexts
 {
@@ -81,25 +82,27 @@ namespace Favalet.Contexts
                 expr.InternalMakeRewritable(this) :
                 expression;
 
-        [DebuggerStepThrough]
         public IExpression MakeRewritableHigherOrder(IExpression higherOrder)
         {
-            if (higherOrder is IPlaceholderTerm)
+            switch (higherOrder)
             {
-                return higherOrder;
-            }
-            else
-            {
-                var placeholder =
-                    this.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove);
-            
-                if (!(higherOrder is UnspecifiedTerm))
-                {
-                    var expr = this.MakeRewritable(higherOrder);
-                    this.unifier.Unify(this, placeholder, expr);
-                }
-
-                return placeholder;
+                case DeadEndTerm _:
+                    return higherOrder;
+                case FourthTerm _:
+                    return higherOrder;
+                case IPlaceholderTerm _:
+                    return higherOrder;
+                case IFunctionExpression _:
+                    var ho = this.MakeRewritable(higherOrder);
+                    return ho;
+                default:
+                    var placeholder = this.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove);
+                    if (!(higherOrder is UnspecifiedTerm))
+                    {
+                        var expr = this.MakeRewritable(higherOrder);
+                        this.unifier.Unify(this, placeholder, expr);
+                    }
+                    return placeholder;
             }
         }
 
@@ -134,7 +137,7 @@ namespace Favalet.Contexts
             this.Bind(symbol, expression);
 
         [DebuggerStepThrough]
-        public IIdentityTerm CreatePlaceholder(PlaceholderOrderHints orderHint) =>
+        public IExpression CreatePlaceholder(PlaceholderOrderHints orderHint) =>
             this.rootScope.CreatePlaceholder(orderHint);
 
         [DebuggerStepThrough]

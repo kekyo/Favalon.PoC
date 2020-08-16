@@ -69,16 +69,10 @@ namespace Favalet.Expressions
 
             var body = newScope.Infer(this.Body);
 
-            var lambdaHigherOrder = FunctionExpression.Create(
-                parameter.HigherOrder,
-                body.HigherOrder,
-                context,
-                PlaceholderOrderHints.TypeOrAbove);
-
-            var inferredLambdaHigherOrder =
-                context.Infer(lambdaHigherOrder);
-
-            context.Unify(inferredLambdaHigherOrder, higherOrder);
+            var lambdaHigherOrder = FunctionExpression.SafeCreate(
+                parameter.HigherOrder, body.HigherOrder);
+            
+            context.Unify(lambdaHigherOrder, higherOrder);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
                 object.ReferenceEquals(this.Body, body) &&

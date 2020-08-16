@@ -47,7 +47,7 @@ namespace Favalet.Expressions
             return base.ChoiceForOr(left, right);
         }
 
-        public static new readonly TypeCalculator Instance =
+        public new static readonly TypeCalculator Instance =
             new TypeCalculator();
     }
 }

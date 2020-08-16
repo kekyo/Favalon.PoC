@@ -1,8 +1,10 @@
-﻿using Favalet.Contexts;
+﻿using System;
+using Favalet.Contexts;
 using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 
 namespace Favalet
@@ -27,26 +29,25 @@ namespace Favalet
         { }
 
         [DebuggerStepThrough]
-        internal PlaceholderTerm CreatePlaceholder(
+        internal IExpression CreatePlaceholder(
             PlaceholderOrderHints orderHint)
         {
-            var ph = PlaceholderTerm.Create(
-                this,
-                Interlocked.Increment(ref this.placeholderIndex),
-                orderHint);
-#if DEBUG
-            // Preassigned higher orders.
-            var ho = ph.HigherOrder;
-            while (!(ho is DeadEndTerm))
-            {
-                ho = ho.HigherOrder;
-            }
-#endif
-            return ph;
+            var count = Math.Min(
+                (int)PlaceholderOrderHints.Fourth - (int)orderHint,
+                (int)PlaceholderOrderHints.KindOrAbove);
+            var indexList =
+                Enumerable.Range(0, count).
+                Select(_ => Interlocked.Increment(ref this.placeholderIndex)).
+                ToArray();
+            return indexList.
+                Reverse().
+                Aggregate(
+                    (IExpression)FourthTerm.Instance,
+                    (agg, index) => PlaceholderTerm.Create(index, agg));
         }
 
         [DebuggerStepThrough]
-        IIdentityTerm IPlaceholderProvider.CreatePlaceholder(
+        IExpression IPlaceholderProvider.CreatePlaceholder(
             PlaceholderOrderHints orderHint) =>
             this.CreatePlaceholder(orderHint);
 

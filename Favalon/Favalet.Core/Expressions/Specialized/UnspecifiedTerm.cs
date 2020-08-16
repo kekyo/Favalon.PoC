@@ -51,5 +51,8 @@ namespace Favalet.Expressions.Specialized
 
         internal static readonly UnspecifiedTerm TypeInstance =
             new UnspecifiedTerm(PlaceholderOrderHints.TypeOrAbove);
+
+        internal static readonly UnspecifiedTerm KindInstance =
+            new UnspecifiedTerm(PlaceholderOrderHints.KindOrAbove);
     }
 }

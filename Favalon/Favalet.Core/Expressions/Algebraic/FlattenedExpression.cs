@@ -17,22 +17,22 @@ namespace Favalet.Expressions.Algebraic
         protected FlattenedExpression(IExpression[] operands) =>
             this.Operands = operands;
 
-        public override sealed int GetHashCode() =>
+        public sealed override int GetHashCode() =>
             this.Operands.Aggregate(0, (agg, operand) => agg ^ operand?.GetHashCode() ?? 0);
 
-        protected override sealed IExpression MakeRewritable(IMakeRewritableContext context) =>
+        protected sealed override IExpression MakeRewritable(IMakeRewritableContext context) =>
             throw new InvalidOperationException();
 
-        protected override sealed IExpression Infer(IInferContext context) =>
+        protected sealed override IExpression Infer(IInferContext context) =>
             throw new InvalidOperationException();
 
-        protected override sealed IExpression Fixup(IFixupContext context) =>
+        protected sealed override IExpression Fixup(IFixupContext context) =>
             throw new InvalidOperationException();
 
-        protected override sealed IExpression Reduce(IReduceContext context) =>
+        protected sealed override IExpression Reduce(IReduceContext context) =>
             throw new InvalidOperationException();
 
-        protected override sealed IEnumerable GetXmlValues(IXmlRenderContext context) =>
+        protected sealed override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             this.Operands.Select(context.GetXml);
 
         [DebuggerStepThrough]

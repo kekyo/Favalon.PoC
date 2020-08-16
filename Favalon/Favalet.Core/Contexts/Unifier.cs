@@ -218,8 +218,8 @@ namespace Favalet.Contexts
                 var parameter = this.InternalUnify(context, fp, tp);
                 var result = this.InternalUnify(context, fr, tr);
 
-                var function = FunctionExpression.Create(
-                    parameter, result, context, PlaceholderOrderHints.TypeOrAbove);
+                var function = FunctionExpression.SafeCreate(
+                    parameter, result);
                 return function;
             }
 
@@ -249,7 +249,7 @@ namespace Favalet.Contexts
 
                 default:
                     // Unification higher order.
-                    this.InternalUnify(context, from.HigherOrder, to.HigherOrder);
+                    var ho = this.InternalUnify(context, from.HigherOrder, to.HigherOrder);
 
                     // Unification.
                     return this.InternalUnifyCore(context, from, to);

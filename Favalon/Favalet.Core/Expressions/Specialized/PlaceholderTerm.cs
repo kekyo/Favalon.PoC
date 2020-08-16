@@ -2,6 +2,7 @@
 using Favalet.Internal;
 using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace Favalet.Expressions.Specialized
@@ -16,47 +17,28 @@ namespace Favalet.Expressions.Specialized
 
     public interface IPlaceholderProvider
     {
-        IIdentityTerm CreatePlaceholder(PlaceholderOrderHints orderHint);
+        IExpression CreatePlaceholder(PlaceholderOrderHints orderHint);
     }
 
     public interface IPlaceholderTerm :
         IIdentityTerm
     {
         int Index { get; }
-        PlaceholderOrderHints OrderHint { get; }
     }
 
     public sealed class PlaceholderTerm :
         Expression, IPlaceholderTerm
     {
-        private readonly IPlaceholderProvider provider;
-        private readonly LazySlim<IExpression> higherOrder;
-
         public readonly int Index;
-        public readonly PlaceholderOrderHints OrderHint;
 
         [DebuggerStepThrough]
-        private PlaceholderTerm(
-            IPlaceholderProvider provider,
-            int index,
-            PlaceholderOrderHints orderHint)
+        private PlaceholderTerm(int index, IExpression higherOrder)
         {
-            Debug.Assert(orderHint <= PlaceholderOrderHints.Fourth);
-
-            this.provider = provider;
             this.Index = index;
-            this.OrderHint = orderHint;
-            this.higherOrder = LazySlim.Create(() =>
-                (this.OrderHint >= PlaceholderOrderHints.Fourth) ?
-                    (IExpression)DeadEndTerm.Instance :
-                    this.provider.CreatePlaceholder(this.OrderHint + 1));
+            this.HigherOrder = higherOrder;
         }
 
-        public override IExpression HigherOrder
-        {
-            [DebuggerStepThrough]
-            get => this.higherOrder.Value;
-        }
+        public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string Symbol
@@ -72,13 +54,6 @@ namespace Favalet.Expressions.Specialized
             get => this.Index;
         }
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        PlaceholderOrderHints IPlaceholderTerm.OrderHint
-        {
-            [DebuggerStepThrough]
-            get => this.OrderHint;
-        }
-
         public override int GetHashCode() =>
             this.Index.GetHashCode();
 
@@ -89,7 +64,7 @@ namespace Favalet.Expressions.Specialized
             other is IIdentityTerm rhs && this.Equals(rhs);
 
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
-            this;
+            this;  // Placeholder already rewritable on the unifier infrastructure.
 
         protected override IExpression Infer(IInferContext context) =>
             this;
@@ -110,8 +85,7 @@ namespace Favalet.Expressions.Specialized
                 }
                 else
                 {
-                    return new PlaceholderTerm(
-                        this.provider, this.Index, this.OrderHint);
+                    return new PlaceholderTerm(this.Index, higherOrder);
                 }
             }
         }
@@ -128,14 +102,8 @@ namespace Favalet.Expressions.Specialized
                 this.Symbol);
 
         [DebuggerStepThrough]
-        internal static PlaceholderTerm Create(
-            IPlaceholderProvider provider,
-            int index,
-            PlaceholderOrderHints orderHint) =>
-            new PlaceholderTerm(
-                provider,
-                index,
-                orderHint);
+        internal static PlaceholderTerm Create(int index, IExpression higherOrder) =>
+            new PlaceholderTerm(index, higherOrder);
     }
 
     [DebuggerStepThrough]
@@ -143,11 +111,7 @@ namespace Favalet.Expressions.Specialized
     {
         public static void Deconstruct(
             this IPlaceholderTerm placeholder,
-            out string symbol,
-            out PlaceholderOrderHints orderHint)
-        {
-            symbol = placeholder.Symbol;
-            orderHint = placeholder.OrderHint;
-        }
+            out int index) =>
+            index = placeholder.Index;
     }
 }

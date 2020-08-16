@@ -71,7 +71,7 @@ namespace Favalet.Expressions
         public string Readable =>
             $"{this.Type}: {this.GetPrettyString(PrettyStringTypes.Readable)}";
 
-        public override sealed string ToString() =>
+        public sealed override string ToString() =>
             this.GetPrettyString(PrettyStringTypes.Strict);
 
         public abstract bool Equals(IExpression? other);

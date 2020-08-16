@@ -46,7 +46,7 @@ namespace Favalet.Expressions
             other is ITypeTerm rhs && Equals(rhs);
 
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
-            this;
+            context.CreatePlaceholderFrom(this);
 
         protected override IExpression Infer(IInferContext context) =>
             this;

@@ -7,10 +7,9 @@ using System.Reflection;
 
 namespace Favalet.Contexts
 {
-    public interface IMakeRewritableContext :
-        IPlaceholderProvider
+    public interface IMakeRewritableContext
     {
-        PlaceholderOrderHints OrderHint { get; }
+        IExpression CreatePlaceholderFrom(IExpression original);
         
         IExpression MakeRewritable(IExpression expression);
         IExpression MakeRewritableHigherOrder(IExpression higherOrder);
@@ -80,10 +79,25 @@ namespace Favalet.Contexts
         public ILogicalCalculator TypeCalculator =>
             this.rootScope.TypeCalculator;
 
-        PlaceholderOrderHints IMakeRewritableContext.OrderHint =>
-            (this.orderHint > PlaceholderOrderHints.Fourth) ?
-                PlaceholderOrderHints.Fourth :
-                this.orderHint;
+        public IExpression CreatePlaceholderFrom(IExpression original)
+        {
+            if (original is IPlaceholderTerm)
+            {
+                return original;
+            }
+            
+            var placeholder = this.rootScope.CreatePlaceholder(
+                (this.orderHint > PlaceholderOrderHints.Fourth) ?
+                    PlaceholderOrderHints.Fourth :
+                    this.orderHint);
+            
+            if (!(original is UnspecifiedTerm))
+            {
+                this.unifier.Unify(this, placeholder, original);
+            }
+            
+            return placeholder;
+        }
 
         public IExpression MakeRewritable(IExpression expression) =>
             expression is Expression expr ?
@@ -95,9 +109,7 @@ namespace Favalet.Contexts
             this.orderHint++;
             
             var rewritable = this.MakeRewritable(higherOrder);
-
-            var placeholder = this.CreatePlaceholder(this.orderHint);
-            this.unifier.Unify(this, placeholder, rewritable);
+            var placeholder = this.CreatePlaceholderFrom(rewritable);
             
             this.orderHint--;
             Debug.Assert(this.orderHint >= PlaceholderOrderHints.VariableOrAbove);
@@ -134,10 +146,6 @@ namespace Favalet.Contexts
         IReduceContext IReduceContext.Bind(
             IBoundVariableTerm symbol, IExpression expression) =>
             this.Bind(symbol, expression);
-
-        [DebuggerStepThrough]
-        public IExpression CreatePlaceholder(PlaceholderOrderHints orderHint) =>
-            this.rootScope.CreatePlaceholder(orderHint);
 
         [DebuggerStepThrough]
         public void Unify(IExpression fromHigherOrder, IExpression toHigherOrder) =>

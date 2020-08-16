@@ -24,7 +24,7 @@ namespace Favalet.Expressions.Specialized
             other is UnspecifiedTerm;
 
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
-            context.CreatePlaceholder(context.OrderHint);
+            context.CreatePlaceholderFrom(this);
 
         protected override IExpression Infer(IInferContext context) =>
             this;

@@ -41,9 +41,14 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? other) =>
             other is IBoundVariableTerm rhs && this.Equals(rhs);
 
-        protected override IExpression Infer(IReduceContext context)
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            new BoundVariableTerm(
+                this.Symbol,
+                context.MakeRewritableHigherOrder(this.HigherOrder));
+
+        protected override IExpression Infer(IInferContext context)
         {
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder))
             {
@@ -55,7 +60,7 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        protected override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             var higherOrder = context.Fixup(this.HigherOrder);
 
@@ -85,6 +90,6 @@ namespace Favalet.Expressions.Specialized
             new BoundVariableTerm(symbol, higherOrder);
         [DebuggerStepThrough]
         public static BoundVariableTerm Create(string symbol) =>
-            new BoundVariableTerm(symbol, UnspecifiedTerm.TypeInstance);
+            new BoundVariableTerm(symbol, UnspecifiedTerm.Instance);
     }
 }

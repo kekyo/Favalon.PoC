@@ -42,10 +42,15 @@ namespace Favalet.Expressions.Algebraic
 
         public override bool Equals(IExpression? other) =>
             other is ILogicalExpression rhs && this.Equals(rhs);
+        
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            new LogicalExpression(
+                context.MakeRewritable(this.Operand),
+                context.MakeRewritable(this.HigherOrder));
 
-        protected override IExpression Infer(IReduceContext context)
+        protected override IExpression Infer(IInferContext context)
         {
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
             var operand = context.Infer(this.Operand);
 
             context.Unify(operand.HigherOrder, higherOrder);
@@ -61,7 +66,7 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        protected override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             var higherOrder = context.Fixup(this.HigherOrder);
             var operand = context.Fixup(this.Operand);
@@ -80,7 +85,7 @@ namespace Favalet.Expressions.Algebraic
         protected override IExpression Reduce(IReduceContext context) =>
             calculator.Compute(context.Reduce(this.Operand));
 
-        protected override sealed IEnumerable GetXmlValues(IXmlRenderContext context) =>
+        protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             new[] { context.GetXml(this.Operand) };
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
@@ -95,6 +100,6 @@ namespace Favalet.Expressions.Algebraic
         [DebuggerStepThrough]
         public static LogicalExpression Create(
             IExpression operand) =>
-            new LogicalExpression(operand, UnspecifiedTerm.TypeInstance);
+            new LogicalExpression(operand, UnspecifiedTerm.Instance);
     }
 }

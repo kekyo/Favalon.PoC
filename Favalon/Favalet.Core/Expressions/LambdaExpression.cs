@@ -54,25 +54,25 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is ILambdaExpression rhs && this.Equals(rhs);
 
-        protected override IExpression Infer(IReduceContext context)
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            new LambdaExpression(
+                (IBoundVariableTerm)context.MakeRewritable(this.Parameter),
+                context.MakeRewritable(this.Body),
+                context.MakeRewritableHigherOrder(this.HigherOrder));
+
+        protected override IExpression Infer(IInferContext context)
         {
             var parameter = (IBoundVariableTerm)context.Infer(this.Parameter);
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
 
             var newScope = context.Bind(parameter, parameter);
 
             var body = newScope.Infer(this.Body);
 
-            var lambdaHigherOrder = FunctionExpression.Create(
-                parameter.HigherOrder,
-                body.HigherOrder,
-                context,
-                PlaceholderOrderHints.TypeOrAbove);
-
-            var inferredLambdaHigherOrder =
-                context.InferHigherOrder(lambdaHigherOrder);
-
-            context.Unify(inferredLambdaHigherOrder, higherOrder);
+            var lambdaHigherOrder = FunctionExpression.SafeCreate(
+                parameter.HigherOrder, body.HigherOrder);
+            
+            context.Unify(lambdaHigherOrder, higherOrder);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
                 object.ReferenceEquals(this.Body, body) &&
@@ -86,7 +86,7 @@ namespace Favalet.Expressions
             }
         }
 
-        protected override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             var parameter = (IBoundVariableTerm)context.Fixup(this.Parameter);
             var body = context.Fixup(this.Body);
@@ -140,7 +140,7 @@ namespace Favalet.Expressions
         [DebuggerStepThrough]
         public static LambdaExpression Create(
             IBoundVariableTerm parameter, IExpression body) =>
-            new LambdaExpression(parameter, body, UnspecifiedTerm.TypeInstance);
+            new LambdaExpression(parameter, body, UnspecifiedTerm.Instance);
     }
 
     [DebuggerStepThrough]

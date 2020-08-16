@@ -1,7 +1,6 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using Favalet.Internal;
-using System;
 using System.Collections;
 using System.Diagnostics;
 
@@ -19,30 +18,24 @@ namespace Favalet.Expressions
         Expression, IFunctionExpression
     {
         private readonly LazySlim<IExpression> higherOrder;
-
+        
         public readonly IExpression Parameter;
         public readonly IExpression Result;
 
         [DebuggerStepThrough]
         private FunctionExpression(
-            IExpression parameter, IExpression result, Func<IExpression> higherOrder)
+            IExpression parameter, IExpression result, LazySlim<IExpression> higherOrder)
         {
             this.Parameter = parameter;
             this.Result = result;
-            this.higherOrder = LazySlim.Create(higherOrder);
+            this.higherOrder = higherOrder;
         }
 
-        [DebuggerStepThrough]
-        private FunctionExpression(
-            IExpression parameter, IExpression result, IExpression higherOrder)
+        public override IExpression HigherOrder
         {
-            this.Parameter = parameter;
-            this.Result = result;
-            this.higherOrder = LazySlim.Create(higherOrder);
+            [DebuggerStepThrough]
+            get => this.higherOrder.Value;
         }
-
-        public override IExpression HigherOrder =>
-            this.higherOrder.Value;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IFunctionExpression.Parameter
@@ -68,13 +61,20 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is IFunctionExpression rhs && this.Equals(rhs);
 
-        protected override IExpression Infer(IReduceContext context)
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            Create(
+                context.MakeRewritable(this.Parameter),
+                context.MakeRewritable(this.Result),
+                context.MakeRewritableHigherOrder(this.HigherOrder));
+
+        protected override IExpression Infer(IInferContext context)
         {
             var parameter = context.Infer(this.Parameter);
             var result = context.Infer(this.Result);
 
-            if (parameter is FourthTerm ||
-                result is FourthTerm)
+            // Recursive inferring exit rule.
+            if (parameter is FourthTerm || result is FourthTerm ||
+                parameter.HigherOrder is DeadEndTerm || result.HigherOrder is DeadEndTerm)
             {
                 if (object.ReferenceEquals(this.Parameter, parameter) &&
                     object.ReferenceEquals(this.Result, result) &&
@@ -84,18 +84,18 @@ namespace Favalet.Expressions
                 }
                 else
                 {
-                    return new FunctionExpression(parameter, result, DeadEndTerm.Instance);
+                    return Create(
+                        parameter,
+                        result,
+                        LazySlim.Create((IExpression)DeadEndTerm.Instance));
                 }
             }
             else
             {
-                var higherOrder = context.InferHigherOrder(this.HigherOrder);
+                var higherOrder = context.Infer(this.HigherOrder);
 
-                var functionHigherOrder = Create(
-                    parameter.HigherOrder,
-                    result.HigherOrder,
-                    context,
-                    PlaceholderOrderHints.KindOrAbove);
+                var functionHigherOrder = SafeCreate(
+                    parameter.HigherOrder, result.HigherOrder);
 
                 context.Unify(functionHigherOrder, higherOrder);
 
@@ -107,26 +107,54 @@ namespace Favalet.Expressions
                 }
                 else
                 {
-                    return new FunctionExpression(parameter, result, higherOrder);
+                    return Create(
+                        parameter,
+                        result,
+                        LazySlim.Create(higherOrder));
                 }
             }
         }
 
-        protected override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             var parameter = context.Fixup(this.Parameter);
             var result = context.Fixup(this.Result);
-            var higherOrder = context.Fixup(this.HigherOrder);
-
-            if (object.ReferenceEquals(this.Parameter, parameter) &&
-                object.ReferenceEquals(this.Result, result) &&
-                object.ReferenceEquals(this.HigherOrder, higherOrder))
+            
+            // Recursive inferring exit rule.
+            if (parameter is FourthTerm || result is FourthTerm ||
+                parameter.HigherOrder is DeadEndTerm || result.HigherOrder is DeadEndTerm)
             {
-                return this;
+                if (object.ReferenceEquals(this.Parameter, parameter) &&
+                    object.ReferenceEquals(this.Result, result) &&
+                    this.HigherOrder is DeadEndTerm)
+                {
+                    return this;
+                }
+                else
+                {
+                    return Create(
+                        parameter,
+                        result,
+                        LazySlim.Create((IExpression)DeadEndTerm.Instance));
+                }
             }
             else
             {
-                return new FunctionExpression(parameter, result, higherOrder);
+                var higherOrder = context.Fixup(this.HigherOrder);
+
+                if (object.ReferenceEquals(this.Parameter, parameter) &&
+                    object.ReferenceEquals(this.Result, result) &&
+                    object.ReferenceEquals(this.HigherOrder, higherOrder))
+                {
+                    return this;
+                }
+                else
+                {
+                    return Create(
+                        parameter,
+                        result,
+                        LazySlim.Create(higherOrder));
+                }
             }
         }
 
@@ -142,7 +170,10 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new FunctionExpression(parameter, result, this.HigherOrder);
+                return Create(
+                    parameter,
+                    result,
+                    this.higherOrder);
             }
         }
 
@@ -154,73 +185,59 @@ namespace Favalet.Expressions
                 this,
                 $"{context.GetPrettyString(this.Parameter)} -> {context.GetPrettyString(this.Result)}");
 
+        private static readonly FunctionExpression Fourth =
+            new FunctionExpression(
+                FourthTerm.Instance,
+                FourthTerm.Instance,
+                LazySlim.Create((IExpression)DeadEndTerm.Instance));
+        private static readonly FunctionExpression UnspecifiedKind =
+            new FunctionExpression(
+                UnspecifiedTerm.Instance,
+                UnspecifiedTerm.Instance,
+                LazySlim.Create((IExpression)Fourth));
+        private static readonly FunctionExpression UnspecifiedType =
+            new FunctionExpression(
+                UnspecifiedTerm.Instance,
+                UnspecifiedTerm.Instance,
+                LazySlim.Create((IExpression)UnspecifiedKind));
+        
         [DebuggerStepThrough]
         private static FunctionExpression Create(
-            IExpression parameter,
-            IExpression result,
-            Func<IExpression> higherOrder) =>
+            IExpression parameter, IExpression result, LazySlim<IExpression> higherOrder) =>
             (parameter, result) switch
             {
+                (FourthTerm _, FourthTerm _) =>
+                    Fourth,
                 (FourthTerm _, _) => new FunctionExpression(
-                    parameter, result, DeadEndTerm.Instance),
+                    parameter,
+                    result,
+                    LazySlim.Create((IExpression)DeadEndTerm.Instance)),
                 (_, FourthTerm _) => new FunctionExpression(
-                    parameter, result, DeadEndTerm.Instance),
+                    parameter,
+                    result,
+                    LazySlim.Create((IExpression)DeadEndTerm.Instance)),
                 _ => new FunctionExpression(
-                    parameter, result, higherOrder)
+                    parameter,
+                    result,
+                    higherOrder)
             };
 
         [DebuggerStepThrough]
         public static FunctionExpression Create(
             IExpression parameter, IExpression result, IExpression higherOrder) =>
-            Create(parameter, result, () => higherOrder);
+            Create(parameter, result, LazySlim.Create(higherOrder));
         [DebuggerStepThrough]
         public static FunctionExpression Create(
             IExpression parameter, IExpression result) =>
-            Create(parameter, result, () => UnspecifiedTerm.TypeInstance);
-
-        private sealed class LazyHigherOrderPlaceholderFunctionGenerator
-        {
-            private readonly IReduceContext context;
-            private readonly PlaceholderOrderHints orderHint;
-
-            public LazyHigherOrderPlaceholderFunctionGenerator(
-                IReduceContext context,
-                PlaceholderOrderHints orderHint)
-            {
-                this.context = context;
-                this.orderHint = orderHint;
-            }
-
-            public IExpression Create()
-            {
-                if (this.orderHint >= PlaceholderOrderHints.Fourth)
-                {
-                    return FunctionExpression.Create(
-                        FourthTerm.Instance,
-                        FourthTerm.Instance,
-                        () => DeadEndTerm.Instance);
-                }
-                else
-                {
-                    var generator = new LazyHigherOrderPlaceholderFunctionGenerator(this.context, this.orderHint + 1);
-                    return FunctionExpression.Create(
-                        context.CreatePlaceholder(this.orderHint),
-                        context.CreatePlaceholder(this.orderHint),
-                        generator.Create);
-                }
-            }
-        }
-
+            Create(parameter, result, LazySlim.Create((IExpression)UnspecifiedType));
+        
         [DebuggerStepThrough]
-        internal static FunctionExpression Create(
-            IExpression parameter,
-            IExpression result,
-            IReduceContext context,
-            PlaceholderOrderHints orderHint)
-        {
-            var generator = new LazyHigherOrderPlaceholderFunctionGenerator(context, orderHint);
-            return Create(parameter, result, generator.Create);
-        }
+        internal static FunctionExpression SafeCreate(
+            IExpression parameter, IExpression result) =>
+            Create(
+                parameter,
+                result,
+                LazySlim.Create(() => (IExpression)SafeCreate(parameter.HigherOrder, result.HigherOrder)));
     }
 
     [DebuggerStepThrough]

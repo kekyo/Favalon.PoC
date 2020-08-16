@@ -22,10 +22,13 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? other) =>
             other is FourthTerm;
 
-        protected override IExpression Infer(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             this;
 
-        protected override IExpression Fixup(IReduceContext context) =>
+        protected override IExpression Infer(IInferContext context) =>
+            this;
+
+        protected override IExpression Fixup(IFixupContext context) =>
             this;
 
         protected override IExpression Reduce(IReduceContext context) =>

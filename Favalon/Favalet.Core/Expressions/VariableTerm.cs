@@ -36,9 +36,14 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
 
-        protected override IExpression Infer(IReduceContext context)
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            new VariableTerm(
+                this.Symbol,
+                context.MakeRewritableHigherOrder(this.HigherOrder));
+        
+        protected override IExpression Infer(IInferContext context)
         {
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
             var variables = context.LookupVariables(this.Symbol);
 
             if (variables.Length >= 1)
@@ -46,27 +51,28 @@ namespace Favalet.Expressions
                 // TODO: overloading
                 if (!object.ReferenceEquals(this, variables[0].Expression))
                 {
-                    var inferred = context.Infer(variables[0].Expression);
-                    var symbolHigherOrder = context.InferHigherOrder(variables[0].SymbolHigherOrder);
+                    var rewritable = context.MakeRewritable(variables[0].Expression);
+                    var inferred = context.Infer(rewritable);
+                    
+                    var symbolHigherOrderRewritable = context.MakeRewritable(variables[0].SymbolHigherOrder);
+                    var symbolHigherOrder = context.Infer(symbolHigherOrderRewritable);
 
                     context.Unify(symbolHigherOrder, higherOrder);
                     context.Unify(inferred.HigherOrder, higherOrder);
                 }
             }
 
-            var variable =
-                object.ReferenceEquals(this.HigherOrder, higherOrder) ?
-                    this :
-                    new VariableTerm(this.Symbol, higherOrder);
-            var placeholder =
-                context.CreatePlaceholder(PlaceholderOrderHints.VariableOrAbove);
-
-            context.Unify(placeholder, variable);
-
-            return placeholder;
+            if (object.ReferenceEquals(this.HigherOrder, higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new VariableTerm(this.Symbol, higherOrder);
+            }
         }
 
-        protected override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             if (context.Resolve(this.Symbol) is IExpression resolved)
             {
@@ -115,6 +121,6 @@ namespace Favalet.Expressions
             new VariableTerm(symbol, higherOrder);
         [DebuggerStepThrough]
         public static VariableTerm Create(string symbol) =>
-            new VariableTerm(symbol, UnspecifiedTerm.TypeInstance);
+            new VariableTerm(symbol, UnspecifiedTerm.Instance);
     }
 }

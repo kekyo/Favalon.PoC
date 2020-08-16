@@ -1,31 +1,70 @@
-﻿using Favalet.Expressions;
+﻿using System;
+using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Favalet.Contexts
 {
-    public interface IReduceContext :
-        IScopeContext, IPlaceholderProvider
+    public interface IMakeRewritableContext :
+        IPlaceholderProvider
     {
-        IReduceContext Bind(IBoundVariableTerm parameter, IExpression expression);
-
-        IExpression InferHigherOrder(IExpression higherOrder);
-        IExpression Fixup(IExpression expression);
+        PlaceholderOrderHints OrderHint { get; }
+        
+        IExpression MakeRewritable(IExpression expression);
+        IExpression MakeRewritableHigherOrder(IExpression higherOrder);
+    }
+    
+    public interface IInferContext :
+        IScopeContext, IMakeRewritableContext
+    {
+        IExpression Infer(IExpression expression);
+    
+        IInferContext Bind(IBoundVariableTerm parameter, IExpression expression);
 
         void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
+    }
+
+    public interface IFixupContext
+    {
+        IExpression Fixup(IExpression expression);
 
         IExpression? Resolve(string symbol);
     }
 
+    public interface IReduceContext :
+        IScopeContext
+    {
+        IExpression Reduce(IExpression expression);
+    
+        IReduceContext Bind(IBoundVariableTerm parameter, IExpression expression);
+    }
+
+    internal abstract class FixupContext :
+        IFixupContext
+    {
+        [DebuggerStepThrough]
+        protected FixupContext()
+        {
+        }
+
+        [DebuggerStepThrough]
+        public IExpression Fixup(IExpression expression) =>
+            expression is Expression expr ? expr.InternalFixup(this) : expression;
+
+        public abstract IExpression? Resolve(string symbol);
+    }
+
     internal sealed partial class ReduceContext :
-        IReduceContext
+        FixupContext, IInferContext, IReduceContext
     {
         private readonly Environments rootScope;
         private readonly IScopeContext parentScope;
         private readonly Unifier unifier;
-        private IBoundVariableTerm? symbol;
-        private IExpression? expression;
+        private IBoundVariableTerm? boundSymbol;
+        private IExpression? boundExpression;
+        private PlaceholderOrderHints orderHint = PlaceholderOrderHints.VariableOrAbove;
 
         [DebuggerStepThrough]
         public ReduceContext(
@@ -41,17 +80,57 @@ namespace Favalet.Contexts
         public ILogicalCalculator TypeCalculator =>
             this.rootScope.TypeCalculator;
 
+        PlaceholderOrderHints IMakeRewritableContext.OrderHint =>
+            (this.orderHint > PlaceholderOrderHints.Fourth) ?
+                PlaceholderOrderHints.Fourth :
+                this.orderHint;
+
+        public IExpression MakeRewritable(IExpression expression)
+        {
+            if (expression is Expression expr)
+            {
+                var rewritable = expr.InternalMakeRewritable(this);
+                switch (rewritable)
+                {
+                    case IPlaceholderTerm _:
+                        return rewritable;
+                    // case IIdentityTerm _:
+                    //     var placeholder = this.CreatePlaceholder(this.orderHint);
+                    //     this.unifier.Unify(this, placeholder, rewritable);
+                    //     return rewritable;
+                    default:
+                        return rewritable;
+                }
+            }
+            else
+            {
+                return expression;
+            }
+        }
+
+        public IExpression MakeRewritableHigherOrder(IExpression higherOrder)
+        {
+            this.orderHint++;
+            
+            var rewritable = this.MakeRewritable(higherOrder);
+
+            var placeholder = this.CreatePlaceholder(this.orderHint);
+            this.unifier.Unify(this, placeholder, rewritable);
+            
+            this.orderHint--;
+            Debug.Assert(this.orderHint >= PlaceholderOrderHints.VariableOrAbove);
+            
+            return rewritable;
+        }
+
         [DebuggerStepThrough]
         public IExpression Infer(IExpression expression) =>
             expression is Expression expr ? expr.InternalInfer(this) : expression;
         [DebuggerStepThrough]
-        public IExpression Fixup(IExpression expression) =>
-            expression is Expression expr ? expr.InternalFixup(this) : expression;
-        [DebuggerStepThrough]
         public IExpression Reduce(IExpression expression) =>
             expression is Expression expr ? expr.InternalReduce(this) : expression;
 
-        public IReduceContext Bind(
+        private ReduceContext Bind(
             IBoundVariableTerm symbol, IExpression expression)
         {
             var newContext = new ReduceContext(
@@ -59,42 +138,38 @@ namespace Favalet.Contexts
                 this,
                 this.unifier);
 
-            newContext.symbol = symbol;
-            newContext.expression = expression;
+            newContext.boundSymbol = symbol;
+            newContext.boundExpression = expression;
 
             return newContext;
         }
 
         [DebuggerStepThrough]
-        public IIdentityTerm CreatePlaceholder(PlaceholderOrderHints orderHint) =>
+        IInferContext IInferContext.Bind(
+            IBoundVariableTerm symbol, IExpression expression) =>
+            this.Bind(symbol, expression);
+        [DebuggerStepThrough]
+        IReduceContext IReduceContext.Bind(
+            IBoundVariableTerm symbol, IExpression expression) =>
+            this.Bind(symbol, expression);
+
+        [DebuggerStepThrough]
+        public IExpression CreatePlaceholder(PlaceholderOrderHints orderHint) =>
             this.rootScope.CreatePlaceholder(orderHint);
-
-        public IExpression InferHigherOrder(IExpression higherOrder)
-        {
-            var inferred = this.Infer(higherOrder);
-
-            // Always replacing placeholder instead higher order.
-            var placeholder =
-                this.CreatePlaceholder(PlaceholderOrderHints.VariableOrAbove);
-
-            this.Unify(placeholder, inferred);
-            
-            return placeholder;
-        }
 
         [DebuggerStepThrough]
         public void Unify(IExpression fromHigherOrder, IExpression toHigherOrder) =>
             this.unifier.Unify(this, fromHigherOrder, toHigherOrder);
 
         [DebuggerStepThrough]
-        public IExpression? Resolve(string symbol) =>
+        public override IExpression? Resolve(string symbol) =>
             this.unifier.Resolve(symbol);
 
         public VariableInformation[] LookupVariables(string symbol) =>
             // TODO: improving when identity's higher order acceptable
             // TODO: what acceptable (narrowing, widening)
-            this.symbol is IBoundVariableTerm p &&
-            expression is IExpression expr &&
+            this.boundSymbol is IBoundVariableTerm p &&
+            boundExpression is IExpression expr &&
             p.Symbol.Equals(symbol) ?
                 new[] { VariableInformation.Create(symbol, p.HigherOrder, expr) } :
                 parentScope.LookupVariables(symbol);

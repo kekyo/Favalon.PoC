@@ -30,20 +30,27 @@ namespace Favalet
             }
         }
 
-        private static bool Trap(bool result)
+        private enum Results
+        {
+            Negate,
+            Assert,
+            Ignore
+        }
+
+        private static Results Trap(bool result)
         {
             if (!result && Debugger.IsAttached)
             {
                 throw new AssertionException("Trap ExpressionAssert");
             }
-            return result;
+            return Results.Assert;
         }
 
-        private static bool Equals(IExpression lhs, IExpression rhs, Indexes indexes)
+        private static Results Equals(IExpression lhs, IExpression rhs, Indexes indexes)
         {
             if (object.ReferenceEquals(lhs, rhs))
             {
-                return true;
+                return Results.Assert;
             }
 
             if (lhs is IIdentityTerm lp1 &&
@@ -63,7 +70,7 @@ namespace Favalet
                     {
                         indexes.Set(lp1.Symbol, rp1.Symbol);
                     }
-                    return true;
+                    return Results.Assert;
                 }
             }
             else if (lhs is PseudoPlaceholderProvider.PseudoPlaceholderTerm lp2 &&
@@ -83,44 +90,84 @@ namespace Favalet
                     {
                         indexes.Set(rp2.Symbol, lp2.Symbol);
                     }
-                    return true;
+                    return Results.Assert;
                 }
             }
 
             switch (lhs, rhs)
             {
                 case (UnspecifiedTerm _, _):   // Only expected expression
-                    return true;
+                    return Results.Ignore;
                 case (FourthTerm _, FourthTerm _):
-                    return true;
+                    return Results.Ignore;
                 case (DeadEndTerm _, _):
                     return Trap(false);
                 case (_, DeadEndTerm _):
                     return Trap(false);
                 case (ILambdaExpression le, ILambdaExpression re):
-                    return
-                        Equals(le.Parameter, re.Parameter, indexes) &&
-                        Equals(le.Body, re.Body, indexes) &&
-                        Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                    var p1 = Equals(le.Parameter, re.Parameter, indexes);
+                    var b1 = Equals(le.Body, re.Body, indexes);
+                    if (p1 != Results.Negate && b1 != Results.Negate)
+                    {
+                        if (p1 == Results.Assert && b1 == Results.Assert)
+                        {
+                            return Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                        }
+                        return Results.Assert;
+                    }
+                    else
+                    {
+                        return Results.Negate;
+                    }
                 case (IFunctionExpression le, IFunctionExpression re):
-                    return
-                        Equals(le.Parameter, re.Parameter, indexes) &&
-                        Equals(le.Result, re.Result, indexes) &&
-                        Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                    var p2 = Equals(le.Parameter, re.Parameter, indexes);
+                    var b2 = Equals(le.Result, re.Result, indexes);
+                    if (p2 != Results.Negate && b2 != Results.Negate)
+                    {
+                        if (p2 == Results.Assert && b2 == Results.Assert)
+                        {
+                            return Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                        }
+                        return Results.Assert;
+                    }
+                    else
+                    {
+                        return Results.Negate;
+                    }
                 case (IApplyExpression le, IApplyExpression re):
-                    return
-                        Equals(le.Function, re.Function, indexes) &&
-                        Equals(le.Argument, re.Argument, indexes) &&
-                        Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                    var f1 = Equals(le.Function, re.Function, indexes);
+                    var a1 = Equals(le.Argument, re.Argument, indexes);
+                    if (f1 != Results.Negate && a1 != Results.Negate)
+                    {
+                        if (f1 == Results.Assert && a1 == Results.Assert)
+                        {
+                            return Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                        }
+                        return Results.Assert;
+                    }
+                    else
+                    {
+                        return Results.Negate;
+                    }
                 default:
-                    return
-                        Trap(lhs.Equals(rhs)) &&
-                        Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                    if (Trap(lhs.Equals(rhs)) is Results r &&
+                        r != Results.Negate)
+                    {
+                        if (r == Results.Assert)
+                        {
+                            return Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                        }
+                        return Results.Assert;
+                    }
+                    else
+                    {
+                        return Results.Negate;
+                    }
             }
         }
 
         [DebuggerStepThrough]
         public static bool Equals(IExpression expected, IExpression actual) =>
-            Equals(expected, actual, new Indexes());
+            Equals(expected, actual, new Indexes()) != Results.Negate;
     }
 }

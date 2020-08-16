@@ -8,7 +8,8 @@ using System.Xml.Linq;
 
 namespace Favalet.Expressions
 {
-    public interface ITypeTerm : ITerm
+    public interface ITypeTerm :
+        IIdentityTerm
     {
         Type RuntimeType { get; }
     }
@@ -29,6 +30,13 @@ namespace Favalet.Expressions
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        string IIdentityTerm.Symbol
+        {
+            [DebuggerStepThrough]
+            get => this.RuntimeType.Name;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         Type ITypeTerm.RuntimeType
         {
             [DebuggerStepThrough]
@@ -44,17 +52,13 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is ITypeTerm rhs && Equals(rhs);
 
-        protected override IExpression Infer(IReduceContext context)
-        {
-            var placeholder =
-                context.CreatePlaceholder(PlaceholderOrderHints.VariableOrAbove);
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            this;
 
-            context.Unify(placeholder, this);
+        protected override IExpression Infer(IInferContext context) =>
+            this;
 
-            return placeholder;
-        }
-
-        protected override IExpression Fixup(IReduceContext context) =>
+        protected override IExpression Fixup(IFixupContext context) =>
             this;
 
         protected override IExpression Reduce(IReduceContext context) =>

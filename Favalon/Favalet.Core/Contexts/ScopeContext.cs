@@ -26,8 +26,11 @@ namespace Favalet.Contexts
         }
 
         public override string ToString() =>
+#if DEBUG
             $"{this.Symbol}:{this.SymbolHigherOrder.GetPrettyString(PrettyStringTypes.Readable)} --> {this.Expression.GetPrettyString(PrettyStringTypes.Readable)}";
-
+#else
+            $"{this.SymbolHigherOrder.GetPrettyString(PrettyStringTypes.Readable)} --> {this.Expression.GetPrettyString(PrettyStringTypes.Readable)}";
+#endif
         public static VariableInformation Create(
             string symbol, IExpression symbolHigherOrder, IExpression expression) =>
             new VariableInformation(symbol, symbolHigherOrder, expression);
@@ -38,12 +41,10 @@ namespace Favalet.Contexts
         ILogicalCalculator TypeCalculator { get; }
 
         VariableInformation[] LookupVariables(string symbol);
-
-        IExpression Infer(IExpression expression);
-        IExpression Reduce(IExpression expression);
     }
 
-    public abstract class ScopeContext
+    public abstract class ScopeContext :
+        IScopeContext
     {
         private readonly ScopeContext? parent;
         private Dictionary<string, List<VariableInformation>>? variables;

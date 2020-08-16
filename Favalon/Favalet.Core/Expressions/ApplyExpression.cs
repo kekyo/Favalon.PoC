@@ -60,17 +60,20 @@ namespace Favalet.Expressions
         public override bool Equals(IExpression? other) =>
             other is IApplyExpression rhs && this.Equals(rhs);
 
-        protected override IExpression Infer(IReduceContext context)
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            new ApplyExpression(
+                context.MakeRewritable(this.Function),
+                context.MakeRewritable(this.Argument),
+                context.MakeRewritableHigherOrder(this.HigherOrder));
+
+        protected override IExpression Infer(IInferContext context)
         {
             var argument = context.Infer(this.Argument);
             var function = context.Infer(this.Function);
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
 
-            var functionHigherOrder = FunctionExpression.Create(
-                argument.HigherOrder,
-                higherOrder,
-                context,
-                PlaceholderOrderHints.TypeOrAbove);
+            var functionHigherOrder = FunctionExpression.SafeCreate(
+                argument.HigherOrder, higherOrder);
 
             context.Unify(function.HigherOrder, functionHigherOrder);
 
@@ -86,7 +89,7 @@ namespace Favalet.Expressions
             }
         }
 
-        protected override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             var argument = context.Fixup(this.Argument);
             var function = context.Fixup(this.Function);
@@ -148,7 +151,7 @@ namespace Favalet.Expressions
         [DebuggerStepThrough]
         public static ApplyExpression Create(
             IExpression function, IExpression argument) =>
-            new ApplyExpression(function, argument, UnspecifiedTerm.TypeInstance);
+            new ApplyExpression(function, argument, UnspecifiedTerm.Instance);
     }
 
     [DebuggerStepThrough]

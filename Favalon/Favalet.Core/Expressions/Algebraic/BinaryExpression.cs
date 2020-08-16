@@ -45,11 +45,17 @@ namespace Favalet.Expressions.Algebraic
         internal abstract IExpression OnCreate(
             IExpression left, IExpression right, IExpression higherOrder);
 
-        protected override sealed IExpression Infer(IReduceContext context)
+        protected sealed override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            this.OnCreate(
+                context.MakeRewritable(this.Left),
+                context.MakeRewritable(this.Right),
+                context.MakeRewritableHigherOrder(this.HigherOrder));
+
+        protected sealed override IExpression Infer(IInferContext context)
         {
             var left = context.Infer(this.Left);
             var right = context.Infer(this.Right);
-            var higherOrder = context.InferHigherOrder(this.HigherOrder);
+            var higherOrder = context.Infer(this.HigherOrder);
 
             context.Unify(left.HigherOrder, higherOrder);
             context.Unify(right.HigherOrder, higherOrder);
@@ -66,7 +72,7 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        protected override sealed IExpression Fixup(IReduceContext context)
+        protected sealed override IExpression Fixup(IFixupContext context)
         {
             var left = context.Fixup(this.Left);
             var right = context.Fixup(this.Right);
@@ -84,7 +90,7 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        protected override sealed IExpression Reduce(IReduceContext context)
+        protected sealed override IExpression Reduce(IReduceContext context)
         {
             var left = context.Reduce(this.Left);
             var right = context.Reduce(this.Right);
@@ -109,7 +115,7 @@ namespace Favalet.Expressions.Algebraic
         public override bool Equals(IExpression? other) =>
             other is TBinaryExpression rhs && this.Equals(rhs);
 
-        protected override sealed IEnumerable GetXmlValues(IXmlRenderContext context) =>
+        protected sealed override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             new[] { context.GetXml(this.Left), context.GetXml(this.Right) };
     }
 

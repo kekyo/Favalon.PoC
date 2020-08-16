@@ -17,21 +17,15 @@ namespace Favalet.Expressions
     public sealed class MethodTerm :
         Expression, IMethodTerm
     {
-        private readonly LazySlim<FunctionExpression> higherOrder;
+        private readonly LazySlim<IExpression> higherOrder;
 
         public readonly MethodBase RuntimeMethod;
 
         [DebuggerStepThrough]
-        private MethodTerm(MethodBase runtimeMethod)
+        private MethodTerm(MethodBase runtimeMethod, LazySlim<IExpression> higherOrder)
         {
             this.RuntimeMethod = runtimeMethod;
-            this.higherOrder = LazySlim.Create(() =>
-                FunctionExpression.Create(
-                    TypeTerm.From(this.RuntimeMethod.GetParameters()[0].ParameterType),
-                    TypeTerm.From(
-                        this.RuntimeMethod is MethodInfo method ?
-                            method.ReturnType :
-                            this.RuntimeMethod.DeclaringType)));
+            this.higherOrder = higherOrder;
         }
 
         public override IExpression HigherOrder
@@ -55,11 +49,16 @@ namespace Favalet.Expressions
 
         public override bool Equals(IExpression? other) =>
             other is IMethodTerm rhs && this.Equals(rhs);
+        
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            new MethodTerm(
+                this.RuntimeMethod,
+                LazySlim.Create(context.MakeRewritableHigherOrder(this.HigherOrder)));
 
-        protected override IExpression Infer(IReduceContext context) =>
+        protected override IExpression Infer(IInferContext context) =>
             this;
 
-        protected override IExpression Fixup(IReduceContext context) =>
+        protected override IExpression Fixup(IFixupContext context) =>
             this;
 
         protected override IExpression Reduce(IReduceContext context) =>
@@ -96,8 +95,17 @@ namespace Favalet.Expressions
                 this.RuntimeMethod.GetReadableName());
 
         [DebuggerStepThrough]
+        private static IExpression CreateHigherOrder(MethodBase method) =>
+            FunctionExpression.Create(
+                TypeTerm.From(method.GetParameters()[0].ParameterType),
+                TypeTerm.From(
+                    method is MethodInfo mi ?
+                        mi.ReturnType :
+                        method.DeclaringType));
+
+        [DebuggerStepThrough]
         public static MethodTerm From(MethodBase method) =>
-            new MethodTerm(method);
+            new MethodTerm(method, LazySlim.Create(() => CreateHigherOrder(method)));
     }
 
     public static class MethodTermExtension

@@ -2,6 +2,7 @@
 using Favalet.Internal;
 using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace Favalet.Expressions.Specialized
@@ -16,45 +17,41 @@ namespace Favalet.Expressions.Specialized
 
     public interface IPlaceholderProvider
     {
-        IIdentityTerm CreatePlaceholder(PlaceholderOrderHints orderHint);
+        IExpression CreatePlaceholder(PlaceholderOrderHints orderHint);
+    }
+
+    public interface IPlaceholderTerm :
+        IIdentityTerm
+    {
+        int Index { get; }
     }
 
     public sealed class PlaceholderTerm :
-        Expression, IIdentityTerm
+        Expression, IPlaceholderTerm
     {
-        private IPlaceholderProvider provider;
-        private readonly LazySlim<IExpression> higherOrder;
-
         public readonly int Index;
-        public readonly PlaceholderOrderHints OrderHint;
 
         [DebuggerStepThrough]
-        private PlaceholderTerm(
-            IPlaceholderProvider provider,
-            int index,
-            PlaceholderOrderHints orderHint)
+        private PlaceholderTerm(int index, IExpression higherOrder)
         {
-            Debug.Assert(orderHint <= PlaceholderOrderHints.Fourth);
-
-            this.provider = provider;
             this.Index = index;
-            this.OrderHint = orderHint;
-            this.higherOrder = LazySlim.Create(() =>
-                (this.OrderHint >= PlaceholderOrderHints.Fourth) ?
-                    (IExpression)DeadEndTerm.Instance :
-                    this.provider.CreatePlaceholder(this.OrderHint + 1));
+            this.HigherOrder = higherOrder;
         }
 
-        public override IExpression HigherOrder
-        {
-            [DebuggerStepThrough]
-            get => this.higherOrder.Value;
-        }
+        public override IExpression HigherOrder { get; }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string Symbol
         {
             [DebuggerStepThrough]
             get => $"'{this.Index}";
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        int IPlaceholderTerm.Index
+        {
+            [DebuggerStepThrough]
+            get => this.Index;
         }
 
         public override int GetHashCode() =>
@@ -66,10 +63,13 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
 
-        protected override IExpression Infer(IReduceContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            this;  // Placeholder already rewritable on the unifier infrastructure.
+
+        protected override IExpression Infer(IInferContext context) =>
             this;
 
-        protected override IExpression Fixup(IReduceContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             if (context.Resolve(this.Symbol) is IExpression resolved)
             {
@@ -85,8 +85,7 @@ namespace Favalet.Expressions.Specialized
                 }
                 else
                 {
-                    return new PlaceholderTerm(
-                        this.provider, this.Index, this.OrderHint);
+                    return new PlaceholderTerm(this.Index, higherOrder);
                 }
             }
         }
@@ -103,26 +102,16 @@ namespace Favalet.Expressions.Specialized
                 this.Symbol);
 
         [DebuggerStepThrough]
-        internal static PlaceholderTerm Create(
-            IPlaceholderProvider provider,
-            int index,
-            PlaceholderOrderHints orderHint) =>
-            new PlaceholderTerm(
-                provider,
-                index,
-                orderHint);
+        internal static PlaceholderTerm Create(int index, IExpression higherOrder) =>
+            new PlaceholderTerm(index, higherOrder);
     }
 
     [DebuggerStepThrough]
     public static class PlaceholderTermExtension
     {
         public static void Deconstruct(
-            this PlaceholderTerm placeholder,
-            out string symbol,
-            out PlaceholderOrderHints orderHint)
-        {
-            symbol = placeholder.Symbol;
-            orderHint = placeholder.OrderHint;
-        }
+            this IPlaceholderTerm placeholder,
+            out int index) =>
+            index = placeholder.Index;
     }
 }

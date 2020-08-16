@@ -9,10 +9,9 @@ namespace Favalet.Expressions.Specialized
     public sealed class UnspecifiedTerm :
         Expression, ITerm
     {
-        private readonly PlaceholderOrderHints orderHint;
-
-        private UnspecifiedTerm(PlaceholderOrderHints orderHint) =>
-            this.orderHint = orderHint;
+        private UnspecifiedTerm()
+        {
+        }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public override IExpression HigherOrder =>
@@ -24,12 +23,13 @@ namespace Favalet.Expressions.Specialized
         public override bool Equals(IExpression? other) =>
             other is UnspecifiedTerm;
 
-        protected override IExpression Infer(IReduceContext context) =>
-            context is IPlaceholderProvider provider ?
-                (IExpression)provider.CreatePlaceholder(this.orderHint) :
-                this;
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+            context.CreatePlaceholder(context.OrderHint);
 
-        protected override IExpression Fixup(IReduceContext context) =>
+        protected override IExpression Infer(IInferContext context) =>
+            this;
+
+        protected override IExpression Fixup(IFixupContext context) =>
             this;
 
         protected override IExpression Reduce(IReduceContext context) =>
@@ -39,16 +39,9 @@ namespace Favalet.Expressions.Specialized
             Enumerable.Empty<object>();
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
-            context.Type switch
-            {
-                PrettyStringTypes.Readable => "_",
-                _ => this.orderHint.ToString()
-            };
+            "_";
 
         public static readonly UnspecifiedTerm Instance =
-            new UnspecifiedTerm(PlaceholderOrderHints.VariableOrAbove);
-
-        internal static readonly UnspecifiedTerm TypeInstance =
-            new UnspecifiedTerm(PlaceholderOrderHints.TypeOrAbove);
+            new UnspecifiedTerm();
     }
 }

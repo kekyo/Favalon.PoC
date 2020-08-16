@@ -39,10 +39,13 @@ namespace Favalet
             public string Symbol =>
                 $"'{this.Index}";
 
-            protected override IExpression Fixup(IReduceContext context) =>
+            protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
                 throw new NotImplementedException();
 
-            protected override IExpression Infer(IReduceContext context) =>
+            protected override IExpression Fixup(IFixupContext context) =>
+                throw new NotImplementedException();
+
+            protected override IExpression Infer(IInferContext context) =>
                 throw new NotImplementedException();
 
             protected override IExpression Reduce(IReduceContext context) =>

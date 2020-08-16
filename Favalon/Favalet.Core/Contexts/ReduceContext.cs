@@ -1,4 +1,5 @@
-﻿using Favalet.Expressions;
+﻿using System;
+using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Diagnostics;
@@ -9,6 +10,8 @@ namespace Favalet.Contexts
     public interface IMakeRewritableContext :
         IPlaceholderProvider
     {
+        PlaceholderOrderHints OrderHint { get; }
+        
         IExpression MakeRewritable(IExpression expression);
         IExpression MakeRewritableHigherOrder(IExpression higherOrder);
     }
@@ -61,6 +64,7 @@ namespace Favalet.Contexts
         private readonly Unifier unifier;
         private IBoundVariableTerm? boundSymbol;
         private IExpression? boundExpression;
+        private PlaceholderOrderHints orderHint = PlaceholderOrderHints.VariableOrAbove;
 
         [DebuggerStepThrough]
         public ReduceContext(
@@ -76,34 +80,47 @@ namespace Favalet.Contexts
         public ILogicalCalculator TypeCalculator =>
             this.rootScope.TypeCalculator;
 
-        [DebuggerStepThrough]
-        public IExpression MakeRewritable(IExpression expression) =>
-            expression is Expression expr ?
-                expr.InternalMakeRewritable(this) :
-                expression;
+        PlaceholderOrderHints IMakeRewritableContext.OrderHint =>
+            (this.orderHint > PlaceholderOrderHints.Fourth) ?
+                PlaceholderOrderHints.Fourth :
+                this.orderHint;
+
+        public IExpression MakeRewritable(IExpression expression)
+        {
+            if (expression is Expression expr)
+            {
+                var rewritable = expr.InternalMakeRewritable(this);
+                switch (rewritable)
+                {
+                    case IPlaceholderTerm _:
+                        return rewritable;
+                    // case IIdentityTerm _:
+                    //     var placeholder = this.CreatePlaceholder(this.orderHint);
+                    //     this.unifier.Unify(this, placeholder, rewritable);
+                    //     return rewritable;
+                    default:
+                        return rewritable;
+                }
+            }
+            else
+            {
+                return expression;
+            }
+        }
 
         public IExpression MakeRewritableHigherOrder(IExpression higherOrder)
         {
-            switch (higherOrder)
-            {
-                case DeadEndTerm _:
-                    return higherOrder;
-                case FourthTerm _:
-                    return higherOrder;
-                case IPlaceholderTerm _:
-                    return higherOrder;
-                case IFunctionExpression _:
-                    var ho = this.MakeRewritable(higherOrder);
-                    return ho;
-                default:
-                    var placeholder = this.CreatePlaceholder(PlaceholderOrderHints.TypeOrAbove);
-                    if (!(higherOrder is UnspecifiedTerm))
-                    {
-                        var expr = this.MakeRewritable(higherOrder);
-                        this.unifier.Unify(this, placeholder, expr);
-                    }
-                    return placeholder;
-            }
+            this.orderHint++;
+            
+            var rewritable = this.MakeRewritable(higherOrder);
+
+            var placeholder = this.CreatePlaceholder(this.orderHint);
+            this.unifier.Unify(this, placeholder, rewritable);
+            
+            this.orderHint--;
+            Debug.Assert(this.orderHint >= PlaceholderOrderHints.VariableOrAbove);
+            
+            return rewritable;
         }
 
         [DebuggerStepThrough]

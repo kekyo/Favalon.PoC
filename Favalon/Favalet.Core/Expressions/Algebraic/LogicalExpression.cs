@@ -46,7 +46,7 @@ namespace Favalet.Expressions.Algebraic
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new LogicalExpression(
                 context.MakeRewritable(this.Operand),
-                context.MakeRewritableHigherOrder(this.HigherOrder));
+                context.MakeRewritable(this.HigherOrder));
 
         protected override IExpression Infer(IInferContext context)
         {
@@ -100,6 +100,6 @@ namespace Favalet.Expressions.Algebraic
         [DebuggerStepThrough]
         public static LogicalExpression Create(
             IExpression operand) =>
-            new LogicalExpression(operand, UnspecifiedTerm.TypeInstance);
+            new LogicalExpression(operand, UnspecifiedTerm.Instance);
     }
 }

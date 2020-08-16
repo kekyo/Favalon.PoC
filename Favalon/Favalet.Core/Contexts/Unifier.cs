@@ -105,6 +105,8 @@ namespace Favalet.Contexts
                     return;
                 }
 #if DEBUG
+                Debug.WriteLine(
+                    "Detected circular variable reference: " + marker);
                 throw new InvalidOperationException(
                     "Detected circular variable reference: " + marker);
 #else
@@ -130,53 +132,59 @@ namespace Favalet.Contexts
             this.Occur(PlaceholderMarker.Create(), symbol);
         }
 
-        private IExpression InternalUnifyBothPlaceholders(
+        private IExpression? InternalUnifyBothPlaceholders(
             IInferContext context, IIdentityTerm from, IIdentityTerm to)
         {
             // Greater prioritize by exist unification rather than not exist.
             // Because will check ignoring circular reference at recursive path [1].
             switch
                 (this.unifications.TryGetValue(from.Symbol, out var rfrom),
-                    this.unifications.TryGetValue(to.Symbol, out var rto))
+                 this.unifications.TryGetValue(to.Symbol, out var rto))
             {
                 case (true, false):
-                    var result1 = this.InternalUnify(context, rfrom, to);
-                    this.Update(from.Symbol, result1);
-                    return from;
+                    if (this.InternalUnify(context, rfrom, to) is IExpression result1)
+                    {
+                        this.Update(from.Symbol, result1);
+                    }
+                    return null;
                 case (false, true):
-                    var result2 = this.InternalUnify(context, from, rto);
-                    this.Update(to.Symbol, result2);
-                    return to;
+                    if (this.InternalUnify(context, from, rto) is IExpression result2)
+                    {
+                        this.Update(to.Symbol, result2);
+                    }
+                    return null;
             }
 
             switch (from, to)
             {
-                case (PlaceholderTerm _, _):
+                case (IPlaceholderTerm _, _):
                     this.Update(from.Symbol, to);
-                    return from;
+                    return null;
                 default:
                     this.Update(to.Symbol, from);
-                    return to;
+                    return null;
             }
         }
 
-        private IExpression InternalUnifyPlaceholder(
+        private IExpression? InternalUnifyPlaceholder(
             IInferContext context, IIdentityTerm from, IExpression to)
         {
             if (this.unifications.TryGetValue(from.Symbol, out var target))
             {
-                var result = this.InternalUnify(context, to, target);
-                this.Update(from.Symbol, result);
+                if (this.InternalUnify(context, to, target) is IExpression result)
+                {
+                    this.Update(from.Symbol, result);
+                }
             }
             else
             {
                 this.Update(from.Symbol, to);
             }
 
-            return from;
+            return null;
         }
 
-        private IExpression InternalUnifyCore(
+        private IExpression? InternalUnifyCore(
             IInferContext context, IExpression from, IExpression to)
         {
             Debug.Assert(!(from is UnspecifiedTerm) && !(from is DeadEndTerm));
@@ -191,7 +199,7 @@ namespace Favalet.Contexts
                     if (fromSymbol == toSymbol)
                     {
                         // Ignore equal placeholders.
-                        return from;
+                        return null;
                     }
                     else
                     {
@@ -218,9 +226,17 @@ namespace Favalet.Contexts
                 var parameter = this.InternalUnify(context, fp, tp);
                 var result = this.InternalUnify(context, fr, tr);
 
-                var function = FunctionExpression.SafeCreate(
-                    parameter, result);
-                return function;
+                if (parameter is IExpression || result is IExpression)
+                {
+                    var function = FunctionExpression.SafeCreate(
+                        parameter is IExpression ? parameter : fp,
+                        result is IExpression ? result : fr);
+                    return function;
+                }
+                else
+                {
+                    return null;
+                }
             }
 
             var combined = OrExpression.Create(from, to);
@@ -232,7 +248,7 @@ namespace Favalet.Contexts
             return inferred;
         }
 
-        private IExpression InternalUnify(
+        private IExpression? InternalUnify(
             IInferContext context, IExpression from, IExpression to)
         {
             if (object.ReferenceEquals(from, to))

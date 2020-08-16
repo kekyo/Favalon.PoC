@@ -192,13 +192,13 @@ namespace Favalet.Expressions
                 LazySlim.Create((IExpression)DeadEndTerm.Instance));
         private static readonly FunctionExpression UnspecifiedKind =
             new FunctionExpression(
-                UnspecifiedTerm.KindInstance,
-                UnspecifiedTerm.KindInstance,
+                UnspecifiedTerm.Instance,
+                UnspecifiedTerm.Instance,
                 LazySlim.Create((IExpression)Fourth));
         private static readonly FunctionExpression UnspecifiedType =
             new FunctionExpression(
-                UnspecifiedTerm.TypeInstance,
-                UnspecifiedTerm.TypeInstance,
+                UnspecifiedTerm.Instance,
+                UnspecifiedTerm.Instance,
                 LazySlim.Create((IExpression)UnspecifiedKind));
         
         [DebuggerStepThrough]

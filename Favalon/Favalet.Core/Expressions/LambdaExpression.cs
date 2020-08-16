@@ -140,7 +140,7 @@ namespace Favalet.Expressions
         [DebuggerStepThrough]
         public static LambdaExpression Create(
             IBoundVariableTerm parameter, IExpression body) =>
-            new LambdaExpression(parameter, body, UnspecifiedTerm.TypeInstance);
+            new LambdaExpression(parameter, body, UnspecifiedTerm.Instance);
     }
 
     [DebuggerStepThrough]

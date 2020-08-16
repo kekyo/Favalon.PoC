@@ -54,7 +54,7 @@ namespace Favalet.Expressions
                     var rewritable = context.MakeRewritable(variables[0].Expression);
                     var inferred = context.Infer(rewritable);
                     
-                    var symbolHigherOrderRewritable = context.MakeRewritableHigherOrder(variables[0].SymbolHigherOrder);
+                    var symbolHigherOrderRewritable = context.MakeRewritable(variables[0].SymbolHigherOrder);
                     var symbolHigherOrder = context.Infer(symbolHigherOrderRewritable);
 
                     context.Unify(symbolHigherOrder, higherOrder);
@@ -121,6 +121,6 @@ namespace Favalet.Expressions
             new VariableTerm(symbol, higherOrder);
         [DebuggerStepThrough]
         public static VariableTerm Create(string symbol) =>
-            new VariableTerm(symbol, UnspecifiedTerm.TypeInstance);
+            new VariableTerm(symbol, UnspecifiedTerm.Instance);
     }
 }

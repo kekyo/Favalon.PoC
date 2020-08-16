@@ -35,6 +35,6 @@ namespace Favalet.Expressions.Algebraic
         [DebuggerStepThrough]
         public static AndExpression Create(
             IExpression left, IExpression right) =>
-            new AndExpression(left, right, UnspecifiedTerm.TypeInstance);
+            new AndExpression(left, right, UnspecifiedTerm.Instance);
     }
 }

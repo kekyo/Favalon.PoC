@@ -50,7 +50,7 @@ namespace Favalet.Expressions
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new ConstantTerm(
                 this.Value,
-                LazySlim.Create(context.MakeRewritableHigherOrder(this.HigherOrder)));
+                LazySlim.Create(context.MakeRewritable(this.HigherOrder)));
 
         protected override IExpression Infer(IInferContext context) =>
             this;

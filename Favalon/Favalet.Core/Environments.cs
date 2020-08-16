@@ -32,13 +32,18 @@ namespace Favalet
         internal IExpression CreatePlaceholder(
             PlaceholderOrderHints orderHint)
         {
+            var oh = Math.Min(
+                (int)PlaceholderOrderHints.Fourth,
+                Math.Max(0, (int) orderHint));
             var count = Math.Min(
-                (int)PlaceholderOrderHints.Fourth - (int)orderHint,
+                (int)PlaceholderOrderHints.Fourth - oh,
                 (int)PlaceholderOrderHints.KindOrAbove);
+            
             var indexList =
                 Enumerable.Range(0, count).
                 Select(_ => Interlocked.Increment(ref this.placeholderIndex)).
                 ToArray();
+            
             return indexList.
                 Reverse().
                 Aggregate(

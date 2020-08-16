@@ -40,10 +40,11 @@ namespace Favalet
         private static Results Trap(bool result)
         {
             if (!result && Debugger.IsAttached)
-            {
-                throw new AssertionException("Trap ExpressionAssert");
+            { 
+                // Negate
+                Debugger.Break();
             }
-            return Results.Assert;
+            return result ? Results.Assert : Results.Negate;
         }
 
         private static Results Equals(IExpression lhs, IExpression rhs, Indexes indexes)

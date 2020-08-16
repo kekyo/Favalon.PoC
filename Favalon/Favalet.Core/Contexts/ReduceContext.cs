@@ -85,28 +85,10 @@ namespace Favalet.Contexts
                 PlaceholderOrderHints.Fourth :
                 this.orderHint;
 
-        public IExpression MakeRewritable(IExpression expression)
-        {
-            if (expression is Expression expr)
-            {
-                var rewritable = expr.InternalMakeRewritable(this);
-                switch (rewritable)
-                {
-                    case IPlaceholderTerm _:
-                        return rewritable;
-                    // case IIdentityTerm _:
-                    //     var placeholder = this.CreatePlaceholder(this.orderHint);
-                    //     this.unifier.Unify(this, placeholder, rewritable);
-                    //     return rewritable;
-                    default:
-                        return rewritable;
-                }
-            }
-            else
-            {
-                return expression;
-            }
-        }
+        public IExpression MakeRewritable(IExpression expression) =>
+            expression is Expression expr ?
+                expr.InternalMakeRewritable(this) :
+                expression;
 
         public IExpression MakeRewritableHigherOrder(IExpression higherOrder)
         {
@@ -120,7 +102,7 @@ namespace Favalet.Contexts
             this.orderHint--;
             Debug.Assert(this.orderHint >= PlaceholderOrderHints.VariableOrAbove);
             
-            return rewritable;
+            return placeholder;
         }
 
         [DebuggerStepThrough]

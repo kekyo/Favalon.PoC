@@ -9,7 +9,7 @@ using System.Xml.Linq;
 namespace Favalet.Expressions
 {
     public interface ITypeTerm :
-        IIdentityTerm
+        ITerm
     {
         Type RuntimeType { get; }
     }
@@ -27,13 +27,6 @@ namespace Favalet.Expressions
         {
             [DebuggerStepThrough]
             get => Generator.Kind();
-        }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IIdentityTerm.Symbol
-        {
-            [DebuggerStepThrough]
-            get => this.RuntimeType.Name;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]

@@ -135,8 +135,6 @@ namespace Favalet.Contexts
         private IExpression? InternalUnifyBothPlaceholders(
             IInferContext context, IIdentityTerm from, IIdentityTerm to)
         {
-            // Greater prioritize by exist unification rather than not exist.
-            // Because will check ignoring circular reference at recursive path [1].
             switch
                 (this.unifications.TryGetValue(from.Symbol, out var rfrom),
                  this.unifications.TryGetValue(to.Symbol, out var rto))

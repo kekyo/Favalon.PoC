@@ -42,13 +42,13 @@ namespace Favalet.Inferring
 
             var actual = environment.Infer(expression);
 
-            // (a:object -> a:object):(object -> object)
+            // (a:int -> a:object):(int -> object)
             var expected =
                 Lambda(
-                    BoundVariable("a", Type<object>()),
+                    BoundVariable("a", Type<int>()),
                     Variable("a", Type<object>()),
                     Function(
-                        Type<object>(),
+                        Type<int>(),
                         Type<object>()));
 
             AssertLogicalEqual(expression, expected, actual);

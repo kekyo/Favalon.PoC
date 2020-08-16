@@ -44,7 +44,10 @@ namespace Favalet.Expressions.Specialized
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new BoundVariableTerm(
                 this.Symbol,
-                context.MakeRewritableHigherOrder(this.HigherOrder));
+                // Bound type receiver force fixed a gave type.
+                this.HigherOrder is UnspecifiedTerm ?
+                    context.MakeRewritableHigherOrder(this.HigherOrder) :
+                    this.HigherOrder);
 
         protected override IExpression Infer(IInferContext context)
         {

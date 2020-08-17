@@ -12,7 +12,8 @@ namespace Favalet.Expressions.Specialized
         VariableOrAbove = 0,
         TypeOrAbove,
         KindOrAbove,
-        Fourth
+        Fourth,
+        DeadEnd
     }
 
     public interface IPlaceholderProvider

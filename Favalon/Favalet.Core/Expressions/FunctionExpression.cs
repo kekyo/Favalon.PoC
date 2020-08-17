@@ -62,10 +62,10 @@ namespace Favalet.Expressions
             other is IFunctionExpression rhs && this.Equals(rhs);
 
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
-            Create(
+            InternalCreate(
                 context.MakeRewritable(this.Parameter),
                 context.MakeRewritable(this.Result),
-                context.MakeRewritableHigherOrder(this.HigherOrder));
+                LazySlim.Create(context.MakeRewritableHigherOrder(this.HigherOrder)));
 
         protected override IExpression Infer(IInferContext context)
         {
@@ -84,7 +84,7 @@ namespace Favalet.Expressions
                 }
                 else
                 {
-                    return Create(
+                    return InternalCreate(
                         parameter,
                         result,
                         LazySlim.Create((IExpression)DeadEndTerm.Instance));
@@ -94,7 +94,7 @@ namespace Favalet.Expressions
             {
                 var higherOrder = context.Infer(this.HigherOrder);
 
-                var functionHigherOrder = SafeCreate(
+                var functionHigherOrder = Create(
                     parameter.HigherOrder, result.HigherOrder);
 
                 context.Unify(functionHigherOrder, higherOrder);
@@ -107,7 +107,7 @@ namespace Favalet.Expressions
                 }
                 else
                 {
-                    return Create(
+                    return InternalCreate(
                         parameter,
                         result,
                         LazySlim.Create(higherOrder));
@@ -132,7 +132,7 @@ namespace Favalet.Expressions
                 }
                 else
                 {
-                    return Create(
+                    return InternalCreate(
                         parameter,
                         result,
                         LazySlim.Create((IExpression)DeadEndTerm.Instance));
@@ -150,7 +150,7 @@ namespace Favalet.Expressions
                 }
                 else
                 {
-                    return Create(
+                    return InternalCreate(
                         parameter,
                         result,
                         LazySlim.Create(higherOrder));
@@ -170,7 +170,7 @@ namespace Favalet.Expressions
             }
             else
             {
-                return Create(
+                return InternalCreate(
                     parameter,
                     result,
                     this.higherOrder);
@@ -195,17 +195,21 @@ namespace Favalet.Expressions
                 UnspecifiedTerm.Instance,
                 UnspecifiedTerm.Instance,
                 LazySlim.Create((IExpression)Fourth));
-        private static readonly FunctionExpression UnspecifiedType =
+        internal static readonly FunctionExpression UnspecifiedType =
             new FunctionExpression(
                 UnspecifiedTerm.Instance,
                 UnspecifiedTerm.Instance,
                 LazySlim.Create((IExpression)UnspecifiedKind));
-        
+
         [DebuggerStepThrough]
-        private static FunctionExpression Create(
+        private static IExpression InternalCreate(
             IExpression parameter, IExpression result, LazySlim<IExpression> higherOrder) =>
             (parameter, result) switch
             {
+                (DeadEndTerm _, _) =>
+                    DeadEndTerm.Instance,
+                (_, DeadEndTerm _) =>
+                    DeadEndTerm.Instance,
                 (FourthTerm _, FourthTerm _) =>
                     Fourth,
                 (FourthTerm _, _) => new FunctionExpression(
@@ -225,19 +229,19 @@ namespace Favalet.Expressions
         [DebuggerStepThrough]
         public static FunctionExpression Create(
             IExpression parameter, IExpression result, IExpression higherOrder) =>
-            Create(parameter, result, LazySlim.Create(higherOrder));
+            (FunctionExpression)InternalCreate(parameter, result, LazySlim.Create(higherOrder));
+
+        [DebuggerStepThrough]
+        private static IExpression CreateRecursivity(
+            IExpression parameter, IExpression result) =>
+            InternalCreate(
+                parameter,
+                result,
+                LazySlim.Create(() => CreateRecursivity(parameter.HigherOrder, result.HigherOrder)));
         [DebuggerStepThrough]
         public static FunctionExpression Create(
             IExpression parameter, IExpression result) =>
-            Create(parameter, result, LazySlim.Create((IExpression)UnspecifiedType));
-        
-        [DebuggerStepThrough]
-        internal static FunctionExpression SafeCreate(
-            IExpression parameter, IExpression result) =>
-            Create(
-                parameter,
-                result,
-                LazySlim.Create(() => (IExpression)SafeCreate(parameter.HigherOrder, result.HigherOrder)));
+            (FunctionExpression)CreateRecursivity(parameter, result);
     }
 
     [DebuggerStepThrough]

@@ -81,9 +81,17 @@ namespace Favalet.Contexts
 
         public IExpression CreatePlaceholderFrom(IExpression original)
         {
-            if (original is IPlaceholderTerm)
+            // Cannot replace these terms.
+            if (original is IPlaceholderTerm ||
+                original is DeadEndTerm ||
+                original is FourthTerm)
             {
                 return original;
+            }
+
+            if (this.orderHint >= PlaceholderOrderHints.DeadEnd)
+            {
+                return DeadEndTerm.Instance;
             }
             
             var placeholder = this.rootScope.CreatePlaceholder(
@@ -91,6 +99,7 @@ namespace Favalet.Contexts
                     PlaceholderOrderHints.Fourth :
                     this.orderHint);
             
+            // The placeholder will be independent by a unspecified term.
             if (!(original is UnspecifiedTerm))
             {
                 this.unifier.Unify(this, placeholder, original);

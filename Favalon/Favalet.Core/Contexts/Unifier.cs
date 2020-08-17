@@ -226,7 +226,7 @@ namespace Favalet.Contexts
 
                 if (parameter is IExpression || result is IExpression)
                 {
-                    var function = FunctionExpression.SafeCreate(
+                    var function = FunctionExpression.Create(
                         parameter is IExpression ? parameter : fp,
                         result is IExpression ? result : fr);
                     return function;

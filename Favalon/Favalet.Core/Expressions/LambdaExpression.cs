@@ -69,7 +69,7 @@ namespace Favalet.Expressions
 
             var body = newScope.Infer(this.Body);
 
-            var lambdaHigherOrder = FunctionExpression.SafeCreate(
+            var lambdaHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder, body.HigherOrder);
             
             context.Unify(lambdaHigherOrder, higherOrder);
@@ -140,7 +140,7 @@ namespace Favalet.Expressions
         [DebuggerStepThrough]
         public static LambdaExpression Create(
             IBoundVariableTerm parameter, IExpression body) =>
-            new LambdaExpression(parameter, body, UnspecifiedTerm.Instance);
+            new LambdaExpression(parameter, body, FunctionExpression.UnspecifiedType);
     }
 
     [DebuggerStepThrough]

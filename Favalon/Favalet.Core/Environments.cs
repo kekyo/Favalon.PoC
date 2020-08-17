@@ -33,10 +33,10 @@ namespace Favalet
             PlaceholderOrderHints orderHint)
         {
             var oh = Math.Min(
-                (int)PlaceholderOrderHints.Fourth,
-                Math.Max(0, (int) orderHint));
+                (int)PlaceholderOrderHints.DeadEnd,
+                Math.Max(0, (int)orderHint));
             var count = Math.Min(
-                (int)PlaceholderOrderHints.Fourth - oh,
+                (int)PlaceholderOrderHints.DeadEnd - oh,
                 (int)PlaceholderOrderHints.KindOrAbove);
             
             var indexList =
@@ -47,7 +47,7 @@ namespace Favalet
             return indexList.
                 Reverse().
                 Aggregate(
-                    (IExpression)FourthTerm.Instance,
+                    (IExpression)DeadEndTerm.Instance,
                     (agg, index) => PlaceholderTerm.Create(index, agg));
         }
 

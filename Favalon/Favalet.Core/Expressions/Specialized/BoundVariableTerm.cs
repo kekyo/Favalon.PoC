@@ -44,7 +44,8 @@ namespace Favalet.Expressions.Specialized
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new BoundVariableTerm(
                 this.Symbol,
-                context.MakeRewritableHigherOrder(this.HigherOrder));
+                // Bound variable isn't replace placeholder term.
+                context.MakeRewritableHigherOrder(this.HigherOrder, false));
 
         protected override IExpression Infer(IInferContext context)
         {
@@ -62,7 +63,7 @@ namespace Favalet.Expressions.Specialized
 
         protected override IExpression Fixup(IFixupContext context)
         {
-            var higherOrder = context.Fixup(this.HigherOrder);
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder))
             {

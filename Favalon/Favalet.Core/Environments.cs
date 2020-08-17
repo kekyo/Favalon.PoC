@@ -57,7 +57,7 @@ namespace Favalet
 
         public IExpression Infer(IExpression expression)
         {
-            var unifier = new Unifier();
+            var unifier = Unifier.Create(this.TypeCalculator);
             var context = new ReduceContext(this, this, unifier);
 
             Debug.WriteLine(
@@ -85,7 +85,7 @@ namespace Favalet
 
         public IExpression Reduce(IExpression expression)
         {
-            var unifier = new Unifier();
+            var unifier = Unifier.Create(this.TypeCalculator);
             var context = new ReduceContext(this, this, unifier);
 
             Debug.WriteLine(

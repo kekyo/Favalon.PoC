@@ -93,7 +93,7 @@ namespace Favalet.Expressions
         {
             var argument = context.Fixup(this.Argument);
             var function = context.Fixup(this.Function);
-            var higherOrder = context.Fixup(this.HigherOrder);
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
             if (object.ReferenceEquals(this.Argument, argument) &&
                 object.ReferenceEquals(this.Function, function) &&

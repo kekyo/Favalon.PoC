@@ -6,8 +6,13 @@ using System.Xml.Linq;
 
 namespace Favalet.Expressions
 {
+    public interface IVariableTerm :
+        IIdentityTerm
+    {
+    }
+    
     public sealed class VariableTerm :
-        Expression, IIdentityTerm
+        Expression, IVariableTerm
     {
         public readonly string Symbol;
 
@@ -74,22 +79,15 @@ namespace Favalet.Expressions
 
         protected override IExpression Fixup(IFixupContext context)
         {
-            if (context.Resolve(this.Symbol) is IExpression resolved)
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+
+            if (object.ReferenceEquals(this.HigherOrder, higherOrder))
             {
-                return context.Fixup(resolved);
+                return this;
             }
             else
             {
-                var higherOrder = context.Fixup(this.HigherOrder);
-
-                if (object.ReferenceEquals(this.HigherOrder, higherOrder))
-                {
-                    return this;
-                }
-                else
-                {
-                    return new VariableTerm(this.Symbol, higherOrder);
-                }
+                return new VariableTerm(this.Symbol, higherOrder);
             }
         }
 

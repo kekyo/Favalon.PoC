@@ -76,7 +76,7 @@ namespace Favalet.Expressions.Algebraic
         {
             var left = context.Fixup(this.Left);
             var right = context.Fixup(this.Right);
-            var higherOrder = context.Fixup(this.HigherOrder);
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
             if (object.ReferenceEquals(this.Left, left) &&
                 object.ReferenceEquals(this.Right, right) &&

@@ -4,7 +4,7 @@ using System;
 
 namespace Favalet.Expressions
 {
-    public sealed class TypeCalculator :
+    public sealed class CLRTypeCalculator :
         LogicalCalculator
     {
         protected override ChoiceResults ChoiceForAnd(
@@ -47,7 +47,7 @@ namespace Favalet.Expressions
             return base.ChoiceForOr(left, right);
         }
 
-        public new static readonly TypeCalculator Instance =
-            new TypeCalculator();
+        public new static readonly CLRTypeCalculator Instance =
+            new CLRTypeCalculator();
     }
 }

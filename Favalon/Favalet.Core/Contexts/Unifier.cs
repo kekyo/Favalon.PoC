@@ -14,66 +14,67 @@ namespace Favalet.Contexts
     internal sealed class Unifier :
         FixupContext  // Because used by "Simple" property implementation.
     {
-        private readonly Dictionary<string, IExpression> unifications =
-            new Dictionary<string, IExpression>();
+        private readonly Dictionary<int, IExpression> unifications =
+            new Dictionary<int, IExpression>();
 
-        public Unifier()
+        private Unifier(ILogicalCalculator typeCalculator) :
+            base(typeCalculator)
         {
         }
 
         private sealed class PlaceholderMarker
         {
-            private readonly HashSet<string> symbols;
+            private readonly HashSet<int> indexes;
 #if DEBUG
-            private readonly List<string> list;
+            private readonly List<int> list;
 #endif
             private PlaceholderMarker(
 #if DEBUG
-                HashSet<string> symbols, List<string> list
+                HashSet<int> indexes, List<int> list
 #else
-                HashSet<string> symbols
+                HashSet<int> indexes
 #endif
             )
             {
-                this.symbols = symbols;
+                this.indexes = indexes;
 #if DEBUG
                 this.list = list;
 #endif
             }
 
-            public bool Mark(string targetSymbol)
+            public bool Mark(int targetIndex)
             {
 #if DEBUG
-                list.Add(targetSymbol);
+                list.Add(targetIndex);
 #endif
-                return symbols.Add(targetSymbol);
+                return indexes.Add(targetIndex);
             }
 
             public PlaceholderMarker Fork() =>
 #if DEBUG
-                new PlaceholderMarker(new HashSet<string>(this.symbols), new List<string>(this.list));
+                new PlaceholderMarker(new HashSet<int>(this.indexes), new List<int>(this.list));
 #else
-                new PlaceholderMarker(new HashSet<string>(this.symbols));
+                new PlaceholderMarker(new HashSet<int>(this.symbols));
 #endif
 
 #if DEBUG
             public override string ToString() =>
-                StringUtilities.Join(" --> ", this.list);
+                StringUtilities.Join(" ==> ", this.list.Select(index => $"'{index}"));
 #endif
 
             public static PlaceholderMarker Create() =>
 #if DEBUG
-                new PlaceholderMarker(new HashSet<string>(), new List<string>());
+                new PlaceholderMarker(new HashSet<int>(), new List<int>());
 #else
-                new PlaceholderMarker(new HashSet<string>());
+                new PlaceholderMarker(new HashSet<int>());
 #endif
         }
 
         private void Occur(PlaceholderMarker marker, IExpression expression)
         {
-            if (expression is IIdentityTerm identity)
+            if (expression is IPlaceholderTerm identity)
             {
-                this.Occur(marker, identity.Symbol);
+                this.Occur(marker, identity.Index);
             }
             else if (expression is IFunctionExpression(IExpression p, IExpression r))
             {
@@ -82,18 +83,18 @@ namespace Favalet.Contexts
             }
         }
 
-        private void Occur(PlaceholderMarker marker, string symbol)
+        private void Occur(PlaceholderMarker marker, int index)
         {
-            var targetSymbol = symbol;
+            var targetIndex = index;
             while (true)
             {
-                if (marker.Mark(targetSymbol))
+                if (marker.Mark(targetIndex))
                 {
-                    if (this.unifications.TryGetValue(targetSymbol, out var resolved))
+                    if (this.unifications.TryGetValue(targetIndex, out var resolved))
                     {
-                        if (resolved is IIdentityTerm identity)
+                        if (resolved is IPlaceholderTerm placeholder)
                         {
-                            targetSymbol = identity.Symbol;
+                            targetIndex = placeholder.Index;
                             continue;
                         }
                         else
@@ -116,78 +117,72 @@ namespace Favalet.Contexts
             }
         }
 
-        private void Update(string symbol, IExpression expression)
+        private void Update(int index, IExpression expression)
         {
 #if DEBUG
-            if (this.unifications.TryGetValue(symbol, out var origin))
+            if (this.unifications.TryGetValue(index, out var origin))
             {
                 if (!origin.Equals(expression))
                 {
                     Debug.WriteLine(
-                        $"Unifier.Update: {symbol}: {origin.GetPrettyString(PrettyStringTypes.Readable)} ==> {expression.GetPrettyString(PrettyStringTypes.Readable)}");
+                        $"Unifier.Update: '{index}: {origin.GetPrettyString(PrettyStringTypes.Readable)} ==> {expression.GetPrettyString(PrettyStringTypes.Readable)}");
                 }
             }
 #endif
-            this.unifications[symbol] = expression;
-            this.Occur(PlaceholderMarker.Create(), symbol);
+            this.unifications[index] = expression;
+            
+            this.Occur(PlaceholderMarker.Create(), index);
         }
 
         private IExpression? InternalUnifyBothPlaceholders(
-            IInferContext context, IIdentityTerm from, IIdentityTerm to)
+            IInferContext context, IPlaceholderTerm from, IPlaceholderTerm to)
         {
-            this.unifications.TryGetValue(from.Symbol, out var rfrom);
-            this.unifications.TryGetValue(to.Symbol, out var rto);
+            this.unifications.TryGetValue(from.Index, out var rfrom);
+            this.unifications.TryGetValue(to.Index, out var rto);
             
             switch (rfrom, rto)
             {
                 case (IExpression _, IExpression _):
                     if (this.InternalUnify(context, rfrom, rto) is IExpression result0)
                     {
-                        this.Update(from.Symbol, result0);
-                        this.Update(to.Symbol, result0);
+                        this.Update(from.Index, result0);
+                        this.Update(to.Index, result0);
                     }
                     return null;
                 
                 case (IExpression _, null):
                     if (this.InternalUnify(context, rfrom, to) is IExpression result1)
                     {
-                        this.Update(from.Symbol, result1);
+                        this.Update(from.Index, result1);
                     }
                     return null;
                 
                 case (null, IExpression _):
                     if (this.InternalUnify(context, from, rto) is IExpression result2)
                     {
-                        this.Update(to.Symbol, result2);
+                        this.Update(to.Index, result2);
                     }
-                    return null;
-            }
-
-            switch (from, to)
-            {
-                case (IPlaceholderTerm _, _):
-                    this.Update(from.Symbol, to);
                     return null;
                 
                 default:
-                    this.Update(to.Symbol, from);
+                    this.Update(from.Index, to);
                     return null;
             }
         }
 
         private IExpression? InternalUnifyPlaceholder(
-            IInferContext context, IIdentityTerm from, IExpression to)
+            IInferContext context, IPlaceholderTerm from, IExpression to)
         {
-            if (this.unifications.TryGetValue(from.Symbol, out var target))
+            if (this.unifications.TryGetValue(from.Index, out var target))
             {
                 if (this.InternalUnify(context, to, target) is IExpression result)
                 {
-                    this.Update(from.Symbol, result);
+                    this.Update(from.Index, result);
                 }
             }
             else
             {
-                this.Update(from.Symbol, to);
+                this.Update(from.Index, to);
             }
 
             return null;
@@ -200,12 +195,12 @@ namespace Favalet.Contexts
             Debug.Assert(!(to is UnspecifiedTerm) && !(to is DeadEndTerm));
 
             // Interpret placeholders.
-            if (from is IIdentityTerm(string fromSymbol) fi)
+            if (from is IPlaceholderTerm(int fromIndex) fph)
             {
-                if (to is IIdentityTerm(string toSymbol) ti)
+                if (to is IPlaceholderTerm(int toIndex) tph)
                 {
                     // [1]
-                    if (fromSymbol == toSymbol)
+                    if (fromIndex == toIndex)
                     {
                         // Ignore equal placeholders.
                         return null;
@@ -213,19 +208,19 @@ namespace Favalet.Contexts
                     else
                     {
                         // Unify both placeholders.
-                        return this.InternalUnifyBothPlaceholders(context, fi, ti);
+                        return this.InternalUnifyBothPlaceholders(context, fph, tph);
                     }
                 }
                 else
                 {
                     // Unify from placeholder.
-                    return this.InternalUnifyPlaceholder(context, fi, to);
+                    return this.InternalUnifyPlaceholder(context, fph, to);
                 }
             }
-            else if (to is IIdentityTerm ti)
+            else if (to is IPlaceholderTerm tph)
             {
                 // Unify to placeholder.
-                return this.InternalUnifyPlaceholder(context, ti, from);
+                return this.InternalUnifyPlaceholder(context, tph, from);
             }
 
             if (from is IFunctionExpression(IExpression fp, IExpression fr) &&
@@ -286,12 +281,12 @@ namespace Favalet.Contexts
             IInferContext context, IExpression from, IExpression to) =>
             this.InternalUnify(context, from, to);
 
-        public override IExpression? Resolve(string symbol)
+        public override IExpression? Resolve(int index)
         {
 #if DEBUG
-            this.Occur(PlaceholderMarker.Create(), symbol);
+            this.Occur(PlaceholderMarker.Create(), index);
 #endif
-            return this.unifications.TryGetValue(symbol, out var resolved) ? resolved : null;
+            return this.unifications.TryGetValue(index, out var resolved) ? resolved : null;
         }
 
         public string Xml =>
@@ -316,5 +311,8 @@ namespace Favalet.Contexts
 
         public override string ToString() =>
             "Unifier: " + this.Simple;
+        
+        public static Unifier Create(ILogicalCalculator typeCalculator) =>
+            new Unifier(typeCalculator);
     }
 }

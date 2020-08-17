@@ -1,8 +1,6 @@
 ﻿using Favalet.Contexts;
-using Favalet.Internal;
 using System.Collections;
 using System.Diagnostics;
-using System.Linq;
 using System.Xml.Linq;
 
 namespace Favalet.Expressions.Specialized

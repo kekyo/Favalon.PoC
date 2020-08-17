@@ -81,23 +81,21 @@ namespace Favalet.Contexts
 
         public IExpression CreatePlaceholderFrom(IExpression original)
         {
-            // Cannot replace these terms.
-            if (original is IPlaceholderTerm ||
-                original is DeadEndTerm ||
-                original is FourthTerm)
-            {
-                return original;
-            }
-
             if (this.orderHint >= PlaceholderOrderHints.DeadEnd)
             {
                 return DeadEndTerm.Instance;
             }
             
-            var placeholder = this.rootScope.CreatePlaceholder(
-                (this.orderHint > PlaceholderOrderHints.Fourth) ?
-                    PlaceholderOrderHints.Fourth :
-                    this.orderHint);
+            // Cannot replace these terms.
+            if (original is IPlaceholderTerm ||
+                original is DeadEndTerm ||
+                original is FourthTerm ||
+                original is IFunctionExpression)
+            {
+                return original;
+            }
+            
+            var placeholder = this.rootScope.CreatePlaceholder(this.orderHint);
             
             // The placeholder will be independent by a unspecified term.
             if (!(original is UnspecifiedTerm))

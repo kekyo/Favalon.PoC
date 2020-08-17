@@ -1,4 +1,5 @@
-﻿using Favalet.Contexts;
+﻿using System;
+using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System.Collections;
@@ -17,25 +18,19 @@ namespace Favalet.Expressions
     public sealed class FunctionExpression :
         Expression, IFunctionExpression
     {
-        private readonly LazySlim<IExpression> higherOrder;
-        
         public readonly IExpression Parameter;
         public readonly IExpression Result;
 
         [DebuggerStepThrough]
         private FunctionExpression(
-            IExpression parameter, IExpression result, LazySlim<IExpression> higherOrder)
+            IExpression parameter, IExpression result, IExpression higherOrder)
         {
             this.Parameter = parameter;
             this.Result = result;
-            this.higherOrder = higherOrder;
+            this.HigherOrder = higherOrder;
         }
 
-        public override IExpression HigherOrder
-        {
-            [DebuggerStepThrough]
-            get => this.higherOrder.Value;
-        }
+        public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         IExpression IFunctionExpression.Parameter
@@ -65,7 +60,7 @@ namespace Favalet.Expressions
             InternalCreate(
                 context.MakeRewritable(this.Parameter),
                 context.MakeRewritable(this.Result),
-                LazySlim.Create(context.MakeRewritableHigherOrder(this.HigherOrder)));
+                () => context.MakeRewritableHigherOrder(this.HigherOrder));
 
         protected override IExpression Infer(IInferContext context)
         {
@@ -87,7 +82,7 @@ namespace Favalet.Expressions
                     return InternalCreate(
                         parameter,
                         result,
-                        LazySlim.Create((IExpression)DeadEndTerm.Instance));
+                        () => DeadEndTerm.Instance);
                 }
             }
             else
@@ -110,7 +105,7 @@ namespace Favalet.Expressions
                     return InternalCreate(
                         parameter,
                         result,
-                        LazySlim.Create(higherOrder));
+                        () => higherOrder);
                 }
             }
         }
@@ -120,41 +115,15 @@ namespace Favalet.Expressions
             var parameter = context.Fixup(this.Parameter);
             var result = context.Fixup(this.Result);
             
-            // Recursive inferring exit rule.
-            if (parameter is FourthTerm || result is FourthTerm ||
-                parameter.HigherOrder is DeadEndTerm || result.HigherOrder is DeadEndTerm)
+            if (object.ReferenceEquals(this.Parameter, parameter) &&
+                object.ReferenceEquals(this.Result, result))
             {
-                if (object.ReferenceEquals(this.Parameter, parameter) &&
-                    object.ReferenceEquals(this.Result, result) &&
-                    this.HigherOrder is DeadEndTerm)
-                {
-                    return this;
-                }
-                else
-                {
-                    return InternalCreate(
-                        parameter,
-                        result,
-                        LazySlim.Create((IExpression)DeadEndTerm.Instance));
-                }
+                return this;
             }
             else
             {
-                var higherOrder = context.Fixup(this.HigherOrder);
-
-                if (object.ReferenceEquals(this.Parameter, parameter) &&
-                    object.ReferenceEquals(this.Result, result) &&
-                    object.ReferenceEquals(this.HigherOrder, higherOrder))
-                {
-                    return this;
-                }
-                else
-                {
-                    return InternalCreate(
-                        parameter,
-                        result,
-                        LazySlim.Create(higherOrder));
-                }
+                // Discarded higher order and will produce by parameter and result.
+                return Create(parameter, result);
             }
         }
 
@@ -173,7 +142,7 @@ namespace Favalet.Expressions
                 return InternalCreate(
                     parameter,
                     result,
-                    this.higherOrder);
+                    () => this.HigherOrder);
             }
         }
 
@@ -189,47 +158,40 @@ namespace Favalet.Expressions
             new FunctionExpression(
                 FourthTerm.Instance,
                 FourthTerm.Instance,
-                LazySlim.Create((IExpression)DeadEndTerm.Instance));
-        private static readonly FunctionExpression UnspecifiedKind =
-            new FunctionExpression(
-                UnspecifiedTerm.Instance,
-                UnspecifiedTerm.Instance,
-                LazySlim.Create((IExpression)Fourth));
-        internal static readonly FunctionExpression UnspecifiedType =
-            new FunctionExpression(
-                UnspecifiedTerm.Instance,
-                UnspecifiedTerm.Instance,
-                LazySlim.Create((IExpression)UnspecifiedKind));
+                DeadEndTerm.Instance);
 
         [DebuggerStepThrough]
         private static IExpression InternalCreate(
-            IExpression parameter, IExpression result, LazySlim<IExpression> higherOrder) =>
-            (parameter, result) switch
+            IExpression parameter, IExpression result, Func<IExpression> higherOrder)
+        {
+            switch (parameter, result)
             {
-                (DeadEndTerm _, _) =>
-                    DeadEndTerm.Instance,
-                (_, DeadEndTerm _) =>
-                    DeadEndTerm.Instance,
-                (FourthTerm _, FourthTerm _) =>
-                    Fourth,
-                (FourthTerm _, _) => new FunctionExpression(
-                    parameter,
-                    result,
-                    LazySlim.Create((IExpression)DeadEndTerm.Instance)),
-                (_, FourthTerm _) => new FunctionExpression(
-                    parameter,
-                    result,
-                    LazySlim.Create((IExpression)DeadEndTerm.Instance)),
-                _ => new FunctionExpression(
-                    parameter,
-                    result,
-                    higherOrder)
+                case (DeadEndTerm _, _):
+                case (_, DeadEndTerm _):
+                    return DeadEndTerm.Instance;
+                case (FourthTerm _, FourthTerm _):
+                    return Fourth;
+                case (FourthTerm _, _):
+                case (_, FourthTerm _):
+                    return new FunctionExpression(
+                        parameter,
+                        result,
+                        DeadEndTerm.Instance);
+                default:
+                    return new FunctionExpression(
+                        parameter,
+                        result,
+                        higherOrder());
             };
+        }
 
         [DebuggerStepThrough]
         public static FunctionExpression Create(
-            IExpression parameter, IExpression result, IExpression higherOrder) =>
-            (FunctionExpression)InternalCreate(parameter, result, LazySlim.Create(higherOrder));
+            IExpression parameter, IExpression result, IFunctionExpression higherOrder) =>
+            (FunctionExpression)InternalCreate(
+                parameter,
+                result,
+                () => higherOrder);
 
         [DebuggerStepThrough]
         private static IExpression CreateRecursivity(
@@ -237,7 +199,8 @@ namespace Favalet.Expressions
             InternalCreate(
                 parameter,
                 result,
-                LazySlim.Create(() => CreateRecursivity(parameter.HigherOrder, result.HigherOrder)));
+                () => CreateRecursivity(parameter.HigherOrder, result.HigherOrder));
+
         [DebuggerStepThrough]
         public static FunctionExpression Create(
             IExpression parameter, IExpression result) =>

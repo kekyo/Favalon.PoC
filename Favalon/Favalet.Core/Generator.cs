@@ -64,10 +64,10 @@ namespace Favalet
             string parameter, IExpression body) =>
             LambdaExpression.Create(BoundVariableTerm.Create(parameter), body);
         public static LambdaExpression Lambda(
-            IBoundVariableTerm parameter, IExpression body, IExpression higherOrder) =>
+            IBoundVariableTerm parameter, IExpression body, IFunctionExpression higherOrder) =>
             LambdaExpression.Create(parameter, body, higherOrder);
         public static LambdaExpression Lambda(
-            string parameter, IExpression body, IExpression higherOrder) =>
+            string parameter, IExpression body, IFunctionExpression higherOrder) =>
             LambdaExpression.Create(BoundVariableTerm.Create(parameter), body, higherOrder);
 
         public static ApplyExpression Apply(
@@ -81,7 +81,7 @@ namespace Favalet
             IExpression parameter, IExpression result) =>
             FunctionExpression.Create(parameter, result);
         public static FunctionExpression Function(
-            IExpression parameter, IExpression result, IExpression higherOrder) =>
+            IExpression parameter, IExpression result, IFunctionExpression higherOrder) =>
             FunctionExpression.Create(parameter, result, higherOrder);
     }
 }

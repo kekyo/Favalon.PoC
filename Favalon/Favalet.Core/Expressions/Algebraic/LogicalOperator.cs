@@ -16,7 +16,7 @@ namespace Favalet.Expressions.Algebraic
     {
         private static readonly LogicalCalculator calculator = new LogicalCalculator();
         private static readonly IExpression higherOrder =
-            FunctionExpression.Create(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
+            FunctionExpression.Create(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
 
         private LogicalOperator()
         { }

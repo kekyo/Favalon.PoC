@@ -135,17 +135,27 @@ namespace Favalet.Contexts
         private IExpression? InternalUnifyBothPlaceholders(
             IInferContext context, IIdentityTerm from, IIdentityTerm to)
         {
-            switch
-                (this.unifications.TryGetValue(from.Symbol, out var rfrom),
-                 this.unifications.TryGetValue(to.Symbol, out var rto))
+            this.unifications.TryGetValue(from.Symbol, out var rfrom);
+            this.unifications.TryGetValue(to.Symbol, out var rto);
+            
+            switch (rfrom, rto)
             {
-                case (true, false):
+                case (IExpression _, IExpression _):
+                    if (this.InternalUnify(context, rfrom, rto) is IExpression result0)
+                    {
+                        this.Update(from.Symbol, result0);
+                        this.Update(to.Symbol, result0);
+                    }
+                    return null;
+                
+                case (IExpression _, null):
                     if (this.InternalUnify(context, rfrom, to) is IExpression result1)
                     {
                         this.Update(from.Symbol, result1);
                     }
                     return null;
-                case (false, true):
+                
+                case (null, IExpression _):
                     if (this.InternalUnify(context, from, rto) is IExpression result2)
                     {
                         this.Update(to.Symbol, result2);
@@ -158,6 +168,7 @@ namespace Favalet.Contexts
                 case (IPlaceholderTerm _, _):
                     this.Update(from.Symbol, to);
                     return null;
+                
                 default:
                     this.Update(to.Symbol, from);
                     return null;
@@ -226,10 +237,9 @@ namespace Favalet.Contexts
 
                 if (parameter is IExpression || result is IExpression)
                 {
-                    var function = FunctionExpression.Create(
+                    return FunctionExpression.Create(
                         parameter is IExpression ? parameter : fp,
                         result is IExpression ? result : fr);
-                    return function;
                 }
                 else
                 {
@@ -249,9 +259,10 @@ namespace Favalet.Contexts
         private IExpression? InternalUnify(
             IInferContext context, IExpression from, IExpression to)
         {
+            // Same as.
             if (object.ReferenceEquals(from, to))
             {
-                return from;
+                return null;
             }
 
             switch (from, to)
@@ -259,11 +270,11 @@ namespace Favalet.Contexts
                 // Ignore DeadEndTerm unification.
                 case (DeadEndTerm _, _):
                 case (_, DeadEndTerm _):
-                    return DeadEndTerm.Instance;
+                    return null;
 
                 default:
-                    // Unification higher order.
-                    var ho = this.InternalUnify(context, from.HigherOrder, to.HigherOrder);
+                    // Higher order unification.
+                    this.InternalUnify(context, from.HigherOrder, to.HigherOrder);
 
                     // Unification.
                     return this.InternalUnifyCore(context, from, to);

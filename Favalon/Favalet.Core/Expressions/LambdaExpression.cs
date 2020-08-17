@@ -2,6 +2,7 @@
 using Favalet.Expressions.Specialized;
 using System.Collections;
 using System.Diagnostics;
+using Favalet.Internal;
 
 namespace Favalet.Expressions
 {
@@ -23,9 +24,9 @@ namespace Favalet.Expressions
         private LambdaExpression(
             IBoundVariableTerm parameter, IExpression body, IExpression higherOrder)
         {
-            this.HigherOrder = higherOrder;
             this.Parameter = parameter;
             this.Body = body;
+            this.HigherOrder = higherOrder;
         }
 
         public override IExpression HigherOrder { get; }
@@ -82,7 +83,10 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new LambdaExpression(parameter, body, higherOrder);
+                return new LambdaExpression(
+                    parameter,
+                    body,
+                    higherOrder);
             }
         }
 
@@ -90,17 +94,16 @@ namespace Favalet.Expressions
         {
             var parameter = (IBoundVariableTerm)context.Fixup(this.Parameter);
             var body = context.Fixup(this.Body);
-            var higherOrder = context.Fixup(this.HigherOrder);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
-                object.ReferenceEquals(this.Body, body) &&
-                object.ReferenceEquals(this.HigherOrder, higherOrder))
+                object.ReferenceEquals(this.Body, body))
             {
                 return this;
             }
             else
             {
-                return new LambdaExpression(parameter, body, higherOrder);
+                // Discarded higher order and will produce by parameter and body.
+                return Create(parameter, body);
             }
         }
 
@@ -116,7 +119,10 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new LambdaExpression(parameter, body, this.HigherOrder);
+                return new LambdaExpression(
+                    parameter,
+                    body,
+                    this.HigherOrder);
             }
         }
 
@@ -135,12 +141,15 @@ namespace Favalet.Expressions
 
         [DebuggerStepThrough]
         public static LambdaExpression Create(
-            IBoundVariableTerm parameter, IExpression body, IExpression higherOrder) =>
+            IBoundVariableTerm parameter, IExpression body, IFunctionExpression higherOrder) =>
             new LambdaExpression(parameter, body, higherOrder);
         [DebuggerStepThrough]
         public static LambdaExpression Create(
             IBoundVariableTerm parameter, IExpression body) =>
-            new LambdaExpression(parameter, body, FunctionExpression.UnspecifiedType);
+            new LambdaExpression(
+                parameter,
+                body,
+                FunctionExpression.Create(parameter.HigherOrder, body.HigherOrder));
     }
 
     [DebuggerStepThrough]

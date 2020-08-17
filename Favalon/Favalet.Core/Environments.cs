@@ -28,7 +28,6 @@ namespace Favalet
             base(null, typeCalculator)
         { }
 
-        [DebuggerStepThrough]
         internal IExpression CreatePlaceholder(
             PlaceholderOrderHints orderHint)
         {
@@ -37,7 +36,7 @@ namespace Favalet
                 Math.Max(0, (int)orderHint));
             var count = Math.Min(
                 (int)PlaceholderOrderHints.DeadEnd - oh,
-                (int)PlaceholderOrderHints.KindOrAbove);
+                (int)PlaceholderOrderHints.Fourth);
             
             var indexList =
                 Enumerable.Range(0, count).

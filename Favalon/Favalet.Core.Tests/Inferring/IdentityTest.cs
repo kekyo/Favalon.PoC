@@ -83,7 +83,7 @@ namespace Favalet.Inferring
         {
             var environment = CLREnvironment();
 
-            // a:int -> b:object
+            // a:int -> a:object
             var expression =
                 Lambda(
                     BoundVariable("a", Type<int>()),
@@ -91,10 +91,10 @@ namespace Favalet.Inferring
 
             var actual = environment.Infer(expression);
 
-            // a:object -> b:object
+            // a:int -> a:object
             var expected =
                 Lambda(
-                    BoundVariable("a", Type<object>()),
+                    BoundVariable("a", Type<int>()),
                     Variable("a", Type<object>()));
 
             AssertLogicalEqual(expression, expected, actual);

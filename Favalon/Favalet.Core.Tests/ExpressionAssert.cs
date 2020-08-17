@@ -99,10 +99,10 @@ namespace Favalet
             {
                 case (UnspecifiedTerm _, _):   // Only expected expression
                     return Results.Ignore;
+                case (DeadEndTerm _, _):
+                    return Results.Ignore;
                 case (FourthTerm _, FourthTerm _):
                     return Results.Ignore;
-                case (DeadEndTerm _, _):
-                    return Trap(false);
                 case (_, DeadEndTerm _):
                     return Trap(false);
                 case (ILambdaExpression le, ILambdaExpression re):

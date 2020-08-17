@@ -89,8 +89,9 @@ namespace Favalet.Contexts
             // Cannot replace these terms.
             if (original is IPlaceholderTerm ||
                 original is DeadEndTerm ||
-                original is FourthTerm ||
-                original is IFunctionExpression)
+                original is FourthTerm
+                //||original is IFunctionExpression
+                )
             {
                 return original;
             }

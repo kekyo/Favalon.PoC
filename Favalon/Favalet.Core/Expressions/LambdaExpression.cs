@@ -2,6 +2,7 @@
 using Favalet.Expressions.Specialized;
 using System.Collections;
 using System.Diagnostics;
+using System.Threading;
 using Favalet.Internal;
 
 namespace Favalet.Expressions
@@ -94,15 +95,17 @@ namespace Favalet.Expressions
         {
             var parameter = (IBoundVariableTerm)context.Fixup(this.Parameter);
             var body = context.Fixup(this.Body);
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
-                object.ReferenceEquals(this.Body, body))
+                object.ReferenceEquals(this.Body, body) &&
+                object.ReferenceEquals(this.HigherOrder, higherOrder))
             {
                 return this;
             }
             else
             {
-                // Discarded higher order and will produce by parameter and body.
+                // Ignore fixup higher order.
                 return Create(parameter, body);
             }
         }

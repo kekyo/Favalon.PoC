@@ -17,6 +17,7 @@ namespace Favalet.Contexts
         private readonly Dictionary<int, IExpression> unifications =
             new Dictionary<int, IExpression>();
 
+        [DebuggerStepThrough]
         private Unifier(ILogicalCalculator typeCalculator) :
             base(typeCalculator)
         {
@@ -312,6 +313,7 @@ namespace Favalet.Contexts
         public override string ToString() =>
             "Unifier: " + this.Simple;
         
+        [DebuggerStepThrough]
         public static Unifier Create(ILogicalCalculator typeCalculator) =>
             new Unifier(typeCalculator);
     }

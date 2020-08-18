@@ -109,30 +109,52 @@ namespace Favalet.Expressions
 
         protected override IExpression Reduce(IReduceContext context)
         {
-            var argument = context.Reduce(this.Argument);
-
-            var function = this.Function;
+            var currentFunction = this.Function;
             while (true)
             {
-                if (function is ICallableExpression callable)
+                // Apply with left outermost strategy at lambda expression.
+                if (currentFunction is ILambdaExpression lambda)
                 {
+                    var result = lambda.Call(context, this.Argument);
+                    return context.Reduce(result);
+                }
+
+                // Apply with right outermost strategy,
+                // because maybe cannot analyze inside of the function.
+                if (currentFunction is ICallableExpression callable)
+                {
+                    var argument = context.Reduce(this.Argument);
                     return callable.Call(context, argument);
                 }
 
-                var reducedFunction = context.Reduce(function);
+                var reducedFunction = context.Reduce(currentFunction);
 
-                if (object.ReferenceEquals(this.Function, reducedFunction) &&
-                    object.ReferenceEquals(this.Argument, argument))
+                if (object.ReferenceEquals(this.Function, reducedFunction))
                 {
-                    return this;
+                    var argument = context.Reduce(this.Argument);
+                    if (object.ReferenceEquals(this.Argument, argument))
+                    {
+                        return this;
+                    }
+                    else
+                    {
+                        return new ApplyExpression(
+                            reducedFunction,
+                            argument,
+                            this.HigherOrder);
+                    }
+                }
+                
+                if (object.ReferenceEquals(currentFunction, reducedFunction))
+                {
+                    var argument = context.Reduce(this.Argument);
+                    return new ApplyExpression(
+                        reducedFunction,
+                        argument,
+                        this.HigherOrder);
                 }
 
-                if (object.ReferenceEquals(function, reducedFunction))
-                {
-                    return new ApplyExpression(reducedFunction, argument, this.HigherOrder);
-                }
-
-                function = reducedFunction;
+                currentFunction = reducedFunction;
             }
         }
 

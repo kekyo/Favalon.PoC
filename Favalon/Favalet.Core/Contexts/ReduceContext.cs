@@ -9,8 +9,6 @@ namespace Favalet.Contexts
 {
     public interface IMakeRewritableContext
     {
-        IExpression CreatePlaceholderFrom(IExpression original);
-        
         IExpression MakeRewritable(IExpression expression);
         IExpression MakeRewritableHigherOrder(
             IExpression higherOrder,
@@ -94,56 +92,62 @@ namespace Favalet.Contexts
         public ILogicalCalculator TypeCalculator =>
             this.rootScope.TypeCalculator;
 
-        public IExpression CreatePlaceholderFrom(IExpression original)
+        private IExpression MakeRewritable(
+            IExpression expression, bool replacePlaceholder)
         {
             if (this.orderHint >= PlaceholderOrderHints.DeadEnd)
             {
                 return DeadEndTerm.Instance;
             }
             
+            var rewritable = expression is Expression expr ?
+                expr.InternalMakeRewritable(this) :
+                expression;
+
             // Cannot replace these terms.
-            if (original is IPlaceholderTerm ||
-                original is IVariableTerm ||
-                original is DeadEndTerm ||
-                original is FourthTerm
-                //||original is IFunctionExpression
-                )
+            if (rewritable is IPlaceholderTerm ||
+                rewritable is IVariableTerm ||
+                rewritable is DeadEndTerm ||
+                rewritable is FourthTerm)
             {
-                return original;
+                return rewritable;
             }
-            
-            var placeholder = this.rootScope.CreatePlaceholder(this.orderHint);
-            
-            // The placeholder will be independent by a unspecified term.
-            if (!(original is UnspecifiedTerm))
+
+            // The unspecified term always turns to placeholder term.
+            if (rewritable is UnspecifiedTerm)
             {
-                this.unifier.Unify(this, placeholder, original);
+                return this.rootScope.CreatePlaceholder(this.orderHint);
             }
-            
-            return placeholder;
+
+            // Replace a placeholder term if required.
+            if (replacePlaceholder)
+            {
+                var placeholder = this.rootScope.CreatePlaceholder(this.orderHint);
+                this.unifier.Unify(this, placeholder, rewritable);
+                return placeholder;
+            }
+            else
+            {
+                return rewritable;
+            }
         }
 
         [DebuggerStepThrough]
         public IExpression MakeRewritable(IExpression expression) =>
-            expression is Expression expr ?
-                expr.InternalMakeRewritable(this) :
-                expression;
-
+            this.MakeRewritable(expression, false);
+            
         public IExpression MakeRewritableHigherOrder(
             IExpression higherOrder,
             bool replacePlaceholder = true)
         {
             this.orderHint++;
             
-            var rewritable = this.MakeRewritable(higherOrder);
-            var result = replacePlaceholder ?
-                this.CreatePlaceholderFrom(rewritable) :
-                rewritable;
+            var rewritable = this.MakeRewritable(higherOrder, replacePlaceholder);
             
             this.orderHint--;
             Debug.Assert(this.orderHint >= PlaceholderOrderHints.VariableOrAbove);
             
-            return result;
+            return rewritable;
         }
 
         [DebuggerStepThrough]

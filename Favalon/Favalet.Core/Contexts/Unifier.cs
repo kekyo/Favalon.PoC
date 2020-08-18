@@ -191,8 +191,8 @@ namespace Favalet.Contexts
         private IExpression? InternalUnifyCore(
             IInferContext context, IExpression from, IExpression to)
         {
-            Debug.Assert(!(from is UnspecifiedTerm) && !(from is DeadEndTerm));
-            Debug.Assert(!(to is UnspecifiedTerm) && !(to is DeadEndTerm));
+            Debug.Assert(!(from is IIgnoreUnificationTerm));
+            Debug.Assert(!(to is IIgnoreUnificationTerm));
 
             // Interpret placeholders.
             if (from is IPlaceholderTerm(int fromIndex) fph)
@@ -262,9 +262,9 @@ namespace Favalet.Contexts
 
             switch (from, to)
             {
-                // Ignore DeadEndTerm unification.
-                case (DeadEndTerm _, _):
-                case (_, DeadEndTerm _):
+                // Ignore IIgnoreUnificationTerm unification.
+                case (IIgnoreUnificationTerm _, _):
+                case (_, IIgnoreUnificationTerm _):
                     return null;
 
                 default:

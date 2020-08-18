@@ -7,7 +7,7 @@ namespace Favalet.Expressions.Specialized
 {
     [DebuggerStepThrough]
     public sealed class UnspecifiedTerm :
-        Expression, ITerm
+        Expression, IIgnoreUnificationTerm
     {
         private UnspecifiedTerm()
         {
@@ -24,7 +24,7 @@ namespace Favalet.Expressions.Specialized
             other is UnspecifiedTerm;
 
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
-            context.CreatePlaceholderFrom(this);
+            this;
 
         protected override IExpression Infer(IInferContext context) =>
             this;

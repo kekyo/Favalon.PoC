@@ -44,7 +44,7 @@ namespace Favalet.Expressions
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new VariableTerm(
                 this.Symbol,
-                context.MakeRewritableHigherOrder(this.HigherOrder));
+                context.MakeRewritableHigherOrder(this.HigherOrder, false));
         
         protected override IExpression Infer(IInferContext context)
         {

@@ -200,7 +200,9 @@ namespace Favalet.Contexts
                     if (from.Constraint == Constraints.Fixed)
                     {
                         // Force replaced.
-                        this.Update(((IPlaceholderTerm)from.Expression).Index, to);
+                        this.Update(
+                            ((IPlaceholderTerm)from.Expression).Index,
+                            to.WithConstraint(from.Constraint));
 
                         if (this.InternalUnify(
                             context,
@@ -235,7 +237,9 @@ namespace Favalet.Contexts
                     if (to.Constraint == Constraints.Fixed)
                     {
                         // Force replaced.
-                        this.Update(((IPlaceholderTerm)to.Expression).Index, from);
+                        this.Update(
+                            ((IPlaceholderTerm)to.Expression).Index,
+                            from.WithConstraint(to.Constraint));
 
                         if (this.InternalUnify(
                             context,
@@ -284,7 +288,9 @@ namespace Favalet.Contexts
                 if (from.Constraint == Constraints.Fixed)
                 {
                     // Force replaced.
-                    this.Update(((IPlaceholderTerm)from.Expression).Index, to);
+                    this.Update(
+                        ((IPlaceholderTerm)from.Expression).Index,
+                        to.WithConstraint(from.Constraint));
                     
                     if (this.InternalUnify(
                         context,

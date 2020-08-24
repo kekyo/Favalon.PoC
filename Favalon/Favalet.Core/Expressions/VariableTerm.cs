@@ -62,8 +62,8 @@ namespace Favalet.Expressions
                     var symbolHigherOrderRewritable = context.MakeRewritable(variables[0].SymbolHigherOrder);
                     var symbolHigherOrder = context.Infer(symbolHigherOrderRewritable);
 
-                    context.Unify(symbolHigherOrder, higherOrder);
-                    context.Unify(inferred.HigherOrder, higherOrder);
+                    context.Unify(symbolHigherOrder, higherOrder, true);
+                    context.Unify(inferred.HigherOrder, higherOrder, true);
                 }
             }
 

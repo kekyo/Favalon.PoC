@@ -10,10 +10,10 @@ using System.Xml.Linq;
 
 namespace Favalet.Contexts
 {
-    internal enum Constraints
+    internal enum UnifyConstraints
     {
         Free,
-        Equal
+        Fixed
     }
     
     [DebuggerDisplay("{Simple}")]
@@ -145,8 +145,8 @@ namespace Favalet.Contexts
             IInferContext context,
             IPlaceholderTerm from,
             IPlaceholderTerm to,
-            Constraints fromConstraint,
-            Constraints toConstraint)
+            UnifyConstraints fromConstraint,
+            UnifyConstraints toConstraint)
         {
             this.unifications.TryGetValue(from.Index, out var rfrom);
             this.unifications.TryGetValue(to.Index, out var rto);
@@ -167,14 +167,14 @@ namespace Favalet.Contexts
                     return null;
                 
                 case (IExpression _, null):
-                    if (fromConstraint == Constraints.Equal)
+                    if (fromConstraint == UnifyConstraints.Fixed)
                     {
                         this.Update(from.Index, to);
                         if (this.InternalUnify(
                             context,
                             rfrom,
                             to,
-                            Constraints.Free,
+                            UnifyConstraints.Free,
                             /* derived from */ fromConstraint) is IExpression result)
                         {
                             var combined = OrExpression.Create(to, result);
@@ -202,7 +202,7 @@ namespace Favalet.Contexts
                     return null;
                 
                 case (null, IExpression _):
-                    if (toConstraint == Constraints.Equal)
+                    if (toConstraint == UnifyConstraints.Fixed)
                     {
                         this.Update(to.Index, from);
                         if (this.InternalUnify(
@@ -210,7 +210,7 @@ namespace Favalet.Contexts
                             from,
                             rto,
                             /* derived to */ toConstraint,
-                            Constraints.Free) is IExpression result)
+                            UnifyConstraints.Free) is IExpression result)
                         {
                             var combined = OrExpression.Create(from, result);
                             var calculated = context.TypeCalculator.Compute(combined);
@@ -246,12 +246,12 @@ namespace Favalet.Contexts
             IInferContext context,
             IPlaceholderTerm from,
             IExpression to,
-            Constraints fromConstraint,
-            Constraints toConstraint)
+            UnifyConstraints fromConstraint,
+            UnifyConstraints toConstraint)
         {
             if (this.unifications.TryGetValue(from.Index, out var target))
             {
-                if (fromConstraint == Constraints.Equal)
+                if (fromConstraint == UnifyConstraints.Fixed)
                 {
                     this.Update(from.Index, to);
                     if (this.InternalUnify(
@@ -259,7 +259,7 @@ namespace Favalet.Contexts
                         to, 
                         target,
                         /* derived from */ fromConstraint,
-                        Constraints.Free) is IExpression result)
+                        UnifyConstraints.Free) is IExpression result)
                     {
                         var combined = OrExpression.Create(to, result);
                         var calculated = context.TypeCalculator.Compute(combined);
@@ -296,8 +296,8 @@ namespace Favalet.Contexts
             IInferContext context,
             IExpression from,
             IExpression to,
-            Constraints fromConstraint,
-            Constraints toConstraint)
+            UnifyConstraints fromConstraint,
+            UnifyConstraints toConstraint)
         {
             Debug.Assert(!(from is IIgnoreUnificationTerm));
             Debug.Assert(!(to is IIgnoreUnificationTerm));
@@ -388,8 +388,8 @@ namespace Favalet.Contexts
             IInferContext context,
             IExpression from,
             IExpression to,
-            Constraints fromConstraint,
-            Constraints toConstraint)
+            UnifyConstraints fromConstraint,
+            UnifyConstraints toConstraint)
         {
             // Same as.
             if (object.ReferenceEquals(from, to))
@@ -428,14 +428,13 @@ namespace Favalet.Contexts
             IInferContext context,
             IExpression from,
             IExpression to,
-            bool fixedFrom,
-            bool fixedTo) =>
+            bool fixedAssignes) =>
             this.InternalUnify(
                 context,
                 from,
                 to,
-                fixedFrom ? Constraints.Equal : Constraints.Free,
-                fixedTo ? Constraints.Equal : Constraints.Free);
+                fixedAssignes ? UnifyConstraints.Fixed : UnifyConstraints.Free,
+                fixedAssignes ? UnifyConstraints.Fixed : UnifyConstraints.Free);
 
         public override IExpression? Resolve(int index)
         {

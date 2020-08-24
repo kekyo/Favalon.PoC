@@ -42,11 +42,11 @@ namespace Favalet.Inferring
 
             var actual = environment.Infer(expression);
 
-            // (a:int -> a:object):(int -> object)
+            // (a:int -> a:int):(int -> object)
             var expected =
                 Lambda(
                     BoundVariable("a", Type<int>()),
-                    Variable("a", Type<object>()),
+                    Variable("a", Type<int>()),
                     Function(
                         Type<int>(),
                         Type<object>()));

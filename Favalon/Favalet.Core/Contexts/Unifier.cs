@@ -27,6 +27,9 @@ namespace Favalet.Contexts
             this.Expression = expression;
             this.Constraint = constraint;
         }
+        
+        public ConstrainedExpression WithConstraint(Constraints constraint) =>
+            new ConstrainedExpression(this.Expression, constraint);
 
         public string GetPrettyString(PrettyStringTypes type) =>
             $"{this.Expression.GetPrettyString(type)},{this.Constraint}";
@@ -167,9 +170,7 @@ namespace Favalet.Contexts
         private ConstrainedExpression? InternalUnifyBothPlaceholders(
             IInferContext context,
             ConstrainedExpression from,
-            ConstrainedExpression to,
-            Constraints fromConstraint,
-            Constraints toConstraint)
+            ConstrainedExpression to)
         {
             Debug.Assert(from.Expression is IPlaceholderTerm);
             Debug.Assert(to.Expression is IPlaceholderTerm);
@@ -187,9 +188,8 @@ namespace Favalet.Contexts
                     if (this.InternalUnify(
                         context,
                         rfrom,
-                        rto,
-                        fromConstraint,
-                        toConstraint) is ConstrainedExpression result0)
+                        rto)
+                        is ConstrainedExpression result0)
                     {
                         this.Update(((IPlaceholderTerm)from.Expression).Index, result0);
                         this.Update(((IPlaceholderTerm)to.Expression).Index, result0);
@@ -197,20 +197,21 @@ namespace Favalet.Contexts
                     return null;
                 
                 case (true, false):
-                    if (fromConstraint == Constraints.Fixed)
+                    if (from.Constraint == Constraints.Fixed)
                     {
+                        // Force replaced.
                         this.Update(((IPlaceholderTerm)from.Expression).Index, to);
+
                         if (this.InternalUnify(
                             context,
-                            rfrom,
-                            to,
-                            Constraints.Free,
-                            /* derived from */ fromConstraint) is ConstrainedExpression result)
+                            rfrom.WithConstraint(Constraints.Free),
+                            to.WithConstraint(from.Constraint))  // derived from 
+                            is ConstrainedExpression result)
                         {
                             var combined = OrExpression.Create(to.Expression, result.Expression);
                             var calculated = context.TypeCalculator.Compute(combined);
 
-                            if (!calculated.Equals(result))
+                            if (!calculated.Equals(result.Expression))
                             {
                                 throw new InvalidOperationException(
                                     $"Cannot unify: {from} ==> {to}");
@@ -222,9 +223,8 @@ namespace Favalet.Contexts
                         if (this.InternalUnify(
                             context,
                             rfrom,
-                            to,
-                            fromConstraint,
-                            toConstraint) is ConstrainedExpression result)
+                            to)
+                            is ConstrainedExpression result)
                         {
                             this.Update(((IPlaceholderTerm)from.Expression).Index, result);
                         }
@@ -232,20 +232,21 @@ namespace Favalet.Contexts
                     return null;
                 
                 case (false, true):
-                    if (toConstraint == Constraints.Fixed)
+                    if (to.Constraint == Constraints.Fixed)
                     {
+                        // Force replaced.
                         this.Update(((IPlaceholderTerm)to.Expression).Index, from);
+
                         if (this.InternalUnify(
                             context,
-                            from,
-                            rto,
-                            /* derived to */ toConstraint,
-                            Constraints.Free) is ConstrainedExpression result)
+                            from.WithConstraint(to.Constraint),
+                            rto.WithConstraint(Constraints.Free))
+                            is ConstrainedExpression result)
                         {
                             var combined = OrExpression.Create(from.Expression, result.Expression);
                             var calculated = context.TypeCalculator.Compute(combined);
 
-                            if (!calculated.Equals(result))
+                            if (!calculated.Equals(result.Expression))
                             {
                                 throw new InvalidOperationException(
                                     $"Cannot unify: {from} ==> {to}");
@@ -257,9 +258,8 @@ namespace Favalet.Contexts
                         if (this.InternalUnify(
                             context,
                             from,
-                            rto,
-                            fromConstraint,
-                            toConstraint) is ConstrainedExpression result)
+                            rto)
+                            is ConstrainedExpression result)
                         {
                             this.Update(((IPlaceholderTerm)to.Expression).Index, result);
                         }
@@ -275,28 +275,27 @@ namespace Favalet.Contexts
         private ConstrainedExpression? InternalUnifyPlaceholder(
             IInferContext context,
             ConstrainedExpression from,
-            ConstrainedExpression to,
-            Constraints fromConstraint,
-            Constraints toConstraint)
+            ConstrainedExpression to)
         {
             Debug.Assert(from.Expression is IPlaceholderTerm);
 
             if (this.unifications.TryGetValue(((IPlaceholderTerm)from.Expression).Index, out var target))
             {
-                if (fromConstraint == Constraints.Fixed)
+                if (from.Constraint == Constraints.Fixed)
                 {
+                    // Force replaced.
                     this.Update(((IPlaceholderTerm)from.Expression).Index, to);
+                    
                     if (this.InternalUnify(
                         context,
-                        to, 
-                        target,
-                        /* derived from */ fromConstraint,
-                        Constraints.Free) is ConstrainedExpression result)
+                        to.WithConstraint(from.Constraint), 
+                        target.WithConstraint(Constraints.Free))
+                        is ConstrainedExpression result)
                     {
                         var combined = OrExpression.Create(to.Expression, result.Expression);
                         var calculated = context.TypeCalculator.Compute(combined);
 
-                        if (!calculated.Equals(result))
+                        if (!calculated.Equals(result.Expression))
                         {
                             throw new InvalidOperationException(
                                 $"Cannot unify: {from} ==> {to}");
@@ -307,10 +306,9 @@ namespace Favalet.Contexts
                 {
                     if (this.InternalUnify(
                         context,
-                        to,
-                        target,
-                        fromConstraint,
-                        toConstraint) is ConstrainedExpression result)
+                        to.WithConstraint(from.Constraint),
+                        target.WithConstraint(to.Constraint))
+                        is ConstrainedExpression result)
                     {
                         this.Update(((IPlaceholderTerm)from.Expression).Index, result);
                     }
@@ -327,9 +325,7 @@ namespace Favalet.Contexts
         private ConstrainedExpression? InternalUnifyCore(
             IInferContext context,
             ConstrainedExpression from,
-            ConstrainedExpression to,
-            Constraints fromConstraint,
-            Constraints toConstraint)
+            ConstrainedExpression to)
         {
             Debug.Assert(!(from.Expression is IIgnoreUnificationTerm));
             Debug.Assert(!(to.Expression is IIgnoreUnificationTerm));
@@ -351,9 +347,7 @@ namespace Favalet.Contexts
                         return this.InternalUnifyBothPlaceholders(
                             context,
                             from,
-                            to,
-                            fromConstraint,
-                            toConstraint);
+                            to);
                     }
                 }
                 else
@@ -362,9 +356,7 @@ namespace Favalet.Contexts
                     return this.InternalUnifyPlaceholder(
                         context,
                         from, 
-                        to,
-                        fromConstraint,
-                        toConstraint);
+                        to);
                 }
             }
             else if (to.Expression is IPlaceholderTerm)
@@ -372,10 +364,8 @@ namespace Favalet.Contexts
                 // Unify to placeholder.
                 return this.InternalUnifyPlaceholder(
                     context,
-                    to,             // Reversed order.
-                    from,
-                    toConstraint,    // Reversed order.
-                    fromConstraint);
+                    to,
+                    from);
             }
 
             if (from.Expression is IFunctionExpression(IExpression fp, IExpression fr) &&
@@ -384,16 +374,12 @@ namespace Favalet.Contexts
                 // Unify FunctionExpression.
                 var parameter = this.InternalUnify(
                     context,
-                    ConstrainedExpression.Create(fp),  // TODO: covariance?
-                    ConstrainedExpression.Create(tp),
-                    fromConstraint,
-                    toConstraint);
+                    ConstrainedExpression.Create(fp, from.Constraint),  // TODO: covariance?
+                    ConstrainedExpression.Create(tp, to.Constraint));
                 var result = this.InternalUnify(
                     context,
-                    ConstrainedExpression.Create(fr),  // TODO: covariance?
-                    ConstrainedExpression.Create(tr),
-                    fromConstraint,
-                    toConstraint);
+                    ConstrainedExpression.Create(fr, from.Constraint),  // TODO: covariance?
+                    ConstrainedExpression.Create(tr, to.Constraint));
 
                 if (parameter?.Expression is IExpression || result?.Expression is IExpression)
                 {
@@ -420,9 +406,7 @@ namespace Favalet.Contexts
         private ConstrainedExpression? InternalUnify(
             IInferContext context,
             ConstrainedExpression from,
-            ConstrainedExpression to,
-            Constraints fromConstraint,
-            Constraints toConstraint)
+            ConstrainedExpression to)
         {
             // Same as.
             if (object.ReferenceEquals(from.Expression, to.Expression))
@@ -441,18 +425,14 @@ namespace Favalet.Contexts
                     // Higher order unification.
                     this.InternalUnify(
                         context,
-                        ConstrainedExpression.Create(from.Expression.HigherOrder),
-                        ConstrainedExpression.Create(to.Expression.HigherOrder),
-                        fromConstraint,
-                        toConstraint);
+                        ConstrainedExpression.Create(from.Expression.HigherOrder, from.Constraint),
+                        ConstrainedExpression.Create(to.Expression.HigherOrder, to.Constraint));
 
                     // Unification.
                     return this.InternalUnifyCore(
                         context,
                         from,
-                        to,
-                        fromConstraint,
-                        toConstraint);
+                        to);
             }
         }
 
@@ -464,10 +444,8 @@ namespace Favalet.Contexts
             bool fixedAssignes) =>
             this.InternalUnify(
                 context,
-                ConstrainedExpression.Create(from),
-                ConstrainedExpression.Create(to),
-                fixedAssignes ? Constraints.Fixed : Constraints.Free,
-                fixedAssignes ? Constraints.Fixed : Constraints.Free);
+                ConstrainedExpression.Create(from, fixedAssignes ? Constraints.Fixed : Constraints.Free),
+                ConstrainedExpression.Create(to, fixedAssignes ? Constraints.Fixed : Constraints.Free));
 
         public override IExpression? Resolve(int index)
         {

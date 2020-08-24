@@ -70,13 +70,13 @@ namespace Favalet.Expressions.Specialized
 
         protected override IExpression Fixup(IFixupContext context)
         {
-            if (context.Resolve(this.Symbol) is IExpression resolved)
+            if (context.Resolve(this.Index) is IExpression resolved)
             {
                 return context.Fixup(resolved);
             }
             else
             {
-                var higherOrder = context.Fixup(this.HigherOrder);
+                var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
                 if (object.ReferenceEquals(this.HigherOrder, higherOrder))
                 {

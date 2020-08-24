@@ -22,8 +22,8 @@ namespace Favalet.Reducing
     [TestFixture]
     public sealed class TypeCalculatorTest
     {
-        private static readonly TypeCalculator calculator =
-            new TypeCalculator();
+        private static readonly CLRTypeCalculator calculator =
+            new CLRTypeCalculator();
 
         private static void AssertLogicalEqual(
             IExpression expression,

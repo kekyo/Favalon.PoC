@@ -7,7 +7,7 @@ namespace Favalet.Expressions.Specialized
 {
     [DebuggerStepThrough]
     internal sealed class DeadEndTerm :
-        Expression
+        Expression, IIgnoreUnificationTerm
     {
         private DeadEndTerm()
         { }

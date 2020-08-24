@@ -9,7 +9,7 @@ namespace Favalet
     public static class CLRGenerator
     {
         public static Environments CLREnvironment() =>
-            Favalet.Environments.Create(TypeCalculator.Instance);
+            Favalet.Environments.Create(CLRTypeCalculator.Instance);
 
         public static ITerm Type<T>() =>
             TypeTerm.From(typeof(T));

@@ -22,7 +22,11 @@ namespace Favalet.Contexts
     
         IInferContext Bind(IBoundVariableTerm parameter, IExpression expression);
 
-        void Unify(IExpression fromHigherOrder, IExpression toHigherOrder);
+        void Unify(
+            IExpression fromHigherOrder,
+            IExpression toHigherOrder,
+            bool fixedFrom = false,
+            bool fixedTo = false);
     }
 
     public interface IFixupContext
@@ -123,7 +127,7 @@ namespace Favalet.Contexts
             if (replacePlaceholder)
             {
                 var placeholder = this.rootScope.CreatePlaceholder(this.orderHint);
-                this.unifier.Unify(this, placeholder, rewritable);
+                this.Unify(placeholder, rewritable);
                 return placeholder;
             }
             else
@@ -181,8 +185,12 @@ namespace Favalet.Contexts
             this.Bind(symbol, expression);
 
         [DebuggerStepThrough]
-        public void Unify(IExpression fromHigherOrder, IExpression toHigherOrder) =>
-            this.unifier.Unify(this, fromHigherOrder, toHigherOrder);
+        public void Unify(
+            IExpression fromHigherOrder,
+            IExpression toHigherOrder,
+            bool fixedFrom = false,
+            bool fixedTo = false) =>
+            this.unifier.Unify(this, fromHigherOrder, toHigherOrder, fixedFrom, fixedTo);
 
         [DebuggerStepThrough]
         public override IExpression? Resolve(int index) =>

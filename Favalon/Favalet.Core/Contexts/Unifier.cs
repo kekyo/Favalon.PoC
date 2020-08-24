@@ -10,6 +10,12 @@ using System.Xml.Linq;
 
 namespace Favalet.Contexts
 {
+    internal enum Constraints
+    {
+        Free,
+        Equal
+    }
+    
     [DebuggerDisplay("{Simple}")]
     internal sealed class Unifier :
         FixupContext  // Because used by "Simple" property implementation.
@@ -136,7 +142,11 @@ namespace Favalet.Contexts
         }
 
         private IExpression? InternalUnifyBothPlaceholders(
-            IInferContext context, IPlaceholderTerm from, IPlaceholderTerm to)
+            IInferContext context,
+            IPlaceholderTerm from,
+            IPlaceholderTerm to,
+            Constraints fromConstraint,
+            Constraints toConstraint)
         {
             this.unifications.TryGetValue(from.Index, out var rfrom);
             this.unifications.TryGetValue(to.Index, out var rto);
@@ -144,7 +154,12 @@ namespace Favalet.Contexts
             switch (rfrom, rto)
             {
                 case (IExpression _, IExpression _):
-                    if (this.InternalUnify(context, rfrom, rto) is IExpression result0)
+                    if (this.InternalUnify(
+                        context,
+                        rfrom,
+                        rto,
+                        fromConstraint,
+                        toConstraint) is IExpression result0)
                     {
                         this.Update(from.Index, result0);
                         this.Update(to.Index, result0);
@@ -152,16 +167,72 @@ namespace Favalet.Contexts
                     return null;
                 
                 case (IExpression _, null):
-                    if (this.InternalUnify(context, rfrom, to) is IExpression result1)
+                    if (fromConstraint == Constraints.Equal)
                     {
-                        this.Update(from.Index, result1);
+                        this.Update(from.Index, to);
+                        if (this.InternalUnify(
+                            context,
+                            rfrom,
+                            to,
+                            Constraints.Free,
+                            /* derived from */ fromConstraint) is IExpression result)
+                        {
+                            var combined = OrExpression.Create(to, result);
+                            var calculated = context.TypeCalculator.Compute(combined);
+
+                            if (!calculated.Equals(result))
+                            {
+                                throw new InvalidOperationException(
+                                    $"Cannot unify: {from.GetPrettyString(PrettyStringTypes.Readable)} ==> {to.GetPrettyString(PrettyStringTypes.Readable)}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (this.InternalUnify(
+                            context,
+                            rfrom,
+                            to,
+                            fromConstraint,
+                            toConstraint) is IExpression result)
+                        {
+                            this.Update(from.Index, result);
+                        }
                     }
                     return null;
                 
                 case (null, IExpression _):
-                    if (this.InternalUnify(context, from, rto) is IExpression result2)
+                    if (toConstraint == Constraints.Equal)
                     {
-                        this.Update(to.Index, result2);
+                        this.Update(to.Index, from);
+                        if (this.InternalUnify(
+                            context,
+                            from,
+                            rto,
+                            /* derived to */ toConstraint,
+                            Constraints.Free) is IExpression result)
+                        {
+                            var combined = OrExpression.Create(from, result);
+                            var calculated = context.TypeCalculator.Compute(combined);
+
+                            if (!calculated.Equals(result))
+                            {
+                                throw new InvalidOperationException(
+                                    $"Cannot unify: {from.GetPrettyString(PrettyStringTypes.Readable)} ==> {to.GetPrettyString(PrettyStringTypes.Readable)}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (this.InternalUnify(
+                            context,
+                            from,
+                            rto,
+                            fromConstraint,
+                            toConstraint) is IExpression result)
+                        {
+                            this.Update(to.Index, result);
+                        }
                     }
                     return null;
                 
@@ -172,13 +243,45 @@ namespace Favalet.Contexts
         }
 
         private IExpression? InternalUnifyPlaceholder(
-            IInferContext context, IPlaceholderTerm from, IExpression to)
+            IInferContext context,
+            IPlaceholderTerm from,
+            IExpression to,
+            Constraints fromConstraint,
+            Constraints toConstraint)
         {
             if (this.unifications.TryGetValue(from.Index, out var target))
             {
-                if (this.InternalUnify(context, to, target) is IExpression result)
+                if (fromConstraint == Constraints.Equal)
                 {
-                    this.Update(from.Index, result);
+                    this.Update(from.Index, to);
+                    if (this.InternalUnify(
+                        context,
+                        to, 
+                        target,
+                        /* derived from */ fromConstraint,
+                        Constraints.Free) is IExpression result)
+                    {
+                        var combined = OrExpression.Create(to, result);
+                        var calculated = context.TypeCalculator.Compute(combined);
+
+                        if (!calculated.Equals(result))
+                        {
+                            throw new InvalidOperationException(
+                                $"Cannot unify: {from.GetPrettyString(PrettyStringTypes.Readable)} ==> {to.GetPrettyString(PrettyStringTypes.Readable)}");
+                        }
+                    }
+                }
+                else
+                {
+                    if (this.InternalUnify(
+                        context,
+                        to,
+                        target,
+                        fromConstraint,
+                        toConstraint) is IExpression result)
+                    {
+                        this.Update(from.Index, result);
+                    }
                 }
             }
             else
@@ -190,7 +293,11 @@ namespace Favalet.Contexts
         }
 
         private IExpression? InternalUnifyCore(
-            IInferContext context, IExpression from, IExpression to)
+            IInferContext context,
+            IExpression from,
+            IExpression to,
+            Constraints fromConstraint,
+            Constraints toConstraint)
         {
             Debug.Assert(!(from is IIgnoreUnificationTerm));
             Debug.Assert(!(to is IIgnoreUnificationTerm));
@@ -209,27 +316,52 @@ namespace Favalet.Contexts
                     else
                     {
                         // Unify both placeholders.
-                        return this.InternalUnifyBothPlaceholders(context, fph, tph);
+                        return this.InternalUnifyBothPlaceholders(
+                            context,
+                            fph,
+                            tph,
+                            fromConstraint,
+                            toConstraint);
                     }
                 }
                 else
                 {
                     // Unify from placeholder.
-                    return this.InternalUnifyPlaceholder(context, fph, to);
+                    return this.InternalUnifyPlaceholder(
+                        context,
+                        fph, 
+                        to,
+                        fromConstraint,
+                        toConstraint);
                 }
             }
             else if (to is IPlaceholderTerm tph)
             {
                 // Unify to placeholder.
-                return this.InternalUnifyPlaceholder(context, tph, from);
+                return this.InternalUnifyPlaceholder(
+                    context,
+                    tph,             // Reversed order.
+                    from,
+                    toConstraint,    // Reversed order.
+                    fromConstraint);
             }
 
             if (from is IFunctionExpression(IExpression fp, IExpression fr) &&
                 to is IFunctionExpression(IExpression tp, IExpression tr))
             {
                 // Unify FunctionExpression.
-                var parameter = this.InternalUnify(context, fp, tp);
-                var result = this.InternalUnify(context, fr, tr);
+                var parameter = this.InternalUnify(
+                    context,
+                    fp,
+                    tp,
+                    fromConstraint,  // TODO: covariance?
+                    toConstraint);
+                var result = this.InternalUnify(
+                    context,
+                    fr,
+                    tr,
+                    fromConstraint,  // TODO: covariance?
+                    toConstraint);
 
                 if (parameter is IExpression || result is IExpression)
                 {
@@ -253,7 +385,11 @@ namespace Favalet.Contexts
         }
 
         private IExpression? InternalUnify(
-            IInferContext context, IExpression from, IExpression to)
+            IInferContext context,
+            IExpression from,
+            IExpression to,
+            Constraints fromConstraint,
+            Constraints toConstraint)
         {
             // Same as.
             if (object.ReferenceEquals(from, to))
@@ -270,17 +406,36 @@ namespace Favalet.Contexts
 
                 default:
                     // Higher order unification.
-                    this.InternalUnify(context, from.HigherOrder, to.HigherOrder);
+                    this.InternalUnify(
+                        context,
+                        from.HigherOrder,
+                        to.HigherOrder,
+                        fromConstraint,
+                        toConstraint);
 
                     // Unification.
-                    return this.InternalUnifyCore(context, from, to);
+                    return this.InternalUnifyCore(
+                        context,
+                        from,
+                        to,
+                        fromConstraint,
+                        toConstraint);
             }
         }
 
         [DebuggerStepThrough]
         public void Unify(
-            IInferContext context, IExpression from, IExpression to) =>
-            this.InternalUnify(context, from, to);
+            IInferContext context,
+            IExpression from,
+            IExpression to,
+            bool fixedFrom,
+            bool fixedTo) =>
+            this.InternalUnify(
+                context,
+                from,
+                to,
+                fixedFrom ? Constraints.Equal : Constraints.Free,
+                fixedTo ? Constraints.Equal : Constraints.Free);
 
         public override IExpression? Resolve(int index)
         {

@@ -66,8 +66,6 @@ namespace Favalet.Expressions
 
         public string Xml =>
             this.GetXml().ToString();
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string Readable =>
             $"{this.Type}: {this.GetPrettyString(PrettyStringTypes.Readable)}";
 

@@ -25,7 +25,7 @@ namespace Favalet.Contexts
         void Unify(
             IExpression fromHigherOrder,
             IExpression toHigherOrder,
-            bool fixedAssignes = false);
+            bool @fixed = false);
     }
 
     public interface IFixupContext
@@ -187,8 +187,8 @@ namespace Favalet.Contexts
         public void Unify(
             IExpression fromHigherOrder,
             IExpression toHigherOrder,
-            bool fixedAssignes = false) =>
-            this.unifier.Unify(this, fromHigherOrder, toHigherOrder, fixedAssignes);
+            bool @fixed = false) =>
+            this.unifier.Unify(this, fromHigherOrder, toHigherOrder, @fixed);
 
         [DebuggerStepThrough]
         public override IExpression? Resolve(int index) =>

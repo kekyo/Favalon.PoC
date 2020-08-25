@@ -1,5 +1,4 @@
 ﻿using Favalet.Expressions;
-using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System.Collections.Generic;
@@ -38,7 +37,7 @@ namespace Favalet.Contexts
 
     public interface IScopeContext
     {
-        ILogicalCalculator TypeCalculator { get; }
+        ITypeCalculator TypeCalculator { get; }
 
         VariableInformation[] LookupVariables(string symbol);
     }
@@ -50,13 +49,13 @@ namespace Favalet.Contexts
         private Dictionary<string, List<VariableInformation>>? variables;
 
         [DebuggerStepThrough]
-        internal ScopeContext(ScopeContext? parent, ILogicalCalculator typeCalculator)
+        internal ScopeContext(ScopeContext? parent, ITypeCalculator typeCalculator)
         {
             this.parent = parent;
             this.TypeCalculator = typeCalculator;
         }
 
-        public ILogicalCalculator TypeCalculator { get; }
+        public ITypeCalculator TypeCalculator { get; }
 
         private protected void MutableBind(IBoundVariableTerm symbol, IExpression expression)
         {

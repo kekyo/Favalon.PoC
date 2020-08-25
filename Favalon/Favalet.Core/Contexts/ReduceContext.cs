@@ -15,8 +15,13 @@ namespace Favalet.Contexts
             bool replacePlaceholder = true);
     }
     
+    public interface IResolver
+    {
+        IExpression? Resolve(int index);
+    }
+
     public interface IInferContext :
-        IScopeContext, IMakeRewritableContext
+        IScopeContext, IMakeRewritableContext, IResolver
     {
         IExpression Infer(IExpression expression);
     
@@ -28,16 +33,15 @@ namespace Favalet.Contexts
             bool @fixed = false);
     }
 
-    public interface IFixupContext
+    public interface IFixupContext :
+        IResolver
     {
         IExpression Fixup(IExpression expression);
         IExpression FixupHigherOrder(IExpression higherOrder);
-
-        IExpression? Resolve(int index);
     }
 
     public interface IReduceContext :
-        IScopeContext
+        IScopeContext, IResolver
     {
         IExpression Reduce(IExpression expression);
     
@@ -47,10 +51,10 @@ namespace Favalet.Contexts
     internal abstract class FixupContext :
         IFixupContext
     {
-        private readonly ILogicalCalculator typeCalculator;
+        private readonly ITypeCalculator typeCalculator;
 
         [DebuggerStepThrough]
-        protected FixupContext(ILogicalCalculator typeCalculator) =>
+        protected FixupContext(ITypeCalculator typeCalculator) =>
             this.typeCalculator = typeCalculator;
 
         [DebuggerStepThrough]
@@ -64,7 +68,7 @@ namespace Favalet.Contexts
                 expr.InternalFixup(this) :
                 higherOrder;
 
-            return this.typeCalculator.Compute(fixupped);
+            return this.typeCalculator.Compute(fixupped, this);
         }
 
         public abstract IExpression? Resolve(int index);
@@ -92,7 +96,7 @@ namespace Favalet.Contexts
             this.unifier = unifier;
         }
 
-        public ILogicalCalculator TypeCalculator =>
+        public ITypeCalculator TypeCalculator =>
             this.rootScope.TypeCalculator;
 
         private IExpression MakeRewritable(

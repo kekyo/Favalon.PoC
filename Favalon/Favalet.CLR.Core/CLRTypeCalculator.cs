@@ -1,14 +1,16 @@
-﻿using Favalet.Expressions.Algebraic;
+﻿using System;
+using System.Reflection;
+using Favalet.Contexts;
+using Favalet.Expressions;
 using Favalet.Internal;
-using System;
 
-namespace Favalet.Expressions
+namespace Favalet
 {
     public sealed class CLRTypeCalculator :
-        LogicalCalculator
+        TypeCalculator
     {
         protected override ChoiceResults ChoiceForAnd(
-            IExpression left, IExpression right)
+            IExpression left, IExpression right, IResolver resolver)
         {
             // Narrowing
             if (left is ITypeTerm(Type lt) &&
@@ -24,11 +26,11 @@ namespace Favalet.Expressions
                 }
             }
 
-            return base.ChoiceForAnd(left, right);
+            return base.ChoiceForAnd(left, right, resolver);
         }
 
         protected override ChoiceResults ChoiceForOr(
-            IExpression left, IExpression right)
+            IExpression left, IExpression right, IResolver resolver)
         {
             // Widening
             if (left is ITypeTerm(Type lt) &&
@@ -44,7 +46,7 @@ namespace Favalet.Expressions
                 }
             }
 
-            return base.ChoiceForOr(left, right);
+            return base.ChoiceForOr(left, right, resolver);
         }
 
         public new static readonly CLRTypeCalculator Instance =

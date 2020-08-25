@@ -1,7 +1,6 @@
 ﻿using System;
 using Favalet.Contexts;
 using Favalet.Expressions;
-using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Diagnostics;
 using System.Linq;
@@ -24,7 +23,7 @@ namespace Favalet
         private int placeholderIndex = -1;
 
         [DebuggerStepThrough]
-        private Environments(ILogicalCalculator typeCalculator) :
+        private Environments(ITypeCalculator typeCalculator) :
             base(null, typeCalculator)
         { }
 
@@ -105,7 +104,7 @@ namespace Favalet
             base.MutableBind(symbol, expression);
 
         [DebuggerStepThrough]
-        public static Environments Create(ILogicalCalculator typeCalculator)
+        public static Environments Create(ITypeCalculator typeCalculator)
         {
             var environment = new Environments(typeCalculator);
             return environment;

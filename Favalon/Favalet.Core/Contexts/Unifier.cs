@@ -24,7 +24,7 @@ namespace Favalet.Contexts
             new Dictionary<int, IExpression>();
 
         [DebuggerStepThrough]
-        private Unifier(ILogicalCalculator typeCalculator) :
+        private Unifier(ITypeCalculator typeCalculator) :
             base(typeCalculator)
         {
         }
@@ -155,7 +155,7 @@ namespace Favalet.Contexts
                     context, lookuppedFrom, to, @fixed) is IExpression result)
                 {
                     var combined = OrExpression.Create(to, result);
-                    var calculated = context.TypeCalculator.Compute(combined);
+                    var calculated = context.TypeCalculator.Compute(combined, context);
 
                     if (!calculated.Equals(result))
                     {
@@ -287,7 +287,7 @@ namespace Favalet.Contexts
             }
 
             var combined = OrExpression.Create(from, to);
-            var calculated = context.TypeCalculator.Compute(combined);
+            var calculated = context.TypeCalculator.Compute(combined, context);
 
             var rewritable = context.MakeRewritable(calculated);
             var inferred = context.Infer(rewritable);
@@ -366,7 +366,7 @@ namespace Favalet.Contexts
             "Unifier: " + this.Simple;
         
         [DebuggerStepThrough]
-        public static Unifier Create(ILogicalCalculator typeCalculator) =>
+        public static Unifier Create(ITypeCalculator typeCalculator) =>
             new Unifier(typeCalculator);
     }
 }

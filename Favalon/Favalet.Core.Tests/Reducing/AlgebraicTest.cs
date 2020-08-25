@@ -1,6 +1,7 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
+using Favalet.Internal;
 using NUnit.Framework;
 
 using static Favalet.Generator;
@@ -10,15 +11,15 @@ namespace Favalet.Reducing
     [TestFixture]
     public sealed class AlgebraicTest
     {
-        private static readonly LogicalCalculator calculator =
-            new LogicalCalculator();
+        private static readonly LogicalCalculator<Unit> calculator =
+            LogicalCalculator<Unit>.Instance;
 
         private static void AssertLogicalEqual(
             IExpression expression,
             IExpression expected,
             IExpression actual)
         {
-            if (!calculator.ExactEquals(expected, actual))
+            if (!calculator.ExactEquals(expected, actual, default))
             {
                 Assert.Fail(
                     "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",

@@ -154,10 +154,13 @@ namespace Favalet.Contexts
                 if (this.InternalUnify(
                     context, lookuppedFrom, to, @fixed) is IExpression result)
                 {
-                    var combined = OrExpression.Create(to, result);
+                    var rresult = this.UnsafeResolveWhile(result);
+                    var tresult = this.UnsafeResolveWhile(to);
+                    
+                    var combined = OrExpression.Create(tresult, rresult);
                     var calculated = context.TypeCalculator.Compute(combined, context);
 
-                    if (!calculated.Equals(result))
+                    if (!calculated.Equals(rresult))
                     {
                         throw new InvalidOperationException(
                             $"Cannot unify: {from.GetPrettyString(PrettyStringTypes.Readable)} ==> {to.GetPrettyString(PrettyStringTypes.Readable)}");
@@ -339,7 +342,9 @@ namespace Favalet.Contexts
 #if DEBUG
             this.Occur(PlaceholderMarker.Create(), index);
 #endif
-            return this.unifications.TryGetValue(index, out var resolved) ? resolved : null;
+            return this.unifications.TryGetValue(index, out var resolved) ?
+                resolved :
+                null;
         }
 
         public string Xml =>

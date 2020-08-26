@@ -2,7 +2,7 @@
 using Favalet.Expressions;
 using NUnit.Framework;
 using System;
-
+using Favalet.Expressions.Specialized;
 using static Favalet.CLRGenerator;
 using static Favalet.Generator;
 
@@ -21,15 +21,17 @@ namespace Favalet.Reducing
     [TestFixture]
     public sealed class TypeCalculatorTest
     {
-        internal sealed class DummyResolver : IResolver
+        private sealed class DummyResolver : IPlaceholderResolver
         {
             public IExpression? Resolve(int index) =>
+                null;
+            public IExpression? Resolve(IPlaceholderTerm placeholder) =>
                 null;
         }
 
         private static readonly CLRTypeCalculator calculator =
             new CLRTypeCalculator();
-        private static readonly IResolver resolver =
+        private static readonly IPlaceholderResolver resolver =
             new DummyResolver();
 
         private static void AssertLogicalEqual(

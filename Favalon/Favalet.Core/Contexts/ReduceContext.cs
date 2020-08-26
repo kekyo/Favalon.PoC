@@ -15,13 +15,45 @@ namespace Favalet.Contexts
             bool replacePlaceholder = true);
     }
     
-    public interface IResolver
+    public interface IPlaceholderResolver
     {
         IExpression? Resolve(int index);
     }
 
+    public static class PlaceholderResolverExtension
+    {
+        public static IExpression UnsafeResolveWhile(this IPlaceholderResolver resolver, IExpression expression)
+        {
+            var current = expression;
+            while (true)
+            {
+                switch (current)
+                {
+                    case IPlaceholderTerm placeholder:
+                        if (resolver.Resolve(placeholder.Index) is IExpression resolved)
+                        {
+                            current = resolved;
+                            continue;
+                        }
+                        else
+                        {
+                            return current;
+                        }
+                    
+                    case IFunctionExpression(IExpression parameter, IExpression result):
+                        return FunctionExpression.Create(
+                            UnsafeResolveWhile(resolver, parameter),
+                            UnsafeResolveWhile(resolver, result));
+                    
+                    default:
+                        return current;
+                }
+            }
+        }
+    }
+
     public interface IInferContext :
-        IScopeContext, IMakeRewritableContext, IResolver
+        IScopeContext, IMakeRewritableContext, IPlaceholderResolver
     {
         IExpression Infer(IExpression expression);
     
@@ -34,14 +66,14 @@ namespace Favalet.Contexts
     }
 
     public interface IFixupContext :
-        IResolver
+        IPlaceholderResolver
     {
         IExpression Fixup(IExpression expression);
         IExpression FixupHigherOrder(IExpression higherOrder);
     }
 
     public interface IReduceContext :
-        IScopeContext, IResolver
+        IScopeContext, IPlaceholderResolver
     {
         IExpression Reduce(IExpression expression);
     

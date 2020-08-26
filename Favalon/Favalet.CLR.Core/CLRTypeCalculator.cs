@@ -10,7 +10,7 @@ namespace Favalet
         TypeCalculator
     {
         protected override ChoiceResults ChoiceForAnd(
-            IExpression left, IExpression right, IResolver resolver)
+            IExpression left, IExpression right, IPlaceholderResolver resolver)
         {
             // Narrowing
             if (left is ITypeTerm(Type lt) &&
@@ -30,7 +30,7 @@ namespace Favalet
         }
 
         protected override ChoiceResults ChoiceForOr(
-            IExpression left, IExpression right, IResolver resolver)
+            IExpression left, IExpression right, IPlaceholderResolver resolver)
         {
             // Widening
             if (left is ITypeTerm(Type lt) &&

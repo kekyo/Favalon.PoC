@@ -7,12 +7,19 @@ using System.Reflection;
 
 namespace Favalet.Contexts
 {
+    public enum HigherOrderAttributes
+    {
+        None,
+        Placeholder,
+        FixedPlaceholder
+    }
+    
     public interface IMakeRewritableContext
     {
         IExpression MakeRewritable(IExpression expression);
         IExpression MakeRewritableHigherOrder(
             IExpression higherOrder,
-            bool replacePlaceholder = true);
+            HigherOrderAttributes attribute = HigherOrderAttributes.Placeholder);
     }
     
     public interface IUnsafePlaceholderResolver
@@ -137,7 +144,7 @@ namespace Favalet.Contexts
             this.rootScope.TypeCalculator;
 
         private IExpression MakeRewritable(
-            IExpression expression, bool replacePlaceholder)
+            IExpression expression, HigherOrderAttributes attribute)
         {
             if (this.orderHint >= PlaceholderOrderHints.DeadEnd)
             {
@@ -164,10 +171,10 @@ namespace Favalet.Contexts
             }
 
             // Replace a placeholder term if required.
-            if (replacePlaceholder)
+            if (attribute != HigherOrderAttributes.None)
             {
                 var placeholder = this.rootScope.CreatePlaceholder(this.orderHint);
-                this.Unify(placeholder, rewritable);
+                this.Unify(placeholder, rewritable, attribute == HigherOrderAttributes.FixedPlaceholder);
                 return placeholder;
             }
             else
@@ -178,15 +185,15 @@ namespace Favalet.Contexts
 
         [DebuggerStepThrough]
         public IExpression MakeRewritable(IExpression expression) =>
-            this.MakeRewritable(expression, false);
+            this.MakeRewritable(expression, HigherOrderAttributes.None);
             
         public IExpression MakeRewritableHigherOrder(
             IExpression higherOrder,
-            bool replacePlaceholder = true)
+            HigherOrderAttributes attribute = HigherOrderAttributes.Placeholder)
         {
             this.orderHint++;
             
-            var rewritable = this.MakeRewritable(higherOrder, replacePlaceholder);
+            var rewritable = this.MakeRewritable(higherOrder, attribute);
             
             this.orderHint--;
             Debug.Assert(this.orderHint >= PlaceholderOrderHints.VariableOrAbove);

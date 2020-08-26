@@ -183,38 +183,71 @@ namespace Favalet.Contexts
             IInferContext context,
             IPlaceholderTerm from,
             IExpression to,
-            IExpression examinedFrom,
+            Unification examinedFrom,
             bool @fixed)
         {
-            if (@fixed)
+            // (origin, current)
+            switch (examinedFrom.Fixed, @fixed)
             {
-                // Force update.
-                this.Update(from.Index, to, @fixed);
-                
-                // Must reinterprets examinedFrom.
-                if (this.InternalUnify(
-                    context, examinedFrom, to, @fixed) is IExpression result)
-                {
-                    var rresult = this.UnsafeResolveWhile(result);
-                    var tresult = this.UnsafeResolveWhile(to);
-                    
-                    var combined = OrExpression.Create(tresult, rresult);
-                    var calculated = context.TypeCalculator.Compute(combined);
-
-                    if (!calculated.Equals(rresult))
+                case (true, true):
+                    // Cannot update `from.Index`, will check only compatibility.
+                    if (this.InternalUnify(
+                        context, examinedFrom.Expression, to, @fixed) is IExpression result0)
                     {
-                        throw new InvalidOperationException(
-                            $"Cannot unify: {from.GetPrettyString(PrettyStringTypes.Readable)} ==> {to.GetPrettyString(PrettyStringTypes.Readable)}");
+                        var rresult = this.UnsafeResolveWhile(result0);
+                        var tresult = this.UnsafeResolveWhile(to);
+                    
+                        var combined = OrExpression.Create(tresult, rresult);
+                        var calculated = context.TypeCalculator.Compute(combined);
+
+                        if (!calculated.Equals(rresult))
+                        {
+                            throw new InvalidOperationException(
+                                $"Cannot unify: {from.GetPrettyString(PrettyStringTypes.Readable)} ==> {to.GetPrettyString(PrettyStringTypes.Readable)}");
+                        }
                     }
-                }
-            }
-            else
-            {
-                if (this.InternalUnify(
-                    context, examinedFrom, to, @fixed) is IExpression result)
-                {
-                    this.Update(from.Index, result, @fixed);
-                }
+                    break;
+                
+                case (false, true):
+                    // Force update.
+                    this.Update(from.Index, to, @fixed);
+                
+                    // Must reinterprets examinedFrom.
+                    if (this.InternalUnify(
+                        context, examinedFrom.Expression, to, @fixed) is IExpression result1)
+                    {
+                        var rresult = this.UnsafeResolveWhile(result1);
+                        var tresult = this.UnsafeResolveWhile(to);
+                    
+                        var combined = OrExpression.Create(tresult, rresult);
+                        var calculated = context.TypeCalculator.Compute(combined);
+
+                        if (!calculated.Equals(rresult))
+                        {
+                            throw new InvalidOperationException(
+                                $"Cannot unify: {from.GetPrettyString(PrettyStringTypes.Readable)} ==> {to.GetPrettyString(PrettyStringTypes.Readable)}");
+                        }
+                    }
+                    break;
+                
+                default:
+                    // Derived fixed attribute.
+                    var ffixed = examinedFrom.Fixed || @fixed;
+                    
+                    if (this.InternalUnify(
+                        context, examinedFrom.Expression, to, ffixed) is IExpression result2)
+                    {
+                        if (!examinedFrom.Fixed)
+                        {
+                            this.Update(from.Index, result2, ffixed);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException(
+                                $"Cannot unify: {from.GetPrettyString(PrettyStringTypes.Readable)} ==> {to.GetPrettyString(PrettyStringTypes.Readable)}");
+                        }
+                    }
+                    break;
             }
         }
 
@@ -244,12 +277,12 @@ namespace Favalet.Contexts
                 
                 case (true, false):
                     this.InternalUnifyPlaceholder(
-                        context, from, to, rfrom.Expression, rfrom.Fixed || @fixed);
+                        context, from, to, rfrom, @fixed);
                     break;
                 
                 case (false, true):
                     this.InternalUnifyPlaceholder(
-                        context, to, from, rto.Expression, rto.Fixed || @fixed);
+                        context, to, from, rto, @fixed);
                     break;
                 
                 default:
@@ -267,7 +300,7 @@ namespace Favalet.Contexts
             if (this.unifications.TryGetValue(from.Index, out var rfrom))
             {
                 this.InternalUnifyPlaceholder(
-                    context, from, to, rfrom.Expression, rfrom.Fixed || @fixed);
+                    context, from, to, rfrom, @fixed);
             }
             else
             {

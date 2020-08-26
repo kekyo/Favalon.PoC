@@ -21,9 +21,33 @@ namespace Favalet.Contexts
         FixupContext,  // Because used by "Simple" property implementation.
         IUnsafePlaceholderResolver
     {
-        private readonly Dictionary<int, IExpression> unifications =
-            new Dictionary<int, IExpression>();
+        [DebuggerStepThrough]
+        private readonly struct Unification
+        {
+            public readonly IExpression Expression;
+            public readonly bool Fixed;
 
+            private Unification(IExpression expression, bool @fixed)
+            {
+                this.Expression = expression;
+                this.Fixed = @fixed;
+            }
+
+            public string ToString(PrettyStringTypes type)
+            {
+                var @fixed = this.Fixed ? ",Fixed" : string.Empty;
+                return $"{this.Expression.GetPrettyString(type)}{@fixed}";
+            }
+            public override string ToString() =>
+                this.ToString(PrettyStringTypes.Readable);
+
+            public static Unification Create(IExpression expression, bool @fixed) =>
+                new Unification(expression, @fixed);
+        }
+        
+        private readonly Dictionary<int, Unification> unifications =
+            new Dictionary<int, Unification>();
+        
         [DebuggerStepThrough]
         private Unifier(ITypeCalculator typeCalculator) :
             base(typeCalculator)
@@ -100,14 +124,14 @@ namespace Favalet.Contexts
                 {
                     if (this.unifications.TryGetValue(targetIndex, out var resolved))
                     {
-                        if (resolved is IPlaceholderTerm placeholder)
+                        if (resolved.Expression is IPlaceholderTerm placeholder)
                         {
                             targetIndex = placeholder.Index;
                             continue;
                         }
                         else
                         {
-                            this.Occur(marker, resolved);
+                            this.Occur(marker, resolved.Expression);
                         }
                     }
 
@@ -125,35 +149,51 @@ namespace Favalet.Contexts
             }
         }
 
-        private void Update(int index, IExpression expression)
+        private void Update(int index, IExpression expression, bool @fixed)
         {
-#if DEBUG
-            if (this.unifications.TryGetValue(index, out var origin))
+            if (this.unifications.TryGetValue(index, out var lastUnification))
             {
-                if (!origin.Equals(expression))
+                var unification = Unification.Create(
+                    expression,
+                    lastUnification.Fixed || @fixed);     // Derived if already fixed.
+                
+                if (!lastUnification.Equals(unification))
                 {
+                    this.unifications[index] = unification;
+
                     Debug.WriteLine(
-                        $"Unifier.Update: '{index}: {origin.GetPrettyString(PrettyStringTypes.Readable)} ==> {expression.GetPrettyString(PrettyStringTypes.Readable)}");
+                        $"Unifier.Update: '{index}: {lastUnification} ==> {unification}");
+
+                    this.Occur(PlaceholderMarker.Create(), index);
                 }
             }
-#endif
-            this.unifications[index] = expression;
-            
-            this.Occur(PlaceholderMarker.Create(), index);
+            else
+            {
+                var unification = Unification.Create(expression, @fixed);
+                this.unifications.Add(index, unification);
+
+                Debug.WriteLine(
+                    $"Unifier.Update: '{index}: {unification}");
+
+                this.Occur(PlaceholderMarker.Create(), index);
+            }
         }
 
         private void InternalUnifyPlaceholder(
             IInferContext context,
             IPlaceholderTerm from,
             IExpression to,
-            IExpression lookuppedFrom,
+            IExpression examinedFrom,
             bool @fixed)
         {
             if (@fixed)
             {
-                this.Update(from.Index, to);
+                // Force update.
+                this.Update(from.Index, to, @fixed);
+                
+                // Must reinterprets examinedFrom.
                 if (this.InternalUnify(
-                    context, lookuppedFrom, to, @fixed) is IExpression result)
+                    context, examinedFrom, to, @fixed) is IExpression result)
                 {
                     var rresult = this.UnsafeResolveWhile(result);
                     var tresult = this.UnsafeResolveWhile(to);
@@ -171,9 +211,9 @@ namespace Favalet.Contexts
             else
             {
                 if (this.InternalUnify(
-                    context, lookuppedFrom, to, @fixed) is IExpression result)
+                    context, examinedFrom, to, @fixed) is IExpression result)
                 {
-                    this.Update(from.Index, result);
+                    this.Update(from.Index, result, @fixed);
                 }
             }
         }
@@ -184,32 +224,36 @@ namespace Favalet.Contexts
             IPlaceholderTerm to,
             bool @fixed)
         {
-            this.unifications.TryGetValue(from.Index, out var rfrom);
-            this.unifications.TryGetValue(to.Index, out var rto);
+            var rf = this.unifications.TryGetValue(from.Index, out var rfrom);
+            var rt = this.unifications.TryGetValue(to.Index, out var rto);
             
-            switch (rfrom, rto)
+            switch (rf, rt)
             {
-                case (IExpression _, IExpression _):
+                case (true, true):
+                    var rfixed = rfrom.Fixed || rto.Fixed || @fixed;     // Derived if already fixed.
                     if (this.InternalUnify(
-                        context, rfrom, rto, @fixed) is IExpression result0)
+                        context,
+                        rfrom.Expression,
+                        rto.Expression,
+                        rfixed) is IExpression result0)
                     {
-                        this.Update(from.Index, result0);
-                        this.Update(to.Index, result0);
+                        this.Update(from.Index, result0, rfixed);
+                        this.Update(to.Index, result0, rfixed);
                     }
                     break;
                 
-                case (IExpression _, null):
+                case (true, false):
                     this.InternalUnifyPlaceholder(
-                        context, from, to, rfrom, @fixed);
+                        context, from, to, rfrom.Expression, rfrom.Fixed || @fixed);
                     break;
                 
-                case (null, IExpression _):
+                case (false, true):
                     this.InternalUnifyPlaceholder(
-                        context, to, from, rto, @fixed);
+                        context, to, from, rto.Expression, rto.Fixed || @fixed);
                     break;
                 
                 default:
-                    this.Update(from.Index, to);
+                    this.Update(from.Index, to, @fixed);
                     break;
             }
         }
@@ -223,11 +267,11 @@ namespace Favalet.Contexts
             if (this.unifications.TryGetValue(from.Index, out var rfrom))
             {
                 this.InternalUnifyPlaceholder(
-                    context, from, to, rfrom, @fixed);
+                    context, from, to, rfrom.Expression, rfrom.Fixed || @fixed);
             }
             else
             {
-                this.Update(from.Index, to);
+                this.Update(from.Index, to, @fixed);
             }
         }
 
@@ -273,9 +317,9 @@ namespace Favalet.Contexts
                 to is IFunctionExpression(IExpression tp, IExpression tr))
             {
                 // Unify FunctionExpression.
-                var parameter = this.InternalUnify(  // TODO: covariance?
+                var parameter = this.InternalUnify(
                     context, fp, tp, @fixed);
-                var result = this.InternalUnify(  // TODO: contravariance?
+                var result = this.InternalUnify(
                     context, fr, tr, @fixed);
 
                 if (parameter is IExpression || result is IExpression)
@@ -344,7 +388,7 @@ namespace Favalet.Contexts
             this.Occur(PlaceholderMarker.Create(), index);
 #endif
             return this.unifications.TryGetValue(index, out var resolved) ?
-                resolved :
+                resolved.Expression :
                 null;
         }
 
@@ -353,7 +397,7 @@ namespace Favalet.Contexts
                 "Unifier",
                 this.unifications.OrderBy(entry => entry.Key).Select(entry => new XElement("Unification",
                     new XAttribute("symbol", entry.Key),
-                    entry.Value.GetXml())).Memoize()).ToString();
+                    entry.Value.Expression.GetXml())).Memoize()).ToString();
         
         public string Simple =>
             StringUtilities.Join(
@@ -361,9 +405,10 @@ namespace Favalet.Contexts
                 this.unifications.
                 OrderBy(entry => entry.Key).
                 Select(entry => string.Format(
-                    "{0} --> {1}{2}",
+                    "'{0} ==> {1}{2}",
                     entry.Key,
-                    entry.Value.GetPrettyString(PrettyStringTypes.Minimum),
+                    entry.Value.ToString(PrettyStringTypes.Minimum),
+                    // It will not resolve any function types.
                     this.Resolve(entry.Key) is IExpression expr ?
                         $" [{this.Fixup(expr).GetPrettyString(PrettyStringTypes.Readable)}]" :
                         string.Empty)));

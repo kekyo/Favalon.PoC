@@ -37,7 +37,7 @@ namespace Favalet.Expressions.Algebraic
             this.Operand.GetHashCode();
 
         public bool Equals(ILogicalExpression rhs) =>
-            LogicalCalculator<Unit>.Instance.Equals(this.Operand, rhs.Operand, default);
+            LogicalCalculator.Instance.Equals(this.Operand, rhs.Operand);
 
         public override bool Equals(IExpression? other) =>
             other is ILogicalExpression rhs && this.Equals(rhs);
@@ -82,7 +82,7 @@ namespace Favalet.Expressions.Algebraic
         }
 
         protected override IExpression Reduce(IReduceContext context) =>
-            LogicalCalculator<Unit>.Instance.Compute(context.Reduce(this.Operand), default);
+            LogicalCalculator.Instance.Compute(context.Reduce(this.Operand));
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             new[] { context.GetXml(this.Operand) };

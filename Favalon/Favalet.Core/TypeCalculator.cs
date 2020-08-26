@@ -7,24 +7,21 @@ namespace Favalet
 {
     public interface ITypeCalculator
     {
-        IExpression Compute(IExpression operand, IPlaceholderResolver resolver);
+        IExpression Compute(IExpression operand);
     }
     
     public class TypeCalculator :
-        LogicalCalculator<IPlaceholderResolver>, ITypeCalculator
+        LogicalCalculator, ITypeCalculator
     {
         protected override ChoiceResults ChoiceForAnd(
-            IExpression left, IExpression right, IPlaceholderResolver resolver)
+            IExpression left, IExpression right)
         {
-            var l = resolver.UnsafeResolveWhile(left);
-            var r = resolver.UnsafeResolveWhile(right);
-            
             // Function variance:
-            if (l is IFunctionExpression(IExpression lp, IExpression lr) &&
-                r is IFunctionExpression(IExpression rp, IExpression rr))
+            if (left is IFunctionExpression(IExpression lp, IExpression lr) &&
+                right is IFunctionExpression(IExpression rp, IExpression rr))
             {
                 // Contravariance.
-                switch (this.ChoiceForAnd(lp, rp, resolver), this.ChoiceForOr(lr, rr, resolver))
+                switch (this.ChoiceForAnd(lp, rp), this.ChoiceForOr(lr, rr))
                 {
                     case (ChoiceResults.AcceptLeft, ChoiceResults.Equal):
                     case (ChoiceResults.AcceptLeft, ChoiceResults.AcceptLeft):
@@ -37,21 +34,18 @@ namespace Favalet
                 }
             }
 
-            return base.ChoiceForAnd(left, right, resolver);
+            return base.ChoiceForAnd(left, right);
         }
 
         protected override ChoiceResults ChoiceForOr(
-            IExpression left, IExpression right, IPlaceholderResolver resolver)
+            IExpression left, IExpression right)
         {
-            var l = resolver.UnsafeResolveWhile(left);
-            var r = resolver.UnsafeResolveWhile(right);
-            
             // Function variance:
-            if (l is IFunctionExpression(IExpression lp, IExpression lr) &&
-                r is IFunctionExpression(IExpression rp, IExpression rr))
+            if (left is IFunctionExpression(IExpression lp, IExpression lr) &&
+                right is IFunctionExpression(IExpression rp, IExpression rr))
             {
                 // Covariance.
-                switch (this.ChoiceForOr(lp, rp, resolver), this.ChoiceForAnd(lr, rr, resolver))
+                switch (this.ChoiceForOr(lp, rp), this.ChoiceForAnd(lr, rr))
                 {
                     case (ChoiceResults.AcceptLeft, ChoiceResults.Equal):
                     case (ChoiceResults.AcceptLeft, ChoiceResults.AcceptLeft):
@@ -64,7 +58,7 @@ namespace Favalet
                 }
             }
 
-            return base.ChoiceForOr(left, right, resolver);
+            return base.ChoiceForOr(left, right);
         }
 
         public new static readonly TypeCalculator Instance =

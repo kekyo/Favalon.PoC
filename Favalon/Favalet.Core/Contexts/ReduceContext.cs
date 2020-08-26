@@ -15,14 +15,14 @@ namespace Favalet.Contexts
             bool replacePlaceholder = true);
     }
     
-    public interface IPlaceholderResolver
+    public interface IUnsafePlaceholderResolver
     {
-        IExpression? Resolve(int index);
+        IExpression? UnsafeResolve(int index);
     }
 
-    public static class PlaceholderResolverExtension
+    public static class UnsafePlaceholderResolverExtension
     {
-        public static IExpression UnsafeResolveWhile(this IPlaceholderResolver resolver, IExpression expression)
+        public static IExpression UnsafeResolveWhile(this IUnsafePlaceholderResolver resolver, IExpression expression)
         {
             var current = expression;
             while (true)
@@ -30,7 +30,7 @@ namespace Favalet.Contexts
                 switch (current)
                 {
                     case IPlaceholderTerm placeholder:
-                        if (resolver.Resolve(placeholder.Index) is IExpression resolved)
+                        if (resolver.UnsafeResolve(placeholder.Index) is IExpression resolved)
                         {
                             current = resolved;
                             continue;
@@ -53,7 +53,7 @@ namespace Favalet.Contexts
     }
 
     public interface IInferContext :
-        IScopeContext, IMakeRewritableContext, IPlaceholderResolver
+        IScopeContext, IMakeRewritableContext, IUnsafePlaceholderResolver
     {
         IExpression Infer(IExpression expression);
     
@@ -65,15 +65,16 @@ namespace Favalet.Contexts
             bool @fixed = false);
     }
 
-    public interface IFixupContext :
-        IPlaceholderResolver
+    public interface IFixupContext
     {
         IExpression Fixup(IExpression expression);
         IExpression FixupHigherOrder(IExpression higherOrder);
+        
+        IExpression? Resolve(int index);
     }
 
     public interface IReduceContext :
-        IScopeContext, IPlaceholderResolver
+        IScopeContext
     {
         IExpression Reduce(IExpression expression);
     
@@ -81,7 +82,7 @@ namespace Favalet.Contexts
     }
 
     internal abstract class FixupContext :
-        IFixupContext
+        IFixupContext, IUnsafePlaceholderResolver
     {
         private readonly ITypeCalculator typeCalculator;
 
@@ -100,10 +101,14 @@ namespace Favalet.Contexts
                 expr.InternalFixup(this) :
                 higherOrder;
 
-            return this.typeCalculator.Compute(fixupped, this);
+            return this.typeCalculator.Compute(fixupped);
         }
 
         public abstract IExpression? Resolve(int index);
+
+        [DebuggerStepThrough]
+        IExpression? IUnsafePlaceholderResolver.UnsafeResolve(int index) =>
+            this.Resolve(index);
     }
 
     internal sealed partial class ReduceContext :

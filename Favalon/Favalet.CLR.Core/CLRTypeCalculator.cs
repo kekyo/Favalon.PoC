@@ -10,7 +10,7 @@ namespace Favalet
         TypeCalculator
     {
         protected override ChoiceResults ChoiceForAnd(
-            IExpression left, IExpression right, IPlaceholderResolver resolver)
+            IExpression left, IExpression right)
         {
             // Narrowing
             if (left is ITypeTerm(Type lt) &&
@@ -26,11 +26,11 @@ namespace Favalet
                 }
             }
 
-            return base.ChoiceForAnd(left, right, resolver);
+            return base.ChoiceForAnd(left, right);
         }
 
         protected override ChoiceResults ChoiceForOr(
-            IExpression left, IExpression right, IPlaceholderResolver resolver)
+            IExpression left, IExpression right)
         {
             // Widening
             if (left is ITypeTerm(Type lt) &&
@@ -46,7 +46,7 @@ namespace Favalet
                 }
             }
 
-            return base.ChoiceForOr(left, right, resolver);
+            return base.ChoiceForOr(left, right);
         }
 
         public new static readonly CLRTypeCalculator Instance =

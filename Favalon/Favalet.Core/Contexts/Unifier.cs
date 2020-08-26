@@ -18,7 +18,8 @@ namespace Favalet.Contexts
     
     [DebuggerDisplay("{Simple}")]
     internal sealed class Unifier :
-        FixupContext  // Because used by "Simple" property implementation.
+        FixupContext,  // Because used by "Simple" property implementation.
+        IUnsafePlaceholderResolver
     {
         private readonly Dictionary<int, IExpression> unifications =
             new Dictionary<int, IExpression>();
@@ -158,7 +159,7 @@ namespace Favalet.Contexts
                     var tresult = this.UnsafeResolveWhile(to);
                     
                     var combined = OrExpression.Create(tresult, rresult);
-                    var calculated = context.TypeCalculator.Compute(combined, context);
+                    var calculated = context.TypeCalculator.Compute(combined);
 
                     if (!calculated.Equals(rresult))
                     {
@@ -290,7 +291,7 @@ namespace Favalet.Contexts
             }
 
             var combined = OrExpression.Create(from, to);
-            var calculated = context.TypeCalculator.Compute(combined, context);
+            var calculated = context.TypeCalculator.Compute(combined);
 
             var rewritable = context.MakeRewritable(calculated);
             var inferred = context.Infer(rewritable);
@@ -362,7 +363,7 @@ namespace Favalet.Contexts
                 Select(entry => string.Format(
                     "{0} --> {1}{2}",
                     entry.Key,
-                    entry.Value.GetPrettyString(PrettyStringTypes.ReadableWithoutHigherOrder),
+                    entry.Value.GetPrettyString(PrettyStringTypes.Minimum),
                     this.Resolve(entry.Key) is IExpression expr ?
                         $" [{this.Fixup(expr).GetPrettyString(PrettyStringTypes.Readable)}]" :
                         string.Empty)));

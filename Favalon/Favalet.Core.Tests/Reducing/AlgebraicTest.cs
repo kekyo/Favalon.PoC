@@ -11,15 +11,15 @@ namespace Favalet.Reducing
     [TestFixture]
     public sealed class AlgebraicTest
     {
-        private static readonly LogicalCalculator<Unit> calculator =
-            LogicalCalculator<Unit>.Instance;
+        private static readonly LogicalCalculator calculator =
+            LogicalCalculator.Instance;
 
         private static void AssertLogicalEqual(
             IExpression expression,
             IExpression expected,
             IExpression actual)
         {
-            if (!calculator.ExactEquals(expected, actual, default))
+            if (!calculator.ExactEquals(expected, actual))
             {
                 Assert.Fail(
                     "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",

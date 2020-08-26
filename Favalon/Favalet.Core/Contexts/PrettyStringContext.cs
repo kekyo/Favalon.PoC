@@ -14,7 +14,7 @@ namespace Favalet.Contexts
 
     public enum PrettyStringTypes
     {
-        ReadableWithoutHigherOrder,
+        Minimum,
         Readable,
         Strict,
         StrictAll
@@ -43,7 +43,7 @@ namespace Favalet.Contexts
         public string GetPrettyString(IExpression expression) =>
             (this.Type, expression, expression) switch
             {
-                (PrettyStringTypes.ReadableWithoutHigherOrder, Expression expr, _) => expr.InternalGetPrettyString(this),
+                (PrettyStringTypes.Minimum, Expression expr, _) => expr.InternalGetPrettyString(this),
                 (PrettyStringTypes.Readable, Expression expr, _) => expr.InternalGetPrettyString(this),
                 (_, Expression expr, DeadEndTerm _) => expr.InternalGetPrettyString(this),
                 (_, Expression expr, _) => $"{expr.Type} {expr.InternalGetPrettyString(this)}",
@@ -53,8 +53,8 @@ namespace Favalet.Contexts
         string IPrettyStringContext.GetPrettyString(IExpression expression) =>
             (this.Type, expression, expression) switch
             {
-                (PrettyStringTypes.ReadableWithoutHigherOrder, Expression expr, ITerm _) => expr.InternalGetPrettyString(this),
-                (PrettyStringTypes.ReadableWithoutHigherOrder, Expression expr, _) => $"({expr.InternalGetPrettyString(this)})",
+                (PrettyStringTypes.Minimum, Expression expr, ITerm _) => expr.InternalGetPrettyString(this),
+                (PrettyStringTypes.Minimum, Expression expr, _) => $"({expr.InternalGetPrettyString(this)})",
                 (PrettyStringTypes.Readable, Expression expr, ITerm _) => expr.InternalGetPrettyString(this),
                 (PrettyStringTypes.Readable, Expression expr, _) => $"({expr.InternalGetPrettyString(this)})",
                 (_, Expression expr, DeadEndTerm _) => expr.InternalGetPrettyString(this),
@@ -79,7 +79,7 @@ namespace Favalet.Contexts
                     preFormatted,
                 (_, _, _, DeadEndTerm _) =>
                     preFormatted,
-                (PrettyStringTypes.ReadableWithoutHigherOrder, _, _, _) =>
+                (PrettyStringTypes.Minimum, _, _, _) =>
                     preFormatted, 
                 (PrettyStringTypes.Readable, _, _, UnspecifiedTerm _) =>
                     preFormatted,

@@ -6,18 +6,18 @@ using System.Linq;
 
 namespace Favalet.Expressions.Algebraic
 {
-    public interface ILogicalCalculator<TContext>
+    public interface ILogicalCalculator
     {
-        bool Equals(IExpression lhs, IExpression rhs, TContext context);
-        bool ExactEquals(IExpression lhs, IExpression rhs, TContext context);
+        bool Equals(IExpression lhs, IExpression rhs);
+        bool ExactEquals(IExpression lhs, IExpression rhs);
 
-        IExpression Compute(IExpression operand, TContext context);
+        IExpression Compute(IExpression operand);
     }
 
-    public class LogicalCalculator<TContext> :
-        ILogicalCalculator<TContext>
+    public class LogicalCalculator :
+        ILogicalCalculator
     {
-        public bool Equals(IExpression lhs, IExpression rhs, TContext context)
+        public bool Equals(IExpression lhs, IExpression rhs)
         {
             if (object.ReferenceEquals(lhs, rhs))
             {
@@ -32,7 +32,7 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
-        public bool ExactEquals(IExpression lhs, IExpression rhs, TContext context)
+        public bool ExactEquals(IExpression lhs, IExpression rhs)
         {
             if (object.ReferenceEquals(lhs, rhs))
             {
@@ -51,9 +51,8 @@ namespace Favalet.Expressions.Algebraic
                         (DeadEndTerm _, _) => false,
                         (_, DeadEndTerm _) => false,
                         _ => this.Equals(
-                            this.Compute(lhs.HigherOrder, context),
-                            this.Compute(rhs.HigherOrder, context),
-                            context)
+                            this.Compute(lhs.HigherOrder),
+                            this.Compute(rhs.HigherOrder))
                     };
             }
         }
@@ -67,24 +66,23 @@ namespace Favalet.Expressions.Algebraic
         }
 
         protected virtual ChoiceResults ChoiceForAnd(
-            IExpression left, IExpression right, TContext context) =>
+            IExpression left, IExpression right) =>
             // Idempotence
-            this.Equals(left, right, context) ?
+            this.Equals(left, right) ?
                 ChoiceResults.Equal :
                 ChoiceResults.NonRelated;
 
         protected virtual ChoiceResults ChoiceForOr(
-            IExpression left, IExpression right, TContext context) =>
+            IExpression left, IExpression right) =>
             // Idempotence
-            this.Equals(left, right, context) ?
+            this.Equals(left, right) ?
                 ChoiceResults.Equal :
                 ChoiceResults.NonRelated;
 
         private IEnumerable<IExpression> ComputeAbsorption<TFlattenedExpression>(
             IExpression left,
             IExpression right,
-            Func<IExpression, IExpression, TContext, ChoiceResults> selector,
-            TContext context)
+            Func<IExpression, IExpression, ChoiceResults> selector)
             where TFlattenedExpression : FlattenedExpression
         {
             var fl = FlattenedExpression.Flatten(left);
@@ -94,7 +92,7 @@ namespace Favalet.Expressions.Algebraic
             {
                 return rightOperands.
                     SelectMany(rightOperand =>
-                        selector(fl, rightOperand, context) switch
+                        selector(fl, rightOperand) switch
                         {
                             ChoiceResults.Equal => new[] { fl },
                             ChoiceResults.AcceptLeft => new[] { fl },
@@ -106,7 +104,7 @@ namespace Favalet.Expressions.Algebraic
             {
                 return leftOperands.
                     SelectMany(leftOperand =>
-                        selector(leftOperand, fr, context) switch
+                        selector(leftOperand, fr) switch
                         {
                             ChoiceResults.Equal => new[] { leftOperand },
                             ChoiceResults.AcceptLeft => new[] { leftOperand },
@@ -123,8 +121,7 @@ namespace Favalet.Expressions.Algebraic
         private IEnumerable<IExpression> ComputeShrink<TBinaryExpression>(
             IExpression left,
             IExpression right,
-            Func<IExpression, IExpression, TContext, ChoiceResults> selector,
-            TContext context)
+            Func<IExpression, IExpression, ChoiceResults> selector)
             where TBinaryExpression : IBinaryExpression
         {
             var flattened = FlattenedExpression.Flatten<TBinaryExpression>(left, right);
@@ -150,7 +147,7 @@ namespace Favalet.Expressions.Algebraic
                         // The pair are both type term.
                         else
                         {
-                            switch (selector(origin.Value, current.Value, context))
+                            switch (selector(origin.Value, current.Value))
                             {
                                 case ChoiceResults.Equal:
                                 case ChoiceResults.AcceptLeft:
@@ -186,27 +183,27 @@ namespace Favalet.Expressions.Algebraic
                 _ => results.Skip(2).Aggregate(creator(results[0], results[1]), creator)
             };
 
-        public IExpression Compute(IExpression operand, TContext context)
+        public IExpression Compute(IExpression operand)
         {
             if (operand is IBinaryExpression binary)
             {
-                var left = this.Compute(binary.Left, context);
-                var right = this.Compute(binary.Right, context);
+                var left = this.Compute(binary.Left);
+                var right = this.Compute(binary.Right);
 
                 if (binary is IAndExpression)
                 {
                     // Absorption
                     var absorption =
-                        this.ComputeAbsorption<OrFlattenedExpression>(left, right, this.ChoiceForAnd, context).
+                        this.ComputeAbsorption<OrFlattenedExpression>(left, right, this.ChoiceForAnd).
                         Memoize();
                     if (ReConstructExpression(absorption, OrExpression.Create) is IExpression result1)
                     {
-                        return this.Compute(result1, context);
+                        return this.Compute(result1);
                     }
 
                     // Shrink
                     var shrinked =
-                        this.ComputeShrink<IAndExpression>(left, right, this.ChoiceForAnd, context).
+                        this.ComputeShrink<IAndExpression>(left, right, this.ChoiceForAnd).
                         Memoize();
                     if (ReConstructExpression(shrinked, AndExpression.Create) is IExpression result2)
                     {
@@ -217,16 +214,16 @@ namespace Favalet.Expressions.Algebraic
                 {
                     // Absorption
                     var absorption =
-                        this.ComputeAbsorption<AndFlattenedExpression>(left, right, this.ChoiceForOr, context).
+                        this.ComputeAbsorption<AndFlattenedExpression>(left, right, this.ChoiceForOr).
                         Memoize();
                     if (ReConstructExpression(absorption, AndExpression.Create) is IExpression result1)
                     {
-                        return this.Compute(result1, context);
+                        return this.Compute(result1);
                     }
 
                     // Shrink
                     var shrinked =
-                        this.ComputeShrink<IOrExpression>(left, right, this.ChoiceForOr, context).
+                        this.ComputeShrink<IOrExpression>(left, right, this.ChoiceForOr).
                         Memoize();
                     if (ReConstructExpression(shrinked, OrExpression.Create) is IExpression result2)
                     {
@@ -261,7 +258,7 @@ namespace Favalet.Expressions.Algebraic
             return operand;
         }
 
-        public static readonly LogicalCalculator<TContext> Instance =
-            new LogicalCalculator<TContext>();
+        public static readonly LogicalCalculator Instance =
+            new LogicalCalculator();
     }
 }

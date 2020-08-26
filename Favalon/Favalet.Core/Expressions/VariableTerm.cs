@@ -98,7 +98,7 @@ namespace Favalet.Expressions
             if (variables.Length >= 1)
             {
                 var reduced = context.Reduce(variables[0].Expression);
-                return context.TypeCalculator.Compute(reduced, context);
+                return context.TypeCalculator.Compute(reduced);
             }
             else
             {

@@ -60,7 +60,7 @@ namespace Favalet.Expressions
             new LambdaExpression(
                 (IBoundVariableTerm)context.MakeRewritable(this.Parameter),
                 context.MakeRewritable(this.Body),
-                context.MakeRewritableHigherOrder(this.HigherOrder));
+                context.MakeRewritableHigherOrder(this.HigherOrder, HigherOrderAttributes.FixedPlaceholder));
 
         protected override IExpression Infer(IInferContext context)
         {
@@ -93,7 +93,7 @@ namespace Favalet.Expressions
 
         protected override IExpression Fixup(IFixupContext context)
         {
-            var parameter = (IBoundVariableTerm)context.Fixup(this.Parameter);
+            var parameter = (IBoundVariableTerm) context.Fixup(this.Parameter);
             var body = context.Fixup(this.Body);
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
@@ -102,6 +102,10 @@ namespace Favalet.Expressions
                 object.ReferenceEquals(this.HigherOrder, higherOrder))
             {
                 return this;
+            }
+            else if (higherOrder is IFunctionExpression functionHigherOrder)
+            {
+                return Create(parameter, body, functionHigherOrder);
             }
             else
             {

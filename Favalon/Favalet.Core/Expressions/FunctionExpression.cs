@@ -122,9 +122,12 @@ namespace Favalet.Expressions
             {
                 return this;
             }
+            else if (higherOrder is IFunctionExpression functionExpression)
+            {
+                return Create(parameter, result, functionExpression);
+            }
             else
             {
-                // Ignore fixup higher order.
                 return Create(parameter, result);
             }
         }

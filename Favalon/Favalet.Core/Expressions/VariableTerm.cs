@@ -2,7 +2,10 @@
 using Favalet.Expressions.Specialized;
 using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Xml.Linq;
+using Favalet.Expressions.Algebraic;
+using Favalet.Internal;
 
 namespace Favalet.Expressions
 {
@@ -53,18 +56,35 @@ namespace Favalet.Expressions
 
             if (variables.Length >= 1)
             {
-                // TODO: overloading
-                if (!object.ReferenceEquals(this, variables[0].Expression))
-                {
-                    var rewritable = context.MakeRewritable(variables[0].Expression);
-                    var inferred = context.Infer(rewritable);
-                    
-                    var symbolHigherOrderRewritable = context.MakeRewritable(variables[0].SymbolHigherOrder);
-                    var symbolHigherOrder = context.Infer(symbolHigherOrderRewritable);
+                var targets = variables.
+                    Where(v => !object.ReferenceEquals(this, v.Expression)).
+                    Memoize();
 
-                    context.Unify(symbolHigherOrder, higherOrder, true);
-                    context.Unify(inferred.HigherOrder, higherOrder, true);
-                }
+                var symbolHigherOrder = targets.
+                    Skip(1).
+                    Aggregate(
+                        context.Infer(context.MakeRewritable(
+                            targets[0].SymbolHigherOrder)),
+                        (agg, v) =>
+                        {
+                            var inferred = context.Infer(context.MakeRewritable(
+                                v.SymbolHigherOrder));
+                            return OrExpression.Create(agg, inferred);
+                        });
+                var target = targets.
+                    Skip(1).
+                    Aggregate(
+                        context.Infer(context.MakeRewritable(
+                            targets[0].Expression)),
+                        (agg, v) =>
+                        {
+                            var inferred = context.Infer(context.MakeRewritable(
+                                v.Expression));
+                            return OrExpression.Create(agg, inferred);
+                        });
+               
+                context.Unify(symbolHigherOrder, higherOrder, true);
+                context.Unify(target.HigherOrder, higherOrder, true);
             }
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder))

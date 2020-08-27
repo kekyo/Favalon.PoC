@@ -128,6 +128,8 @@ namespace Favalet.Expressions
             }
             else
             {
+                // TODO: Apply fixed up higher order.
+                //return InternalCreate(parameter, result, () => higherOrder);
                 return Create(parameter, result);
             }
         }

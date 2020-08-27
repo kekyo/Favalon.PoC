@@ -73,13 +73,13 @@ namespace Favalet
             Debug.WriteLine(
                 $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetXml()}\", unifier=\"{unifier}\"");
 #endif            
-            var fixupped = context.Fixup(inferred);
+            var fixedup = context.Fixup(inferred);
             Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: fixupped=\"{fixupped.GetXml()}\"");
+                $"Infer[{context.GetHashCode()}]: fixedup=\"{fixedup.GetXml()}\"");
 #if DEBUG
             this.lastUnifier = unifier;
 #endif
-            return fixupped;
+            return fixedup;
         }
 
         public IExpression Reduce(IExpression expression)

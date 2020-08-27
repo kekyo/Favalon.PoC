@@ -109,7 +109,8 @@ namespace Favalet.Expressions
             }
             else
             {
-                // Ignore fixup higher order.
+                // TODO: Apply fixed up higher order.
+                //return new LambdaExpression(parameter, body, higherOrder);
                 return Create(parameter, body);
             }
         }

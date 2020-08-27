@@ -104,11 +104,11 @@ namespace Favalet.Contexts
         [DebuggerStepThrough]
         public IExpression FixupHigherOrder(IExpression higherOrder)
         {
-            var fixupped = higherOrder is Expression expr ?
+            var fixedup = higherOrder is Expression expr ?
                 expr.InternalFixup(this) :
                 higherOrder;
 
-            return this.typeCalculator.Compute(fixupped);
+            return this.typeCalculator.Compute(fixedup);
         }
 
         public abstract IExpression? Resolve(int index);

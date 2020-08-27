@@ -35,8 +35,8 @@ namespace Favalet.Contexts
 
             public string ToString(PrettyStringTypes type)
             {
-                var @fixed = this.Fixed ? ",Fixed" : string.Empty;
-                return $"{this.Expression.GetPrettyString(type)}{@fixed}";
+                var @fixed = this.Fixed ? "Fixed," : string.Empty;
+                return $"{@fixed}{this.Expression.GetPrettyString(type)}";
             }
             public override string ToString() =>
                 this.ToString(PrettyStringTypes.Readable);

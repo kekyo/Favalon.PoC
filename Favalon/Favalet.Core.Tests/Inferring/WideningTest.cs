@@ -27,7 +27,7 @@ namespace Favalet.Inferring
         }
 
         [Test]
-        public void WideningInLambdaBody()
+        public void WideningInLambdaBody1()
         {
             var environment = CLREnvironment();
 
@@ -38,6 +38,62 @@ namespace Favalet.Inferring
                     Variable("a"),
                     Function(
                         Type<int>(),
+                        Type<object>()));
+
+            var actual = environment.Infer(expression);
+
+            // (a:int -> a:int):(int -> object)
+            var expected =
+                Lambda(
+                    BoundVariable("a", Type<int>()),
+                    Variable("a", Type<int>()),
+                    Function(
+                        Type<int>(),
+                        Type<object>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void WideningInLambdaBody2()
+        {
+            var environment = CLREnvironment();
+
+            // (a:int -> a):(_ -> object)
+            var expression =
+                Lambda(
+                    BoundVariable("a", Type<int>()),
+                    Variable("a"),
+                    Function(
+                        Unspecified(),
+                        Type<object>()));
+
+            var actual = environment.Infer(expression);
+
+            // (a:int -> a:int):(int -> object)
+            var expected =
+                Lambda(
+                    BoundVariable("a", Type<int>()),
+                    Variable("a", Type<int>()),
+                    Function(
+                        Type<int>(),
+                        Type<object>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+
+        [Test]
+        public void WideningInLambdaBody3()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a:int):(_ -> object)
+            var expression =
+                Lambda(
+                    BoundVariable("a"),
+                    Variable("a", Type<int>()),
+                    Function(
+                        Unspecified(),
                         Type<object>()));
 
             var actual = environment.Infer(expression);

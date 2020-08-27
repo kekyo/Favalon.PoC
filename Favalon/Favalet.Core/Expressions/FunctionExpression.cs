@@ -92,7 +92,7 @@ namespace Favalet.Expressions
                 var functionHigherOrder = Create(
                     parameter.HigherOrder, result.HigherOrder);
 
-                context.Unify(functionHigherOrder, higherOrder);
+                context.Unify(functionHigherOrder, higherOrder, true);
 
                 if (object.ReferenceEquals(this.Parameter, parameter) &&
                     object.ReferenceEquals(this.Result, result) &&
@@ -122,9 +122,14 @@ namespace Favalet.Expressions
             {
                 return this;
             }
+            else if (higherOrder is IFunctionExpression functionExpression)
+            {
+                return Create(parameter, result, functionExpression);
+            }
             else
             {
-                // Ignore fixup higher order.
+                // TODO: Apply fixed up higher order.
+                //return InternalCreate(parameter, result, () => higherOrder);
                 return Create(parameter, result);
             }
         }

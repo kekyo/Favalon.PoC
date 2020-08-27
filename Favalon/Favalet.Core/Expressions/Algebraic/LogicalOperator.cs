@@ -3,6 +3,7 @@ using Favalet.Expressions.Specialized;
 using System.Collections;
 using System.Diagnostics;
 using System.Linq;
+using Favalet.Internal;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -14,7 +15,6 @@ namespace Favalet.Expressions.Algebraic
     public sealed class LogicalOperator :
         Expression, ILogicalOperator
     {
-        private static readonly LogicalCalculator calculator = new LogicalCalculator();
         private static readonly IExpression higherOrder =
             FunctionExpression.Create(UnspecifiedTerm.Instance, UnspecifiedTerm.Instance);
 
@@ -43,7 +43,7 @@ namespace Favalet.Expressions.Algebraic
             this;
 
         public IExpression Call(IReduceContext context, IExpression argument) =>
-            calculator.Compute(argument);
+            LogicalCalculator.Instance.Compute(argument);
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             Enumerable.Empty<object>();

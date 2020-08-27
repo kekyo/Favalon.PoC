@@ -1,11 +1,13 @@
-﻿using Favalet.Expressions.Algebraic;
+﻿using System;
+using System.Reflection;
+using Favalet.Contexts;
+using Favalet.Expressions;
 using Favalet.Internal;
-using System;
 
-namespace Favalet.Expressions
+namespace Favalet
 {
     public sealed class CLRTypeCalculator :
-        LogicalCalculator
+        TypeCalculator
     {
         protected override ChoiceResults ChoiceForAnd(
             IExpression left, IExpression right)

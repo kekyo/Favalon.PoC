@@ -60,6 +60,7 @@ namespace Favalet.Expressions.Algebraic
         protected enum ChoiceResults
         {
             NonRelated,
+            Equal,
             AcceptLeft,
             AcceptRight,
         }
@@ -68,14 +69,14 @@ namespace Favalet.Expressions.Algebraic
             IExpression left, IExpression right) =>
             // Idempotence
             this.Equals(left, right) ?
-                ChoiceResults.AcceptLeft :
+                ChoiceResults.Equal :
                 ChoiceResults.NonRelated;
 
         protected virtual ChoiceResults ChoiceForOr(
             IExpression left, IExpression right) =>
             // Idempotence
             this.Equals(left, right) ?
-                ChoiceResults.AcceptLeft :
+                ChoiceResults.Equal :
                 ChoiceResults.NonRelated;
 
         private IEnumerable<IExpression> ComputeAbsorption<TFlattenedExpression>(
@@ -93,6 +94,7 @@ namespace Favalet.Expressions.Algebraic
                     SelectMany(rightOperand =>
                         selector(fl, rightOperand) switch
                         {
+                            ChoiceResults.Equal => new[] { fl },
                             ChoiceResults.AcceptLeft => new[] { fl },
                             ChoiceResults.AcceptRight => new[] { rightOperand },
                             _ => Enumerable.Empty<IExpression>()
@@ -104,6 +106,7 @@ namespace Favalet.Expressions.Algebraic
                     SelectMany(leftOperand =>
                         selector(leftOperand, fr) switch
                         {
+                            ChoiceResults.Equal => new[] { leftOperand },
                             ChoiceResults.AcceptLeft => new[] { leftOperand },
                             ChoiceResults.AcceptRight => new[] { fr },
                             _ => Enumerable.Empty<IExpression>()
@@ -146,6 +149,7 @@ namespace Favalet.Expressions.Algebraic
                         {
                             switch (selector(origin.Value, current.Value))
                             {
+                                case ChoiceResults.Equal:
                                 case ChoiceResults.AcceptLeft:
                                     current.Value = origin.Value;
                                     requiredRecompute = true;

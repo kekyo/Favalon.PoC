@@ -7,16 +7,60 @@ using System.Reflection;
 
 namespace Favalet.Contexts
 {
+    public enum HigherOrderAttributes
+    {
+        None,
+        Placeholder,
+        FixedPlaceholder
+    }
+    
     public interface IMakeRewritableContext
     {
         IExpression MakeRewritable(IExpression expression);
         IExpression MakeRewritableHigherOrder(
             IExpression higherOrder,
-            bool replacePlaceholder = true);
+            HigherOrderAttributes attribute = HigherOrderAttributes.Placeholder);
     }
     
+    public interface IUnsafePlaceholderResolver
+    {
+        IExpression? UnsafeResolve(int index);
+    }
+
+    public static class UnsafePlaceholderResolverExtension
+    {
+        public static IExpression UnsafeResolveWhile(this IUnsafePlaceholderResolver resolver, IExpression expression)
+        {
+            var current = expression;
+            while (true)
+            {
+                switch (current)
+                {
+                    case IPlaceholderTerm placeholder:
+                        if (resolver.UnsafeResolve(placeholder.Index) is IExpression resolved)
+                        {
+                            current = resolved;
+                            continue;
+                        }
+                        else
+                        {
+                            return current;
+                        }
+                    
+                    case IFunctionExpression(IExpression parameter, IExpression result):
+                        return FunctionExpression.Create(
+                            UnsafeResolveWhile(resolver, parameter),
+                            UnsafeResolveWhile(resolver, result));
+                    
+                    default:
+                        return current;
+                }
+            }
+        }
+    }
+
     public interface IInferContext :
-        IScopeContext, IMakeRewritableContext
+        IScopeContext, IMakeRewritableContext, IUnsafePlaceholderResolver
     {
         IExpression Infer(IExpression expression);
     
@@ -25,15 +69,14 @@ namespace Favalet.Contexts
         void Unify(
             IExpression fromHigherOrder,
             IExpression toHigherOrder,
-            bool fixedFrom = false,
-            bool fixedTo = false);
+            bool @fixed = false);
     }
 
     public interface IFixupContext
     {
         IExpression Fixup(IExpression expression);
         IExpression FixupHigherOrder(IExpression higherOrder);
-
+        
         IExpression? Resolve(int index);
     }
 
@@ -46,12 +89,12 @@ namespace Favalet.Contexts
     }
 
     internal abstract class FixupContext :
-        IFixupContext
+        IFixupContext, IUnsafePlaceholderResolver
     {
-        private readonly ILogicalCalculator typeCalculator;
+        private readonly ITypeCalculator typeCalculator;
 
         [DebuggerStepThrough]
-        protected FixupContext(ILogicalCalculator typeCalculator) =>
+        protected FixupContext(ITypeCalculator typeCalculator) =>
             this.typeCalculator = typeCalculator;
 
         [DebuggerStepThrough]
@@ -61,14 +104,18 @@ namespace Favalet.Contexts
         [DebuggerStepThrough]
         public IExpression FixupHigherOrder(IExpression higherOrder)
         {
-            var fixupped = higherOrder is Expression expr ?
+            var fixedup = higherOrder is Expression expr ?
                 expr.InternalFixup(this) :
                 higherOrder;
 
-            return this.typeCalculator.Compute(fixupped);
+            return this.typeCalculator.Compute(fixedup);
         }
 
         public abstract IExpression? Resolve(int index);
+
+        [DebuggerStepThrough]
+        IExpression? IUnsafePlaceholderResolver.UnsafeResolve(int index) =>
+            this.Resolve(index);
     }
 
     internal sealed partial class ReduceContext :
@@ -93,11 +140,11 @@ namespace Favalet.Contexts
             this.unifier = unifier;
         }
 
-        public ILogicalCalculator TypeCalculator =>
+        public ITypeCalculator TypeCalculator =>
             this.rootScope.TypeCalculator;
 
         private IExpression MakeRewritable(
-            IExpression expression, bool replacePlaceholder)
+            IExpression expression, HigherOrderAttributes attribute)
         {
             if (this.orderHint >= PlaceholderOrderHints.DeadEnd)
             {
@@ -124,10 +171,10 @@ namespace Favalet.Contexts
             }
 
             // Replace a placeholder term if required.
-            if (replacePlaceholder)
+            if (attribute != HigherOrderAttributes.None)
             {
                 var placeholder = this.rootScope.CreatePlaceholder(this.orderHint);
-                this.Unify(placeholder, rewritable);
+                this.Unify(placeholder, rewritable, attribute == HigherOrderAttributes.FixedPlaceholder);
                 return placeholder;
             }
             else
@@ -138,15 +185,15 @@ namespace Favalet.Contexts
 
         [DebuggerStepThrough]
         public IExpression MakeRewritable(IExpression expression) =>
-            this.MakeRewritable(expression, false);
+            this.MakeRewritable(expression, HigherOrderAttributes.None);
             
         public IExpression MakeRewritableHigherOrder(
             IExpression higherOrder,
-            bool replacePlaceholder = true)
+            HigherOrderAttributes attribute = HigherOrderAttributes.Placeholder)
         {
             this.orderHint++;
             
-            var rewritable = this.MakeRewritable(higherOrder, replacePlaceholder);
+            var rewritable = this.MakeRewritable(higherOrder, attribute);
             
             this.orderHint--;
             Debug.Assert(this.orderHint >= PlaceholderOrderHints.VariableOrAbove);
@@ -188,9 +235,8 @@ namespace Favalet.Contexts
         public void Unify(
             IExpression fromHigherOrder,
             IExpression toHigherOrder,
-            bool fixedFrom = false,
-            bool fixedTo = false) =>
-            this.unifier.Unify(this, fromHigherOrder, toHigherOrder, fixedFrom, fixedTo);
+            bool @fixed = false) =>
+            this.unifier.Unify(this, fromHigherOrder, toHigherOrder, @fixed);
 
         [DebuggerStepThrough]
         public override IExpression? Resolve(int index) =>

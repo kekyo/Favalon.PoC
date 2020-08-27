@@ -72,7 +72,8 @@ namespace Favalet.Contexts
             bool @fixed = false);
     }
 
-    public interface IFixupContext
+    public interface IFixupContext :
+        IScopeContext
     {
         IExpression Fixup(IExpression expression);
         IExpression FixupHigherOrder(IExpression higherOrder);
@@ -91,11 +92,11 @@ namespace Favalet.Contexts
     internal abstract class FixupContext :
         IFixupContext, IUnsafePlaceholderResolver
     {
-        private readonly ITypeCalculator typeCalculator;
-
         [DebuggerStepThrough]
         protected FixupContext(ITypeCalculator typeCalculator) =>
-            this.typeCalculator = typeCalculator;
+            this.TypeCalculator = typeCalculator;
+
+        public ITypeCalculator TypeCalculator { get; }
 
         [DebuggerStepThrough]
         public IExpression Fixup(IExpression expression) =>
@@ -108,7 +109,7 @@ namespace Favalet.Contexts
                 expr.InternalFixup(this) :
                 higherOrder;
 
-            return this.typeCalculator.Compute(fixedup);
+            return this.TypeCalculator.Compute(fixedup);
         }
 
         public abstract IExpression? Resolve(int index);
@@ -116,6 +117,9 @@ namespace Favalet.Contexts
         [DebuggerStepThrough]
         IExpression? IUnsafePlaceholderResolver.UnsafeResolve(int index) =>
             this.Resolve(index);
+
+        public virtual VariableInformation[] LookupVariables(string symbol) =>
+            throw new InvalidOperationException();
     }
 
     internal sealed partial class ReduceContext :
@@ -245,7 +249,7 @@ namespace Favalet.Contexts
         public override IExpression? Resolve(int index) =>
             this.unifier.Resolve(index);
 
-        public VariableInformation[] LookupVariables(string symbol) =>
+        public override VariableInformation[] LookupVariables(string symbol) =>
             // TODO: improving when identity's higher order acceptable
             // TODO: what acceptable (narrowing, widening)
             this.boundSymbol is IBoundVariableTerm p &&

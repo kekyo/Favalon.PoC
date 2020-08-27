@@ -59,7 +59,7 @@ namespace Favalet.Expressions
                 var targets = variables.
                     Where(v => !object.ReferenceEquals(this, v.Expression)).
                     Select(v =>
-                        (symbolHigherOrder: context.Infer(context.MakeRewritable(v.SymbolHigherOrder)), 
+                        (symbolHigherOrder: context.Infer(context.MakeRewritableHigherOrder(v.SymbolHigherOrder)), 
                          expression: context.Infer(context.MakeRewritable(v.Expression)))).
                     Memoize();
 
@@ -91,6 +91,25 @@ namespace Favalet.Expressions
         protected override IExpression Fixup(IFixupContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+            var variables = context.LookupVariables(this.Symbol);
+
+            if (variables.Length >= 1)
+            {
+                var targets = variables.
+                    Where(v => !object.ReferenceEquals(this, v.Expression)).
+                    Select(v => context.Fixup(v.Expression)).
+                    Memoize();
+                var expression = targets.
+                    Skip(1).
+                    Aggregate(
+                        targets[0],
+                        OrExpression.Create);
+                
+                var calculated = context.TypeCalculator.Compute(
+                    AndExpression.Create(
+                        higherOrder, expression.HigherOrder));
+                var filtered = 
+            }
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder))
             {

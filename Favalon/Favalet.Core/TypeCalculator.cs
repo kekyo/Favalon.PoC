@@ -5,9 +5,9 @@ using Favalet.Expressions;
 
 namespace Favalet
 {
-    public interface ITypeCalculator
+    public interface ITypeCalculator :
+        ILogicalCalculator
     {
-        IExpression Compute(IExpression operand);
     }
     
     public class TypeCalculator :

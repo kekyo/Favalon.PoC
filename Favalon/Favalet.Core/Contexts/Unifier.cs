@@ -35,8 +35,8 @@ namespace Favalet.Contexts
 
             public string ToString(PrettyStringTypes type)
             {
-                var @fixed = this.Fixed ? ",Fixed" : string.Empty;
-                return $"{this.Expression.GetPrettyString(type)}{@fixed}";
+                var @fixed = this.Fixed ? "Fixed," : string.Empty;
+                return $"{@fixed}{this.Expression.GetPrettyString(type)}";
             }
             public override string ToString() =>
                 this.ToString(PrettyStringTypes.Readable);
@@ -179,25 +179,57 @@ namespace Favalet.Contexts
             }
         }
 
+        private readonly struct Attribute
+        {
+            public readonly bool Forward;
+            public readonly bool Fixed;
+
+            private Attribute(bool forward, bool @fixed)
+            {
+                this.Forward = forward;
+                this.Fixed = @fixed;
+            }
+
+            public Attribute Reverse() =>
+                new Attribute(!this.Forward, this.Fixed);
+            
+            public Attribute ApplyFixed(bool @fixed) =>
+                new Attribute(this.Forward, this.Fixed || @fixed);
+
+            public override string ToString() =>
+                (this.Forward, this.Fixed) switch
+                {
+                    (false, false) => "Backward",
+                    (false, true) => "Backward,Fixed",
+                    (true, false) => "Forward",
+                    (true, true) => "Forward,Fixed",
+                };
+
+            public static Attribute Create(bool @fixed) =>
+                new Attribute(true, @fixed);
+        }
+
         private void InternalUnifyPlaceholder(
             IInferContext context,
             IPlaceholderTerm from,
             IExpression to,
             Unification examinedFrom,
-            bool @fixed)
+            Attribute attribute)
         {
             // (origin, current)
-            switch (examinedFrom.Fixed, @fixed)
+            switch (examinedFrom.Fixed, attribute.Fixed)
             {
                 case (true, true):
                     // Cannot update `from.Index`, will check only compatibility.
                     if (this.InternalUnify(
-                        context, examinedFrom.Expression, to, @fixed) is IExpression result0)
+                        context, examinedFrom.Expression, to, attribute) is IExpression result0)
                     {
                         var rresult = this.UnsafeResolveWhile(result0);
                         var tresult = this.UnsafeResolveWhile(to);
-                    
-                        var combined = OrExpression.Create(tresult, rresult);
+                        
+                        var combined = attribute.Forward ?
+                            (IExpression)OrExpression.Create(tresult, rresult) :  // Covariance.
+                            AndExpression.Create(tresult, rresult);               // Contravariance.
                         var calculated = context.TypeCalculator.Compute(combined);
 
                         if (!calculated.Equals(rresult))
@@ -210,16 +242,18 @@ namespace Favalet.Contexts
                 
                 case (false, true):
                     // Force update.
-                    this.Update(from.Index, to, @fixed);
+                    this.Update(from.Index, to, attribute.Fixed);
                 
                     // Must reinterprets examinedFrom.
                     if (this.InternalUnify(
-                        context, examinedFrom.Expression, to, @fixed) is IExpression result1)
+                        context, examinedFrom.Expression, to, attribute) is IExpression result1)
                     {
                         var rresult = this.UnsafeResolveWhile(result1);
                         var tresult = this.UnsafeResolveWhile(to);
                     
-                        var combined = OrExpression.Create(tresult, rresult);
+                        var combined = attribute.Forward ?
+                            (IExpression)OrExpression.Create(tresult, rresult) :  // Covariance.
+                            AndExpression.Create(tresult, rresult);               // Contravariance.
                         var calculated = context.TypeCalculator.Compute(combined);
 
                         if (!calculated.Equals(rresult))
@@ -232,14 +266,14 @@ namespace Favalet.Contexts
                 
                 default:
                     // Derived fixed attribute.
-                    var ffixed = examinedFrom.Fixed || @fixed;
+                    var rattribute = Attribute.Create(examinedFrom.Fixed || attribute.Fixed);
                     
                     if (this.InternalUnify(
-                        context, examinedFrom.Expression, to, ffixed) is IExpression result2)
+                        context, examinedFrom.Expression, to, rattribute) is IExpression result2)
                     {
                         if (!examinedFrom.Fixed)
                         {
-                            this.Update(from.Index, result2, ffixed);
+                            this.Update(from.Index, result2, rattribute.Fixed);
                         }
                         else
                         {
@@ -255,7 +289,7 @@ namespace Favalet.Contexts
             IInferContext context,
             IPlaceholderTerm from,
             IPlaceholderTerm to,
-            bool @fixed)
+            Attribute attribute)
         {
             var rf = this.unifications.TryGetValue(from.Index, out var rfrom);
             var rt = this.unifications.TryGetValue(to.Index, out var rto);
@@ -263,30 +297,30 @@ namespace Favalet.Contexts
             switch (rf, rt)
             {
                 case (true, true):
-                    var rfixed = rfrom.Fixed || rto.Fixed || @fixed;     // Derived if already fixed.
+                    var rattribute = Attribute.Create(rfrom.Fixed || rto.Fixed || attribute.Fixed);     // Derived if already fixed.
                     if (this.InternalUnify(
                         context,
                         rfrom.Expression,
                         rto.Expression,
-                        rfixed) is IExpression result0)
+                        rattribute) is IExpression result0)
                     {
-                        this.Update(from.Index, result0, rfixed);
-                        this.Update(to.Index, result0, rfixed);
+                        this.Update(from.Index, result0, rattribute.Fixed);
+                        this.Update(to.Index, result0, rattribute.Fixed);
                     }
                     break;
                 
                 case (true, false):
                     this.InternalUnifyPlaceholder(
-                        context, from, to, rfrom, @fixed);
+                        context, from, to, rfrom, attribute);
                     break;
                 
                 case (false, true):
                     this.InternalUnifyPlaceholder(
-                        context, to, from, rto, @fixed);
+                        context, to, from, rto, attribute);
                     break;
                 
                 default:
-                    this.Update(from.Index, to, @fixed);
+                    this.Update(from.Index, to, attribute.Fixed);
                     break;
             }
         }
@@ -295,16 +329,16 @@ namespace Favalet.Contexts
             IInferContext context,
             IPlaceholderTerm from,
             IExpression to,
-            bool @fixed)
+            Attribute attribute)
         {
             if (this.unifications.TryGetValue(from.Index, out var rfrom))
             {
                 this.InternalUnifyPlaceholder(
-                    context, from, to, rfrom, @fixed);
+                    context, from, to, rfrom, attribute);
             }
             else
             {
-                this.Update(from.Index, to, @fixed);
+                this.Update(from.Index, to, attribute.Fixed);
             }
         }
 
@@ -312,7 +346,7 @@ namespace Favalet.Contexts
             IInferContext context,
             IExpression from,
             IExpression to,
-            bool @fixed)
+            Attribute attribute)
         {
             Debug.Assert(!(from is IIgnoreUnificationTerm));
             Debug.Assert(!(to is IIgnoreUnificationTerm));
@@ -327,14 +361,14 @@ namespace Favalet.Contexts
                     {
                         // Unify both placeholders.
                         this.InternalUnifyBothPlaceholders(
-                            context, fph, tph, @fixed);
+                            context, fph, tph, attribute);
                     }
                 }
                 else
                 {
                     // Unify from placeholder.
                     this.InternalUnifyPlaceholder(
-                        context, fph, to, @fixed);
+                        context, fph, to, attribute);
                 }
                 return null;
             }
@@ -342,7 +376,7 @@ namespace Favalet.Contexts
             {
                 // Unify to placeholder.
                 this.InternalUnifyPlaceholder(
-                    context, tph, from, @fixed);    // Reversed order.
+                    context, tph, from, attribute.Reverse());    // Reversed order.
                 return null;
             }
 
@@ -351,9 +385,9 @@ namespace Favalet.Contexts
             {
                 // Unify FunctionExpression.
                 var parameter = this.InternalUnify(
-                    context, fp, tp, @fixed);
+                    context, fp, tp, attribute);
                 var result = this.InternalUnify(
-                    context, fr, tr, @fixed);
+                    context, fr, tr, attribute);
 
                 if (parameter is IExpression || result is IExpression)
                 {
@@ -367,7 +401,9 @@ namespace Favalet.Contexts
                 }
             }
 
-            var combined = OrExpression.Create(from, to);
+            var combined = attribute.Forward ?
+                (IExpression)OrExpression.Create(from, to) :  // Covariance.
+                AndExpression.Create(from, to);               // Contravariance.
             var calculated = context.TypeCalculator.Compute(combined);
 
             var rewritable = context.MakeRewritable(calculated);
@@ -380,7 +416,7 @@ namespace Favalet.Contexts
             IInferContext context,
             IExpression from,
             IExpression to,
-            bool @fixed)
+            Attribute attribute)
         {
             // Same as.
             if (object.ReferenceEquals(from, to))
@@ -398,11 +434,11 @@ namespace Favalet.Contexts
                 default:
                     // Unify higher order (ignored result.)
                     this.InternalUnify(
-                        context, from.HigherOrder, to.HigherOrder, @fixed);
+                        context, from.HigherOrder, to.HigherOrder, attribute);
 
                     // Unify.
                     return this.InternalUnifyCore(
-                        context, from, to, @fixed);
+                        context, from, to, attribute);
             }
         }
 
@@ -413,7 +449,7 @@ namespace Favalet.Contexts
             IExpression to,
             bool @fixed) =>
             this.InternalUnify(
-                context, from, to, @fixed);
+                context, from, to, Attribute.Create(@fixed));
 
         public override IExpression? Resolve(int index)
         {

@@ -140,8 +140,11 @@ namespace Favalet.Contexts
             this.unifier = unifier;
         }
 
-        public ITypeCalculator TypeCalculator =>
-            this.rootScope.TypeCalculator;
+        public ITypeCalculator TypeCalculator
+        {
+            [DebuggerStepThrough]
+            get => this.rootScope.TypeCalculator;
+        }
 
         private IExpression MakeRewritable(
             IExpression expression, HigherOrderAttributes attribute)

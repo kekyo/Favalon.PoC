@@ -20,17 +20,24 @@ namespace Favalet
             if (left is IFunctionExpression(IExpression lp, IExpression lr) &&
                 right is IFunctionExpression(IExpression rp, IExpression rr))
             {
+                var parameter = this.ChoiceForAnd(lp, rp);
+                var result = this.ChoiceForAnd(lr, rr);
+
                 // Contravariance.
-                switch (this.ChoiceForAnd(lp, rp), this.ChoiceForOr(lr, rr))
+                switch (parameter, result)
                 {
+                    case (ChoiceResults.Equal, ChoiceResults.Equal):
+                        return ChoiceResults.Equal;
+
+                    case (ChoiceResults.Equal, ChoiceResults.AcceptLeft):
                     case (ChoiceResults.AcceptLeft, ChoiceResults.Equal):
                     case (ChoiceResults.AcceptLeft, ChoiceResults.AcceptLeft):
                         return ChoiceResults.AcceptLeft;
+                    
+                    case (ChoiceResults.Equal, ChoiceResults.AcceptRight):
                     case (ChoiceResults.AcceptRight, ChoiceResults.Equal):
                     case (ChoiceResults.AcceptRight, ChoiceResults.AcceptRight):
                         return ChoiceResults.AcceptRight;
-                    case (ChoiceResults.Equal, ChoiceResults.Equal):
-                        return ChoiceResults.Equal;
                 }
             }
 
@@ -44,17 +51,24 @@ namespace Favalet
             if (left is IFunctionExpression(IExpression lp, IExpression lr) &&
                 right is IFunctionExpression(IExpression rp, IExpression rr))
             {
+                var parameter = this.ChoiceForOr(lp, rp);
+                var result = this.ChoiceForOr(lr, rr);
+                
                 // Covariance.
-                switch (this.ChoiceForOr(lp, rp), this.ChoiceForAnd(lr, rr))
+                switch (parameter, result)
                 {
+                    case (ChoiceResults.Equal, ChoiceResults.Equal):
+                        return ChoiceResults.Equal;
+
+                    case (ChoiceResults.Equal, ChoiceResults.AcceptLeft):
                     case (ChoiceResults.AcceptLeft, ChoiceResults.Equal):
                     case (ChoiceResults.AcceptLeft, ChoiceResults.AcceptLeft):
                         return ChoiceResults.AcceptLeft;
+                    
+                    case (ChoiceResults.Equal, ChoiceResults.AcceptRight):
                     case (ChoiceResults.AcceptRight, ChoiceResults.Equal):
                     case (ChoiceResults.AcceptRight, ChoiceResults.AcceptRight):
                         return ChoiceResults.AcceptRight;
-                    case (ChoiceResults.Equal, ChoiceResults.Equal):
-                        return ChoiceResults.Equal;
                 }
             }
 

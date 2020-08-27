@@ -58,33 +58,24 @@ namespace Favalet.Expressions
             {
                 var targets = variables.
                     Where(v => !object.ReferenceEquals(this, v.Expression)).
+                    Select(v =>
+                        (symbolHigherOrder: context.Infer(context.MakeRewritable(v.SymbolHigherOrder)), 
+                         expression: context.Infer(context.MakeRewritable(v.Expression)))).
                     Memoize();
 
                 var symbolHigherOrder = targets.
                     Skip(1).
                     Aggregate(
-                        context.Infer(context.MakeRewritable(
-                            targets[0].SymbolHigherOrder)),
-                        (agg, v) =>
-                        {
-                            var inferred = context.Infer(context.MakeRewritable(
-                                v.SymbolHigherOrder));
-                            return OrExpression.Create(agg, inferred);
-                        });
-                var target = targets.
+                        targets[0].symbolHigherOrder,
+                        (agg, v) => OrExpression.Create(agg, v.symbolHigherOrder));
+                var expression = targets.
                     Skip(1).
                     Aggregate(
-                        context.Infer(context.MakeRewritable(
-                            targets[0].Expression)),
-                        (agg, v) =>
-                        {
-                            var inferred = context.Infer(context.MakeRewritable(
-                                v.Expression));
-                            return OrExpression.Create(agg, inferred);
-                        });
+                        targets[0].expression,
+                        (agg, v) => OrExpression.Create(agg, v.expression));
                
                 context.Unify(symbolHigherOrder, higherOrder, true);
-                context.Unify(target.HigherOrder, higherOrder, true);
+                context.Unify(expression.HigherOrder, higherOrder, true);
             }
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder))

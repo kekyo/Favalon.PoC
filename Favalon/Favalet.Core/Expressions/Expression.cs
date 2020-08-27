@@ -66,13 +66,14 @@ namespace Favalet.Expressions
 
         public string Xml =>
             this.GetXml().ToString();
-
+        public string Strict =>
+            $"{this.Type}: {this.GetPrettyString(PrettyStringTypes.Strict)}";
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string Readable =>
             $"{this.Type}: {this.GetPrettyString(PrettyStringTypes.Readable)}";
 
         public sealed override string ToString() =>
-            this.GetPrettyString(PrettyStringTypes.Strict);
+            this.Readable;
 
         public abstract bool Equals(IExpression? other);
 

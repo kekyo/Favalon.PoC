@@ -10,7 +10,7 @@ namespace Favalet
     public static class Generator
     {
         public static Environments Environment() =>
-            Favalet.Environments.Create(LogicalCalculator.Instance);
+            Favalet.Environments.Create(TypeCalculator.Instance);
 
         private static readonly VariableTerm kind =
             VariableTerm.Create("*", FourthTerm.Instance);

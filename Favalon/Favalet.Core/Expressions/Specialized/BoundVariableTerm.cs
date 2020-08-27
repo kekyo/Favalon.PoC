@@ -45,7 +45,7 @@ namespace Favalet.Expressions.Specialized
             new BoundVariableTerm(
                 this.Symbol,
                 // Bound variable isn't replace placeholder term.
-                context.MakeRewritableHigherOrder(this.HigherOrder, false));
+                context.MakeRewritableHigherOrder(this.HigherOrder, HigherOrderAttributes.None));
 
         protected override IExpression Infer(IInferContext context)
         {

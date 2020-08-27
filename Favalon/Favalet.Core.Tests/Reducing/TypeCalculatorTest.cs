@@ -2,8 +2,7 @@
 using Favalet.Expressions;
 using NUnit.Framework;
 using System;
-using System.Collections;
-
+using Favalet.Expressions.Specialized;
 using static Favalet.CLRGenerator;
 using static Favalet.Generator;
 

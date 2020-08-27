@@ -98,6 +98,7 @@ namespace Favalet
             switch (lhs, rhs)
             {
                 case (UnspecifiedTerm _, _):   // Only expected expression
+                case (IFunctionExpression(UnspecifiedTerm _, UnspecifiedTerm _), _):
                     return Results.Ignore;
                 case (DeadEndTerm _, _):
                     return Results.Ignore;

@@ -1,7 +1,6 @@
 ﻿using System;
 using Favalet.Contexts;
 using Favalet.Expressions;
-using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Diagnostics;
 using System.Linq;
@@ -24,7 +23,7 @@ namespace Favalet
         private int placeholderIndex = -1;
 
         [DebuggerStepThrough]
-        private Environments(ILogicalCalculator typeCalculator) :
+        private Environments(ITypeCalculator typeCalculator) :
             base(null, typeCalculator)
         { }
 
@@ -74,13 +73,13 @@ namespace Favalet
             Debug.WriteLine(
                 $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetXml()}\", unifier=\"{unifier}\"");
 #endif            
-            var fixupped = context.Fixup(inferred);
+            var fixedup = context.Fixup(inferred);
             Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: fixupped=\"{fixupped.GetXml()}\"");
+                $"Infer[{context.GetHashCode()}]: fixedup=\"{fixedup.GetXml()}\"");
 #if DEBUG
             this.lastUnifier = unifier;
 #endif
-            return fixupped;
+            return fixedup;
         }
 
         public IExpression Reduce(IExpression expression)
@@ -105,7 +104,7 @@ namespace Favalet
             base.MutableBind(symbol, expression);
 
         [DebuggerStepThrough]
-        public static Environments Create(ILogicalCalculator typeCalculator)
+        public static Environments Create(ITypeCalculator typeCalculator)
         {
             var environment = new Environments(typeCalculator);
             return environment;

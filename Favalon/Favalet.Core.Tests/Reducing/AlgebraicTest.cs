@@ -1,6 +1,7 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
+using Favalet.Internal;
 using NUnit.Framework;
 
 using static Favalet.Generator;
@@ -11,7 +12,7 @@ namespace Favalet.Reducing
     public sealed class AlgebraicTest
     {
         private static readonly LogicalCalculator calculator =
-            new LogicalCalculator();
+            LogicalCalculator.Instance;
 
         private static void AssertLogicalEqual(
             IExpression expression,

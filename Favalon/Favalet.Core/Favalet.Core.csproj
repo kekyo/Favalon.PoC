@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">net40-client;net45;netstandard1.0;netstandard2.0;netstandard2.1</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net35-client;net40-client;net45;netstandard1.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MSBuildRuntimeType)' == 'Core'">net40-client;net45;netstandard1.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MSBuildRuntimeType)' != 'Core'">net35-client;net40-client;net45;netstandard1.0;netstandard2.0;netstandard2.1</TargetFrameworks>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>Favalet</RootNamespace>
@@ -23,7 +23,7 @@
   <ItemGroup Condition="$(TargetFrameworkVersion) != 'v3.5' And $(TargetFrameworkVersion) != 'v4.0'">
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>

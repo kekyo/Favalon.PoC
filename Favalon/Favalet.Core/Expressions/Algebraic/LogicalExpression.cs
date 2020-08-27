@@ -2,6 +2,7 @@
 using Favalet.Expressions.Specialized;
 using System.Collections;
 using System.Diagnostics;
+using Favalet.Internal;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -13,8 +14,6 @@ namespace Favalet.Expressions.Algebraic
     public sealed class LogicalExpression :
         Expression, ILogicalExpression
     {
-        private static readonly LogicalCalculator calculator = new LogicalCalculator();
-
         public readonly IExpression Operand;
 
         [DebuggerStepThrough]
@@ -38,7 +37,7 @@ namespace Favalet.Expressions.Algebraic
             this.Operand.GetHashCode();
 
         public bool Equals(ILogicalExpression rhs) =>
-            calculator.Equals(this.Operand, rhs.Operand);
+            LogicalCalculator.Instance.Equals(this.Operand, rhs.Operand);
 
         public override bool Equals(IExpression? other) =>
             other is ILogicalExpression rhs && this.Equals(rhs);
@@ -83,7 +82,7 @@ namespace Favalet.Expressions.Algebraic
         }
 
         protected override IExpression Reduce(IReduceContext context) =>
-            calculator.Compute(context.Reduce(this.Operand));
+            LogicalCalculator.Instance.Compute(context.Reduce(this.Operand));
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             new[] { context.GetXml(this.Operand) };

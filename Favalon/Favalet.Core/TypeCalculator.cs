@@ -32,12 +32,12 @@ namespace Favalet
                     case (ChoiceResults.Equal, ChoiceResults.AcceptLeft):
                     case (ChoiceResults.AcceptLeft, ChoiceResults.Equal):
                     case (ChoiceResults.AcceptLeft, ChoiceResults.AcceptLeft):
-                        return ChoiceResults.AcceptRight;
+                        return ChoiceResults.AcceptLeft;
                     
                     case (ChoiceResults.Equal, ChoiceResults.AcceptRight):
                     case (ChoiceResults.AcceptRight, ChoiceResults.Equal):
                     case (ChoiceResults.AcceptRight, ChoiceResults.AcceptRight):
-                        return ChoiceResults.AcceptLeft;
+                        return ChoiceResults.AcceptRight;
                 }
             }
 

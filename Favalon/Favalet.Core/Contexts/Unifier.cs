@@ -226,8 +226,10 @@ namespace Favalet.Contexts
                     {
                         var rresult = this.UnsafeResolveWhile(result0);
                         var tresult = this.UnsafeResolveWhile(to);
-                    
-                        var combined = OrExpression.Create(tresult, rresult);
+                        
+                        var combined = attribute.Forward ?
+                            (IExpression)OrExpression.Create(tresult, rresult) :  // Covariance.
+                            AndExpression.Create(tresult, rresult);               // Contravariance.
                         var calculated = context.TypeCalculator.Compute(combined);
 
                         if (!calculated.Equals(rresult))
@@ -249,7 +251,9 @@ namespace Favalet.Contexts
                         var rresult = this.UnsafeResolveWhile(result1);
                         var tresult = this.UnsafeResolveWhile(to);
                     
-                        var combined = OrExpression.Create(tresult, rresult);
+                        var combined = attribute.Forward ?
+                            (IExpression)OrExpression.Create(tresult, rresult) :  // Covariance.
+                            AndExpression.Create(tresult, rresult);               // Contravariance.
                         var calculated = context.TypeCalculator.Compute(combined);
 
                         if (!calculated.Equals(rresult))
@@ -397,7 +401,9 @@ namespace Favalet.Contexts
                 }
             }
 
-            var combined = OrExpression.Create(from, to);
+            var combined = attribute.Forward ?
+                (IExpression)OrExpression.Create(from, to) :  // Covariance.
+                AndExpression.Create(from, to);               // Contravariance.
             var calculated = context.TypeCalculator.Compute(combined);
 
             var rewritable = context.MakeRewritable(calculated);

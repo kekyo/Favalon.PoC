@@ -9,7 +9,7 @@ using static Favalet.Generator;
 namespace Favalet.Inferring
 {
     [TestFixture]
-    public sealed class WideningTest
+    public sealed class SubTypingTest
     {
         private static void AssertLogicalEqual(
             IExpression expression,
@@ -26,8 +26,9 @@ namespace Favalet.Inferring
             }
         }
 
+        #region Covariance
         [Test]
-        public void WideningInLambdaBody1()
+        public void CovarianceInLambdaBody1()
         {
             var environment = CLREnvironment();
 
@@ -55,7 +56,7 @@ namespace Favalet.Inferring
         }
 
         [Test]
-        public void WideningInLambdaBody2()
+        public void CovarianceInLambdaBody2()
         {
             var environment = CLREnvironment();
 
@@ -83,7 +84,7 @@ namespace Favalet.Inferring
         }
 
         [Test]
-        public void WideningInLambdaBody3()
+        public void CovarianceInLambdaBody3()
         {
             var environment = CLREnvironment();
 
@@ -109,5 +110,36 @@ namespace Favalet.Inferring
 
             AssertLogicalEqual(expression, expected, actual);
         }
+        #endregion
+
+        #region Contravariance
+        [Test]
+        public void ContravarianceInLambdaBody1()
+        {
+            var environment = CLREnvironment();
+
+            // (a:object -> a):(int -> object)
+            var expression =
+                Lambda(
+                    BoundVariable("a", Type<object>()),
+                    Variable("a"),
+                    Function(
+                        Type<int>(),
+                        Type<object>()));
+
+            var actual = environment.Infer(expression);
+
+            // (a:object -> a:object):(int -> object)
+            var expected =
+                Lambda(
+                    BoundVariable("a", Type<object>()),
+                    Variable("a", Type<object>()),
+                    Function(
+                        Type<int>(),
+                        Type<object>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        #endregion
     }
 }

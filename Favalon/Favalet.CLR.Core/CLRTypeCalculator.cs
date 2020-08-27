@@ -16,13 +16,17 @@ namespace Favalet
             if (left is ITypeTerm(Type lt) &&
                 right is ITypeTerm(Type rt))
             {
-                if (rt.IsAssignableFrom(lt))
+                var rtl = lt.IsAssignableFrom(rt);
+                var ltr = rt.IsAssignableFrom(lt);
+
+                switch (rtl, ltr)
                 {
-                    return ChoiceResults.AcceptLeft;
-                }
-                if (lt.IsAssignableFrom(rt))
-                {
-                    return ChoiceResults.AcceptRight;
+                    case (true, true):
+                        return ChoiceResults.Equal;
+                    case (true, false):
+                        return ChoiceResults.AcceptRight;
+                    case (false, true):
+                        return ChoiceResults.AcceptLeft;
                 }
             }
 
@@ -36,13 +40,17 @@ namespace Favalet
             if (left is ITypeTerm(Type lt) &&
                 right is ITypeTerm(Type rt))
             {
-                if (lt.IsAssignableFrom(rt))
+                var rtl = lt.IsAssignableFrom(rt);
+                var ltr = rt.IsAssignableFrom(lt);
+
+                switch (rtl, ltr)
                 {
-                    return ChoiceResults.AcceptLeft;
-                }
-                if (rt.IsAssignableFrom(lt))
-                {
-                    return ChoiceResults.AcceptRight;
+                    case (true, true):
+                        return ChoiceResults.Equal;
+                    case (true, false):
+                        return ChoiceResults.AcceptLeft;
+                    case (false, true):
+                        return ChoiceResults.AcceptRight;
                 }
             }
 

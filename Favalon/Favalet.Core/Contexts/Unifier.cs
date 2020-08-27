@@ -54,6 +54,7 @@ namespace Favalet.Contexts
         {
         }
 
+        [DebuggerStepThrough]
         private sealed class PlaceholderMarker
         {
             private readonly HashSet<int> indexes;
@@ -179,6 +180,7 @@ namespace Favalet.Contexts
             }
         }
 
+        [DebuggerStepThrough]
         private readonly struct Attribute
         {
             public readonly bool Forward;
@@ -232,7 +234,7 @@ namespace Favalet.Contexts
                             AndExpression.Create(tresult, rresult);               // Contravariance.
                         var calculated = context.TypeCalculator.Compute(combined);
 
-                        if (!calculated.Equals(rresult))
+                        if (!context.TypeCalculator.Equals(calculated, rresult))
                         {
                             throw new InvalidOperationException(
                                 $"Cannot unify: {from.GetPrettyString(PrettyStringTypes.Readable)} ==> {to.GetPrettyString(PrettyStringTypes.Readable)}");
@@ -256,7 +258,7 @@ namespace Favalet.Contexts
                             AndExpression.Create(tresult, rresult);               // Contravariance.
                         var calculated = context.TypeCalculator.Compute(combined);
 
-                        if (!calculated.Equals(rresult))
+                        if (!context.TypeCalculator.Equals(calculated, rresult))
                         {
                             throw new InvalidOperationException(
                                 $"Cannot unify: {from.GetPrettyString(PrettyStringTypes.Readable)} ==> {to.GetPrettyString(PrettyStringTypes.Readable)}");
@@ -316,7 +318,7 @@ namespace Favalet.Contexts
                 
                 case (false, true):
                     this.InternalUnifyPlaceholder(
-                        context, to, from, rto, attribute);
+                        context, to, from, rto, attribute.Reverse());    // Reversed order.
                     break;
                 
                 default:

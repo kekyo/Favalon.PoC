@@ -60,7 +60,7 @@ namespace Favalet.Expressions
             new LambdaExpression(
                 (IBoundVariableTerm)context.MakeRewritable(this.Parameter),
                 context.MakeRewritable(this.Body),
-                context.MakeRewritableHigherOrder(this.HigherOrder, HigherOrderAttributes.FixedPlaceholder));
+                context.MakeRewritableHigherOrder(this.HigherOrder));
 
         protected override IExpression Infer(IInferContext context)
         {
@@ -157,7 +157,17 @@ namespace Favalet.Expressions
             new LambdaExpression(
                 parameter,
                 body,
-                FunctionExpression.Create(parameter.HigherOrder, body.HigherOrder));
+                (parameter, body) switch
+                {
+                    // (UnspecifiedTerm _, UnspecifiedTerm _) =>
+                    //     DeadEndTerm.Instance,
+                    // (UnspecifiedTerm _, _) =>
+                    //     FunctionExpression.Create(UnspecifiedTerm.Instance, body.HigherOrder),
+                    (_, UnspecifiedTerm _) =>
+                        FunctionExpression.Create(parameter.HigherOrder, UnspecifiedTerm.Instance),
+                    _ =>
+                        FunctionExpression.Create(parameter.HigherOrder, body.HigherOrder)
+                });
     }
 
     [DebuggerStepThrough]

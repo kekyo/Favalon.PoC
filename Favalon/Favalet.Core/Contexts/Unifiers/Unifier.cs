@@ -352,11 +352,7 @@ namespace Favalet.Contexts.Unifiers
             Attribute attribute)
         {
             // Same as.
-            if (object.ReferenceEquals(from, to))
-            {
-                return null;
-            }
-            else if (context.TypeCalculator.ExactEquals(from, to))
+            if (context.TypeCalculator.ExactEquals(from, to))
             {
                 return null;
             }

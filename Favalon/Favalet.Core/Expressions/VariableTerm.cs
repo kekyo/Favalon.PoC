@@ -99,16 +99,32 @@ namespace Favalet.Expressions
                     Where(v => !object.ReferenceEquals(this, v.Expression)).
                     Select(v => context.Fixup(v.Expression)).
                     Memoize();
-                var expression = targets.
-                    Skip(1).
-                    Aggregate(
-                        targets[0],
-                        OrExpression.Create);
+
+                if (targets.Length >= 1)
+                {
+                    var expression = targets.
+                        Skip(1).
+                        Aggregate(
+                            targets[0],
+                            OrExpression.Create);
                 
-                var calculated = context.TypeCalculator.Compute(
-                    AndExpression.Create(
-                        higherOrder, expression.HigherOrder));
-                var filtered = 
+                    var calculated = context.TypeCalculator.Compute(
+                        AndExpression.Create(
+                            higherOrder, expression.HigherOrder));
+
+                    var filteredHigherOrder = targets.
+                        Where(v => context.TypeCalculator.Equals(v.HigherOrder, calculated)).
+                        Select(v => v.HigherOrder).
+                        Memoize();
+                    
+                    if (filteredHigherOrder.Length >= 1)
+                    {
+                        // Apply only calculated higher order.
+                        var result = LogicalCalculator.ConstructExpressions(
+                            filteredHigherOrder, OrExpression.Create)!;
+                        return new VariableTerm(this.Symbol, result);
+                    }
+                }
             }
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder))

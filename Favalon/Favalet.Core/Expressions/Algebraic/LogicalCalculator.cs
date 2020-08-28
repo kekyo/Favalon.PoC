@@ -172,7 +172,7 @@ namespace Favalet.Expressions.Algebraic
             return candidates;
         }
 
-        private static IExpression? ReConstructExpression(
+        public static IExpression? ConstructExpressions(
             IExpression[] results,
             Func<IExpression, IExpression, IExpression> creator) =>
             results.Length switch
@@ -196,7 +196,7 @@ namespace Favalet.Expressions.Algebraic
                     var absorption =
                         this.ComputeAbsorption<OrFlattenedExpression>(left, right, this.ChoiceForAnd).
                         Memoize();
-                    if (ReConstructExpression(absorption, OrExpression.Create) is IExpression result1)
+                    if (ConstructExpressions(absorption, OrExpression.Create) is IExpression result1)
                     {
                         return this.Compute(result1);
                     }
@@ -205,7 +205,7 @@ namespace Favalet.Expressions.Algebraic
                     var shrinked =
                         this.ComputeShrink<IAndExpression>(left, right, this.ChoiceForAnd).
                         Memoize();
-                    if (ReConstructExpression(shrinked, AndExpression.Create) is IExpression result2)
+                    if (ConstructExpressions(shrinked, AndExpression.Create) is IExpression result2)
                     {
                         return result2;
                     }
@@ -216,7 +216,7 @@ namespace Favalet.Expressions.Algebraic
                     var absorption =
                         this.ComputeAbsorption<AndFlattenedExpression>(left, right, this.ChoiceForOr).
                         Memoize();
-                    if (ReConstructExpression(absorption, AndExpression.Create) is IExpression result1)
+                    if (ConstructExpressions(absorption, AndExpression.Create) is IExpression result1)
                     {
                         return this.Compute(result1);
                     }
@@ -225,7 +225,7 @@ namespace Favalet.Expressions.Algebraic
                     var shrinked =
                         this.ComputeShrink<IOrExpression>(left, right, this.ChoiceForOr).
                         Memoize();
-                    if (ReConstructExpression(shrinked, OrExpression.Create) is IExpression result2)
+                    if (ConstructExpressions(shrinked, OrExpression.Create) is IExpression result2)
                     {
                         return result2;
                     }

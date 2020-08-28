@@ -4,6 +4,8 @@ using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
 using System.Diagnostics;
 using System.Reflection;
+using Favalet.Contexts.Unifiers;
+using Favalet.Internal;
 
 namespace Favalet.Contexts
 {
@@ -119,10 +121,10 @@ namespace Favalet.Contexts
             this.Resolve(index);
 
         public virtual VariableInformation[] LookupVariables(string symbol) =>
-            throw new InvalidOperationException();
+            ArrayEx.Empty<VariableInformation>();
     }
 
-    internal sealed partial class ReduceContext :
+    internal sealed class ReduceContext :
         FixupContext, IInferContext, IReduceContext
     {
         private readonly Environments rootScope;
@@ -142,12 +144,6 @@ namespace Favalet.Contexts
             this.rootScope = rootScope;
             this.parentScope = parentScope;
             this.unifier = unifier;
-        }
-
-        public ITypeCalculator TypeCalculator
-        {
-            [DebuggerStepThrough]
-            get => this.rootScope.TypeCalculator;
         }
 
         private IExpression MakeRewritable(

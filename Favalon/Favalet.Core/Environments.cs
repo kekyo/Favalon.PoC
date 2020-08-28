@@ -5,6 +5,7 @@ using Favalet.Expressions.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using Favalet.Contexts.Unifiers;
 
 namespace Favalet
 {

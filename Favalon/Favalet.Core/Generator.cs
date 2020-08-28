@@ -52,10 +52,16 @@ namespace Favalet
         public static AndExpression And(IExpression lhs, IExpression rhs, IExpression higherOrder) =>
             AndExpression.Create(lhs, rhs, higherOrder);
 
+        public static IExpression? AndExpressions(params IExpression[] expressions) =>
+            LogicalCalculator.ConstructExpressions(expressions, AndExpression.Create);
+
         public static OrExpression Or(IExpression lhs, IExpression rhs) =>
             OrExpression.Create(lhs, rhs);
         public static OrExpression Or(IExpression lhs, IExpression rhs, IExpression higherOrder) =>
             OrExpression.Create(lhs, rhs, higherOrder);
+
+        public static IExpression? OrExpressions(params IExpression[] expressions) =>
+            LogicalCalculator.ConstructExpressions(expressions, OrExpression.Create);
 
         public static LambdaExpression Lambda(
             IBoundVariableTerm parameter, IExpression body) =>

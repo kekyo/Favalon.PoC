@@ -8,43 +8,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace Favalet.Contexts
+namespace Favalet.Contexts.Unifiers
 {
-    internal enum UnifyConstraints
-    {
-        Free,
-        Fixed
-    }
-    
     [DebuggerDisplay("{Simple}")]
     internal sealed class Unifier :
         FixupContext,  // Because used by "Simple" property implementation.
         IUnsafePlaceholderResolver
     {
-        [DebuggerStepThrough]
-        private readonly struct Unification
-        {
-            public readonly IExpression Expression;
-            public readonly bool Fixed;
-
-            private Unification(IExpression expression, bool @fixed)
-            {
-                this.Expression = expression;
-                this.Fixed = @fixed;
-            }
-
-            public string ToString(PrettyStringTypes type)
-            {
-                var @fixed = this.Fixed ? "Fixed," : string.Empty;
-                return $"{@fixed}{this.Expression.GetPrettyString(type)}";
-            }
-            public override string ToString() =>
-                this.ToString(PrettyStringTypes.Readable);
-
-            public static Unification Create(IExpression expression, bool @fixed) =>
-                new Unification(expression, @fixed);
-        }
-        
         private readonly Dictionary<int, Unification> unifications =
             new Dictionary<int, Unification>();
         
@@ -52,55 +22,6 @@ namespace Favalet.Contexts
         private Unifier(ITypeCalculator typeCalculator) :
             base(typeCalculator)
         {
-        }
-
-        [DebuggerStepThrough]
-        private sealed class PlaceholderMarker
-        {
-            private readonly HashSet<int> indexes;
-#if DEBUG
-            private readonly List<int> list;
-#endif
-            private PlaceholderMarker(
-#if DEBUG
-                HashSet<int> indexes, List<int> list
-#else
-                HashSet<int> indexes
-#endif
-            )
-            {
-                this.indexes = indexes;
-#if DEBUG
-                this.list = list;
-#endif
-            }
-
-            public bool Mark(int targetIndex)
-            {
-#if DEBUG
-                list.Add(targetIndex);
-#endif
-                return indexes.Add(targetIndex);
-            }
-
-            public PlaceholderMarker Fork() =>
-#if DEBUG
-                new PlaceholderMarker(new HashSet<int>(this.indexes), new List<int>(this.list));
-#else
-                new PlaceholderMarker(new HashSet<int>(this.symbols));
-#endif
-
-#if DEBUG
-            public override string ToString() =>
-                StringUtilities.Join(" ==> ", this.list.Select(index => $"'{index}"));
-#endif
-
-            public static PlaceholderMarker Create() =>
-#if DEBUG
-                new PlaceholderMarker(new HashSet<int>(), new List<int>());
-#else
-                new PlaceholderMarker(new HashSet<int>());
-#endif
         }
 
         private void Occur(PlaceholderMarker marker, IExpression expression)
@@ -178,37 +99,6 @@ namespace Favalet.Contexts
 
                 this.Occur(PlaceholderMarker.Create(), index);
             }
-        }
-
-        [DebuggerStepThrough]
-        private readonly struct Attribute
-        {
-            public readonly bool Forward;
-            public readonly bool Fixed;
-
-            private Attribute(bool forward, bool @fixed)
-            {
-                this.Forward = forward;
-                this.Fixed = @fixed;
-            }
-
-            public Attribute Reverse() =>
-                new Attribute(!this.Forward, this.Fixed);
-            
-            public Attribute ApplyFixed(bool @fixed) =>
-                new Attribute(this.Forward, this.Fixed || @fixed);
-
-            public override string ToString() =>
-                (this.Forward, this.Fixed) switch
-                {
-                    (false, false) => "Backward",
-                    (false, true) => "Backward,Fixed",
-                    (true, false) => "Forward",
-                    (true, true) => "Forward,Fixed",
-                };
-
-            public static Attribute Create(bool @fixed) =>
-                new Attribute(true, @fixed);
         }
 
         private void InternalUnifyPlaceholder(

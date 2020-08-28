@@ -419,7 +419,7 @@ namespace Favalet.Contexts
             Attribute attribute)
         {
             // Same as.
-            if (object.ReferenceEquals(from, to))
+            if (context.TypeCalculator.ExactEquals(from, to))
             {
                 return null;
             }

@@ -275,9 +275,9 @@ namespace Favalet.Contexts.Unifiers
             if (from is IOrExpression(IExpression flo, IExpression fro))
             {
                 var left = this.InternalUnify(
-                    context, flo, OrExpression.Create(fro, to), attribute);
+                    context, flo, to, attribute);
                 var right = this.InternalUnify(
-                    context, fro, OrExpression.Create(flo, to), attribute);
+                    context, fro, to, attribute);
 
                 if (left is IExpression || right is IExpression)
                 {
@@ -353,6 +353,10 @@ namespace Favalet.Contexts.Unifiers
         {
             // Same as.
             if (object.ReferenceEquals(from, to))
+            {
+                return null;
+            }
+            else if (context.TypeCalculator.ExactEquals(from, to))
             {
                 return null;
             }

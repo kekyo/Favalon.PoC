@@ -71,8 +71,8 @@ namespace Favalet.Expressions
                     var expressionHigherOrder = LogicalCalculator.ConstructExpressions(
                         targets.Select(v => v.expression.HigherOrder).Memoize(), OrExpression.Create)!;
                
-                    context.Unify(symbolHigherOrder, higherOrder, true);
-                    context.Unify(expressionHigherOrder, higherOrder, true);
+                    context.Unify(symbolHigherOrder, higherOrder);
+                    context.Unify(expressionHigherOrder, higherOrder);
                 }
             }
 

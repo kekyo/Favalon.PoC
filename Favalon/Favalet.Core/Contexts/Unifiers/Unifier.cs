@@ -272,6 +272,47 @@ namespace Favalet.Contexts.Unifiers
                 return null;
             }
 
+            if (from is IOrExpression(IExpression flo, IExpression fro))
+            {
+                var left = this.InternalUnify(
+                    context, flo, OrExpression.Create(fro, to), attribute);
+                var right = this.InternalUnify(
+                    context, fro, OrExpression.Create(flo, to), attribute);
+
+                if (left is IExpression || right is IExpression)
+                {
+                    var combined1 = OrExpression.Create(
+                        left is IExpression ? left : OrExpression.Create(flo, to),
+                        right is IExpression ? right : OrExpression.Create(fro, to));
+                    var calculated1 = context.TypeCalculator.Compute(combined1);
+
+                    var rewritable1 = context.MakeRewritable(calculated1);
+                    var inferred1 = context.Infer(rewritable1);
+
+                    return inferred1;
+                }
+            }
+            else if (to is IOrExpression(IExpression tlo, IExpression tro))
+            {
+                var left = this.InternalUnify(
+                    context, OrExpression.Create(from, tro), tlo, attribute);
+                var right = this.InternalUnify(
+                    context, OrExpression.Create(from, tlo), tro, attribute);
+
+                if (left is IExpression || right is IExpression)
+                {
+                    var combined1 = OrExpression.Create(
+                        left is IExpression ? left : OrExpression.Create(from, tlo),
+                        right is IExpression ? right : OrExpression.Create(from, tro));
+                    var calculated1 = context.TypeCalculator.Compute(combined1);
+
+                    var rewritable1 = context.MakeRewritable(calculated1);
+                    var inferred1 = context.Infer(rewritable1);
+
+                    return inferred1;
+                }
+            }
+
             if (from is IFunctionExpression(IExpression fp, IExpression fr) &&
                 to is IFunctionExpression(IExpression tp, IExpression tr))
             {
@@ -293,15 +334,15 @@ namespace Favalet.Contexts.Unifiers
                 }
             }
 
-            var combined = attribute.Forward ?
+            var combined0 = attribute.Forward ?
                 (IExpression)OrExpression.Create(from, to) :  // Covariance.
                 AndExpression.Create(from, to);               // Contravariance.
-            var calculated = context.TypeCalculator.Compute(combined);
+            var calculated0 = context.TypeCalculator.Compute(combined0);
 
-            var rewritable = context.MakeRewritable(calculated);
-            var inferred = context.Infer(rewritable);
+            var rewritable0 = context.MakeRewritable(calculated0);
+            var inferred0 = context.Infer(rewritable0);
 
-            return inferred;
+            return inferred0;
         }
 
         private IExpression? InternalUnify(

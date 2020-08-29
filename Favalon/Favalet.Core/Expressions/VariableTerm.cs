@@ -65,11 +65,12 @@ namespace Favalet.Expressions
 
                 if (targets.Length >= 1)
                 {
+                    // It's bit difficult understanding what reason for using Or instead And.
                     var symbolHigherOrder = LogicalCalculator.ConstructExpressions(
-                        targets.Select(v => v.symbolHigherOrder).Memoize(), OrExpression.Create)!;
+                        targets.Select(v => v.symbolHigherOrder).Memoize(), AndExpression.Create)!;
 
                     var expressionHigherOrder = LogicalCalculator.ConstructExpressions(
-                        targets.Select(v => v.expression.HigherOrder).Memoize(), OrExpression.Create)!;
+                        targets.Select(v => v.expression.HigherOrder).Memoize(), AndExpression.Create)!;
                
                     context.Unify(symbolHigherOrder, higherOrder);
                     context.Unify(expressionHigherOrder, higherOrder);

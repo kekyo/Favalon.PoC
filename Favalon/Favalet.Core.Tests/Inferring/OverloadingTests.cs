@@ -102,8 +102,8 @@ namespace Favalet.Inferring
         {
             var environment = CLREnvironment();
             
-            environment.MutableBind("a", Type<int>());
-            environment.MutableBind("a", Type<double>());
+            environment.MutableBind("a", Constant(123));
+            environment.MutableBind("a", Constant(123.456));
 
             // (x:double -> x) a
             var expression =

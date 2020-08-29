@@ -234,6 +234,95 @@ namespace Favalet.Contexts.Unifiers
             }
         }
 
+        private bool InternalUnifyLogical<TBinaryExpression>(
+            IInferContext context,
+            IExpression from,
+            IExpression to,
+            Attribute attribute,
+            Func<IExpression, IExpression, TBinaryExpression> creator,
+            out IExpression? result)
+            where TBinaryExpression : IBinaryExpression
+        {
+            if (from is TBinaryExpression(IExpression flo, IExpression fro))
+            {
+                var left = this.InternalUnify(
+                    context, flo, to, attribute);
+                var right = this.InternalUnify(
+                    context, fro, to, attribute);
+
+                if (left is IExpression || right is IExpression)
+                {
+                    var combined = creator(
+                        left is IExpression ? left : creator(flo, to),
+                        right is IExpression ? right : creator(fro, to));
+                    var calculated = context.TypeCalculator.Compute(combined);
+
+                    var rewritable = context.MakeRewritable(calculated);
+                    var inferred = context.Infer(rewritable);
+
+                    result = inferred;
+                    return true;
+                }
+            }
+            else if (to is TBinaryExpression(IExpression tlo, IExpression tro))
+            {
+                var left = this.InternalUnify(
+                    context, from, tlo, attribute);
+                var right = this.InternalUnify(
+                    context, from, tro, attribute);
+
+                if (left is IExpression || right is IExpression)
+                {
+                    var combined = creator(
+                        left is IExpression ? left : creator(from, tlo),
+                        right is IExpression ? right : creator(from, tro));
+                    var calculated = context.TypeCalculator.Compute(combined);
+
+                    var rewritable = context.MakeRewritable(calculated);
+                    var inferred = context.Infer(rewritable);
+
+                    result = inferred;
+                    return true;
+                }
+            }
+
+            result = default;
+            return false;
+        }
+
+        private bool InternalUnifyFunction(
+            IInferContext context,
+            IExpression from,
+            IExpression to,
+            Attribute attribute,
+            out IExpression? result)
+        {
+            if (from is IFunctionExpression(IExpression fp, IExpression fr) &&
+                to is IFunctionExpression(IExpression tp, IExpression tr))
+            {
+                // Unify FunctionExpression.
+                var parameter = this.InternalUnify(
+                    context, fp, tp, attribute);
+                var result_ = this.InternalUnify(
+                    context, fr, tr, attribute);
+
+                if (parameter is IExpression || result_ is IExpression)
+                {
+                    result = FunctionExpression.Create(
+                        parameter is IExpression ? parameter : fp,
+                        result_ is IExpression ? result_ : fr);
+                }
+                else
+                {
+                    result = default;
+                }
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
         private IExpression? InternalUnifyCore(
             IInferContext context,
             IExpression from,
@@ -272,77 +361,34 @@ namespace Favalet.Contexts.Unifiers
                 return null;
             }
 
-            if (from is IOrExpression(IExpression flo, IExpression fro))
+            // Or expression.
+            if (this.InternalUnifyLogical<IOrExpression>(
+                context, from, to, attribute, OrExpression.Create, out var result0))
             {
-                var left = this.InternalUnify(
-                    context, flo, to, attribute);
-                var right = this.InternalUnify(
-                    context, fro, to, attribute);
-
-                if (left is IExpression || right is IExpression)
-                {
-                    var combined1 = OrExpression.Create(
-                        left is IExpression ? left : OrExpression.Create(flo, to),
-                        right is IExpression ? right : OrExpression.Create(fro, to));
-                    var calculated1 = context.TypeCalculator.Compute(combined1);
-
-                    var rewritable1 = context.MakeRewritable(calculated1);
-                    var inferred1 = context.Infer(rewritable1);
-
-                    return inferred1;
-                }
+                return result0;
             }
-            else if (to is IOrExpression(IExpression tlo, IExpression tro))
+            // And expression.
+            else if (this.InternalUnifyLogical<IAndExpression>(
+                context, from, to, attribute, AndExpression.Create, out var result1))
             {
-                var left = this.InternalUnify(
-                    context, OrExpression.Create(from, tro), tlo, attribute);
-                var right = this.InternalUnify(
-                    context, OrExpression.Create(from, tlo), tro, attribute);
-
-                if (left is IExpression || right is IExpression)
-                {
-                    var combined1 = OrExpression.Create(
-                        left is IExpression ? left : OrExpression.Create(from, tlo),
-                        right is IExpression ? right : OrExpression.Create(from, tro));
-                    var calculated1 = context.TypeCalculator.Compute(combined1);
-
-                    var rewritable1 = context.MakeRewritable(calculated1);
-                    var inferred1 = context.Infer(rewritable1);
-
-                    return inferred1;
-                }
+                return result1;
             }
 
-            if (from is IFunctionExpression(IExpression fp, IExpression fr) &&
-                to is IFunctionExpression(IExpression tp, IExpression tr))
+            if (this.InternalUnifyFunction(
+                context, from, to, attribute, out var result2))
             {
-                // Unify FunctionExpression.
-                var parameter = this.InternalUnify(
-                    context, fp, tp, attribute);
-                var result = this.InternalUnify(
-                    context, fr, tr, attribute);
-
-                if (parameter is IExpression || result is IExpression)
-                {
-                    return FunctionExpression.Create(
-                        parameter is IExpression ? parameter : fp,
-                        result is IExpression ? result : fr);
-                }
-                else
-                {
-                    return null;
-                }
+                return result2;
             }
 
-            var combined0 = attribute.Forward ?
+            var combined = attribute.Forward ?
                 (IExpression)OrExpression.Create(from, to) :  // Covariance.
                 AndExpression.Create(from, to);               // Contravariance.
-            var calculated0 = context.TypeCalculator.Compute(combined0);
+            var calculated = context.TypeCalculator.Compute(combined);
 
-            var rewritable0 = context.MakeRewritable(calculated0);
-            var inferred0 = context.Infer(rewritable0);
+            var rewritable = context.MakeRewritable(calculated);
+            var inferred = context.Infer(rewritable);
 
-            return inferred0;
+            return inferred;
         }
 
         private IExpression? InternalUnify(

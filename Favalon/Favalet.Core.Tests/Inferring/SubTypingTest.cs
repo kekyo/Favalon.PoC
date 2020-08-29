@@ -200,10 +200,10 @@ namespace Favalet.Inferring
 
             var actual = environment.Infer(expression);
 
-            // (a:object -> a:object):(int -> object)
+            // (a:int -> a:object):(int -> object)
             var expected =
                 Lambda(
-                    BoundVariable("a", Type<object>()),
+                    BoundVariable("a", Type<int>()),
                     Variable("a", Type<object>()),
                     Function(
                         Type<int>(),
@@ -256,10 +256,10 @@ namespace Favalet.Inferring
 
             var actual = environment.Infer(expression);
 
-            // (a:object -> a:object):(int -> object)
+            // (a:int -> a:object):(int -> object)
             var expected =
                 Lambda(
-                    BoundVariable("a", Type<object>()),
+                    BoundVariable("a", Type<int>()),
                     Variable("a", Type<object>()),
                     Function(
                         Type<int>(),

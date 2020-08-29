@@ -6,17 +6,16 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace Favalet.Contexts.Unifiers
 {
-    [DebuggerDisplay("{Simple}")]
+    [DebuggerDisplay("{Unifications}")]
     internal sealed class Unifier :
         FixupContext,  // Because used by "Simple" property implementation.
         IUnsafePlaceholderResolver
     {
-        private readonly Dictionary<int, Unification> unifications =
-            new Dictionary<int, Unification>();
+        private readonly Dictionary<IIdentityTerm, Unification> unifications =
+            new Dictionary<IIdentityTerm, Unification>(IdentityTermComparer.Instance);
         
         [DebuggerStepThrough]
         private Unifier(ITypeCalculator typeCalculator) :
@@ -28,7 +27,7 @@ namespace Favalet.Contexts.Unifiers
         {
             if (expression is IPlaceholderTerm identity)
             {
-                this.Occur(marker, identity.Index);
+                this.Occur(marker, identity);
             }
             else if (expression is IFunctionExpression(IExpression p, IExpression r))
             {
@@ -37,18 +36,18 @@ namespace Favalet.Contexts.Unifiers
             }
         }
 
-        private void Occur(PlaceholderMarker marker, int index)
+        private void Occur(PlaceholderMarker marker, IIdentityTerm identity)
         {
-            var targetIndex = index;
+            var targetIdentity = identity;
             while (true)
             {
-                if (marker.Mark(targetIndex))
+                if (marker.Mark(targetIdentity))
                 {
-                    if (this.unifications.TryGetValue(targetIndex, out var resolved))
+                    if (this.unifications.TryGetValue(targetIdentity, out var resolved))
                     {
                         if (resolved.Expression is IPlaceholderTerm placeholder)
                         {
-                            targetIndex = placeholder.Index;
+                            targetIdentity = placeholder;
                             continue;
                         }
                         else
@@ -71,7 +70,10 @@ namespace Favalet.Contexts.Unifiers
             }
         }
 
-        private void Update(int index, IExpression expression, bool @fixed)
+        private void Update(
+            IIdentityTerm index, 
+            IExpression expression,
+            bool @fixed)
         {
             if (this.unifications.TryGetValue(index, out var lastUnification))
             {
@@ -103,7 +105,7 @@ namespace Favalet.Contexts.Unifiers
 
         private void InternalUnifyPlaceholder(
             IInferContext context,
-            IPlaceholderTerm from,
+            IIdentityTerm from,
             IExpression to,
             Unification examinedFrom,
             Attribute attribute)
@@ -134,7 +136,7 @@ namespace Favalet.Contexts.Unifiers
                 
                 case (false, true):
                     // Force update.
-                    this.Update(from.Index, to, attribute.Fixed);
+                    this.Update(from, to, attribute.Fixed);
                 
                     // Must reinterprets examinedFrom.
                     if (this.InternalUnify(
@@ -165,7 +167,7 @@ namespace Favalet.Contexts.Unifiers
                     {
                         if (!examinedFrom.Fixed)
                         {
-                            this.Update(from.Index, result2, rattribute.Fixed);
+                            this.Update(from, result2, rattribute.Fixed);
                         }
                         else
                         {
@@ -177,14 +179,14 @@ namespace Favalet.Contexts.Unifiers
             }
         }
 
-        private void InternalUnifyBothPlaceholders(
+        private void InternalUnifyBothIdentities(
             IInferContext context,
-            IPlaceholderTerm from,
-            IPlaceholderTerm to,
+            IIdentityTerm from,
+            IIdentityTerm to,
             Attribute attribute)
         {
-            var rf = this.unifications.TryGetValue(from.Index, out var rfrom);
-            var rt = this.unifications.TryGetValue(to.Index, out var rto);
+            var rf = this.unifications.TryGetValue(from, out var rfrom);
+            var rt = this.unifications.TryGetValue(to, out var rto);
             
             switch (rf, rt)
             {
@@ -196,8 +198,8 @@ namespace Favalet.Contexts.Unifiers
                         rto.Expression,
                         rattribute) is IExpression result0)
                     {
-                        this.Update(from.Index, result0, rattribute.Fixed);
-                        this.Update(to.Index, result0, rattribute.Fixed);
+                        this.Update(from, result0, rattribute.Fixed);
+                        this.Update(to, result0, rattribute.Fixed);
                     }
                     break;
                 
@@ -212,26 +214,65 @@ namespace Favalet.Contexts.Unifiers
                     break;
                 
                 default:
-                    this.Update(from.Index, to, attribute.Fixed);
+                    this.Update(from, to, attribute.Fixed);
                     break;
             }
         }
 
-        private void InternalUnifyPlaceholder(
+        private void InternalUnifyIdentity(
             IInferContext context,
-            IPlaceholderTerm from,
+            IIdentityTerm from,
             IExpression to,
             Attribute attribute)
         {
-            if (this.unifications.TryGetValue(from.Index, out var rfrom))
+            if (this.unifications.TryGetValue(from, out var rfrom))
             {
                 this.InternalUnifyPlaceholder(
                     context, from, to, rfrom, attribute);
             }
             else
             {
-                this.Update(from.Index, to, attribute.Fixed);
+                this.Update(from, to, attribute.Fixed);
             }
+        }
+
+        private bool InternalUnifyIdentity<TIdentityTerm>(
+            IInferContext context,
+            IExpression from,
+            IExpression to,
+            Attribute attribute)
+            where TIdentityTerm : class, IIdentityTerm
+        {
+            // Interpret identities.
+            if (from is TIdentityTerm fi)
+            {
+                if (to is TIdentityTerm ti)
+                {
+                    // Identities aren't matched.
+                    if (!fi.Identity.Equals(ti.Identity))
+                    {
+                        // Unify both identities.
+                        this.InternalUnifyBothIdentities(
+                            context, fi, ti, attribute);
+                    }
+                }
+                else
+                {
+                    // Unify from identity.
+                    this.InternalUnifyIdentity(
+                        context, fi, to, attribute);
+                }
+                return true;
+            }
+            else if (to is TIdentityTerm ti)
+            {
+                // Unify to identity.
+                this.InternalUnifyIdentity(
+                    context, ti, from, attribute.Reverse());    // Reversed order.
+                return true;
+            }
+
+            return false;
         }
 
         private bool InternalUnifyLogical<TBinaryExpression>(
@@ -241,7 +282,7 @@ namespace Favalet.Contexts.Unifiers
             Attribute attribute,
             Func<IExpression, IExpression, TBinaryExpression> creator,
             out IExpression? result)
-            where TBinaryExpression : IBinaryExpression
+            where TBinaryExpression : class, IBinaryExpression
         {
             if (from is TBinaryExpression(IExpression flo, IExpression fro))
             {
@@ -333,31 +374,18 @@ namespace Favalet.Contexts.Unifiers
             Debug.Assert(!(to is IIgnoreUnificationTerm));
 
             // Interpret placeholders.
-            if (from is IPlaceholderTerm(int fromIndex) fph)
+            if (this.InternalUnifyIdentity<IPlaceholderTerm>(
+                context, from, to, attribute))
             {
-                if (to is IPlaceholderTerm(int toIndex) tph)
-                {
-                    // [1]
-                    if (fromIndex != toIndex)
-                    {
-                        // Unify both placeholders.
-                        this.InternalUnifyBothPlaceholders(
-                            context, fph, tph, attribute);
-                    }
-                }
-                else
-                {
-                    // Unify from placeholder.
-                    this.InternalUnifyPlaceholder(
-                        context, fph, to, attribute);
-                }
+                // Done.
                 return null;
             }
-            else if (to is IPlaceholderTerm tph)
+
+            // Interpret identities.
+            if (this.InternalUnifyIdentity<IIdentityTerm>(
+                context, from, to, attribute))
             {
-                // Unify to placeholder.
-                this.InternalUnifyPlaceholder(
-                    context, tph, from, attribute.Reverse());    // Reversed order.
+                // Done.
                 return null;
             }
 
@@ -365,18 +393,21 @@ namespace Favalet.Contexts.Unifiers
             if (this.InternalUnifyLogical<IOrExpression>(
                 context, from, to, attribute, OrExpression.Create, out var result0))
             {
+                // Done and got replacement.
                 return result0;
             }
             // And expression.
             else if (this.InternalUnifyLogical<IAndExpression>(
                 context, from, to, attribute, AndExpression.Create, out var result1))
             {
+                // Done and got replacement.
                 return result1;
             }
 
             if (this.InternalUnifyFunction(
                 context, from, to, attribute, out var result2))
             {
+                // Done and got replacement.
                 return result2;
             }
 
@@ -430,31 +461,24 @@ namespace Favalet.Contexts.Unifiers
             this.InternalUnify(
                 context, from, to, Attribute.Create(@fixed));
 
-        public override IExpression? Resolve(int index)
+        public override IExpression? Resolve(IIdentityTerm identity)
         {
 #if DEBUG
-            this.Occur(PlaceholderMarker.Create(), index);
+            this.Occur(PlaceholderMarker.Create(), identity);
 #endif
-            return this.unifications.TryGetValue(index, out var resolved) ?
+            return this.unifications.TryGetValue(identity, out var resolved) ?
                 resolved.Expression :
                 null;
         }
-
-        public string Xml =>
-            new XElement(
-                "Unifier",
-                this.unifications.OrderBy(entry => entry.Key).Select(entry => new XElement("Unification",
-                    new XAttribute("symbol", entry.Key),
-                    entry.Value.Expression.GetXml())).Memoize()).ToString();
         
-        public string Simple =>
+        public string Unifications =>
             StringUtilities.Join(
                 Environment.NewLine,
                 this.unifications.
-                OrderBy(entry => entry.Key).
+                OrderBy(entry => entry.Key, IdentityTermComparer.Instance).
                 Select(entry => string.Format(
-                    "'{0} ==> {1}{2}",
-                    entry.Key,
+                    "{0} ==> {1}{2}",
+                    entry.Key.Symbol,
                     entry.Value.ToString(PrettyStringTypes.Minimum),
                     // It will not resolve any function types.
                     this.Resolve(entry.Key) is IExpression expr ?
@@ -462,7 +486,7 @@ namespace Favalet.Contexts.Unifiers
                         string.Empty)));
 
         public override string ToString() =>
-            "Unifier: " + this.Simple;
+            "Unifier: " + this.Unifications;
         
         [DebuggerStepThrough]
         public static Unifier Create(ITypeCalculator typeCalculator) =>

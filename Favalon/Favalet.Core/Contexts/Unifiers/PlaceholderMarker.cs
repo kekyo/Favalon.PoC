@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Favalet.Expressions;
 using Favalet.Internal;
 
 namespace Favalet.Contexts.Unifiers
@@ -8,15 +9,15 @@ namespace Favalet.Contexts.Unifiers
     [DebuggerStepThrough]
     internal sealed class PlaceholderMarker
     {
-        private readonly HashSet<int> indexes;
+        private readonly HashSet<IIdentityTerm> indexes;
 #if DEBUG
-        private readonly List<int> list;
+        private readonly List<IIdentityTerm> list;
 #endif
         private PlaceholderMarker(
 #if DEBUG
-            HashSet<int> indexes, List<int> list
+            HashSet<IIdentityTerm> indexes, List<IIdentityTerm> list
 #else
-            HashSet<int> indexes
+            HashSet<IIdentityTerm> indexes
 #endif
         )
         {
@@ -26,19 +27,22 @@ namespace Favalet.Contexts.Unifiers
 #endif
         }
 
-        public bool Mark(int targetIndex)
+        public bool Mark(IIdentityTerm identity)
         {
 #if DEBUG
-            list.Add(targetIndex);
+            list.Add(identity);
 #endif
-            return indexes.Add(targetIndex);
+            return indexes.Add(identity);
         }
 
         public PlaceholderMarker Fork() =>
 #if DEBUG
-            new PlaceholderMarker(new HashSet<int>(this.indexes), new List<int>(this.list));
+            new PlaceholderMarker(
+                new HashSet<IIdentityTerm>(this.indexes),
+                new List<IIdentityTerm>(this.list));
 #else
-            new PlaceholderMarker(new HashSet<int>(this.symbols));
+            new PlaceholderMarker(
+                new HashSet<IIdentityTerm>(this.symbols));
 #endif
 
 #if DEBUG
@@ -48,9 +52,12 @@ namespace Favalet.Contexts.Unifiers
 
         public static PlaceholderMarker Create() =>
 #if DEBUG
-            new PlaceholderMarker(new HashSet<int>(), new List<int>());
+            new PlaceholderMarker(
+                new HashSet<IIdentityTerm>(),
+                new List<IIdentityTerm>());
 #else
-             new PlaceholderMarker(new HashSet<int>());
+            new PlaceholderMarker(
+                new HashSet<IIdentityTerm>());
 #endif
     }
 }

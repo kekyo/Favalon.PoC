@@ -1,11 +1,8 @@
-﻿using System;
+﻿using Favalet.Contexts.Unifiers;
 using Favalet.Expressions;
-using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
-using System.Diagnostics;
-using System.Reflection;
-using Favalet.Contexts.Unifiers;
 using Favalet.Internal;
+using System.Diagnostics;
 
 namespace Favalet.Contexts
 {
@@ -17,7 +14,7 @@ namespace Favalet.Contexts
     
     public interface IUnsafePlaceholderResolver
     {
-        IExpression? UnsafeResolve(int index);
+        IExpression? UnsafeResolve(IIdentityTerm identity);
     }
 
     public static class UnsafePlaceholderResolverExtension
@@ -30,7 +27,7 @@ namespace Favalet.Contexts
                 switch (current)
                 {
                     case IPlaceholderTerm placeholder:
-                        if (resolver.UnsafeResolve(placeholder.Index) is IExpression resolved)
+                        if (resolver.UnsafeResolve(placeholder) is IExpression resolved)
                         {
                             current = resolved;
                             continue;
@@ -71,7 +68,7 @@ namespace Favalet.Contexts
         IExpression Fixup(IExpression expression);
         IExpression FixupHigherOrder(IExpression higherOrder);
         
-        IExpression? Resolve(int index);
+        IExpression? Resolve(IIdentityTerm identity);
     }
 
     public interface IReduceContext :
@@ -105,11 +102,11 @@ namespace Favalet.Contexts
             return this.TypeCalculator.Compute(fixedup);
         }
 
-        public abstract IExpression? Resolve(int index);
+        public abstract IExpression? Resolve(IIdentityTerm identity);
 
         [DebuggerStepThrough]
-        IExpression? IUnsafePlaceholderResolver.UnsafeResolve(int index) =>
-            this.Resolve(index);
+        IExpression? IUnsafePlaceholderResolver.UnsafeResolve(IIdentityTerm identity) =>
+            this.Resolve(identity);
 
         public virtual VariableInformation[] LookupVariables(string symbol) =>
             ArrayEx.Empty<VariableInformation>();
@@ -216,8 +213,8 @@ namespace Favalet.Contexts
             this.unifier.Unify(this, fromHigherOrder, toHigherOrder, @fixed);
 
         [DebuggerStepThrough]
-        public override IExpression? Resolve(int index) =>
-            this.unifier.Resolve(index);
+        public override IExpression? Resolve(IIdentityTerm identity) =>
+            this.unifier.Resolve(identity);
 
         public override VariableInformation[] LookupVariables(string symbol) =>
             // TODO: improving when identity's higher order acceptable

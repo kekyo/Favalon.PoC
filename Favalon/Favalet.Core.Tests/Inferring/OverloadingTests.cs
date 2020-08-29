@@ -2,7 +2,7 @@
 using Favalet.Expressions;
 using NUnit.Framework;
 using System;
-
+using Favalet.Expressions.Specialized;
 using static Favalet.CLRGenerator;
 using static Favalet.Generator;
 
@@ -31,8 +31,15 @@ namespace Favalet.Inferring
         {
             var environment = CLREnvironment();
             
+            // a = 123
+            // a = 123.456
+            // a = x -> x
             environment.MutableBind("a", Constant(123));
             environment.MutableBind("a", Constant(123.456));
+            environment.MutableBind("a",
+                Lambda(
+                    "x",
+                    Variable("x")));
 
             // a:int
             var expression =
@@ -52,8 +59,15 @@ namespace Favalet.Inferring
         {
             var environment = CLREnvironment();
             
+            // a = 123
+            // a = 123.456
+            // a = x -> x
             environment.MutableBind("a", Constant(123));
             environment.MutableBind("a", Constant(123.456));
+            environment.MutableBind("a",
+                Lambda(
+                    "x",
+                    Variable("x")));
 
             // a:double
             var expression =
@@ -67,14 +81,93 @@ namespace Favalet.Inferring
 
             AssertLogicalEqual(expression, expected, actual);
         }
+                
+        [Test]
+        public void OverloadingFunctionExactMatch1()
+        {
+            var environment = CLREnvironment();
+            
+            // a = 123
+            // a = 123.456
+            // a = x -> x
+            environment.MutableBind("a", Constant(123));
+            environment.MutableBind("a", Constant(123.456));
+            environment.MutableBind("a",
+                Lambda(
+                    "x",
+                    Variable("x")));
+
+            // a:(_ -> _))
+            var expression =
+                Variable("a",
+                    Function(
+                        Unspecified(),
+                        Unspecified()));
+
+            var actual = environment.Infer(expression);
+
+            // a:('0 -> '0)
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Variable("a",
+                    Function(
+                        ph0,
+                        ph0));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+                
+        [Test]
+        public void OverloadingFunctionExactMatch2()
+        {
+            var environment = CLREnvironment();
+            
+            // a = 123
+            // a = 123.456
+            // a = x -> x
+            environment.MutableBind("a", Constant(123));
+            environment.MutableBind("a", Constant(123.456));
+            environment.MutableBind("a",
+                Lambda(
+                    "x",
+                    Variable("x")));
+
+            // a:(b -> b))
+            var expression =
+                Variable("a",
+                    Function(
+                        Variable("b"),
+                        Variable("b")));
+
+            var actual = environment.Infer(expression);
+
+            // a:('0 -> '0)
+            var provider = PseudoPlaceholderProvider.Create();
+            var ph0 = provider.CreatePlaceholder();
+            var expected =
+                Variable("a",
+                    Function(
+                        ph0,
+                        ph0));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
 
         [Test]
         public void ApplyOverloadingExactMatch1()
         {
             var environment = CLREnvironment();
             
+            // a = 123
+            // a = 123.456
+            // a = x -> x
             environment.MutableBind("a", Constant(123));
             environment.MutableBind("a", Constant(123.456));
+            environment.MutableBind("a",
+                Lambda(
+                    "x",
+                    Variable("x")));
 
             // (x:int -> x) a
             var expression =
@@ -98,12 +191,19 @@ namespace Favalet.Inferring
         }
         
         [Test]
-        public void ApplyverloadingExactMatch2()
+        public void ApplyOverloadingExactMatch2()
         {
             var environment = CLREnvironment();
             
+            // a = 123
+            // a = 123.456
+            // a = x -> x
             environment.MutableBind("a", Constant(123));
             environment.MutableBind("a", Constant(123.456));
+            environment.MutableBind("a",
+                Lambda(
+                    "x",
+                    Variable("x")));
 
             // (x:double -> x) a
             var expression =

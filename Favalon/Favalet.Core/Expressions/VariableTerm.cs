@@ -35,6 +35,13 @@ namespace Favalet.Expressions
             get => this.Symbol;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        object IIdentityTerm.Identity
+        {
+            [DebuggerStepThrough]
+            get => this.Symbol;
+        }
+
         public override int GetHashCode() =>
             this.Symbol.GetHashCode();
 

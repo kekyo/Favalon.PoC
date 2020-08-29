@@ -1,8 +1,8 @@
-﻿using Favalet.Contexts;
+﻿using System;
+using Favalet.Contexts;
 using Favalet.Expressions;
 using NUnit.Framework;
-using System;
-using Favalet.Expressions.Specialized;
+
 using static Favalet.CLRGenerator;
 using static Favalet.Generator;
 
@@ -26,6 +26,7 @@ namespace Favalet.Inferring
             }
         }
         
+        #region Exact match
         [Test]
         public void OverloadingExactMatch1()
         {
@@ -81,7 +82,78 @@ namespace Favalet.Inferring
 
             AssertLogicalEqual(expression, expected, actual);
         }
+        
+        [Test]
+        public void OverloadingExactMatch3()
+        {
+            var environment = CLREnvironment();
+            
+            // a = [object]
+            // a = 123
+            environment.MutableBind("a", Constant(new object()));
+            environment.MutableBind("a", Constant(123));
+
+            // a:int
+            var expression =
+                Variable("a", Type<int>());
+
+            var actual = environment.Infer(expression);
+
+            // a:int
+            var expected =
+                Variable("a", Type<int>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+                    
+        [Test]
+        public void OverloadingExactMatch4()
+        {
+            var environment = CLREnvironment();
+            
+            // a = [object]
+            // a = 123
+            environment.MutableBind("a", Constant(new object()));
+            environment.MutableBind("a", Constant(123));
+
+            // a:object
+            var expression =
+                Variable("a", Type<object>());
+
+            var actual = environment.Infer(expression);
+
+            // a:object
+            var expected =
+                Variable("a", Type<object>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+                    
+        [Test]
+        public void OverloadingExactMatch5()
+        {
+            var environment = CLREnvironment();
+            
+            // a = [object]
+            // a = 123
+            environment.MutableBind("a", Constant(new object()));
+            environment.MutableBind("a", Constant(123));
+
+            // a:IFormattable
+            var expression =
+                Variable("a", Type<IFormattable>());
+
+            var actual = environment.Infer(expression);
+
+            // a:IFormattable
+            var expected =
+                Variable("a", Type<IFormattable>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        #endregion
                 
+        #region Function exact match
         [Test]
         public void OverloadingFunctionExactMatch1()
         {
@@ -153,7 +225,9 @@ namespace Favalet.Inferring
 
             AssertLogicalEqual(expression, expected, actual);
         }
+        #endregion
 
+        #region Indirect match
         [Test]
         public void ApplyOverloadingExactMatch1()
         {
@@ -225,5 +299,6 @@ namespace Favalet.Inferring
 
             AssertLogicalEqual(expression, expected, actual);
         }
+        #endregion
     }
 }

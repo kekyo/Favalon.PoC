@@ -112,20 +112,27 @@ namespace Favalet.Expressions
                         targets.Select(v => v.HigherOrder).Memoize(),
                         OrExpression.Create)!;
                 
-                    var calculated = context.TypeCalculator.Compute(
-                        AndExpression.Create(
-                            higherOrder, targetsHigherOrder));
+                    var calculated = context.TypeCalculator.
+                        Compute(
+                            AndExpression.Create(
+                                higherOrder, targetsHigherOrder));
 
-                    var filteredHigherOrder = targets.
-                        Where(v => context.TypeCalculator.Equals(v.HigherOrder, calculated)).
-                        Select(v => v.HigherOrder).
+                    var filteredHigherOrders = targets.
+                        Select(v =>
+                            (higherOrder: v.HigherOrder, 
+                             calculated: context.TypeCalculator.
+                                Compute(
+                                    OrExpression.Create(
+                                        v.HigherOrder, calculated)))).
+                        Where(entry => entry.calculated.Equals(calculated)).
+                        Select(entry => entry.higherOrder).
                         Memoize();
                     
-                    if (filteredHigherOrder.Length >= 1)
+                    if (filteredHigherOrders.Length >= 1)
                     {
                         // Apply only calculated higher order.
                         var result = LogicalCalculator.ConstructNested(
-                            filteredHigherOrder,
+                            filteredHigherOrders,
                             OrExpression.Create)!;
                         return new VariableTerm(this.Symbol, result);
                     }

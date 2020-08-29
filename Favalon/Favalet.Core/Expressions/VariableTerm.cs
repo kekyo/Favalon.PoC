@@ -64,7 +64,7 @@ namespace Favalet.Expressions
             if (variables.Length >= 1)
             {
                 var targets = variables.
-                    Where(v => !object.ReferenceEquals(this, v.Expression)).
+                    Where(v => !context.TypeCalculator.ExactEquals(this, v.Expression)).
                     Select(v =>
                         (symbolHigherOrder: context.Infer(context.MakeRewritableHigherOrder(v.SymbolHigherOrder)), 
                          expression: context.Infer(context.MakeRewritable(v.Expression)))).
@@ -73,10 +73,10 @@ namespace Favalet.Expressions
                 if (targets.Length >= 1)
                 {
                     // It's bit difficult understanding what reason for using Or instead And.
-                    var symbolHigherOrder = LogicalCalculator.ConstructExpressions(
+                    var symbolHigherOrder = LogicalCalculator.ConstructNested(
                         targets.Select(v => v.symbolHigherOrder).Memoize(), AndExpression.Create)!;
 
-                    var expressionHigherOrder = LogicalCalculator.ConstructExpressions(
+                    var expressionHigherOrder = LogicalCalculator.ConstructNested(
                         targets.Select(v => v.expression.HigherOrder).Memoize(), AndExpression.Create)!;
                
                     context.Unify(symbolHigherOrder, higherOrder);
@@ -102,13 +102,13 @@ namespace Favalet.Expressions
             if (variables.Length >= 1)
             {
                 var targets = variables.
-                    Where(v => !object.ReferenceEquals(this, v.Expression)).
+                    Where(v => !context.TypeCalculator.ExactEquals(this, v.Expression)).
                     Select(v => context.Fixup(v.Expression)).
                     Memoize();
 
                 if (targets.Length >= 1)
                 {
-                    var targetsHigherOrder = LogicalCalculator.ConstructExpressions(
+                    var targetsHigherOrder = LogicalCalculator.ConstructNested(
                         targets.Select(v => v.HigherOrder).Memoize(),
                         OrExpression.Create)!;
                 
@@ -124,7 +124,7 @@ namespace Favalet.Expressions
                     if (filteredHigherOrder.Length >= 1)
                     {
                         // Apply only calculated higher order.
-                        var result = LogicalCalculator.ConstructExpressions(
+                        var result = LogicalCalculator.ConstructNested(
                             filteredHigherOrder,
                             OrExpression.Create)!;
                         return new VariableTerm(this.Symbol, result);

@@ -15,6 +15,10 @@ namespace Favalet.Contexts.Unifiers
             this.Fixed = @fixed;
         }
 
+        public bool Equals(Unification rhs) =>
+            this.Expression.Equals(rhs.Expression) &&
+            (this.Fixed == rhs.Fixed);
+
         public string ToString(PrettyStringTypes type)
         {
             var @fixed = this.Fixed ? "Fixed," : string.Empty;

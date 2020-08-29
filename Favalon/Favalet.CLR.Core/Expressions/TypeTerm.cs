@@ -43,7 +43,7 @@ namespace Favalet.Expressions
             this.RuntimeType.Equals(rhs.RuntimeType);
 
         public override bool Equals(IExpression? other) =>
-            other is ITypeTerm rhs && Equals(rhs);
+            other is ITypeTerm rhs && this.Equals(rhs);
 
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             this;

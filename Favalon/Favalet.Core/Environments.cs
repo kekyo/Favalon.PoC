@@ -1,11 +1,11 @@
-﻿using System;
-using Favalet.Contexts;
+﻿using Favalet.Contexts;
 using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
+using Favalet.Contexts.Unifiers;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using Favalet.Contexts.Unifiers;
 
 namespace Favalet
 {
@@ -26,7 +26,9 @@ namespace Favalet
         [DebuggerStepThrough]
         private Environments(ITypeCalculator typeCalculator) :
             base(null, typeCalculator)
-        { }
+        {
+            this.MutableBind(Generator.kind.Symbol, Generator.kind);
+        }
 
         [DebuggerStepThrough]
         internal IExpression CreatePlaceholder(

@@ -29,10 +29,15 @@ namespace Favalet.Contexts.Unifiers
             {
                 this.Occur(marker, identity);
             }
-            else if (expression is IFunctionExpression(IExpression p, IExpression r))
+            else if (expression is IFunctionExpression(IExpression parameter, IExpression result))
             {
-                this.Occur(marker.Fork(), p);
-                this.Occur(marker.Fork(), r);
+                this.Occur(marker.Fork(), parameter);
+                this.Occur(marker.Fork(), result);
+            }
+            else if (expression is IBinaryExpression(IExpression left, IExpression right))
+            {
+                this.Occur(marker.Fork(), left);
+                this.Occur(marker.Fork(), right);
             }
         }
 
@@ -71,11 +76,11 @@ namespace Favalet.Contexts.Unifiers
         }
 
         private void Update(
-            IIdentityTerm index, 
+            IIdentityTerm identity, 
             IExpression expression,
             bool @fixed)
         {
-            if (this.unifications.TryGetValue(index, out var lastUnification))
+            if (this.unifications.TryGetValue(identity, out var lastUnification))
             {
                 var unification = Unification.Create(
                     expression,
@@ -83,32 +88,32 @@ namespace Favalet.Contexts.Unifiers
                 
                 if (!lastUnification.Equals(unification))
                 {
-                    this.unifications[index] = unification;
+                    this.unifications[identity] = unification;
 
                     Debug.WriteLine(
-                        $"Unifier.Update: '{index}: {lastUnification} ==> {unification}");
+                        $"Unifier.Update: {identity.GetPrettyString(PrettyStringTypes.Readable)}: {lastUnification} ==> {unification}");
 
-                    this.Occur(PlaceholderMarker.Create(), index);
+                    this.Occur(PlaceholderMarker.Create(), identity);
                 }
             }
             else
             {
                 var unification = Unification.Create(expression, @fixed);
-                this.unifications.Add(index, unification);
+                this.unifications.Add(identity, unification);
 
                 Debug.WriteLine(
-                    $"Unifier.Update: '{index}: {unification}");
+                    $"Unifier.Update: {identity.GetPrettyString(PrettyStringTypes.Readable)}: {unification}");
 
-                this.Occur(PlaceholderMarker.Create(), index);
+                this.Occur(PlaceholderMarker.Create(), identity);
             }
         }
 
-        private void InternalUnifyPlaceholder(
+        private void InternalUnifyIdentity(
             IInferContext context,
             IIdentityTerm from,
             IExpression to,
             Unification examinedFrom,
-            Attribute attribute)
+            ExpressionAttribute attribute)
         {
             // (origin, current)
             switch (examinedFrom.Fixed, attribute.Fixed)
@@ -160,7 +165,7 @@ namespace Favalet.Contexts.Unifiers
                 
                 default:
                     // Derived fixed attribute.
-                    var rattribute = Attribute.Create(examinedFrom.Fixed || attribute.Fixed);
+                    var rattribute = ExpressionAttribute.Create(examinedFrom.Fixed || attribute.Fixed);
                     
                     if (this.InternalUnify(
                         context, examinedFrom.Expression, to, rattribute) is IExpression result2)
@@ -183,7 +188,7 @@ namespace Favalet.Contexts.Unifiers
             IInferContext context,
             IIdentityTerm from,
             IIdentityTerm to,
-            Attribute attribute)
+            ExpressionAttribute attribute)
         {
             var rf = this.unifications.TryGetValue(from, out var rfrom);
             var rt = this.unifications.TryGetValue(to, out var rto);
@@ -191,7 +196,7 @@ namespace Favalet.Contexts.Unifiers
             switch (rf, rt)
             {
                 case (true, true):
-                    var rattribute = Attribute.Create(rfrom.Fixed || rto.Fixed || attribute.Fixed);     // Derived if already fixed.
+                    var rattribute = ExpressionAttribute.Create(rfrom.Fixed || rto.Fixed || attribute.Fixed);     // Derived if already fixed.
                     if (this.InternalUnify(
                         context,
                         rfrom.Expression,
@@ -204,12 +209,12 @@ namespace Favalet.Contexts.Unifiers
                     break;
                 
                 case (true, false):
-                    this.InternalUnifyPlaceholder(
+                    this.InternalUnifyIdentity(
                         context, from, to, rfrom, attribute);
                     break;
                 
                 case (false, true):
-                    this.InternalUnifyPlaceholder(
+                    this.InternalUnifyIdentity(
                         context, to, from, rto, attribute.Reverse());    // Reversed order.
                     break;
                 
@@ -223,11 +228,11 @@ namespace Favalet.Contexts.Unifiers
             IInferContext context,
             IIdentityTerm from,
             IExpression to,
-            Attribute attribute)
+            ExpressionAttribute attribute)
         {
             if (this.unifications.TryGetValue(from, out var rfrom))
             {
-                this.InternalUnifyPlaceholder(
+                this.InternalUnifyIdentity(
                     context, from, to, rfrom, attribute);
             }
             else
@@ -240,7 +245,7 @@ namespace Favalet.Contexts.Unifiers
             IInferContext context,
             IExpression from,
             IExpression to,
-            Attribute attribute)
+            ExpressionAttribute attribute)
             where TIdentityTerm : class, IIdentityTerm
         {
             // Interpret identities.
@@ -279,7 +284,7 @@ namespace Favalet.Contexts.Unifiers
             IInferContext context,
             IExpression from,
             IExpression to,
-            Attribute attribute,
+            ExpressionAttribute attribute,
             Func<IExpression, IExpression, TBinaryExpression> creator,
             out IExpression? result)
             where TBinaryExpression : class, IBinaryExpression
@@ -335,7 +340,7 @@ namespace Favalet.Contexts.Unifiers
             IInferContext context,
             IExpression from,
             IExpression to,
-            Attribute attribute,
+            ExpressionAttribute attribute,
             out IExpression? result)
         {
             if (from is IFunctionExpression(IExpression fp, IExpression fr) &&
@@ -368,7 +373,7 @@ namespace Favalet.Contexts.Unifiers
             IInferContext context,
             IExpression from,
             IExpression to,
-            Attribute attribute)
+            ExpressionAttribute attribute)
         {
             Debug.Assert(!(from is IIgnoreUnificationTerm));
             Debug.Assert(!(to is IIgnoreUnificationTerm));
@@ -426,7 +431,7 @@ namespace Favalet.Contexts.Unifiers
             IInferContext context,
             IExpression from,
             IExpression to,
-            Attribute attribute)
+            ExpressionAttribute attribute)
         {
             // Same as.
             if (context.TypeCalculator.ExactEquals(from, to))
@@ -459,7 +464,7 @@ namespace Favalet.Contexts.Unifiers
             IExpression to,
             bool @fixed) =>
             this.InternalUnify(
-                context, from, to, Attribute.Create(@fixed));
+                context, from, to, ExpressionAttribute.Create(@fixed));
 
         public override IExpression? Resolve(IIdentityTerm identity)
         {
@@ -470,20 +475,22 @@ namespace Favalet.Contexts.Unifiers
                 resolved.Expression :
                 null;
         }
-        
-        public string Unifications =>
-            StringUtilities.Join(
+
+        public string Unifications
+        {
+            [DebuggerStepThrough]
+            get => StringUtilities.Join(
                 Environment.NewLine,
                 this.unifications.
-                OrderBy(entry => entry.Key, IdentityTermComparer.Instance).
-                Select(entry => string.Format(
-                    "{0} ==> {1}{2}",
-                    entry.Key.Symbol,
-                    entry.Value.ToString(PrettyStringTypes.Minimum),
-                    // It will not resolve any function types.
-                    this.Resolve(entry.Key) is IExpression expr ?
-                        $" [{this.Fixup(expr).GetPrettyString(PrettyStringTypes.Readable)}]" :
-                        string.Empty)));
+                    OrderBy(entry => entry.Key, IdentityTermComparer.Instance).
+                    Select(entry => string.Format(
+                        "{0} ==> {1}{2}",
+                        entry.Key.Symbol,
+                        entry.Value.ToString(PrettyStringTypes.Minimum),
+                        this.Resolve(entry.Key) is IExpression expr
+                            ? $" [{this.Fixup(expr).GetPrettyString(PrettyStringTypes.Readable)}]"
+                            : string.Empty)));
+        }
 
         public override string ToString() =>
             "Unifier: " + this.Unifications;

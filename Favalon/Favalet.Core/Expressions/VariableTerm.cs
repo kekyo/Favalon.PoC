@@ -1,11 +1,11 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
+using Favalet.Expressions.Algebraic;
+using Favalet.Internal;
 using System.Collections;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
-using Favalet.Expressions.Algebraic;
-using Favalet.Internal;
 
 namespace Favalet.Expressions
 {
@@ -46,7 +46,7 @@ namespace Favalet.Expressions
             this.Symbol.GetHashCode();
 
         public bool Equals(IIdentityTerm rhs) =>
-            this.Symbol.Equals(rhs.Symbol);
+            this.Symbol.Equals(rhs.Identity);
 
         public override bool Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
@@ -66,21 +66,24 @@ namespace Favalet.Expressions
                 var targets = variables.
                     Where(v => !context.TypeCalculator.ExactEquals(this, v.Expression)).
                     Select(v =>
-                        (symbolHigherOrder: context.Infer(context.MakeRewritableHigherOrder(v.SymbolHigherOrder)), 
-                         expression: context.Infer(context.MakeRewritable(v.Expression)))).
+                        (symbolHigherOrder: context.MakeRewritableHigherOrder(v.SymbolHigherOrder), 
+                         expression: context.MakeRewritable(v.Expression))).
                     Memoize();
 
                 if (targets.Length >= 1)
                 {
-                    // It's bit difficult understanding what reason for using Or instead And.
                     var symbolHigherOrder = LogicalCalculator.ConstructNested(
-                        targets.Select(v => v.symbolHigherOrder).Memoize(), AndExpression.Create)!;
-
-                    var expressionHigherOrder = LogicalCalculator.ConstructNested(
-                        targets.Select(v => v.expression.HigherOrder).Memoize(), AndExpression.Create)!;
+                        targets.Select(v => context.Infer(v.symbolHigherOrder)).Memoize(), OrExpression.Create)!;
+                    
+                    var expression = LogicalCalculator.ConstructNested(
+                        targets.Select(v => v.expression).Memoize(), OrExpression.Create)!;
+                    var rewritable = context.MakeRewritable(expression);
+                    var inferred = context.Infer(rewritable);
                
                     context.Unify(symbolHigherOrder, higherOrder);
-                    context.Unify(expressionHigherOrder, higherOrder);
+                    context.Unify(this, inferred);
+
+                    return ReferencedVariableTerm.Create(this.Symbol, higherOrder);
                 }
             }
 

@@ -307,8 +307,12 @@ namespace Favalet.Contexts.Unifiers
                     var inferred = context.Infer(rewritable);
 
                     result = inferred;
-                    return true;
                 }
+                else
+                {
+                    result = default;
+                }
+                return true;
             }
             else if (to is TBinaryExpression(IExpression tlo, IExpression tro))
             {
@@ -328,8 +332,12 @@ namespace Favalet.Contexts.Unifiers
                     var inferred = context.Infer(rewritable);
 
                     result = inferred;
-                    return true;
                 }
+                else
+                {
+                    result = default;
+                }
+                return true;
             }
 
             result = default;

@@ -5,72 +5,45 @@ using System.Xml.Linq;
 
 namespace Favalet.Expressions.Specialized
 {
-    public enum PlaceholderOrderHints
+    internal sealed class ReferencedVariableTerm :
+        Expression, IIdentityTerm
     {
-        VariableOrAbove = 0,
-        TypeOrAbove,
-        KindOrAbove,
-        Fourth,
-        DeadEnd
-    }
-
-    public interface IPlaceholderProvider
-    {
-        IExpression CreatePlaceholder(PlaceholderOrderHints orderHint);
-    }
-
-    public interface IPlaceholderTerm :
-        IIdentityTerm
-    {
-        int Index { get; }
-    }
-
-    public sealed class PlaceholderTerm :
-        Expression, IPlaceholderTerm
-    {
-        public readonly int Index;
+        public readonly string Symbol;
 
         [DebuggerStepThrough]
-        private PlaceholderTerm(int index, IExpression higherOrder)
+        private ReferencedVariableTerm(string symbol, IExpression higherOrder)
         {
-            this.Index = index;
+            this.Symbol = symbol;
             this.HigherOrder = higherOrder;
         }
 
         public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public string Symbol
+        string IIdentityTerm.Symbol
         {
             [DebuggerStepThrough]
-            get => $"'{this.Index}";
+            get => this.Symbol;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object IIdentityTerm.Identity
         {
             [DebuggerStepThrough]
-            get => this.Index;
-        }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        int IPlaceholderTerm.Index
-        {
-            [DebuggerStepThrough]
-            get => this.Index;
+            get => this.Symbol;
         }
 
         public override int GetHashCode() =>
-            this.Index.GetHashCode();
+            this.Symbol.GetHashCode();
 
         public bool Equals(IIdentityTerm rhs) =>
-            this.Index.Equals(rhs.Identity);
+            this.Symbol.Equals(rhs.Identity);
 
         public override bool Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
 
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
-            this;  // Placeholder already rewritable on the unifier infrastructure.
+            this;
 
         protected override IExpression Infer(IInferContext context) =>
             this;
@@ -91,7 +64,7 @@ namespace Favalet.Expressions.Specialized
                 }
                 else
                 {
-                    return new PlaceholderTerm(this.Index, higherOrder);
+                    return new ReferencedVariableTerm(this.Symbol, higherOrder);
                 }
             }
         }
@@ -100,7 +73,7 @@ namespace Favalet.Expressions.Specialized
             this;
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
-            new[] { new XAttribute("index", this.Index) };
+            new[] { new XAttribute("symbol", this.Symbol) };
 
         protected override string GetPrettyString(IPrettyStringContext context) =>
             context.FinalizePrettyString(
@@ -108,16 +81,7 @@ namespace Favalet.Expressions.Specialized
                 this.Symbol);
 
         [DebuggerStepThrough]
-        internal static PlaceholderTerm Create(int index, IExpression higherOrder) =>
-            new PlaceholderTerm(index, higherOrder);
-    }
-
-    [DebuggerStepThrough]
-    public static class PlaceholderTermExtension
-    {
-        public static void Deconstruct(
-            this IPlaceholderTerm placeholder,
-            out int index) =>
-            index = placeholder.Index;
+        internal static ReferencedVariableTerm Create(string symbol, IExpression higherOrder) =>
+            new ReferencedVariableTerm(symbol, higherOrder);
     }
 }

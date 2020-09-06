@@ -59,7 +59,8 @@ namespace Favalet.Contexts
         void Unify(
             IExpression fromHigherOrder,
             IExpression toHigherOrder,
-            bool @fixed = false);
+            bool @fixed = false,
+            bool useAndIfNotQualified = false);
     }
 
     public interface IFixupContext :
@@ -209,8 +210,9 @@ namespace Favalet.Contexts
         public void Unify(
             IExpression fromHigherOrder,
             IExpression toHigherOrder,
-            bool @fixed = false) =>
-            this.unifier.Unify(this, fromHigherOrder, toHigherOrder, @fixed);
+            bool @fixed = false,
+            bool useAndIfNotQualified = false) =>
+            this.unifier.Unify(this, fromHigherOrder, toHigherOrder, @fixed, useAndIfNotQualified);
 
         [DebuggerStepThrough]
         public override IExpression? Resolve(IIdentityTerm identity) =>

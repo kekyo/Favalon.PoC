@@ -298,6 +298,7 @@ namespace Favalet.Contexts.Unifiers
 
                 if (left is IExpression || right is IExpression)
                 {
+                    // TODO: really?
                     var combined = creator(
                         left is IExpression ? left : creator(flo, to),
                         right is IExpression ? right : creator(fro, to));
@@ -381,7 +382,8 @@ namespace Favalet.Contexts.Unifiers
             IInferContext context,
             IExpression from,
             IExpression to,
-            ExpressionAttribute attribute)
+            ExpressionAttribute attribute,
+            bool useAndIfNotQualified)
         {
             Debug.Assert(!(from is IIgnoreUnificationTerm));
             Debug.Assert(!(to is IIgnoreUnificationTerm));
@@ -424,9 +426,9 @@ namespace Favalet.Contexts.Unifiers
                 return result2;
             }
 
-            var combined = attribute.Forward ?
-                (IExpression)OrExpression.Create(from, to) :  // Covariance.
-                AndExpression.Create(from, to);               // Contravariance.
+            var combined = useAndIfNotQualified ?
+                (IExpression)AndExpression.Create(from, to) :
+                OrExpression.Create(from, to);
             var calculated = context.TypeCalculator.Compute(combined);
 
             var rewritable = context.MakeRewritable(calculated);
@@ -439,7 +441,8 @@ namespace Favalet.Contexts.Unifiers
             IInferContext context,
             IExpression from,
             IExpression to,
-            ExpressionAttribute attribute)
+            ExpressionAttribute attribute,
+            bool useAndIfNotQualified)
         {
             // Same as.
             if (context.TypeCalculator.ExactEquals(from, to))
@@ -457,22 +460,30 @@ namespace Favalet.Contexts.Unifiers
                 default:
                     // Unify higher order (ignored result.)
                     this.InternalUnify(
-                        context, from.HigherOrder, to.HigherOrder, attribute);
+                        context, from.HigherOrder, to.HigherOrder, attribute, useAndIfNotQualified);
 
                     // Unify.
                     return this.InternalUnifyCore(
-                        context, from, to, attribute);
+                        context, from, to, attribute, useAndIfNotQualified);
             }
         }
+
+        private IExpression? InternalUnify(
+            IInferContext context,
+            IExpression from,
+            IExpression to,
+            ExpressionAttribute attribute) =>
+            this.InternalUnify(context, from, to, attribute, attribute.Forward);
 
         [DebuggerStepThrough]
         public void Unify(
             IInferContext context,
             IExpression from,
             IExpression to,
-            bool @fixed) =>
+            bool @fixed,
+            bool useAndIfNotQualified) =>
             this.InternalUnify(
-                context, from, to, ExpressionAttribute.Create(@fixed));
+                context, from, to, ExpressionAttribute.Create(@fixed), useAndIfNotQualified);
 
         public override IExpression? Resolve(IIdentityTerm identity)
         {

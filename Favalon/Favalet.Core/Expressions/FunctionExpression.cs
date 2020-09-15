@@ -206,7 +206,17 @@ namespace Favalet.Expressions
             InternalCreate(
                 parameter,
                 result,
-                () => CreateRecursivity(parameter.HigherOrder, result.HigherOrder));
+                () => (parameter, result) switch
+                {
+                    (UnspecifiedTerm _, UnspecifiedTerm _) =>
+                        DeadEndTerm.Instance,
+                    (UnspecifiedTerm _, _) =>
+                        CreateRecursivity(UnspecifiedTerm.Instance, result.HigherOrder),
+                    (_, UnspecifiedTerm _) =>
+                        CreateRecursivity(parameter.HigherOrder, UnspecifiedTerm.Instance),
+                    _ =>
+                        CreateRecursivity(parameter.HigherOrder, result.HigherOrder)
+                });
 
         [DebuggerStepThrough]
         public static FunctionExpression Create(

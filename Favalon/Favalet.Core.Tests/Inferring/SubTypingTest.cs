@@ -25,6 +25,49 @@ namespace Favalet.Inferring
                     actual.GetPrettyString(PrettyStringTypes.Readable));
             }
         }
+        
+        #region Widening
+        [Test]
+        public void Widening1()
+        {
+            var environment = CLREnvironment();
+            
+            environment.MutableBind("a", Type<int>());
+
+            // a:object
+            var expression =
+                Variable("a", Type<object>());
+
+            var actual = environment.Infer(expression);
+
+            // a:object
+            var expected =
+                Variable("a", Type<object>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        //[Test]
+        public void Widening2()
+        {
+            var environment = CLREnvironment();
+            
+            environment.MutableBind("a", Type<object>());
+
+            // a:int
+            var expression =
+                Variable("a", Type<int>());
+
+            var actual = environment.Infer(expression);
+
+            // TODO: really? cause error?
+            // a:object
+            var expected =
+                Variable("a", Type<object>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        #endregion
 
         #region Covariance
         [Test]
@@ -133,6 +176,90 @@ namespace Favalet.Inferring
             var expected =
                 Lambda(
                     BoundVariable("a", Type<object>()),
+                    Variable("a", Type<object>()),
+                    Function(
+                        Type<int>(),
+                        Type<object>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void ContravarianceInLambdaBody2()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a:object):(int -> object)
+            var expression =
+                Lambda(
+                    BoundVariable("a"),
+                    Variable("a", Type<object>()),
+                    Function(
+                        Type<int>(),
+                        Type<object>()));
+
+            var actual = environment.Infer(expression);
+
+            // (a:int -> a:object):(int -> object)
+            var expected =
+                Lambda(
+                    BoundVariable("a", Type<int>()),
+                    Variable("a", Type<object>()),
+                    Function(
+                        Type<int>(),
+                        Type<object>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void ContravarianceInLambdaBody3()
+        {
+            var environment = CLREnvironment();
+
+            // (a:object -> a):(int -> _)
+            var expression =
+                Lambda(
+                    BoundVariable("a", Type<object>()),
+                    Variable("a"),
+                    Function(
+                        Type<int>(),
+                        Unspecified()));
+
+            var actual = environment.Infer(expression);
+
+            // (a:object -> a:object):(int -> object)
+            var expected =
+                Lambda(
+                    BoundVariable("a", Type<object>()),
+                    Variable("a", Type<object>()),
+                    Function(
+                        Type<int>(),
+                        Type<object>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void ContravarianceInLambdaBody4()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a:object):(int -> _)
+            var expression =
+                Lambda(
+                    BoundVariable("a"),
+                    Variable("a", Type<object>()),
+                    Function(
+                        Type<int>(),
+                        Unspecified()));
+
+            var actual = environment.Infer(expression);
+
+            // (a:int -> a:object):(int -> object)
+            var expected =
+                Lambda(
+                    BoundVariable("a", Type<int>()),
                     Variable("a", Type<object>()),
                     Function(
                         Type<int>(),

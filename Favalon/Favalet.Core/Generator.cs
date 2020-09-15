@@ -12,7 +12,7 @@ namespace Favalet
         public static Environments Environment() =>
             Favalet.Environments.Create(TypeCalculator.Instance);
 
-        private static readonly VariableTerm kind =
+        internal static readonly VariableTerm kind =
             VariableTerm.Create("*", FourthTerm.Instance);
 
 #if !NET35 && !NET40
@@ -52,10 +52,16 @@ namespace Favalet
         public static AndExpression And(IExpression lhs, IExpression rhs, IExpression higherOrder) =>
             AndExpression.Create(lhs, rhs, higherOrder);
 
+        public static IExpression? AndExpressions(params IExpression[] expressions) =>
+            LogicalCalculator.ConstructNested(expressions, AndExpression.Create);
+
         public static OrExpression Or(IExpression lhs, IExpression rhs) =>
             OrExpression.Create(lhs, rhs);
         public static OrExpression Or(IExpression lhs, IExpression rhs, IExpression higherOrder) =>
             OrExpression.Create(lhs, rhs, higherOrder);
+
+        public static IExpression? OrExpressions(params IExpression[] expressions) =>
+            LogicalCalculator.ConstructNested(expressions, OrExpression.Create);
 
         public static LambdaExpression Lambda(
             IBoundVariableTerm parameter, IExpression body) =>

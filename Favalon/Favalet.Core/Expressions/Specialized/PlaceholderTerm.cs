@@ -47,6 +47,13 @@ namespace Favalet.Expressions.Specialized
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        object IIdentityTerm.Identity
+        {
+            [DebuggerStepThrough]
+            get => this.Index;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         int IPlaceholderTerm.Index
         {
             [DebuggerStepThrough]
@@ -57,7 +64,7 @@ namespace Favalet.Expressions.Specialized
             this.Index.GetHashCode();
 
         public bool Equals(IIdentityTerm rhs) =>
-            this.Symbol.Equals(rhs.Symbol);
+            this.Index.Equals(rhs.Identity);
 
         public override bool Equals(IExpression? other) =>
             other is IIdentityTerm rhs && this.Equals(rhs);
@@ -70,7 +77,7 @@ namespace Favalet.Expressions.Specialized
 
         protected override IExpression Fixup(IFixupContext context)
         {
-            if (context.Resolve(this.Index) is IExpression resolved)
+            if (context.Resolve(this) is IExpression resolved)
             {
                 return context.Fixup(resolved);
             }

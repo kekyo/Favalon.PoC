@@ -5,7 +5,6 @@ namespace Favalet.Contexts.Unifiers
 {
     internal enum UnificationPolarities
     {
-        Equal,
         Covariance,
         Contravariance
     }

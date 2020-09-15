@@ -519,6 +519,6 @@ namespace Favalet.Contexts.Unifiers
         public static Unifier Create(ITypeCalculator typeCalculator) =>
             new Unifier(typeCalculator);
     }
-}
 
 #endif
+}

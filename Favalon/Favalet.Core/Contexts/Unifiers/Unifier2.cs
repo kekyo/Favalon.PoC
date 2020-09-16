@@ -77,20 +77,6 @@ namespace Favalet.Contexts.Unifiers
         }
         #endregion
 
-        private void ValidateSubTyping(
-            IInferContext context,
-            IExpression from,
-            IExpression to)
-        {
-            // from <: to
-            var combined = OrExpression.Create(from, to);
-            var calculated = context.TypeCalculator.Compute(combined);
-            if (!context.TypeCalculator.Equals(calculated, to))
-            {
-                throw new ArgumentException("");
-            }
-        }
-          
         private void InternalUnifyBothPlaceholders(
             IInferContext context,
             IPlaceholderTerm from,
@@ -102,42 +88,57 @@ namespace Favalet.Contexts.Unifiers
             switch (ufr, utr)
             {
                 case (true, true):
-                    this.Unify(context, from, ut.Expression);
-                    if ((uf.Polarity == UnificationPolarities.Covariance) &&
-                        (ut.Polarity == UnificationPolarities.Contravariance))
+                    switch (uf.Polarity, ut.Polarity)
                     {
-                        this.unifications[to] = Unification.Create(
-                            from, UnificationPolarities.Covariance);
-                    }
-                    else
-                    {
-                        throw new ArgumentException("");
+                        case (UnificationPolarities.Covariance, UnificationPolarities.Contravariance):
+                            this.unifications[to] = Unification.Create(
+                                from, UnificationPolarities.Covariance);
+                            this.Unify(context, from, ut.Expression);
+                            break;
+
+                        case (UnificationPolarities.Contravariance, UnificationPolarities.Covariance):
+                            this.unifications[from] = Unification.Create(
+                                to, UnificationPolarities.Covariance);
+                            this.Unify(context, uf.Expression, to);
+                            break;
+
+                        case (UnificationPolarities.Covariance, UnificationPolarities.Covariance):
+                            this.Unify(context, from, ut.Expression);
+                            break;
+                        
+                        case (UnificationPolarities.Contravariance, UnificationPolarities.Contravariance):
+                            this.Unify(context, uf.Expression, to);
+                            break;
                     }
                     break;
                 
                 case (_, true):
-                    this.Unify(context, from, ut.Expression);
-                    if (ut.Polarity == UnificationPolarities.Contravariance)
+                    switch (ut.Polarity)
                     {
-                        this.unifications[to] = Unification.Create(
-                            from, UnificationPolarities.Covariance);
-                    }
-                    else
-                    {
-                        throw new ArgumentException("");
+                        case UnificationPolarities.Contravariance:
+                            this.unifications[to] = Unification.Create(
+                                from, UnificationPolarities.Covariance);
+                            this.Unify(context, from, ut.Expression);
+                            break;
+                        
+                        case UnificationPolarities.Covariance:
+                            this.Unify(context, from, ut.Expression);
+                            break;
                     }
                     break;
 
                 case (true, _):
-                    this.Unify(context, uf.Expression, to);
-                    if (uf.Polarity == UnificationPolarities.Covariance)
+                    switch (uf.Polarity)
                     {
-                        this.unifications[from] = Unification.Create(
-                            to, UnificationPolarities.Contravariance);
-                    }
-                    else
-                    {
-                        throw new ArgumentException("");
+                        case UnificationPolarities.Covariance:
+                            this.unifications[from] = Unification.Create(
+                                to, UnificationPolarities.Contravariance);
+                            this.Unify(context, uf.Expression, to);
+                            break;
+                        
+                        case UnificationPolarities.Contravariance:
+                            this.Unify(context, uf.Expression, to);
+                            break;
                     }
                     break;
                 
@@ -145,15 +146,6 @@ namespace Favalet.Contexts.Unifiers
                     this.unifications[to] = Unification.Create(
                         from, UnificationPolarities.Covariance);
                     break;
-            }
-            
-            if (this.unifications.TryGetValue(to, out var unification))
-            {
-            }
-            else
-            {
-                this.unifications[to] = Unification.Create(
-                    from, UnificationPolarities.Covariance);
             }
         }
       
@@ -164,14 +156,17 @@ namespace Favalet.Contexts.Unifiers
         {
             if (this.unifications.TryGetValue(to, out var unification))
             {
-                // unification <: from
-                //this.ValidateSubTyping(context, from, unification.Expression);
-                this.Unify(context, from, unification.Expression);
-
-                if (unification.Polarity == UnificationPolarities.Contravariance)
+                switch (unification.Polarity)
                 {
-                    this.unifications[to] = Unification.Create(
-                        from, UnificationPolarities.Covariance);
+                    case UnificationPolarities.Contravariance:
+                        this.unifications[to] = Unification.Create(
+                            from, UnificationPolarities.Covariance);
+                        this.Unify(context, from, unification.Expression);
+                        break;
+                    
+                    case UnificationPolarities.Covariance:
+                        this.Unify(context, from, unification.Expression);
+                        break;
                 }
             }
             else
@@ -188,14 +183,17 @@ namespace Favalet.Contexts.Unifiers
         {
             if (this.unifications.TryGetValue(from, out var unification))
             {
-                // unification <: from
-                //this.ValidateSubTyping(context, unification.Expression, to);
-                this.Unify(context, unification.Expression, to);
-
-                if (unification.Polarity == UnificationPolarities.Covariance)
+                switch (unification.Polarity)
                 {
-                    this.unifications[from] = Unification.Create(
-                        to, UnificationPolarities.Contravariance);
+                    case UnificationPolarities.Covariance:
+                        this.unifications[from] = Unification.Create(
+                            to, UnificationPolarities.Contravariance);
+                        this.Unify(context, unification.Expression, to);
+                        break;
+                    
+                    case UnificationPolarities.Contravariance:
+                        this.Unify(context, unification.Expression, to);
+                        break;
                 }
             }
             else
@@ -205,6 +203,19 @@ namespace Favalet.Contexts.Unifiers
             }
         }
         
+        private void ValidatePolarity(
+            IInferContext context,
+            IExpression from,
+            IExpression to)
+        {
+            // from <: to
+            var f = context.TypeCalculator.Compute(OrExpression.Create(from, to));
+            if (!context.TypeCalculator.Equals(f, to))
+            {
+                throw new ArgumentException("");
+            }
+        }
+
         private void InternalUnify(
             IInferContext context,
             IExpression from,
@@ -215,7 +226,7 @@ namespace Favalet.Contexts.Unifiers
 
             switch (from, to)
             {
-                // Placeholder unifications
+                // Placeholder unification.
                 case (IPlaceholderTerm fp1, IPlaceholderTerm tp1):
                     this.InternalUnifyBothPlaceholders(context, fp1, tp1);
                     break;
@@ -236,8 +247,8 @@ namespace Favalet.Contexts.Unifiers
                     break;
                 
                 default:
-                    // from <: to
-                    this.ValidateSubTyping(context, from, to);
+                    // Validate polarity.
+                    this.ValidatePolarity(context, from, to);
                     break;
             }
         }
@@ -261,7 +272,7 @@ namespace Favalet.Contexts.Unifiers
                     break;
 
                 default:
-                    // Unify higher order (ignored result.)
+                    // Unify higher order.
                     this.Unify(context, from.HigherOrder, to.HigherOrder);
 
                     // Unify.

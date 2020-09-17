@@ -3,6 +3,7 @@ using Favalet.Expressions;
 
 namespace Favalet.Contexts.Unifiers
 {
+    #if false
     [DebuggerStepThrough]
     internal readonly struct Unification
     {
@@ -30,4 +31,5 @@ namespace Favalet.Contexts.Unifiers
         public static Unification Create(IExpression expression, bool @fixed) =>
             new Unification(expression, @fixed);
     }
+    #endif
 }

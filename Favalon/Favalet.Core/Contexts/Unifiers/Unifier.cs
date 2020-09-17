@@ -9,6 +9,7 @@ using System.Linq;
 
 namespace Favalet.Contexts.Unifiers
 {
+#if false
     [DebuggerDisplay("{Unifications}")]
     internal sealed class Unifier :
         FixupContext,  // Because used by "Simple" property implementation.
@@ -518,4 +519,6 @@ namespace Favalet.Contexts.Unifiers
         public static Unifier Create(ITypeCalculator typeCalculator) =>
             new Unifier(typeCalculator);
     }
+
+#endif
 }

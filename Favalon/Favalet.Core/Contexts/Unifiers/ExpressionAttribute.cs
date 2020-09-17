@@ -2,6 +2,7 @@
 
 namespace Favalet.Contexts.Unifiers
 {
+    #if false
     [DebuggerStepThrough]
     internal readonly struct ExpressionAttribute
     {
@@ -32,4 +33,5 @@ namespace Favalet.Contexts.Unifiers
         public static ExpressionAttribute Create(bool @fixed) =>
             new ExpressionAttribute(true, @fixed);
     }
+    #endif
 }

@@ -5,8 +5,8 @@ namespace Favalet.Contexts.Unifiers
 {
     internal enum UnificationPolarities
     {
-        Covariance,
-        Contravariance
+        Out,
+        In
     }
     
     [DebuggerStepThrough]
@@ -26,12 +26,7 @@ namespace Favalet.Contexts.Unifiers
             (this.Polarity == rhs.Polarity);
 
         public string ToString(PrettyStringTypes type) =>
-            this.Polarity switch
-            {
-                UnificationPolarities.Covariance => $"out,{this.Expression.GetPrettyString(type)}",
-                UnificationPolarities.Contravariance => $"in,{this.Expression.GetPrettyString(type)}",
-                _ => $"{this.Expression.GetPrettyString(type)}",
-            };
+            $"{this.Polarity},{this.Expression.GetPrettyString(type)}";
         public override string ToString() =>
             this.ToString(PrettyStringTypes.Readable);
 

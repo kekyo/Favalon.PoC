@@ -77,142 +77,153 @@ namespace Favalet.Contexts.Unifiers
         }
         #endregion
 
+        private void UpdateUnification(
+            IInferContext context,
+            IPlaceholderTerm placeholder,
+            IExpression expression,
+            UnificationPolarities polarity)
+        {
+            var updated = Unification.Create(expression, polarity);
+            
+#if DEBUG
+            if (this.unifications.TryGetValue(placeholder, out var last))
+            {
+                if (context.TypeCalculator.Equals(
+                    last.Expression, updated.Expression) &&
+                    (last.Polarity == updated.Polarity))
+                {
+                }
+                else
+                {
+                    Debug.WriteLine(
+                        $"UpdateUnification: {placeholder} ==> [{last} --> {updated}]");
+                }
+            }
+            else
+            {
+                Debug.WriteLine(
+                    $"UpdateUnification: {placeholder} ==> {updated}");
+            }
+#endif
+            this.unifications[placeholder] = updated;
+            
+            this.Occur(PlaceholderMarker.Create(), placeholder);
+        }
+
         private void InternalUnifyBothPlaceholders(
             IInferContext context,
             IPlaceholderTerm from,
             IPlaceholderTerm to)
         {
-            var ufr = this.unifications.TryGetValue(from, out var uf);
-            var utr = this.unifications.TryGetValue(to, out var ut);
+            var fr = this.unifications.TryGetValue(from, out var flast);
+            var tr = this.unifications.TryGetValue(to, out var tlast);
 
-            switch (ufr, utr)
+            switch (fr, tr)
             {
                 case (true, true):
-                    switch (uf.Polarity, ut.Polarity)
+                    switch (flast.Polarity, tlast.Polarity)
                     {
-                        case (UnificationPolarities.Covariance, UnificationPolarities.Contravariance):
-                            this.unifications[to] = Unification.Create(
-                                from, UnificationPolarities.Covariance);
-                            this.Unify(context, from, ut.Expression);
+                        case (UnificationPolarities.Out, UnificationPolarities.In):
+                            this.UpdateUnification(context, to, from, UnificationPolarities.Out);
+                            this.Unify(context, from, tlast.Expression);
                             break;
 
-                        case (UnificationPolarities.Contravariance, UnificationPolarities.Covariance):
-                            this.unifications[from] = Unification.Create(
-                                to, UnificationPolarities.Covariance);
-                            this.Unify(context, uf.Expression, to);
+                        case (UnificationPolarities.In, UnificationPolarities.Out):
+                            this.UpdateUnification(context, from, to, UnificationPolarities.In);
+                            this.Unify(context, flast.Expression, to);
                             break;
 
-                        case (UnificationPolarities.Covariance, UnificationPolarities.Covariance):
-                            this.Unify(context, from, ut.Expression);
+                        case (UnificationPolarities.Out, UnificationPolarities.Out):
+                            this.Unify(context, from, tlast.Expression);
                             break;
                         
-                        case (UnificationPolarities.Contravariance, UnificationPolarities.Contravariance):
-                            this.Unify(context, uf.Expression, to);
+                        case (UnificationPolarities.In, UnificationPolarities.In):
+                            this.Unify(context, flast.Expression, to);
                             break;
                     }
                     break;
                 
                 case (_, true):
-                    switch (ut.Polarity)
+                    switch (tlast.Polarity)
                     {
-                        case UnificationPolarities.Contravariance:
-                            this.unifications[to] = Unification.Create(
-                                from, UnificationPolarities.Covariance);
-                            this.Unify(context, from, ut.Expression);
+                        case UnificationPolarities.In:
+                            this.UpdateUnification(context, to, from, UnificationPolarities.Out);
+                            this.Unify(context, from, tlast.Expression);
                             break;
                         
-                        case UnificationPolarities.Covariance:
-                            this.Unify(context, from, ut.Expression);
+                        case UnificationPolarities.Out:
+                            this.Unify(context, from, tlast.Expression);
                             break;
                     }
                     break;
 
                 case (true, _):
-                    switch (uf.Polarity)
+                    switch (flast.Polarity)
                     {
-                        case UnificationPolarities.Covariance:
-                            this.unifications[from] = Unification.Create(
-                                to, UnificationPolarities.Contravariance);
-                            this.Unify(context, uf.Expression, to);
+                        case UnificationPolarities.Out:
+                            this.UpdateUnification(context, from, to, UnificationPolarities.In);
+                            this.Unify(context, flast.Expression, to);
                             break;
                         
-                        case UnificationPolarities.Contravariance:
-                            this.Unify(context, uf.Expression, to);
+                        case UnificationPolarities.In:
+                            this.Unify(context, flast.Expression, to);
                             break;
                     }
                     break;
                 
                 default:
-                    this.unifications[to] = Unification.Create(
-                        from, UnificationPolarities.Covariance);
+                    this.UpdateUnification(context, to, from, UnificationPolarities.Out);
                     break;
             }
         }
       
-        private void InternalUnifyPlaceholder(
+        private void InternalUnifyPlaceholderForward(
             IInferContext context,
             IExpression from,
-            IPlaceholderTerm to)
+            IPlaceholderTerm placeholder)
         {
-            if (this.unifications.TryGetValue(to, out var unification))
+            if (this.unifications.TryGetValue(placeholder, out var last))
             {
-                switch (unification.Polarity)
+                switch (last.Polarity)
                 {
-                    case UnificationPolarities.Contravariance:
-                        this.unifications[to] = Unification.Create(
-                            from, UnificationPolarities.Covariance);
-                        this.Unify(context, from, unification.Expression);
+                    case UnificationPolarities.In:
+                        this.UpdateUnification(context, placeholder, from, UnificationPolarities.Out);
+                        this.Unify(context, last.Expression, from);
                         break;
                     
-                    case UnificationPolarities.Covariance:
-                        this.Unify(context, from, unification.Expression);
+                    case UnificationPolarities.Out:
+                        this.Unify(context, from, last.Expression);
                         break;
                 }
             }
             else
             {
-                this.unifications[to] = Unification.Create(
-                    from, UnificationPolarities.Covariance);
+                this.UpdateUnification(context, placeholder, from, UnificationPolarities.Out);
             }
         }
 
-        private void InternalUnifyPlaceholder(
+        private void InternalUnifyPlaceholderBackward(
             IInferContext context,
-            IPlaceholderTerm from,
+            IPlaceholderTerm placeholder,
             IExpression to)
         {
-            if (this.unifications.TryGetValue(from, out var unification))
+            if (this.unifications.TryGetValue(placeholder, out var last))
             {
-                switch (unification.Polarity)
+                switch (last.Polarity)
                 {
-                    case UnificationPolarities.Covariance:
-                        this.unifications[from] = Unification.Create(
-                            to, UnificationPolarities.Contravariance);
-                        this.Unify(context, unification.Expression, to);
+                    case UnificationPolarities.Out:
+                        this.UpdateUnification(context, placeholder, to, UnificationPolarities.In);
+                        this.Unify(context, last.Expression, placeholder);
                         break;
                     
-                    case UnificationPolarities.Contravariance:
-                        this.Unify(context, unification.Expression, to);
+                    case UnificationPolarities.In:
+                        this.Unify(context, last.Expression, to);
                         break;
                 }
             }
             else
             {
-                this.unifications[from] = Unification.Create(
-                    to, UnificationPolarities.Contravariance);
-            }
-        }
-        
-        private void ValidatePolarity(
-            IInferContext context,
-            IExpression from,
-            IExpression to)
-        {
-            // from <: to
-            var f = context.TypeCalculator.Compute(OrExpression.Create(from, to));
-            if (!context.TypeCalculator.Equals(f, to))
-            {
-                throw new ArgumentException("");
+                this.UpdateUnification(context, placeholder, to, UnificationPolarities.In);
             }
         }
 
@@ -231,10 +242,10 @@ namespace Favalet.Contexts.Unifiers
                     this.InternalUnifyBothPlaceholders(context, fp1, tp1);
                     break;
                 case (_, IPlaceholderTerm tp2):
-                    this.InternalUnifyPlaceholder(context, from, tp2);
+                    this.InternalUnifyPlaceholderForward(context, from, tp2);
                     break;
                 case (IPlaceholderTerm fp2, _):
-                    this.InternalUnifyPlaceholder(context, fp2, to);
+                    this.InternalUnifyPlaceholderBackward(context, fp2, to);
                     break;
 
                 // Function unification.
@@ -248,7 +259,12 @@ namespace Favalet.Contexts.Unifiers
                 
                 default:
                     // Validate polarity.
-                    this.ValidatePolarity(context, from, to);
+                    // from <: to
+                    var f = context.TypeCalculator.Compute(OrExpression.Create(from, to));
+                    if (!context.TypeCalculator.Equals(f, to))
+                    {
+                        throw new ArgumentException("");
+                    }
                     break;
             }
         }

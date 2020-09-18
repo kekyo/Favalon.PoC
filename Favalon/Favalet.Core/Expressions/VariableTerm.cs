@@ -89,8 +89,8 @@ namespace Favalet.Expressions
                         targets.Select(v => v.expression.HigherOrder).Memoize(),
                         OrExpression.Create)!;
                
-                    context.Unify(higherOrder, symbolHigherOrder);
                     context.Unify(symbolHigherOrder, expressionHigherOrder);
+                    context.Unify(expressionHigherOrder, higherOrder);
                 }
                 
                 var bounds = targets.

@@ -23,60 +23,6 @@ namespace Favalet.Contexts.Unifiers
         {
         }
 
-        #region Occurrence
-        private void Occur(PlaceholderMarker marker, IExpression expression)
-        {
-            if (expression is IPlaceholderTerm identity)
-            {
-                this.Occur(marker, identity);
-            }
-            else if (expression is IFunctionExpression(IExpression parameter, IExpression result))
-            {
-                this.Occur(marker.Fork(), parameter);
-                this.Occur(marker.Fork(), result);
-            }
-            else if (expression is IBinaryExpression(IExpression left, IExpression right))
-            {
-                this.Occur(marker.Fork(), left);
-                this.Occur(marker.Fork(), right);
-            }
-        }
-
-        private void Occur(PlaceholderMarker marker, IIdentityTerm identity)
-        {
-            var targetIdentity = identity;
-            while (true)
-            {
-                if (marker.Mark(targetIdentity))
-                {
-                    if (this.unifications.TryGetValue(targetIdentity, out var resolved))
-                    {
-                        if (resolved.Expression is IPlaceholderTerm placeholder)
-                        {
-                            targetIdentity = placeholder;
-                            continue;
-                        }
-                        else
-                        {
-                            this.Occur(marker, resolved.Expression);
-                        }
-                    }
-
-                    return;
-                }
-#if DEBUG
-                Debug.WriteLine(
-                    "Detected circular variable reference: " + marker);
-                throw new InvalidOperationException(
-                    "Detected circular variable reference: " + marker);
-#else
-                throw new InvalidOperationException(
-                    "Detected circular variable reference: " + symbol);
-#endif
-            }
-        }
-        #endregion
-
         private void UpdateUnification(
             IInferContext context,
             IPlaceholderTerm placeholder,
@@ -96,18 +42,18 @@ namespace Favalet.Contexts.Unifiers
                 else
                 {
                     Debug.WriteLine(
-                        $"UpdateUnification: {placeholder} ==> [{last} --> {updated}]");
+                        $"UpdateUnification: {placeholder} {updated} [{last}]");
                 }
             }
             else
             {
                 Debug.WriteLine(
-                    $"UpdateUnification: {placeholder} ==> {updated}");
+                    $"UpdateUnification: {placeholder} {updated}");
             }
 #endif
             this.unifications[placeholder] = updated;
             
-            this.Occur(PlaceholderMarker.Create(), placeholder);
+            OccurenceValidator.Validate(placeholder, this.unifications);
         }
 
         private void InternalUnifyBothPlaceholders(
@@ -118,57 +64,41 @@ namespace Favalet.Contexts.Unifiers
             var fr = this.unifications.TryGetValue(from, out var flast);
             var tr = this.unifications.TryGetValue(to, out var tlast);
 
+            // Detect already saved unification pair.
+            if (fr &&
+                (flast.Polarity == UnificationPolarities.In) &&
+                context.TypeCalculator.Equals(flast.Expression, to))
+            {
+                return;
+            }
+            if (tr &&
+                (tlast.Polarity == UnificationPolarities.Out) &&
+                context.TypeCalculator.Equals(from, tlast.Expression))
+            {
+                return;
+            }
+               
             switch (fr, tr)
             {
+                // Make recursive unification when both expressions are placeholder,
+                // uses only forward direction strategy.
                 case (true, true):
-                    switch (flast.Polarity, tlast.Polarity)
+                    this.UpdateUnification(context, to, from, UnificationPolarities.Out);
+                    switch (tlast.Polarity)
                     {
-                        case (UnificationPolarities.Out, UnificationPolarities.In):
-                            this.UpdateUnification(context, to, from, UnificationPolarities.Out);
-                            this.Unify(context, from, tlast.Expression);
+                        case UnificationPolarities.In:
+                            this.Unify(context, to, tlast.Expression);
                             break;
 
-                        case (UnificationPolarities.In, UnificationPolarities.Out):
-                            this.UpdateUnification(context, from, to, UnificationPolarities.In);
-                            this.Unify(context, flast.Expression, to);
-                            break;
-
-                        case (UnificationPolarities.Out, UnificationPolarities.Out):
-                            this.Unify(context, from, tlast.Expression);
-                            break;
-                        
-                        case (UnificationPolarities.In, UnificationPolarities.In):
-                            this.Unify(context, flast.Expression, to);
+                        case UnificationPolarities.Out:
+                            this.Unify(context, tlast.Expression, to);
                             break;
                     }
                     break;
                 
                 case (_, true):
-                    switch (tlast.Polarity)
-                    {
-                        case UnificationPolarities.In:
-                            this.UpdateUnification(context, to, from, UnificationPolarities.Out);
-                            this.Unify(context, from, tlast.Expression);
-                            break;
-                        
-                        case UnificationPolarities.Out:
-                            this.Unify(context, from, tlast.Expression);
-                            break;
-                    }
-                    break;
-
-                case (true, _):
-                    switch (flast.Polarity)
-                    {
-                        case UnificationPolarities.Out:
-                            this.UpdateUnification(context, from, to, UnificationPolarities.In);
-                            this.Unify(context, flast.Expression, to);
-                            break;
-                        
-                        case UnificationPolarities.In:
-                            this.Unify(context, flast.Expression, to);
-                            break;
-                    }
+                    // Make backward direction when detect non-saved placeholder.
+                    this.UpdateUnification(context, from, to, UnificationPolarities.In);
                     break;
                 
                 default:
@@ -176,23 +106,24 @@ namespace Favalet.Contexts.Unifiers
                     break;
             }
         }
-      
+ 
         private void InternalUnifyPlaceholderForward(
             IInferContext context,
             IExpression from,
             IPlaceholderTerm placeholder)
         {
-            if (this.unifications.TryGetValue(placeholder, out var last))
+            if (this.unifications.TryGetValue(placeholder, out var tlast))
             {
-                switch (last.Polarity)
+                // Uses only forward direction strategy.
+                this.UpdateUnification(context, placeholder, from, UnificationPolarities.Out);
+                switch (tlast.Polarity)
                 {
                     case UnificationPolarities.In:
-                        this.UpdateUnification(context, placeholder, from, UnificationPolarities.Out);
-                        this.Unify(context, last.Expression, from);
+                        this.Unify(context, tlast.Expression, placeholder);
                         break;
                     
                     case UnificationPolarities.Out:
-                        this.Unify(context, from, last.Expression);
+                        this.Unify(context, placeholder, tlast.Expression);
                         break;
                 }
             }
@@ -207,17 +138,18 @@ namespace Favalet.Contexts.Unifiers
             IPlaceholderTerm placeholder,
             IExpression to)
         {
-            if (this.unifications.TryGetValue(placeholder, out var last))
+            if (this.unifications.TryGetValue(placeholder, out var flast))
             {
-                switch (last.Polarity)
+                // Uses only backward direction strategy.
+                this.UpdateUnification(context, placeholder, to, UnificationPolarities.In);
+                switch (flast.Polarity)
                 {
-                    case UnificationPolarities.Out:
-                        this.UpdateUnification(context, placeholder, to, UnificationPolarities.In);
-                        this.Unify(context, last.Expression, placeholder);
+                    case UnificationPolarities.In:
+                        this.Unify(context, placeholder, flast.Expression);
                         break;
                     
-                    case UnificationPolarities.In:
-                        this.Unify(context, last.Expression, to);
+                    case UnificationPolarities.Out:
+                        this.Unify(context, flast.Expression, placeholder);
                         break;
                 }
             }
@@ -300,7 +232,7 @@ namespace Favalet.Contexts.Unifiers
         public override IExpression? Resolve(IIdentityTerm identity)
         {
 #if DEBUG
-            this.Occur(PlaceholderMarker.Create(), identity);
+            OccurenceValidator.Validate(identity, this.unifications);
 #endif
             return this.unifications.TryGetValue(identity, out var resolved) ?
                 resolved.Expression :
@@ -315,7 +247,7 @@ namespace Favalet.Contexts.Unifiers
                 this.unifications.
                     OrderBy(entry => entry.Key, IdentityTermComparer.Instance).
                     Select(entry => string.Format(
-                        "{0} ==> {1}{2}",
+                        "{0} {1}{2}",
                         entry.Key.Symbol,
                         entry.Value.ToString(PrettyStringTypes.Minimum),
                         this.Resolve(entry.Key) is IExpression expr

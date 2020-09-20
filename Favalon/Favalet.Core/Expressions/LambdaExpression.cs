@@ -157,17 +157,7 @@ namespace Favalet.Expressions
             new LambdaExpression(
                 parameter,
                 body,
-                (parameter, body) switch
-                {
-                    // (UnspecifiedTerm _, UnspecifiedTerm _) =>
-                    //     DeadEndTerm.Instance,
-                    // (UnspecifiedTerm _, _) =>
-                    //     FunctionExpression.Create(UnspecifiedTerm.Instance, body.HigherOrder),
-                    (_, UnspecifiedTerm _) =>
-                        FunctionExpression.Create(parameter.HigherOrder, UnspecifiedTerm.Instance),
-                    _ =>
-                        FunctionExpression.Create(parameter.HigherOrder, body.HigherOrder)
-                });
+                FunctionExpression.Create(parameter.HigherOrder, body.HigherOrder));
     }
 
     [DebuggerStepThrough]

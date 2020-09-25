@@ -14,7 +14,7 @@ namespace Favalet.Contexts
     
     public interface IUnsafePlaceholderResolver
     {
-        IExpression? UnsafeResolve(IIdentityTerm identity);
+        IExpression? UnsafeResolve(IPlaceholderTerm placeholder);
     }
 
     public static class UnsafePlaceholderResolverExtension
@@ -67,7 +67,7 @@ namespace Favalet.Contexts
         IExpression Fixup(IExpression expression);
         IExpression FixupHigherOrder(IExpression higherOrder);
         
-        IExpression? Resolve(IIdentityTerm identity);
+        IExpression? Resolve(IPlaceholderTerm placeholder);
     }
 
     public interface IReduceContext :
@@ -101,11 +101,11 @@ namespace Favalet.Contexts
             return this.TypeCalculator.Compute(fixedup);
         }
 
-        public abstract IExpression? Resolve(IIdentityTerm identity);
+        public abstract IExpression? Resolve(IPlaceholderTerm placeholder);
 
         [DebuggerStepThrough]
-        IExpression? IUnsafePlaceholderResolver.UnsafeResolve(IIdentityTerm identity) =>
-            this.Resolve(identity);
+        IExpression? IUnsafePlaceholderResolver.UnsafeResolve(IPlaceholderTerm placeholder) =>
+            this.Resolve(placeholder);
 
         public virtual VariableInformation[] LookupVariables(string symbol) =>
             ArrayEx.Empty<VariableInformation>();
@@ -208,11 +208,11 @@ namespace Favalet.Contexts
         public void Unify(
             IExpression fromHigherOrder,
             IExpression toHigherOrder) =>
-            this.unifier.Unify(this, fromHigherOrder, toHigherOrder);
+            this.unifier.Unify(fromHigherOrder, toHigherOrder);
 
         [DebuggerStepThrough]
-        public override IExpression? Resolve(IIdentityTerm identity) =>
-            this.unifier.Resolve(identity);
+        public override IExpression? Resolve(IPlaceholderTerm placeholder) =>
+            this.unifier.Resolve(placeholder);
 
         public override VariableInformation[] LookupVariables(string symbol) =>
             // TODO: improving when identity's higher order acceptable

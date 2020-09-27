@@ -76,7 +76,7 @@ namespace Favalet
 
             var inferred = context.Infer(rewritable);
             unifier.SetTargetRoot(inferred);
-
+            
 #if DEBUG
             Debug.WriteLine(
                 $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetXml()}\", unifier=\"{unifier}\"");

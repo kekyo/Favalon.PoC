@@ -352,47 +352,90 @@ namespace Favalet.Contexts.Unifiers
                     this.targetRoot.GetPrettyString(PrettyStringTypes.ReadableAll));
                 tw.WriteLine();
 #endif
+
+                var parentSymbolMap = new Dictionary<IParentExpression, string>();
+                
+                (string symbol, IExpression expression) ToSymbolString(IExpression expression)
+                {
+                    switch (expression)
+                    {
+                        case IPlaceholderTerm ph:
+                            return ($"p{ph.Index}", expression);
+                        case IParentExpression parent:
+                            if (!parentSymbolMap!.TryGetValue(parent, out var symbol))
+                            {
+                                var index = parentSymbolMap.Count;
+                                symbol = $"c{index}";
+                                parentSymbolMap.Add(parent, symbol);
+                            }
+                            return (symbol, parent);
+                        default:
+                            return (expression.GetPrettyString(PrettyStringTypes.Minimum), expression);
+                    }
+                }
+                
                 foreach (var entry in this.topology.
                     OrderBy(entry => entry.Key, IdentityTermComparer.Instance))
                 {
                     tw.WriteLine(
-                        "    p{0} [label=\"{1}\",shape={2}];",
-                        entry.Key.Index,
+                        "    {0} [label=\"{1}\",shape={2}];",
+                        ToSymbolString(entry.Key).symbol,
                         entry.Key.Symbol,
                         entry.Value.IsScopeWall ? "doublecircle" : "circle");
                 }
-                
-                foreach (var label in this.topology.
-                    SelectMany(entry => entry.Value.Unifications.
+
+                foreach (var entry in this.topology.
+                    SelectMany(entry =>
+                        entry.Value.Unifications.
                         Where(unification => !(unification.Expression is IPlaceholderTerm)).
-                        Select(unification => unification.Expression.GetPrettyString(PrettyStringTypes.Minimum))).
+                        Select(unification => ToSymbolString(unification.Expression))).
                     Distinct().
-                    OrderBy(label => label))
+                    OrderBy(entry => entry.symbol))
                 {
                     tw.WriteLine(
-                        "    {0} [shape=box];",
-                        label);
+                        "    {0} [{1}];",
+                        entry.symbol,
+                        entry.expression switch
+                        {
+                            IPlaceholderTerm _ => "shape=circle",
+                            IParentExpression parent =>
+                                $"xlabel=\"{parent.GetPrettyString(PrettyStringTypes.Minimum)}\",label=\"" +
+                                StringUtilities.Join("|", parent.Children.Select((_, index) => $"<i{index}>[{index}]")) +
+                                "\",shape=record",
+                            _ => "shape=box"
+                        });
                 }
 
                 tw.WriteLine();
+
+                IEnumerable<(string, string)> ToSymbols(IPlaceholderTerm placeholder, Unification unification)
+                {
+                    var phSymbol = ToSymbolString(placeholder).symbol;
+                    switch (unification.Polarity, unification.Expression)
+                    {
+                        case (UnificationPolarities.In, IParentExpression parent):
+                            return parent.Children.Select((_, index) => (phSymbol, $"{ToSymbolString(parent).symbol}:i{index}"));
+                        case (UnificationPolarities.Out, IParentExpression parent):
+                            return parent.Children.Select((_, index) => ($"{ToSymbolString(parent).symbol}:i{index}", phSymbol));
+                        case (UnificationPolarities.In, _):
+                            return new[] { (phSymbol, ToSymbolString(unification.Expression).symbol) };
+                        case (UnificationPolarities.Out, _):
+                            return new[] { (ToSymbolString(unification.Expression).symbol, phSymbol) };
+                        default:
+                            throw new InvalidOperationException();
+                    }
+                }
                     
                 foreach (var entry in this.topology.
-                    OrderBy(entry => entry.Key, IdentityTermComparer.Instance).
                     SelectMany(entry => entry.Value.Unifications.
-                        Select(unification => unification.Polarity == UnificationPolarities.In ?
-                            ($"p{entry.Key.Index}", unification.Expression) :
-                            (unification.Expression is IPlaceholderTerm ph ?
-                                $"p{ph.Index}" :
-                                unification.Expression.GetPrettyString(PrettyStringTypes.Minimum),
-                                entry.Key))).
-                    Distinct())
+                        SelectMany(unification => ToSymbols(entry.Key, unification))).
+                    Distinct().
+                    OrderBy(entry => entry.Item1))
                 {
                     tw.WriteLine(
                         "    {0} -> {1};",
                         entry.Item1,
-                        entry.Item2 is IPlaceholderTerm ph ?
-                            $"p{ph.Index}" :
-                            entry.Item2.GetPrettyString(PrettyStringTypes.Minimum));
+                        entry.Item2);
                 }
                 
                 tw.WriteLine("}");

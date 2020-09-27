@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Favalet.Contexts.Unifiers
 {
-    [DebuggerDisplay("{Unifications}")]
+    [DebuggerDisplay("{View}")]
     internal sealed class Unifier :
         FixupContext,  // Because used by "Simple" property implementation.
         IUnsafePlaceholderResolver
@@ -89,6 +89,7 @@ namespace Favalet.Contexts.Unifiers
             }
         }
 
+        [DebuggerStepThrough]
         public override IExpression? Resolve(IPlaceholderTerm placeholder)
         {
 #if DEBUG
@@ -97,15 +98,21 @@ namespace Favalet.Contexts.Unifiers
             return this.topology.Resolve(this.TypeCalculator, placeholder);
         }
 
-        public string Unifications
+        public string View
         {
             [DebuggerStepThrough]
-            get => this.topology.ToString();
+            get => this.topology.View;
+        }
+
+        public string Dot
+        {
+            [DebuggerStepThrough]
+            get => this.topology.Dot;
         }
 
         [DebuggerStepThrough]
         public override string ToString() =>
-            "Unifier: " + this.Unifications;
+            "Unifier: " + this.View;
         
         [DebuggerStepThrough]
         public static Unifier Create(ITypeCalculator typeCalculator) =>

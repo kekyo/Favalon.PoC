@@ -1,9 +1,8 @@
 ﻿using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
-using Favalet.Internal;
 
 namespace Favalet.Expressions
 {
@@ -16,7 +15,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class LambdaExpression :
-        Expression, ILambdaExpression
+        Expression, ILambdaExpression, IParentExpression
     {
         public readonly IBoundVariableTerm Parameter;
         public readonly IExpression Body;
@@ -44,6 +43,17 @@ namespace Favalet.Expressions
         {
             [DebuggerStepThrough]
             get => this.Body;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IEnumerable<IExpression> IParentExpression.Children
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                yield return this.Parameter;
+                yield return this.Body;
+            }
         }
 
         public override int GetHashCode() =>

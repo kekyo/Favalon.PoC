@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
@@ -9,6 +11,7 @@ using Favalet.Internal;
 
 namespace Favalet.Contexts.Unifiers
 {
+    [DebuggerDisplay("{View}")]
     internal sealed class Topology
     {
         private readonly Dictionary<IPlaceholderTerm, HashSet<Unification>> topology =
@@ -53,7 +56,7 @@ namespace Favalet.Contexts.Unifiers
         }
 
         [DebuggerStepThrough]
-        public Unification[] Lookup(IPlaceholderTerm placeholder) =>
+        private Unification[] Lookup(IPlaceholderTerm placeholder) =>
             this.topology.TryGetValue(placeholder, out var unifications) ?
                 unifications.ToArray() :
                 ArrayEx.Empty<Unification>();
@@ -65,48 +68,43 @@ namespace Favalet.Contexts.Unifiers
             Func<IExpression, IExpression, IExpression> creator,
             Dictionary<IPlaceholderTerm, IExpression> cache)
         {
-            var unifications = this.Lookup(placeholder);
-            if (unifications.Length == 0)
+            if (this.topology.TryGetValue(placeholder, out var us))
             {
-                cache.Add(placeholder, placeholder);
-                return placeholder;
-            }
-            
-            var combined = LogicalCalculator.ConstructNested(
-                unifications.
-                Where(unification => unification.Polarity == polarity).
-                Select(unification =>
+                var unifications = us.
+                    Where(unification => unification.Polarity == polarity).
+                    ToArray();
+                if (unifications.Length >= 1)
                 {
-                    if (unification.Expression is IPlaceholderTerm ph)
-                    {
-                        if (!cache.TryGetValue(ph, out var cached))
+                    var combined = LogicalCalculator.ConstructNested(unifications.
+                        Select(unification =>
                         {
-                            return this.InternalResolve(calculator, ph, polarity, creator, cache);
-                        }
-                        else
-                        {
-                            return cached;
-                        }
-                    }
-                    else
-                    {
-                        return unification.Expression;
-                    }
-                }).
-                ToArray(),
-                creator);
+                            if (unification.Expression is IPlaceholderTerm ph)
+                            {
+                                if (!cache.TryGetValue(ph, out var cached))
+                                {
+                                    return this.InternalResolve(calculator, ph, polarity, creator, cache);
+                                }
+                                else
+                                {
+                                    return cached;
+                                }
+                            }
+                            else
+                            {
+                                return unification.Expression;
+                            }
+                        }).
+                        ToArray(),
+                        creator)!;
 
-            if (combined != null)
-            {
-                var result = calculator.Compute(combined);
-                cache.Add(placeholder, result);
-                return result;
+                    var result = calculator.Compute(combined);
+                    cache.Add(placeholder, result);
+                    return result;
+                }
             }
-            else
-            {
-                cache.Add(placeholder, placeholder);
-                return placeholder;
-            }
+
+            cache.Add(placeholder, placeholder);
+            return placeholder;
         }
 
         public IExpression Resolve(ITypeCalculator calculator, IPlaceholderTerm placeholder)
@@ -116,12 +114,8 @@ namespace Favalet.Contexts.Unifiers
                 {
                     IPlaceholderTerm _ =>
                         true,
-                    IBinaryExpression binary =>
-                        ContainsPlaceholder(binary.Left) || ContainsPlaceholder(binary.Right),
-                    IFunctionExpression function =>
-                        ContainsPlaceholder(function.Parameter) || ContainsPlaceholder(function.Result),
-                    IApplyExpression apply =>
-                        ContainsPlaceholder(apply.Function) || ContainsPlaceholder(apply.Argument),
+                    IParentExpression parent =>
+                        parent.Children.Any(ContainsPlaceholder),
                     _ =>
                         false
                 };
@@ -147,16 +141,21 @@ namespace Favalet.Contexts.Unifiers
             {
                 return backward;
             }
-
-            // Higher recommend if it's a single placeholder term excepts myself....?
-            if (!placeholder.Equals(forward))
+            
+            // Higher recommend if it isn't a single placeholder
+            if (!(forward is IPlaceholderTerm) &&
+                !(forward is IParentExpression))
             {
                 return forward;
             }
-            else if (!placeholder.Equals(backward))
+
+            // Higher recommend if it isn't a single placeholder
+            if (!(backward is IPlaceholderTerm) &&
+                !(backward is IParentExpression))
             {
                 return backward;
             }
+
             if (forward is IPlaceholderTerm)
             {
                 return forward;
@@ -179,20 +178,12 @@ namespace Favalet.Contexts.Unifiers
             {
                 this.Validate(marker, placeholder);
             }
-            else if (expression is IBinaryExpression(IExpression left, IExpression right))
+            else if (expression is IParentExpression parent)
             {
-                this.Validate(marker.Fork(), left);
-                this.Validate(marker.Fork(), right);
-            }
-            else if (expression is IFunctionExpression(IExpression parameter, IExpression result))
-            {
-                this.Validate(marker.Fork(), parameter);
-                this.Validate(marker.Fork(), result);
-            }
-            else if (expression is IApplyExpression(IExpression function, IExpression argument))
-            {
-                this.Validate(marker.Fork(), function);
-                this.Validate(marker.Fork(), argument);
+                foreach (var child in parent.Children)
+                {
+                    this.Validate(marker.Fork(), child);
+                }
             }
         }
 
@@ -236,19 +227,77 @@ namespace Favalet.Contexts.Unifiers
             this.Validate(PlaceholderMarker.Create(), placeholder);
         #endregion
 
-        [DebuggerStepThrough]
-        public override string ToString() =>
-            StringUtilities.Join(
+        public string View
+        {
+            [DebuggerStepThrough]
+            get => StringUtilities.Join(
                 Environment.NewLine,
                 this.topology.
                     OrderBy(entry => entry.Key, IdentityTermComparer.Instance).
                     SelectMany(entry =>
                         entry.Value.Select(unification =>
                             string.Format(
-                            "{0} {1}",
-                            entry.Key.Symbol,
-                            unification.ToString(PrettyStringTypes.Minimum)))));
-        
+                                "{0} {1}",
+                                entry.Key.Symbol,
+                                unification.ToString(PrettyStringTypes.Minimum)))));
+        }
+
+        public string Dot
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                var tw = new StringWriter();
+                tw.WriteLine("digraph topology");
+                tw.WriteLine("{");
+
+                foreach (var identity in this.topology.Keys.
+                    OrderBy(identity => identity, IdentityTermComparer.Instance))
+                {
+                    tw.WriteLine(
+                        "    p{0} [label=\"{1}\"]",
+                        identity.Index,
+                        identity.Symbol);
+                }
+                
+                foreach (var label in this.topology.
+                    SelectMany(entry => entry.Value.
+                        Where(unification => !(unification.Expression is IPlaceholderTerm)).
+                        Select(unification => unification.Expression.GetPrettyString(PrettyStringTypes.Minimum))).
+                    Distinct().
+                    OrderBy(label => label))
+                {
+                    tw.WriteLine(
+                        "    {0} [shape=box]",
+                        label);
+                }
+
+                tw.WriteLine();
+                    
+                foreach (var entry in this.topology.
+                    OrderBy(entry => entry.Key, IdentityTermComparer.Instance).
+                    SelectMany(entry => entry.Value.
+                        Where(unification => unification.Polarity == UnificationPolarities.In).
+                        Select(unification => (entry.Key, unification.Expression))))
+                {
+                    tw.WriteLine(
+                        "    p{0} -> {1}",
+                        entry.Key.Index,
+                        entry.Item2 is IPlaceholderTerm ph ?
+                            $"p{ph.Index}" :
+                            entry.Item2.GetPrettyString(PrettyStringTypes.Minimum));
+                }
+                
+                tw.WriteLine("}");
+
+                return tw.ToString();
+            }
+        }
+
+        [DebuggerStepThrough]
+        public override string ToString() =>
+            "Topology: " + this.View;
+
         [DebuggerStepThrough]
         public static Topology Create() =>
             new Topology();

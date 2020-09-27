@@ -223,7 +223,20 @@ namespace Favalet.Contexts
                 new[] { VariableInformation.Create(symbol, p.HigherOrder, expr) } :
                 parentScope.LookupVariables(symbol);
 
+        public string View
+        {
+            [DebuggerStepThrough]
+            get => this.unifier.View;
+        }
+
+        public string Dot
+        {
+            [DebuggerStepThrough]
+            get => this.unifier.Dot;
+        }
+
+        [DebuggerStepThrough]
         public override string ToString() =>
-            "ReduceContext: " + this.unifier;
+            "ReduceContext: " + this.View;
     }
 }

@@ -3,6 +3,7 @@ using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using Favalet.Internal;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Favalet.Expressions
@@ -16,7 +17,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class FunctionExpression :
-        Expression, IFunctionExpression
+        Expression, IFunctionExpression, IParentExpression
     {
         public readonly IExpression Parameter;
         public readonly IExpression Result;
@@ -44,6 +45,17 @@ namespace Favalet.Expressions
         {
             [DebuggerStepThrough]
             get => this.Result;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IEnumerable<IExpression> IParentExpression.Children
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                yield return this.Parameter;
+                yield return this.Result;
+            }
         }
 
         public override int GetHashCode() =>

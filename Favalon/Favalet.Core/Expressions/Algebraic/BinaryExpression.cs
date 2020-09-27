@@ -1,6 +1,8 @@
 ﻿using Favalet.Contexts;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using Favalet.Expressions.Specialized;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -11,7 +13,7 @@ namespace Favalet.Expressions.Algebraic
     }
 
     public abstract class BinaryExpression<TBinaryExpression> :
-        Expression, IBinaryExpression
+        Expression, IBinaryExpression, IParentExpression
         where TBinaryExpression : IBinaryExpression
     {
         public readonly IExpression Left;
@@ -40,6 +42,17 @@ namespace Favalet.Expressions.Algebraic
         {
             [DebuggerStepThrough]
             get => this.Right;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IEnumerable<IExpression> IParentExpression.Children
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                yield return this.Left;
+                yield return this.Right;
+            }
         }
 
         internal abstract IExpression OnCreate(

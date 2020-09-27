@@ -21,7 +21,7 @@ namespace Favalet.Contexts.Unifiers
         private void InternalUnifyCore(
             IExpression from,
             IExpression to,
-            bool isFromScopeWall)
+            bool isScopeWall)
         {
             Debug.Assert(!(from is IIgnoreUnificationTerm));
             Debug.Assert(!(to is IIgnoreUnificationTerm));
@@ -30,18 +30,18 @@ namespace Favalet.Contexts.Unifiers
             {
                 // Placeholder unification.
                 case (_, IPlaceholderTerm tp2):
-                    this.topology.AddForward(tp2, from, isFromScopeWall);
+                    this.topology.AddForward(tp2, from, isScopeWall);
                     //this.topology.Validate(tp2);
                     break;
                 case (IPlaceholderTerm fp2, _):
-                    this.topology.AddBackward(fp2, to, isFromScopeWall) ;
+                    this.topology.AddBackward(fp2, to, isScopeWall) ;
                     //this.topology.Validate(fp2);
                     break;
 
                 // Function unification.
                 case (IFunctionExpression(IExpression fp, IExpression fr),
                       IFunctionExpression(IExpression tp, IExpression tr)):
-                    // unify(C +> A)
+                    // unify(C +> A) : they're function parameters, so will raise up scope wall.
                     this.InternalUnify(tp, fp, true);
                     // unify(B +> D)
                     this.InternalUnify(fr, tr, false);
@@ -63,7 +63,7 @@ namespace Favalet.Contexts.Unifiers
         private void InternalUnify(
             IExpression from,
             IExpression to,
-            bool isFromScopeWall)
+            bool isScopeWall)
         {
             // Same as.
             if (this.TypeCalculator.ExactEquals(from, to))
@@ -80,10 +80,10 @@ namespace Favalet.Contexts.Unifiers
 
                 default:
                     // Unify higher order.
-                    this.InternalUnify(from.HigherOrder, to.HigherOrder, isFromScopeWall);
+                    this.InternalUnify(from.HigherOrder, to.HigherOrder, isScopeWall);
 
                     // Unify.
-                    this.InternalUnifyCore(from, to, isFromScopeWall);
+                    this.InternalUnifyCore(from, to, isScopeWall);
                     break;
             }
         }

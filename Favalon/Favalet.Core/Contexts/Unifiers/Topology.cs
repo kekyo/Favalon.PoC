@@ -66,12 +66,12 @@ namespace Favalet.Contexts.Unifiers
         public void AddForward(
             IPlaceholderTerm placeholder,
             IExpression from,
-            bool isFromScopeWall)
+            bool isScopeWall)
         {
-            this.AddIf(placeholder, from, UnificationPolarities.Out, false);
+            this.AddIf(placeholder, from, UnificationPolarities.Out, isScopeWall);
             if (from is IPlaceholderTerm ei)
             {
-                this.AddIf(ei, placeholder, UnificationPolarities.In, isFromScopeWall);
+                this.AddIf(ei, placeholder, UnificationPolarities.In, isScopeWall);
             }
         }
 
@@ -79,12 +79,12 @@ namespace Favalet.Contexts.Unifiers
         public void AddBackward(
             IPlaceholderTerm placeholder,
             IExpression to,
-            bool isFromScopeWall)
+            bool isScopeWall)
         {
-            this.AddIf(placeholder, to, UnificationPolarities.In, isFromScopeWall);
+            this.AddIf(placeholder, to, UnificationPolarities.In, isScopeWall);
             if (to is IPlaceholderTerm ei)
             {
-                this.AddIf(ei, placeholder, UnificationPolarities.Out, false);
+                this.AddIf(ei, placeholder, UnificationPolarities.Out, isScopeWall);
             }
         }
         

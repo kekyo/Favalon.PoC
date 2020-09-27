@@ -1,11 +1,8 @@
-﻿using Favalet.Expressions;
+using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
-using Favalet.Internal;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Favalet.Contexts.Unifiers
 {
@@ -14,17 +11,17 @@ namespace Favalet.Contexts.Unifiers
         FixupContext,  // Because used by "Simple" property implementation.
         IUnsafePlaceholderResolver
     {
-        private readonly Topology topology = Topology.Create();
+        private readonly Topology topology ;
         
         [DebuggerStepThrough]
-        private Unifier(ITypeCalculator typeCalculator) :
-            base(typeCalculator)
-        {
-        }
+        private Unifier(ITypeCalculator typeCalculator, IExpression targetRoot) :
+            base(typeCalculator) =>
+            this.topology = Topology.Create(targetRoot);
 
-        private void InternalUnify(
+        private void InternalUnifyCore(
             IExpression from,
-            IExpression to)
+            IExpression to,
+            bool isFromScopeWall)
         {
             Debug.Assert(!(from is IIgnoreUnificationTerm));
             Debug.Assert(!(to is IIgnoreUnificationTerm));
@@ -33,11 +30,11 @@ namespace Favalet.Contexts.Unifiers
             {
                 // Placeholder unification.
                 case (_, IPlaceholderTerm tp2):
-                    this.topology.AddForward(tp2, from);
+                    this.topology.AddForward(tp2, from, isFromScopeWall);
                     //this.topology.Validate(tp2);
                     break;
                 case (IPlaceholderTerm fp2, _):
-                    this.topology.AddBackward(fp2, to);
+                    this.topology.AddBackward(fp2, to, isFromScopeWall) ;
                     //this.topology.Validate(fp2);
                     break;
 
@@ -45,9 +42,9 @@ namespace Favalet.Contexts.Unifiers
                 case (IFunctionExpression(IExpression fp, IExpression fr),
                       IFunctionExpression(IExpression tp, IExpression tr)):
                     // unify(C +> A)
-                    this.Unify(tp, fp);
+                    this.InternalUnify(tp, fp, true);
                     // unify(B +> D)
-                    this.Unify(fr, tr);
+                    this.InternalUnify(fr, tr, false);
                     break;
                 
                 default:
@@ -56,15 +53,17 @@ namespace Favalet.Contexts.Unifiers
                     var f = this.TypeCalculator.Compute(OrExpression.Create(from, to));
                     if (!this.TypeCalculator.Equals(f, to))
                     {
-                        throw new ArgumentException("");
+                        throw new ArgumentException(
+                            $"Couldn't unify: {f.GetPrettyString(PrettyStringTypes.Minimum)} <: {to.GetPrettyString(PrettyStringTypes.Minimum)}");
                     }
                     break;
             }
         }
 
-        public void Unify(
+        private void InternalUnify(
             IExpression from,
-            IExpression to)
+            IExpression to,
+            bool isFromScopeWall)
         {
             // Same as.
             if (this.TypeCalculator.ExactEquals(from, to))
@@ -81,13 +80,19 @@ namespace Favalet.Contexts.Unifiers
 
                 default:
                     // Unify higher order.
-                    this.Unify(from.HigherOrder, to.HigherOrder);
+                    this.InternalUnify(from.HigherOrder, to.HigherOrder, isFromScopeWall);
 
                     // Unify.
-                    this.InternalUnify(from, to);
+                    this.InternalUnifyCore(from, to, isFromScopeWall);
                     break;
             }
         }
+
+        [DebuggerStepThrough]
+        public void Unify(
+            IExpression from,
+            IExpression to) =>
+            this.InternalUnify(from, to, false);
 
         [DebuggerStepThrough]
         public override IExpression? Resolve(IPlaceholderTerm placeholder)
@@ -97,6 +102,10 @@ namespace Favalet.Contexts.Unifiers
 #endif
             return this.topology.Resolve(this.TypeCalculator, placeholder);
         }
+
+        [DebuggerStepThrough]
+        public void SetTargetRoot(IExpression targetRoot) =>
+            this.topology.SetTargetRoot(targetRoot);
 
         public string View
         {
@@ -115,7 +124,7 @@ namespace Favalet.Contexts.Unifiers
             "Unifier: " + this.View;
         
         [DebuggerStepThrough]
-        public static Unifier Create(ITypeCalculator typeCalculator) =>
-            new Unifier(typeCalculator);
+        public static Unifier Create(ITypeCalculator typeCalculator, IExpression targetRoot) =>
+            new Unifier(typeCalculator, targetRoot);
     }
 }

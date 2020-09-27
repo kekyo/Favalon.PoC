@@ -16,6 +16,7 @@ namespace Favalet.Contexts
     {
         Minimum,
         Readable,
+        ReadableAll,
         Strict,
         StrictAll
     }
@@ -45,6 +46,7 @@ namespace Favalet.Contexts
             {
                 (PrettyStringTypes.Minimum, Expression expr, _) => expr.InternalGetPrettyString(this),
                 (PrettyStringTypes.Readable, Expression expr, _) => expr.InternalGetPrettyString(this),
+                (PrettyStringTypes.ReadableAll, Expression expr, _) => expr.InternalGetPrettyString(this),
                 (_, Expression expr, DeadEndTerm _) => expr.InternalGetPrettyString(this),
                 (_, Expression expr, _) => $"{expr.Type} {expr.InternalGetPrettyString(this)}",
                 _ => this.FinalizePrettyString(expression, "?")
@@ -57,6 +59,8 @@ namespace Favalet.Contexts
                 (PrettyStringTypes.Minimum, Expression expr, _) => $"({expr.InternalGetPrettyString(this)})",
                 (PrettyStringTypes.Readable, Expression expr, ITerm _) => expr.InternalGetPrettyString(this),
                 (PrettyStringTypes.Readable, Expression expr, _) => $"({expr.InternalGetPrettyString(this)})",
+                (PrettyStringTypes.ReadableAll, Expression expr, ITerm _) => expr.InternalGetPrettyString(this),
+                (PrettyStringTypes.ReadableAll, Expression expr, _) => $"({expr.InternalGetPrettyString(this)})",
                 (_, Expression expr, DeadEndTerm _) => expr.InternalGetPrettyString(this),
                 (_, Expression expr, _) => $"({expr.Type} {expr.InternalGetPrettyString(this)})",
                 _ => this.FinalizePrettyString(expression, "?")
@@ -66,6 +70,7 @@ namespace Favalet.Contexts
         private IPrettyStringContext MakePartial() =>
             (this.Type, this.isPartial) switch
             {
+                (PrettyStringTypes.ReadableAll, _) => this,
                 (PrettyStringTypes.StrictAll, _) => this,
                 _ => new PrettyStringContext(this.Type, true),
             };

@@ -1,23 +1,26 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Favalet.Expressions;
 
 namespace Favalet.Contexts.Unifiers
 {
     internal enum UnificationPolarities
     {
-        // Indicate "<==", forward direction, will make covariant (widen)
+        // Indicate "<==", forward polarity, will make covariant (widen)
         Out,
-        // Indicate "==>", backward direction, will make contravariant (narrow)
+        // Indicate "==>", backward polarity, will make contravariant (narrow)
         In
     }
-    
+
     [DebuggerStepThrough]
     internal readonly struct Unification
     {
         public readonly IExpression Expression;
         public readonly UnificationPolarities Polarity;
 
-        private Unification(IExpression expression, UnificationPolarities polarity)
+        private Unification(
+            IExpression expression,
+            UnificationPolarities polarity)
         {
             this.Expression = expression;
             this.Polarity = polarity;
@@ -35,7 +38,9 @@ namespace Favalet.Contexts.Unifiers
         public override string ToString() =>
             this.ToString(PrettyStringTypes.Readable);
 
-        public static Unification Create(IExpression expression, UnificationPolarities polarity) =>
+        public static Unification Create(
+            IExpression expression,
+            UnificationPolarities polarity) =>
             new Unification(expression, polarity);
     }
 }

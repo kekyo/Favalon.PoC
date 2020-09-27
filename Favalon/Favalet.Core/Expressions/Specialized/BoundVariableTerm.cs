@@ -6,7 +6,7 @@ using System.Xml.Linq;
 namespace Favalet.Expressions.Specialized
 {
     public interface IBoundVariableTerm :
-        ITerm
+        ITerm, IScopeWallExpression
     {
         string Symbol { get; }
     }

@@ -1,4 +1,4 @@
-﻿using Favalet.Contexts;
+using Favalet.Contexts;
 using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
 using Favalet.Contexts.Unifiers;
@@ -60,27 +60,34 @@ namespace Favalet
 
         public IExpression Infer(IExpression expression)
         {
-            var unifier = Unifier.Create(this.TypeCalculator);
+            var unifier = Unifier.Create(this.TypeCalculator, expression);
             var context = new ReduceContext(this, this, unifier);
 
             Debug.WriteLine(
                 $"Infer[{context.GetHashCode()}]: expression=\"{expression.GetXml()}\"");
 
             var rewritable = context.MakeRewritable(expression);
+            unifier.SetTargetRoot(rewritable);
+
 #if DEBUG
             Debug.WriteLine(
                 $"Infer[{context.GetHashCode()}]: rewritable=\"{rewritable.GetXml()}\", unifier=\"{unifier}\"");
 #endif            
 
             var inferred = context.Infer(rewritable);
+            unifier.SetTargetRoot(inferred);
+
 #if DEBUG
             Debug.WriteLine(
                 $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetXml()}\", unifier=\"{unifier}\"");
 #endif            
+
             var fixedup = context.Fixup(inferred);
+            unifier.SetTargetRoot(fixedup);
+
+#if DEBUG
             Debug.WriteLine(
                 $"Infer[{context.GetHashCode()}]: fixedup=\"{fixedup.GetXml()}\"");
-#if DEBUG
             this.lastUnifier = unifier;
 #endif
             return fixedup;
@@ -88,7 +95,7 @@ namespace Favalet
 
         public IExpression Reduce(IExpression expression)
         {
-            var unifier = Unifier.Create(this.TypeCalculator);
+            var unifier = Unifier.Create(this.TypeCalculator, expression);
             var context = new ReduceContext(this, this, unifier);
 
             Debug.WriteLine(

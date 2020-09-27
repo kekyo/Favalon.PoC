@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
@@ -14,52 +13,80 @@ namespace Favalet.Contexts.Unifiers
     [DebuggerDisplay("{View}")]
     internal sealed class Topology
     {
-        private readonly Dictionary<IPlaceholderTerm, HashSet<Unification>> topology =
-            new Dictionary<IPlaceholderTerm, HashSet<Unification>>(IdentityTermComparer.Instance);
+        private sealed class Node
+        {
+            public readonly HashSet<Unification> Unifications;
+            public bool IsSocpeWall { get; private set; }
+
+            public Node() =>
+                this.Unifications = new HashSet<Unification>();
+
+            public void SetScopeWall() =>
+                this.IsSocpeWall = true;
+        }
+        
+        private readonly Dictionary<IPlaceholderTerm, Node> topology =
+            new Dictionary<IPlaceholderTerm, Node>(IdentityTermComparer.Instance);
+
+#if DEBUG
+        private IExpression targetRoot;
+#endif
 
         [DebuggerStepThrough]
-        private Topology()
+        private Topology(IExpression targetRoot)
         {
+#if DEBUG
+            this.targetRoot = targetRoot;
+#endif            
         }
 
         [DebuggerStepThrough]
-        private bool AddIf(IPlaceholderTerm placeholder, IExpression expression, UnificationPolarities polarity)
+        private bool AddIf(
+            IPlaceholderTerm placeholder,
+            IExpression expression,
+            UnificationPolarities polarity,
+            bool isScopeWall)
         {
-            if (!this.topology.TryGetValue(placeholder, out var unifications))
+            if (!this.topology.TryGetValue(placeholder, out var node))
             {
-                unifications = new HashSet<Unification>();
-                this.topology.Add(placeholder, unifications);
+                node = new Node();
+                this.topology.Add(placeholder, node);
+            }
+
+            if (isScopeWall)
+            {
+                node.SetScopeWall();
             }
 
             var unification = Unification.Create(expression, polarity);
-            return unifications.Add(unification);
+            return node.Unifications.Add(unification);
         }
 
         [DebuggerStepThrough]
-        public void AddForward(IPlaceholderTerm placeholder, IExpression expression)
+        public void AddForward(
+            IPlaceholderTerm placeholder,
+            IExpression from,
+            bool isFromScopeWall)
         {
-            this.AddIf(placeholder, expression, UnificationPolarities.Out);
-            if (expression is IPlaceholderTerm ei)
+            this.AddIf(placeholder, from, UnificationPolarities.Out, false);
+            if (from is IPlaceholderTerm ei)
             {
-                this.AddIf(ei, placeholder, UnificationPolarities.In);
+                this.AddIf(ei, placeholder, UnificationPolarities.In, isFromScopeWall);
             }
         }
 
         [DebuggerStepThrough]
-        public void AddBackward(IPlaceholderTerm placeholder, IExpression expression)
+        public void AddBackward(
+            IPlaceholderTerm placeholder,
+            IExpression to,
+            bool isFromScopeWall)
         {
-            this.AddIf(placeholder, expression, UnificationPolarities.In);
-            if (expression is IPlaceholderTerm ei)
+            this.AddIf(placeholder, to, UnificationPolarities.In, isFromScopeWall);
+            if (to is IPlaceholderTerm ei)
             {
-                this.AddIf(ei, placeholder, UnificationPolarities.Out);
+                this.AddIf(ei, placeholder, UnificationPolarities.Out, false);
             }
         }
-
-        [DebuggerStepThrough]
-        private Unification[] Lookup(IPlaceholderTerm placeholder) =>
-            this.topology.TryGetValue(placeholder, out var unifications) ?
-                unifications.ToArray() :
-                ArrayEx.Empty<Unification>();
         
         private IExpression InternalResolve(
             ITypeCalculator calculator, 
@@ -68,9 +95,9 @@ namespace Favalet.Contexts.Unifiers
             Func<IExpression, IExpression, IExpression> creator,
             Dictionary<IPlaceholderTerm, IExpression> cache)
         {
-            if (this.topology.TryGetValue(placeholder, out var us))
+            if (this.topology.TryGetValue(placeholder, out var node))
             {
-                var unifications = us.
+                var unifications = node.Unifications.
                     Where(unification => unification.Polarity == polarity).
                     ToArray();
                 if (unifications.Length >= 1)
@@ -195,16 +222,16 @@ namespace Favalet.Contexts.Unifiers
             {
                 if (marker.Mark(targetPlaceholder))
                 {
-                    if (this.topology.TryGetValue(targetPlaceholder, out var unifications))
+                    if (this.topology.TryGetValue(targetPlaceholder, out var node))
                     {
-                        if (unifications is IPlaceholderTerm pnext)
+                        if (node.Unifications is IPlaceholderTerm pnext)
                         {
                             targetPlaceholder = pnext;
                             continue;
                         }
                         else
                         {
-                            Validate(marker, (IIdentityTerm)unifications);
+                            Validate(marker, (IIdentityTerm)node.Unifications);
                         }
                     }
 
@@ -227,6 +254,10 @@ namespace Favalet.Contexts.Unifiers
             this.Validate(PlaceholderMarker.Create(), placeholder);
         #endregion
 
+        [DebuggerStepThrough]
+        public void SetTargetRoot(IExpression targetRoot) =>
+            this.targetRoot = targetRoot;
+
         public string View
         {
             [DebuggerStepThrough]
@@ -235,10 +266,11 @@ namespace Favalet.Contexts.Unifiers
                 this.topology.
                     OrderBy(entry => entry.Key, IdentityTermComparer.Instance).
                     SelectMany(entry =>
-                        entry.Value.Select(unification =>
+                        entry.Value.Unifications.Select(unification =>
                             string.Format(
-                                "{0} {1}",
+                                "{0}{1} {2}",
                                 entry.Key.Symbol,
+                                entry.Value.IsSocpeWall ? "*" : "",
                                 unification.ToString(PrettyStringTypes.Minimum)))));
         }
 
@@ -250,25 +282,31 @@ namespace Favalet.Contexts.Unifiers
                 var tw = new StringWriter();
                 tw.WriteLine("digraph topology");
                 tw.WriteLine("{");
-
-                foreach (var identity in this.topology.Keys.
-                    OrderBy(identity => identity, IdentityTermComparer.Instance))
+#if DEBUG
+                tw.WriteLine(
+                    "    graph [label=\"{0}\"];",
+                    this.targetRoot.GetPrettyString(PrettyStringTypes.ReadableAll));
+                tw.WriteLine();
+#endif
+                foreach (var entry in this.topology.
+                    OrderBy(entry => entry.Key, IdentityTermComparer.Instance))
                 {
                     tw.WriteLine(
-                        "    p{0} [label=\"{1}\"]",
-                        identity.Index,
-                        identity.Symbol);
+                        "    p{0} [label=\"{1}\",shape={2}];",
+                        entry.Key.Index,
+                        entry.Key.Symbol,
+                        entry.Value.IsSocpeWall ? "doublecircle" : "circle");
                 }
                 
                 foreach (var label in this.topology.
-                    SelectMany(entry => entry.Value.
+                    SelectMany(entry => entry.Value.Unifications.
                         Where(unification => !(unification.Expression is IPlaceholderTerm)).
                         Select(unification => unification.Expression.GetPrettyString(PrettyStringTypes.Minimum))).
                     Distinct().
                     OrderBy(label => label))
                 {
                     tw.WriteLine(
-                        "    {0} [shape=box]",
+                        "    {0} [shape=box];",
                         label);
                 }
 
@@ -276,13 +314,18 @@ namespace Favalet.Contexts.Unifiers
                     
                 foreach (var entry in this.topology.
                     OrderBy(entry => entry.Key, IdentityTermComparer.Instance).
-                    SelectMany(entry => entry.Value.
-                        Where(unification => unification.Polarity == UnificationPolarities.In).
-                        Select(unification => (entry.Key, unification.Expression))))
+                    SelectMany(entry => entry.Value.Unifications.
+                        Select(unification => unification.Polarity == UnificationPolarities.In ?
+                            ($"p{entry.Key.Index}", unification.Expression) :
+                            (unification.Expression is IPlaceholderTerm ph ?
+                                $"p{ph.Index}" :
+                                unification.Expression.GetPrettyString(PrettyStringTypes.Minimum),
+                                entry.Key))).
+                    Distinct())
                 {
                     tw.WriteLine(
-                        "    p{0} -> {1}",
-                        entry.Key.Index,
+                        "    {0} -> {1};",
+                        entry.Item1,
                         entry.Item2 is IPlaceholderTerm ph ?
                             $"p{ph.Index}" :
                             entry.Item2.GetPrettyString(PrettyStringTypes.Minimum));
@@ -299,7 +342,7 @@ namespace Favalet.Contexts.Unifiers
             "Topology: " + this.View;
 
         [DebuggerStepThrough]
-        public static Topology Create() =>
-            new Topology();
+        public static Topology Create(IExpression targetRoot) =>
+            new Topology(targetRoot);
     }
 }

@@ -225,24 +225,20 @@ namespace Favalet.Contexts.Unifiers
             }
             
             // Higher recommend if it isn't a single placeholder
-            if (!(forwardResult.Result is IPlaceholderTerm) &&
-                !(forwardResult.Result is IParentExpression))
+            if (!(forwardResult.Result is IPlaceholderTerm))
             {
                 return forwardResult.Result;
             }
-            if (!(forwardResult.Bottom is IPlaceholderTerm) &&
-                !(forwardResult.Bottom is IParentExpression))
+            if (!(forwardResult.Bottom is IPlaceholderTerm))
             {
                 return forwardResult.Bottom;
             }
 
-            if (!(backwardResult.Result is IPlaceholderTerm) &&
-                !(backwardResult.Result is IParentExpression))
+            if (!(backwardResult.Result is IPlaceholderTerm))
             {
                 return backwardResult.Result;
             }
-            if (!(backwardResult.Bottom is IPlaceholderTerm) &&
-                !(backwardResult.Bottom is IParentExpression))
+            if (!(backwardResult.Bottom is IPlaceholderTerm))
             {
                 return backwardResult.Bottom;
             }

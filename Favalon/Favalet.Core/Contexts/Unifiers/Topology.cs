@@ -165,8 +165,12 @@ namespace Favalet.Contexts.Unifiers
             IPlaceholderTerm placeholder,
             UnificationPolarities targetPolarity,
             Func<IExpression, IExpression, IExpression> creator,
+            HashSet<IPlaceholderTerm> visited,
             Dictionary<IPlaceholderTerm, ResolveResult> cache)
         {
+            var v = visited.Add(placeholder);
+            Debug.Assert(v);
+
             if (this.topology.TryGetValue(placeholder, out var node))
             {
                 var unifications = node.Unifications.
@@ -182,12 +186,15 @@ namespace Favalet.Contexts.Unifiers
                             {
                                 if (!cache.TryGetValue(ph, out var cached))
                                 {
-                                    var result = this.InternalResolve(
-                                        calculator,
-                                        ph,
-                                        targetPolarity,
-                                        creator,
-                                        cache);
+                                    var result = visited.Contains(ph) ?
+                                        ResolveResult.Create(ph) :
+                                        this.InternalResolve(
+                                            calculator,
+                                            ph,
+                                            targetPolarity,
+                                            creator,
+                                            visited,
+                                            cache);
                                     
                                     if ((targetPolarity != UnificationPolarities.In) &&
                                         node.IsScopeWall)
@@ -252,6 +259,7 @@ namespace Favalet.Contexts.Unifiers
                 placeholder,
                 UnificationPolarities.In,
                 AndExpression.Create,
+                new HashSet<IPlaceholderTerm>(IdentityTermComparer.Instance),
                 new Dictionary<IPlaceholderTerm, ResolveResult>(IdentityTermComparer.Instance));
             if (!ContainsPlaceholder(forwardResult.Result))
             {
@@ -263,6 +271,7 @@ namespace Favalet.Contexts.Unifiers
                 placeholder,
                 UnificationPolarities.Out,
                 OrExpression.Create,
+                new HashSet<IPlaceholderTerm>(IdentityTermComparer.Instance),
                 new Dictionary<IPlaceholderTerm, ResolveResult>(IdentityTermComparer.Instance));
             if (!ContainsPlaceholder(backwardResult.Result))
             {
@@ -449,19 +458,23 @@ namespace Favalet.Contexts.Unifiers
 
                 tw.WriteLine();
 
-                IEnumerable<(string, string)> ToSymbols(IPlaceholderTerm placeholder, Unification unification)
+                IEnumerable<(string, string, string)> ToSymbols(IPlaceholderTerm placeholder, Unification unification)
                 {
                     var phSymbol = ToSymbolString(placeholder).symbol;
                     switch (unification.Polarity, unification.Expression)
                     {
                         case (UnificationPolarities.In, IParentExpression parent):
-                            return parent.Children.Select((_, index) => (phSymbol, $"{ToSymbolString(parent).symbol}:i{index}"));
+                            return parent.Children.Select((_, index) => (phSymbol, $"{ToSymbolString(parent).symbol}:i{index}", ""));
                         case (UnificationPolarities.Out, IParentExpression parent):
-                            return parent.Children.Select((_, index) => ($"{ToSymbolString(parent).symbol}:i{index}", phSymbol));
+                            return parent.Children.Select((_, index) => ($"{ToSymbolString(parent).symbol}:i{index}", phSymbol, ""));
+                        case (UnificationPolarities.Both, IParentExpression parent):
+                            return parent.Children.Select((_, index) => ($"{ToSymbolString(parent).symbol}:i{index}", phSymbol, " [dir=none]"));
                         case (UnificationPolarities.In, _):
-                            return new[] { (phSymbol, ToSymbolString(unification.Expression).symbol) };
+                            return new[] { (phSymbol, ToSymbolString(unification.Expression).symbol, "") };
                         case (UnificationPolarities.Out, _):
-                            return new[] { (ToSymbolString(unification.Expression).symbol, phSymbol) };
+                            return new[] { (ToSymbolString(unification.Expression).symbol, phSymbol, "") };
+                        case (UnificationPolarities.Both, _):
+                            return new[] { (ToSymbolString(unification.Expression).symbol, phSymbol, " [dir=none]") };
                         default:
                             throw new InvalidOperationException();
                     }
@@ -474,9 +487,10 @@ namespace Favalet.Contexts.Unifiers
                     OrderBy(entry => entry.Item1))
                 {
                     tw.WriteLine(
-                        "    {0} -> {1};",
+                        "    {0} -> {1}{2};",
                         entry.Item1,
-                        entry.Item2);
+                        entry.Item2,
+                        entry.Item3);
                 }
                 
                 tw.WriteLine("}");

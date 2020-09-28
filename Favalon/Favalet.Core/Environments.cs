@@ -76,6 +76,8 @@ namespace Favalet
 
             var inferred = context.Infer(rewritable);
             unifier.SetTargetRoot(inferred);
+
+            var dot = unifier.Dot;
             
 #if DEBUG
             Debug.WriteLine(

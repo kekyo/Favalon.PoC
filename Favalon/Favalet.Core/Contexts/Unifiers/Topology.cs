@@ -92,15 +92,49 @@ namespace Favalet.Contexts.Unifiers
         }
 
         [DebuggerStepThrough]
+        public void Add(
+            IExpression from,
+            IExpression to,
+            bool isScopeWall)
+        {
+            if (from is IPlaceholderTerm fph)
+            {
+                this.AddIf(
+                    fph,
+                    to,
+                    UnificationPolarities.Both,
+                    isScopeWall);
+            }
+            
+            if (to is IPlaceholderTerm tph)
+            {
+                this.AddIf(
+                    tph,
+                    from,
+                    UnificationPolarities.Both,
+                    isScopeWall);
+            }
+        }
+
+        [DebuggerStepThrough]
         public void AddForward(
             IPlaceholderTerm placeholder,
             IExpression from,
             bool isScopeWall)
         {
-            this.AddIf(placeholder, from, UnificationPolarities.Out, isScopeWall);
+            this.AddIf(
+                placeholder,
+                from,
+                UnificationPolarities.Out,
+                isScopeWall);
+            
             if (from is IPlaceholderTerm ei)
             {
-                this.AddIf(ei, placeholder, UnificationPolarities.In, isScopeWall);
+                this.AddIf(
+                    ei,
+                    placeholder,
+                    UnificationPolarities.In,
+                    isScopeWall);
             }
         }
 
@@ -110,10 +144,19 @@ namespace Favalet.Contexts.Unifiers
             IExpression to,
             bool isScopeWall)
         {
-            this.AddIf(placeholder, to, UnificationPolarities.In, isScopeWall);
+            this.AddIf(
+                placeholder,
+                to,
+                UnificationPolarities.In,
+                isScopeWall);
+            
             if (to is IPlaceholderTerm ei)
             {
-                this.AddIf(ei, placeholder, UnificationPolarities.Out, isScopeWall);
+                this.AddIf(
+                    ei,
+                    placeholder,
+                    UnificationPolarities.Out,
+                    isScopeWall);
             }
         }
 
@@ -127,7 +170,9 @@ namespace Favalet.Contexts.Unifiers
             if (this.topology.TryGetValue(placeholder, out var node))
             {
                 var unifications = node.Unifications.
-                    Where(unification => unification.Polarity == targetPolarity).
+                    Where(unification =>
+                        (unification.Polarity == targetPolarity) ||
+                        (unification.Polarity == UnificationPolarities.Both)).
                     ToArray();
                 if (unifications.Length >= 1)
                 {
@@ -144,7 +189,7 @@ namespace Favalet.Contexts.Unifiers
                                         creator,
                                         cache);
                                     
-                                    if ((targetPolarity == UnificationPolarities.Out) &&
+                                    if ((targetPolarity != UnificationPolarities.In) &&
                                         node.IsScopeWall)
                                     {
                                         // Force places this placeholder if it's out polarity and a scope wall.

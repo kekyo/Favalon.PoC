@@ -21,27 +21,35 @@ namespace Favalet.Contexts.Unifiers
         private void InternalUnifyCore(
             IExpression from,
             IExpression to,
-            bool isScopeWall)
+            bool isBound)
         {
             Debug.Assert(!(from is IIgnoreUnificationTerm));
             Debug.Assert(!(to is IIgnoreUnificationTerm));
 
-            switch (from, to)
+            switch (from, to, isBound)
             {
                 // Placeholder unification.
-                case (_, IPlaceholderTerm tp2):
-                    this.topology.AddForward(tp2, from, isScopeWall);
+                case (_, IPlaceholderTerm tph, false):
+                    this.topology.AddForward(tph, from, false);
                     //this.topology.Validate(tp2);
                     break;
-                case (IPlaceholderTerm fp2, _):
-                    this.topology.AddBackward(fp2, to, isScopeWall) ;
+                case (IPlaceholderTerm fph, _, false):
+                    this.topology.AddBackward(fph, to, false);
+                    //this.topology.Validate(fp2);
+                    break;
+                case (_, IPlaceholderTerm tph, true):
+                     this.topology.Add(tph, from, true);
+                     //this.topology.Validate(tp2);
+                     break;
+                case (IPlaceholderTerm fph, _, true):
+                    this.topology.Add(fph, to, true);
                     //this.topology.Validate(fp2);
                     break;
 
                 // Function unification.
                 case (IFunctionExpression(IExpression fp, IExpression fr),
-                      IFunctionExpression(IExpression tp, IExpression tr)):
-                    // unify(C +> A) : they're function parameters, so will raise up scope wall.
+                      IFunctionExpression(IExpression tp, IExpression tr), _):
+                    // unify(C +> A)
                     this.InternalUnify(tp, fp, true);
                     // unify(B +> D)
                     this.InternalUnify(fr, tr, false);
@@ -63,7 +71,7 @@ namespace Favalet.Contexts.Unifiers
         private void InternalUnify(
             IExpression from,
             IExpression to,
-            bool isScopeWall)
+            bool isBound)
         {
             // Same as.
             if (this.TypeCalculator.ExactEquals(from, to))
@@ -80,10 +88,10 @@ namespace Favalet.Contexts.Unifiers
 
                 default:
                     // Unify higher order.
-                    this.InternalUnify(from.HigherOrder, to.HigherOrder, isScopeWall);
+                    this.InternalUnify(from.HigherOrder, to.HigherOrder, isBound);
 
                     // Unify.
-                    this.InternalUnifyCore(from, to, isScopeWall);
+                    this.InternalUnifyCore(from, to, isBound);
                     break;
             }
         }

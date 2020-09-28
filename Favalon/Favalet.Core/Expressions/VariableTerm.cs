@@ -117,33 +117,34 @@ namespace Favalet.Expressions
             {
                 if (this.bounds.Length >= 1)
                 {
-                    var targets = this.bounds.Select(context.Fixup).Memoize();
+                    var targets = this.bounds.
+                        Select(context.Fixup).
+                        Memoize();
 
                     if (targets.Length >= 1)
                     {
                         var targetsHigherOrder = LogicalCalculator.ConstructNested(
-                            targets.Select(v => v.HigherOrder).Memoize(),
+                            targets.
+                                Select(target => target.HigherOrder).
+                                Memoize(),
                             OrExpression.Create)!;
 
                         var calculated = context.TypeCalculator.Compute(
                             AndExpression.Create(
                                 higherOrder, targetsHigherOrder));
 
-                        var filteredHigherOrders = targets.Select(v =>
-                                (higherOrder: v.HigherOrder,
-                                    calculated: context.TypeCalculator.Compute(
-                                        OrExpression.Create(
-                                            v.HigherOrder, calculated))))
-                            .Where(entry => entry.calculated.Equals(calculated)).Select(entry => entry.higherOrder)
-                            .Memoize();
+                        var filteredTargets = targets.
+                            Select(target =>
+                                (target,
+                                 calculated: context.TypeCalculator.Compute(
+                                    OrExpression.Create(target.HigherOrder, calculated)))).
+                            Where(entry => entry.calculated.Equals(calculated)).
+                            Select(entry => entry.target).
+                            Memoize();
 
-                        if (filteredHigherOrders.Length >= 1)
+                        if (filteredTargets.Length >= 1)
                         {
-                            // Apply only calculated higher order.
-                            var result = LogicalCalculator.ConstructNested(
-                                filteredHigherOrders,
-                                OrExpression.Create)!;
-                            return new VariableTerm(this.Symbol, result, this.bounds);
+                            return new VariableTerm(this.Symbol, higherOrder, filteredTargets);
                         }
                     }
                 }
@@ -161,11 +162,9 @@ namespace Favalet.Expressions
 
         protected override IExpression Reduce(IReduceContext context)
         {
-            var variables = context.LookupVariables(this.Symbol);
-
-            if (variables.Length >= 1)
+            if (this.bounds is IExpression[] bounds)
             {
-                var reduced = context.Reduce(variables[0].Expression);
+                var reduced = context.Reduce(bounds[0]);
                 return context.TypeCalculator.Compute(reduced);
             }
             else

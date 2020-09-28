@@ -9,7 +9,9 @@ namespace Favalet.Contexts.Unifiers
         // Indicate "<==", forward polarity, will make covariant (widen)
         Out,
         // Indicate "==>", backward polarity, will make contravariant (narrow)
-        In
+        In,
+        // Both direction "<=>"  
+        Both
     }
 
     [DebuggerStepThrough]
@@ -32,7 +34,12 @@ namespace Favalet.Contexts.Unifiers
 
         public string ToString(PrettyStringTypes type)
         {
-            var polarity = this.Polarity == UnificationPolarities.Out ? "<==" : "==>";
+            var polarity = this.Polarity switch
+            {
+                UnificationPolarities.Out => "<==",
+                UnificationPolarities.In => "==>",
+                _ => "<=>"
+            };
             return $"{polarity} {this.Expression.GetPrettyString(type)}";
         }
         public override string ToString() =>

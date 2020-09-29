@@ -23,7 +23,7 @@ namespace Favalet.Contexts.Unifiers
         public void SetTargetRoot(IExpression targetRoot) =>
             this.topology.SetTargetRoot(targetRoot);
 
-        private void InternalUnifyCore(
+        private bool InternalUnifyCore(
             IExpression from,
             IExpression to,
             bool isBound,
@@ -38,29 +38,29 @@ namespace Favalet.Contexts.Unifiers
                 case (_, IPlaceholderTerm tph, false, _):
                     this.topology.AddForward(tph, from, false);
                     //this.topology.Validate(tp2);
-                    break;
+                    return true;
                 case (IPlaceholderTerm fph, _, false, _):
                     this.topology.AddBackward(fph, to, false);
                     //this.topology.Validate(fp2);
-                    break;
+                    return true;
                 case (_, IPlaceholderTerm tph, true, _):
                      this.topology.Add(tph, from, true);
                      //this.topology.Validate(tp2);
-                    break;
+                     return true;
                 case (IPlaceholderTerm fph, _, true, _):
                     this.topology.Add(fph, to, true);
                     //this.topology.Validate(fp2);
-                    break;
+                    return true;
 
                 // Binary expression unification.
                 case (IBinaryExpression fb, _, _, _):
                     this.InternalUnify(fb.Left, to, false, false);
                     this.InternalUnify(fb.Right, to, false, false);
-                    break;
+                    return true;
                 case (_, IBinaryExpression tb, _, _):
                     this.InternalUnify(from, tb.Left, false, false);
                     this.InternalUnify(from, tb.Right, false, false);
-                    break;
+                    return true;
 
                 // Applied function unification.
                 case (IFunctionExpression(IExpression fp, IExpression fr),
@@ -70,7 +70,7 @@ namespace Favalet.Contexts.Unifiers
                     this.InternalUnify(tp, fp, false, true);
                     // unify(B +> D)
                     this.InternalUnify(fr, tr, false, true);
-                    break;
+                    return true;
 
                 // Function unification.
                 case (IFunctionExpression(IExpression fp, IExpression fr),
@@ -80,7 +80,7 @@ namespace Favalet.Contexts.Unifiers
                     this.InternalUnify(tp, fp, true, true);
                     // unify(B +> D)
                     this.InternalUnify(fr, tr, false, true);
-                    break;
+                    return true;
                 
                 case (_, _, _, true):
                     // Validate polarity.
@@ -91,11 +91,13 @@ namespace Favalet.Contexts.Unifiers
                         throw new ArgumentException(
                             $"Couldn't unify: {from.GetPrettyString(PrettyStringTypes.Minimum)} <: {to.GetPrettyString(PrettyStringTypes.Minimum)}");
                     }
-                    break;
+                    return true;
             }
+
+            return false;
         }
 
-        private void InternalUnify(
+        private bool InternalUnify(
             IExpression from,
             IExpression to,
             bool isBound,
@@ -104,7 +106,7 @@ namespace Favalet.Contexts.Unifiers
             // Same as.
             if (this.TypeCalculator.ExactEquals(from, to))
             {
-                return;
+                return true;
             }
 
             switch (from, to)
@@ -112,24 +114,27 @@ namespace Favalet.Contexts.Unifiers
                 // Ignore IIgnoreUnificationTerm unification.
                 case (IIgnoreUnificationTerm _, _):
                 case (_, IIgnoreUnificationTerm _):
-                    break;
+                    return true;
 
                 default:
                     // Unify higher order.
-                    this.InternalUnify(
+                    if (this.InternalUnify(
                         from.HigherOrder,
                         to.HigherOrder,
                         isBound,
-                        raiseIfCouldNotUnify);
-
-                    // Unify.
-                    this.InternalUnifyCore(
-                        from,
-                        to,
-                        isBound,
-                        raiseIfCouldNotUnify);
+                        raiseIfCouldNotUnify))
+                    {
+                        // Unify if succeeded higher order.
+                        return this.InternalUnifyCore(
+                            from,
+                            to,
+                            isBound,
+                            raiseIfCouldNotUnify);
+                    }
                     break;
             }
+
+            return false;
         }
 
         [DebuggerStepThrough]

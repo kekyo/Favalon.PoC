@@ -327,7 +327,7 @@ namespace Favalet.Contexts.Unifiers
                     if (!visited.Add(ph))
                     {
                         // TODO: cache
-                        return current;
+                        return ph;
                     }
 
                     current = ph;

@@ -12,23 +12,28 @@ namespace Favalet
     public interface IEnvironments :
         IScopeContext
     {
+        ITopology? LastTopology { get; }
+        
         void MutableBind(IBoundVariableTerm symbol, IExpression expression);
     }
 
     public sealed class Environments :
         ScopeContext, IEnvironments, IPlaceholderProvider
     {
-#if DEBUG
         private ReduceContext? lastContext;
-#endif
         private int placeholderIndex = -1;
+        private bool saveLastTopology;
 
         [DebuggerStepThrough]
-        private Environments(ITypeCalculator typeCalculator) :
+        private Environments(ITypeCalculator typeCalculator, bool saveLastTopology) :
             base(null, typeCalculator)
         {
+            this.saveLastTopology = saveLastTopology;
             this.MutableBind(Generator.kind.Symbol, Generator.kind);
         }
+        
+        public ITopology? LastTopology =>
+            this.lastContext;
 
         [DebuggerStepThrough]
         internal IExpression CreatePlaceholder(
@@ -70,7 +75,7 @@ namespace Favalet
 
 #if DEBUG
             Debug.WriteLine($"Infer[{context.GetHashCode()}:rewritable] :");
-            Debug.WriteLine(expression.GetXml());
+            Debug.WriteLine(rewritable.GetXml());
 #endif            
 
             var inferred = context.Infer(rewritable);
@@ -78,7 +83,7 @@ namespace Favalet
             
 #if DEBUG
             Debug.WriteLine($"Infer[{context.GetHashCode()}:inferred] :");
-            Debug.WriteLine(expression.GetXml());
+            Debug.WriteLine(inferred.GetXml());
 #endif            
 
             var fixedup = context.Fixup(inferred);
@@ -86,7 +91,7 @@ namespace Favalet
 
 #if DEBUG
             Debug.WriteLine($"Infer[{context.GetHashCode()}:fixedup] :");
-            Debug.WriteLine(expression.GetXml());
+            Debug.WriteLine(fixedup.GetXml());
 #endif
 
             return fixedup;
@@ -98,10 +103,11 @@ namespace Favalet
             var context = new ReduceContext(this, this, unifier);
 
             var inferred = this.InternalInfer(context, expression);
-            
-#if DEBUG
-            this.lastContext = context;
-#endif
+
+            if (this.saveLastTopology)
+            {
+                this.lastContext = context;
+            }
 
             return inferred;
         }
@@ -117,9 +123,12 @@ namespace Favalet
 #if DEBUG
             Debug.WriteLine($"Reduce[{context.GetHashCode()}:reduced] :");
             Debug.WriteLine(reduced.GetXml());
-            this.lastContext = context;
 #endif
-            
+            if (this.saveLastTopology)
+            {
+                this.lastContext = context;
+            }
+
             return reduced;
         }
 
@@ -128,11 +137,15 @@ namespace Favalet
             base.MutableBind(symbol, expression);
 
         [DebuggerStepThrough]
-        public static Environments Create(ITypeCalculator typeCalculator)
-        {
-            var environment = new Environments(typeCalculator);
-            return environment;
-        }
+        public static Environments Create(
+            ITypeCalculator typeCalculator,
+#if DEBUG
+            bool saveLastTopology = true
+#else
+            bool saveLastTopology = false
+#endif
+            ) =>
+            new Environments(typeCalculator, saveLastTopology);
     }
 
     public static class EnvironmentExtension

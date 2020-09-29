@@ -10,8 +10,15 @@ using Favalet.Internal;
 
 namespace Favalet.Contexts.Unifiers
 {
+    public interface ITopology
+    {
+        string View { get; }    
+        string Dot { get; }    
+    }
+    
     [DebuggerDisplay("{View}")]
-    internal sealed class Topology
+    internal sealed class Topology :
+        ITopology
     {
         private sealed class Node
         {
@@ -87,7 +94,7 @@ namespace Favalet.Contexts.Unifiers
 
             if (isScopeWall)
             {
-                node.SetScopeWall();
+                //node.SetScopeWall();
             }
 
             var unification = Unification.Create(expression, polarity);
@@ -163,6 +170,7 @@ namespace Favalet.Contexts.Unifiers
             }
         }
 
+        #region Resolve
         private ResolveResult InternalResolve(
             ITypeCalculator calculator, 
             IPlaceholderTerm placeholder,
@@ -246,16 +254,16 @@ namespace Favalet.Contexts.Unifiers
             return result;
         }
 
-        public IExpression Resolve(ITypeCalculator calculator, IPlaceholderTerm placeholder)
-        {
-            bool ContainsPlaceholder(IExpression expression) =>
-                expression switch
-                {
-                    IPlaceholderTerm _ => true,
-                    IParentExpression parent => parent.Children.Any(ContainsPlaceholder),
-                    _ => false
-                };
+        private static bool ContainsPlaceholder(IExpression expression) =>
+            expression switch
+            {
+                IPlaceholderTerm _ => true,
+                IParentExpression parent => parent.Children.Any(ContainsPlaceholder),
+                _ => false
+            };
             
+        private IExpression InternalResolve(ITypeCalculator calculator, IPlaceholderTerm placeholder)
+        {
             var forwardResult = this.InternalResolve(
                 calculator,
                 placeholder,
@@ -289,11 +297,11 @@ namespace Favalet.Contexts.Unifiers
                 return backwardResult.Bottom;
             }
 
-            if (forwardResult.Result is IPlaceholderTerm)
+            if (!(forwardResult.Result is IPlaceholderTerm))
             {
                 return forwardResult.Result;
             }
-            else if (backwardResult.Result is IPlaceholderTerm)
+            else if (!(backwardResult.Result is IPlaceholderTerm))
             {
                 return backwardResult.Result;
             }
@@ -303,6 +311,35 @@ namespace Favalet.Contexts.Unifiers
             }
         }
 
+        public IExpression Resolve(ITypeCalculator calculator, IPlaceholderTerm placeholder)
+        {
+            var current = placeholder;
+
+            var visited = new HashSet<IPlaceholderTerm>(IdentityTermComparer.Instance);
+            visited.Add(current);
+            
+            while (true)
+            {
+                var candidate = this.InternalResolve(calculator, current);
+                if (candidate is IPlaceholderTerm ph &&
+                    !ph.Equals(current))
+                {
+                    if (!visited.Add(ph))
+                    {
+                        // TODO: cache
+                        return current;
+                    }
+
+                    current = ph;
+                    continue;
+                }
+
+                // TODO: cache
+                return candidate;
+            }
+        }
+        #endregion
+        
         #region Validator
         [DebuggerStepThrough]
         private void Validate(PlaceholderMarker marker, IExpression expression)

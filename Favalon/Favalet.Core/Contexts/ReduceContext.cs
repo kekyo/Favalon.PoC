@@ -112,7 +112,7 @@ namespace Favalet.Contexts
     }
 
     internal sealed class ReduceContext :
-        FixupContext, IInferContext, IReduceContext
+        FixupContext, IInferContext, IReduceContext, ITopology
     {
         private readonly Environments rootScope;
         private readonly IScopeContext parentScope;

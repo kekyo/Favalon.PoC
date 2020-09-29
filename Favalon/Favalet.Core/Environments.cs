@@ -19,7 +19,7 @@ namespace Favalet
         ScopeContext, IEnvironments, IPlaceholderProvider
     {
 #if DEBUG
-        private Unifier? lastUnifier;
+        private ReduceContext? lastContext;
 #endif
         private int placeholderIndex = -1;
 
@@ -58,41 +58,52 @@ namespace Favalet
             PlaceholderOrderHints orderHint) =>
             this.CreatePlaceholder(orderHint);
 
+        private IExpression InternalInfer(
+            ReduceContext context,
+            IExpression expression)
+        {
+            Debug.WriteLine($"Infer[{context.GetHashCode()}:before] :");
+            Debug.WriteLine(expression.GetXml());
+  
+            var rewritable = context.MakeRewritable(expression);
+            context.SetTargetRoot(rewritable);
+
+#if DEBUG
+            Debug.WriteLine($"Infer[{context.GetHashCode()}:rewritable] :");
+            Debug.WriteLine(expression.GetXml());
+#endif            
+
+            var inferred = context.Infer(rewritable);
+            context.SetTargetRoot(inferred);
+            
+#if DEBUG
+            Debug.WriteLine($"Infer[{context.GetHashCode()}:inferred] :");
+            Debug.WriteLine(expression.GetXml());
+#endif            
+
+            var fixedup = context.Fixup(inferred);
+            context.SetTargetRoot(fixedup);
+
+#if DEBUG
+            Debug.WriteLine($"Infer[{context.GetHashCode()}:fixedup] :");
+            Debug.WriteLine(expression.GetXml());
+#endif
+
+            return fixedup;
+        }
+
         public IExpression Infer(IExpression expression)
         {
             var unifier = Unifier.Create(this.TypeCalculator, expression);
             var context = new ReduceContext(this, this, unifier);
 
-            Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: expression=\"{expression.GetXml()}\"");
-
-            var rewritable = context.MakeRewritable(expression);
-            unifier.SetTargetRoot(rewritable);
-
-#if DEBUG
-            Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: rewritable=\"{rewritable.GetXml()}\", unifier=\"{unifier}\"");
-#endif            
-
-            var inferred = context.Infer(rewritable);
-            unifier.SetTargetRoot(inferred);
-
-            var dot = unifier.Dot;
+            var inferred = this.InternalInfer(context, expression);
             
 #if DEBUG
-            Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetXml()}\", unifier=\"{unifier}\"");
-#endif            
-
-            var fixedup = context.Fixup(inferred);
-            unifier.SetTargetRoot(fixedup);
-
-#if DEBUG
-            Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: fixedup=\"{fixedup.GetXml()}\"");
-            this.lastUnifier = unifier;
+            this.lastContext = context;
 #endif
-            return fixedup;
+
+            return inferred;
         }
 
         public IExpression Reduce(IExpression expression)
@@ -100,15 +111,15 @@ namespace Favalet
             var unifier = Unifier.Create(this.TypeCalculator, expression);
             var context = new ReduceContext(this, this, unifier);
 
-            Debug.WriteLine(
-                $"Reduce[{context.GetHashCode()}]: expression=\"{expression.GetXml()}\"");
-
-            var reduced = context.Reduce(expression);
-            Debug.WriteLine(
-                $"Reduce[{context.GetHashCode()}]: reduced=\"{reduced.GetXml()}\"");
+            var inferred = this.InternalInfer(context, expression);
+            var reduced = context.Reduce(inferred);
+            
 #if DEBUG
-            this.lastUnifier = unifier;
+            Debug.WriteLine($"Reduce[{context.GetHashCode()}:reduced] :");
+            Debug.WriteLine(reduced.GetXml());
+            this.lastContext = context;
 #endif
+            
             return reduced;
         }
 

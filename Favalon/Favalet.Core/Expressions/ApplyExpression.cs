@@ -84,10 +84,10 @@ namespace Favalet.Expressions
             var function = context.Infer(this.Function);
             var higherOrder = context.Infer(this.HigherOrder);
 
-            var functionHigherOrder = FunctionExpression.Create(
+            var functionHigherOrder = AppliedFunctionExpression.Create(
                 argument.HigherOrder, higherOrder);
 
-            context.Unify(functionHigherOrder, function.HigherOrder);
+            context.Unify(function.HigherOrder, functionHigherOrder);
 
             if (object.ReferenceEquals(this.Argument, argument) &&
                 object.ReferenceEquals(this.Function, function) &&

@@ -164,13 +164,21 @@ namespace Favalet.Expressions
         {
             if (this.bounds is IExpression[] bounds)
             {
-                var reduced = context.Reduce(bounds[0]);
-                return context.TypeCalculator.Compute(reduced);
+                var variables = context.LookupVariables(this.Symbol);
+                if (variables.Length >= 1)
+                {
+                    var filtered = variables.Where(
+                        v => context.TypeCalculator.Equals(v.SymbolHigherOrder, bounds[0].HigherOrder)).
+                        ToArray();
+                    if (filtered.Length >= 1)
+                    {
+                        var reduced = context.Reduce(filtered[0].Expression);
+                        return context.TypeCalculator.Compute(reduced);
+                    }
+                }
             }
-            else
-            {
-                return this;
-            }
+
+            return this;
         }
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>

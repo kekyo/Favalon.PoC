@@ -133,6 +133,10 @@ namespace Favalet.Contexts
             this.unifier = unifier;
         }
 
+        [DebuggerStepThrough]
+        public void SetTargetRoot(IExpression targetRoot) =>
+            this.unifier.SetTargetRoot(targetRoot);
+
         public IExpression MakeRewritable(IExpression expression)
         {
             if (this.orderHint >= PlaceholderOrderHints.DeadEnd)

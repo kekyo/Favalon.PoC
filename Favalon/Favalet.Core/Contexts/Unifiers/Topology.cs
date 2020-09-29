@@ -29,13 +29,16 @@ namespace Favalet.Contexts.Unifiers
                 StringUtilities.Join(",", this.Unifications.Select(unification => unification.ToString())) + "]";
         }
         
-        private struct ResolveResult
+        private sealed class ResolveResult
         {
             public readonly IExpression Bottom;
             public readonly IExpression Result;
 
             private ResolveResult(IExpression bottom, IExpression result)
             {
+                Debug.Assert(bottom != null);
+                Debug.Assert(result != null);
+                
                 this.Bottom = bottom;
                 this.Result = result;
             }
@@ -180,62 +183,61 @@ namespace Favalet.Contexts.Unifiers
                     ToArray();
                 if (unifications.Length >= 1)
                 {
-                    var results = unifications.Select(unification =>
+                    var results = unifications.
+                        Collect(unification =>
                         {
-                            if (unification.Expression is IPlaceholderTerm ph)
-                            {
-                                if (!cache.TryGetValue(ph, out var cached))
-                                {
-                                    var result = visited.Contains(ph) ?
-                                        ResolveResult.Create(ph) :
-                                        this.InternalResolve(
-                                            calculator,
-                                            ph,
-                                            targetPolarity,
-                                            creator,
-                                            visited,
-                                            cache);
-                                    
-                                    if ((targetPolarity != UnificationPolarities.In) &&
-                                        node.IsScopeWall)
-                                    {
-                                        // Force places this placeholder if it's out polarity and a scope wall.
-                                        return result.Update(placeholder);
-                                    }
-                                    else
-                                    {
-                                        return result;
-                                    }
-                                }
-                                else
-                                {
-                                    return cached;
-                                }
-                            }
-                            else
+                            if (!(unification.Expression is IPlaceholderTerm uph))
                             {
                                 return ResolveResult.Create(unification.Expression);
                             }
+
+                            if (cache.TryGetValue(uph, out var cached))
+                            {
+                                return cached;
+                            }
+
+                            if (visited.Contains(uph))
+                            {
+                                return null;
+                            }
+
+                            var ur = this.InternalResolve(
+                                calculator,
+                                uph,
+                                targetPolarity,
+                                creator,
+                                visited,
+                                cache);
+                            
+                            if ((targetPolarity != UnificationPolarities.In) &&
+                                node.IsScopeWall)
+                            {
+                                // Force places this placeholder if it's out polarity and a scope wall.
+                                return ur.Update(placeholder);
+                            }
+                            else
+                            {
+                                return ur;
+                            }
                         }).
                         ToArray();
-                    
-                    var bottomCombined = LogicalCalculator.ConstructNested(
-                        results.
-                            Select(result => result.Bottom).
-                            ToArray(),
-                        creator)!;
-                    var bottomCalculated = calculator.Compute(bottomCombined);
 
-                    var resultCombined = LogicalCalculator.ConstructNested(
-                        results.
-                            Select(result => result.Result).
-                            ToArray(),
-                        creator)!;
-                    var resultCalculated = calculator.Compute(resultCombined);
+                    if (results.Length >= 1)
+                    {
+                        var bottomCombined = LogicalCalculator.ConstructNested(
+                            results.Select(r => r.Bottom).ToArray(),
+                            creator)!;
+                        var bottomCalculated = calculator.Compute(bottomCombined);
 
-                    var resultFinal = ResolveResult.Create(bottomCalculated, resultCalculated);
-                    cache.Add(placeholder, resultFinal);
-                    return resultFinal;
+                        var resultCombined = LogicalCalculator.ConstructNested(
+                            results.Select(r => r.Result).ToArray(),
+                            creator)!;
+                        var resultCalculated = calculator.Compute(resultCombined);
+
+                        var resultFinal = ResolveResult.Create(bottomCalculated, resultCalculated);
+                        cache.Add(placeholder, resultFinal);
+                        return resultFinal;
+                    }
                 }
             }
 
@@ -278,21 +280,11 @@ namespace Favalet.Contexts.Unifiers
                 return backwardResult.Result;
             }
             
-            // Higher recommend if it isn't a single placeholder
-            if (!(forwardResult.Result is IPlaceholderTerm))
-            {
-                return forwardResult.Result;
-            }
-            if (!(forwardResult.Bottom is IPlaceholderTerm))
+            if (!ContainsPlaceholder(forwardResult.Bottom))
             {
                 return forwardResult.Bottom;
             }
-
-            if (!(backwardResult.Result is IPlaceholderTerm))
-            {
-                return backwardResult.Result;
-            }
-            if (!(backwardResult.Bottom is IPlaceholderTerm))
+            if (!ContainsPlaceholder(backwardResult.Bottom))
             {
                 return backwardResult.Bottom;
             }

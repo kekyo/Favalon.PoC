@@ -18,6 +18,10 @@ namespace Favalet.Contexts.Unifiers
             base(typeCalculator) =>
             this.topology = Topology.Create(targetRoot);
 
+        [DebuggerStepThrough]
+        public void SetTargetRoot(IExpression targetRoot) =>
+            this.topology.SetTargetRoot(targetRoot);
+
         private void InternalUnifyCore(
             IExpression from,
             IExpression to,
@@ -47,16 +51,6 @@ namespace Favalet.Contexts.Unifiers
                     //this.topology.Validate(fp2);
                     break;
 
-                // Function unification.
-                case (IFunctionExpression(IExpression fp, IExpression fr),
-                      IFunctionExpression(IExpression tp, IExpression tr),
-                      _, _):
-                    // unify(C +> A)
-                    this.InternalUnify(tp, fp, true, true);
-                    // unify(B +> D)
-                    this.InternalUnify(fr, tr, false, true);
-                    break;
-
                 // Binary expression unification.
                 case (IBinaryExpression fb, _, _, _):
                     this.InternalUnify(fb.Left, to, false, false);
@@ -65,6 +59,26 @@ namespace Favalet.Contexts.Unifiers
                 case (_, IBinaryExpression tb, _, _):
                     this.InternalUnify(from, tb.Left, false, false);
                     this.InternalUnify(from, tb.Right, false, false);
+                    break;
+
+                // Applied function unification.
+                case (IFunctionExpression(IExpression fp, IExpression fr),
+                      IAppliedFunctionExpression(IExpression tp, IExpression tr),
+                      _, _):
+                    // unify(C +> A): But parameters aren't binder.
+                    this.InternalUnify(tp, fp, false, true);
+                    // unify(B +> D)
+                    this.InternalUnify(fr, tr, false, true);
+                    break;
+
+                // Function unification.
+                case (IFunctionExpression(IExpression fp, IExpression fr),
+                      IFunctionExpression(IExpression tp, IExpression tr),
+                      _, _):
+                    // unify(C +> A): Parameters are binder.
+                    this.InternalUnify(tp, fp, true, true);
+                    // unify(B +> D)
+                    this.InternalUnify(fr, tr, false, true);
                     break;
                 
                 case (_, _, _, true):
@@ -131,10 +145,6 @@ namespace Favalet.Contexts.Unifiers
 #endif
             return this.topology.Resolve(this.TypeCalculator, placeholder);
         }
-
-        [DebuggerStepThrough]
-        public void SetTargetRoot(IExpression targetRoot) =>
-            this.topology.SetTargetRoot(targetRoot);
 
         public string View
         {

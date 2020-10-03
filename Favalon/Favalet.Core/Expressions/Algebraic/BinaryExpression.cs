@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Favalet.Expressions.Specialized;
 
 namespace Favalet.Expressions.Algebraic
@@ -55,6 +56,12 @@ namespace Favalet.Expressions.Algebraic
             }
         }
 
+        [DebuggerStepThrough]
+        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
+            LogicalCalculator.ConstructNested(
+                children.ToArray(),
+                (l, r) => this.OnCreate(l, r, UnspecifiedTerm.Instance));
+        
         internal abstract IExpression OnCreate(
             IExpression left, IExpression right, IExpression higherOrder);
 

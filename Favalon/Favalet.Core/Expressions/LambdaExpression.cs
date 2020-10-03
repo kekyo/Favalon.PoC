@@ -1,8 +1,10 @@
-﻿using Favalet.Contexts;
+﻿using System;
+using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -56,6 +58,13 @@ namespace Favalet.Expressions
             }
         }
 
+        [DebuggerStepThrough]
+        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
+            (children.ToArray() is IExpression[] c && c.Length == 2 &&
+                c[0] is IBoundVariableTerm c0) ?
+                Create(c0, c[1]) :
+                throw new InvalidOperationException();
+        
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^ this.Body.GetHashCode();
 

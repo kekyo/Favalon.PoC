@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -127,6 +128,12 @@ namespace Favalet.Expressions
                 yield return this.Result;
             }
         }
+
+        [DebuggerStepThrough]
+        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
+            (children.ToArray() is IExpression[] c && c.Length == 2) ?
+                this.Factory.Create(c[0], c[1]) :
+                throw new InvalidOperationException();
 
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^ this.Result.GetHashCode();

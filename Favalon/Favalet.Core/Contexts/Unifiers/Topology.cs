@@ -191,41 +191,52 @@ namespace Favalet.Contexts.Unifiers
                     ToArray();
                 if (unifications.Length >= 1)
                 {
+                    ResolveResult? Collector(IPlaceholderTerm ph)
+                    {
+                        if (cache.TryGetValue(ph, out var cached))
+                        {
+                            return cached;
+                        }
+
+                        if (visited.Contains(ph))
+                        {
+                            return null;
+                        }
+
+                        var ur = this.InternalResolve(
+                            calculator,
+                            ph,
+                            targetPolarity,
+                            creator,
+                            visited,
+                            cache);
+                            
+                        if ((targetPolarity != UnificationPolarities.In) &&
+                            node.IsScopeWall)
+                        {
+                            // Force places this placeholder if it's out polarity and a scope wall.
+                            return ur.Update(placeholder);
+                        }
+                        else
+                        {
+                            return ur;
+                        }
+                    }
+                    
                     var results = unifications.
                         Collect(unification =>
                         {
-                            if (!(unification.Expression is IPlaceholderTerm uph))
+                            if (unification.Expression is IPlaceholderTerm uph)
                             {
-                                return ResolveResult.Create(unification.Expression);
+                                return Collector(uph);
                             }
-
-                            if (cache.TryGetValue(uph, out var cached))
+                            else if (unification.Expression is IParentExpression parent)
                             {
-                                return cached;
-                            }
-
-                            if (visited.Contains(uph))
-                            {
-                                return null;
-                            }
-
-                            var ur = this.InternalResolve(
-                                calculator,
-                                uph,
-                                targetPolarity,
-                                creator,
-                                visited,
-                                cache);
-                            
-                            if ((targetPolarity != UnificationPolarities.In) &&
-                                node.IsScopeWall)
-                            {
-                                // Force places this placeholder if it's out polarity and a scope wall.
-                                return ur.Update(placeholder);
+                                var pr = parent.Create(parent.Children.Select(c => Collector(c)));
                             }
                             else
                             {
-                                return ur;
+                                return ResolveResult.Create(unification.Expression);
                             }
                         }).
                         ToArray();

@@ -6,5 +6,7 @@ namespace Favalet.Expressions.Specialized
         IExpression
     {
         IEnumerable<IExpression> Children { get; }
+
+        IExpression? Create(IEnumerable<IExpression> children);
     }
 }

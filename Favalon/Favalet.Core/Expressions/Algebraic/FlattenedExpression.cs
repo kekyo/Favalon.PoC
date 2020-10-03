@@ -25,6 +25,10 @@ namespace Favalet.Expressions.Algebraic
             get => this.Operands;
         }
 
+        [DebuggerStepThrough]
+        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
+            throw new InvalidOperationException();
+
         public sealed override int GetHashCode() =>
             this.Operands.Aggregate(0, (agg, operand) => agg ^ operand?.GetHashCode() ?? 0);
 

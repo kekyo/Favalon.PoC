@@ -80,11 +80,10 @@ namespace Favalet.Contexts.Unifiers
             return this.InternalAddNormalized(ph, ex, polarity);
         }
 
-        [DebuggerStepThrough]
+        //[DebuggerStepThrough]
         public void AddBoth(
             IExpression from,
-            IExpression to,
-            bool isScopeWall)
+            IExpression to)
         {
             switch (from, to)
             {
@@ -95,22 +94,18 @@ namespace Favalet.Contexts.Unifiers
                          this.aliases.TryGetValue(tph, out var taph) ? taph : null)
                     {
                         case (IPlaceholderTerm _, null):
-                            this.InternalAddNormalized(
+                            this.AddBoth(
                                 faph,
-                                to,
-                                UnificationPolarities.Both);
+                                to);
                             break;
                         case (null, IPlaceholderTerm _):
-                            this.InternalAddNormalized(
-                                taph,
+                            this.AddBoth(
                                 from,
-                                UnificationPolarities.Both);
+                                taph);
                             break;
                         case (null, null):
                             this.aliases.Add(fph, tph);
                             break;
-                        default:
-                            throw new InvalidOperationException();
                     }
                     break;
                 
@@ -133,8 +128,7 @@ namespace Favalet.Contexts.Unifiers
         [DebuggerStepThrough]
         public void AddForward(
             IPlaceholderTerm placeholder,
-            IExpression from,
-            bool isScopeWall)
+            IExpression from)
         {
             this.InternalAdd(
                 placeholder,
@@ -153,8 +147,7 @@ namespace Favalet.Contexts.Unifiers
         [DebuggerStepThrough]
         public void AddBackward(
             IPlaceholderTerm placeholder,
-            IExpression to,
-            bool isScopeWall)
+            IExpression to)
         {
             this.InternalAdd(
                 placeholder,
@@ -202,13 +195,13 @@ namespace Favalet.Contexts.Unifiers
                 new ResolveContext(calculator, polarity, creator);
         }
         
-        private IExpression? InternalResolve(
+        private IExpression InternalResolve(
             ResolveContext context,
             IPlaceholderTerm placeholder)
         {
             if (this.topology.TryGetValue(placeholder, out var node))
             {
-                IExpression? ResolveRecursive(
+                IExpression ResolveRecursive(
                     IExpression expression)
                 {
                     switch (expression)
@@ -217,7 +210,7 @@ namespace Favalet.Contexts.Unifiers
                             return this.InternalResolve(context, ph);
                         case IParentExpression parent:
                             return parent.Create(
-                                parent.Children.Collect(child => ResolveRecursive(child)));
+                                parent.Children.Select(child => ResolveRecursive(child)))!;
                         default:
                             return expression;
                     }
@@ -227,34 +220,72 @@ namespace Favalet.Contexts.Unifiers
                     Where(unification =>
                         (unification.Polarity == context.Polarity) ||
                         (unification.Polarity == UnificationPolarities.Both)).
-                    Collect(unification => ResolveRecursive(unification.Expression)).
+                    Select(unification => ResolveRecursive(unification.Expression)).
                     ToArray();
+                if (expressions.Length >= 1)
+                {
+                    var calculated = context.Compute(expressions)!;
+                    return calculated;
+                }
+            }
 
-                var calculated = context.Compute(expressions);
-                return calculated;
-            }
-            else
-            {
-                return placeholder;
-            }
+            return placeholder;
         }
         
         public IExpression Resolve(ITypeCalculator calculator, IPlaceholderTerm placeholder)
         {
-            var o = this.InternalResolve(
+            var outMost0 = this.InternalResolve(
                 ResolveContext.Create(
                     calculator,
                     UnificationPolarities.Out,
                     OrExpression.Create),
                 placeholder);
-            var i = this.InternalResolve(
+            var inMost0 = this.InternalResolve(
                 ResolveContext.Create(
                     calculator,
                     UnificationPolarities.In,
                     AndExpression.Create),
                 placeholder);
 
-            return o;
+            switch (outMost0, inMost0)
+            {
+                case (IPlaceholderTerm _, _):
+                    if (inMost0 is IPlaceholderTerm imph0)
+                    {
+                        var inMost1 = this.InternalResolve(
+                            ResolveContext.Create(
+                                calculator,
+                                UnificationPolarities.In,
+                                AndExpression.Create),
+                            imph0);
+                        return inMost1;
+                    }
+                    return inMost0;
+                case (_, IPlaceholderTerm _):
+                    if (outMost0 is IPlaceholderTerm omph0)
+                    {
+                        var outMost1 = this.InternalResolve(
+                            ResolveContext.Create(
+                                calculator,
+                                UnificationPolarities.Out,
+                                OrExpression.Create),
+                            omph0);
+                        return outMost1;
+                    }
+                    return outMost0;
+                default:
+                    if (inMost0 is IPlaceholderTerm imph1)
+                    {
+                        var inMost1 = this.InternalResolve(
+                            ResolveContext.Create(
+                                calculator,
+                                UnificationPolarities.In,
+                                AndExpression.Create),
+                            imph1);
+                        return inMost1;
+                    }
+                    return inMost0;
+            }
         }
         #endregion
         

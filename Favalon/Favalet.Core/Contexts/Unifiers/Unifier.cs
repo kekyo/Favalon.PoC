@@ -36,19 +36,19 @@ namespace Favalet.Contexts.Unifiers
             {
                 // Placeholder unification.
                 case (_, IPlaceholderTerm tph, false, _):
-                    this.topology.AddForward(tph, from, false);
+                    this.topology.AddForward(tph, from);
                     //this.topology.Validate(tp2);
                     return true;
                 case (IPlaceholderTerm fph, _, false, _):
-                    this.topology.AddBackward(fph, to, false);
+                    this.topology.AddBackward(fph, to);
                     //this.topology.Validate(fp2);
                     return true;
                 case (_, IPlaceholderTerm tph, true, _):
-                     this.topology.AddBoth(tph, from, true);
+                     this.topology.AddBoth(tph, from);
                      //this.topology.Validate(tp2);
                      return true;
                 case (IPlaceholderTerm fph, _, true, _):
-                    this.topology.AddBoth(fph, to, true);
+                    this.topology.AddBoth(fph, to);
                     //this.topology.Validate(fp2);
                     return true;
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Favalet.Expressions;
 using Favalet.Expressions.Algebraic;
 using Favalet.Expressions.Specialized;
@@ -23,49 +24,18 @@ namespace Favalet.Contexts.Unifiers
         private sealed class Node
         {
             public readonly HashSet<Unification> Unifications;
-            public bool IsScopeWall { get; private set; }
 
             public Node() =>
                 this.Unifications = new HashSet<Unification>();
 
-            public void SetScopeWall() =>
-                this.IsScopeWall = true;
-
             public override string ToString() =>
-                (this.IsScopeWall ? "* [" : "[") +
-                StringUtilities.Join(",", this.Unifications.Select(unification => unification.ToString())) + "]";
+                "[" + StringUtilities.Join(",", this.Unifications.Select(unification => unification.ToString())) + "]";
         }
         
-        private sealed class ResolveResult
-        {
-            public readonly IExpression Bottom;
-            public readonly IExpression Result;
-
-            private ResolveResult(IExpression bottom, IExpression result)
-            {
-                Debug.Assert(bottom != null);
-                Debug.Assert(result != null);
-                
-                this.Bottom = bottom;
-                this.Result = result;
-            }
-
-            public ResolveResult Update(IExpression result) =>
-                new ResolveResult(this.Bottom, result);
-
-            public override string ToString() =>
-                object.ReferenceEquals(this.Bottom, this.Result) ?
-                    this.Result.GetPrettyString(PrettyStringTypes.Minimum) :
-                    $"{this.Result.GetPrettyString(PrettyStringTypes.Minimum)} [{this.Bottom.GetPrettyString(PrettyStringTypes.Minimum)}]";
-
-            public static ResolveResult Create(IExpression result) =>
-                new ResolveResult(result, result);
-            public static ResolveResult Create(IExpression bottom, IExpression result) =>
-                new ResolveResult(bottom, result);
-        }
-
         private readonly Dictionary<IPlaceholderTerm, Node> topology =
             new Dictionary<IPlaceholderTerm, Node>(IdentityTermComparer.Instance);
+        private readonly Dictionary<IPlaceholderTerm, IPlaceholderTerm> aliases =
+            new Dictionary<IPlaceholderTerm, IPlaceholderTerm>(IdentityTermComparer.Instance);
 
 #if DEBUG
         private IExpression targetRoot;
@@ -80,11 +50,10 @@ namespace Favalet.Contexts.Unifiers
         }
 
         [DebuggerStepThrough]
-        private bool AddIf(
+        private bool InternalAddNormalized(
             IPlaceholderTerm placeholder,
             IExpression expression,
-            UnificationPolarities polarity,
-            bool isScopeWall)
+            UnificationPolarities polarity)
         {
             if (!this.topology.TryGetValue(placeholder, out var node))
             {
@@ -92,37 +61,72 @@ namespace Favalet.Contexts.Unifiers
                 this.topology.Add(placeholder, node);
             }
 
-            if (isScopeWall)
-            {
-                //node.SetScopeWall();
-            }
-
             var unification = Unification.Create(expression, polarity);
             return node.Unifications.Add(unification);
         }
 
         [DebuggerStepThrough]
-        public void Add(
+        private bool InternalAdd(
+            IPlaceholderTerm placeholder,
+            IExpression expression,
+            UnificationPolarities polarity)
+        {
+            var ph = this.aliases.TryGetValue(placeholder, out var pha) ?
+                pha : placeholder;
+            var ex = expression is IPlaceholderTerm exph ?
+                this.aliases.TryGetValue(exph, out var exa) ? exa : exph :
+                expression;
+
+            return this.InternalAddNormalized(ph, ex, polarity);
+        }
+
+        [DebuggerStepThrough]
+        public void AddBoth(
             IExpression from,
             IExpression to,
             bool isScopeWall)
         {
-            if (from is IPlaceholderTerm fph)
+            switch (from, to)
             {
-                this.AddIf(
-                    fph,
-                    to,
-                    UnificationPolarities.Both,
-                    isScopeWall);
-            }
-            
-            if (to is IPlaceholderTerm tph)
-            {
-                this.AddIf(
-                    tph,
-                    from,
-                    UnificationPolarities.Both,
-                    isScopeWall);
+                case (IPlaceholderTerm fph, IPlaceholderTerm tph)
+                    when !fph.Equals(tph):
+                    switch
+                        (this.aliases.TryGetValue(fph, out var faph) ? faph : null,
+                         this.aliases.TryGetValue(tph, out var taph) ? taph : null)
+                    {
+                        case (IPlaceholderTerm _, null):
+                            this.InternalAddNormalized(
+                                faph,
+                                to,
+                                UnificationPolarities.Both);
+                            break;
+                        case (null, IPlaceholderTerm _):
+                            this.InternalAddNormalized(
+                                taph,
+                                from,
+                                UnificationPolarities.Both);
+                            break;
+                        case (null, null):
+                            this.aliases.Add(fph, tph);
+                            break;
+                        default:
+                            throw new InvalidOperationException();
+                    }
+                    break;
+                
+                case (IPlaceholderTerm fph, _):
+                    this.InternalAdd(
+                        fph,
+                        to,
+                        UnificationPolarities.Both);
+                    break;
+                
+                case (_, IPlaceholderTerm tph):
+                    this.InternalAdd(
+                        tph,
+                        from,
+                        UnificationPolarities.Both);
+                    break;
             }
         }
 
@@ -132,19 +136,17 @@ namespace Favalet.Contexts.Unifiers
             IExpression from,
             bool isScopeWall)
         {
-            this.AddIf(
+            this.InternalAdd(
                 placeholder,
                 from,
-                UnificationPolarities.Out,
-                isScopeWall);
+                UnificationPolarities.In);
             
             if (from is IPlaceholderTerm ei)
             {
-                this.AddIf(
+                this.InternalAdd(
                     ei,
                     placeholder,
-                    UnificationPolarities.In,
-                    isScopeWall);
+                    UnificationPolarities.Out);
             }
         }
 
@@ -154,200 +156,121 @@ namespace Favalet.Contexts.Unifiers
             IExpression to,
             bool isScopeWall)
         {
-            this.AddIf(
+            this.InternalAdd(
                 placeholder,
                 to,
-                UnificationPolarities.In,
-                isScopeWall);
+                UnificationPolarities.Out);
             
             if (to is IPlaceholderTerm ei)
             {
-                this.AddIf(
+                this.InternalAdd(
                     ei,
                     placeholder,
-                    UnificationPolarities.Out,
-                    isScopeWall);
+                    UnificationPolarities.In);
             }
         }
 
         #region Resolve
-        private ResolveResult InternalResolve(
-            ITypeCalculator calculator, 
-            IPlaceholderTerm placeholder,
-            UnificationPolarities targetPolarity,
-            Func<IExpression, IExpression, IExpression> creator,
-            HashSet<IPlaceholderTerm> visited,
-            Dictionary<IPlaceholderTerm, ResolveResult> cache)
+        [DebuggerStepThrough]
+        private sealed class ResolveContext
         {
-            var v = visited.Add(placeholder);
-            Debug.Assert(v);
+            private readonly ITypeCalculator calculator;
+            private readonly Func<IExpression, IExpression, IExpression> creator;
 
-            if (this.topology.TryGetValue(placeholder, out var node))
+            public readonly UnificationPolarities Polarity;
+
+            private ResolveContext(
+                ITypeCalculator calculator,
+                UnificationPolarities polarity, 
+                Func<IExpression, IExpression, IExpression> creator)
             {
-                var unifications = node.Unifications.
-                    Where(unification =>
-                        (unification.Polarity == targetPolarity) ||
-                        (unification.Polarity == UnificationPolarities.Both)).
-                    ToArray();
-                if (unifications.Length >= 1)
-                {
-                    ResolveResult? Collector(IPlaceholderTerm ph)
-                    {
-                        if (cache.TryGetValue(ph, out var cached))
-                        {
-                            return cached;
-                        }
-
-                        if (visited.Contains(ph))
-                        {
-                            return null;
-                        }
-
-                        var ur = this.InternalResolve(
-                            calculator,
-                            ph,
-                            targetPolarity,
-                            creator,
-                            visited,
-                            cache);
-                            
-                        if ((targetPolarity != UnificationPolarities.In) &&
-                            node.IsScopeWall)
-                        {
-                            // Force places this placeholder if it's out polarity and a scope wall.
-                            return ur.Update(placeholder);
-                        }
-                        else
-                        {
-                            return ur;
-                        }
-                    }
-                    
-                    var results = unifications.
-                        Collect(unification =>
-                        {
-                            if (unification.Expression is IPlaceholderTerm uph)
-                            {
-                                return Collector(uph);
-                            }
-                            else if (unification.Expression is IParentExpression parent)
-                            {
-                                var pr = parent.Create(parent.Children.Select(c => Collector(c)));
-                            }
-                            else
-                            {
-                                return ResolveResult.Create(unification.Expression);
-                            }
-                        }).
-                        ToArray();
-
-                    if (results.Length >= 1)
-                    {
-                        var bottomCombined = LogicalCalculator.ConstructNested(
-                            results.Select(r => r.Bottom).ToArray(),
-                            creator)!;
-                        var bottomCalculated = calculator.Compute(bottomCombined);
-
-                        var resultCombined = LogicalCalculator.ConstructNested(
-                            results.Select(r => r.Result).ToArray(),
-                            creator)!;
-                        var resultCalculated = calculator.Compute(resultCombined);
-
-                        var resultFinal = ResolveResult.Create(bottomCalculated, resultCalculated);
-                        cache.Add(placeholder, resultFinal);
-                        return resultFinal;
-                    }
-                }
+                Debug.Assert(polarity != UnificationPolarities.Both);
+                
+                this.calculator = calculator;
+                this.Polarity = polarity;
+                this.creator = creator;
             }
 
-            var result = ResolveResult.Create(placeholder);
-            cache.Add(placeholder, result);
-            return result;
+            public IExpression? Compute(IExpression[] expressions) =>
+                LogicalCalculator.ConstructNested(expressions, this.creator) is IExpression combined ?
+                    this.calculator.Compute(combined) : null;
+            
+            public static ResolveContext Create(
+                ITypeCalculator calculator,
+                UnificationPolarities polarity, 
+                Func<IExpression, IExpression, IExpression> creator) =>
+                new ResolveContext(calculator, polarity, creator);
         }
 
-        private static bool ContainsPlaceholder(IExpression expression) =>
-            expression switch
-            {
-                IPlaceholderTerm _ => true,
-                IParentExpression parent => parent.Children.Any(ContainsPlaceholder),
-                _ => false
-            };
-            
-        private IExpression InternalResolve(ITypeCalculator calculator, IPlaceholderTerm placeholder)
+        private static readonly ISet<IPlaceholderTerm> empty =
+            new HashSet<IPlaceholderTerm>(IdentityTermComparer.Instance);
+        
+        private IExpression? InternalResolve(
+            ResolveContext context,
+            IPlaceholderTerm placeholder,
+            ISet<IPlaceholderTerm> exceptsForBoth)
         {
-            var forwardResult = this.InternalResolve(
-                calculator,
-                placeholder,
-                UnificationPolarities.In,
-                AndExpression.Create,
-                new HashSet<IPlaceholderTerm>(IdentityTermComparer.Instance),
-                new Dictionary<IPlaceholderTerm, ResolveResult>(IdentityTermComparer.Instance));
-            if (!ContainsPlaceholder(forwardResult.Result))
+            if (this.topology.TryGetValue(placeholder, out var node))
             {
-                return forwardResult.Result;
-            }
-
-            var backwardResult = this.InternalResolve(
-                calculator,
-                placeholder,
-                UnificationPolarities.Out,
-                OrExpression.Create,
-                new HashSet<IPlaceholderTerm>(IdentityTermComparer.Instance),
-                new Dictionary<IPlaceholderTerm, ResolveResult>(IdentityTermComparer.Instance));
-            if (!ContainsPlaceholder(backwardResult.Result))
-            {
-                return backwardResult.Result;
-            }
+                IExpression? ResolveRecursive(
+                    IExpression expression,
+                    ISet<IPlaceholderTerm> subExceptsForBoth)
+                {
+                    switch (expression)
+                    {
+                        case IPlaceholderTerm ph:
+                            return this.InternalResolve(context, ph, subExceptsForBoth);
+                        case IParentExpression parent:
+                            return parent.Create(
+                                parent.Children.Collect(child => ResolveRecursive(child, empty)));
+                        default:
+                            return expression;
+                    }
+                }
+                
+                var nodeExceptsForBoth = new HashSet<IPlaceholderTerm>(
+                    node.Unifications.
+                        Where(unification => unification.Polarity == UnificationPolarities.Both).
+                        Select(unification => (IPlaceholderTerm)unification.Expression).
+                        Concat(exceptsForBoth).
+                        Distinct<IPlaceholderTerm>(IdentityTermComparer.Instance),
+                    IdentityTermComparer.Instance);
             
-            if (!ContainsPlaceholder(forwardResult.Bottom))
-            {
-                return forwardResult.Bottom;
-            }
-            if (!ContainsPlaceholder(backwardResult.Bottom))
-            {
-                return backwardResult.Bottom;
-            }
+                var expressions = node.Unifications.
+                    Where(unification =>
+                        (unification.Polarity == context.Polarity) ||
+                        (unification.Polarity == UnificationPolarities.Both &&
+                         !exceptsForBoth.Contains(unification.Expression))).
+                    Collect(unification => ResolveRecursive(unification.Expression, nodeExceptsForBoth)).
+                    ToArray();
 
-            if (!(forwardResult.Result is IPlaceholderTerm))
-            {
-                return forwardResult.Result;
-            }
-            else if (!(backwardResult.Result is IPlaceholderTerm))
-            {
-                return backwardResult.Result;
+                var calculated = context.Compute(expressions);
+                return calculated;
             }
             else
             {
-                return forwardResult.Result;
+                return placeholder;
             }
         }
-
+        
         public IExpression Resolve(ITypeCalculator calculator, IPlaceholderTerm placeholder)
         {
-            var current = placeholder;
+            var o = this.InternalResolve(
+                ResolveContext.Create(
+                    calculator,
+                    UnificationPolarities.Out,
+                    OrExpression.Create),
+                placeholder,
+                empty);
+            var i = this.InternalResolve(
+                ResolveContext.Create(
+                    calculator,
+                    UnificationPolarities.In,
+                    AndExpression.Create),
+                placeholder,
+                empty);
 
-            var visited = new HashSet<IPlaceholderTerm>(IdentityTermComparer.Instance);
-            visited.Add(current);
-            
-            while (true)
-            {
-                var candidate = this.InternalResolve(calculator, current);
-                if (candidate is IPlaceholderTerm ph &&
-                    !ph.Equals(current))
-                {
-                    if (!visited.Add(ph))
-                    {
-                        // TODO: cache
-                        return ph;
-                    }
-
-                    current = ph;
-                    continue;
-                }
-
-                // TODO: cache
-                return candidate;
-            }
+            return o;
         }
         #endregion
         
@@ -422,9 +345,8 @@ namespace Favalet.Contexts.Unifiers
                     SelectMany(entry =>
                         entry.Value.Unifications.Select(unification =>
                             string.Format(
-                                "{0}{1} {2}",
+                                "{0} {1}",
                                 entry.Key.Symbol,
-                                entry.Value.IsScopeWall ? "*" : "",
                                 unification.ToString(PrettyStringTypes.Minimum)))));
         }
 
@@ -468,10 +390,9 @@ namespace Favalet.Contexts.Unifiers
                     OrderBy(entry => entry.Key, IdentityTermComparer.Instance))
                 {
                     tw.WriteLine(
-                        "    {0} [label=\"{1}\",shape={2}];",
+                        "    {0} [label=\"{1}\",shape=circle];",
                         ToSymbolString(entry.Key).symbol,
-                        entry.Key.Symbol,
-                        entry.Value.IsScopeWall ? "doublecircle" : "circle");
+                        entry.Key.Symbol);
                 }
 
                 foreach (var entry in this.topology.
@@ -503,15 +424,15 @@ namespace Favalet.Contexts.Unifiers
                     var phSymbol = ToSymbolString(placeholder).symbol;
                     switch (unification.Polarity, unification.Expression)
                     {
-                        case (UnificationPolarities.In, IParentExpression parent):
-                            return parent.Children.Select((_, index) => (phSymbol, $"{ToSymbolString(parent).symbol}:i{index}", ""));
                         case (UnificationPolarities.Out, IParentExpression parent):
+                            return parent.Children.Select((_, index) => (phSymbol, $"{ToSymbolString(parent).symbol}:i{index}", ""));
+                        case (UnificationPolarities.In, IParentExpression parent):
                             return parent.Children.Select((_, index) => ($"{ToSymbolString(parent).symbol}:i{index}", phSymbol, ""));
                         case (UnificationPolarities.Both, IParentExpression parent):
                             return parent.Children.Select((_, index) => ($"{ToSymbolString(parent).symbol}:i{index}", phSymbol, " [dir=none]"));
-                        case (UnificationPolarities.In, _):
-                            return new[] { (phSymbol, ToSymbolString(unification.Expression).symbol, "") };
                         case (UnificationPolarities.Out, _):
+                            return new[] { (phSymbol, ToSymbolString(unification.Expression).symbol, "") };
+                        case (UnificationPolarities.In, _):
                             return new[] { (ToSymbolString(unification.Expression).symbol, phSymbol, "") };
                         case (UnificationPolarities.Both, _):
                             return new[] { (ToSymbolString(unification.Expression).symbol, phSymbol, " [dir=none]") };

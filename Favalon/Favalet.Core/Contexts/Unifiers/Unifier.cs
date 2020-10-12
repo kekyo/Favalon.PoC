@@ -44,11 +44,11 @@ namespace Favalet.Contexts.Unifiers
                     //this.topology.Validate(fp2);
                     return true;
                 case (_, IPlaceholderTerm tph, true, _):
-                     this.topology.Add(tph, from, true);
+                     this.topology.AddBoth(tph, from, true);
                      //this.topology.Validate(tp2);
                      return true;
                 case (IPlaceholderTerm fph, _, true, _):
-                    this.topology.Add(fph, to, true);
+                    this.topology.AddBoth(fph, to, true);
                     //this.topology.Validate(fp2);
                     return true;
 

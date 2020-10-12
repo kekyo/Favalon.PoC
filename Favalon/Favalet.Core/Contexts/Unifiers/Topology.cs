@@ -201,47 +201,33 @@ namespace Favalet.Contexts.Unifiers
                 Func<IExpression, IExpression, IExpression> creator) =>
                 new ResolveContext(calculator, polarity, creator);
         }
-
-        private static readonly ISet<IPlaceholderTerm> empty =
-            new HashSet<IPlaceholderTerm>(IdentityTermComparer.Instance);
         
         private IExpression? InternalResolve(
             ResolveContext context,
-            IPlaceholderTerm placeholder,
-            ISet<IPlaceholderTerm> exceptsForBoth)
+            IPlaceholderTerm placeholder)
         {
             if (this.topology.TryGetValue(placeholder, out var node))
             {
                 IExpression? ResolveRecursive(
-                    IExpression expression,
-                    ISet<IPlaceholderTerm> subExceptsForBoth)
+                    IExpression expression)
                 {
                     switch (expression)
                     {
                         case IPlaceholderTerm ph:
-                            return this.InternalResolve(context, ph, subExceptsForBoth);
+                            return this.InternalResolve(context, ph);
                         case IParentExpression parent:
                             return parent.Create(
-                                parent.Children.Collect(child => ResolveRecursive(child, empty)));
+                                parent.Children.Collect(child => ResolveRecursive(child)));
                         default:
                             return expression;
                     }
                 }
-                
-                var nodeExceptsForBoth = new HashSet<IPlaceholderTerm>(
-                    node.Unifications.
-                        Where(unification => unification.Polarity == UnificationPolarities.Both).
-                        Select(unification => (IPlaceholderTerm)unification.Expression).
-                        Concat(exceptsForBoth).
-                        Distinct<IPlaceholderTerm>(IdentityTermComparer.Instance),
-                    IdentityTermComparer.Instance);
             
                 var expressions = node.Unifications.
                     Where(unification =>
                         (unification.Polarity == context.Polarity) ||
-                        (unification.Polarity == UnificationPolarities.Both &&
-                         !exceptsForBoth.Contains(unification.Expression))).
-                    Collect(unification => ResolveRecursive(unification.Expression, nodeExceptsForBoth)).
+                        (unification.Polarity == UnificationPolarities.Both)).
+                    Collect(unification => ResolveRecursive(unification.Expression)).
                     ToArray();
 
                 var calculated = context.Compute(expressions);
@@ -260,15 +246,13 @@ namespace Favalet.Contexts.Unifiers
                     calculator,
                     UnificationPolarities.Out,
                     OrExpression.Create),
-                placeholder,
-                empty);
+                placeholder);
             var i = this.InternalResolve(
                 ResolveContext.Create(
                     calculator,
                     UnificationPolarities.In,
                     AndExpression.Create),
-                placeholder,
-                empty);
+                placeholder);
 
             return o;
         }

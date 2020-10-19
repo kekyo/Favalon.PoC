@@ -76,7 +76,8 @@ namespace Favalet.Contexts.Unifiers
             IExpression expression,
             UnificationPolarities polarity)
         {
-            var ph = this.GetAlias(placeholder, placeholder)!;
+            var ph =
+                this.GetAlias(placeholder, placeholder)!;
             var ex = expression is IPlaceholderTerm exph ?
                 this.GetAlias(exph, exph)! :
                 expression;
@@ -96,21 +97,28 @@ namespace Favalet.Contexts.Unifiers
                     switch (this.GetAlias(fph, null), this.GetAlias(tph, null))
                     {
                         case (IPlaceholderTerm faph, null):
-                            this.AddBoth(
-                                faph,
-                                to);
+                            if (!faph.Equals(to))
+                            {
+                                this.AddBoth(
+                                    faph,
+                                    to);
+                            }
                             break;
                         case (null, IPlaceholderTerm taph):
-                            this.AddBoth(
-                                from,
-                                taph);
+                            if (!from.Equals(taph))
+                            {
+                                this.AddBoth(
+                                    from,
+                                    taph);
+                            }
                             break;
                         case (null, null):
-                            if (IdentityTermComparer.Instance.Compare(fph, tph) > 0)
+                            var formalDirection = IdentityTermComparer.Instance.Compare(fph, tph);
+                            if (formalDirection > 0)
                             {
                                 this.aliases.Add(fph, tph);
                             }
-                            else
+                            else if (formalDirection < 0)
                             {
                                 this.aliases.Add(tph, fph);
                             }
@@ -245,6 +253,8 @@ namespace Favalet.Contexts.Unifiers
         
         public IExpression Resolve(ITypeCalculator calculator, IPlaceholderTerm placeholder)
         {
+            // TODO: cache
+            
             var outMost0 = this.InternalResolve(
                 ResolveContext.Create(
                     calculator,

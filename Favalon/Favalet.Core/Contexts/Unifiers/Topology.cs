@@ -39,6 +39,8 @@ namespace Favalet.Contexts.Unifiers
 
 #if DEBUG
         private IExpression targetRoot;
+#else
+        private string targetRootString;
 #endif
 
         [DebuggerStepThrough]
@@ -46,7 +48,10 @@ namespace Favalet.Contexts.Unifiers
         {
 #if DEBUG
             this.targetRoot = targetRoot;
-#endif            
+#else
+            this.targetRootString =
+                targetRoot.GetPrettyString(PrettyStringTypes.ReadableAll);
+#endif
         }
 
         [DebuggerStepThrough]
@@ -357,7 +362,7 @@ namespace Favalet.Contexts.Unifiers
                     "Detected circular variable reference: " + marker);
 #else
                 throw new InvalidOperationException(
-                    "Detected circular variable reference: " + symbol);
+                    "Detected circular variable reference: " + marker);
 #endif
             }
         }
@@ -369,7 +374,12 @@ namespace Favalet.Contexts.Unifiers
 
         [DebuggerStepThrough]
         public void SetTargetRoot(IExpression targetRoot) =>
+#if DEBUG
             this.targetRoot = targetRoot;
+#else
+            this.targetRootString =
+                targetRoot.GetPrettyString(PrettyStringTypes.ReadableAll);
+#endif
 
         public string View
         {
@@ -377,13 +387,11 @@ namespace Favalet.Contexts.Unifiers
             get => StringUtilities.Join(
                 Environment.NewLine,
                 this.topology.
+                    // TODO: alias
                     OrderBy(entry => entry.Key, IdentityTermComparer.Instance).
                     SelectMany(entry =>
                         entry.Value.Unifications.Select(unification =>
-                            string.Format(
-                                "{0} {1}",
-                                entry.Key.Symbol,
-                                unification.ToString(PrettyStringTypes.Minimum)))));
+                            $"{entry.Key.Symbol} {unification.ToString(PrettyStringTypes.Minimum)}")));
         }
 
         public string Dot
@@ -398,28 +406,38 @@ namespace Favalet.Contexts.Unifiers
                 tw.WriteLine(
                     "    graph [label=\"{0}\"];",
                     this.targetRoot.GetPrettyString(PrettyStringTypes.ReadableAll));
-                tw.WriteLine();
+#else
+                tw.WriteLine(
+                    "    graph [label=\"{0}\"];",
+                    this.targetRootString);
 #endif
+                tw.WriteLine();
                 tw.WriteLine("    # nodes");
 
-                var parentSymbolMap = new Dictionary<IParentExpression, string>();
+                var symbolMap = new Dictionary<IExpression, string>();
                 
                 (string symbol, IExpression expression) ToSymbolString(IExpression expression)
                 {
                     switch (expression)
                     {
                         case IPlaceholderTerm ph:
-                            return ($"p{ph.Index}", expression);
+                            return ($"ph{ph.Index}", expression);
                         case IParentExpression parent:
-                            if (!parentSymbolMap!.TryGetValue(parent, out var symbol))
+                            if (!symbolMap!.TryGetValue(parent, out var symbol2))
                             {
-                                var index = parentSymbolMap.Count;
-                                symbol = $"c{index}";
-                                parentSymbolMap.Add(parent, symbol);
+                                var index = symbolMap.Count;
+                                symbol2 = $"pe{index}";
+                                symbolMap.Add(parent, symbol2);
                             }
-                            return (symbol, parent);
+                            return (symbol2, parent);
                         default:
-                            return (expression.GetPrettyString(PrettyStringTypes.Minimum), expression);
+                            if (!symbolMap!.TryGetValue(expression, out var symbol1))
+                            {
+                                var index = symbolMap.Count;
+                                symbol1 = $"ex{index}";
+                                symbolMap.Add(expression, symbol1);
+                            }
+                            return (symbol1, expression);
                     }
                 }
 
@@ -449,12 +467,12 @@ namespace Favalet.Contexts.Unifiers
                         entry.symbol,
                         entry.expression switch
                         {
-                            IPlaceholderTerm _ => "shape=circle",
                             IParentExpression parent =>
                                 $"xlabel=\"{parent.GetPrettyString(PrettyStringTypes.Minimum)}\",label=\"" +
                                 StringUtilities.Join("|", parent.Children.Select((_, index) => $"<i{index}>[{index}]")) +
                                 "\",shape=record",
-                            _ => "shape=box"
+                            _ =>
+                                $"label=\"{entry.expression.GetPrettyString(PrettyStringTypes.Minimum)}\",shape=box",
                         });
                 }
 

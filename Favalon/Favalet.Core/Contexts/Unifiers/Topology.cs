@@ -275,42 +275,23 @@ namespace Favalet.Contexts.Unifiers
 
             switch (outMost0, inMost0)
             {
+                case (IPlaceholderTerm _, IPlaceholderTerm imph0):
+                    // inmost (narrow) has higher priority.
+                    var inMost1 = this.InternalResolve(
+                        ResolveContext.Create(
+                            calculator,
+                            UnificationPolarities.In,
+                            AndExpression.Create),
+                        imph0);
+                    return inMost1;
                 case (IPlaceholderTerm _, _):
-                    if (inMost0 is IPlaceholderTerm imph0)
-                    {
-                        var inMost1 = this.InternalResolve(
-                            ResolveContext.Create(
-                                calculator,
-                                UnificationPolarities.In,
-                                AndExpression.Create),
-                            imph0);
-                        return inMost1;
-                    }
                     return inMost0;
                 case (_, IPlaceholderTerm _):
-                    if (outMost0 is IPlaceholderTerm omph0)
-                    {
-                        var outMost1 = this.InternalResolve(
-                            ResolveContext.Create(
-                                calculator,
-                                UnificationPolarities.Out,
-                                OrExpression.Create),
-                            omph0);
-                        return outMost1;
-                    }
                     return outMost0;
                 default:
-                    if (inMost0 is IPlaceholderTerm imph1)
-                    {
-                        var inMost1 = this.InternalResolve(
-                            ResolveContext.Create(
-                                calculator,
-                                UnificationPolarities.In,
-                                AndExpression.Create),
-                            imph1);
-                        return inMost1;
-                    }
-                    return inMost0;
+                    // Combine both expressions.
+                    return calculator.Compute(
+                        AndExpression.Create(outMost0, inMost0));
             }
         }
         #endregion

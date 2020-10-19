@@ -400,6 +400,7 @@ namespace Favalet.Contexts.Unifiers
                     this.targetRoot.GetPrettyString(PrettyStringTypes.ReadableAll));
                 tw.WriteLine();
 #endif
+                tw.WriteLine("    # nodes");
 
                 var parentSymbolMap = new Dictionary<IParentExpression, string>();
                 
@@ -421,14 +422,18 @@ namespace Favalet.Contexts.Unifiers
                             return (expression.GetPrettyString(PrettyStringTypes.Minimum), expression);
                     }
                 }
-                
+
                 foreach (var entry in this.topology.
-                    OrderBy(entry => entry.Key, IdentityTermComparer.Instance))
+                    Select(entry => (ph: entry.Key, label: entry.Key.Symbol)).
+                    Concat(this.aliases.Select(entry => (ph: entry.Key, label: entry.Key.Symbol))).
+                    Concat(this.aliases.Select(entry => (ph: entry.Value, label: entry.Value.Symbol))).
+                    Distinct().
+                    OrderBy(entry => entry.ph, IdentityTermComparer.Instance))
                 {
                     tw.WriteLine(
                         "    {0} [label=\"{1}\",shape=circle];",
-                        ToSymbolString(entry.Key).symbol,
-                        entry.Key.Symbol);
+                        ToSymbolString(entry.ph).symbol,
+                        entry.label);
                 }
 
                 foreach (var entry in this.topology.
@@ -454,8 +459,9 @@ namespace Favalet.Contexts.Unifiers
                 }
 
                 tw.WriteLine();
+                tw.WriteLine("    # topology");
 
-                IEnumerable<(string, string, string)> ToSymbols(IPlaceholderTerm placeholder, Unification unification)
+                IEnumerable<(string from, string to, string attribute)> ToSymbols(IPlaceholderTerm placeholder, Unification unification)
                 {
                     var phSymbol = ToSymbolString(placeholder).symbol;
                     switch (unification.Polarity, unification.Expression)
@@ -485,11 +491,25 @@ namespace Favalet.Contexts.Unifiers
                 {
                     tw.WriteLine(
                         "    {0} -> {1}{2};",
-                        entry.Item1,
-                        entry.Item2,
-                        entry.Item3);
+                        entry.from,
+                        entry.to,
+                        entry.attribute);
                 }
                 
+                tw.WriteLine();
+                tw.WriteLine("    # aliases");
+
+                foreach (var entry in this.aliases.
+                    Select(entry => (from: ToSymbolString(entry.Key).symbol, to: ToSymbolString(this.GetAlias(entry.Key, entry.Key)!).symbol)).
+                    Distinct().
+                    OrderBy(entry => entry.from))
+                {
+                    tw.WriteLine(
+                        "    {0} -> {1} [dir=none];",
+                        entry.from,
+                        entry.to);
+                }
+
                 tw.WriteLine("}");
 
                 return tw.ToString();

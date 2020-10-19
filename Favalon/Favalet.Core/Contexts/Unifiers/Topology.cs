@@ -65,16 +65,20 @@ namespace Favalet.Contexts.Unifiers
             return node.Unifications.Add(unification);
         }
 
-        [DebuggerStepThrough]
+        private IPlaceholderTerm? GetAlias(
+            IPlaceholderTerm placeholder,
+            IPlaceholderTerm? defaultValue) =>
+            this.aliases.TryGetValue(placeholder, out var alias) ?
+                this.GetAlias(alias, alias) : defaultValue;
+        
         private bool InternalAdd(
             IPlaceholderTerm placeholder,
             IExpression expression,
             UnificationPolarities polarity)
         {
-            var ph = this.aliases.TryGetValue(placeholder, out var pha) ?
-                pha : placeholder;
+            var ph = this.GetAlias(placeholder, placeholder)!;
             var ex = expression is IPlaceholderTerm exph ?
-                this.aliases.TryGetValue(exph, out var exa) ? exa : exph :
+                this.GetAlias(exph, exph)! :
                 expression;
 
             return this.InternalAddNormalized(ph, ex, polarity);
@@ -89,22 +93,27 @@ namespace Favalet.Contexts.Unifiers
             {
                 case (IPlaceholderTerm fph, IPlaceholderTerm tph)
                     when !fph.Equals(tph):
-                    switch
-                        (this.aliases.TryGetValue(fph, out var faph) ? faph : null,
-                         this.aliases.TryGetValue(tph, out var taph) ? taph : null)
+                    switch (this.GetAlias(fph, null), this.GetAlias(tph, null))
                     {
-                        case (IPlaceholderTerm _, null):
+                        case (IPlaceholderTerm faph, null):
                             this.AddBoth(
                                 faph,
                                 to);
                             break;
-                        case (null, IPlaceholderTerm _):
+                        case (null, IPlaceholderTerm taph):
                             this.AddBoth(
                                 from,
                                 taph);
                             break;
                         case (null, null):
-                            this.aliases.Add(fph, tph);
+                            if (IdentityTermComparer.Instance.Compare(fph, tph) > 0)
+                            {
+                                this.aliases.Add(fph, tph);
+                            }
+                            else
+                            {
+                                this.aliases.Add(tph, fph);
+                            }
                             break;
                     }
                     break;
@@ -199,7 +208,9 @@ namespace Favalet.Contexts.Unifiers
             ResolveContext context,
             IPlaceholderTerm placeholder)
         {
-            if (this.topology.TryGetValue(placeholder, out var node))
+            var ph = this.GetAlias(placeholder, placeholder)!;
+            
+            if (this.topology.TryGetValue(ph, out var node))
             {
                 IExpression ResolveRecursive(
                     IExpression expression)
@@ -229,7 +240,7 @@ namespace Favalet.Contexts.Unifiers
                 }
             }
 
-            return placeholder;
+            return ph;
         }
         
         public IExpression Resolve(ITypeCalculator calculator, IPlaceholderTerm placeholder)

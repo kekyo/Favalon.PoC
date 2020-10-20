@@ -14,7 +14,7 @@ namespace Favalet.Expressions.Algebraic
     }
 
     public abstract class BinaryExpression<TBinaryExpression> :
-        Expression, IBinaryExpression, IParentExpression
+        Expression, IBinaryExpression, IPairExpression
         where TBinaryExpression : IBinaryExpression
     {
         public readonly IExpression Left;
@@ -44,23 +44,24 @@ namespace Favalet.Expressions.Algebraic
             [DebuggerStepThrough]
             get => this.Right;
         }
-
+        
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IEnumerable<IExpression> IParentExpression.Children
+        IExpression IPairExpression.Left
         {
             [DebuggerStepThrough]
-            get
-            {
-                yield return this.Left;
-                yield return this.Right;
-            }
+            get => this.Left;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IPairExpression.Right
+        {
+            [DebuggerStepThrough]
+            get => this.Right;
         }
 
         [DebuggerStepThrough]
-        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
-            LogicalCalculator.ConstructNested(
-                children.ToArray(),
-                (l, r) => this.OnCreate(l, r, UnspecifiedTerm.Instance));
+        IExpression IPairExpression.Create(IExpression left, IExpression right) =>
+            this.OnCreate(left, right, UnspecifiedTerm.Instance);
         
         internal abstract IExpression OnCreate(
             IExpression left, IExpression right, IExpression higherOrder);

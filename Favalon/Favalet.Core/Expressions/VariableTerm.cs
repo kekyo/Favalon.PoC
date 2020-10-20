@@ -164,18 +164,10 @@ namespace Favalet.Expressions
         {
             if (this.bounds is IExpression[] bounds)
             {
-                var variables = context.LookupVariables(this.Symbol);
-                if (variables.Length >= 1)
-                {
-                    var filtered = variables.Where(
-                        v => context.TypeCalculator.Equals(v.SymbolHigherOrder, bounds[0].HigherOrder)).
-                        ToArray();
-                    if (filtered.Length >= 1)
-                    {
-                        var reduced = context.Reduce(filtered[0].Expression);
-                        return context.TypeCalculator.Compute(reduced);
-                    }
-                }
+                Debug.Assert(bounds.Length >= 1);
+
+                // TODO: priority from higher orders.
+                return context.Reduce(bounds[0]);
             }
 
             return this;

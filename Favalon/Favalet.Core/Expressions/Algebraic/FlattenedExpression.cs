@@ -10,24 +10,13 @@ using Favalet.Expressions.Specialized;
 namespace Favalet.Expressions.Algebraic
 {
     internal abstract class FlattenedExpression :
-        Expression, IParentExpression
+        Expression
     {
         public readonly IExpression[] Operands;
 
         [DebuggerStepThrough]
         protected FlattenedExpression(IExpression[] operands) =>
             this.Operands = operands;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IEnumerable<IExpression> IParentExpression.Children
-        {
-            [DebuggerStepThrough]
-            get => this.Operands;
-        }
-
-        [DebuggerStepThrough]
-        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
-            throw new InvalidOperationException();
 
         public sealed override int GetHashCode() =>
             this.Operands.Aggregate(0, (agg, operand) => agg ^ operand?.GetHashCode() ?? 0);

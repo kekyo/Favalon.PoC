@@ -106,6 +106,24 @@ namespace Favalet
                     return Results.Ignore;
                 case (_, DeadEndTerm _):
                     return Trap(false);
+#if true
+                case (IPairExpression le, IPairExpression re)
+                    when le.GetType() == re.GetType():
+                    var p1 = Equals(le.Left, re.Left, indexes);
+                    var b1 = Equals(le.Right, re.Right, indexes);
+                    if (p1 != Results.Negate && b1 != Results.Negate)
+                    {
+                        if (p1 == Results.Assert && b1 == Results.Assert)
+                        {
+                            return Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                        }
+                        return Results.Assert;
+                    }
+                    else
+                    {
+                        return Results.Negate;
+                    }
+#else
                 case (ILambdaExpression le, ILambdaExpression re):
                     var p1 = Equals(le.Parameter, re.Parameter, indexes);
                     var b1 = Equals(le.Body, re.Body, indexes);
@@ -151,6 +169,7 @@ namespace Favalet
                     {
                         return Results.Negate;
                     }
+#endif
                 default:
                     if (Trap(lhs.Equals(rhs)) is Results r &&
                         r != Results.Negate)

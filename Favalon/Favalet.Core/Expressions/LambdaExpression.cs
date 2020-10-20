@@ -17,7 +17,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class LambdaExpression :
-        Expression, ILambdaExpression, IParentExpression
+        Expression, ILambdaExpression, IPairExpression
     {
         public readonly IBoundVariableTerm Parameter;
         public readonly IExpression Body;
@@ -48,21 +48,23 @@ namespace Favalet.Expressions
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IEnumerable<IExpression> IParentExpression.Children
+        IExpression IPairExpression.Left
         {
             [DebuggerStepThrough]
-            get
-            {
-                yield return this.Parameter;
-                yield return this.Body;
-            }
+            get => this.Parameter;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IPairExpression.Right
+        {
+            [DebuggerStepThrough]
+            get => this.Body;
         }
 
         [DebuggerStepThrough]
-        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
-            (children.ToArray() is IExpression[] c && c.Length == 2 &&
-                c[0] is IBoundVariableTerm c0) ?
-                Create(c0, c[1]) :
+        IExpression IPairExpression.Create(IExpression left, IExpression right) =>
+            left is IBoundVariableTerm bound ?
+                Create(bound, right) :
                 throw new InvalidOperationException();
         
         public override int GetHashCode() =>

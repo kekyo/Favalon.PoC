@@ -21,7 +21,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class ApplyExpression :
-        Expression, IApplyExpression, IParentExpression
+        Expression, IApplyExpression, IPairExpression
     {
         public readonly IExpression Function;
         public readonly IExpression Argument;
@@ -53,22 +53,24 @@ namespace Favalet.Expressions
             get => this.Argument;
         }
 
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IEnumerable<IExpression> IParentExpression.Children
+        IExpression IPairExpression.Left
         {
             [DebuggerStepThrough]
-            get
-            {
-                yield return this.Function;
-                yield return this.Argument;
-            }
+            get => this.Function;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IPairExpression.Right
+        {
+            [DebuggerStepThrough]
+            get => this.Argument;
         }
 
         [DebuggerStepThrough]
-        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
-            (children.ToArray() is IExpression[] c && c.Length == 2) ?
-                Create(c[0], c[1]) :
-                throw new InvalidOperationException();
+        IExpression IPairExpression.Create(IExpression left, IExpression right) =>
+            Create(left, right);
 
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();

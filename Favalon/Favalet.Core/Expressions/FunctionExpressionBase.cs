@@ -17,7 +17,7 @@ namespace Favalet.Expressions
     }
 
     public abstract class FunctionExpressionBase :
-        Expression, IFunctionExpression, IParentExpression
+        Expression, IFunctionExpression, IPairExpression
     {
         #region Factory
         [DebuggerStepThrough]
@@ -119,21 +119,22 @@ namespace Favalet.Expressions
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        IEnumerable<IExpression> IParentExpression.Children
+        IExpression IPairExpression.Left
         {
             [DebuggerStepThrough]
-            get
-            {
-                yield return this.Parameter;
-                yield return this.Result;
-            }
+            get => this.Parameter;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IPairExpression.Right
+        {
+            [DebuggerStepThrough]
+            get => this.Result;
         }
 
         [DebuggerStepThrough]
-        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
-            (children.ToArray() is IExpression[] c && c.Length == 2) ?
-                this.Factory.Create(c[0], c[1]) :
-                throw new InvalidOperationException();
+        IExpression IPairExpression.Create(IExpression left, IExpression right) =>
+            this.Factory.Create(left, right);
 
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^ this.Result.GetHashCode();

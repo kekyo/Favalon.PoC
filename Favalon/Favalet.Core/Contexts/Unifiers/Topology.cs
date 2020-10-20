@@ -297,9 +297,10 @@ namespace Favalet.Contexts.Unifiers
                         {
                             case IPlaceholderTerm ph:
                                 return this.InternalResolve(context, ph);
-                            case IParentExpression parent:
+                            case IPairExpression parent:
                                 return parent.Create(
-                                    parent.Children.Select(child => ResolveRecursive(child)))!;
+                                    ResolveRecursive(parent.Left),
+                                    ResolveRecursive(parent.Right));
                             default:
                                 return expression;
                         }
@@ -370,12 +371,10 @@ namespace Favalet.Contexts.Unifiers
             {
                 this.Validate(marker, placeholder);
             }
-            else if (expression is IParentExpression parent)
+            else if (expression is IPairExpression parent)
             {
-                foreach (var child in parent.Children)
-                {
-                    this.Validate(marker.Fork(), child);
-                }
+                this.Validate(marker.Fork(), parent.Left);
+                this.Validate(marker.Fork(), parent.Right);
             }
         }
 
@@ -469,7 +468,7 @@ namespace Favalet.Contexts.Unifiers
                     {
                         case IPlaceholderTerm ph:
                             return ($"ph{ph.Index}", expression);
-                        case IParentExpression parent:
+                        case IPairExpression parent:
                             if (!symbolMap!.TryGetValue(parent, out var symbol2))
                             {
                                 var index = symbolMap.Count;
@@ -517,10 +516,8 @@ namespace Favalet.Contexts.Unifiers
                         entry.symbol,
                         entry.expression switch
                         {
-                            IParentExpression parent =>
-                                $"xlabel=\"{parent.GetPrettyString(PrettyStringTypes.Minimum)}\",label=\"" +
-                                StringUtilities.Join("|", parent.Children.Select((_, index) => $"<i{index}>[{index}]")) +
-                                "\",shape=record",
+                            IPairExpression parent =>
+                                $"xlabel=\"{parent.GetPrettyString(PrettyStringTypes.Minimum)}\",label=\"<i0>[0]\",shape=record",
                             _ =>
                                 $"label=\"{entry.expression.GetPrettyString(PrettyStringTypes.Minimum)}\",shape=box",
                         });
@@ -534,18 +531,27 @@ namespace Favalet.Contexts.Unifiers
                     var phSymbol = ToSymbolString(placeholder).symbol;
                     switch (unification.Polarity, unification.Expression)
                     {
-                        case (UnificationPolarities.Out, IParentExpression parent):
-                            return parent.Children.Select((_, index) => (phSymbol, $"{ToSymbolString(parent).symbol}:i{index}", ""));
-                        case (UnificationPolarities.In, IParentExpression parent):
-                            return parent.Children.Select((_, index) => ($"{ToSymbolString(parent).symbol}:i{index}", phSymbol, ""));
-                        case (UnificationPolarities.Both, IParentExpression parent):
-                            return parent.Children.Select((_, index) => ($"{ToSymbolString(parent).symbol}:i{index}", phSymbol, " [dir=none]"));
+                        case (UnificationPolarities.Out, IPairExpression parent):
+                            yield return (phSymbol, $"{ToSymbolString(parent).symbol}:i0", "");
+                            yield return (phSymbol, $"{ToSymbolString(parent).symbol}:i1", "");
+                            break;
+                        case (UnificationPolarities.In, IPairExpression parent):
+                            yield return ($"{ToSymbolString(parent).symbol}:i0", phSymbol, "");
+                            yield return ($"{ToSymbolString(parent).symbol}:i1", phSymbol, "");
+                            break;
+                        case (UnificationPolarities.Both, IPairExpression parent):
+                            yield return ($"{ToSymbolString(parent).symbol}:i0", phSymbol, " [dir=none]");
+                            yield return ($"{ToSymbolString(parent).symbol}:i1", phSymbol, " [dir=none]");
+                            break;
                         case (UnificationPolarities.Out, _):
-                            return new[] { (phSymbol, ToSymbolString(unification.Expression).symbol, "") };
+                            yield return (phSymbol, ToSymbolString(unification.Expression).symbol, "");
+                            break;
                         case (UnificationPolarities.In, _):
-                            return new[] { (ToSymbolString(unification.Expression).symbol, phSymbol, "") };
+                            yield return (ToSymbolString(unification.Expression).symbol, phSymbol, "");
+                            break;
                         case (UnificationPolarities.Both, _):
-                            return new[] { (ToSymbolString(unification.Expression).symbol, phSymbol, " [dir=none]") };
+                            yield return (ToSymbolString(unification.Expression).symbol, phSymbol, " [dir=none]");
+                            break;
                         default:
                             throw new InvalidOperationException();
                     }

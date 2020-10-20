@@ -19,7 +19,7 @@ namespace Favalet.Reducing
             IExpression expected,
             IExpression actual)
         {
-            if (!calculator.ExactEquals(expected, actual))
+            if (!calculator.Equals(expected, actual))
             {
                 Assert.Fail(
                     "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",

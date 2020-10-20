@@ -43,8 +43,8 @@ namespace Favalet.Contexts.Unifiers
         
         private readonly Dictionary<IPlaceholderTerm, Node> topology =
             new Dictionary<IPlaceholderTerm, Node>(IdentityTermComparer.Instance);
-        private readonly Dictionary<IPlaceholderTerm, IPlaceholderTerm> aliases =
-            new Dictionary<IPlaceholderTerm, IPlaceholderTerm>(IdentityTermComparer.Instance);
+        private readonly Dictionary<IPlaceholderTerm, IExpression> aliases =
+            new Dictionary<IPlaceholderTerm, IExpression>(IdentityTermComparer.Instance);
 
 #if DEBUG
         private IExpression targetRoot;
@@ -79,12 +79,18 @@ namespace Favalet.Contexts.Unifiers
             return node.Unifications.Add(unification);
         }
 
-        private IPlaceholderTerm? GetAlias(
+        [DebuggerStepThrough]
+        private T? GetAlias<T>(
             IPlaceholderTerm placeholder,
-            IPlaceholderTerm? defaultValue) =>
+            T? defaultValue)
+            where T : class, IExpression =>
             this.aliases.TryGetValue(placeholder, out var alias) ?
-                this.GetAlias(alias, alias) : defaultValue;
+                (alias is IPlaceholderTerm a ? 
+                    this.GetAlias<T>(a, (T)alias) : 
+                    ((alias as T) ?? defaultValue)) :
+                defaultValue;
         
+        [DebuggerStepThrough]
         private bool InternalAdd(
             IPlaceholderTerm placeholder,
             IExpression expression,
@@ -99,7 +105,7 @@ namespace Favalet.Contexts.Unifiers
             return this.InternalAddNormalized(ph, ex, polarity);
         }
 
-        //[DebuggerStepThrough]
+        [DebuggerStepThrough]
         public void AddBoth(
             IExpression from,
             IExpression to)
@@ -108,7 +114,7 @@ namespace Favalet.Contexts.Unifiers
             {
                 case (IPlaceholderTerm fph, IPlaceholderTerm tph)
                     when !fph.Equals(tph):
-                    switch (this.GetAlias(fph, null), this.GetAlias(tph, null))
+                    switch (this.GetAlias(fph, default(IPlaceholderTerm)), this.GetAlias(tph, default(IPlaceholderTerm)))
                     {
                         case (IPlaceholderTerm faph, null):
                             if (!faph.Equals(to))
@@ -198,30 +204,46 @@ namespace Favalet.Contexts.Unifiers
         {
             // Will make aliases normalized topology excepts outside PlaceholderTerm instances.
             
+            // Step 1: Resolve and shrink placeholder aliases.
             foreach (var entry in this.aliases)
             {
-                if (this.topology.TryGetValue(entry.Key, out var source))
+                if (this.topology.TryGetValue(entry.Key, out var source) &&
+                    entry.Value is IPlaceholderTerm target)
                 {
-                    if (this.topology.TryGetValue(entry.Value, out var destination))
+                    // Already declared topology key:
+                    if (this.topology.TryGetValue(target, out var destination))
                     {
+                        // Merge into destination.
                         destination.Merge(source);
                     }
                     else
                     {
-                        this.topology.Add(entry.Value, source);
+                        // Redeclare topology key.
+                        this.topology.Add(target, source);
                     }
                     this.topology.Remove(entry.Key);
                 }
             }
 
-            foreach (var node in this.topology.Values)
+            // Step 2: Resolve inside unification expressions.
+            foreach (var entry in this.topology)
             {
-                foreach (var unification in node.Unifications)
+                foreach (var unification in entry.Value.Unifications.ToArray())
                 {
-                    if (unification.Expression is IPlaceholderTerm placeholder &&
-                        this.aliases.TryGetValue(placeholder, out var target))
+                    if (unification.Expression is IPlaceholderTerm placeholder)
                     {
-                        unification.UpdateExpression(target);
+                        // Alias declared placeholder:
+                        if (this.aliases.TryGetValue(placeholder, out var target))
+                        {
+                            // Resolved.
+                            unification.UpdateExpression(target);
+                        }
+                    }
+                    else if (unification.Polarity == UnificationPolarities.Both)
+                    {
+                        // Switch an unification to new non-placeholder alias.
+                        entry.Value.Unifications.Remove(unification);
+                        this.aliases.Add(entry.Key, unification.Expression);
                     }
                 }
             }
@@ -263,39 +285,41 @@ namespace Favalet.Contexts.Unifiers
             ResolveContext context,
             IPlaceholderTerm placeholder)
         {
-            var ph = this.GetAlias(placeholder, placeholder)!;
-            
-            if (this.topology.TryGetValue(ph, out var node))
+            var resolved = this.GetAlias<IExpression>(placeholder, placeholder)!;
+            if (resolved is IPlaceholderTerm ph)
             {
-                IExpression ResolveRecursive(
-                    IExpression expression)
+                if (this.topology.TryGetValue(ph, out var node))
                 {
-                    switch (expression)
+                    IExpression ResolveRecursive(
+                        IExpression expression)
                     {
-                        case IPlaceholderTerm ph:
-                            return this.InternalResolve(context, ph);
-                        case IParentExpression parent:
-                            return parent.Create(
-                                parent.Children.Select(child => ResolveRecursive(child)))!;
-                        default:
-                            return expression;
+                        switch (expression)
+                        {
+                            case IPlaceholderTerm ph:
+                                return this.InternalResolve(context, ph);
+                            case IParentExpression parent:
+                                return parent.Create(
+                                    parent.Children.Select(child => ResolveRecursive(child)))!;
+                            default:
+                                return expression;
+                        }
                     }
-                }
             
-                var expressions = node.Unifications.
-                    Where(unification =>
-                        (unification.Polarity == context.Polarity) ||
-                        (unification.Polarity == UnificationPolarities.Both)).
-                    Select(unification => ResolveRecursive(unification.Expression)).
-                    ToArray();
-                if (expressions.Length >= 1)
-                {
-                    var calculated = context.Compute(expressions)!;
-                    return calculated;
+                    var expressions = node.Unifications.
+                        Where(unification =>
+                            (unification.Polarity == context.Polarity) ||
+                            (unification.Polarity == UnificationPolarities.Both)).
+                        Select(unification => ResolveRecursive(unification.Expression)).
+                        ToArray();
+                    if (expressions.Length >= 1)
+                    {
+                        var calculated = context.Compute(expressions)!;
+                        return calculated;
+                    }
                 }
             }
 
-            return ph;
+            return resolved;
         }
         
         public IExpression Resolve(ITypeCalculator calculator, IPlaceholderTerm placeholder)
@@ -466,8 +490,11 @@ namespace Favalet.Contexts.Unifiers
 
                 foreach (var entry in this.topology.
                     Select(entry => (ph: entry.Key, label: entry.Key.Symbol)).
-                    Concat(this.aliases.Select(entry => (ph: entry.Key, label: entry.Key.Symbol))).
-                    Concat(this.aliases.Select(entry => (ph: entry.Value, label: entry.Value.Symbol))).
+                    Concat(this.aliases.Keys.
+                        Select(key => (ph: key, label: key.Symbol))).
+                    Concat(this.aliases.Values.
+                        OfType<IPlaceholderTerm>().
+                        Select(value => (ph: value, label: value.Symbol))).
                     Distinct().
                     OrderBy(entry => entry.ph, IdentityTermComparer.Instance))
                 {
@@ -541,7 +568,13 @@ namespace Favalet.Contexts.Unifiers
                 tw.WriteLine("    # aliases");
 
                 foreach (var entry in this.aliases.
-                    Select(entry => (from: ToSymbolString(entry.Key).symbol, to: ToSymbolString(this.GetAlias(entry.Key, entry.Key)!).symbol)).
+                    Select(entry =>
+                    {
+                        var resolved = this.GetAlias<IExpression>(entry.Key, entry.Key)!;
+                        return
+                            (from: ToSymbolString(entry.Key).symbol,
+                               to: ToSymbolString(resolved).symbol);
+                    }).
                     Distinct().
                     OrderBy(entry => entry.from))
                 {

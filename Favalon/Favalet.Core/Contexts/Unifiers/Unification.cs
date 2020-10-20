@@ -16,7 +16,8 @@ namespace Favalet.Contexts.Unifiers
     }
 
     [DebuggerStepThrough]
-    internal sealed class Unification : IEquatable<Unification?>
+    internal sealed class Unification :
+        IEquatable<Unification?>
     {
         public IExpression Expression { get; private set; }
         public readonly UnificationPolarities Polarity;

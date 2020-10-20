@@ -42,7 +42,7 @@ namespace Favalet.Contexts.Unifiers
                 new List<IIdentityTerm>(this.list));
 #else
             new PlaceholderMarker(
-                new HashSet<IIdentityTerm>(this.symbols));
+                new HashSet<IIdentityTerm>(this.indexes));
 #endif
 
 #if DEBUG

@@ -1,9 +1,10 @@
-﻿using Favalet.Contexts;
+﻿using System;
+using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
-using Favalet.Internal;
+using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -16,7 +17,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class LambdaExpression :
-        Expression, ILambdaExpression
+        Expression, ILambdaExpression, IParentExpression
     {
         public readonly IBoundVariableTerm Parameter;
         public readonly IExpression Body;
@@ -46,6 +47,24 @@ namespace Favalet.Expressions
             get => this.Body;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IEnumerable<IExpression> IParentExpression.Children
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                yield return this.Parameter;
+                yield return this.Body;
+            }
+        }
+
+        [DebuggerStepThrough]
+        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
+            (children.ToArray() is IExpression[] c && c.Length == 2 &&
+                c[0] is IBoundVariableTerm c0) ?
+                Create(c0, c[1]) :
+                throw new InvalidOperationException();
+        
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^ this.Body.GetHashCode();
 
@@ -74,7 +93,7 @@ namespace Favalet.Expressions
             var lambdaHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder, body.HigherOrder);
             
-            context.Unify(lambdaHigherOrder, higherOrder);
+            context.Unify(lambdaHigherOrder, higherOrder, false);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
                 object.ReferenceEquals(this.Body, body) &&

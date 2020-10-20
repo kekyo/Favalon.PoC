@@ -32,7 +32,7 @@ namespace Favalet.Inferring
         {
             var environment = CLREnvironment();
             
-            environment.MutableBind("a", Type<int>());
+            environment.MutableBind("a", Constant(123));
 
             // a:object
             var expression =
@@ -47,23 +47,22 @@ namespace Favalet.Inferring
             AssertLogicalEqual(expression, expected, actual);
         }
         
-        //[Test]
+        [Test]
         public void Widening2()
         {
             var environment = CLREnvironment();
             
-            environment.MutableBind("a", Type<object>());
+            environment.MutableBind("a", Constant(123));
 
-            // a:int
+            // a:IFormattable
             var expression =
-                Variable("a", Type<int>());
+                Variable("a", Type<IFormattable>());
 
             var actual = environment.Infer(expression);
 
-            // TODO: really? cause error?
-            // a:object
+            // a:IFormattable
             var expected =
-                Variable("a", Type<object>());
+                Variable("a", Type<IFormattable>());
 
             AssertLogicalEqual(expression, expected, actual);
         }

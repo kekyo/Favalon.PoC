@@ -8,8 +8,14 @@ namespace Favalet
     [DebuggerStepThrough]
     public static class CLRGenerator
     {
-        public static Environments CLREnvironment() =>
-            Favalet.Environments.Create(CLRTypeCalculator.Instance);
+        public static Environments CLREnvironment(
+#if DEBUG
+            bool saveLastTopology = true
+#else
+            bool saveLastTopology = false
+#endif
+            ) =>
+            Favalet.Environments.Create(CLRTypeCalculator.Instance, saveLastTopology);
 
         public static ITerm Type<T>() =>
             TypeTerm.From(typeof(T));

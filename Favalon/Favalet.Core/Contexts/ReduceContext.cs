@@ -14,7 +14,7 @@ namespace Favalet.Contexts
     
     public interface IUnsafePlaceholderResolver
     {
-        IExpression? UnsafeResolve(IIdentityTerm identity);
+        IExpression? UnsafeResolve(IPlaceholderTerm placeholder);
     }
 
     public static class UnsafePlaceholderResolverExtension
@@ -58,7 +58,8 @@ namespace Favalet.Contexts
 
         void Unify(
             IExpression fromHigherOrder,
-            IExpression toHigherOrder);
+            IExpression toHigherOrder,
+            bool bidirectional);
     }
 
     public interface IFixupContext :
@@ -67,7 +68,7 @@ namespace Favalet.Contexts
         IExpression Fixup(IExpression expression);
         IExpression FixupHigherOrder(IExpression higherOrder);
         
-        IExpression? Resolve(IIdentityTerm identity);
+        IExpression? Resolve(IPlaceholderTerm placeholder);
     }
 
     public interface IReduceContext :
@@ -101,18 +102,18 @@ namespace Favalet.Contexts
             return this.TypeCalculator.Compute(fixedup);
         }
 
-        public abstract IExpression? Resolve(IIdentityTerm identity);
+        public abstract IExpression? Resolve(IPlaceholderTerm placeholder);
 
         [DebuggerStepThrough]
-        IExpression? IUnsafePlaceholderResolver.UnsafeResolve(IIdentityTerm identity) =>
-            this.Resolve(identity);
+        IExpression? IUnsafePlaceholderResolver.UnsafeResolve(IPlaceholderTerm placeholder) =>
+            this.Resolve(placeholder);
 
         public virtual VariableInformation[] LookupVariables(string symbol) =>
             ArrayEx.Empty<VariableInformation>();
     }
 
     internal sealed class ReduceContext :
-        FixupContext, IInferContext, IReduceContext
+        FixupContext, IInferContext, IReduceContext, ITopology
     {
         private readonly Environments rootScope;
         private readonly IScopeContext parentScope;
@@ -132,6 +133,10 @@ namespace Favalet.Contexts
             this.parentScope = parentScope;
             this.unifier = unifier;
         }
+
+        [DebuggerStepThrough]
+        public void SetTargetRoot(IExpression targetRoot) =>
+            this.unifier.SetTargetRoot(targetRoot);
 
         public IExpression MakeRewritable(IExpression expression)
         {
@@ -175,6 +180,10 @@ namespace Favalet.Contexts
         }
 
         [DebuggerStepThrough]
+        public void NormalizeAliases() =>
+            this.unifier.NormalizeAliases();
+
+        [DebuggerStepThrough]
         public IExpression Infer(IExpression expression) =>
             expression is Expression expr ? expr.InternalInfer(this) : expression;
         [DebuggerStepThrough]
@@ -207,12 +216,13 @@ namespace Favalet.Contexts
         [DebuggerStepThrough]
         public void Unify(
             IExpression fromHigherOrder,
-            IExpression toHigherOrder) =>
-            this.unifier.Unify(this, fromHigherOrder, toHigherOrder);
+            IExpression toHigherOrder,
+            bool bidirectional = false) =>
+            this.unifier.Unify(fromHigherOrder, toHigherOrder, bidirectional);
 
         [DebuggerStepThrough]
-        public override IExpression? Resolve(IIdentityTerm identity) =>
-            this.unifier.Resolve(identity);
+        public override IExpression? Resolve(IPlaceholderTerm placeholder) =>
+            this.unifier.Resolve(placeholder);
 
         public override VariableInformation[] LookupVariables(string symbol) =>
             // TODO: improving when identity's higher order acceptable
@@ -223,7 +233,20 @@ namespace Favalet.Contexts
                 new[] { VariableInformation.Create(symbol, p.HigherOrder, expr) } :
                 parentScope.LookupVariables(symbol);
 
+        public string View
+        {
+            [DebuggerStepThrough]
+            get => this.unifier.View;
+        }
+
+        public string Dot
+        {
+            [DebuggerStepThrough]
+            get => this.unifier.Dot;
+        }
+
+        [DebuggerStepThrough]
         public override string ToString() =>
-            "ReduceContext: " + this.unifier;
+            "ReduceContext: " + this.View;
     }
 }

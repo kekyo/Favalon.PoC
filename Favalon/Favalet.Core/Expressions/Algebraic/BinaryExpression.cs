@@ -1,6 +1,9 @@
 ﻿using Favalet.Contexts;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using Favalet.Expressions.Specialized;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -11,7 +14,7 @@ namespace Favalet.Expressions.Algebraic
     }
 
     public abstract class BinaryExpression<TBinaryExpression> :
-        Expression, IBinaryExpression
+        Expression, IBinaryExpression, IParentExpression
         where TBinaryExpression : IBinaryExpression
     {
         public readonly IExpression Left;
@@ -42,6 +45,23 @@ namespace Favalet.Expressions.Algebraic
             get => this.Right;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IEnumerable<IExpression> IParentExpression.Children
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                yield return this.Left;
+                yield return this.Right;
+            }
+        }
+
+        [DebuggerStepThrough]
+        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
+            LogicalCalculator.ConstructNested(
+                children.ToArray(),
+                (l, r) => this.OnCreate(l, r, UnspecifiedTerm.Instance));
+        
         internal abstract IExpression OnCreate(
             IExpression left, IExpression right, IExpression higherOrder);
 
@@ -57,8 +77,10 @@ namespace Favalet.Expressions.Algebraic
             var right = context.Infer(this.Right);
             var higherOrder = context.Infer(this.HigherOrder);
 
-            context.Unify(left.HigherOrder, higherOrder);
-            context.Unify(right.HigherOrder, higherOrder);
+            context.Unify(left.HigherOrder, right.HigherOrder, true);
+            
+            context.Unify(left.HigherOrder, higherOrder, false);
+            context.Unify(right.HigherOrder, higherOrder, false);
 
             if (object.ReferenceEquals(this.Left, left) &&
                 object.ReferenceEquals(this.Right, right) &&

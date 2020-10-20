@@ -1,4 +1,4 @@
-﻿using Favalet.Contexts;
+using Favalet.Contexts;
 using Favalet.Expressions;
 using Favalet.Expressions.Specialized;
 using Favalet.Contexts.Unifiers;
@@ -12,23 +12,28 @@ namespace Favalet
     public interface IEnvironments :
         IScopeContext
     {
+        ITopology? LastTopology { get; }
+        
         void MutableBind(IBoundVariableTerm symbol, IExpression expression);
     }
 
     public sealed class Environments :
         ScopeContext, IEnvironments, IPlaceholderProvider
     {
-#if DEBUG
-        private Unifier? lastUnifier;
-#endif
+        private ReduceContext? lastContext;
         private int placeholderIndex = -1;
+        private bool saveLastTopology;
 
         [DebuggerStepThrough]
-        private Environments(ITypeCalculator typeCalculator) :
+        private Environments(ITypeCalculator typeCalculator, bool saveLastTopology) :
             base(null, typeCalculator)
         {
+            this.saveLastTopology = saveLastTopology;
             this.MutableBind(Generator.kind.Symbol, Generator.kind);
         }
+        
+        public ITopology? LastTopology =>
+            this.lastContext;
 
         [DebuggerStepThrough]
         internal IExpression CreatePlaceholder(
@@ -58,48 +63,74 @@ namespace Favalet
             PlaceholderOrderHints orderHint) =>
             this.CreatePlaceholder(orderHint);
 
-        public IExpression Infer(IExpression expression)
+        private IExpression InternalInfer(
+            ReduceContext context,
+            IExpression expression)
         {
-            var unifier = Unifier.Create(this.TypeCalculator);
-            var context = new ReduceContext(this, this, unifier);
-
-            Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: expression=\"{expression.GetXml()}\"");
-
+            Debug.WriteLine($"Infer[{context.GetHashCode()}:before] :");
+            Debug.WriteLine(expression.GetXml());
+  
             var rewritable = context.MakeRewritable(expression);
+            context.SetTargetRoot(rewritable);
+
 #if DEBUG
-            Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: rewritable=\"{rewritable.GetXml()}\", unifier=\"{unifier}\"");
+            Debug.WriteLine($"Infer[{context.GetHashCode()}:rewritable] :");
+            Debug.WriteLine(rewritable.GetXml());
 #endif            
 
             var inferred = context.Infer(rewritable);
+            context.SetTargetRoot(inferred);
+            
 #if DEBUG
-            Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: inferred=\"{inferred.GetXml()}\", unifier=\"{unifier}\"");
-#endif            
-            var fixedup = context.Fixup(inferred);
-            Debug.WriteLine(
-                $"Infer[{context.GetHashCode()}]: fixedup=\"{fixedup.GetXml()}\"");
-#if DEBUG
-            this.lastUnifier = unifier;
+            Debug.WriteLine($"Infer[{context.GetHashCode()}:inferred] :");
+            Debug.WriteLine(inferred.GetXml());
 #endif
+
+            context.NormalizeAliases();
+
+            var fixedup = context.Fixup(inferred);
+            context.SetTargetRoot(fixedup);
+
+#if DEBUG
+            Debug.WriteLine($"Infer[{context.GetHashCode()}:fixedup] :");
+            Debug.WriteLine(fixedup.GetXml());
+#endif
+
             return fixedup;
+        }
+
+        public IExpression Infer(IExpression expression)
+        {
+            var unifier = Unifier.Create(this.TypeCalculator, expression);
+            var context = new ReduceContext(this, this, unifier);
+
+            var inferred = this.InternalInfer(context, expression);
+
+            if (this.saveLastTopology)
+            {
+                this.lastContext = context;
+            }
+
+            return inferred;
         }
 
         public IExpression Reduce(IExpression expression)
         {
-            var unifier = Unifier.Create(this.TypeCalculator);
+            var unifier = Unifier.Create(this.TypeCalculator, expression);
             var context = new ReduceContext(this, this, unifier);
 
-            Debug.WriteLine(
-                $"Reduce[{context.GetHashCode()}]: expression=\"{expression.GetXml()}\"");
-
-            var reduced = context.Reduce(expression);
-            Debug.WriteLine(
-                $"Reduce[{context.GetHashCode()}]: reduced=\"{reduced.GetXml()}\"");
+            var inferred = this.InternalInfer(context, expression);
+            var reduced = context.Reduce(inferred);
+            
 #if DEBUG
-            this.lastUnifier = unifier;
+            Debug.WriteLine($"Reduce[{context.GetHashCode()}:reduced] :");
+            Debug.WriteLine(reduced.GetXml());
 #endif
+            if (this.saveLastTopology)
+            {
+                this.lastContext = context;
+            }
+
             return reduced;
         }
 
@@ -108,11 +139,15 @@ namespace Favalet
             base.MutableBind(symbol, expression);
 
         [DebuggerStepThrough]
-        public static Environments Create(ITypeCalculator typeCalculator)
-        {
-            var environment = new Environments(typeCalculator);
-            return environment;
-        }
+        public static Environments Create(
+            ITypeCalculator typeCalculator,
+#if DEBUG
+            bool saveLastTopology = true
+#else
+            bool saveLastTopology = false
+#endif
+            ) =>
+            new Environments(typeCalculator, saveLastTopology);
     }
 
     public static class EnvironmentExtension

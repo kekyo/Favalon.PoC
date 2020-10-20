@@ -1,7 +1,10 @@
-﻿using Favalet.Contexts;
+﻿using System;
+using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -18,7 +21,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class ApplyExpression :
-        Expression, IApplyExpression
+        Expression, IApplyExpression, IParentExpression
     {
         public readonly IExpression Function;
         public readonly IExpression Argument;
@@ -50,6 +53,23 @@ namespace Favalet.Expressions
             get => this.Argument;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IEnumerable<IExpression> IParentExpression.Children
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                yield return this.Function;
+                yield return this.Argument;
+            }
+        }
+
+        [DebuggerStepThrough]
+        IExpression? IParentExpression.Create(IEnumerable<IExpression> children) =>
+            (children.ToArray() is IExpression[] c && c.Length == 2) ?
+                Create(c[0], c[1]) :
+                throw new InvalidOperationException();
+
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
 
@@ -72,10 +92,10 @@ namespace Favalet.Expressions
             var function = context.Infer(this.Function);
             var higherOrder = context.Infer(this.HigherOrder);
 
-            var functionHigherOrder = FunctionExpression.Create(
+            var functionHigherOrder = AppliedFunctionExpression.Create(
                 argument.HigherOrder, higherOrder);
 
-            context.Unify(functionHigherOrder, function.HigherOrder);
+            context.Unify(function.HigherOrder, functionHigherOrder, false);
 
             if (object.ReferenceEquals(this.Argument, argument) &&
                 object.ReferenceEquals(this.Function, function) &&

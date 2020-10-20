@@ -77,7 +77,8 @@ namespace Favalet.Expressions.Specialized
 
         protected override IExpression Fixup(IFixupContext context)
         {
-            if (context.Resolve(this) is IExpression resolved)
+            if (context.Resolve(this) is IExpression resolved &&
+                !this.Equals(resolved))
             {
                 return context.Fixup(resolved);
             }

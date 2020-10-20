@@ -26,13 +26,13 @@ namespace Favalet.Contexts.Unifiers
         private bool InternalUnifyCore(
             IExpression from,
             IExpression to,
-            bool isBound,
+            bool bidirectional,
             bool raiseIfCouldNotUnify)
         {
             Debug.Assert(!(from is IIgnoreUnificationTerm));
             Debug.Assert(!(to is IIgnoreUnificationTerm));
 
-            switch (from, to, isBound, raiseIfCouldNotUnify)
+            switch (from, to, bidirectional, raiseIfCouldNotUnify)
             {
                 // Placeholder unification.
                 case (_, IPlaceholderTerm tph, false, _):
@@ -100,7 +100,7 @@ namespace Favalet.Contexts.Unifiers
         private bool InternalUnify(
             IExpression from,
             IExpression to,
-            bool isBound,
+            bool bidirectional,
             bool raiseIfCouldNotUnify)
         {
             // Same as.
@@ -121,14 +121,14 @@ namespace Favalet.Contexts.Unifiers
                     if (this.InternalUnify(
                         from.HigherOrder,
                         to.HigherOrder,
-                        isBound,
+                        bidirectional,
                         raiseIfCouldNotUnify))
                     {
                         // Unify if succeeded higher order.
                         return this.InternalUnifyCore(
                             from,
                             to,
-                            isBound,
+                            bidirectional,
                             raiseIfCouldNotUnify);
                     }
                     break;
@@ -140,8 +140,13 @@ namespace Favalet.Contexts.Unifiers
         [DebuggerStepThrough]
         public void Unify(
             IExpression from,
-            IExpression to) =>
-            this.InternalUnify(from, to, false, true);
+            IExpression to,
+            bool bidirectional) =>
+            this.InternalUnify(from, to, bidirectional, true);
+
+        [DebuggerStepThrough]
+        public void NormalizeAliases() =>
+            this.topology.NormalizeAliases();
 
         [DebuggerStepThrough]
         public override IExpression? Resolve(IPlaceholderTerm placeholder)

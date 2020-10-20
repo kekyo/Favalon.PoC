@@ -21,12 +21,21 @@ namespace Favalet.Contexts.Unifiers
     internal sealed class Topology :
         ITopology
     {
+        [DebuggerStepThrough]
         private sealed class Node
         {
             public readonly HashSet<Unification> Unifications;
 
             public Node() =>
                 this.Unifications = new HashSet<Unification>();
+
+            public void Merge(Node node)
+            {
+                foreach (var unification in node.Unifications)
+                {
+                    this.Unifications.Add(unification);
+                }
+            }
 
             public override string ToString() =>
                 "[" + StringUtilities.Join(",", this.Unifications.Select(unification => unification.ToString())) + "]";
@@ -182,6 +191,39 @@ namespace Favalet.Contexts.Unifiers
                     ei,
                     placeholder,
                     UnificationPolarities.In);
+            }
+        }
+
+        public void NormalizeAliases()
+        {
+            // Will make aliases normalized topology excepts outside PlaceholderTerm instances.
+            
+            foreach (var entry in this.aliases)
+            {
+                if (this.topology.TryGetValue(entry.Key, out var source))
+                {
+                    if (this.topology.TryGetValue(entry.Value, out var destination))
+                    {
+                        destination.Merge(source);
+                    }
+                    else
+                    {
+                        this.topology.Add(entry.Value, source);
+                    }
+                    this.topology.Remove(entry.Key);
+                }
+            }
+
+            foreach (var node in this.topology.Values)
+            {
+                foreach (var unification in node.Unifications)
+                {
+                    if (unification.Expression is IPlaceholderTerm placeholder &&
+                        this.aliases.TryGetValue(placeholder, out var target))
+                    {
+                        unification.UpdateExpression(target);
+                    }
+                }
             }
         }
 

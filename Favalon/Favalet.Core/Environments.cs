@@ -84,7 +84,9 @@ namespace Favalet
 #if DEBUG
             Debug.WriteLine($"Infer[{context.GetHashCode()}:inferred] :");
             Debug.WriteLine(inferred.GetXml());
-#endif            
+#endif
+
+            context.NormalizeAliases();
 
             var fixedup = context.Fixup(inferred);
             context.SetTargetRoot(fixedup);

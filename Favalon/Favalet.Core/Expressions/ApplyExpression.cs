@@ -95,7 +95,7 @@ namespace Favalet.Expressions
             var functionHigherOrder = AppliedFunctionExpression.Create(
                 argument.HigherOrder, higherOrder);
 
-            context.Unify(function.HigherOrder, functionHigherOrder);
+            context.Unify(function.HigherOrder, functionHigherOrder, false);
 
             if (object.ReferenceEquals(this.Argument, argument) &&
                 object.ReferenceEquals(this.Function, function) &&

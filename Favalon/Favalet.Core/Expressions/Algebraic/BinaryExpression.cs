@@ -77,8 +77,10 @@ namespace Favalet.Expressions.Algebraic
             var right = context.Infer(this.Right);
             var higherOrder = context.Infer(this.HigherOrder);
 
-            context.Unify(left.HigherOrder, higherOrder);
-            context.Unify(right.HigherOrder, higherOrder);
+            context.Unify(left.HigherOrder, right.HigherOrder, true);
+            
+            context.Unify(left.HigherOrder, higherOrder, false);
+            context.Unify(right.HigherOrder, higherOrder, false);
 
             if (object.ReferenceEquals(this.Left, left) &&
                 object.ReferenceEquals(this.Right, right) &&

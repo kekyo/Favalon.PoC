@@ -52,7 +52,7 @@ namespace Favalet.Expressions.Algebraic
             var higherOrder = context.Infer(this.HigherOrder);
             var operand = context.Infer(this.Operand);
 
-            context.Unify(operand.HigherOrder, higherOrder);
+            context.Unify(operand.HigherOrder, higherOrder, false);
 
             if (object.ReferenceEquals(this.HigherOrder, higherOrder) &&
                 object.ReferenceEquals(this.Operand, operand))

@@ -181,7 +181,7 @@ namespace Favalet.Expressions
                 var functionHigherOrder = this.Factory.Create(
                     parameter.HigherOrder, result.HigherOrder);
 
-                context.Unify(functionHigherOrder, higherOrder);
+                context.Unify(functionHigherOrder, higherOrder, false);
 
                 if (object.ReferenceEquals(this.Parameter, parameter) &&
                     object.ReferenceEquals(this.Result, result) &&

@@ -58,7 +58,8 @@ namespace Favalet.Contexts
 
         void Unify(
             IExpression fromHigherOrder,
-            IExpression toHigherOrder);
+            IExpression toHigherOrder,
+            bool bidirectional);
     }
 
     public interface IFixupContext :
@@ -179,6 +180,10 @@ namespace Favalet.Contexts
         }
 
         [DebuggerStepThrough]
+        public void NormalizeAliases() =>
+            this.unifier.NormalizeAliases();
+
+        [DebuggerStepThrough]
         public IExpression Infer(IExpression expression) =>
             expression is Expression expr ? expr.InternalInfer(this) : expression;
         [DebuggerStepThrough]
@@ -211,8 +216,9 @@ namespace Favalet.Contexts
         [DebuggerStepThrough]
         public void Unify(
             IExpression fromHigherOrder,
-            IExpression toHigherOrder) =>
-            this.unifier.Unify(fromHigherOrder, toHigherOrder);
+            IExpression toHigherOrder,
+            bool bidirectional = false) =>
+            this.unifier.Unify(fromHigherOrder, toHigherOrder, bidirectional);
 
         [DebuggerStepThrough]
         public override IExpression? Resolve(IPlaceholderTerm placeholder) =>

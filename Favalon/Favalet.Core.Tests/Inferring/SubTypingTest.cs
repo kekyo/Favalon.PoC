@@ -32,17 +32,17 @@ namespace Favalet.Inferring
         {
             var environment = CLREnvironment();
             
-            environment.MutableBind("a", Constant(123));
-
-            // a:object
+            // bool || IConvertible
             var expression =
-                Variable("a", Type<object>());
+                Or(
+                    Type<bool>(),
+                    Type<IConvertible>());
 
-            var actual = environment.Infer(expression);
+            var actual = environment.TypeCalculator.Compute(expression);
 
-            // a:object
+            // IConvertible
             var expected =
-                Variable("a", Type<object>());
+                Type<IConvertible>();
 
             AssertLogicalEqual(expression, expected, actual);
         }
@@ -51,18 +51,204 @@ namespace Favalet.Inferring
         public void Widening2()
         {
             var environment = CLREnvironment();
-            
-            environment.MutableBind("a", Constant(123));
 
-            // a:IFormattable
+            // bool || IConvertible || int
             var expression =
-                Variable("a", Type<IFormattable>());
+                Or(
+                    Type<bool>(),
+                    Or(
+                        Type<IConvertible>(),
+                        Type<int>()));
 
-            var actual = environment.Infer(expression);
+            var actual = environment.TypeCalculator.Compute(expression);
 
-            // a:IFormattable
+            // IConvertible
             var expected =
-                Variable("a", Type<IFormattable>());
+                Type<IConvertible>();
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void Widening3()
+        {
+            var environment = CLREnvironment();
+
+            // IConvertible || bool || int
+            var expression =
+                Or(
+                    Type<IConvertible>(),
+                    Or(
+                        Type<bool>(),
+                        Type<int>()));
+
+            var actual = environment.TypeCalculator.Compute(expression);
+
+            // IConvertible
+            var expected =
+                Type<IConvertible>();
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void Widening4()
+        {
+            var environment = CLREnvironment();
+
+            // bool || IConvertible || int
+            var expression =
+                Or(
+                    Or(
+                        Type<bool>(),
+                        Type<IConvertible>()),
+                    Type<int>());
+
+            var actual = environment.TypeCalculator.Compute(expression);
+
+            // IConvertible
+            var expected =
+                Type<IConvertible>();
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void Widening5()
+        {
+            var environment = CLREnvironment();
+
+            // bool || int || IConvertible
+            var expression =
+                Or(
+                    Or(
+                        Type<bool>(),
+                        Type<int>()),
+                    Type<IConvertible>());
+
+            var actual = environment.TypeCalculator.Compute(expression);
+
+            // IConvertible
+            var expected =
+                Type<IConvertible>();
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        #endregion
+        
+        #region Narrowing
+        [Test]
+        public void Narrowing1()
+        {
+            var environment = CLREnvironment();
+            
+            // bool && IConvertible
+            var expression =
+                And(
+                    Type<bool>(),
+                    Type<IConvertible>());
+
+            var actual = environment.TypeCalculator.Compute(expression);
+
+            // bool
+            var expected =
+                Type<bool>();
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void Narrowing2()
+        {
+            var environment = CLREnvironment();
+
+            // bool && IConvertible && int
+            var expression =
+                And(
+                    Type<bool>(),
+                    And(
+                        Type<IConvertible>(),
+                        Type<int>()));
+
+            var actual = environment.TypeCalculator.Compute(expression);
+
+            // bool && int
+            var expected =
+                And(
+                    Type<bool>(),
+                    Type<int>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void Narrowing3()
+        {
+            var environment = CLREnvironment();
+
+            // IConvertible && bool && int
+            var expression =
+                And(
+                    Type<IConvertible>(),
+                    And(
+                        Type<bool>(),
+                        Type<int>()));
+
+            var actual = environment.TypeCalculator.Compute(expression);
+
+            // bool && int
+            var expected =
+                And(
+                    Type<bool>(),
+                    Type<int>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void Narrowing4()
+        {
+            var environment = CLREnvironment();
+
+            // bool && IConvertible && int
+            var expression =
+                And(
+                    And(
+                        Type<bool>(),
+                        Type<IConvertible>()),
+                    Type<int>());
+
+            var actual = environment.TypeCalculator.Compute(expression);
+
+            // bool && int
+            var expected =
+                And(
+                    Type<bool>(),
+                    Type<int>());
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void Narrowing5()
+        {
+            var environment = CLREnvironment();
+
+            // bool && int && IConvertible
+            var expression =
+                And(
+                    And(
+                        Type<bool>(),
+                        Type<int>()),
+                    Type<IConvertible>());
+
+            var actual = environment.TypeCalculator.Compute(expression);
+
+            // bool && int
+            var expected =
+                And(
+                    Type<bool>(),
+                    Type<int>());
 
             AssertLogicalEqual(expression, expected, actual);
         }

@@ -488,11 +488,11 @@ namespace Favalet.Contexts.Unifiers
                 }
 
                 foreach (var entry in this.topology.
-                    Select(entry => (ph: entry.Key, label: entry.Key.Symbol)).
+                    Select(entry => (ph: (IIdentityTerm)entry.Key, label: entry.Key.Symbol)).
                     Concat(this.aliases.Keys.
-                        Select(key => (ph: key, label: key.Symbol))).
+                        Select(key => (ph: (IIdentityTerm)key, label: key.Symbol))).
                     Concat(this.aliases.Values.
-                        OfType<IPlaceholderTerm>().
+                        OfType<IIdentityTerm>().
                         Select(value => (ph: value, label: value.Symbol))).
                     Distinct().
                     OrderBy(entry => entry.ph, IdentityTermComparer.Instance))

@@ -106,9 +106,8 @@ namespace Favalet
                     return Results.Ignore;
                 case (_, DeadEndTerm _):
                     return Trap(false);
-#if true
                 case (IPairExpression le, IPairExpression re)
-                    when le.GetType() == re.GetType():
+                    when le.IdentityType.Equals(re.IdentityType):
                     var p1 = Equals(le.Left, re.Left, indexes);
                     var b1 = Equals(le.Right, re.Right, indexes);
                     if (p1 != Results.Negate && b1 != Results.Negate)
@@ -123,53 +122,6 @@ namespace Favalet
                     {
                         return Results.Negate;
                     }
-#else
-                case (ILambdaExpression le, ILambdaExpression re):
-                    var p1 = Equals(le.Parameter, re.Parameter, indexes);
-                    var b1 = Equals(le.Body, re.Body, indexes);
-                    if (p1 != Results.Negate && b1 != Results.Negate)
-                    {
-                        if (p1 == Results.Assert && b1 == Results.Assert)
-                        {
-                            return Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
-                        }
-                        return Results.Assert;
-                    }
-                    else
-                    {
-                        return Results.Negate;
-                    }
-                case (IFunctionExpression le, IFunctionExpression re):
-                    var p2 = Equals(le.Parameter, re.Parameter, indexes);
-                    var b2 = Equals(le.Result, re.Result, indexes);
-                    if (p2 != Results.Negate && b2 != Results.Negate)
-                    {
-                        if (p2 == Results.Assert && b2 == Results.Assert)
-                        {
-                            return Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
-                        }
-                        return Results.Assert;
-                    }
-                    else
-                    {
-                        return Results.Negate;
-                    }
-                case (IApplyExpression le, IApplyExpression re):
-                    var f1 = Equals(le.Function, re.Function, indexes);
-                    var a1 = Equals(le.Argument, re.Argument, indexes);
-                    if (f1 != Results.Negate && a1 != Results.Negate)
-                    {
-                        if (f1 == Results.Assert && a1 == Results.Assert)
-                        {
-                            return Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
-                        }
-                        return Results.Assert;
-                    }
-                    else
-                    {
-                        return Results.Negate;
-                    }
-#endif
                 default:
                     if (Trap(lhs.Equals(rhs)) is Results r &&
                         r != Results.Negate)

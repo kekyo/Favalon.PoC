@@ -9,6 +9,8 @@ namespace Favalet.Expressions.Specialized
     {
         IExpression Left { get; }
         IExpression Right { get; }
+        
+        Type IdentityType { get; }
 
         IExpression Create(IExpression left, IExpression right);
     }

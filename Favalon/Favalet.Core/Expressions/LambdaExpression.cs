@@ -61,6 +61,13 @@ namespace Favalet.Expressions
             get => this.Body;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        Type IPairExpression.IdentityType
+        {
+            [DebuggerStepThrough]
+            get => typeof(ILambdaExpression);
+        }
+
         [DebuggerStepThrough]
         IExpression IPairExpression.Create(IExpression left, IExpression right) =>
             left is IBoundVariableTerm bound ?
@@ -95,7 +102,7 @@ namespace Favalet.Expressions
             var lambdaHigherOrder = FunctionExpression.Create(
                 parameter.HigherOrder, body.HigherOrder);
             
-            context.Unify(lambdaHigherOrder, higherOrder, false);
+            context.Unify(lambdaHigherOrder, higherOrder, true);
 
             if (object.ReferenceEquals(this.Parameter, parameter) &&
                 object.ReferenceEquals(this.Body, body) &&

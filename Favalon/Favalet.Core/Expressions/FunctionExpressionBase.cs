@@ -132,6 +132,13 @@ namespace Favalet.Expressions
             get => this.Result;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        Type IPairExpression.IdentityType
+        {
+            [DebuggerStepThrough]
+            get => typeof(IFunctionExpression);
+        }
+
         [DebuggerStepThrough]
         IExpression IPairExpression.Create(IExpression left, IExpression right) =>
             this.Factory.Create(left, right);
@@ -182,7 +189,7 @@ namespace Favalet.Expressions
                 var functionHigherOrder = this.Factory.Create(
                     parameter.HigherOrder, result.HigherOrder);
 
-                context.Unify(functionHigherOrder, higherOrder, false);
+                context.Unify(functionHigherOrder, higherOrder, true);
 
                 if (object.ReferenceEquals(this.Parameter, parameter) &&
                     object.ReferenceEquals(this.Result, result) &&

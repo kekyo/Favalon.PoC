@@ -68,6 +68,13 @@ namespace Favalet.Expressions
             get => this.Argument;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        Type IPairExpression.IdentityType
+        {
+            [DebuggerStepThrough]
+            get => typeof(IApplyExpression);
+        }
+
         [DebuggerStepThrough]
         IExpression IPairExpression.Create(IExpression left, IExpression right) =>
             Create(left, right);

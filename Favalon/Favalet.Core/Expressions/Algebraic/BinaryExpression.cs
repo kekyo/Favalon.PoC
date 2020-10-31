@@ -1,4 +1,5 @@
-﻿using Favalet.Contexts;
+﻿using System;
+using Favalet.Contexts;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -57,6 +58,13 @@ namespace Favalet.Expressions.Algebraic
         {
             [DebuggerStepThrough]
             get => this.Right;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        Type IPairExpression.IdentityType
+        {
+            [DebuggerStepThrough]
+            get => typeof(TBinaryExpression);
         }
 
         [DebuggerStepThrough]

@@ -17,7 +17,7 @@ namespace Favalet.Expressions.Specialized
         public readonly string Symbol;
 
         [DebuggerStepThrough]
-        private BoundVariableTerm(string symbol, IExpression higherOrder)
+        private BoundVariableTermBase(string symbol, IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
             this.Symbol = symbol;
@@ -32,21 +32,12 @@ namespace Favalet.Expressions.Specialized
             get => this.Symbol;
         }
 
-        public override int GetHashCode() =>
-            this.Symbol.GetHashCode();
-
-        public bool Equals(IBoundVariableTerm rhs) =>
-            this.Symbol.Equals(rhs.Symbol);
-
-        public override bool Equals(IExpression? other) =>
-            other is IBoundVariableTerm rhs && this.Equals(rhs);
-
-        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
+        protected override sealed IExpression MakeRewritable(IMakeRewritableContext context) =>
             new BoundVariableTerm(
                 this.Symbol,
                 context.MakeRewritableHigherOrder(this.HigherOrder));
 
-        protected override IExpression Infer(IInferContext context)
+        protected override sealed IExpression Infer(IInferContext context)
         {
             var higherOrder = context.Infer(this.HigherOrder);
 
@@ -60,7 +51,7 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        protected override IExpression Fixup(IFixupContext context)
+        protected override sealed IExpression Fixup(IFixupContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 
@@ -76,6 +67,15 @@ namespace Favalet.Expressions.Specialized
 
         protected override IExpression Reduce(IReduceContext context) =>
             this;
+        
+        public override int GetHashCode() =>
+            this.Symbol.GetHashCode();
+
+        public bool Equals(IBoundVariableTerm rhs) =>
+            this.Symbol.Equals(rhs.Symbol);
+
+        public override bool Equals(IExpression? other) =>
+            other is IBoundVariableTerm rhs && this.Equals(rhs);
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             new[] { new XAttribute("symbol", this.Symbol) };

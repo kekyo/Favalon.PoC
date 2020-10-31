@@ -5,19 +5,13 @@ using System.Xml.Linq;
 
 namespace Favalet.Expressions.Specialized
 {
-    public interface IBoundVariableTerm :
-        ITerm
-    {
-        string Symbol { get; }
-    }
-
-    public sealed class BoundVariableTerm :
-        Expression, IBoundVariableTerm
+    internal sealed class ReinterpretTerm :
+        Expression, ITerm
     {
         public readonly string Symbol;
 
         [DebuggerStepThrough]
-        private BoundVariableTerm(string symbol, IExpression higherOrder)
+        private ReinterpretTerm(string symbol, IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
             this.Symbol = symbol;
@@ -25,24 +19,17 @@ namespace Favalet.Expressions.Specialized
 
         public override IExpression HigherOrder { get; }
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IBoundVariableTerm.Symbol
-        {
-            [DebuggerStepThrough]
-            get => this.Symbol;
-        }
-
         public override int GetHashCode() =>
             this.Symbol.GetHashCode();
 
-        public bool Equals(IBoundVariableTerm rhs) =>
+        public bool Equals(ReinterpretTerm rhs) =>
             this.Symbol.Equals(rhs.Symbol);
 
         public override bool Equals(IExpression? other) =>
-            other is IBoundVariableTerm rhs && this.Equals(rhs);
+            other is ReinterpretTerm rhs && this.Equals(rhs);
 
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
-            new BoundVariableTerm(
+            new ReinterpretTerm(
                 this.Symbol,
                 context.MakeRewritableHigherOrder(this.HigherOrder));
 
@@ -56,7 +43,7 @@ namespace Favalet.Expressions.Specialized
             }
             else
             {
-                return new BoundVariableTerm(this.Symbol, higherOrder);
+                return new ReinterpretTerm(this.Symbol, higherOrder);
             }
         }
 
@@ -70,12 +57,24 @@ namespace Favalet.Expressions.Specialized
             }
             else
             {
-                return new BoundVariableTerm(this.Symbol, higherOrder);
+                return new ReinterpretTerm(this.Symbol, higherOrder);
             }
         }
 
-        protected override IExpression Reduce(IReduceContext context) =>
-            this;
+        protected override IExpression Reduce(IReduceContext context)
+        {
+            var variables = context.LookupVariables(this.Symbol);
+
+            if (variables.Length >= 1)
+            {
+                // Nearly overloaded variable.
+                return context.Reduce(variables[0].Expression);
+            }
+            else
+            {
+                return this;
+            }
+        }
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             new[] { new XAttribute("symbol", this.Symbol) };
@@ -86,10 +85,7 @@ namespace Favalet.Expressions.Specialized
                 this.Symbol);
 
         [DebuggerStepThrough]
-        public static BoundVariableTerm Create(string symbol, IExpression higherOrder) =>
-            new BoundVariableTerm(symbol, higherOrder);
-        [DebuggerStepThrough]
-        public static BoundVariableTerm Create(string symbol) =>
-            new BoundVariableTerm(symbol, UnspecifiedTerm.Instance);
+        public static ReinterpretTerm Create(IBoundVariableTerm bound) =>
+            new ReinterpretTerm(bound.Symbol, bound.HigherOrder);
     }
 }

@@ -95,7 +95,9 @@ namespace Favalet.Expressions
             var parameter = (IBoundVariableTerm)context.Infer(this.Parameter);
             var higherOrder = context.Infer(this.HigherOrder);
 
-            var newScope = context.Bind(parameter, parameter);
+            var newScope = context.Bind(
+                parameter,
+                ReinterpretTerm.Create(parameter));
 
             var body = newScope.Infer(this.Body);
 

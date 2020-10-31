@@ -77,7 +77,7 @@ namespace Favalet.Contexts.Unifiers
                       IFunctionExpression(IExpression tp, IExpression tr),
                       _, _):
                     // unify(C +> A): Parameters are binder.
-                    this.InternalUnify(tp, fp, true, true);
+                    this.InternalUnify(tp, fp, false, true);
                     // unify(B +> D)
                     this.InternalUnify(fr, tr, false, true);
                     return true;
@@ -146,7 +146,7 @@ namespace Favalet.Contexts.Unifiers
 
         [DebuggerStepThrough]
         public void NormalizeAliases() =>
-            this.topology.NormalizeAliases();
+            this.topology.NormalizeAliases(this.TypeCalculator);
 
         [DebuggerStepThrough]
         public override IExpression? Resolve(IPlaceholderTerm placeholder)

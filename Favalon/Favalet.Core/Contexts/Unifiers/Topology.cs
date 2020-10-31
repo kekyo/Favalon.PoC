@@ -200,7 +200,7 @@ namespace Favalet.Contexts.Unifiers
             }
         }
 
-        public void NormalizeAliases()
+        public void NormalizeAliases(ITypeCalculator calculator)
         {
             // Will make aliases normalized topology excepts outside PlaceholderTerm instances.
             
@@ -230,20 +230,73 @@ namespace Favalet.Contexts.Unifiers
             {
                 foreach (var unification in entry.Value.Unifications.ToArray())
                 {
-                    if (unification.Expression is IPlaceholderTerm placeholder)
+                    switch (unification.Expression, unification.Polarity)
                     {
-                        // Alias declared placeholder:
-                        if (this.aliases.TryGetValue(placeholder, out var target))
-                        {
-                            // Resolved.
-                            unification.UpdateExpression(target);
-                        }
-                    }
-                    else if (unification.Polarity == UnificationPolarities.Both)
-                    {
-                        // Switch an unification to new non-placeholder alias.
-                        entry.Value.Unifications.Remove(unification);
-                        this.aliases.Add(entry.Key, unification.Expression);
+                        case (IPlaceholderTerm placeholder, _):
+                            // Alias declared placeholder:
+                            if (this.aliases.TryGetValue(placeholder, out var target1))
+                            {
+                                // Resolved.
+                                unification.UpdateExpression(target1);
+                            }
+                            break;
+
+                        case (_, UnificationPolarities.Both):
+                            // Switch an unification to new non-placeholder alias.
+                            entry.Value.Unifications.Remove(unification);
+                            // Alias declared placeholder:
+                            if (this.aliases.TryGetValue(entry.Key, out var target2))
+                            {
+                                // Narrow and replace
+                                var combined = AndExpression.Create(
+                                    target2, unification.Expression);
+                                var calculated = calculator.Compute(combined);
+                                this.aliases[entry.Key] = calculated;
+                            }
+                            else
+                            {
+                                // Store
+                                this.aliases.Add(entry.Key, unification.Expression);
+                            }
+                            break;
+                        
+                        case (_, UnificationPolarities.In):
+                            // Alias declared placeholder:
+                            if (this.aliases.TryGetValue(entry.Key, out var target3))
+                            {
+                                // Narrow and check
+                                var combined = AndExpression.Create(
+                                    target3, unification.Expression);
+                                var calculated = calculator.Compute(combined);
+                                
+                                // Absorb?
+                                if (calculator.Equals(calculated, unification.Expression))
+                                {
+                                    // Switch an unification to new non-placeholder alias.
+                                    entry.Value.Unifications.Remove(unification);
+                                    this.aliases[entry.Key] = calculated;
+                                }
+                            }
+                            break;
+
+                        case (_, UnificationPolarities.Out):
+                            // Alias declared placeholder:
+                            if (this.aliases.TryGetValue(entry.Key, out var target4))
+                            {
+                                // Narrow and check
+                                var combined = AndExpression.Create(
+                                    target4, unification.Expression);
+                                var calculated = calculator.Compute(combined);
+                                
+                                // Absorb?
+                                if (calculator.Equals(calculated, unification.Expression))
+                                {
+                                    // Switch an unification to new non-placeholder alias.
+                                    entry.Value.Unifications.Remove(unification);
+                                    this.aliases[entry.Key] = calculated;
+                                }
+                            }
+                            break;
                     }
                 }
             }

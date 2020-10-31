@@ -32,13 +32,16 @@ namespace Favalet.Reducing
         {
             var environment = Environment();
 
+            // let ABC = XYZ
             environment.MutableBind("ABC", Variable("XYZ"));
 
+            // ABC
             var expression =
                 Variable("ABC");
 
             var actual = environment.Reduce(expression);
 
+            // XYZ
             var expected =
                 Variable("XYZ");
 
@@ -50,6 +53,7 @@ namespace Favalet.Reducing
         {
             var environment = Environment();
 
+            // arg -> arg && B
             var expression =
                 Lambda(
                     "arg",
@@ -59,6 +63,7 @@ namespace Favalet.Reducing
 
             var actual = environment.Reduce(expression);
 
+            // arg -> arg && B
             var expected =
                 Lambda(
                     "arg",
@@ -86,6 +91,7 @@ namespace Favalet.Reducing
 
             var actual = environment.Reduce(expression);
 
+            // A && B
             var expected =
                 And(
                     Variable("A"),

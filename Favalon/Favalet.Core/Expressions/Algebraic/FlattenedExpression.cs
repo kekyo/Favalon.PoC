@@ -5,11 +5,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Favalet.Expressions.Specialized;
 
 namespace Favalet.Expressions.Algebraic
 {
     internal abstract class FlattenedExpression :
-        Expression, IExpression
+        Expression
     {
         public readonly IExpression[] Operands;
 

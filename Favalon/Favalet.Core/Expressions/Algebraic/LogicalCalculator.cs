@@ -172,17 +172,6 @@ namespace Favalet.Expressions.Algebraic
             return candidates;
         }
 
-        private static IExpression? ReConstructExpression(
-            IExpression[] results,
-            Func<IExpression, IExpression, IExpression> creator) =>
-            results.Length switch
-            {
-                0 => null,
-                1 => results[0],
-                2 => creator(results[0], results[1]),
-                _ => results.Skip(2).Aggregate(creator(results[0], results[1]), creator)
-            };
-
         public IExpression Compute(IExpression operand)
         {
             if (operand is IBinaryExpression binary)
@@ -196,7 +185,7 @@ namespace Favalet.Expressions.Algebraic
                     var absorption =
                         this.ComputeAbsorption<OrFlattenedExpression>(left, right, this.ChoiceForAnd).
                         Memoize();
-                    if (ReConstructExpression(absorption, OrExpression.Create) is IExpression result1)
+                    if (ConstructNested(absorption, OrExpression.Create) is IExpression result1)
                     {
                         return this.Compute(result1);
                     }
@@ -205,7 +194,7 @@ namespace Favalet.Expressions.Algebraic
                     var shrinked =
                         this.ComputeShrink<IAndExpression>(left, right, this.ChoiceForAnd).
                         Memoize();
-                    if (ReConstructExpression(shrinked, AndExpression.Create) is IExpression result2)
+                    if (ConstructNested(shrinked, AndExpression.Create) is IExpression result2)
                     {
                         return result2;
                     }
@@ -216,7 +205,7 @@ namespace Favalet.Expressions.Algebraic
                     var absorption =
                         this.ComputeAbsorption<AndFlattenedExpression>(left, right, this.ChoiceForOr).
                         Memoize();
-                    if (ReConstructExpression(absorption, AndExpression.Create) is IExpression result1)
+                    if (ConstructNested(absorption, AndExpression.Create) is IExpression result1)
                     {
                         return this.Compute(result1);
                     }
@@ -225,7 +214,7 @@ namespace Favalet.Expressions.Algebraic
                     var shrinked =
                         this.ComputeShrink<IOrExpression>(left, right, this.ChoiceForOr).
                         Memoize();
-                    if (ReConstructExpression(shrinked, OrExpression.Create) is IExpression result2)
+                    if (ConstructNested(shrinked, OrExpression.Create) is IExpression result2)
                     {
                         return result2;
                     }
@@ -257,6 +246,17 @@ namespace Favalet.Expressions.Algebraic
 
             return operand;
         }
+
+        public static IExpression? ConstructNested(
+            IExpression[] results,
+            Func<IExpression, IExpression, IExpression> creator) =>
+            results.Length switch
+            {
+                0 => null,
+                1 => results[0],
+                2 => creator(results[0], results[1]),
+                _ => results.Skip(2).Aggregate(creator(results[0], results[1]), creator)
+            };
 
         public static readonly LogicalCalculator Instance =
             new LogicalCalculator();

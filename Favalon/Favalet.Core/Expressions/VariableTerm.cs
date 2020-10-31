@@ -2,7 +2,10 @@
 using Favalet.Expressions.Specialized;
 using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Xml.Linq;
+using Favalet.Expressions.Algebraic;
+using Favalet.Internal;
 
 namespace Favalet.Expressions
 {
@@ -14,19 +17,29 @@ namespace Favalet.Expressions
     public sealed class VariableTerm :
         Expression, IVariableTerm
     {
+        private readonly IExpression[]? bounds;
+        
         public readonly string Symbol;
 
         [DebuggerStepThrough]
-        private VariableTerm(string symbol, IExpression higherOrder)
+        private VariableTerm(string symbol, IExpression higherOrder, IExpression[]? bounds)
         {
             this.HigherOrder = higherOrder;
             this.Symbol = symbol;
+            this.bounds = bounds;
         }
 
         public override IExpression HigherOrder { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IIdentityTerm.Symbol
+        {
+            [DebuggerStepThrough]
+            get => this.Symbol;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        object IIdentityTerm.Identity
         {
             [DebuggerStepThrough]
             get => this.Symbol;
@@ -44,26 +57,96 @@ namespace Favalet.Expressions
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new VariableTerm(
                 this.Symbol,
-                context.MakeRewritableHigherOrder(this.HigherOrder, HigherOrderAttributes.None));
+                context.MakeRewritableHigherOrder(this.HigherOrder),
+                this.bounds);
         
         protected override IExpression Infer(IInferContext context)
         {
+            if (this.bounds is IExpression[])
+            {
+                return this;
+            }
+            
             var higherOrder = context.Infer(this.HigherOrder);
             var variables = context.LookupVariables(this.Symbol);
 
             if (variables.Length >= 1)
             {
-                // TODO: overloading
-                if (!object.ReferenceEquals(this, variables[0].Expression))
-                {
-                    var rewritable = context.MakeRewritable(variables[0].Expression);
-                    var inferred = context.Infer(rewritable);
-                    
-                    var symbolHigherOrderRewritable = context.MakeRewritable(variables[0].SymbolHigherOrder);
-                    var symbolHigherOrder = context.Infer(symbolHigherOrderRewritable);
+                var targets = variables.
+                    Where(v => !context.TypeCalculator.ExactEquals(this, v.Expression)).
+                    Select(v =>
+                        (symbolHigherOrder: context.Infer(context.MakeRewritableHigherOrder(v.SymbolHigherOrder)), 
+                         expression: context.Infer(context.MakeRewritable(v.Expression)))).
+                    Memoize();
 
-                    context.Unify(symbolHigherOrder, higherOrder, true);
-                    context.Unify(inferred.HigherOrder, higherOrder, true);
+                if (targets.Length >= 1)
+                {
+                    var symbolHigherOrder = LogicalCalculator.ConstructNested(
+                        targets.Select(v => v.symbolHigherOrder).Memoize(),
+                        OrExpression.Create)!;
+
+                    var expressionHigherOrder = LogicalCalculator.ConstructNested(
+                        targets.Select(v => v.expression.HigherOrder).Memoize(),
+                        OrExpression.Create)!;
+               
+                    context.Unify(symbolHigherOrder, expressionHigherOrder, true);
+                    context.Unify(expressionHigherOrder, higherOrder, true);
+                }
+                
+                var bounds = targets.
+                    Select(entry => entry.expression).
+                    Memoize();
+                return new VariableTerm(this.Symbol, higherOrder, bounds);
+            }
+
+            if (object.ReferenceEquals(this.HigherOrder, higherOrder))
+            {
+                return this;
+            }
+            else
+            {
+                return new VariableTerm(this.Symbol, higherOrder, this.bounds);
+            }
+        }
+
+        protected override IExpression Fixup(IFixupContext context)
+        {
+            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
+
+            if (this.bounds is IExpression[])
+            {
+                if (this.bounds.Length >= 1)
+                {
+                    var targets = this.bounds.
+                        Select(context.Fixup).
+                        Memoize();
+
+                    if (targets.Length >= 1)
+                    {
+                        var targetsHigherOrder = LogicalCalculator.ConstructNested(
+                            targets.
+                                Select(target => target.HigherOrder).
+                                Memoize(),
+                            OrExpression.Create)!;
+
+                        var calculated = context.TypeCalculator.Compute(
+                            AndExpression.Create(
+                                higherOrder, targetsHigherOrder));
+
+                        var filteredTargets = targets.
+                            Select(target =>
+                                (target,
+                                 calculated: context.TypeCalculator.Compute(
+                                    OrExpression.Create(target.HigherOrder, calculated)))).
+                            Where(entry => entry.calculated.Equals(calculated)).
+                            Select(entry => entry.target).
+                            Memoize();
+
+                        if (filteredTargets.Length >= 1)
+                        {
+                            return new VariableTerm(this.Symbol, higherOrder, filteredTargets);
+                        }
+                    }
                 }
             }
 
@@ -73,37 +156,21 @@ namespace Favalet.Expressions
             }
             else
             {
-                return new VariableTerm(this.Symbol, higherOrder);
-            }
-        }
-
-        protected override IExpression Fixup(IFixupContext context)
-        {
-            var higherOrder = context.FixupHigherOrder(this.HigherOrder);
-
-            if (object.ReferenceEquals(this.HigherOrder, higherOrder))
-            {
-                return this;
-            }
-            else
-            {
-                return new VariableTerm(this.Symbol, higherOrder);
+                return new VariableTerm(this.Symbol, higherOrder, this.bounds);
             }
         }
 
         protected override IExpression Reduce(IReduceContext context)
         {
-            var variables = context.LookupVariables(this.Symbol);
+            if (this.bounds is IExpression[] bounds)
+            {
+                Debug.Assert(bounds.Length >= 1);
 
-            if (variables.Length >= 1)
-            {
-                var reduced = context.Reduce(variables[0].Expression);
-                return context.TypeCalculator.Compute(reduced);
+                // TODO: priority from higher orders.
+                return context.Reduce(bounds[0]);
             }
-            else
-            {
-                return this;
-            }
+
+            return this;
         }
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
@@ -116,9 +183,9 @@ namespace Favalet.Expressions
 
         [DebuggerStepThrough]
         public static VariableTerm Create(string symbol, IExpression higherOrder) =>
-            new VariableTerm(symbol, higherOrder);
+            new VariableTerm(symbol, higherOrder, default);
         [DebuggerStepThrough]
         public static VariableTerm Create(string symbol) =>
-            new VariableTerm(symbol, UnspecifiedTerm.Instance);
+            new VariableTerm(symbol, UnspecifiedTerm.Instance, default);
     }
 }

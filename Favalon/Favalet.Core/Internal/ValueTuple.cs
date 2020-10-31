@@ -1,6 +1,7 @@
 ﻿
 #if NET35 || NET40
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace System
 {
@@ -47,6 +48,18 @@ namespace System
             this.Item3 = item3;
             this.Item4 = item4;
         }
+    }
+}
+
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.All)]
+    internal sealed class TupleElementNamesAttribute : Attribute
+    {
+        public IList<string>? TransformNames { get; }
+
+        public TupleElementNamesAttribute(string[]? transformNames) =>
+            this.TransformNames = transformNames;
     }
 }
 #endif

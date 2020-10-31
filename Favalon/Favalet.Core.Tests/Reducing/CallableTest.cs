@@ -17,7 +17,7 @@ namespace Favalet.Reducing
             IExpression expected,
             IExpression actual)
         {
-            if (!expected.Equals(actual))
+            if (!ExpressionAssert.Equals(expected, actual))
             {
                 Assert.Fail(
                     "Expression = {0}\r\nExpected   = {1}\r\nActual     = {2}",
@@ -32,13 +32,16 @@ namespace Favalet.Reducing
         {
             var environment = Environment();
 
+            // let ABC = XYZ
             environment.MutableBind("ABC", Variable("XYZ"));
 
+            // ABC
             var expression =
                 Variable("ABC");
 
             var actual = environment.Reduce(expression);
 
+            // XYZ
             var expected =
                 Variable("XYZ");
 
@@ -50,6 +53,7 @@ namespace Favalet.Reducing
         {
             var environment = Environment();
 
+            // arg -> arg && B
             var expression =
                 Lambda(
                     "arg",
@@ -59,6 +63,7 @@ namespace Favalet.Reducing
 
             var actual = environment.Reduce(expression);
 
+            // arg -> arg && B
             var expected =
                 Lambda(
                     "arg",
@@ -86,6 +91,7 @@ namespace Favalet.Reducing
 
             var actual = environment.Reduce(expression);
 
+            // A && B
             var expected =
                 And(
                     Variable("A"),

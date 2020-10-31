@@ -26,6 +26,7 @@ namespace Favalet.Inferring
             }
         }
 
+        #region Variable
         [Test]
         public void FromVariable1()
         {
@@ -77,7 +78,64 @@ namespace Favalet.Inferring
 
             AssertLogicalEqual(expression, expected, actual);
         }
+        #endregion
  
+        #region BoundVariable
+        [Test]
+        public void BoundVariableFixedRelation1()
+        {
+            var environment = CLREnvironment();
+
+            // (a -> a):(object -> _)
+            var expression =
+                Lambda(
+                    BoundVariable("a"),
+                    Variable("a"),
+                    Function(
+                        Type<object>(),
+                        Unspecified()));
+
+            var actual = environment.Infer(expression);
+
+            // (a:object -> a:object):(object -> object)
+            var expected =
+                Lambda(
+                    BoundVariable("a", Type<object>()),
+                    Variable("a", Type<object>()),
+                    Function(
+                        Type<object>(),
+                        Type<object>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        
+        [Test]
+        public void BoundVariableFixedRelation3()
+        {
+            var environment = CLREnvironment();
+
+            // a:object -> a
+            var expression =
+                Lambda(
+                    BoundVariable("a", Type<object>()),
+                    Variable("a"));
+
+            var actual = environment.Infer(expression);
+
+            // (a:object -> a:object):(object -> object)
+            var expected =
+                Lambda(
+                    BoundVariable("a", Type<object>()),
+                    Variable("a", Type<object>()),
+                    Function(
+                        Type<object>(),
+                        Type<object>()));
+
+            AssertLogicalEqual(expression, expected, actual);
+        }
+        #endregion
+ 
+        #region TypeVariable
         [Test]
         public void TypeVariable1()
         {
@@ -177,27 +235,6 @@ namespace Favalet.Inferring
 
             AssertLogicalEqual(expression, expected, actual);
         }
-
-        [Test]
-        public void Placeholder1()
-        {
-            var environment = CLREnvironment();
-
-            // a:int -> a:object
-            var expression =
-                Lambda(
-                    BoundVariable("a", Type<int>()),
-                    Variable("a", Type<object>()));
-
-            var actual = environment.Infer(expression);
-
-            // a:int -> a:object
-            var expected =
-                Lambda(
-                    BoundVariable("a", Type<int>()),
-                    Variable("a", Type<object>()));
-
-            AssertLogicalEqual(expression, expected, actual);
-        }
+        #endregion
     }
 }

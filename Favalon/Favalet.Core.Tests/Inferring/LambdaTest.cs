@@ -473,8 +473,6 @@ namespace Favalet.Inferring
                         Variable("bool"),
                         Variable("bool")));
 
-            var r = expected.GetPrettyString(PrettyStringTypes.Readable);
-
             AssertLogicalEqual(expression, expected, actual);
         }
 

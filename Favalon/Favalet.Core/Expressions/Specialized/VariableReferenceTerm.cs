@@ -5,35 +5,44 @@ using System.Xml.Linq;
 
 namespace Favalet.Expressions.Specialized
 {
-    public interface IBoundVariableTerm :
+    public interface IVariableReferenceTerm :
         ITerm
     {
         string Symbol { get; }
     }
 
-    public sealed class BoundVariableTerm :
-        Expression, IBoundVariableTerm
+    internal sealed class VariableReferenceTerm :
+        Expression, IVariableReferenceTerm
     {
         public readonly string Symbol;
-
+        
         [DebuggerStepThrough]
-        private BoundVariableTerm(string symbol, IExpression higherOrder)
+        private VariableReferenceTerm(string symbol, IExpression higherOrder)
         {
-            this.HigherOrder = higherOrder;
             this.Symbol = symbol;
+            this.HigherOrder = higherOrder;
         }
-
+        
         public override IExpression HigherOrder { get; }
-
+        
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IBoundVariableTerm.Symbol
+        string IVariableReferenceTerm.Symbol
         {
             [DebuggerStepThrough]
             get => this.Symbol;
         }
 
+        public override int GetHashCode() =>
+            this.Symbol.GetHashCode();
+
+        public bool Equals(IVariableReferenceTerm rhs) =>
+            this.Symbol.Equals(rhs.Symbol);
+
+        public override bool Equals(IExpression? other) =>
+            other is IVariableReferenceTerm rhs && this.Equals(rhs);
+
         protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
-            new BoundVariableTerm(
+            new VariableReferenceTerm(
                 this.Symbol,
                 context.MakeRewritableHigherOrder(this.HigherOrder));
 
@@ -47,7 +56,7 @@ namespace Favalet.Expressions.Specialized
             }
             else
             {
-                return new BoundVariableTerm(this.Symbol, higherOrder);
+                return new VariableReferenceTerm(this.Symbol, higherOrder);
             }
         }
 
@@ -61,21 +70,23 @@ namespace Favalet.Expressions.Specialized
             }
             else
             {
-                return new BoundVariableTerm(this.Symbol, higherOrder);
+                return new VariableReferenceTerm(this.Symbol, higherOrder);
             }
         }
 
-        protected override IExpression Reduce(IReduceContext context) =>
-            this;
-        
-        public override int GetHashCode() =>
-            this.Symbol.GetHashCode();
-
-        public bool Equals(IBoundVariableTerm rhs) =>
-            this.Symbol.Equals(rhs.Symbol);
-
-        public override bool Equals(IExpression? other) =>
-            other is IBoundVariableTerm rhs && this.Equals(rhs);
+        protected override IExpression Reduce(IReduceContext context)
+        {
+            var variables = context.LookupVariables(this.Symbol);
+            if (variables.Length >= 1)
+            {
+                // Nearly overloaded variable.
+                return context.Reduce(variables[0].Expression);
+            }
+            else
+            {
+                return this;
+            }
+        }
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             new[] { new XAttribute("symbol", this.Symbol) };
@@ -86,10 +97,7 @@ namespace Favalet.Expressions.Specialized
                 this.Symbol);
 
         [DebuggerStepThrough]
-        public static BoundVariableTerm Create(string symbol, IExpression higherOrder) =>
-            new BoundVariableTerm(symbol, higherOrder);
-        [DebuggerStepThrough]
-        public static BoundVariableTerm Create(string symbol) =>
-            new BoundVariableTerm(symbol, UnspecifiedTerm.Instance);
+        public static VariableReferenceTerm Create(IBoundVariableTerm bound) =>
+            new VariableReferenceTerm(bound.Symbol, bound.HigherOrder);
     }
 }

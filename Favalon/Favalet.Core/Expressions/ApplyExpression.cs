@@ -1,7 +1,10 @@
-﻿using Favalet.Contexts;
+﻿using System;
+using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -18,7 +21,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class ApplyExpression :
-        Expression, IApplyExpression
+        Expression, IApplyExpression, IPairExpression
     {
         public readonly IExpression Function;
         public readonly IExpression Argument;
@@ -50,6 +53,32 @@ namespace Favalet.Expressions
             get => this.Argument;
         }
 
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IPairExpression.Left
+        {
+            [DebuggerStepThrough]
+            get => this.Function;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IPairExpression.Right
+        {
+            [DebuggerStepThrough]
+            get => this.Argument;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        Type IPairExpression.IdentityType
+        {
+            [DebuggerStepThrough]
+            get => typeof(IApplyExpression);
+        }
+
+        [DebuggerStepThrough]
+        IExpression IPairExpression.Create(IExpression left, IExpression right) =>
+            Create(left, right);
+
         public override int GetHashCode() =>
             this.Function.GetHashCode() ^ this.Argument.GetHashCode();
 
@@ -72,10 +101,10 @@ namespace Favalet.Expressions
             var function = context.Infer(this.Function);
             var higherOrder = context.Infer(this.HigherOrder);
 
-            var functionHigherOrder = FunctionExpression.Create(
+            var functionHigherOrder = AppliedFunctionExpression.Create(
                 argument.HigherOrder, higherOrder);
 
-            context.Unify(function.HigherOrder, functionHigherOrder);
+            context.Unify(function.HigherOrder, functionHigherOrder, false);
 
             if (object.ReferenceEquals(this.Argument, argument) &&
                 object.ReferenceEquals(this.Function, function) &&

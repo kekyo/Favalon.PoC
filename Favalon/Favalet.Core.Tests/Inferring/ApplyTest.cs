@@ -78,7 +78,7 @@ namespace Favalet.Inferring
             AssertLogicalEqual(expression, expected, actual);
         }
 
-        [Test]
+        //[Test]
         public void ApplyNestedFunctionWithoutAnnotation2()
         {
             var environment = CLREnvironment();

@@ -1,6 +1,10 @@
-﻿using Favalet.Contexts;
+﻿using System;
+using Favalet.Contexts;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using Favalet.Expressions.Specialized;
 
 namespace Favalet.Expressions.Algebraic
 {
@@ -11,7 +15,7 @@ namespace Favalet.Expressions.Algebraic
     }
 
     public abstract class BinaryExpression<TBinaryExpression> :
-        Expression, IBinaryExpression
+        Expression, IBinaryExpression, IPairExpression
         where TBinaryExpression : IBinaryExpression
     {
         public readonly IExpression Left;
@@ -41,7 +45,32 @@ namespace Favalet.Expressions.Algebraic
             [DebuggerStepThrough]
             get => this.Right;
         }
+        
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IPairExpression.Left
+        {
+            [DebuggerStepThrough]
+            get => this.Left;
+        }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IPairExpression.Right
+        {
+            [DebuggerStepThrough]
+            get => this.Right;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        Type IPairExpression.IdentityType
+        {
+            [DebuggerStepThrough]
+            get => typeof(TBinaryExpression);
+        }
+
+        [DebuggerStepThrough]
+        IExpression IPairExpression.Create(IExpression left, IExpression right) =>
+            this.OnCreate(left, right, UnspecifiedTerm.Instance);
+        
         internal abstract IExpression OnCreate(
             IExpression left, IExpression right, IExpression higherOrder);
 
@@ -57,8 +86,10 @@ namespace Favalet.Expressions.Algebraic
             var right = context.Infer(this.Right);
             var higherOrder = context.Infer(this.HigherOrder);
 
-            context.Unify(left.HigherOrder, higherOrder);
-            context.Unify(right.HigherOrder, higherOrder);
+            context.Unify(left.HigherOrder, right.HigherOrder, true);
+            
+            context.Unify(left.HigherOrder, higherOrder, false);
+            context.Unify(right.HigherOrder, higherOrder, false);
 
             if (object.ReferenceEquals(this.Left, left) &&
                 object.ReferenceEquals(this.Right, right) &&

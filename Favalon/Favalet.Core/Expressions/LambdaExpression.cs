@@ -1,9 +1,10 @@
-﻿using Favalet.Contexts;
+﻿using System;
+using Favalet.Contexts;
 using Favalet.Expressions.Specialized;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
-using Favalet.Internal;
+using System.Linq;
 
 namespace Favalet.Expressions
 {
@@ -16,7 +17,7 @@ namespace Favalet.Expressions
     }
 
     public sealed class LambdaExpression :
-        Expression, ILambdaExpression
+        Expression, ILambdaExpression, IPairExpression
     {
         public readonly IBoundVariableTerm Parameter;
         public readonly IExpression Body;
@@ -46,6 +47,33 @@ namespace Favalet.Expressions
             get => this.Body;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IPairExpression.Left
+        {
+            [DebuggerStepThrough]
+            get => this.Parameter;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        IExpression IPairExpression.Right
+        {
+            [DebuggerStepThrough]
+            get => this.Body;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        Type IPairExpression.IdentityType
+        {
+            [DebuggerStepThrough]
+            get => typeof(ILambdaExpression);
+        }
+
+        [DebuggerStepThrough]
+        IExpression IPairExpression.Create(IExpression left, IExpression right) =>
+            left is IBoundVariableTerm bound ?
+                Create(bound, right) :
+                throw new InvalidOperationException();
+        
         public override int GetHashCode() =>
             this.Parameter.GetHashCode() ^ this.Body.GetHashCode();
 
@@ -60,14 +88,15 @@ namespace Favalet.Expressions
             new LambdaExpression(
                 (IBoundVariableTerm)context.MakeRewritable(this.Parameter),
                 context.MakeRewritable(this.Body),
-                context.MakeRewritableHigherOrder(this.HigherOrder, HigherOrderAttributes.FixedPlaceholder));
+                context.MakeRewritableHigherOrder(this.HigherOrder));
 
         protected override IExpression Infer(IInferContext context)
         {
             var parameter = (IBoundVariableTerm)context.Infer(this.Parameter);
             var higherOrder = context.Infer(this.HigherOrder);
 
-            var newScope = context.Bind(parameter, parameter);
+            var newScope = context.Bind(
+                parameter, VariableReferenceTerm.Create(parameter));
 
             var body = newScope.Infer(this.Body);
 

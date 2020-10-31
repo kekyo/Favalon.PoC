@@ -75,8 +75,20 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        protected override IExpression Reduce(IReduceContext context) =>
-            this;
+        protected override IExpression Reduce(IReduceContext context)
+        {
+            var variables = context.LookupVariables(this.Symbol);
+
+            if (variables.Length >= 1)
+            {
+                // Nearly overloaded variable.
+                return context.Reduce(variables[0].Expression);
+            }
+            else
+            {
+                return this;
+            }
+        }
 
         protected override IEnumerable GetXmlValues(IXmlRenderContext context) =>
             new[] { new XAttribute("symbol", this.Symbol) };

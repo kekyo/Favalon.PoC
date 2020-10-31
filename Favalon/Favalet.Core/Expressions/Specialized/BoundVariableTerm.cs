@@ -17,7 +17,7 @@ namespace Favalet.Expressions.Specialized
         public readonly string Symbol;
 
         [DebuggerStepThrough]
-        private BoundVariableTermBase(string symbol, IExpression higherOrder)
+        private BoundVariableTerm(string symbol, IExpression higherOrder)
         {
             this.HigherOrder = higherOrder;
             this.Symbol = symbol;
@@ -32,12 +32,12 @@ namespace Favalet.Expressions.Specialized
             get => this.Symbol;
         }
 
-        protected override sealed IExpression MakeRewritable(IMakeRewritableContext context) =>
+        protected override IExpression MakeRewritable(IMakeRewritableContext context) =>
             new BoundVariableTerm(
                 this.Symbol,
                 context.MakeRewritableHigherOrder(this.HigherOrder));
 
-        protected override sealed IExpression Infer(IInferContext context)
+        protected override IExpression Infer(IInferContext context)
         {
             var higherOrder = context.Infer(this.HigherOrder);
 
@@ -51,7 +51,7 @@ namespace Favalet.Expressions.Specialized
             }
         }
 
-        protected override sealed IExpression Fixup(IFixupContext context)
+        protected override IExpression Fixup(IFixupContext context)
         {
             var higherOrder = context.FixupHigherOrder(this.HigherOrder);
 

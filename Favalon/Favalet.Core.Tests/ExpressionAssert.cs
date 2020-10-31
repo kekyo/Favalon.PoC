@@ -106,6 +106,24 @@ namespace Favalet
                     return Results.Ignore;
                 case (_, DeadEndTerm _):
                     return Trap(false);
+                case (IVariableTerm lv, IVariableReferenceTerm rvr):
+                    if (lv.Symbol.Equals(rvr.Symbol))
+                    {
+                        return Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                    }
+                    else
+                    {
+                        return Results.Negate;
+                    }
+                case (IVariableReferenceTerm lvr, IVariableTerm rv):
+                    if (lvr.Symbol.Equals(rv.Symbol))
+                    {
+                        return Equals(lhs.HigherOrder, rhs.HigherOrder, indexes);
+                    }
+                    else
+                    {
+                        return Results.Negate;
+                    }
                 case (IPairExpression le, IPairExpression re)
                     when le.IdentityType.Equals(re.IdentityType):
                     var p1 = Equals(le.Left, re.Left, indexes);

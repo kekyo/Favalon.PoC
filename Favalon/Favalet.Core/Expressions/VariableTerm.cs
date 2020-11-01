@@ -166,8 +166,20 @@ namespace Favalet.Expressions
             {
                 Debug.Assert(bounds.Length >= 1);
 
-                // TODO: priority from higher orders.
-                return context.Reduce(bounds[0]);
+                var target = bounds[0];
+                if (target is IBoundVariableTerm bound)
+                {
+                    var variables = context.LookupVariables(bound.Symbol);
+                    if (variables.Length >= 1)
+                    {
+                        // Nearly overloaded variable.
+                        return context.Reduce(variables[0].Expression);
+                    }
+                }
+                else
+                {
+                    return context.Reduce(target);
+                }
             }
 
             return this;

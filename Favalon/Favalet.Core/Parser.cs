@@ -6,11 +6,21 @@ using System.Diagnostics;
 
 namespace Favalet
 {
-    partial class Environment
+    public interface IParser
+    {
+        IEnumerable<IExpression> Parse(IEnumerable<Token> tokens);
+    }
+    
+    public sealed class Parser : IParser
     {
 #if DEBUG
         public int BreakIndex = -1;
 #endif
+
+        [DebuggerStepThrough]
+        private Parser()
+        {
+        }
 
         public IEnumerable<IExpression> Parse(IEnumerable<Token> tokens)
         {
@@ -51,5 +61,8 @@ namespace Favalet
                 yield return finalTerm.VisitUnveil();
             }
         }
+
+        public static Parser Create() =>
+            new Parser();
     }
 }

@@ -17,7 +17,7 @@ namespace Favalet.Parsers
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private ParseRunnerContext(Context context, Stack<ScopeInformation> scopes)
+        private ParseRunnerContext(Parser context, Stack<ScopeInformation> scopes)
         {
             this.CurrentContext = context;
             this.PreSignToken = null;
@@ -26,7 +26,7 @@ namespace Favalet.Parsers
             this.scopes = scopes;
         }
 
-        public Context CurrentContext { get; private set; }
+        public Parser CurrentContext { get; private set; }
         public IExpression? CurrentTerm { get; private set; }
         public BoundTermPrecedences? CurrentPrecedence { get; private set; }
         public Token? LastToken { get; private set; }
@@ -101,7 +101,7 @@ namespace Favalet.Parsers
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static ParseRunnerContext Create(Context context) =>
+        public static ParseRunnerContext Create(Parser context) =>
             new ParseRunnerContext(context, new Stack<ScopeInformation>());
     }
 }

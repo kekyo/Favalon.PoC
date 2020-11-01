@@ -1,4 +1,4 @@
-﻿using Favalet.LexRunners;
+﻿using Favalet.Lexers;
 using Favalet.Tokens;
 using System.Collections.Generic;
 using System.IO;

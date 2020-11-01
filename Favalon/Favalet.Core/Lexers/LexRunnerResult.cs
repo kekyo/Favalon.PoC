@@ -1,7 +1,7 @@
 ﻿using Favalet.Tokens;
 using System.Runtime.CompilerServices;
 
-namespace Favalet.LexRunners
+namespace Favalet.Lexers
 {
     internal struct LexRunnerResult
     {

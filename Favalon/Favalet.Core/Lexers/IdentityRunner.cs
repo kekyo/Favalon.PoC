@@ -2,18 +2,18 @@
 using Favalet.Tokens;
 using System;
 
-namespace Favalet.LexRunners
+namespace Favalet.Lexers
 {
-    internal sealed class NumericRunner : LexRunner
+    internal sealed class IdentityRunner : LexRunner
     {
-        private NumericRunner()
+        private IdentityRunner()
         { }
 
-        private static NumericToken InternalFinish(LexRunnerContext context)
+        private static IdentityToken InternalFinish(LexRunnerContext context)
         {
             var token = context.TokenBuffer.ToString();
             context.TokenBuffer.Clear();
-            return new NumericToken(token);
+            return new IdentityToken(token);
         }
 
         public override LexRunnerResult Run(LexRunnerContext context, char ch)
@@ -22,10 +22,7 @@ namespace Favalet.LexRunners
             {
                 var token = context.TokenBuffer.ToString();
                 context.TokenBuffer.Clear();
-                return LexRunnerResult.Create(
-                    WaitingIgnoreSpaceRunner.Instance,
-                    new NumericToken(token),
-                    WhiteSpaceToken.Instance);
+                return LexRunnerResult.Create(WaitingIgnoreSpaceRunner.Instance, new IdentityToken(token), WhiteSpaceToken.Instance);
             }
             else if (TokenUtilities.IsOpenParenthesis(ch) is ParenthesisPair)
             {
@@ -47,7 +44,7 @@ namespace Favalet.LexRunners
                 context.TokenBuffer.Append(ch);
                 return LexRunnerResult.Create(OperatorRunner.Instance, token0);
             }
-            else if (char.IsDigit(ch))
+            else if (!char.IsControl(ch))
             {
                 context.TokenBuffer.Append(ch);
                 return LexRunnerResult.Empty(this);
@@ -61,6 +58,6 @@ namespace Favalet.LexRunners
         public override LexRunnerResult Finish(LexRunnerContext context) =>
             LexRunnerResult.Create(WaitingRunner.Instance, InternalFinish(context));
 
-        public static readonly LexRunner Instance = new NumericRunner();
+        public static readonly LexRunner Instance = new IdentityRunner();
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Favalet.LexRunners
+﻿namespace Favalet.Lexers
 {
     internal abstract class LexRunner
     {

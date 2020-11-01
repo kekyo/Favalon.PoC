@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Favalet.LexRunners
+namespace Favalet.Lexers
 {
     internal sealed class LexRunnerContext
     {

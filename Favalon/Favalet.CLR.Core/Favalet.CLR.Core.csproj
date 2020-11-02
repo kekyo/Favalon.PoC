@@ -32,4 +32,8 @@
     <ProjectReference Include="..\Favalet.Core\Favalet.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Parsers" />
+  </ItemGroup>
+
 </Project>

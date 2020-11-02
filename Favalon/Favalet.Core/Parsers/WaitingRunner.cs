@@ -26,17 +26,6 @@ namespace Favalet.Parsers
                     context.CombineAfter(VariableTerm.Create(identity.Identity));
                     return ParseRunnerResult.Empty(ApplyingRunner.Instance);
 
-                // // "123"
-                // case NumericToken numeric:
-                //     context.CombineAfter(
-                //         ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
-                //     return ParseRunnerResult.Empty(ApplyingRunner.Instance);
-                //
-                // // "-"
-                // case NumericalSignToken numericSign:
-                //     context.PreSignToken = numericSign;
-                //     return ParseRunnerResult.Empty(NumericalSignedRunner.Instance);
-
                 // // "("
                 // case OpenParenthesisToken parenthesis:
                 //     context.PushScope(parenthesis.Pair);

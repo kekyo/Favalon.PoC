@@ -11,8 +11,8 @@ namespace Favalet
             private Factory()
             { }
 
-            public ParseRunner Waiting { get; } = WaitingRunner.Instance;
-            public ParseRunner Applying { get; } = ApplyingRunner.Instance;
+            public ParseRunner Waiting { get; } = CLRWaitingRunner.Instance;
+            public ParseRunner Applying { get; } = CLRApplyingRunner.Instance;
             
             public static IParseRunnerFactory Instance =
                 new Factory();

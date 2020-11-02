@@ -1,6 +1,6 @@
-﻿using Favalet.Parsers;
-using Favalet.Expressions;
+﻿using Favalet.Expressions;
 using Favalet.Tokens;
+using Favalet.Parsers;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -11,24 +11,39 @@ namespace Favalet
         IEnumerable<IExpression> Parse(IEnumerable<Token> tokens);
     }
     
-    public sealed class Parser : IParser
+    public class Parser : IParser
     {
+        [DebuggerStepThrough]
+        private sealed class Factory : IParseRunnerFactory
+        {
+            private Factory()
+            { }
+
+            public ParseRunner Waiting { get; } = WaitingRunner.Instance;
+            public ParseRunner Applying { get; } = ApplyingRunner.Instance;
+            
+            public static IParseRunnerFactory Instance =
+                new Factory();
+        }
+        
 #if DEBUG
         public int BreakIndex = -1;
 #endif
 
+        private readonly IParseRunnerFactory factory;
+
         [DebuggerStepThrough]
-        private Parser()
-        {
-        }
+        protected Parser(IParseRunnerFactory factory) =>
+            this.factory = factory;
 
         public IEnumerable<IExpression> Parse(IEnumerable<Token> tokens)
         {
-            var runnerContext = ParseRunnerContext.Create(this);
-            var runner = WaitingRunner.Instance;
 #if DEBUG
             var index = 0;
 #endif
+            var runnerContext = ParseRunnerContext.Create(this.factory);
+            var runner = runnerContext.Factory.Waiting;
+            
             foreach (var token in tokens)
             {
 #if DEBUG
@@ -37,8 +52,8 @@ namespace Favalet
 #endif
                 switch (runner.Run(runnerContext, token))
                 {
-                    case ParseRunnerResult(ParseRunner next, IExpression term):
-                        yield return term;
+                    case ParseRunnerResult(ParseRunner next, IExpression expression):
+                        yield return expression;
                         runner = next;
                         break;
                     case ParseRunnerResult(ParseRunner next, _):
@@ -51,18 +66,14 @@ namespace Favalet
                 runnerContext.SetLastToken(token);
             }
 
-            // Exhaust all saved scopes
-            while (ParserUtilities.LeaveOneImplicitScope(runnerContext) != LeaveScopeResults.None);
-
             // Contains final result
-            if (runnerContext.CurrentTerm is IExpression finalTerm)
+            if (runnerContext.Current is IExpression finalTerm)
             {
-                // Iterate with unveiling hided terms.
-                yield return finalTerm.VisitUnveil();
+                yield return finalTerm;
             }
         }
 
-        public static Parser Create() =>
-            new Parser();
+        public static readonly Parser Instance =
+            new Parser(Factory.Instance);
     }
 }

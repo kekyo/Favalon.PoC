@@ -1,9 +1,11 @@
-﻿using Favalet.Tokens;
+using System.Diagnostics;
+using Favalet.Tokens;
 
 namespace Favalet.Parsers
 {
-    internal abstract class ParseRunner
+    public abstract class ParseRunner
     {
+        [DebuggerStepThrough]
         protected ParseRunner()
         { }
 

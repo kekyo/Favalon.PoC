@@ -1,107 +1,66 @@
-﻿using Favalet.Expressions;
+using System.Diagnostics;
+using Favalet.Expressions;
 using Favalet.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
+using Favalet.Contexts;
 
 namespace Favalet.Parsers
 {
-    internal sealed class ParseRunnerContext
+    public sealed class ParseRunnerContext
     {
-        public NumericalSignToken? PreSignToken;
-        public BoundTermAssociatives ApplyNextAssociative;
+        public readonly IParseRunnerFactory Factory;
 
-        private readonly Stack<ScopeInformation> scopes;
+        //public NumericalSignToken? PreSignToken;
 
-#if NET45 || NETSTANDARD1_0
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        private ParseRunnerContext(Parser context, Stack<ScopeInformation> scopes)
+        [DebuggerStepThrough]
+        private ParseRunnerContext(IParseRunnerFactory factory)
         {
-            this.CurrentContext = context;
-            this.PreSignToken = null;
+            this.Factory = factory;
+            //this.PreSignToken = null;
             this.LastToken = null;
-            this.ApplyNextAssociative = BoundTermAssociatives.LeftToRight;
-            this.scopes = scopes;
         }
 
-        public Parser CurrentContext { get; private set; }
-        public IExpression? CurrentTerm { get; private set; }
-        public BoundTermPrecedences? CurrentPrecedence { get; private set; }
+        public IExpression? Current { get; private set; }
         public Token? LastToken { get; private set; }
 
-        public void SetLastToken(Token token) =>
+        [DebuggerStepThrough]
+        internal void SetLastToken(Token token) =>
             this.LastToken = token;
 
-        public void SetTerm(IExpression term) =>
-            this.CurrentTerm = term;
-        public void CombineAfter(IExpression term) =>
-            this.CurrentTerm = ParserUtilities.CombineTerms(this.CurrentTerm, term);
-        public void CombineBefore(IExpression term) =>
-            this.CurrentTerm = ParserUtilities.CombineTerms(term, this.CurrentTerm);
-
-        public void MakeHidedApplyTerm() =>
-            this.CurrentTerm = ParserUtilities.HideTerm(this.CurrentTerm);
-
-        public void SetPrecedence(BoundTermPrecedences precedence) =>
-            this.CurrentPrecedence = precedence;
-
-        public void PushScope(ParenthesisPair? parenthesisPair = null)
+        [DebuggerStepThrough]
+        private static IExpression Combine(IExpression? left, IExpression? right)
         {
-            this.scopes.Push(new ScopeInformation(this.CurrentContext, this.CurrentTerm, this.CurrentPrecedence, parenthesisPair));
-            this.CurrentContext = this.CurrentContext.Clone();
-            this.CurrentTerm = null;
-            this.CurrentPrecedence = null;
-        }
-
-        public bool TryPopScope(out ParenthesisPair? parenthesisPair)
-        {
-            if (this.scopes.Count >= 1)
+            if (left != null)
             {
-                var scope = this.scopes.Pop();
-
-                // Retreive the context.
-                this.CurrentContext = scope.SavedContext;
-
-                // Make term hiding:
-                // because invalid deconstruction ApplyTerm for next token iteration.
-                var hideTerm = ParserUtilities.HideTerm(this.CurrentTerm);
-
-                // Combine it implicitly.
-                this.CurrentTerm = ParserUtilities.CombineTerms(
-                    scope.SavedTerm,
-                    hideTerm);
-
-                // Reset precedence, because finished a scope.
-                this.CurrentPrecedence = null;
-
-                parenthesisPair = scope.ParenthesisPair;
-
-                return true;
+                if (right != null)
+                {
+                    return ApplyExpression.Create(left, right);
+                }
+                else
+                {
+                    return left;
+                }
             }
             else
             {
-                parenthesisPair = default;
-                return false;
+                return right!;
             }
         }
 
-        public override string ToString()
-        {
-            var currentContext = this.CurrentContext.ToString();
-            var currentTerm = this.CurrentTerm?.Readable ?? "[null]";
-            var currentPrecedence = this.CurrentPrecedence?.ToString() ?? "[null]";
-            var willApplyAssociative = this.ApplyNextAssociative.ToString();
-            var scopes = string.Join(",", this.scopes.Select(scope => $"[{scope}]").ToArray());
+        [DebuggerStepThrough]
+        public void CombineAfter(IExpression expression) =>
+            this.Current = Combine(this.Current, expression);
+        [DebuggerStepThrough]
+        public void CombineBefore(IExpression expression) =>
+            this.Current = Combine(expression, this.Current);
 
-            return $"{currentContext},'{currentTerm}', P={currentPrecedence}, {willApplyAssociative}, [{scopes}]";
-        }
+        [DebuggerStepThrough]
+        public override string ToString() =>
+            this.Current is IExpression current ?
+                $"{current.GetPrettyString(PrettyStringTypes.Readable)}" :
+                "(empty)";
 
-#if NET45 || NETSTANDARD1_0
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public static ParseRunnerContext Create(Parser context) =>
-            new ParseRunnerContext(context, new Stack<ScopeInformation>());
+        [DebuggerStepThrough]
+        public static ParseRunnerContext Create(IParseRunnerFactory factory) =>
+            new ParseRunnerContext(factory);
     }
 }

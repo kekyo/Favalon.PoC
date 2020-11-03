@@ -62,6 +62,7 @@ namespace Favalet
                 actual);
         }
 
+#if false
         [Test]
         public void EnumerableIdentityWithAfterBracketTokens()
         {
@@ -682,5 +683,6 @@ namespace Favalet
                         Generator.Variable("def")) },
                 actual);
         }
+#endif
     }
 }

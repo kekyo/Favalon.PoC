@@ -18,12 +18,21 @@ namespace Favalet.Parsers
 
             switch (token)
             {
-                // // "123"
-                // case NumericToken numeric:
-                //     context.CombineAfter(
-                //         ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
-                //     return ParseRunnerResult.Empty(ApplyingRunner.Instance);
-                //
+                // "123"
+                case NumericToken numeric:
+                    if (int.TryParse(numeric.Value, out var intValue))
+                    {
+                        context.CombineAfter(ConstantTerm.From(intValue));
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"Couldn't parse numeric: {numeric.Value}");
+                    }
+                    //context.CombineAfter(
+                    //    ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
+                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
+                
                 // // "-"
                 // case NumericalSignToken numericSign:
                 //     context.PreSignToken = numericSign;

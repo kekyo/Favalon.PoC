@@ -179,7 +179,6 @@ namespace Favalet
 
         //////////////////////////////////////////////
 
-#if false
         [Test]
         public void EnumerableNumericToken()
         {
@@ -192,6 +191,7 @@ namespace Favalet
                 actual);
         }
 
+#if false
         [TestCase(true)]
         [TestCase(false)]
         public void EnumerableNumericTokenWithSign(bool plus)

@@ -18,11 +18,18 @@ namespace Favalet.Parsers
 
             switch (token)
             {
-                // case NumericToken numeric:
-                //     context.CombineAfter(
-                //         ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
-                //     return ParseRunnerResult.Empty(this);
-                //
+                case NumericToken numeric:
+                    if (int.TryParse(numeric.Value, out var intValue))
+                    {
+                        context.CombineAfter(ConstantTerm.From(intValue));
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"Couldn't parse numeric: {numeric.Value}");
+                    }
+                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
+
                 // case NumericalSignToken numericSign:
                 //     // "abc -" / "123 -" ==> binary op or signed
                 //     if (context.LastToken is WhiteSpaceToken)

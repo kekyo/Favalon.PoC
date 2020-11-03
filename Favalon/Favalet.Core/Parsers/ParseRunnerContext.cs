@@ -7,26 +7,24 @@ using Favalet.Contexts;
 
 namespace Favalet.Parsers
 {
-    public sealed class ParseRunnerContext
+    [DebuggerStepThrough]
+    public class ParseRunnerContext
     {
         private readonly Stack<(ParenthesisPair pair, IExpression? left)> scopes =
             new Stack<(ParenthesisPair pair, IExpression? left)>();
         
-        public readonly IParseRunnerFactory Factory;
-
-        //public NumericalSignToken? PreSignToken;
-
         [DebuggerStepThrough]
-        private ParseRunnerContext(IParseRunnerFactory factory)
-        {
-            this.Factory = factory;
-            //this.PreSignToken = null;
+        protected ParseRunnerContext() =>
             this.LastToken = null;
-        }
 
         public IExpression? Current { get; private set; }
         public Token? LastToken { get; private set; }
 
+        public virtual ParseRunner Waiting =>
+            WaitingRunner.Instance;
+        public virtual ParseRunner Applying =>
+            ApplyingRunner.Instance;
+        
         [DebuggerStepThrough]
         internal void SetLastToken(Token token) =>
             this.LastToken = token;
@@ -89,7 +87,7 @@ namespace Favalet.Parsers
                 "(empty)";
 
         [DebuggerStepThrough]
-        public static ParseRunnerContext Create(IParseRunnerFactory factory) =>
-            new ParseRunnerContext(factory);
+        public static ParseRunnerContext Create() =>
+            new ParseRunnerContext();
     }
 }

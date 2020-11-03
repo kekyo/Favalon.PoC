@@ -33,10 +33,10 @@ namespace Favalet.Parsers
                     //    ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
                     return ParseRunnerResult.Empty(ApplyingRunner.Instance);
                 
-                // // "-"
-                // case NumericalSignToken numericSign:
-                //     context.PreSignToken = numericSign;
-                //     return ParseRunnerResult.Empty(NumericalSignedRunner.Instance);
+                // "-"
+                case NumericalSignToken numericSign:
+                    ((CLRParseRunnerContext)context).PreSignToken = numericSign;
+                    return ParseRunnerResult.Empty(NumericalSignedRunner.Instance);
 
                 default:
                     return base.Run(context, token);

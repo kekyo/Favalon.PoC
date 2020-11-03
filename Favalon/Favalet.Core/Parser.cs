@@ -1,6 +1,7 @@
 ﻿using Favalet.Expressions;
 using Favalet.Tokens;
 using Favalet.Parsers;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -13,36 +14,23 @@ namespace Favalet
     
     public class Parser : IParser
     {
-        [DebuggerStepThrough]
-        private sealed class Factory : IParseRunnerFactory
-        {
-            private Factory()
-            { }
-
-            public ParseRunner Waiting { get; } = WaitingRunner.Instance;
-            public ParseRunner Applying { get; } = ApplyingRunner.Instance;
-            
-            public static IParseRunnerFactory Instance =
-                new Factory();
-        }
-        
 #if DEBUG
         public int BreakIndex = -1;
 #endif
 
-        private readonly IParseRunnerFactory factory;
+        private readonly Func<ParseRunnerContext> contextCreator;
 
         [DebuggerStepThrough]
-        protected Parser(IParseRunnerFactory factory) =>
-            this.factory = factory;
+        protected Parser(Func<ParseRunnerContext> contextCreator) =>
+            this.contextCreator = contextCreator;
 
         public IEnumerable<IExpression> Parse(IEnumerable<Token> tokens)
         {
 #if DEBUG
             var index = 0;
 #endif
-            var runnerContext = ParseRunnerContext.Create(this.factory);
-            var runner = runnerContext.Factory.Waiting;
+            var runnerContext = this.contextCreator();
+            var runner = runnerContext.Waiting;
             
             foreach (var token in tokens)
             {
@@ -74,6 +62,6 @@ namespace Favalet
         }
 
         public static readonly Parser Instance =
-            new Parser(Factory.Instance);
+            new Parser(ParseRunnerContext.Create);
     }
 }

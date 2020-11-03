@@ -1,7 +1,10 @@
-﻿namespace Favalet.Lexers
+﻿using System.Diagnostics;
+
+namespace Favalet.Lexers
 {
     internal abstract class LexRunner
     {
+        [DebuggerStepThrough]
         protected LexRunner()
         { }
 

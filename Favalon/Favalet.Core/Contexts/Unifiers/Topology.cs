@@ -484,7 +484,7 @@ namespace Favalet.Contexts.Unifiers
         {
             [DebuggerStepThrough]
             get => StringUtilities.Join(
-                Environment.NewLine,
+                System.Environment.NewLine,
                 this.topology.
                     // TODO: alias
                     OrderBy(entry => entry.Key, IdentityTermComparer.Instance).

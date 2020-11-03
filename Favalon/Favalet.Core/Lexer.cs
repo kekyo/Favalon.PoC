@@ -1,13 +1,26 @@
 ﻿using Favalet.Lexers;
 using Favalet.Tokens;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace Favalet
 {
-    public static class Lexer
+    public interface ILexer
     {
-        public static IEnumerable<Token> EnumerableTokens(string text)
+        IEnumerable<Token> EnumerableTokens(string text);
+        IEnumerable<Token> EnumerableTokens(IEnumerable<char> chars);
+        IEnumerable<Token> EnumerableTokens(TextReader tr);
+    }
+    
+    public sealed class Lexer : ILexer
+    {
+        [DebuggerStepThrough]
+        private Lexer()
+        {
+        }
+
+        public IEnumerable<Token> EnumerableTokens(string text)
         {
             var context = LexRunnerContext.Create();
             var runner = WaitingIgnoreSpaceRunner.Instance;
@@ -37,7 +50,7 @@ namespace Favalet
             }
         }
 
-        public static IEnumerable<Token> EnumerableTokens(IEnumerable<char> chars)
+        public IEnumerable<Token> EnumerableTokens(IEnumerable<char> chars)
         {
             var runnerContext = LexRunnerContext.Create();
             var runner = WaitingIgnoreSpaceRunner.Instance;
@@ -67,7 +80,7 @@ namespace Favalet
             }
         }
 
-        public static IEnumerable<Token> EnumerableTokens(TextReader tr)
+        public IEnumerable<Token> EnumerableTokens(TextReader tr)
         {
             var context = LexRunnerContext.Create();
             var runner = WaitingIgnoreSpaceRunner.Instance;
@@ -102,5 +115,9 @@ namespace Favalet
                 yield return finalToken;
             }
         }
+        
+        [DebuggerStepThrough]
+        public static Lexer Create() =>
+            new Lexer();
     }
 }

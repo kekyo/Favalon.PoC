@@ -1,11 +1,13 @@
 ﻿using Favalet.Internal;
 using Favalet.Tokens;
 using System;
+using System.Diagnostics;
 
 namespace Favalet.Lexers
 {
     internal sealed class WaitingRunner : LexRunner
     {
+        [DebuggerStepThrough]
         private WaitingRunner()
         { }
 
@@ -50,6 +52,7 @@ namespace Favalet.Lexers
             }
         }
 
-        public static readonly LexRunner Instance = new WaitingRunner();
+        public static readonly LexRunner Instance =
+            new WaitingRunner();
     }
 }

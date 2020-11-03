@@ -1,11 +1,13 @@
 ﻿using Favalet.Internal;
 using Favalet.Tokens;
 using System;
+using System.Diagnostics;
 
 namespace Favalet.Lexers
 {
     internal sealed class OperatorRunner : LexRunner
     {
+        [DebuggerStepThrough]
         private OperatorRunner()
         { }
 
@@ -73,6 +75,7 @@ namespace Favalet.Lexers
         public override LexRunnerResult Finish(LexRunnerContext context) =>
             LexRunnerResult.Create(WaitingRunner.Instance, InternalFinish(context, true));
 
-        public static readonly LexRunner Instance = new OperatorRunner();
+        public static readonly LexRunner Instance =
+            new OperatorRunner();
     }
 }

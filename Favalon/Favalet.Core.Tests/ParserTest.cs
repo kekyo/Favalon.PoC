@@ -62,7 +62,6 @@ namespace Favalet
                 actual);
         }
 
-#if false
         [Test]
         public void EnumerableIdentityWithAfterBracketTokens()
         {
@@ -180,6 +179,7 @@ namespace Favalet
 
         //////////////////////////////////////////////
 
+#if false
         [Test]
         public void EnumerableNumericToken()
         {

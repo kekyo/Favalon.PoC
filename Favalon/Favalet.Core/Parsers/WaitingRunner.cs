@@ -26,23 +26,15 @@ namespace Favalet.Parsers
                     context.CombineAfter(VariableTerm.Create(identity.Identity));
                     return ParseRunnerResult.Empty(ApplyingRunner.Instance);
 
-                // // "("
-                // case OpenParenthesisToken parenthesis:
-                //     context.PushScope(parenthesis.Pair);
-                //     return ParseRunnerResult.Empty(this);
-                //
-                // // ")"
-                // case CloseParenthesisToken parenthesis:
-                //     while (true)
-                //     {
-                //         var result = ParserUtilities.LeaveOneScope(context, parenthesis.Pair);
-                //         Debug.Assert(result != LeaveScopeResults.None);
-                //         if (result == LeaveScopeResults.Explicitly)
-                //         {
-                //             break;
-                //         }
-                //     }
-                //     return ParseRunnerResult.Empty(ApplyingRunner.Instance);
+                // "("
+                case OpenParenthesisToken parenthesis:
+                    context.PushScope(parenthesis.Pair);
+                    return ParseRunnerResult.Empty(this);
+                
+                // ")"
+                case CloseParenthesisToken parenthesis:
+                    context.PopScope(parenthesis.Pair);
+                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
 
                 default:
                     throw new InvalidOperationException(token.ToString());

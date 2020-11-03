@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Favalet.Expressions;
 using Favalet.Tokens;
@@ -7,6 +9,9 @@ namespace Favalet.Parsers
 {
     public sealed class ParseRunnerContext
     {
+        private readonly Stack<(ParenthesisPair pair, IExpression? left)> scopes =
+            new Stack<(ParenthesisPair pair, IExpression? left)>();
+        
         public readonly IParseRunnerFactory Factory;
 
         //public NumericalSignToken? PreSignToken;
@@ -52,6 +57,30 @@ namespace Favalet.Parsers
         [DebuggerStepThrough]
         public void CombineBefore(IExpression expression) =>
             this.Current = Combine(expression, this.Current);
+
+        public void PushScope(ParenthesisPair pair)
+        {
+            this.scopes.Push((pair, this.Current));
+            this.Current = null;
+        }
+
+        public void PopScope(ParenthesisPair pair)
+        {
+            if (this.scopes.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    $"Parenthesis mismatched: ? ... {pair.Close}");
+            }
+            
+            var (p, left) = this.scopes.Pop();
+            if (!p.Close.Equals(pair.Close))
+            {
+                throw new InvalidOperationException(
+                    $"Parenthesis mismatched: {p.Open} ... {pair.Close}");
+            }
+            
+            this.Current = Combine(left, this.Current);
+        }
 
         [DebuggerStepThrough]
         public override string ToString() =>

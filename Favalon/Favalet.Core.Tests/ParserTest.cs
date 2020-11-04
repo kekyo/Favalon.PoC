@@ -280,7 +280,6 @@ namespace Favalet
                 actual);
         }
 
-#if false
         [TestCase(true)]
         [TestCase(false)]
         public void EnumerableNumericTokenCloseBracketedSignAfterIdentity(bool plus)
@@ -302,6 +301,7 @@ namespace Favalet
                 actual);
         }
 
+#if false
         [TestCase(true)]
         [TestCase(false)]
         public void EnumerableNumericTokenCloseNonSpacedBracketedSignAfterIdentity(bool plus)

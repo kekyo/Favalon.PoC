@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Favalet.Lexers
@@ -10,12 +11,14 @@ namespace Favalet.Lexers
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+        [DebuggerStepThrough]
         private LexRunnerContext(StringBuilder tokenBuffer) =>
             this.TokenBuffer = tokenBuffer;
 
 #if NET45 || NETSTANDARD1_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+        [DebuggerStepThrough]
         public static LexRunnerContext Create() =>
             new LexRunnerContext(new StringBuilder());
     }

@@ -11,12 +11,13 @@ namespace Favalet
     [TestFixture]
     public sealed class LexerTest
     {
+        private static readonly Lexer lexer = Lexer.Create();
         private static readonly Func<string, IEnumerable<Token>>[] LexerRunners =
             new[]
             {
-                new Func<string, IEnumerable<Token>>(text => Lexer.EnumerableTokens(text)),
-                new Func<string, IEnumerable<Token>>(text => Lexer.EnumerableTokens(text.AsEnumerable())),
-                new Func<string, IEnumerable<Token>>(text => Lexer.EnumerableTokens(new StringReader(text))),
+                new Func<string, IEnumerable<Token>>(text => lexer.EnumerableTokens(text)),
+                new Func<string, IEnumerable<Token>>(text => lexer.EnumerableTokens(text.AsEnumerable())),
+                new Func<string, IEnumerable<Token>>(text => lexer.EnumerableTokens(new StringReader(text))),
             };
 
         ////////////////////////////////////////////////////

@@ -41,20 +41,17 @@ namespace Favalet.Parsers
                 //     context.PreSignToken = null;
                 //     return ParseRunnerResult.Empty(
                 //         ApplyingRunner.Instance);
-                //
-                // // "-abc"
-                // case IdentityToken identity:
-                //     // Initial precedence (ArithmericAddition)
-                //     context.SetPrecedence(BoundTermPrecedences.ArithmericAddition);
-                //
-                //     // Will make binary op
-                //     context.CombineAfter(
-                //         new IdentityTerm(context.PreSignToken!.Symbol.ToString()));
-                //     context.CombineAfter(
-                //         new IdentityTerm(identity.Identity));
-                //     context.PreSignToken = null;
-                //     return ParseRunnerResult.Empty(
-                //         ApplyingRunner.Instance);
+
+                // "-abc"
+                case IdentityToken identity:
+                    // Will make binary op
+                    context!.CombineAfter(VariableTerm.Create(
+                        ((CLRParseRunnerContext)context!).PreSignToken!.Symbol.ToString()));
+                    context.CombineAfter(
+                        VariableTerm.Create(identity.Identity));
+                    ((CLRParseRunnerContext)context!).PreSignToken = null;
+                    return ParseRunnerResult.Empty(
+                        factory.Applying);
 
                 default:
                     throw new InvalidOperationException(token.ToString());

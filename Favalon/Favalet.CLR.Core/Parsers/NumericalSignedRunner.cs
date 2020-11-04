@@ -29,18 +29,6 @@ namespace Favalet.Parsers
                         numeric);
                     return ParseRunnerResult.Empty(
                         factory.Applying);
-                
-                // // "- ..."
-                // case WhiteSpaceToken _:
-                //     // Initial precedence (ArithmericAddition)
-                //     context.SetPrecedence(BoundTermPrecedences.ArithmericAddition);
-                //
-                //     // Will make binary op
-                //     context.CombineAfter(
-                //         new IdentityTerm(context.PreSignToken!.Symbol.ToString()));
-                //     context.PreSignToken = null;
-                //     return ParseRunnerResult.Empty(
-                //         ApplyingRunner.Instance);
 
                 // "-abc"
                 case IdentityToken identity:

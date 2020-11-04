@@ -447,7 +447,6 @@ namespace Favalet
                 actual);
         }
 
-#if false
         [TestCase(true)]
         [TestCase(false)]
         public void EnumerableIdentityTokenWithOperator(bool plus)
@@ -683,6 +682,5 @@ namespace Favalet
                         Generator.Variable("def")) },
                 actual);
         }
-#endif
     }
 }

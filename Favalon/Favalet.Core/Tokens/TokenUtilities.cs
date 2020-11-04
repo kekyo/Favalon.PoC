@@ -43,7 +43,7 @@ namespace Favalet.Tokens
             closeParenthesis.Add('}', new ParenthesisPair('{', '}'));
         }
         
-#if NET45 || NETSTANDARD1_0
+#if NET45 || NETSTANDARD1_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         [DebuggerStepThrough]
@@ -55,21 +55,21 @@ namespace Favalet.Tokens
                 _ => null
             };
 
-#if NET45 || NETSTANDARD1_0
+#if NET45 || NETSTANDARD1_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         [DebuggerStepThrough]
         public static ParenthesisPair? IsOpenParenthesis(char ch) =>
             openParenthesis.TryGetValue(ch, out var p) ? (ParenthesisPair?)p : null;
 
-#if NET45 || NETSTANDARD1_0
+#if NET45 || NETSTANDARD1_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         [DebuggerStepThrough]
         public static ParenthesisPair? IsCloseParenthesis(char ch) =>
             closeParenthesis.TryGetValue(ch, out var p) ? (ParenthesisPair?)p : null;
 
-#if NET45 || NETSTANDARD1_0
+#if NET45 || NETSTANDARD1_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         [DebuggerStepThrough]

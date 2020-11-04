@@ -9,7 +9,7 @@ namespace Favalet.Parsers
         public readonly ParseRunner Next;
         public readonly IExpression? Expression;
 
-#if NET45 || NETSTANDARD1_0
+#if NET45 || NETSTANDARD1_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         [DebuggerStepThrough]
@@ -19,21 +19,21 @@ namespace Favalet.Parsers
             this.Expression = expression;
         }
 
-#if NET45 || NETSTANDARD1_0
+#if NET45 || NETSTANDARD1_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         [DebuggerStepThrough]
         public static ParseRunnerResult Empty(ParseRunner next) =>
             new ParseRunnerResult(next, null);
 
-#if NET45 || NETSTANDARD1_0
+#if NET45 || NETSTANDARD1_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         [DebuggerStepThrough]
         public static ParseRunnerResult Create(ParseRunner next, IExpression? expression) =>
             new ParseRunnerResult(next, expression);
 
-#if NET45 || NETSTANDARD1_0
+#if NET45 || NETSTANDARD1_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         [DebuggerStepThrough]

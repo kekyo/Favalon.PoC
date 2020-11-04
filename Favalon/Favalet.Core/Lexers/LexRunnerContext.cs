@@ -8,14 +8,14 @@ namespace Favalet.Lexers
     {
         public readonly StringBuilder TokenBuffer;
 
-#if NET45 || NETSTANDARD1_0
+#if NET45 || NETSTANDARD1_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         [DebuggerStepThrough]
         private LexRunnerContext(StringBuilder tokenBuffer) =>
             this.TokenBuffer = tokenBuffer;
 
-#if NET45 || NETSTANDARD1_0
+#if NET45 || NETSTANDARD1_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         [DebuggerStepThrough]

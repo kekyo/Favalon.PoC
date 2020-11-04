@@ -19,11 +19,6 @@ namespace Favalet.Parsers
 
         public IExpression? Current { get; private set; }
         public Token? LastToken { get; private set; }
-
-        public virtual ParseRunner Waiting =>
-            WaitingRunner.Instance;
-        public virtual ParseRunner Applying =>
-            ApplyingRunner.Instance;
         
         [DebuggerStepThrough]
         internal void SetLastToken(Token token) =>

@@ -11,7 +11,10 @@ namespace Favalet.Parsers
         private CLRApplyingRunner()
         { }
 
-        public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
+        public override ParseRunnerResult Run(
+            ParseRunnerContext context,
+            ParseRunnerFactory factory,
+            Token token)
         {
             Debug.Assert(context.Current != null);
             //Debug.Assert(context.PreSignToken == null);
@@ -46,11 +49,11 @@ namespace Favalet.Parsers
                 //     }
 
                 default:
-                    return base.Run(context, token);
+                    return base.Run(context, factory, token);
             }
         }
 
-        public new static readonly ParseRunner Instance =
+        internal new static readonly ParseRunner Instance =
             new CLRApplyingRunner();
     }
 }

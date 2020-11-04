@@ -206,7 +206,6 @@ namespace Favalet
                 actual);
         }
 
-#if false
         [TestCase(true)]
         [TestCase(false)]
         public void EnumerableNumericTokenWithOperator(bool plus)
@@ -225,6 +224,7 @@ namespace Favalet
                 actual);
         }
 
+#if false
         [TestCase(true)]
         [TestCase(false)]
         public void EnumerableNumericTokenWithBracketedSign(bool plus)

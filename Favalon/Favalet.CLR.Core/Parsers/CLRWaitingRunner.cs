@@ -11,7 +11,10 @@ namespace Favalet.Parsers
         private CLRWaitingRunner()
         { }
 
-        public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
+        public override ParseRunnerResult Run(
+            ParseRunnerContext context,
+            ParseRunnerFactory factory,
+            Token token)
         {
             Debug.Assert(context.Current == null);
             //Debug.Assert(context.PreSignToken == null);
@@ -20,18 +23,10 @@ namespace Favalet.Parsers
             {
                 // "123"
                 case NumericToken numeric:
-                    if (int.TryParse(numeric.Value, out var intValue))
-                    {
-                        context.CombineAfter(ConstantTerm.From(intValue));
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(
-                            $"Couldn't parse numeric: {numeric.Value}");
-                    }
-                    //context.CombineAfter(
-                    //    ParserUtilities.GetNumericConstant(numeric.Value, NumericalSignes.Plus));
-                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
+                    CLRParserUtilities.CombineNumeric(
+                        (CLRParseRunnerContext)context,
+                        numeric);
+                    return ParseRunnerResult.Empty(factory.Applying);
                 
                 // "-"
                 case NumericalSignToken numericSign:
@@ -39,11 +34,11 @@ namespace Favalet.Parsers
                     return ParseRunnerResult.Empty(NumericalSignedRunner.Instance);
 
                 default:
-                    return base.Run(context, token);
+                    return base.Run(context, factory, token);
             }
         }
 
-        public new static readonly ParseRunner Instance =
+        internal new static readonly ParseRunner Instance =
             new CLRWaitingRunner();
     }
 }

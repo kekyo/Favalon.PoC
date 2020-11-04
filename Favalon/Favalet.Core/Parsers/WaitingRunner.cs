@@ -11,7 +11,10 @@ namespace Favalet.Parsers
         protected WaitingRunner()
         { }
 
-        public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
+        public override ParseRunnerResult Run(
+            ParseRunnerContext context,
+            ParseRunnerFactory factory,
+            Token token)
         {
             Debug.Assert(context.Current == null);
             //Debug.Assert(context.PreSignToken == null);
@@ -41,7 +44,7 @@ namespace Favalet.Parsers
             }
         }
 
-        public static readonly ParseRunner Instance =
+        internal static readonly ParseRunner Instance =
             new WaitingRunner();
     }
 }

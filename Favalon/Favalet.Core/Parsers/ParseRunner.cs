@@ -3,12 +3,15 @@ using Favalet.Tokens;
 
 namespace Favalet.Parsers
 {
+    [DebuggerStepThrough]
     public abstract class ParseRunner
     {
-        [DebuggerStepThrough]
         protected ParseRunner()
         { }
 
-        public abstract ParseRunnerResult Run(ParseRunnerContext context, Token token);
+        public abstract ParseRunnerResult Run(
+            ParseRunnerContext context,
+            ParseRunnerFactory factory,
+            Token token);
     }
 }

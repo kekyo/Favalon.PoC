@@ -11,7 +11,10 @@ namespace Favalet.Parsers
         protected ApplyingRunner()
         { }
 
-        public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
+        public override ParseRunnerResult Run(
+            ParseRunnerContext context,
+            ParseRunnerFactory factory,
+            Token token)
         {
             Debug.Assert(context.Current != null);
             //Debug.Assert(context.PreSignToken == null);
@@ -23,21 +26,22 @@ namespace Favalet.Parsers
                 
                 case IdentityToken identity:
                     context.CombineAfter(VariableTerm.Create(identity.Identity));
-                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
+                    return ParseRunnerResult.Empty(factory.Applying);
 
                 case OpenParenthesisToken parenthesis:
                     context.PushScope(parenthesis.Pair);
-                    return ParseRunnerResult.Empty(WaitingRunner.Instance);
+                    return ParseRunnerResult.Empty(factory.Waiting);
                 
                 case CloseParenthesisToken parenthesis:
                     context.PopScope(parenthesis.Pair);
-                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
+                    return ParseRunnerResult.Empty(factory.Applying);
 
                 default:
                     throw new InvalidOperationException(token.ToString());
             }
         }
 
-        public static readonly ParseRunner Instance = new ApplyingRunner();
+        internal static readonly ParseRunner Instance =
+            new ApplyingRunner();
     }
 }

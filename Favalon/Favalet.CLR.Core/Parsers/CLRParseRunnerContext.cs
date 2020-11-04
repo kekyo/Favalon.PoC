@@ -10,11 +10,6 @@ namespace Favalet.Parsers
 
         private CLRParseRunnerContext()
         { }
-        
-        public override ParseRunner Waiting =>
-            CLRWaitingRunner.Instance;
-        public override ParseRunner Applying =>
-            CLRApplyingRunner.Instance;
 
         public new static CLRParseRunnerContext Create() =>
             new CLRParseRunnerContext();

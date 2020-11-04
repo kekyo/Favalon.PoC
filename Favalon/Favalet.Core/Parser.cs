@@ -17,20 +17,19 @@ namespace Favalet
 #if DEBUG
         public int BreakIndex = -1;
 #endif
-
-        private readonly Func<ParseRunnerContext> contextCreator;
+        private readonly ParseRunnerFactory factory;
 
         [DebuggerStepThrough]
-        protected Parser(Func<ParseRunnerContext> contextCreator) =>
-            this.contextCreator = contextCreator;
+        protected Parser(ParseRunnerFactory factory) =>
+            this.factory = factory;
 
         public IEnumerable<IExpression> Parse(IEnumerable<Token> tokens)
         {
 #if DEBUG
             var index = 0;
 #endif
-            var runnerContext = this.contextCreator();
-            var runner = runnerContext.Waiting;
+            var context = this.factory.CreateContext();
+            var runner = factory.Waiting;
             
             foreach (var token in tokens)
             {
@@ -38,7 +37,7 @@ namespace Favalet
                 if (index == BreakIndex) Debugger.Break();
                 index++;
 #endif
-                switch (runner.Run(runnerContext, token))
+                switch (runner.Run(context, factory, token))
                 {
                     case ParseRunnerResult(ParseRunner next, IExpression expression):
                         yield return expression;
@@ -49,19 +48,19 @@ namespace Favalet
                         break;
                 }
 
-                Debug.WriteLine($"{index - 1}: '{token}': {runnerContext}");
+                Debug.WriteLine($"{index - 1}: '{token}': {context}");
 
-                runnerContext.SetLastToken(token);
+                context.SetLastToken(token);
             }
 
             // Contains final result
-            if (runnerContext.Current is IExpression finalTerm)
+            if (context.Current is IExpression finalTerm)
             {
                 yield return finalTerm;
             }
         }
 
         public static readonly Parser Instance =
-            new Parser(ParseRunnerContext.Create);
+            new Parser(ParseRunnerFactory.Instance);
     }
 }

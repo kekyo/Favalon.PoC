@@ -7,24 +7,28 @@ namespace Favalet.Parsers
 {
     internal sealed class NumericalSignedRunner : ParseRunner
     {
+        [DebuggerStepThrough]
         private NumericalSignedRunner()
         { }
 
-        public override ParseRunnerResult Run(ParseRunnerContext context, Token token)
+        public override ParseRunnerResult Run(
+            ParseRunnerContext context,
+            ParseRunnerFactory factory,
+            Token token)
         {
             //Debug.Assert(context.PreSignToken != null);
             //Debug.Assert(context.ApplyNextAssociative == BoundTermAssociatives.LeftToRight);
 
             switch (token)
             {
-                // // "-123"
-                // case NumericToken numeric:
-                //     context.CombineAfter(
-                //         ParserUtilities.GetNumericConstant(numeric.Value, context.PreSignToken!.Sign));
-                //     context.PreSignToken = null;
-                //     return ParseRunnerResult.Empty(
-                //         ApplyingRunner.Instance);
-                //
+                // "-123"
+                case NumericToken numeric:
+                    CLRParserUtilities.CombineNumeric(
+                        (CLRParseRunnerContext)context,
+                        numeric);
+                    return ParseRunnerResult.Empty(
+                        factory.Applying);
+                
                 // // "- ..."
                 // case WhiteSpaceToken _:
                 //     // Initial precedence (ArithmericAddition)

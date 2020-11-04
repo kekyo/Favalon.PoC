@@ -16,40 +16,37 @@ namespace Favalet.Parsers
             ParseRunnerFactory factory,
             Token token)
         {
+            Debug.Assert(context is CLRParseRunnerContext);
             Debug.Assert(context.Current != null);
-            //Debug.Assert(context.PreSignToken == null);
+            Debug.Assert(((CLRParseRunnerContext)context).PreSignToken == null);
 
             switch (token)
             {
                 case NumericToken numeric:
-                    if (int.TryParse(numeric.Value, out var intValue))
+                    CLRParserUtilities.CombineNumericValue(
+                        (CLRParseRunnerContext)context!,
+                        numeric);
+                    return ParseRunnerResult.Empty(factory.Applying);
+
+                case NumericalSignToken numericSign:
+                    // "abc -" / "123 -" ==> binary op or signed
+                    if (context!.LastToken is WhiteSpaceToken)
                     {
-                        context.CombineAfter(ConstantTerm.From(intValue));
-                        return ParseRunnerResult.Empty(factory.Applying);
+                        CLRParserUtilities.SetNumericalSign(
+                            (CLRParseRunnerContext)context,
+                            numericSign);
+                        return ParseRunnerResult.Empty(NumericalSignedRunner.Instance);
                     }
+                    // "abc-" / "123-" / "(abc)-" ==> binary op
                     else
                     {
-                        throw new InvalidOperationException(
-                            $"Couldn't parse numeric: {numeric.Value}");
+                        context.CombineAfter(
+                            VariableTerm.Create(numericSign.Symbol.ToString()));
+                        return ParseRunnerResult.Empty(this);
                     }
 
-                // case NumericalSignToken numericSign:
-                //     // "abc -" / "123 -" ==> binary op or signed
-                //     if (context.LastToken is WhiteSpaceToken)
-                //     {
-                //         context.PreSignToken = numericSign;
-                //         return ParseRunnerResult.Empty(NumericalSignedRunner.Instance);
-                //     }
-                //     // "abc-" / "123-" / "(abc)-" ==> binary op
-                //     else
-                //     {
-                //         context.CombineAfter(
-                //             new IdentityTerm(numericSign.Symbol.ToString()));
-                //         return ParseRunnerResult.Empty(this);
-                //     }
-
                 default:
-                    return base.Run(context, factory, token);
+                    return base.Run(context!, factory, token);
             }
         }
 

@@ -16,15 +16,16 @@ namespace Favalet.Parsers
             ParseRunnerFactory factory,
             Token token)
         {
-            //Debug.Assert(context.PreSignToken != null);
+            Debug.Assert(context is CLRParseRunnerContext);
+            Debug.Assert(((CLRParseRunnerContext)context).PreSignToken != null);
             //Debug.Assert(context.ApplyNextAssociative == BoundTermAssociatives.LeftToRight);
 
             switch (token)
             {
                 // "-123"
                 case NumericToken numeric:
-                    CLRParserUtilities.CombineNumeric(
-                        (CLRParseRunnerContext)context,
+                    CLRParserUtilities.CombineNumericValue(
+                        (CLRParseRunnerContext)context!,
                         numeric);
                     return ParseRunnerResult.Empty(
                         factory.Applying);

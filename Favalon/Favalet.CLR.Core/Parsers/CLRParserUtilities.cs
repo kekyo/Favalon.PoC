@@ -6,7 +6,14 @@ namespace Favalet.Parsers
 {
     internal static class CLRParserUtilities
     {
-        public static void CombineNumeric(CLRParseRunnerContext context, NumericToken numeric)
+        public static void SetNumericalSign(
+            CLRParseRunnerContext context,
+            NumericalSignToken numericSign) =>
+            context.PreSignToken = numericSign;
+        
+        public static void CombineNumericValue(
+            CLRParseRunnerContext context,
+            NumericToken numeric)
         {
             var sign = context.PreSignToken?.Sign == NumericalSignes.Minus ? -1 : 1;
             if (int.TryParse(numeric.Value, out var intValue))

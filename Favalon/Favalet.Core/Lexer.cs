@@ -1,18 +1,18 @@
-﻿using System;
-using Favalet.Lexers;
+﻿using Favalet.Lexers;
 using Favalet.Tokens;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
+using System.Reactive;
+using System.Reactive.Disposables;
 using System.Threading;
 
 namespace Favalet
 {
     public interface ILexer
     {
-        IObservable<Token> ToTokens(IObservable<char> chars);
+        IObservable<Token> Analyze(IObservable<char> chars);
     }
     
     public sealed class Lexer : ILexer
@@ -108,8 +108,41 @@ namespace Favalet
         }
 
         [DebuggerStepThrough]
-        public IObservable<Token> ToTokens(IObservable<char> chars) =>
-            new TokenObservableObserver(chars);
+        public IObservable<Token> Analyze(IObservable<char> chars) =>
+            Observable.Create<Token>(observer =>
+            {
+                var context = LexRunnerContext.Create();
+                var runner = WaitingIgnoreSpaceRunner.Instance;
+
+                return chars.Subscribe(Observer.Create<char>(
+                    inch =>
+                    {
+                        switch (runner.Run(context, inch))
+                        {
+                            case LexRunnerResult(LexRunner next, Token token0, Token token1):
+                                observer.OnNext(token0);
+                                observer.OnNext(token1);
+                                runner = next;
+                                break;
+                            case LexRunnerResult(LexRunner next, Token token, _):
+                                observer.OnNext(token);
+                                runner = next;
+                                break;
+                            case LexRunnerResult(LexRunner next, _, _):
+                                runner = next;
+                                break;
+                        }
+                    },
+                    observer.OnError,
+                    () =>
+                    {
+                        if (runner.Finish(context) is LexRunnerResult(_, Token finalToken, _))
+                        {
+                            observer.OnNext(finalToken);
+                        }
+                        observer.OnCompleted();
+                    }));
+            });
      
         [DebuggerStepThrough]
         public static Lexer Create() =>
@@ -119,67 +152,20 @@ namespace Favalet
     [DebuggerStepThrough]
     public static class LexerExtension
     {
-        [DebuggerStepThrough]
-        private sealed class Disposer : IDisposable
-        {
-            private Disposer()
-            { }
-
-            public void Dispose()
-            { }
-            
-            public static readonly Disposer Instance =
-                new Disposer();
-        }
-        
-        private sealed class CharEnumerableObservable :
-            IObservable<char>
-        {
-            private volatile IEnumerable<char>? chars;
-
-            [DebuggerStepThrough]
-            public CharEnumerableObservable(IEnumerable<char> chars) =>
-                this.chars = chars;
-
-            public IDisposable Subscribe(IObserver<char> observer)
+        public static IObservable<Token> Analyze(this ILexer lexer, IEnumerable<char> chars) =>
+            lexer.Analyze(Observable.Create<char>(observer =>
             {
-                var chars = Interlocked.Exchange(ref this.chars, null);
-                if (chars == null)
-                {
-                    throw new InvalidOperationException();
-                }
-
                 foreach (var inch in chars)
                 {
                     observer.OnNext(inch);
                 }
-                
                 observer.OnCompleted();
+                return Disposable.Empty;
+            }));
 
-                return Disposer.Instance;
-            }
-        }
-
-        public static IObservable<Token> ToTokens(this ILexer lexer, IEnumerable<char> chars) =>
-            lexer.ToTokens(new CharEnumerableObservable(chars));
-         
-        private sealed class TextReaderObservable :
-            IObservable<char>
-        {
-            private volatile TextReader? tr;
-
-            [DebuggerStepThrough]
-            public TextReaderObservable(TextReader tr) =>
-                this.tr = tr;
-
-            public IDisposable Subscribe(IObserver<char> observer)
+        public static IObservable<Token> Analyze(this ILexer lexer, TextReader tr) =>
+            lexer.Analyze(Observable.Create<char>(observer =>
             {
-                var tr = Interlocked.Exchange(ref this.tr, null);
-                if (tr == null)
-                {
-                    throw new InvalidOperationException();
-                }
-
                 while (true)
                 {
                     var inch = tr.Read();
@@ -189,14 +175,8 @@ namespace Favalet
                     }
                     observer.OnNext((char)inch);
                 }
-                
                 observer.OnCompleted();
-
-                return Disposer.Instance;
-            }
-        }
-
-        public static IObservable<Token> ToTokens(this ILexer lexer, TextReader tr) =>
-            lexer.ToTokens(new TextReaderObservable(tr));
+                return Disposable.Empty;
+            }));
     }
 }

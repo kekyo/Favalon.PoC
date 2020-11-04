@@ -25,13 +25,13 @@ namespace Favalet.Parsers
                     if (int.TryParse(numeric.Value, out var intValue))
                     {
                         context.CombineAfter(ConstantTerm.From(intValue));
+                        return ParseRunnerResult.Empty(factory.Applying);
                     }
                     else
                     {
                         throw new InvalidOperationException(
                             $"Couldn't parse numeric: {numeric.Value}");
                     }
-                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
 
                 // case NumericalSignToken numericSign:
                 //     // "abc -" / "123 -" ==> binary op or signed

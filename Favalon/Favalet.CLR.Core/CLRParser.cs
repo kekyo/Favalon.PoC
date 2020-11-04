@@ -7,7 +7,7 @@ namespace Favalet
     {
         [DebuggerStepThrough]
         private CLRParser() :
-            base(ParseRunnerFactory.Instance)
+            base(CLRParseRunnerFactory.Instance)
         { }
         
         public new static readonly CLRParser Instance =

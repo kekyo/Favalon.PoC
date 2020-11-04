@@ -27,7 +27,7 @@ namespace Favalet.Parsers
                 // "abc"
                 case IdentityToken identity:
                     context.CombineAfter(VariableTerm.Create(identity.Identity));
-                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
+                    return ParseRunnerResult.Empty(factory.Applying);
 
                 // "("
                 case OpenParenthesisToken parenthesis:
@@ -37,7 +37,7 @@ namespace Favalet.Parsers
                 // ")"
                 case CloseParenthesisToken parenthesis:
                     context.PopScope(parenthesis.Pair);
-                    return ParseRunnerResult.Empty(ApplyingRunner.Instance);
+                    return ParseRunnerResult.Empty(factory.Applying);
 
                 default:
                     throw new InvalidOperationException(token.ToString());

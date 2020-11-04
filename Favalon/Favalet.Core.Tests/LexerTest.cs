@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Favalet
@@ -12,12 +13,12 @@ namespace Favalet
     public sealed class LexerTest
     {
         private static readonly Lexer lexer = Lexer.Create();
-        private static readonly Func<string, IEnumerable<Token>>[] LexerRunners =
+        private static readonly Func<string, Token[]>[] LexerRunners =
             new[]
             {
-                new Func<string, IEnumerable<Token>>(text => lexer.EnumerableTokens(text)),
-                new Func<string, IEnumerable<Token>>(text => lexer.EnumerableTokens(text.AsEnumerable())),
-                new Func<string, IEnumerable<Token>>(text => lexer.EnumerableTokens(new StringReader(text))),
+                new Func<string, Token[]>(text => lexer.ToTokens(text).ToEnumerable().ToArray()),
+                new Func<string, Token[]>(text => lexer.ToTokens(text.AsEnumerable()).ToEnumerable().ToArray()),
+                new Func<string, Token[]>(text => lexer.ToTokens(new StringReader(text)).ToEnumerable().ToArray()),
             };
 
         ////////////////////////////////////////////////////

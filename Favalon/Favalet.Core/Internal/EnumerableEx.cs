@@ -48,7 +48,7 @@ namespace Favalet.Internal
             }
         }
 
-#if NET35 || NET40 || NET45 || NETSTANDARD1_0
+#if NET35 || NET40 || NET45 || NETSTANDARD1_1
         [DebuggerStepThrough]
         public static IEnumerable<T> Append<T>(
             this IEnumerable<T> enumerable,

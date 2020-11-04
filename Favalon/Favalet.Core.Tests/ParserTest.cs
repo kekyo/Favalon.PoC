@@ -1,5 +1,6 @@
-﻿using Favalet.Tokens;
-using Favalet.Expressions;
+﻿using Favalet.Expressions;
+using Favalet.Reactive.Linq;
+using Favalet.Tokens;
 using NUnit.Framework;
 using System.Linq;
 
@@ -9,7 +10,7 @@ namespace Favalet
     public sealed class ParserTest
     {
         private static IExpression[] Parse(params Token[] tokens) =>
-            CLRParser.Instance.Parse(tokens).ToArray();
+            CLRParser.Instance.Parse(tokens).ToEnumerable().ToArray();
 
         [Test]
         public void EnumerableIdentityToken()

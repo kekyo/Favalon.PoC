@@ -28,7 +28,7 @@ namespace Favalet.Internal
                 { typeof(object), "object" },
             };
 
-#if NETSTANDARD1_0
+#if NETSTANDARD1_1
         [DebuggerStepThrough]
         public static bool IsAssignableFrom(this Type lhs, Type rhs) =>
             lhs.GetTypeInfo().IsAssignableFrom(rhs.GetTypeInfo());

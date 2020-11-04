@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
 
-namespace System.Reactive
+namespace Favalet.Reactive
 {
-    internal static class Observer
+    public static class Observer
     {
         [DebuggerStepThrough]
         private sealed class DelegatedObserver<T> :

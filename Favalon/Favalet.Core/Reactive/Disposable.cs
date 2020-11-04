@@ -1,6 +1,7 @@
+using System;
 using System.Diagnostics;
 
-namespace System.Reactive.Disposables
+namespace Favalet.Reactive.Disposables
 {
     [DebuggerStepThrough]
     public sealed class Disposable : IDisposable
